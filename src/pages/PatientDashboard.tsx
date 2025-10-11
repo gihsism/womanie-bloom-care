@@ -2,10 +2,16 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { AppSidebar } from '@/components/dashboard/AppSidebar';
 import DashboardHeader, { getModeStats, type LifeStage } from '@/components/dashboard/DashboardHeader';
 import CycleCalendar from '@/components/dashboard/CycleCalendar';
 import DailyLogging from '@/components/dashboard/DailyLogging';
@@ -17,7 +23,15 @@ import {
   Users, 
   ChevronRight,
   Home,
-  Menu
+  Menu,
+  Settings,
+  Phone,
+  HelpCircle,
+  Shield,
+  Bell,
+  Info,
+  User as UserIcon,
+  LogOut
 } from 'lucide-react';
 import type { User, Session } from '@supabase/supabase-js';
 
@@ -183,19 +197,65 @@ const PatientDashboard = () => {
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
-        
-        <div className="flex-1 flex flex-col min-h-screen w-full">
-          {/* Header */}
-          <div className="border-b border-border bg-card sticky top-0 z-10">
-            <div className="w-full px-4 py-4">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="border-b border-border bg-card sticky top-0 z-10">
+        <div className="w-full px-4 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Menu className="h-4 w-4" />
+                    Menu
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56 bg-card z-50">
+                  <DropdownMenuLabel>Navigation</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/dashboard/profile')}>
+                    <UserIcon className="mr-2 h-4 w-4" />
+                    My Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/dashboard/settings')}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/dashboard/emergency')}>
+                    <Phone className="mr-2 h-4 w-4" />
+                    Emergency Contacts
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/dashboard/help')}>
+                    <HelpCircle className="mr-2 h-4 w-4" />
+                    Help & Support
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/dashboard/privacy')}>
+                    <Shield className="mr-2 h-4 w-4" />
+                    Privacy & Security
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/dashboard/notifications')}>
+                    <Bell className="mr-2 h-4 w-4" />
+                    Notifications
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/dashboard/terms')}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    Terms & Policies
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/dashboard/about')}>
+                    <Info className="mr-2 h-4 w-4" />
+                    About Womanie
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
+              <Button 
+                variant="ghost" 
+                size="sm"
                     onClick={() => navigate('/')}
                     className="gap-2"
                   >
@@ -228,7 +288,7 @@ const PatientDashboard = () => {
             </div>
           </div>
 
-          <div className="w-full px-4 py-6 flex-1">
+          <div className="w-full px-4 py-6">
             {/* Health Statistics */}
             <div className="mb-6">
               <h2 className="text-lg font-bold mb-3">Your Health Today</h2>
@@ -339,8 +399,6 @@ const PatientDashboard = () => {
             </div>
           </div>
         </div>
-      </div>
-    </SidebarProvider>
   );
 };
 
