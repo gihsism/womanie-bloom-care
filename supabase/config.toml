@@ -1,1 +1,8 @@
 project_id = "tuytfgpkukuufkuqhgzv"
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+
+[functions.analyze-document]
+verify_jwt = false

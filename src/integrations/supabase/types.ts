@@ -16,6 +16,9 @@ export type Database = {
     Tables: {
       health_documents: {
         Row: {
+          ai_suggested_category: string | null
+          ai_suggested_name: string | null
+          ai_summary: string | null
           created_at: string | null
           document_type: string
           file_name: string
@@ -28,6 +31,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ai_suggested_category?: string | null
+          ai_suggested_name?: string | null
+          ai_summary?: string | null
           created_at?: string | null
           document_type: string
           file_name: string
@@ -40,6 +46,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          ai_suggested_category?: string | null
+          ai_suggested_name?: string | null
+          ai_summary?: string | null
           created_at?: string | null
           document_type?: string
           file_name?: string

@@ -89,7 +89,7 @@ const DocumentUpload = () => {
       if (uploadError) throw uploadError;
 
       // Save metadata to database
-      const { error: dbError } = await supabase
+      const { data: insertData, error: dbError } = await supabase
         .from('health_documents')
         .insert({
           user_id: user.id,
@@ -99,13 +99,27 @@ const DocumentUpload = () => {
           file_size: file.size,
           mime_type: file.type,
           notes: notes || null,
-        });
+        })
+        .select()
+        .single();
 
       if (dbError) throw dbError;
 
       toast({
         title: 'Success',
-        description: 'Document uploaded successfully',
+        description: 'Document uploaded successfully. AI analysis in progress...',
+      });
+
+      // Trigger AI analysis in background
+      supabase.functions.invoke('analyze-document', {
+        body: {
+          documentId: insertData.id,
+          filePath: fileName,
+          fileName: file.name,
+          mimeType: file.type
+        }
+      }).catch(error => {
+        console.error('AI analysis error:', error);
       });
 
       // Reset form

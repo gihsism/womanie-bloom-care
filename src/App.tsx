@@ -21,6 +21,7 @@ import ForDoctors from "./pages/ForDoctors";
 import About from "./pages/About";
 import Pricing from "./pages/Pricing";
 import Blog from "./pages/Blog";
+import HealthStatistics from "./pages/HealthStatistics";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/auth/signup" element={<PatientSignUp />} />
             <Route path="/auth/login" element={<PatientLogIn />} />
             <Route path="/dashboard" element={<PatientDashboard />} />
+            <Route path="/health-statistics" element={<HealthStatistics />} />
             <Route path="/onboarding/basic-info" element={<BasicInformation />} />
             <Route path="/onboarding/life-stage" element={<LifeStageSelection />} />
             <Route path="/onboarding/mode-setup" element={<ModeSetup />} />
