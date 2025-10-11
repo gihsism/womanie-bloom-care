@@ -88,6 +88,64 @@ const BasicInformation = () => {
             {/* Date of Birth */}
             <div className="space-y-2">
               <Label htmlFor="dob">Date of Birth *</Label>
+              
+              {/* Dropdown selectors for Year and Month */}
+              <div className="flex gap-2">
+                <Select 
+                  value={dateOfBirth ? dateOfBirth.getFullYear().toString() : ''} 
+                  onValueChange={(year) => {
+                    const newDate = dateOfBirth ? new Date(dateOfBirth) : new Date();
+                    newDate.setFullYear(parseInt(year));
+                    setDateOfBirth(newDate);
+                  }}
+                >
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 124 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                      <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select 
+                  value={dateOfBirth ? dateOfBirth.getMonth().toString() : ''} 
+                  onValueChange={(month) => {
+                    const newDate = dateOfBirth ? new Date(dateOfBirth) : new Date();
+                    newDate.setMonth(parseInt(month));
+                    setDateOfBirth(newDate);
+                  }}
+                >
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Month" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((month, i) => (
+                      <SelectItem key={i} value={i.toString()}>{month}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Input
+                  type="number"
+                  placeholder="Day"
+                  min="1"
+                  max="31"
+                  value={dateOfBirth ? dateOfBirth.getDate() : ''}
+                  onChange={(e) => {
+                    const day = parseInt(e.target.value);
+                    if (day >= 1 && day <= 31) {
+                      const newDate = dateOfBirth ? new Date(dateOfBirth) : new Date();
+                      newDate.setDate(day);
+                      setDateOfBirth(newDate);
+                    }
+                  }}
+                  className="w-20"
+                />
+              </div>
+
+              {/* Calendar picker as alternative */}
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -98,7 +156,7 @@ const BasicInformation = () => {
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateOfBirth ? format(dateOfBirth, 'PPP') : <span>Pick a date</span>}
+                    {dateOfBirth ? format(dateOfBirth, 'PPP') : <span>Or pick from calendar</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
