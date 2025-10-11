@@ -30,6 +30,11 @@ const CycleCalendar = ({
   const [periodEndDate, setPeriodEndDate] = useState<Date | undefined>(
     initialPeriodStart ? addDays(initialPeriodStart, initialPeriodLength - 1) : addDays(new Date(2025, 9, 1), 4)
   );
+  
+  // Temporary state for editing - only saved on "Save" button click
+  const [tempPeriodStartDate, setTempPeriodStartDate] = useState<Date | undefined>(undefined);
+  const [tempPeriodEndDate, setTempPeriodEndDate] = useState<Date | undefined>(undefined);
+  
   const [cycleLength, setCycleLength] = useState(initialCycleLength);
   const [isEditingCycle, setIsEditingCycle] = useState(false);
   const [tempCycleLength, setTempCycleLength] = useState(initialCycleLength);
@@ -605,96 +610,151 @@ const CycleCalendar = ({
                 </div>
               </DialogContent>
             </Dialog>
-            <Dialog open={isEditingPeriod} onOpenChange={setIsEditingPeriod}>
+            <Dialog open={isEditingPeriod} onOpenChange={(open) => {
+              if (!open) {
+                // Reset temp values when closing without saving
+                setTempPeriodStartDate(undefined);
+                setTempPeriodEndDate(undefined);
+              } else {
+                // Initialize temp values when opening
+                setTempPeriodStartDate(periodStartDate);
+                setTempPeriodEndDate(periodEndDate);
+              }
+              setIsEditingPeriod(open);
+            }}>
             <DialogTrigger asChild>
               <Button variant="ghost" size="sm" className="h-7 gap-1">
                 <Edit className="h-3 w-3" />
                 <span className="text-xs">Edit Period</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
                 <DialogTitle>Track Your Period</DialogTitle>
                 <DialogDescription>
-                  {!periodStartDate 
+                  {!tempPeriodStartDate 
                     ? "Select when your last period started" 
-                    : !periodEndDate 
+                    : !tempPeriodEndDate 
                     ? "Now select when it ended" 
-                    : "Your period tracking is complete"}
+                    : "Review and save your period dates"}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
-                <Calendar
-                  mode="single"
-                  selected={!periodStartDate ? undefined : periodEndDate || periodStartDate}
-                  onSelect={(date) => {
-                    if (!periodStartDate) {
-                      setPeriodStartDate(date);
-                      setPeriodEndDate(undefined);
-                    } else if (!periodEndDate) {
-                      setPeriodEndDate(date);
-                    } else {
-                      // Reset and start over
-                      setPeriodStartDate(date);
-                      setPeriodEndDate(undefined);
+                <div className="border rounded-lg p-4 bg-muted/20">
+                  <Calendar
+                    mode="single"
+                    selected={!tempPeriodStartDate ? undefined : tempPeriodEndDate || tempPeriodStartDate}
+                    onSelect={(date) => {
+                      if (!tempPeriodStartDate) {
+                        setTempPeriodStartDate(date);
+                        setTempPeriodEndDate(undefined);
+                      } else if (!tempPeriodEndDate) {
+                        setTempPeriodEndDate(date);
+                      } else {
+                        // Reset and start over
+                        setTempPeriodStartDate(date);
+                        setTempPeriodEndDate(undefined);
+                      }
+                    }}
+                    className={cn("rounded-md pointer-events-auto w-full")}
+                    disabled={(date) => 
+                      date > new Date() || 
+                      (tempPeriodStartDate && !tempPeriodEndDate && date < tempPeriodStartDate)
                     }
-                  }}
-                  className={cn("rounded-md border pointer-events-auto w-full")}
-                  disabled={(date) => 
-                    date > new Date() || 
-                    (periodStartDate && !periodEndDate && date < periodStartDate)
-                  }
-                  captionLayout="dropdown-buttons"
-                  fromYear={2020}
-                  toYear={new Date().getFullYear()}
-                />
+                    captionLayout="dropdown-buttons"
+                    fromYear={2020}
+                    toYear={new Date().getFullYear()}
+                  />
+                </div>
                 
-                <div className="space-y-2">
-                  {periodStartDate && (
-                    <div className="flex items-center justify-between p-2 bg-primary/10 rounded-md">
-                      <span className="text-sm">Period started:</span>
-                      <span className="text-sm font-medium">{format(periodStartDate, 'MMM d, yyyy')}</span>
+                <div className="space-y-3">
+                  {tempPeriodStartDate && (
+                    <div className="flex items-center justify-between p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <CalendarIcon className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-medium">Period started:</span>
+                      </div>
+                      <span className="text-sm font-semibold">{format(tempPeriodStartDate, 'MMM d, yyyy')}</span>
                     </div>
                   )}
-                  {periodEndDate && (
-                    <div className="flex items-center justify-between p-2 bg-primary/10 rounded-md">
-                      <span className="text-sm">Period ended:</span>
-                      <span className="text-sm font-medium">{format(periodEndDate, 'MMM d, yyyy')} ({periodLength} days)</span>
-                    </div>
+                  {tempPeriodEndDate && tempPeriodStartDate && (
+                    <>
+                      <div className="flex items-center justify-between p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <CalendarIcon className="h-4 w-4 text-primary" />
+                          <span className="text-sm font-medium">Period ended:</span>
+                        </div>
+                        <span className="text-sm font-semibold">{format(tempPeriodEndDate, 'MMM d, yyyy')}</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-accent/10 border border-accent/20 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Droplet className="h-4 w-4 text-accent" />
+                          <span className="text-sm font-medium">Period length:</span>
+                        </div>
+                        <span className="text-sm font-bold">
+                          {differenceInDays(tempPeriodEndDate, tempPeriodStartDate) + 1} days
+                        </span>
+                      </div>
+                    </>
                   )}
                 </div>
 
-                {periodStartDate && periodEndDate && (
-                  <div className="bg-accent/10 border border-accent rounded-md p-3 space-y-1">
-                    <p className="text-sm font-medium">✨ Fertile Window</p>
-                    <p className="text-xs text-muted-foreground">
-                      Ovulation: ~{format(addDays(periodStartDate, Math.floor(cycleLength / 2)), 'MMM d')}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Fertile days: {format(addDays(periodStartDate, Math.floor(cycleLength / 2) - 5), 'MMM d')} - {format(addDays(periodStartDate, Math.floor(cycleLength / 2)), 'MMM d')}
-                    </p>
+                {tempPeriodStartDate && tempPeriodEndDate && (
+                  <div className="bg-secondary/10 border border-secondary/20 rounded-lg p-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-secondary" />
+                      <p className="text-sm font-semibold">Predicted Fertile Window</p>
+                    </div>
+                    <div className="space-y-1 pl-6">
+                      <p className="text-xs text-muted-foreground">
+                        <span className="font-medium">Ovulation:</span> ~{format(addDays(tempPeriodStartDate, cycleLength - 14), 'MMM d, yyyy')}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        <span className="font-medium">Fertile window:</span> {format(addDays(tempPeriodStartDate, cycleLength - 18), 'MMM d')} - {format(addDays(tempPeriodStartDate, cycleLength - 14), 'MMM d')}
+                      </p>
+                    </div>
                   </div>
                 )}
                 
-                <div className="flex gap-2">
-                  {periodStartDate && (
+                <div className="flex gap-2 pt-2">
+                  {tempPeriodStartDate && (
                     <Button 
                       variant="outline"
                       onClick={() => {
-                        setPeriodStartDate(undefined);
-                        setPeriodEndDate(undefined);
+                        setTempPeriodStartDate(undefined);
+                        setTempPeriodEndDate(undefined);
                       }} 
                       className="flex-1"
                     >
-                      Reset
+                      Reset Selection
                     </Button>
                   )}
                   <Button 
-                    onClick={() => setIsEditingPeriod(false)} 
+                    variant="secondary"
+                    onClick={() => {
+                      setTempPeriodStartDate(undefined);
+                      setTempPeriodEndDate(undefined);
+                      setIsEditingPeriod(false);
+                    }} 
                     className="flex-1"
-                    disabled={!periodStartDate || !periodEndDate}
                   >
-                    Save
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      if (tempPeriodStartDate && tempPeriodEndDate) {
+                        setPeriodStartDate(tempPeriodStartDate);
+                        setPeriodEndDate(tempPeriodEndDate);
+                        setTempPeriodStartDate(undefined);
+                        setTempPeriodEndDate(undefined);
+                        setIsEditingPeriod(false);
+                      }
+                    }} 
+                    className="flex-1"
+                    disabled={!tempPeriodStartDate || !tempPeriodEndDate}
+                  >
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Save Changes
                   </Button>
                 </div>
               </div>
