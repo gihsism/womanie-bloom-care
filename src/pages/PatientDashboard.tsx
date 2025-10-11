@@ -16,6 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import DashboardHeader, { getModeStats, type LifeStage } from '@/components/dashboard/DashboardHeader';
 import CycleCalendar from '@/components/dashboard/CycleCalendar';
 import DailyLogging from '@/components/dashboard/DailyLogging';
+import DocumentUpload from '@/components/dashboard/DocumentUpload';
 import { 
   MessageSquare, 
   Activity, 
@@ -313,6 +314,12 @@ const PatientDashboard = () => {
                 periodLength={5}
                 selectedMode={selectedMode}
               />
+            </div>
+
+            {/* Document Upload */}
+            <div className="mb-6">
+              <h3 className="text-base font-semibold mb-3">Health Documents</h3>
+              <DocumentUpload />
             </div>
 
             {/* Daily Logging */}
