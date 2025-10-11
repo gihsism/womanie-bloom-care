@@ -14,7 +14,8 @@ import {
   Smartphone, 
   Users, 
   LogOut,
-  ChevronRight
+  ChevronRight,
+  Home
 } from 'lucide-react';
 import type { User, Session } from '@supabase/supabase-js';
 
@@ -185,11 +186,36 @@ const PatientDashboard = () => {
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold text-primary">Womanie</h1>
-            <Button variant="outline" onClick={handleLogout} size="sm" className="gap-2">
-              <LogOut className="h-4 w-4" />
-              Logout
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => navigate('/')}
+                className="gap-2"
+              >
+                <Home className="h-4 w-4" />
+                Main Site
+              </Button>
+              <div className="h-6 w-px bg-border" />
+              <h1 className="text-xl font-bold text-primary">Womanie</h1>
+            </div>
+            <div className="flex items-center gap-2">
+              {activeSection !== 'overview' && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setActiveSection('overview')}
+                  className="gap-2"
+                >
+                  <Home className="h-4 w-4" />
+                  Dashboard Home
+                </Button>
+              )}
+              <Button variant="outline" onClick={handleLogout} size="sm" className="gap-2">
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </div>
           </div>
           <DashboardHeader 
             userName={getUserName()}
