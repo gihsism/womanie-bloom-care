@@ -56,12 +56,12 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className={`${isExpanded ? "w-64" : "w-16"} transition-all duration-300 ease-in-out border-r`}
+      className={`${isExpanded ? "w-64" : "w-16"} transition-all duration-300 ease-in-out border-r h-screen sticky top-0`}
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
     >
-      <SidebarContent>
-        <SidebarGroup>
+      <SidebarContent className="h-full">
+        <SidebarGroup className="py-4">
           <SidebarGroupLabel className={!isExpanded ? "opacity-0" : "opacity-100 transition-opacity"}>
             Menu
           </SidebarGroupLabel>

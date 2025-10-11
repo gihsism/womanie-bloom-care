@@ -187,7 +187,7 @@ const PatientDashboard = () => {
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         
-        <div className="flex-1 flex flex-col min-h-screen">
+        <div className="flex-1 flex flex-col min-h-screen w-full">
           {/* Header */}
           <div className="border-b border-border bg-card sticky top-0 z-10">
             <div className="container mx-auto px-4 py-4">
