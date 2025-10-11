@@ -5,7 +5,8 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Calendar } from '@/components/ui/calendar';
-import { ChevronLeft, ChevronRight, Droplet, Heart, Sparkles, Circle, TrendingUp, TrendingDown, Activity, Calendar as CalendarIcon, AlertCircle, CheckCircle2, Target, Edit } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ChevronLeft, ChevronRight, Droplet, Heart, Sparkles, Circle, TrendingUp, TrendingDown, Activity, Calendar as CalendarIcon, AlertCircle, CheckCircle2, Target, Edit, Settings2 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, addDays, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -30,6 +31,8 @@ const CycleCalendar = ({
     initialPeriodStart ? addDays(initialPeriodStart, initialPeriodLength - 1) : addDays(new Date(2025, 9, 1), 4)
   );
   const [cycleLength, setCycleLength] = useState(initialCycleLength);
+  const [isEditingCycle, setIsEditingCycle] = useState(false);
+  const [tempCycleLength, setTempCycleLength] = useState(initialCycleLength);
 
   const lastPeriodStart = periodStartDate || new Date(2025, 9, 1);
   const periodLength = periodEndDate && periodStartDate 
@@ -540,7 +543,69 @@ const CycleCalendar = ({
             <Droplet className="h-4 w-4 text-primary" />
             <span className="text-sm font-semibold">Period Tracking</span>
           </div>
-          <Dialog open={isEditingPeriod} onOpenChange={setIsEditingPeriod}>
+          <div className="flex gap-2">
+            <Dialog open={isEditingCycle} onOpenChange={setIsEditingCycle}>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-7 gap-1">
+                  <Settings2 className="h-3 w-3" />
+                  <span className="text-xs">Cycle Settings</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Cycle Settings</DialogTitle>
+                  <DialogDescription>
+                    Update your average cycle length to improve predictions
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Average Cycle Length</label>
+                    <Select
+                      value={tempCycleLength.toString()}
+                      onValueChange={(value) => setTempCycleLength(parseInt(value))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 24 }, (_, i) => i + 21).map((days) => (
+                          <SelectItem key={days} value={days.toString()}>
+                            {days} days
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Normal cycles range from 21-35 days. Most common: 28 days.
+                    </p>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        setTempCycleLength(initialCycleLength);
+                        setIsEditingCycle(false);
+                      }} 
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={() => {
+                        setCycleLength(tempCycleLength);
+                        setIsEditingCycle(false);
+                      }} 
+                      className="flex-1"
+                    >
+                      Save
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+            <Dialog open={isEditingPeriod} onOpenChange={setIsEditingPeriod}>
             <DialogTrigger asChild>
               <Button variant="ghost" size="sm" className="h-7 gap-1">
                 <Edit className="h-3 w-3" />
@@ -635,6 +700,7 @@ const CycleCalendar = ({
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
       )}
 
