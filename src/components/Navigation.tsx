@@ -17,12 +17,12 @@ const Navigation = () => {
   }, []);
 
   const navLinks = [
-    { label: 'Product', href: '#product' },
-    { label: 'For Patients', href: '#patients' },
-    { label: 'For Doctors', href: '#doctors' },
-    { label: 'About', href: '#about' },
-    { label: 'Pricing', href: '#pricing' },
-    { label: 'Blog', href: '#blog' },
+    { label: 'Product', href: '/product' },
+    { label: 'For Patients', href: '/for-patients' },
+    { label: 'For Doctors', href: '/for-doctors' },
+    { label: 'About', href: '/about' },
+    { label: 'Pricing', href: '/pricing' },
+    { label: 'Blog', href: '/blog' },
   ];
 
   return (
@@ -41,13 +41,13 @@ const Navigation = () => {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
-              <a
+              <button
                 key={link.label}
-                href={link.href}
+                onClick={() => navigate(link.href)}
                 className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
               >
                 {link.label}
-              </a>
+              </button>
             ))}
           </div>
 
@@ -75,14 +75,16 @@ const Navigation = () => {
           <div className="lg:hidden py-4 border-t border-border">
             <div className="flex flex-col gap-4">
               {navLinks.map((link) => (
-                <a
+                <button
                   key={link.label}
-                  href={link.href}
-                  className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={() => {
+                    navigate(link.href);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors text-left"
                 >
                   {link.label}
-                </a>
+                </button>
               ))}
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 <Button 

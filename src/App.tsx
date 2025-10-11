@@ -14,6 +14,12 @@ import BasicInformation from "./pages/onboarding/BasicInformation";
 import LifeStageSelection from "./pages/onboarding/LifeStageSelection";
 import ModeSetup from "./pages/onboarding/ModeSetup";
 import OnboardingSuccess from "./pages/onboarding/OnboardingSuccess";
+import Product from "./pages/Product";
+import ForPatients from "./pages/ForPatients";
+import ForDoctors from "./pages/ForDoctors";
+import About from "./pages/About";
+import Pricing from "./pages/Pricing";
+import Blog from "./pages/Blog";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +32,12 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/product" element={<Product />} />
+            <Route path="/for-patients" element={<ForPatients />} />
+            <Route path="/for-doctors" element={<ForDoctors />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/blog" element={<Blog />} />
             <Route path="/auth/select-type" element={<SelectUserType />} />
             <Route path="/auth/signup" element={<PatientSignUp />} />
             <Route path="/auth/login" element={<PatientLogIn />} />
