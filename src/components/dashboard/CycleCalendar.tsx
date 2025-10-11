@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -68,6 +70,7 @@ const CycleCalendar = ({
   periodLength: initialPeriodLength = 5,
   selectedMode = 'menstrual-cycle'
 }: CycleCalendarProps) => {
+  const { toast } = useToast();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isEditingPeriod, setIsEditingPeriod] = useState(false);
@@ -88,6 +91,127 @@ const CycleCalendar = ({
   const [daySignals, setDaySignals] = useState<Record<string, DaySignal>>({});
   const [isEditingSignals, setIsEditingSignals] = useState(false);
   const [currentEditDate, setCurrentEditDate] = useState<Date | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Load data from database on mount
+  useEffect(() => {
+    loadCalendarData();
+  }, []);
+  
+  const loadCalendarData = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Load period tracking
+      const { data: periodData } = await supabase
+        .from('period_tracking')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('period_start_date', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (periodData) {
+        setPeriodStartDate(new Date(periodData.period_start_date));
+        setPeriodEndDate(new Date(periodData.period_end_date));
+        setCycleLength(periodData.cycle_length);
+        setTempCycleLength(periodData.cycle_length);
+      }
+
+      // Load health signals
+      const { data: signalsData } = await supabase
+        .from('daily_health_signals')
+        .select('*')
+        .eq('user_id', user.id);
+
+      if (signalsData) {
+        const signalsMap: Record<string, DaySignal> = {};
+        signalsData.forEach(signal => {
+          signalsMap[signal.signal_date] = {
+            date: signal.signal_date,
+            symptoms: signal.symptoms || [],
+            intercourse: signal.intercourse as any[] || [],
+            mood: signal.mood || [],
+            discharge: signal.discharge || 'none',
+            notes: signal.notes || '',
+          };
+        });
+        setDaySignals(signalsMap);
+      }
+    } catch (error) {
+      console.error('Error loading calendar data:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load calendar data',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const savePeriodTracking = async (startDate: Date, endDate: Date, cycleLen: number) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from('period_tracking')
+        .upsert({
+          user_id: user.id,
+          period_start_date: format(startDate, 'yyyy-MM-dd'),
+          period_end_date: format(endDate, 'yyyy-MM-dd'),
+          cycle_length: cycleLen,
+        }, {
+          onConflict: 'user_id,period_start_date'
+        });
+
+      if (error) throw error;
+      
+      toast({
+        title: 'Saved',
+        description: 'Period tracking updated successfully',
+      });
+    } catch (error) {
+      console.error('Error saving period tracking:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save period tracking',
+        variant: 'destructive',
+      });
+    }
+  };
+  
+  const saveHealthSignal = async (date: Date, signal: DaySignal) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from('daily_health_signals')
+        .upsert({
+          user_id: user.id,
+          signal_date: format(date, 'yyyy-MM-dd'),
+          symptoms: signal.symptoms,
+          intercourse: signal.intercourse,
+          mood: signal.mood,
+          discharge: signal.discharge,
+          notes: signal.notes,
+        }, {
+          onConflict: 'user_id,signal_date'
+        });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error saving health signal:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save health signal',
+        variant: 'destructive',
+      });
+    }
+  };
   
   // Get or create signal for a date
   const getSignalForDate = (date: Date): DaySignal => {
@@ -105,13 +229,16 @@ const CycleCalendar = ({
   // Update signal for a date
   const updateSignalForDate = (date: Date, signal: Partial<DaySignal>) => {
     const dateKey = format(date, 'yyyy-MM-dd');
+    const updatedSignal = {
+      ...getSignalForDate(date),
+      ...signal,
+    };
     setDaySignals(prev => ({
       ...prev,
-      [dateKey]: {
-        ...getSignalForDate(date),
-        ...signal,
-      }
+      [dateKey]: updatedSignal
     }));
+    // Save immediately to database
+    saveHealthSignal(date, updatedSignal);
   };
 
   const lastPeriodStart = periodStartDate || new Date(2025, 9, 1);
@@ -825,6 +952,7 @@ const CycleCalendar = ({
                       if (tempPeriodStartDate && tempPeriodEndDate) {
                         setPeriodStartDate(tempPeriodStartDate);
                         setPeriodEndDate(tempPeriodEndDate);
+                        savePeriodTracking(tempPeriodStartDate, tempPeriodEndDate, cycleLength);
                         setTempPeriodStartDate(undefined);
                         setTempPeriodEndDate(undefined);
                         setIsEditingPeriod(false);
@@ -1255,7 +1383,10 @@ const CycleCalendar = ({
                 Close
               </Button>
               <Button
-                onClick={() => setIsEditingSignals(false)}
+                onClick={() => {
+                  // Save signal is already handled by updateSignalForDate
+                  setIsEditingSignals(false);
+                }}
                 className="flex-1"
               >
                 <CheckCircle2 className="h-4 w-4 mr-2" />

@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      daily_health_signals: {
+        Row: {
+          created_at: string
+          discharge: string | null
+          id: string
+          intercourse: Json | null
+          mood: string[] | null
+          notes: string | null
+          signal_date: string
+          symptoms: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          discharge?: string | null
+          id?: string
+          intercourse?: Json | null
+          mood?: string[] | null
+          notes?: string | null
+          signal_date: string
+          symptoms?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          discharge?: string | null
+          id?: string
+          intercourse?: Json | null
+          mood?: string[] | null
+          notes?: string | null
+          signal_date?: string
+          symptoms?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       health_documents: {
         Row: {
           ai_suggested_category: string | null
@@ -58,6 +97,36 @@ export type Database = {
           mime_type?: string
           notes?: string | null
           uploaded_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      period_tracking: {
+        Row: {
+          created_at: string
+          cycle_length: number
+          id: string
+          period_end_date: string
+          period_start_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_length?: number
+          id?: string
+          period_end_date: string
+          period_start_date: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          cycle_length?: number
+          id?: string
+          period_end_date?: string
+          period_start_date?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
