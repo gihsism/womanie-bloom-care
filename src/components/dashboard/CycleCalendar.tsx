@@ -628,7 +628,7 @@ const CycleCalendar = ({
                 <span className="text-xs">Edit Period</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Track Your Period</DialogTitle>
                 <DialogDescription>
@@ -639,7 +639,7 @@ const CycleCalendar = ({
                     : "Review and save your period dates"}
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4 py-4">
+              <div className="space-y-4 py-4 px-1">
                 <div className="border rounded-lg p-4 bg-muted/20">
                   <Calendar
                     mode="single"
