@@ -66,59 +66,56 @@ const CycleCalendar = ({
   const daysToNextPeriod = cycleLength - currentCycleDay;
 
   return (
-    <Card className="p-3">
-      <div className="space-y-3">
+    <Card className="p-2">
+      <div className="space-y-2">
       {/* Cycle Stats */}
-      <div className="grid grid-cols-3 gap-3">
-        <Card className="p-3">
-          <div className="flex items-center gap-2 mb-1">
-            <Circle className="h-3 w-3 text-primary" />
-            <span className="text-xs text-muted-foreground">Cycle Day</span>
+      <div className="grid grid-cols-3 gap-2">
+        <div className="p-2 bg-muted/30 rounded">
+          <div className="flex items-center gap-1 mb-1">
+            <Circle className="h-2 w-2 text-primary" />
+            <span className="text-[10px] text-muted-foreground">Day</span>
           </div>
-          <div className="text-xl font-bold">{currentCycleDay + 1}</div>
-          <div className="text-xs text-muted-foreground">of {cycleLength}</div>
-        </Card>
+          <div className="text-sm font-bold">{currentCycleDay + 1}</div>
+        </div>
         
-        <Card className="p-3">
-          <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="h-3 w-3 text-secondary" />
-            <span className="text-xs text-muted-foreground">Ovulation</span>
+        <div className="p-2 bg-muted/30 rounded">
+          <div className="flex items-center gap-1 mb-1">
+            <Sparkles className="h-2 w-2 text-secondary" />
+            <span className="text-[10px] text-muted-foreground">Ovulation</span>
           </div>
-          <div className="text-xl font-bold">
-            {daysToOvulation > 0 ? daysToOvulation : daysToOvulation + cycleLength}
+          <div className="text-sm font-bold">
+            {daysToOvulation > 0 ? daysToOvulation : daysToOvulation + cycleLength}d
           </div>
-          <div className="text-xs text-muted-foreground">days away</div>
-        </Card>
+        </div>
         
-        <Card className="p-3">
-          <div className="flex items-center gap-2 mb-1">
-            <Droplet className="h-3 w-3 text-primary" />
-            <span className="text-xs text-muted-foreground">Next Period</span>
+        <div className="p-2 bg-muted/30 rounded">
+          <div className="flex items-center gap-1 mb-1">
+            <Droplet className="h-2 w-2 text-primary" />
+            <span className="text-[10px] text-muted-foreground">Period</span>
           </div>
-          <div className="text-xl font-bold">{daysToNextPeriod}</div>
-          <div className="text-xs text-muted-foreground">days away</div>
-        </Card>
+          <div className="text-sm font-bold">{daysToNextPeriod}d</div>
+        </div>
       </div>
       
       {/* Calendar Header */}
-      <div className="flex items-center justify-between mb-3">
-        <h4 className="text-sm font-semibold">
-          {format(currentMonth, 'MMM yyyy')}
+      <div className="flex items-center justify-between">
+        <h4 className="text-xs font-semibold">
+          {format(currentMonth, 'MMM yy')}
         </h4>
-        <div className="flex gap-1">
+        <div className="flex gap-0.5">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-            className="h-6 w-6 p-0"
+            className="h-4 w-4 p-0"
           >
-            <ChevronLeft className="h-3 w-3" />
+            <ChevronLeft className="h-2 w-2" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setCurrentMonth(new Date())}
-            className="h-6 px-2 text-xs"
+            className="h-4 px-1 text-[10px]"
           >
             Today
           </Button>
@@ -126,24 +123,24 @@ const CycleCalendar = ({
             variant="ghost"
             size="sm"
             onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-            className="h-6 w-6 p-0"
+            className="h-4 w-4 p-0"
           >
-            <ChevronRight className="h-3 w-3" />
+            <ChevronRight className="h-2 w-2" />
           </Button>
         </div>
       </div>
 
         {/* Weekday Headers */}
-        <div className="grid grid-cols-7 gap-1 mb-1">
+        <div className="grid grid-cols-7 gap-0.5">
           {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-            <div key={i} className="text-center text-xs font-medium text-muted-foreground py-1">
+            <div key={i} className="text-center text-[8px] font-medium text-muted-foreground">
               {day}
             </div>
           ))}
         </div>
 
         {/* Calendar Days */}
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 gap-0.5">
           {calendarDays.map((date) => {
             const dayInfo = getDayType(date);
             const today = isToday(date);
@@ -155,15 +152,14 @@ const CycleCalendar = ({
                 key={date.toISOString()}
                 onClick={() => setSelectedDate(date)}
                 className={`
-                  relative aspect-square p-1 rounded text-xs transition-all
+                  relative aspect-square rounded text-[8px] transition-all
                   ${inCurrentMonth ? 'opacity-100' : 'opacity-30'}
                   ${dayInfo.color}
                   ${today ? 'ring-1 ring-foreground' : ''}
-                  ${isSelected ? 'ring-1 ring-primary scale-105' : ''}
-                  hover:scale-105
+                  ${isSelected ? 'ring-1 ring-primary' : ''}
                 `}
               >
-                <div className={`text-xs font-medium ${
+                <div className={`text-[8px] font-medium ${
                   dayInfo.type === 'period' || dayInfo.type === 'ovulation' || dayInfo.type === 'fertile'
                     ? 'text-white'
                     : 'text-foreground'
@@ -173,17 +169,17 @@ const CycleCalendar = ({
                 
                 {/* Ovulation marker */}
                 {dayInfo.type === 'ovulation' && (
-                  <Sparkles className="absolute top-0.5 right-0.5 h-2 w-2 text-white" />
+                  <Sparkles className="absolute top-0 right-0 h-1.5 w-1.5 text-white" />
                 )}
                 
                 {/* Period marker */}
                 {dayInfo.type === 'period' && (
-                  <Droplet className="absolute top-0.5 right-0.5 h-2 w-2 text-white fill-white" />
+                  <Droplet className="absolute top-0 right-0 h-1.5 w-1.5 text-white fill-white" />
                 )}
                 
                 {/* Fertile marker */}
                 {dayInfo.type === 'fertile' && (
-                  <Heart className="absolute top-0.5 right-0.5 h-2 w-2 text-white" />
+                  <Heart className="absolute top-0 right-0 h-1.5 w-1.5 text-white" />
                 )}
               </button>
             );
@@ -191,17 +187,17 @@ const CycleCalendar = ({
         </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-2 text-xs">
+      <div className="flex flex-wrap gap-1.5 text-[10px]">
         <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded bg-primary"></div>
+          <div className="w-1.5 h-1.5 rounded bg-primary"></div>
           <span className="text-muted-foreground">Period</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded bg-accent"></div>
+          <div className="w-1.5 h-1.5 rounded bg-accent"></div>
           <span className="text-muted-foreground">Fertile</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded bg-secondary"></div>
+          <div className="w-1.5 h-1.5 rounded bg-secondary"></div>
           <span className="text-muted-foreground">Ovulation</span>
         </div>
       </div>
