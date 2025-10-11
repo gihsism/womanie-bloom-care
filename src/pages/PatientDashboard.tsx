@@ -270,19 +270,19 @@ const PatientDashboard = () => {
         </Card>
 
         {/* Health Tracking Section */}
-        <div className="grid lg:grid-cols-2 gap-6 mb-6">
-          <div>
-            <h3 className="text-base font-semibold mb-3">Health Tracking</h3>
-            <CycleCalendar 
-              lastPeriodStart={new Date(2025, 9, 1)} 
-              cycleLength={28} 
-              periodLength={5}
-              selectedMode={selectedMode}
-            />
-          </div>
-          <div>
-            <DailyLogging selectedMode={selectedMode} />
-          </div>
+        <div className="mb-6">
+          <h3 className="text-base font-semibold mb-3">Health Tracking</h3>
+          <CycleCalendar 
+            lastPeriodStart={new Date(2025, 9, 1)} 
+            cycleLength={28} 
+            periodLength={5}
+            selectedMode={selectedMode}
+          />
+        </div>
+
+        {/* Daily Logging */}
+        <div className="mb-6">
+          <DailyLogging selectedMode={selectedMode} />
         </div>
 
         {/* Main Sections */}
