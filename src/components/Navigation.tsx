@@ -72,9 +72,19 @@ const Navigation = () => {
           {/* Desktop CTAs */}
           <div className="hidden lg:flex items-center gap-4">
             {user ? (
-              <Button onClick={() => navigate('/dashboard')}>
-                Dashboard
-              </Button>
+              <>
+                <span className="text-sm text-muted-foreground">Logged in</span>
+                <Button onClick={() => navigate('/dashboard')}>
+                  Dashboard
+                </Button>
+                <Button variant="outline" onClick={async () => {
+                  const { supabase } = await import('@/integrations/supabase/client');
+                  await supabase.auth.signOut();
+                  window.location.reload();
+                }}>
+                  Log Out
+                </Button>
+              </>
             ) : (
               <>
                 <Button variant="ghost" onClick={() => navigate('/auth/login')}>
@@ -119,15 +129,30 @@ const Navigation = () => {
               ))}
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 {user ? (
-                  <Button 
-                    className="w-full"
-                    onClick={() => {
-                      navigate('/dashboard');
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    Dashboard
-                  </Button>
+                  <>
+                    <span className="text-sm text-muted-foreground px-2">Logged in</span>
+                    <Button 
+                      className="w-full"
+                      onClick={() => {
+                        navigate('/dashboard');
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      Dashboard
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      className="w-full"
+                      onClick={async () => {
+                        const { supabase } = await import('@/integrations/supabase/client');
+                        await supabase.auth.signOut();
+                        setIsMobileMenuOpen(false);
+                        window.location.reload();
+                      }}
+                    >
+                      Log Out
+                    </Button>
+                  </>
                 ) : (
                   <>
                     <Button 

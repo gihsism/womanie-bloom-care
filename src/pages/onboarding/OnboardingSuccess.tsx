@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, Sparkles } from 'lucide-react';
+import { CheckCircle2, Sparkles, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 
@@ -29,7 +29,20 @@ const OnboardingSuccess = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Home Button */}
+      <div className="p-4">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 text-foreground hover:text-primary"
+          aria-label="Go to home"
+        >
+          <Home className="h-5 w-5" />
+          <span className="text-sm">Home</span>
+        </button>
+      </div>
+      
+      <div className="flex-1 flex items-center justify-center px-4">
       <div className="w-full max-w-2xl text-center">
         {/* Success Animation */}
         <div className="mb-8 flex justify-center">
@@ -77,6 +90,7 @@ const OnboardingSuccess = () => {
         <p className="mt-8 text-sm text-muted-foreground animate-fade-in-delay-3">
           Redirecting automatically in 3 seconds...
         </p>
+      </div>
       </div>
     </div>
   );

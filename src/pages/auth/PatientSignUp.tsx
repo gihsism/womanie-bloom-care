@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { Home, Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -181,15 +181,15 @@ const PatientSignUp = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Back Arrow */}
+      {/* Home Button */}
       <div className="p-4">
         <button
-          onClick={() => navigate('/auth/select-type')}
-          className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
-          aria-label="Go back to user type selection"
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 text-foreground hover:text-primary"
+          aria-label="Go to home"
         >
-          <ArrowLeft className="h-5 w-5" />
-          <span className="text-sm">Back</span>
+          <Home className="h-5 w-5" />
+          <span className="text-sm">Home</span>
         </button>
       </div>
 
