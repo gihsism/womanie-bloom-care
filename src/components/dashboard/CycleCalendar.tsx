@@ -66,11 +66,11 @@ const CycleCalendar = ({
   const daysToNextPeriod = cycleLength - currentCycleDay;
 
   return (
-    <Card className="p-2">
-      <div className="space-y-2">
+    <Card className="p-1 max-w-[200px]">
+      <div className="space-y-1">
       {/* Cycle Stats */}
-      <div className="grid grid-cols-3 gap-2">
-        <div className="p-2 bg-muted/30 rounded">
+      <div className="grid grid-cols-3 gap-1">
+        <div className="p-1 bg-muted/30 rounded">
           <div className="flex items-center gap-1 mb-1">
             <Circle className="h-2 w-2 text-primary" />
             <span className="text-[10px] text-muted-foreground">Day</span>
@@ -78,7 +78,7 @@ const CycleCalendar = ({
           <div className="text-sm font-bold">{currentCycleDay + 1}</div>
         </div>
         
-        <div className="p-2 bg-muted/30 rounded">
+        <div className="p-1 bg-muted/30 rounded">
           <div className="flex items-center gap-1 mb-1">
             <Sparkles className="h-2 w-2 text-secondary" />
             <span className="text-[10px] text-muted-foreground">Ovulation</span>
@@ -88,7 +88,7 @@ const CycleCalendar = ({
           </div>
         </div>
         
-        <div className="p-2 bg-muted/30 rounded">
+        <div className="p-1 bg-muted/30 rounded">
           <div className="flex items-center gap-1 mb-1">
             <Droplet className="h-2 w-2 text-primary" />
             <span className="text-[10px] text-muted-foreground">Period</span>
@@ -131,16 +131,16 @@ const CycleCalendar = ({
       </div>
 
         {/* Weekday Headers */}
-        <div className="grid grid-cols-7 gap-0.5">
+        <div className="grid grid-cols-7 gap-[1px]">
           {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-            <div key={i} className="text-center text-[8px] font-medium text-muted-foreground">
+            <div key={i} className="text-center text-[6px] font-medium text-muted-foreground w-4">
               {day}
             </div>
           ))}
         </div>
 
         {/* Calendar Days */}
-        <div className="grid grid-cols-7 gap-0.5">
+        <div className="grid grid-cols-7 gap-[1px]">
           {calendarDays.map((date) => {
             const dayInfo = getDayType(date);
             const today = isToday(date);
@@ -152,14 +152,14 @@ const CycleCalendar = ({
                 key={date.toISOString()}
                 onClick={() => setSelectedDate(date)}
                 className={`
-                  relative aspect-square rounded text-[8px] transition-all
+                  relative aspect-square rounded text-[6px] transition-all w-4 h-4
                   ${inCurrentMonth ? 'opacity-100' : 'opacity-30'}
                   ${dayInfo.color}
-                  ${today ? 'ring-1 ring-foreground' : ''}
-                  ${isSelected ? 'ring-1 ring-primary' : ''}
+                  ${today ? 'ring-[0.5px] ring-foreground' : ''}
+                  ${isSelected ? 'ring-[0.5px] ring-primary' : ''}
                 `}
               >
-                <div className={`text-[8px] font-medium ${
+                <div className={`text-[6px] font-medium ${
                   dayInfo.type === 'period' || dayInfo.type === 'ovulation' || dayInfo.type === 'fertile'
                     ? 'text-white'
                     : 'text-foreground'
@@ -169,17 +169,17 @@ const CycleCalendar = ({
                 
                 {/* Ovulation marker */}
                 {dayInfo.type === 'ovulation' && (
-                  <Sparkles className="absolute top-0 right-0 h-1.5 w-1.5 text-white" />
+                  <Sparkles className="absolute top-0 right-0 h-1 w-1 text-white" />
                 )}
                 
                 {/* Period marker */}
                 {dayInfo.type === 'period' && (
-                  <Droplet className="absolute top-0 right-0 h-1.5 w-1.5 text-white fill-white" />
+                  <Droplet className="absolute top-0 right-0 h-1 w-1 text-white fill-white" />
                 )}
                 
                 {/* Fertile marker */}
                 {dayInfo.type === 'fertile' && (
-                  <Heart className="absolute top-0 right-0 h-1.5 w-1.5 text-white" />
+                  <Heart className="absolute top-0 right-0 h-1 w-1 text-white" />
                 )}
               </button>
             );
@@ -187,17 +187,17 @@ const CycleCalendar = ({
         </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-1.5 text-[10px]">
-        <div className="flex items-center gap-1">
-          <div className="w-1.5 h-1.5 rounded bg-primary"></div>
+      <div className="flex flex-wrap gap-1 text-[8px]">
+        <div className="flex items-center gap-0.5">
+          <div className="w-1 h-1 rounded bg-primary"></div>
           <span className="text-muted-foreground">Period</span>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="w-1.5 h-1.5 rounded bg-accent"></div>
+        <div className="flex items-center gap-0.5">
+          <div className="w-1 h-1 rounded bg-accent"></div>
           <span className="text-muted-foreground">Fertile</span>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="w-1.5 h-1.5 rounded bg-secondary"></div>
+        <div className="flex items-center gap-0.5">
+          <div className="w-1 h-1 rounded bg-secondary"></div>
           <span className="text-muted-foreground">Ovulation</span>
         </div>
       </div>
