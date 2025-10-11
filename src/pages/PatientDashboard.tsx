@@ -222,7 +222,26 @@ const PatientDashboard = () => {
           </div>
         </div>
 
-        {/* Cycle Calendar - Only show for relevant modes */}
+        {/* Profile Completion Banner */}
+        <Card className="p-4 mb-6 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex-1">
+              <h3 className="text-lg font-bold mb-2">
+                Complete your profile for better personalized services
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Tell us about your health journey to get customized insights, tracking, and recommendations tailored to your needs.
+              </p>
+            </div>
+            <Button
+              size="lg"
+              onClick={() => navigate('/onboarding/basic-info')}
+            >
+              Complete Profile
+            </Button>
+          </div>
+        </Card>
+
         {['menstrual-cycle', 'contraception', 'conception', 'ivf'].includes(selectedMode) && (
           <div className="mb-6">
             <h3 className="text-base font-semibold mb-3">Menstrual Cycle Calendar</h3>
