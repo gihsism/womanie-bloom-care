@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import DashboardHeader, { getModeStats, type LifeStage } from '@/components/dashboard/DashboardHeader';
 import CycleCalendar from '@/components/dashboard/CycleCalendar';
 import DailyLogging from '@/components/dashboard/DailyLogging';
@@ -33,48 +34,22 @@ import {
   User as UserIcon,
   LogOut
 } from 'lucide-react';
-import type { User, Session } from '@supabase/supabase-js';
+
 
 const PatientDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const { user, session, loading } = useAuth();
   const [profile, setProfile] = useState<{ full_name?: string } | null>(null);
-  const [loading, setLoading] = useState(true);
   const [selectedMode, setSelectedMode] = useState<LifeStage>('menstrual-cycle');
   const [activeSection, setActiveSection] = useState('overview');
 
+  // Fetch profile when user is available
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Fetch profile when user logs in
-        if (session?.user) {
-          setTimeout(() => {
-            fetchProfile(session.user.id);
-          }, 0);
-        }
-      }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+    if (user) {
+      fetchProfile(user.id);
+    }
+  }, [user]);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -88,8 +63,6 @@ const PatientDashboard = () => {
       setProfile(data);
     } catch (error) {
       console.error('Error fetching profile:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
