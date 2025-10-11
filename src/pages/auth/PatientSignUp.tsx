@@ -108,9 +108,9 @@ const PatientSignUp = () => {
       } else {
         toast({
           title: 'Success!',
-          description: 'Your account has been created. Please check your email to verify.',
+          description: 'Your account has been created. Let\'s set up your profile!',
         });
-        navigate('/');
+        navigate('/onboarding/basic-info');
       }
     } catch (error) {
       toast({
