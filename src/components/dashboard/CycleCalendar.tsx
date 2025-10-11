@@ -40,6 +40,11 @@ const CycleCalendar = ({
   };
 
   const getDayType = (date: Date) => {
+    // Don't show cycle tracking for non-menstrual modes
+    if (['pregnancy', 'menopause', 'post-menopause'].includes(selectedMode)) {
+      return { type: 'regular', color: 'bg-muted/30', label: 'Day' };
+    }
+    
     const cycleDay = getCycleDay(date);
     
     // Period days (days 0-4 for 5-day period)
@@ -424,15 +429,17 @@ const CycleCalendar = ({
   };
 
   const modeStats = getModeSpecificStats();
-  const showCalendar = !['pregnancy', 'menopause', 'post-menopause'].includes(selectedMode);
+  const showCycleInfo = !['pregnancy', 'menopause', 'post-menopause'].includes(selectedMode);
+  const showLegend = !['pregnancy', 'menopause', 'post-menopause'].includes(selectedMode);
+
 
 
   return (
     <div className="flex gap-4">
-      {showCalendar && (
       <Card className="p-2 w-[507px]">
         <div className="space-y-2">
-      {/* Cycle Stats */}
+      {/* Cycle Stats - only show for menstrual modes */}
+      {showCycleInfo && (
       <div className="grid grid-cols-3 gap-2">
         <div className="p-2 bg-muted/30 rounded">
           <div className="flex items-center gap-1 mb-1">
@@ -460,6 +467,7 @@ const CycleCalendar = ({
           <div className="text-base font-bold">{daysToNextPeriod}d</div>
         </div>
       </div>
+      )}
       
       {/* Calendar Header */}
       <div className="flex items-center justify-between">
@@ -550,7 +558,8 @@ const CycleCalendar = ({
           })}
         </div>
 
-      {/* Legend */}
+      {/* Legend - only show for menstrual modes */}
+      {showLegend && (
       <div className="flex flex-wrap gap-2 text-xs">
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded bg-primary"></div>
@@ -565,9 +574,9 @@ const CycleCalendar = ({
           <span className="text-muted-foreground">Ovulation</span>
         </div>
       </div>
+      )}
       </div>
       </Card>
-      )}
       
       {/* Statistics Panel */}
       <Card className="p-4 flex-1">
