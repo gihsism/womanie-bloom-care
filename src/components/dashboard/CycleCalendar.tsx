@@ -59,7 +59,8 @@ const CycleCalendar = ({
 
   const getCycleDay = (date: Date) => {
     const daysSince = getDaysSinceLastPeriod(date);
-    return ((daysSince % cycleLength) + cycleLength) % cycleLength;
+    // Cycle day starts at 1, not 0
+    return (daysSince % cycleLength) + 1;
   };
 
   const getDayType = (date: Date) => {
@@ -70,13 +71,13 @@ const CycleCalendar = ({
     
     const cycleDay = getCycleDay(date);
     
-    // Period days (days 0-4 for 5-day period)
-    if (cycleDay < periodLength) {
+    // Period days (cycle days 1-5 for 5-day period)
+    if (cycleDay <= periodLength) {
       return { type: 'period', color: 'bg-primary', label: 'Period' };
     }
     
-    // Ovulation day (14 days before next period)
-    const ovulationDay = cycleLength - 14;
+    // Ovulation day (14 days before next period, which is cycleLength - 13 in cycle day terms)
+    const ovulationDay = cycleLength - 13;
     if (cycleDay === ovulationDay) {
       return { type: 'ovulation', color: 'bg-secondary', label: 'Ovulation' };
     }
@@ -92,9 +93,13 @@ const CycleCalendar = ({
   const isToday = (date: Date) => isSameDay(date, new Date());
   
   const currentCycleDay = getCycleDay(new Date());
-  const ovulationDay = Math.floor(cycleLength / 2);
-  const daysToOvulation = ovulationDay - currentCycleDay;
-  const daysToNextPeriod = cycleLength - currentCycleDay;
+  const ovulationDay = cycleLength - 13; // 14 days before next period
+  const daysToOvulation = ovulationDay >= currentCycleDay 
+    ? ovulationDay - currentCycleDay 
+    : (cycleLength - currentCycleDay) + ovulationDay;
+  const daysToNextPeriod = cycleLength >= currentCycleDay 
+    ? (cycleLength + 1) - currentCycleDay 
+    : 1;
 
   // Mode-specific statistics with enhanced visualizations
   const getModeSpecificStats = () => {
