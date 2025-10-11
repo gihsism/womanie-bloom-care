@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, Sparkles, Home } from 'lucide-react';
+import { CheckCircle2, Sparkles, Home, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 
@@ -30,8 +30,16 @@ const OnboardingSuccess = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Home Button */}
-      <div className="p-4">
+      {/* Navigation */}
+      <div className="p-4 flex items-center justify-between">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-foreground hover:text-primary"
+          aria-label="Go back"
+        >
+          <ArrowLeft className="h-5 w-5" />
+          <span className="text-sm">Back</span>
+        </button>
         <button
           onClick={() => navigate('/')}
           className="flex items-center gap-2 text-foreground hover:text-primary"

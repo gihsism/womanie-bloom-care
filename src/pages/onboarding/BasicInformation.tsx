@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar as CalendarIcon, Home } from 'lucide-react';
+import { Calendar as CalendarIcon, Home, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -60,11 +60,19 @@ const BasicInformation = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col px-4 py-8">
-      {/* Home Button */}
-      <div className="mb-4">
+      {/* Navigation */}
+      <div className="mb-4 flex items-center justify-between">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-foreground hover:text-primary"
+          aria-label="Go back"
+        >
+          <ArrowLeft className="h-5 w-5" />
+          <span className="text-sm">Back</span>
+        </button>
         <button
           onClick={handleHome}
-          className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
+          className="flex items-center gap-2 text-foreground hover:text-primary"
           aria-label="Go to home"
         >
           <Home className="h-5 w-5" />
