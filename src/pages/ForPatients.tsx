@@ -21,8 +21,8 @@ const ForPatients = () => {
     },
     {
       icon: Calendar,
-      title: 'Easy Doctor Appointments',
-      description: 'Book consultations with specialized gynecologists, fertility experts, and women\'s health professionals.',
+      title: 'Chat with a Doctor',
+      description: 'Get support from specialized gynecologists, fertility experts, and women\'s health professionals anytime.',
     },
     {
       icon: Users,
