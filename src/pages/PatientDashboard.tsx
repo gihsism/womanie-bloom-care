@@ -242,16 +242,15 @@ const PatientDashboard = () => {
           </div>
         </Card>
 
-        {['menstrual-cycle', 'contraception', 'conception', 'ivf'].includes(selectedMode) && (
-          <div className="mb-6">
-            <h3 className="text-base font-semibold mb-3">Menstrual Cycle Calendar</h3>
-            <CycleCalendar 
-              lastPeriodStart={new Date(2025, 9, 1)} 
-              cycleLength={28} 
-              periodLength={5} 
-            />
-          </div>
-        )}
+        <div className="mb-6">
+          <h3 className="text-base font-semibold mb-3">Health Tracking</h3>
+          <CycleCalendar 
+            lastPeriodStart={new Date(2025, 9, 1)} 
+            cycleLength={28} 
+            periodLength={5}
+            selectedMode={selectedMode}
+          />
+        </div>
 
         {/* Main Sections */}
         <div className="space-y-4">
