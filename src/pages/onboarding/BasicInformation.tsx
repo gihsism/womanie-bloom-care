@@ -134,7 +134,11 @@ const BasicInformation = () => {
                   max="31"
                   value={dateOfBirth ? dateOfBirth.getDate() : ''}
                   onChange={(e) => {
-                    const day = parseInt(e.target.value);
+                    const value = e.target.value;
+                    if (value === '') {
+                      return; // Don't update if empty
+                    }
+                    const day = parseInt(value);
                     if (day >= 1 && day <= 31) {
                       const newDate = dateOfBirth ? new Date(dateOfBirth) : new Date();
                       newDate.setDate(day);
@@ -166,6 +170,9 @@ const BasicInformation = () => {
                     onSelect={setDateOfBirth}
                     disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
                     initialFocus
+                    captionLayout="dropdown-buttons"
+                    fromYear={1900}
+                    toYear={new Date().getFullYear()}
                     className="pointer-events-auto"
                   />
                 </PopoverContent>
