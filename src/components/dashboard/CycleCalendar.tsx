@@ -70,8 +70,8 @@ const CycleCalendar = ({
       return { type: 'period', color: 'bg-primary', label: 'Period' };
     }
     
-    // Ovulation day (typically day 14 for 28-day cycle)
-    const ovulationDay = Math.floor(cycleLength / 2);
+    // Ovulation day (14 days before next period)
+    const ovulationDay = cycleLength - 14;
     if (cycleDay === ovulationDay) {
       return { type: 'ovulation', color: 'bg-secondary', label: 'Ovulation' };
     }
