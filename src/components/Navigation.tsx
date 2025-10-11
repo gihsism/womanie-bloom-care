@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 
 const Navigation = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -25,6 +26,11 @@ const Navigation = () => {
     { label: 'Blog', href: '/blog' },
   ];
 
+  const isActive = (href: string) => {
+    if (href === '/' && location.pathname === '/') return true;
+    return location.pathname === href;
+  };
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -34,9 +40,12 @@ const Navigation = () => {
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
-          <a href="#" className="text-2xl font-bold text-primary">
+          <button 
+            onClick={() => navigate('/')}
+            className="text-2xl font-bold text-primary hover:opacity-80 transition-opacity"
+          >
             Womanie
-          </a>
+          </button>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8">
@@ -44,9 +53,16 @@ const Navigation = () => {
               <button
                 key={link.label}
                 onClick={() => navigate(link.href)}
-                className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
+                className={`text-sm font-medium transition-colors relative ${
+                  isActive(link.href)
+                    ? 'text-primary font-semibold'
+                    : 'text-foreground/80 hover:text-primary'
+                }`}
               >
                 {link.label}
+                {isActive(link.href) && (
+                  <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full" />
+                )}
               </button>
             ))}
           </div>
@@ -81,9 +97,14 @@ const Navigation = () => {
                     navigate(link.href);
                     setIsMobileMenuOpen(false);
                   }}
-                  className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors text-left"
+                  className={`text-sm font-medium transition-colors text-left py-2 ${
+                    isActive(link.href)
+                      ? 'text-primary font-semibold'
+                      : 'text-foreground/80 hover:text-primary'
+                  }`}
                 >
                   {link.label}
+                  {isActive(link.href) && ' (Current)'}
                 </button>
               ))}
               <div className="flex flex-col gap-2 pt-4 border-t border-border">

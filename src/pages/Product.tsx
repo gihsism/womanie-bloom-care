@@ -1,7 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Activity, Calendar, MessageSquare, FileText, Shield, Zap } from 'lucide-react';
+import { Activity, Calendar, MessageSquare, FileText, Shield, Zap } from 'lucide-react';
+import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
 
 const Product = () => {
   const navigate = useNavigate();
@@ -41,18 +43,10 @@ const Product = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b border-border">
-        <div className="container mx-auto px-4 py-6">
-          <Button variant="ghost" onClick={() => navigate('/')} className="gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Home
-          </Button>
-        </div>
-      </div>
+      <Navigation />
 
       {/* Hero Section */}
-      <section className="py-16 lg:py-24">
+      <section className="py-16 lg:py-24 pt-32">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h1 className="text-4xl lg:text-6xl font-bold mb-6">
@@ -117,6 +111,8 @@ const Product = () => {
           </div>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 };
