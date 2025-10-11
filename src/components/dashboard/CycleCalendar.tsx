@@ -6,9 +6,54 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ChevronLeft, ChevronRight, Droplet, Heart, Sparkles, Circle, TrendingUp, TrendingDown, Activity, Calendar as CalendarIcon, AlertCircle, CheckCircle2, Target, Edit, Settings2 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ChevronLeft, ChevronRight, Droplet, Heart, Sparkles, Circle, TrendingUp, TrendingDown, Activity, Calendar as CalendarIcon, AlertCircle, CheckCircle2, Target, Edit, Settings2, Plus, X } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, addDays, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
+
+// Health signal types
+interface DaySignal {
+  date: string; // ISO date string
+  symptoms: string[];
+  intercourse: {
+    protected: boolean;
+    timestamp?: string;
+  }[];
+  mood: string[];
+  discharge: string;
+  notes: string;
+}
+
+const SYMPTOM_OPTIONS = [
+  { value: 'cramps', label: 'Abdominal Cramps', icon: '🤕' },
+  { value: 'headache', label: 'Headache', icon: '🤯' },
+  { value: 'bloating', label: 'Bloating', icon: '😖' },
+  { value: 'tender_breasts', label: 'Tender Breasts', icon: '💢' },
+  { value: 'back_pain', label: 'Back Pain', icon: '🔙' },
+  { value: 'nausea', label: 'Nausea', icon: '🤢' },
+  { value: 'fatigue', label: 'Fatigue', icon: '😴' },
+  { value: 'acne', label: 'Acne', icon: '😣' },
+];
+
+const MOOD_OPTIONS = [
+  { value: 'happy', label: 'Happy', icon: '😊' },
+  { value: 'sad', label: 'Sad', icon: '😢' },
+  { value: 'anxious', label: 'Anxious', icon: '😰' },
+  { value: 'irritable', label: 'Irritable', icon: '😤' },
+  { value: 'energetic', label: 'Energetic', icon: '⚡' },
+  { value: 'calm', label: 'Calm', icon: '😌' },
+];
+
+const DISCHARGE_OPTIONS = [
+  { value: 'none', label: 'None' },
+  { value: 'dry', label: 'Dry' },
+  { value: 'sticky', label: 'Sticky' },
+  { value: 'creamy', label: 'Creamy' },
+  { value: 'watery', label: 'Watery' },
+  { value: 'ewcm', label: 'EWCM (Egg White)' },
+];
 
 interface CycleCalendarProps {
   lastPeriodStart?: Date;
@@ -38,6 +83,36 @@ const CycleCalendar = ({
   const [cycleLength, setCycleLength] = useState(initialCycleLength);
   const [isEditingCycle, setIsEditingCycle] = useState(false);
   const [tempCycleLength, setTempCycleLength] = useState(initialCycleLength);
+
+  // Health signals tracking
+  const [daySignals, setDaySignals] = useState<Record<string, DaySignal>>({});
+  const [isEditingSignals, setIsEditingSignals] = useState(false);
+  const [currentEditDate, setCurrentEditDate] = useState<Date | null>(null);
+  
+  // Get or create signal for a date
+  const getSignalForDate = (date: Date): DaySignal => {
+    const dateKey = format(date, 'yyyy-MM-dd');
+    return daySignals[dateKey] || {
+      date: dateKey,
+      symptoms: [],
+      intercourse: [],
+      mood: [],
+      discharge: 'none',
+      notes: '',
+    };
+  };
+  
+  // Update signal for a date
+  const updateSignalForDate = (date: Date, signal: Partial<DaySignal>) => {
+    const dateKey = format(date, 'yyyy-MM-dd');
+    setDaySignals(prev => ({
+      ...prev,
+      [dateKey]: {
+        ...getSignalForDate(date),
+        ...signal,
+      }
+    }));
+  };
 
   const lastPeriodStart = periodStartDate || new Date(2025, 9, 1);
   const periodLength = periodEndDate && periodStartDate 
@@ -849,17 +924,24 @@ const CycleCalendar = ({
             const today = isToday(date);
             const inCurrentMonth = isSameMonth(date, currentMonth);
             const isSelected = selectedDate && isSameDay(date, selectedDate);
+            const dateKey = format(date, 'yyyy-MM-dd');
+            const hasSignals = daySignals[dateKey];
 
             return (
               <button
                 key={date.toISOString()}
-                onClick={() => setSelectedDate(date)}
+                onClick={() => {
+                  setSelectedDate(date);
+                  setCurrentEditDate(date);
+                  setIsEditingSignals(true);
+                }}
                 className={`
                   relative aspect-square rounded text-xs transition-all w-10 h-10
                   ${inCurrentMonth ? 'opacity-100' : 'opacity-30'}
                   ${dayInfo.color}
                   ${today ? 'ring-1 ring-foreground' : ''}
                   ${isSelected ? 'ring-1 ring-primary' : ''}
+                  ${hasSignals ? 'ring-2 ring-accent' : ''}
                 `}
               >
                 <div className={`text-[10px] font-bold ${
@@ -883,6 +965,21 @@ const CycleCalendar = ({
                 {/* Fertile marker */}
                 {dayInfo.type === 'fertile' && (
                   <Heart className="absolute top-0.5 right-0.5 h-2.5 w-2.5 text-white" />
+                )}
+                
+                {/* Signal indicators */}
+                {hasSignals && (
+                  <div className="absolute bottom-0.5 left-0 right-0 flex justify-center gap-0.5">
+                    {hasSignals.symptoms.length > 0 && (
+                      <div className="w-1 h-1 rounded-full bg-red-500" />
+                    )}
+                    {hasSignals.intercourse.length > 0 && (
+                      <div className="w-1 h-1 rounded-full bg-pink-500" />
+                    )}
+                    {hasSignals.mood.length > 0 && (
+                      <div className="w-1 h-1 rounded-full bg-yellow-500" />
+                    )}
+                  </div>
                 )}
               </button>
             );
@@ -974,6 +1071,200 @@ const CycleCalendar = ({
           </div>
         </div>
       </Card>
+      
+      {/* Signal Tracking Dialog */}
+      {currentEditDate && (
+        <Dialog open={isEditingSignals} onOpenChange={setIsEditingSignals}>
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CalendarIcon className="h-5 w-5" />
+                Track Health Signals - {format(currentEditDate, 'MMM d, yyyy')}
+              </DialogTitle>
+              <DialogDescription>
+                Log symptoms, mood, intercourse, and other health signals for this day
+              </DialogDescription>
+            </DialogHeader>
+            
+            <ScrollArea className="max-h-[70vh] pr-4">
+              <div className="space-y-6 py-4">
+                {/* Intercourse Tracking */}
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-sm flex items-center gap-2">
+                    <Heart className="h-4 w-4 text-pink-500" />
+                    Intercourse
+                  </h4>
+                  <div className="space-y-2">
+                    {getSignalForDate(currentEditDate).intercourse.map((entry, idx) => (
+                      <div key={idx} className="flex items-center gap-2 p-2 bg-muted/50 rounded">
+                        <Heart className="h-3 w-3 text-pink-500" />
+                        <span className="text-sm flex-1">
+                          {entry.protected ? '🛡️ Protected' : '⚠️ Unprotected'}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0"
+                          onClick={() => {
+                            const signal = getSignalForDate(currentEditDate);
+                            updateSignalForDate(currentEditDate, {
+                              intercourse: signal.intercourse.filter((_, i) => i !== idx)
+                            });
+                          }}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const signal = getSignalForDate(currentEditDate);
+                          updateSignalForDate(currentEditDate, {
+                            intercourse: [...signal.intercourse, { protected: true }]
+                          });
+                        }}
+                        className="flex-1"
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        Protected
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const signal = getSignalForDate(currentEditDate);
+                          updateSignalForDate(currentEditDate, {
+                            intercourse: [...signal.intercourse, { protected: false }]
+                          });
+                        }}
+                        className="flex-1"
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        Unprotected
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Symptoms */}
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-sm flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                    Symptoms
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {SYMPTOM_OPTIONS.map((symptom) => {
+                      const signal = getSignalForDate(currentEditDate);
+                      const isSelected = signal.symptoms.includes(symptom.value);
+                      return (
+                        <div key={symptom.value} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`symptom-${symptom.value}`}
+                            checked={isSelected}
+                            onCheckedChange={(checked) => {
+                              updateSignalForDate(currentEditDate, {
+                                symptoms: checked
+                                  ? [...signal.symptoms, symptom.value]
+                                  : signal.symptoms.filter(s => s !== symptom.value)
+                              });
+                            }}
+                          />
+                          <Label
+                            htmlFor={`symptom-${symptom.value}`}
+                            className="text-sm cursor-pointer"
+                          >
+                            {symptom.icon} {symptom.label}
+                          </Label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Mood */}
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-sm flex items-center gap-2">
+                    <Activity className="h-4 w-4 text-yellow-500" />
+                    Mood
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {MOOD_OPTIONS.map((mood) => {
+                      const signal = getSignalForDate(currentEditDate);
+                      const isSelected = signal.mood.includes(mood.value);
+                      return (
+                        <div key={mood.value} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`mood-${mood.value}`}
+                            checked={isSelected}
+                            onCheckedChange={(checked) => {
+                              updateSignalForDate(currentEditDate, {
+                                mood: checked
+                                  ? [...signal.mood, mood.value]
+                                  : signal.mood.filter(m => m !== mood.value)
+                              });
+                            }}
+                          />
+                          <Label
+                            htmlFor={`mood-${mood.value}`}
+                            className="text-sm cursor-pointer"
+                          >
+                            {mood.icon} {mood.label}
+                          </Label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Discharge */}
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-sm flex items-center gap-2">
+                    <Droplet className="h-4 w-4 text-blue-500" />
+                    Cervical Discharge
+                  </h4>
+                  <Select
+                    value={getSignalForDate(currentEditDate).discharge}
+                    onValueChange={(value) => {
+                      updateSignalForDate(currentEditDate, { discharge: value });
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DISCHARGE_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </ScrollArea>
+
+            <div className="flex gap-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setIsEditingSignals(false)}
+                className="flex-1"
+              >
+                Close
+              </Button>
+              <Button
+                onClick={() => setIsEditingSignals(false)}
+                className="flex-1"
+              >
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Save
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
