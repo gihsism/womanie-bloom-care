@@ -193,12 +193,9 @@ const PatientDashboard = () => {
             <div className="container mx-auto px-4 py-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <SidebarTrigger className="h-8 w-8">
-                    <Menu className="h-4 w-4" />
-                  </SidebarTrigger>
                   <Button 
                     variant="ghost" 
-                    size="sm" 
+                    size="sm"
                     onClick={() => navigate('/')}
                     className="gap-2"
                   >
