@@ -18,10 +18,8 @@ const OnboardingSuccess = () => {
   }, []);
 
   const handleStartExploring = () => {
-    // In a real app, this would navigate to the patient dashboard
-    // For now, we'll go back to home and clear the onboarding data
-    resetOnboarding();
-    navigate('/');
+    // Navigate to dashboard
+    navigate('/dashboard');
   };
 
   const handleTour = () => {

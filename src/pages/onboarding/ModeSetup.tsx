@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Home } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import ProgressBar from '@/components/onboarding/ProgressBar';
 import RegularCycleForm from '@/components/onboarding/RegularCycleForm';
@@ -15,6 +15,10 @@ const ModeSetup = () => {
   const handleBack = () => {
     setCurrentStep(2);
     navigate('/onboarding/life-stage');
+  };
+
+  const handleHome = () => {
+    navigate('/dashboard');
   };
 
   const renderForm = () => {
@@ -36,7 +40,7 @@ const ModeSetup = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col px-4 py-8">
-      <div className="mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <button
           onClick={handleBack}
           className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
@@ -44,6 +48,14 @@ const ModeSetup = () => {
         >
           <ArrowLeft className="h-5 w-5" />
           <span className="text-sm">Back</span>
+        </button>
+        <button
+          onClick={handleHome}
+          className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
+          aria-label="Go to home"
+        >
+          <Home className="h-5 w-5" />
+          <span className="text-sm">Home</span>
         </button>
       </div>
 

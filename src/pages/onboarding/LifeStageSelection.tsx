@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset } from 'lucide-react';
+import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -59,9 +59,13 @@ const LifeStageSelection = () => {
     navigate('/onboarding/basic-info');
   };
 
+  const handleHome = () => {
+    navigate('/dashboard');
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col px-4 py-8">
-      <div className="mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <button
           onClick={handleBack}
           className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
@@ -69,6 +73,14 @@ const LifeStageSelection = () => {
         >
           <ArrowLeft className="h-5 w-5" />
           <span className="text-sm">Back</span>
+        </button>
+        <button
+          onClick={handleHome}
+          className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
+          aria-label="Go to home"
+        >
+          <Home className="h-5 w-5" />
+          <span className="text-sm">Home</span>
         </button>
       </div>
 

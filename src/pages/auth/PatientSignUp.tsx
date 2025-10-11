@@ -108,9 +108,9 @@ const PatientSignUp = () => {
       } else {
         toast({
           title: 'Success!',
-          description: 'Your account has been created. Let\'s set up your profile!',
+          description: 'Your account has been created. Welcome to Womanie!',
         });
-        navigate('/onboarding/basic-info');
+        navigate('/dashboard');
       }
     } catch (error) {
       toast({

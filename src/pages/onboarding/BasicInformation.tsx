@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarIcon, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -54,8 +54,25 @@ const BasicInformation = () => {
     navigate('/onboarding/life-stage');
   };
 
+  const handleHome = () => {
+    navigate('/dashboard');
+  };
+
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-background flex flex-col px-4 py-8">
+      {/* Home Button */}
+      <div className="mb-4">
+        <button
+          onClick={handleHome}
+          className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
+          aria-label="Go to home"
+        >
+          <Home className="h-5 w-5" />
+          <span className="text-sm">Home</span>
+        </button>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center">
       <div className="w-full max-w-2xl">
         <ProgressBar currentStep={1} totalSteps={3} />
 
@@ -204,6 +221,7 @@ const BasicInformation = () => {
             </button>
           </div>
         </Card>
+      </div>
       </div>
     </div>
   );
