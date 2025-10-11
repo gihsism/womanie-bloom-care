@@ -15,6 +15,7 @@ const PatientSignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   const [formData, setFormData] = useState({
+    fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -95,6 +96,9 @@ const PatientSignUp = () => {
         email: formData.email,
         password: formData.password,
         options: {
+          data: {
+            full_name: formData.fullName,
+          },
           emailRedirectTo: redirectUrl,
         },
       });
@@ -150,6 +154,21 @@ const PatientSignUp = () => {
 
           {/* Form */}
           <form onSubmit={handleSignUp} className="space-y-6">
+            {/* Full Name Input */}
+            <div className="space-y-2">
+              <label htmlFor="fullName" className="text-sm font-medium">
+                Full Name
+              </label>
+              <Input
+                id="fullName"
+                type="text"
+                placeholder="Enter your full name"
+                value={formData.fullName}
+                onChange={(e) => handleInputChange('fullName', e.target.value)}
+                required
+              />
+            </div>
+
             {/* Email Input */}
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
