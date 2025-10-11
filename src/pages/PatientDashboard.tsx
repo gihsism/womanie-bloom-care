@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import DashboardHeader, { getModeStats, type LifeStage } from '@/components/dashboard/DashboardHeader';
 import CycleCalendar from '@/components/dashboard/CycleCalendar';
 import { 
   MessageSquare, 
@@ -12,11 +13,7 @@ import {
   Smartphone, 
   Users, 
   LogOut,
-  Calendar as CalendarIcon,
-  Droplet,
-  Heart,
-  Pill,
-  TrendingUp
+  ChevronRight
 } from 'lucide-react';
 import type { User, Session } from '@supabase/supabase-js';
 
@@ -27,6 +24,8 @@ const PatientDashboard = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<{ full_name?: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedMode, setSelectedMode] = useState<LifeStage>('menstrual-cycle');
+  const [activeSection, setActiveSection] = useState('overview');
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -101,84 +100,69 @@ const PatientDashboard = () => {
 
   const getUserName = () => {
     if (profile?.full_name) {
-      return profile.full_name.split(' ')[0]; // First name only
+      return profile.full_name.split(' ')[0];
     }
     return 'there';
   };
 
-  const dashboardButtons = [
+  const healthStats = getModeStats(selectedMode);
+
+  const mainSections = [
     {
       id: 'B1',
       title: 'Healthcare Services',
-      description: 'Active consultations, chat with AI or doctors',
       icon: MessageSquare,
-      color: 'bg-primary',
+      subsections: [
+        { id: 'B1.1', title: 'AI Health Assistant', description: 'Symptom checker & health guidance' },
+        { id: 'B1.2', title: 'Doctor Consultations', description: 'Start consultation & history' },
+      ],
     },
     {
       id: 'B2',
       title: 'My Health Dashboard',
-      description: 'Live tracking, cycle phases, blood results, trends',
       icon: Activity,
-      color: 'bg-secondary',
+      subsections: [
+        { id: 'B2.1', title: "Today's Overview", description: 'Current status & insights' },
+        { id: 'B2.2', title: 'Cycle & Phase Tracking', description: 'Visual calendar & predictions' },
+        { id: 'B2.3', title: 'Body Insights & Patterns', description: 'Daily tracking & correlations' },
+        { id: 'B2.4', title: 'Medical Data & Test Results', description: 'Lab results & imaging' },
+        { id: 'B2.5', title: 'Medical History', description: 'Conditions & medications' },
+        { id: 'B2.6', title: 'Pregnancy Tracker', description: 'Week-by-week development', visible: selectedMode === 'pregnancy' },
+        { id: 'B2.7', title: 'Wearable Device Data', description: 'Synced health metrics' },
+        { id: 'B2.8', title: 'Health Goals & Progress', description: 'Track your goals' },
+      ],
     },
     {
       id: 'B3',
-      title: 'Historical Records',
-      description: 'Permanent archive, uploaded documents, personal profile',
+      title: 'Personal Records',
       icon: FileText,
-      color: 'bg-accent',
+      subsections: [
+        { id: 'B3.1', title: 'My Profile', description: 'Essential & extended info' },
+        { id: 'B3.2', title: 'Document Library', description: 'Upload & organize documents' },
+        { id: 'B3.3', title: 'Health Timeline', description: 'Chronological health events' },
+        { id: 'B3.4', title: 'Settings & Preferences', description: 'Account & privacy settings' },
+      ],
     },
     {
       id: 'B4',
-      title: 'Device Connection',
-      description: 'Sync with wearables, background health data',
+      title: 'Connected Devices',
       icon: Smartphone,
-      color: 'bg-muted',
+      subsections: [
+        { id: 'B4.1', title: 'Device Management', description: 'My devices & connection status' },
+        { id: 'B4.2', title: 'Sync Settings', description: 'Auto-sync & preferences' },
+        { id: 'B4.3', title: 'Troubleshooting', description: 'Connection & sync issues' },
+      ],
     },
     {
       id: 'B5',
-      title: 'Community',
-      description: 'Support groups, shared experiences, Telegram/WhatsApp',
+      title: 'Community & Support',
       icon: Users,
-      color: 'bg-primary/70',
-    },
-  ];
-
-  const healthStats = [
-    {
-      title: 'Cycle Day',
-      value: '14',
-      subtitle: 'Ovulation window',
-      icon: CalendarIcon,
-      color: 'text-primary',
-    },
-    {
-      title: 'Hormones',
-      value: 'Optimal',
-      subtitle: 'Estrogen & Progesterone',
-      icon: TrendingUp,
-      color: 'text-secondary',
-    },
-    {
-      title: 'Vitamins',
-      value: '8/10',
-      subtitle: 'Daily intake goal',
-      icon: Pill,
-      color: 'text-accent',
-    },
-    {
-      title: 'Ovulation',
-      value: 'High',
-      subtitle: 'Fertility today',
-      icon: Droplet,
-      color: 'text-primary',
-    },
-    {
-      title: 'Ovaries',
-      value: 'Healthy',
-      subtitle: 'Last scan: 2 weeks ago',
-      icon: Heart,
-      color: 'text-secondary',
+      subsections: [
+        { id: 'B5.1', title: 'My Groups', description: 'Joined groups & activity' },
+        { id: 'B5.2', title: 'Discover Groups', description: 'Browse recommended groups' },
+        { id: 'B5.3', title: 'Educational Content', description: 'Articles & videos' },
+        { id: 'B5.4', title: 'Upcoming Events', description: 'Webinars & sessions' },
+      ],
     },
   ];
 
@@ -197,30 +181,29 @@ const PatientDashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">
-                {getGreeting()}, {getUserName()}! 👋
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Welcome to your personalized health dashboard
-              </p>
-            </div>
-            <Button variant="outline" onClick={handleLogout} className="gap-2">
+      <div className="border-b border-border bg-card sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-xl font-bold text-primary">Womanie</h1>
+            <Button variant="outline" onClick={handleLogout} size="sm" className="gap-2">
               <LogOut className="h-4 w-4" />
               Logout
             </Button>
           </div>
+          <DashboardHeader 
+            userName={getUserName()}
+            selectedMode={selectedMode}
+            onModeChange={setSelectedMode}
+            onNavigate={setActiveSection}
+          />
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6">
         {/* Health Statistics */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Your Health Today</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="mb-6">
+          <h2 className="text-lg font-bold mb-3">Your Health Today</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
             {healthStats.map((stat) => {
               const IconComponent = stat.icon;
               return (
@@ -239,50 +222,67 @@ const PatientDashboard = () => {
           </div>
         </div>
 
-        {/* Cycle Calendar */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <CalendarIcon className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold">Menstrual Cycle Calendar</h2>
+        {/* Cycle Calendar - Only show for relevant modes */}
+        {['menstrual-cycle', 'contraception', 'conception', 'ivf'].includes(selectedMode) && (
+          <div className="mb-6">
+            <h3 className="text-base font-semibold mb-3">Menstrual Cycle Calendar</h3>
+            <CycleCalendar 
+              lastPeriodStart={new Date(2025, 9, 1)} 
+              cycleLength={28} 
+              periodLength={5} 
+            />
           </div>
-          <CycleCalendar 
-            lastPeriodStart={new Date(2025, 9, 1)} 
-            cycleLength={28} 
-            periodLength={5} 
-          />
-        </div>
+        )}
 
-        {/* Dashboard Actions */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold">Quick Actions</h2>
-            <Button variant="outline" onClick={() => navigate('/onboarding/basic-info')}>
-              Complete Profile
-            </Button>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {dashboardButtons.map((button) => {
-              const IconComponent = button.icon;
-              return (
-                <Card
-                  key={button.id}
-                  className="p-6 cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() =>
-                    toast({
-                      title: button.title,
-                      description: 'This feature is coming soon!',
-                    })
-                  }
+        {/* Main Sections */}
+        <div className="space-y-4">
+          {mainSections.map((section) => {
+            const IconComponent = section.icon;
+            const visibleSubsections = section.subsections.filter(sub => sub.visible !== false);
+            
+            return (
+              <Card key={section.id} className="p-4">
+                <div 
+                  className="flex items-center justify-between cursor-pointer"
+                  onClick={() => setActiveSection(section.id)}
                 >
-                  <div className={`w-12 h-12 rounded-lg ${button.color} flex items-center justify-center mb-4`}>
-                    <IconComponent className="h-6 w-6 text-white" />
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <IconComponent className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">{section.title}</h3>
+                      <p className="text-xs text-muted-foreground">{visibleSubsections.length} features</p>
+                    </div>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">{button.title}</h3>
-                  <p className="text-sm text-muted-foreground">{button.description}</p>
-                </Card>
-              );
-            })}
-          </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                </div>
+                
+                {activeSection === section.id && (
+                  <div className="mt-4 grid md:grid-cols-2 gap-3">
+                    {visibleSubsections.map((sub) => (
+                      <Button
+                        key={sub.id}
+                        variant="outline"
+                        className="justify-start h-auto py-3 px-4"
+                        onClick={() => {
+                          toast({
+                            title: sub.title,
+                            description: sub.description + ' - Coming soon!',
+                          });
+                        }}
+                      >
+                        <div className="text-left">
+                          <div className="font-medium text-sm">{sub.title}</div>
+                          <div className="text-xs text-muted-foreground">{sub.description}</div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                )}
+              </Card>
+            );
+          })}
         </div>
       </div>
     </div>

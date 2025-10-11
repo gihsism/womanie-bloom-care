@@ -66,7 +66,8 @@ const CycleCalendar = ({
   const daysToNextPeriod = cycleLength - currentCycleDay;
 
   return (
-    <div className="space-y-4">
+    <Card className="p-3">
+      <div className="space-y-3">
       {/* Cycle Stats */}
       <div className="grid grid-cols-3 gap-3">
         <Card className="p-3">
@@ -98,38 +99,39 @@ const CycleCalendar = ({
           <div className="text-xs text-muted-foreground">days away</div>
         </Card>
       </div>
-
-      {/* Calendar */}
-      <Card className="p-4">
-        {/* Calendar Header */}
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">
-            {format(currentMonth, 'MMMM yyyy')}
-          </h3>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentMonth(new Date())}
-            >
-              Today
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+      
+      {/* Calendar Header */}
+      <div className="flex items-center justify-between mb-3">
+        <h4 className="text-sm font-semibold">
+          {format(currentMonth, 'MMM yyyy')}
+        </h4>
+        <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+            className="h-6 w-6 p-0"
+          >
+            <ChevronLeft className="h-3 w-3" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setCurrentMonth(new Date())}
+            className="h-6 px-2 text-xs"
+          >
+            Today
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+            className="h-6 w-6 p-0"
+          >
+            <ChevronRight className="h-3 w-3" />
+          </Button>
         </div>
+      </div>
 
         {/* Weekday Headers */}
         <div className="grid grid-cols-7 gap-1 mb-1">
@@ -188,51 +190,23 @@ const CycleCalendar = ({
           })}
         </div>
 
-        {/* Legend */}
-        <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-border">
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded bg-primary"></div>
-            <span className="text-xs text-muted-foreground">Period</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded bg-accent"></div>
-            <span className="text-xs text-muted-foreground">Fertile</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded bg-secondary"></div>
-            <span className="text-xs text-muted-foreground">Ovulation</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded ring-1 ring-foreground"></div>
-            <span className="text-xs text-muted-foreground">Today</span>
-          </div>
+      {/* Legend */}
+      <div className="flex flex-wrap gap-2 text-xs">
+        <div className="flex items-center gap-1">
+          <div className="w-2 h-2 rounded bg-primary"></div>
+          <span className="text-muted-foreground">Period</span>
         </div>
-      </Card>
-
-      {/* Selected Day Details */}
-      {selectedDate && (
-        <Card className="p-4">
-          <h4 className="text-sm font-semibold mb-3">
-            {format(selectedDate, 'EEEE, MMM d')}
-          </h4>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Cycle Day:</span>
-              <span className="font-medium">{getCycleDay(selectedDate) + 1}</span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Phase:</span>
-              <span className="font-medium capitalize">{getDayType(selectedDate).label}</span>
-            </div>
-            <div className="pt-2 border-t border-border">
-              <Button variant="outline" className="w-full" size="sm">
-                Log Symptoms
-              </Button>
-            </div>
-          </div>
-        </Card>
-      )}
-    </div>
+        <div className="flex items-center gap-1">
+          <div className="w-2 h-2 rounded bg-accent"></div>
+          <span className="text-muted-foreground">Fertile</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-2 h-2 rounded bg-secondary"></div>
+          <span className="text-muted-foreground">Ovulation</span>
+        </div>
+      </div>
+      </div>
+    </Card>
   );
 };
 
