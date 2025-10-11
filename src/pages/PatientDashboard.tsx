@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import CycleCalendar from '@/components/dashboard/CycleCalendar';
 import { 
   MessageSquare, 
   Activity, 
@@ -11,7 +12,7 @@ import {
   Smartphone, 
   Users, 
   LogOut,
-  Calendar,
+  Calendar as CalendarIcon,
   Droplet,
   Heart,
   Pill,
@@ -148,7 +149,7 @@ const PatientDashboard = () => {
       title: 'Cycle Day',
       value: '14',
       subtitle: 'Ovulation window',
-      icon: Calendar,
+      icon: CalendarIcon,
       color: 'text-primary',
     },
     {
@@ -238,23 +239,18 @@ const PatientDashboard = () => {
           </div>
         </div>
 
-        {/* Cycle Calendar Teaser */}
-        <Card className="p-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-xl font-semibold mb-2">Menstrual Cycle Calendar</h3>
-              <p className="text-muted-foreground">
-                Track your cycle, symptoms, mood, and fertility window
-              </p>
-            </div>
-            <Calendar className="h-12 w-12 text-primary" />
+        {/* Cycle Calendar */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <CalendarIcon className="h-6 w-6 text-primary" />
+            <h2 className="text-2xl font-bold">Menstrual Cycle Calendar</h2>
           </div>
-          <div className="bg-muted/30 rounded-lg p-8 text-center">
-            <p className="text-muted-foreground">
-              Calendar view coming soon - Track symptoms, mood, and more
-            </p>
-          </div>
-        </Card>
+          <CycleCalendar 
+            lastPeriodStart={new Date(2025, 9, 1)} 
+            cycleLength={28} 
+            periodLength={5} 
+          />
+        </div>
 
         {/* Dashboard Actions */}
         <div className="mb-8">
