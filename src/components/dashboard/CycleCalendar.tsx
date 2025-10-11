@@ -66,44 +66,44 @@ const CycleCalendar = ({
   const daysToNextPeriod = cycleLength - currentCycleDay;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Cycle Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <Card className="p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Circle className="h-4 w-4 text-primary" />
-            <span className="text-sm text-muted-foreground">Cycle Day</span>
+      <div className="grid grid-cols-3 gap-3">
+        <Card className="p-3">
+          <div className="flex items-center gap-2 mb-1">
+            <Circle className="h-3 w-3 text-primary" />
+            <span className="text-xs text-muted-foreground">Cycle Day</span>
           </div>
-          <div className="text-2xl font-bold">{currentCycleDay + 1}</div>
-          <div className="text-xs text-muted-foreground">of {cycleLength} days</div>
+          <div className="text-xl font-bold">{currentCycleDay + 1}</div>
+          <div className="text-xs text-muted-foreground">of {cycleLength}</div>
         </Card>
         
-        <Card className="p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-4 w-4 text-secondary" />
-            <span className="text-sm text-muted-foreground">Ovulation</span>
+        <Card className="p-3">
+          <div className="flex items-center gap-2 mb-1">
+            <Sparkles className="h-3 w-3 text-secondary" />
+            <span className="text-xs text-muted-foreground">Ovulation</span>
           </div>
-          <div className="text-2xl font-bold">
+          <div className="text-xl font-bold">
             {daysToOvulation > 0 ? daysToOvulation : daysToOvulation + cycleLength}
           </div>
           <div className="text-xs text-muted-foreground">days away</div>
         </Card>
         
-        <Card className="p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Droplet className="h-4 w-4 text-primary" />
-            <span className="text-sm text-muted-foreground">Next Period</span>
+        <Card className="p-3">
+          <div className="flex items-center gap-2 mb-1">
+            <Droplet className="h-3 w-3 text-primary" />
+            <span className="text-xs text-muted-foreground">Next Period</span>
           </div>
-          <div className="text-2xl font-bold">{daysToNextPeriod}</div>
+          <div className="text-xl font-bold">{daysToNextPeriod}</div>
           <div className="text-xs text-muted-foreground">days away</div>
         </Card>
       </div>
 
       {/* Calendar */}
-      <Card className="p-6">
+      <Card className="p-4">
         {/* Calendar Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-semibold">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">
             {format(currentMonth, 'MMMM yyyy')}
           </h3>
           <div className="flex gap-2">
@@ -132,16 +132,16 @@ const CycleCalendar = ({
         </div>
 
         {/* Weekday Headers */}
-        <div className="grid grid-cols-7 gap-2 mb-2">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-            <div key={day} className="text-center text-sm font-medium text-muted-foreground py-2">
+        <div className="grid grid-cols-7 gap-1 mb-1">
+          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+            <div key={i} className="text-center text-xs font-medium text-muted-foreground py-1">
               {day}
             </div>
           ))}
         </div>
 
         {/* Calendar Days */}
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 gap-1">
           {calendarDays.map((date) => {
             const dayInfo = getDayType(date);
             const today = isToday(date);
@@ -153,15 +153,15 @@ const CycleCalendar = ({
                 key={date.toISOString()}
                 onClick={() => setSelectedDate(date)}
                 className={`
-                  relative aspect-square p-2 rounded-lg transition-all
+                  relative aspect-square p-1 rounded text-xs transition-all
                   ${inCurrentMonth ? 'opacity-100' : 'opacity-30'}
                   ${dayInfo.color}
-                  ${today ? 'ring-2 ring-foreground' : ''}
-                  ${isSelected ? 'ring-2 ring-primary scale-105' : ''}
-                  hover:scale-105 hover:shadow-md
+                  ${today ? 'ring-1 ring-foreground' : ''}
+                  ${isSelected ? 'ring-1 ring-primary scale-105' : ''}
+                  hover:scale-105
                 `}
               >
-                <div className={`text-sm font-medium ${
+                <div className={`text-xs font-medium ${
                   dayInfo.type === 'period' || dayInfo.type === 'ovulation' || dayInfo.type === 'fertile'
                     ? 'text-white'
                     : 'text-foreground'
@@ -171,17 +171,17 @@ const CycleCalendar = ({
                 
                 {/* Ovulation marker */}
                 {dayInfo.type === 'ovulation' && (
-                  <Sparkles className="absolute top-1 right-1 h-3 w-3 text-white" />
+                  <Sparkles className="absolute top-0.5 right-0.5 h-2 w-2 text-white" />
                 )}
                 
                 {/* Period marker */}
                 {dayInfo.type === 'period' && (
-                  <Droplet className="absolute top-1 right-1 h-3 w-3 text-white fill-white" />
+                  <Droplet className="absolute top-0.5 right-0.5 h-2 w-2 text-white fill-white" />
                 )}
                 
                 {/* Fertile marker */}
                 {dayInfo.type === 'fertile' && (
-                  <Heart className="absolute top-1 right-1 h-3 w-3 text-white" />
+                  <Heart className="absolute top-0.5 right-0.5 h-2 w-2 text-white" />
                 )}
               </button>
             );
@@ -189,42 +189,42 @@ const CycleCalendar = ({
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap gap-4 mt-6 pt-6 border-t border-border">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-primary"></div>
-            <span className="text-sm text-muted-foreground">Period</span>
+        <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-border">
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded bg-primary"></div>
+            <span className="text-xs text-muted-foreground">Period</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-accent"></div>
-            <span className="text-sm text-muted-foreground">Fertile Window</span>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded bg-accent"></div>
+            <span className="text-xs text-muted-foreground">Fertile</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-secondary"></div>
-            <span className="text-sm text-muted-foreground">Ovulation</span>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded bg-secondary"></div>
+            <span className="text-xs text-muted-foreground">Ovulation</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded ring-2 ring-foreground"></div>
-            <span className="text-sm text-muted-foreground">Today</span>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded ring-1 ring-foreground"></div>
+            <span className="text-xs text-muted-foreground">Today</span>
           </div>
         </div>
       </Card>
 
       {/* Selected Day Details */}
       {selectedDate && (
-        <Card className="p-6">
-          <h4 className="font-semibold mb-4">
-            {format(selectedDate, 'EEEE, MMMM d, yyyy')}
+        <Card className="p-4">
+          <h4 className="text-sm font-semibold mb-3">
+            {format(selectedDate, 'EEEE, MMM d')}
           </h4>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Cycle Day:</span>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Cycle Day:</span>
               <span className="font-medium">{getCycleDay(selectedDate) + 1}</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Phase:</span>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Phase:</span>
               <span className="font-medium capitalize">{getDayType(selectedDate).label}</span>
             </div>
-            <div className="pt-3 border-t border-border">
+            <div className="pt-2 border-t border-border">
               <Button variant="outline" className="w-full" size="sm">
                 Log Symptoms
               </Button>
