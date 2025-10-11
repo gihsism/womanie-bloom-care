@@ -1,7 +1,10 @@
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Apple, Smartphone } from 'lucide-react';
 
 const FinalCTA = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="py-16 lg:py-24 px-4 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
       <div className="container mx-auto max-w-4xl text-center">
@@ -14,7 +17,11 @@ const FinalCTA = () => {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-          <Button size="lg" className="text-lg px-8">
+          <Button 
+            size="lg" 
+            className="text-lg px-8"
+            onClick={() => navigate('/auth/select-type')}
+          >
             Get Started Free
           </Button>
         </div>

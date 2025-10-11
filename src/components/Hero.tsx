@@ -1,7 +1,10 @@
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Play } from 'lucide-react';
 
 const Hero = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="pt-32 pb-20 lg:pt-40 lg:pb-32 px-4">
       <div className="container mx-auto">
@@ -17,7 +20,11 @@ const Hero = () => {
               reproductive journey - from first period through menopause
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="text-lg px-8">
+              <Button 
+                size="lg" 
+                className="text-lg px-8"
+                onClick={() => navigate('/auth/select-type')}
+              >
                 Get Started Free
               </Button>
               <Button size="lg" variant="outline" className="text-lg px-8">
