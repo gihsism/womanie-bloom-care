@@ -3,8 +3,11 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, ChevronRight, Droplet, Heart, Sparkles, Circle, TrendingUp, TrendingDown, Activity, Calendar as CalendarIcon, AlertCircle, CheckCircle2, Target } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, addDays } from 'date-fns';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Calendar } from '@/components/ui/calendar';
+import { ChevronLeft, ChevronRight, Droplet, Heart, Sparkles, Circle, TrendingUp, TrendingDown, Activity, Calendar as CalendarIcon, AlertCircle, CheckCircle2, Target, Edit } from 'lucide-react';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, addDays, differenceInDays } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface CycleCalendarProps {
   lastPeriodStart?: Date;
@@ -14,13 +17,24 @@ interface CycleCalendarProps {
 }
 
 const CycleCalendar = ({ 
-  lastPeriodStart = new Date(2025, 9, 1), // Oct 1, 2025 as default
-  cycleLength = 28,
-  periodLength = 5,
+  lastPeriodStart: initialPeriodStart,
+  cycleLength: initialCycleLength = 28,
+  periodLength: initialPeriodLength = 5,
   selectedMode = 'menstrual-cycle'
 }: CycleCalendarProps) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [isEditingPeriod, setIsEditingPeriod] = useState(false);
+  const [periodStartDate, setPeriodStartDate] = useState<Date | undefined>(initialPeriodStart || new Date(2025, 9, 1));
+  const [periodEndDate, setPeriodEndDate] = useState<Date | undefined>(
+    initialPeriodStart ? addDays(initialPeriodStart, initialPeriodLength - 1) : addDays(new Date(2025, 9, 1), 4)
+  );
+  const [cycleLength, setCycleLength] = useState(initialCycleLength);
+
+  const lastPeriodStart = periodStartDate || new Date(2025, 9, 1);
+  const periodLength = periodEndDate && periodStartDate 
+    ? differenceInDays(periodEndDate, periodStartDate) + 1 
+    : initialPeriodLength;
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -519,6 +533,85 @@ const CycleCalendar = ({
     <div className="flex gap-4">
       <Card className="p-2 w-[507px]">
         <div className="space-y-2">
+      {/* Period Tracking Header */}
+      {showCycleInfo && (
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Droplet className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold">Period Tracking</span>
+          </div>
+          <Dialog open={isEditingPeriod} onOpenChange={setIsEditingPeriod}>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-7 gap-1">
+                <Edit className="h-3 w-3" />
+                <span className="text-xs">Edit Period</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Track Your Period</DialogTitle>
+                <DialogDescription>
+                  Select when your last period started and ended to calculate your fertile window
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Period Start Date</label>
+                  <Calendar
+                    mode="single"
+                    selected={periodStartDate}
+                    onSelect={setPeriodStartDate}
+                    className={cn("rounded-md border pointer-events-auto")}
+                    disabled={(date) => date > new Date()}
+                  />
+                  {periodStartDate && (
+                    <p className="text-sm text-muted-foreground">
+                      Started: {format(periodStartDate, 'MMMM d, yyyy')}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Period End Date</label>
+                  <Calendar
+                    mode="single"
+                    selected={periodEndDate}
+                    onSelect={setPeriodEndDate}
+                    className={cn("rounded-md border pointer-events-auto")}
+                    disabled={(date) => 
+                      date > new Date() || 
+                      (periodStartDate ? date < periodStartDate : false)
+                    }
+                  />
+                  {periodEndDate && periodStartDate && (
+                    <p className="text-sm text-muted-foreground">
+                      Ended: {format(periodEndDate, 'MMMM d, yyyy')} ({periodLength} days)
+                    </p>
+                  )}
+                </div>
+                {periodStartDate && periodEndDate && (
+                  <div className="bg-accent/10 border border-accent rounded-md p-3 space-y-1">
+                    <p className="text-sm font-medium">Calculated Fertile Window</p>
+                    <p className="text-xs text-muted-foreground">
+                      Ovulation: ~{format(addDays(periodStartDate, Math.floor(cycleLength / 2)), 'MMMM d')}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Fertile window: {format(addDays(periodStartDate, Math.floor(cycleLength / 2) - 5), 'MMM d')} - {format(addDays(periodStartDate, Math.floor(cycleLength / 2)), 'MMM d')}
+                    </p>
+                  </div>
+                )}
+                <Button 
+                  onClick={() => setIsEditingPeriod(false)} 
+                  className="w-full"
+                  disabled={!periodStartDate || !periodEndDate}
+                >
+                  Save Period Dates
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      )}
+
       {/* Cycle Stats - only show for menstrual modes */}
       {showCycleInfo && (
       <div className="grid grid-cols-3 gap-2">
