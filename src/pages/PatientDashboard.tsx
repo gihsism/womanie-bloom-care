@@ -152,6 +152,7 @@ const PatientDashboard = () => {
       subsections: [
         { id: 'B1.1', title: 'AI Health Assistant', description: 'Symptom checker & health guidance' },
         { id: 'B1.2', title: 'Doctor Consultations', description: 'Start consultation & history' },
+        { id: 'B1.3', title: 'Upload Health Documents', description: 'Upload & get AI analysis' },
       ],
     },
     {
@@ -361,75 +362,6 @@ const PatientDashboard = () => {
               />
             </div>
 
-            {/* Document Upload & Overview */}
-            <div className="mb-6">
-              <h3 className="text-base font-semibold mb-3">Health Documents</h3>
-              <DocumentUpload />
-              
-              {/* Document Overview */}
-              <div className="mt-6">
-                <h4 className="text-sm font-semibold mb-3">Recent Documents</h4>
-                {documentsLoading ? (
-                  <div className="space-y-3">
-                    {[1, 2].map((i) => (
-                      <Card key={i}>
-                        <CardHeader>
-                          <Skeleton className="h-6 w-3/4" />
-                          <Skeleton className="h-4 w-1/2" />
-                        </CardHeader>
-                        <CardContent>
-                          <Skeleton className="h-16 w-full" />
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : documents.length === 0 ? (
-                  <Card>
-                    <CardContent className="flex flex-col items-center justify-center py-8">
-                      <FileText className="h-10 w-10 text-muted-foreground mb-3" />
-                      <p className="text-sm text-muted-foreground text-center">
-                        No documents uploaded yet. Upload health documents to see AI-generated summaries here.
-                      </p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="space-y-3">
-                    {documents.map((doc) => (
-                      <Card key={doc.id} className="hover:shadow-lg transition-shadow">
-                        <CardHeader>
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1">
-                              <CardTitle className="text-base mb-2">
-                                {doc.ai_suggested_name || doc.file_name}
-                              </CardTitle>
-                              <CardDescription className="flex items-center gap-2 flex-wrap">
-                                <Badge variant="outline" className={getCategoryColor(doc.ai_suggested_category)}>
-                                  {doc.ai_suggested_category || doc.document_type}
-                                </Badge>
-                                <span className="flex items-center gap-1 text-xs">
-                                  <Calendar className="h-3 w-3" />
-                                  {format(new Date(doc.uploaded_at), 'MMM d, yyyy')}
-                                </span>
-                              </CardDescription>
-                            </div>
-                            <FileText className="h-6 w-6 text-muted-foreground flex-shrink-0" />
-                          </div>
-                        </CardHeader>
-                        {doc.ai_summary && (
-                          <CardContent>
-                            <div className="bg-muted/50 rounded-lg p-3">
-                              <h5 className="font-semibold mb-1.5 text-xs">AI Summary</h5>
-                              <p className="text-xs leading-relaxed">{doc.ai_summary}</p>
-                            </div>
-                          </CardContent>
-                        )}
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
             {/* Daily Logging */}
             <div className="mb-6">
               <DailyLogging selectedMode={selectedMode} />
@@ -462,22 +394,64 @@ const PatientDashboard = () => {
                     {activeSection === section.id && (
                       <div className="mt-4 grid md:grid-cols-2 gap-3">
                         {visibleSubsections.map((sub) => (
-                          <Button
-                            key={sub.id}
-                            variant="outline"
-                            className="justify-start h-auto py-3 px-4"
-                            onClick={() => {
-                              toast({
-                                title: sub.title,
-                                description: sub.description + ' - Coming soon!',
-                              });
-                            }}
-                          >
-                            <div className="text-left">
-                              <div className="font-medium text-sm">{sub.title}</div>
-                              <div className="text-xs text-muted-foreground">{sub.description}</div>
-                            </div>
-                          </Button>
+                          <div key={sub.id}>
+                            {sub.id === 'B1.3' ? (
+                              <div className="p-4 rounded-lg border border-border bg-card">
+                                <div className="mb-3">
+                                  <div className="font-medium text-sm mb-1">{sub.title}</div>
+                                  <div className="text-xs text-muted-foreground">{sub.description}</div>
+                                </div>
+                                <DocumentUpload />
+                                
+                                {/* Recent Documents Preview */}
+                                {documents.length > 0 && (
+                                  <div className="mt-4">
+                                    <h5 className="text-xs font-semibold mb-2">Recent Uploads</h5>
+                                    <div className="space-y-2">
+                                      {documents.slice(0, 2).map((doc) => (
+                                        <div key={doc.id} className="bg-muted/50 rounded-lg p-2">
+                                          <div className="flex items-start justify-between gap-2">
+                                            <div className="flex-1 min-w-0">
+                                              <div className="text-xs font-medium truncate">
+                                                {doc.ai_suggested_name || doc.file_name}
+                                              </div>
+                                              <div className="flex items-center gap-1 mt-1">
+                                                <Badge variant="outline" className={`text-[10px] px-1 py-0 ${getCategoryColor(doc.ai_suggested_category)}`}>
+                                                  {doc.ai_suggested_category || doc.document_type}
+                                                </Badge>
+                                              </div>
+                                            </div>
+                                            <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                          </div>
+                                          {doc.ai_summary && (
+                                            <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2">
+                                              {doc.ai_summary}
+                                            </p>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <Button
+                                variant="outline"
+                                className="justify-start h-auto py-3 px-4 w-full"
+                                onClick={() => {
+                                  toast({
+                                    title: sub.title,
+                                    description: sub.description + ' - Coming soon!',
+                                  });
+                                }}
+                              >
+                                <div className="text-left">
+                                  <div className="font-medium text-sm">{sub.title}</div>
+                                  <div className="text-xs text-muted-foreground">{sub.description}</div>
+                                </div>
+                              </Button>
+                            )}
+                          </div>
                         ))}
                       </div>
                     )}
