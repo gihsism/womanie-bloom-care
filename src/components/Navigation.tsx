@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Navigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -69,12 +71,20 @@ const Navigation = () => {
 
           {/* Desktop CTAs */}
           <div className="hidden lg:flex items-center gap-4">
-            <Button variant="ghost" onClick={() => navigate('/auth/login')}>
-              Log In
-            </Button>
-            <Button onClick={() => navigate('/auth/select-type')}>
-              Get Started
-            </Button>
+            {user ? (
+              <Button onClick={() => navigate('/dashboard')}>
+                Dashboard
+              </Button>
+            ) : (
+              <>
+                <Button variant="ghost" onClick={() => navigate('/auth/login')}>
+                  Log In
+                </Button>
+                <Button onClick={() => navigate('/auth/select-type')}>
+                  Get Started
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -108,25 +118,39 @@ const Navigation = () => {
                 </button>
               ))}
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                <Button 
-                  variant="ghost" 
-                  className="w-full"
-                  onClick={() => {
-                    navigate('/auth/login');
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  Log In
-                </Button>
-                <Button 
-                  className="w-full"
-                  onClick={() => {
-                    navigate('/auth/select-type');
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  Get Started
-                </Button>
+                {user ? (
+                  <Button 
+                    className="w-full"
+                    onClick={() => {
+                      navigate('/dashboard');
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    Dashboard
+                  </Button>
+                ) : (
+                  <>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full"
+                      onClick={() => {
+                        navigate('/auth/login');
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      Log In
+                    </Button>
+                    <Button 
+                      className="w-full"
+                      onClick={() => {
+                        navigate('/auth/select-type');
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      Get Started
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </div>
