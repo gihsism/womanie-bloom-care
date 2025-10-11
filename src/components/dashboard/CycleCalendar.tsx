@@ -66,8 +66,9 @@ const CycleCalendar = ({
   const daysToNextPeriod = cycleLength - currentCycleDay;
 
   return (
-    <Card className="p-1 max-w-[200px]">
-      <div className="space-y-1">
+    <div className="flex gap-4">
+      <Card className="p-1 w-[260px]">
+        <div className="space-y-1">
       {/* Cycle Stats */}
       <div className="grid grid-cols-3 gap-1">
         <div className="p-1 bg-muted/30 rounded">
@@ -202,7 +203,41 @@ const CycleCalendar = ({
         </div>
       </div>
       </div>
-    </Card>
+      </Card>
+      
+      {/* Statistics Panel */}
+      <Card className="p-3 flex-1">
+        <h4 className="text-sm font-semibold mb-3">Cycle Statistics</h4>
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-muted-foreground">Average Cycle Length</span>
+            <span className="text-sm font-medium">{cycleLength} days</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-muted-foreground">Period Duration</span>
+            <span className="text-sm font-medium">{periodLength} days</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-muted-foreground">Last Period Started</span>
+            <span className="text-sm font-medium">{format(lastPeriodStart, 'MMM d, yyyy')}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-muted-foreground">Next Period Expected</span>
+            <span className="text-sm font-medium">{format(new Date(lastPeriodStart.getTime() + (cycleLength - currentCycleDay) * 24 * 60 * 60 * 1000), 'MMM d, yyyy')}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-muted-foreground">Next Ovulation</span>
+            <span className="text-sm font-medium">
+              {format(new Date(lastPeriodStart.getTime() + ((ovulationDay - currentCycleDay + cycleLength) % cycleLength) * 24 * 60 * 60 * 1000), 'MMM d, yyyy')}
+            </span>
+          </div>
+          <div className="flex justify-between items-center pt-2 border-t">
+            <span className="text-xs text-muted-foreground">Cycle Regularity</span>
+            <span className="text-sm font-medium text-green-600">Regular</span>
+          </div>
+        </div>
+      </Card>
+    </div>
   );
 };
 
