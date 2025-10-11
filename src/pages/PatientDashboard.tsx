@@ -190,7 +190,7 @@ const PatientDashboard = () => {
         <div className="flex-1 flex flex-col min-h-screen w-full">
           {/* Header */}
           <div className="border-b border-border bg-card sticky top-0 z-10">
-            <div className="container mx-auto px-4 py-4">
+            <div className="w-full px-4 py-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <Button 
@@ -228,7 +228,7 @@ const PatientDashboard = () => {
             </div>
           </div>
 
-          <div className="container mx-auto px-4 py-6 flex-1">
+          <div className="w-full px-4 py-6 flex-1">
             {/* Health Statistics */}
             <div className="mb-6">
               <h2 className="text-lg font-bold mb-3">Your Health Today</h2>
