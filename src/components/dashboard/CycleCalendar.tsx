@@ -258,7 +258,7 @@ const CycleCalendar = ({
                   ${isSelected ? 'ring-[0.5px] ring-primary' : ''}
                 `}
               >
-                <div className={`text-[6px] font-medium ${
+                <div className={`text-[10px] font-bold ${
                   dayInfo.type === 'period' || dayInfo.type === 'ovulation' || dayInfo.type === 'fertile'
                     ? 'text-white'
                     : 'text-foreground'

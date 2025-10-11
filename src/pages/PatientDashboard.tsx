@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import DashboardHeader, { getModeStats, type LifeStage } from '@/components/dashboard/DashboardHeader';
 import CycleCalendar from '@/components/dashboard/CycleCalendar';
+import DailyLogging from '@/components/dashboard/DailyLogging';
 import { 
   MessageSquare, 
   Activity, 
@@ -242,14 +243,20 @@ const PatientDashboard = () => {
           </div>
         </Card>
 
-        <div className="mb-6">
-          <h3 className="text-base font-semibold mb-3">Health Tracking</h3>
-          <CycleCalendar 
-            lastPeriodStart={new Date(2025, 9, 1)} 
-            cycleLength={28} 
-            periodLength={5}
-            selectedMode={selectedMode}
-          />
+        {/* Health Tracking Section */}
+        <div className="grid lg:grid-cols-2 gap-6 mb-6">
+          <div>
+            <h3 className="text-base font-semibold mb-3">Health Tracking</h3>
+            <CycleCalendar 
+              lastPeriodStart={new Date(2025, 9, 1)} 
+              cycleLength={28} 
+              periodLength={5}
+              selectedMode={selectedMode}
+            />
+          </div>
+          <div>
+            <DailyLogging selectedMode={selectedMode} />
+          </div>
         </div>
 
         {/* Main Sections */}
