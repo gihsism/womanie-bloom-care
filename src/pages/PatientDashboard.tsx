@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +10,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,6 +19,7 @@ import DashboardHeader, { getModeStats, type LifeStage } from '@/components/dash
 import CycleCalendar from '@/components/dashboard/CycleCalendar';
 import DailyLogging from '@/components/dashboard/DailyLogging';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
+import { format } from 'date-fns';
 import { 
   MessageSquare, 
   Activity, 
@@ -33,8 +36,19 @@ import {
   Bell,
   Info,
   User as UserIcon,
-  LogOut
+  LogOut,
+  Calendar
 } from 'lucide-react';
+
+interface DocumentSummary {
+  id: string;
+  file_name: string;
+  ai_suggested_name: string | null;
+  ai_suggested_category: string | null;
+  ai_summary: string | null;
+  uploaded_at: string;
+  document_type: string;
+}
 
 
 const PatientDashboard = () => {
@@ -44,11 +58,14 @@ const PatientDashboard = () => {
   const [profile, setProfile] = useState<{ full_name?: string } | null>(null);
   const [selectedMode, setSelectedMode] = useState<LifeStage>('menstrual-cycle');
   const [activeSection, setActiveSection] = useState('overview');
+  const [documents, setDocuments] = useState<DocumentSummary[]>([]);
+  const [documentsLoading, setDocumentsLoading] = useState(true);
 
-  // Fetch profile when user is available
+  // Fetch profile and documents when user is available
   useEffect(() => {
     if (user) {
       fetchProfile(user.id);
+      fetchDocuments();
     }
   }, [user]);
 
@@ -65,6 +82,34 @@ const PatientDashboard = () => {
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
+  };
+
+  const fetchDocuments = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('health_documents')
+        .select('id, file_name, ai_suggested_name, ai_suggested_category, ai_summary, uploaded_at, document_type')
+        .order('uploaded_at', { ascending: false });
+
+      if (error) throw error;
+      setDocuments(data || []);
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+    } finally {
+      setDocumentsLoading(false);
+    }
+  };
+
+  const getCategoryColor = (category: string | null) => {
+    const colors: Record<string, string> = {
+      lab_results: 'bg-primary/10 text-primary',
+      imaging: 'bg-secondary/10 text-secondary',
+      prescription: 'bg-accent/10 text-accent',
+      consultation_notes: 'bg-muted',
+      vaccination_record: 'bg-primary/20 text-primary',
+      other: 'bg-muted'
+    };
+    return colors[category || 'other'] || 'bg-muted';
   };
 
   // Redirect to login if not authenticated
@@ -316,10 +361,73 @@ const PatientDashboard = () => {
               />
             </div>
 
-            {/* Document Upload */}
+            {/* Document Upload & Overview */}
             <div className="mb-6">
               <h3 className="text-base font-semibold mb-3">Health Documents</h3>
               <DocumentUpload />
+              
+              {/* Document Overview */}
+              <div className="mt-6">
+                <h4 className="text-sm font-semibold mb-3">Recent Documents</h4>
+                {documentsLoading ? (
+                  <div className="space-y-3">
+                    {[1, 2].map((i) => (
+                      <Card key={i}>
+                        <CardHeader>
+                          <Skeleton className="h-6 w-3/4" />
+                          <Skeleton className="h-4 w-1/2" />
+                        </CardHeader>
+                        <CardContent>
+                          <Skeleton className="h-16 w-full" />
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : documents.length === 0 ? (
+                  <Card>
+                    <CardContent className="flex flex-col items-center justify-center py-8">
+                      <FileText className="h-10 w-10 text-muted-foreground mb-3" />
+                      <p className="text-sm text-muted-foreground text-center">
+                        No documents uploaded yet. Upload health documents to see AI-generated summaries here.
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-3">
+                    {documents.map((doc) => (
+                      <Card key={doc.id} className="hover:shadow-lg transition-shadow">
+                        <CardHeader>
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <CardTitle className="text-base mb-2">
+                                {doc.ai_suggested_name || doc.file_name}
+                              </CardTitle>
+                              <CardDescription className="flex items-center gap-2 flex-wrap">
+                                <Badge variant="outline" className={getCategoryColor(doc.ai_suggested_category)}>
+                                  {doc.ai_suggested_category || doc.document_type}
+                                </Badge>
+                                <span className="flex items-center gap-1 text-xs">
+                                  <Calendar className="h-3 w-3" />
+                                  {format(new Date(doc.uploaded_at), 'MMM d, yyyy')}
+                                </span>
+                              </CardDescription>
+                            </div>
+                            <FileText className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                          </div>
+                        </CardHeader>
+                        {doc.ai_summary && (
+                          <CardContent>
+                            <div className="bg-muted/50 rounded-lg p-3">
+                              <h5 className="font-semibold mb-1.5 text-xs">AI Summary</h5>
+                              <p className="text-xs leading-relaxed">{doc.ai_summary}</p>
+                            </div>
+                          </CardContent>
+                        )}
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Daily Logging */}
