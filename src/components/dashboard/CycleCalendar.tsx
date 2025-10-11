@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ChevronLeft, ChevronRight, Droplet, Heart, Sparkles, Circle, TrendingUp, TrendingDown, Activity } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
+import { ChevronLeft, ChevronRight, Droplet, Heart, Sparkles, Circle, TrendingUp, TrendingDown, Activity, Calendar as CalendarIcon, AlertCircle, CheckCircle2, Target } from 'lucide-react';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, addDays } from 'date-fns';
 
 interface CycleCalendarProps {
   lastPeriodStart?: Date;
@@ -73,357 +74,437 @@ const CycleCalendar = ({
   const daysToOvulation = ovulationDay - currentCycleDay;
   const daysToNextPeriod = cycleLength - currentCycleDay;
 
-  // Mode-specific statistics with visualizations
+  // Mode-specific statistics with enhanced visualizations
   const getModeSpecificStats = () => {
+    const today = new Date();
+    const nextOvulation = addDays(lastPeriodStart, ovulationDay);
+    const nextPeriod = addDays(lastPeriodStart, cycleLength);
+    const fertileWindowStart = addDays(nextOvulation, -5);
+    const fertileWindowEnd = nextOvulation;
+    
     switch (selectedMode) {
+      case 'conception':
+        const isInFertileWindow = currentCycleDay >= ovulationDay - 5 && currentCycleDay <= ovulationDay;
+        const fertilityStatus = isInFertileWindow ? 'Peak Fertility' : daysToOvulation <= 3 ? 'Approaching' : 'Low';
+        
+        return {
+          title: 'Conception Tracking',
+          sections: [
+            {
+              title: 'Fertility Status',
+              highlight: true,
+              items: [
+                {
+                  label: 'Current Status',
+                  value: fertilityStatus,
+                  badge: isInFertileWindow ? 'High' : daysToOvulation <= 3 ? 'Medium' : 'Low',
+                  icon: Target,
+                  description: isInFertileWindow 
+                    ? 'Best time to conceive - fertile window active!' 
+                    : daysToOvulation > 0 
+                      ? `Fertile window starts in ${daysToOvulation - 5} days`
+                      : 'Ovulation has passed'
+                },
+                {
+                  label: 'Fertility Score',
+                  value: `${isInFertileWindow ? '92%' : daysToOvulation <= 3 ? '65%' : '15%'}`,
+                  progress: isInFertileWindow ? 92 : daysToOvulation <= 3 ? 65 : 15,
+                  icon: Activity,
+                  description: 'Probability of conception today'
+                }
+              ]
+            },
+            {
+              title: 'Ovulation Tracking',
+              items: [
+                {
+                  label: 'Next Ovulation',
+                  value: format(nextOvulation, 'MMM d'),
+                  badge: daysToOvulation === 0 ? 'Today' : `${Math.abs(daysToOvulation)}d`,
+                  icon: Sparkles,
+                  description: daysToOvulation === 0 ? 'Ovulating today!' : daysToOvulation > 0 ? `In ${daysToOvulation} days` : `Was ${Math.abs(daysToOvulation)} days ago`
+                },
+                {
+                  label: 'Fertile Window',
+                  value: `${format(fertileWindowStart, 'MMM d')} - ${format(fertileWindowEnd, 'MMM d')}`,
+                  badge: isInFertileWindow ? 'Active' : 'Upcoming',
+                  icon: Heart,
+                  description: '5 days before ovulation + ovulation day'
+                },
+                {
+                  label: 'LH Test Result',
+                  value: daysToOvulation === 0 ? 'Positive (Peak)' : 'Negative',
+                  icon: CheckCircle2,
+                  description: 'Latest ovulation test result'
+                }
+              ]
+            },
+            {
+              title: 'Conception Metrics',
+              items: [
+                {
+                  label: 'BBT Pattern',
+                  value: 'Biphasic',
+                  icon: TrendingUp,
+                  description: '0.4°F temperature rise detected'
+                },
+                {
+                  label: 'Cervical Mucus',
+                  value: isInFertileWindow ? 'EWCM (Optimal)' : 'Creamy',
+                  icon: Droplet,
+                  description: isInFertileWindow ? 'Egg white consistency - most fertile' : 'Not fertile quality'
+                },
+                {
+                  label: 'Intercourse Timing',
+                  value: isInFertileWindow ? 'Optimal' : 'Plan ahead',
+                  icon: Target,
+                  description: isInFertileWindow ? '3 times in fertile window' : 'Time intercourse for fertile window'
+                }
+              ]
+            },
+            {
+              title: 'Ovarian Reserve',
+              items: [
+                {
+                  label: 'AMH Level',
+                  value: '2.8 ng/mL',
+                  badge: 'Normal',
+                  icon: Activity,
+                  description: 'Good ovarian reserve for age'
+                },
+                {
+                  label: 'Antral Follicle Count',
+                  value: '12 follicles',
+                  badge: 'Excellent',
+                  icon: Circle,
+                  description: 'From latest ultrasound (Oct 1)'
+                },
+                {
+                  label: 'Trying Duration',
+                  value: '3 months',
+                  progress: 25,
+                  icon: CalendarIcon,
+                  description: 'Average conception time: 6-12 months'
+                }
+              ]
+            }
+          ],
+          summary: isInFertileWindow 
+            ? '🎯 Peak fertility window! This is your best time to conceive.'
+            : daysToOvulation > 0 
+              ? `Fertile window opens in ${daysToOvulation - 5} days. Plan ahead!`
+              : 'Focus on tracking for next cycle.'
+        };
+      
       case 'contraception':
         return {
           title: 'Contraception Monitoring',
-          metrics: [
-            { 
-              label: 'Adherence Rate', 
-              value: '98%', 
-              progress: 98,
-              trend: 'up',
-              description: '29/30 pills on time this month'
+          sections: [
+            {
+              title: 'Protection Status',
+              highlight: true,
+              items: [
+                {
+                  label: 'Current Status',
+                  value: 'Active Protection',
+                  badge: 'Protected',
+                  icon: CheckCircle2,
+                  description: 'Contraception is effective'
+                },
+                {
+                  label: 'Adherence Rate',
+                  value: '98%',
+                  progress: 98,
+                  icon: Target,
+                  description: '29/30 pills taken on time this month'
+                }
+              ]
             },
-            { 
-              label: 'Breakthrough Bleeding', 
-              value: '2 days', 
-              progress: 20,
-              trend: 'stable',
-              description: 'Light spotting episodes'
+            {
+              title: 'This Month',
+              items: [
+                {
+                  label: 'Fertile Window',
+                  value: daysToOvulation > 0 && daysToOvulation < 6 ? 'Active' : 'Not Active',
+                  badge: daysToOvulation > 0 && daysToOvulation < 6 ? 'Caution' : 'Safe',
+                  icon: AlertCircle,
+                  description: 'Natural fertility tracking (informational)'
+                },
+                {
+                  label: 'Breakthrough Bleeding',
+                  value: '2 days',
+                  icon: Droplet,
+                  description: 'Light spotting episodes'
+                },
+                {
+                  label: 'Next Pill Pack',
+                  value: format(addDays(today, 21), 'MMM d'),
+                  icon: CalendarIcon,
+                  description: 'In 21 days'
+                }
+              ]
             },
-            { 
-              label: 'Mood Score', 
-              value: '7/10', 
-              progress: 70,
-              trend: 'down',
-              description: 'Slight anxiety noted'
-            },
-            { 
-              label: 'Weight Change', 
-              value: '+1.2 kg', 
-              progress: 40,
-              trend: 'up',
-              description: 'Within normal range'
-            },
-            { 
-              label: 'Libido Score', 
-              value: '6/10', 
-              progress: 60,
-              trend: 'stable',
-              description: 'Consistent this cycle'
-            },
-            { 
-              label: 'Side Effects', 
-              value: 'Mild', 
-              progress: 30,
-              trend: 'down',
-              description: 'Headaches decreased'
+            {
+              title: 'Side Effects Monitoring',
+              items: [
+                {
+                  label: 'Mood Score',
+                  value: '7/10',
+                  progress: 70,
+                  icon: Activity,
+                  description: 'Slight anxiety noted'
+                },
+                {
+                  label: 'Weight Change',
+                  value: '+1.2 kg',
+                  icon: TrendingUp,
+                  description: 'Within normal range'
+                },
+                {
+                  label: 'Libido Score',
+                  value: '6/10',
+                  progress: 60,
+                  icon: Heart,
+                  description: 'Consistent this cycle'
+                }
+              ]
             }
           ],
-          summary: 'Excellent adherence. Monitor mood changes.'
-        };
-      
-      case 'conception':
-        return {
-          title: 'Conception Tracking',
-          metrics: [
-            { 
-              label: 'Ovulation Confirmed', 
-              value: 'LH+ & BBT↑', 
-              progress: 100,
-              trend: 'up',
-              description: 'Peak detected yesterday'
-            },
-            { 
-              label: 'BBT Rise', 
-              value: '0.4°F', 
-              progress: 80,
-              trend: 'up',
-              description: 'Biphasic pattern confirmed'
-            },
-            { 
-              label: 'Cervical Mucus', 
-              value: 'EWCM', 
-              progress: 100,
-              trend: 'stable',
-              description: 'Optimal fertile quality'
-            },
-            { 
-              label: 'Intercourse Timing', 
-              value: 'Optimal', 
-              progress: 90,
-              trend: 'up',
-              description: '3 days in fertile window'
-            },
-            { 
-              label: 'Fertility Score', 
-              value: '92%', 
-              progress: 92,
-              trend: 'up',
-              description: 'Peak fertility today'
-            },
-            { 
-              label: 'Days Trying', 
-              value: '3 months', 
-              progress: 25,
-              trend: 'stable',
-              description: 'Cycle 3 of 12'
-            }
-          ],
-          summary: 'Perfect timing! Peak fertility window active.'
+          summary: 'Excellent adherence. Your contraception is working effectively.'
         };
       
       case 'ivf':
         return {
-          title: 'IVF Protocol Status',
-          metrics: [
-            { 
-              label: 'Protocol Progress', 
-              value: 'Day 8/14', 
-              progress: 57,
-              trend: 'up',
-              description: 'Stimulation phase'
+          title: 'IVF Protocol',
+          sections: [
+            {
+              title: 'Protocol Progress',
+              highlight: true,
+              items: [
+                {
+                  label: 'Current Phase',
+                  value: 'Stimulation Day 8',
+                  badge: 'Active',
+                  icon: Activity,
+                  description: 'Day 8 of 14 - on track'
+                },
+                {
+                  label: 'Progress',
+                  value: '57% Complete',
+                  progress: 57,
+                  icon: Target,
+                  description: 'Estimated retrieval in 6 days'
+                }
+              ]
             },
-            { 
-              label: 'Medication Adherence', 
-              value: '100%', 
-              progress: 100,
-              trend: 'stable',
-              description: 'All doses on schedule'
+            {
+              title: 'Follicle Development',
+              items: [
+                {
+                  label: 'Leading Follicles',
+                  value: '12 growing',
+                  badge: 'Excellent',
+                  icon: Circle,
+                  description: 'Great response to medication'
+                },
+                {
+                  label: 'Largest Follicle',
+                  value: '14 mm',
+                  icon: TrendingUp,
+                  description: 'Target: 18-20mm for trigger'
+                },
+                {
+                  label: 'Next Monitoring',
+                  value: format(addDays(today, 2), 'MMM d'),
+                  icon: CalendarIcon,
+                  description: 'Ultrasound + bloodwork'
+                }
+              ]
             },
-            { 
-              label: 'Injection Site Reaction', 
-              value: '2/10', 
-              progress: 20,
-              trend: 'down',
-              description: 'Minimal discomfort'
-            },
-            { 
-              label: 'Follicle Development', 
-              value: '12 growing', 
-              progress: 75,
-              trend: 'up',
-              description: 'Excellent response'
-            },
-            { 
-              label: 'Anxiety Level', 
-              value: '6/10', 
-              progress: 60,
-              trend: 'stable',
-              description: 'Managing well'
-            },
-            { 
-              label: 'Fatigue Score', 
-              value: '7/10', 
-              progress: 70,
-              trend: 'up',
-              description: 'Expected during stim'
+            {
+              title: 'Medication & Wellness',
+              items: [
+                {
+                  label: 'Medication Adherence',
+                  value: '100%',
+                  progress: 100,
+                  icon: CheckCircle2,
+                  description: 'All doses on schedule'
+                },
+                {
+                  label: 'Injection Site',
+                  value: 'Minimal discomfort',
+                  progress: 20,
+                  icon: AlertCircle,
+                  description: 'Reaction score: 2/10'
+                },
+                {
+                  label: 'Anxiety Level',
+                  value: '6/10',
+                  progress: 60,
+                  icon: Activity,
+                  description: 'Managing well with support'
+                }
+              ]
             }
           ],
-          summary: 'Excellent protocol response. Retrieval in ~6 days.'
+          summary: '✅ Excellent protocol response! Follicles developing perfectly.'
         };
-      
+
       case 'pregnancy':
         return {
-          title: 'Pregnancy Monitoring',
-          metrics: [
-            { 
-              label: 'Gestational Week', 
-              value: 'Week 24', 
-              progress: 67,
-              trend: 'up',
-              description: '6 months, 2nd trimester'
+          title: 'Pregnancy Progress',
+          sections: [
+            {
+              title: 'Current Status',
+              highlight: true,
+              items: [
+                {
+                  label: 'Gestational Age',
+                  value: 'Week 24',
+                  badge: '2nd Trimester',
+                  icon: CalendarIcon,
+                  description: '6 months pregnant'
+                },
+                {
+                  label: 'Progress',
+                  value: '67% Complete',
+                  progress: 67,
+                  icon: Target,
+                  description: '16 weeks remaining'
+                }
+              ]
             },
-            { 
-              label: 'Fetal Kick Count', 
-              value: '12/hour', 
-              progress: 100,
-              trend: 'stable',
-              description: 'Healthy activity'
+            {
+              title: 'Baby Development',
+              items: [
+                {
+                  label: 'Fetal Movement',
+                  value: '12 kicks/hour',
+                  badge: 'Healthy',
+                  icon: Heart,
+                  description: 'Active and healthy movement'
+                },
+                {
+                  label: 'Estimated Size',
+                  value: 'Papaya (~30cm)',
+                  icon: Activity,
+                  description: 'Growing well for gestational age'
+                },
+                {
+                  label: 'Due Date',
+                  value: format(new Date(2025, 6, 15), 'MMM d, yyyy'),
+                  icon: CalendarIcon,
+                  description: '112 days until due date'
+                }
+              ]
             },
-            { 
-              label: 'Weight Gain', 
-              value: '+11 kg', 
-              progress: 73,
-              trend: 'up',
-              description: 'On target for week 24'
-            },
-            { 
-              label: 'Nausea Level', 
-              value: '1/10', 
-              progress: 10,
-              trend: 'down',
-              description: 'Resolved'
-            },
-            { 
-              label: 'Swelling/Edema', 
-              value: 'Mild', 
-              progress: 30,
-              trend: 'stable',
-              description: 'Feet/ankles evening'
-            },
-            { 
-              label: 'Contractions', 
-              value: 'None', 
-              progress: 0,
-              trend: 'stable',
-              description: 'No Braxton Hicks yet'
+            {
+              title: 'Maternal Health',
+              items: [
+                {
+                  label: 'Weight Gain',
+                  value: '+11 kg',
+                  progress: 73,
+                  icon: TrendingUp,
+                  description: 'On target for week 24'
+                },
+                {
+                  label: 'Symptoms',
+                  value: 'Mild swelling',
+                  icon: AlertCircle,
+                  description: 'Feet/ankles in evening'
+                },
+                {
+                  label: 'Next Checkup',
+                  value: format(addDays(today, 14), 'MMM d'),
+                  icon: CalendarIcon,
+                  description: 'Routine prenatal visit'
+                }
+              ]
             }
           ],
-          summary: 'Healthy pregnancy progression. Baby developing well.'
+          summary: '👶 Healthy pregnancy! Baby developing perfectly on schedule.'
         };
-      
-      case 'menopause':
+
+      default: // menstrual-cycle
         return {
-          title: 'Menopause Symptom Tracking',
-          metrics: [
-            { 
-              label: 'Hot Flashes', 
-              value: '8/week', 
-              progress: 60,
-              trend: 'down',
-              description: 'Down from 12 last week'
+          title: 'Cycle Health',
+          sections: [
+            {
+              title: 'Current Cycle Status',
+              highlight: true,
+              items: [
+                {
+                  label: 'Cycle Day',
+                  value: `Day ${currentCycleDay + 1}`,
+                  badge: currentCycleDay < periodLength ? 'Period' : currentCycleDay >= ovulationDay - 5 && currentCycleDay <= ovulationDay ? 'Fertile' : 'Regular',
+                  icon: CalendarIcon,
+                  description: `${cycleLength}-day cycle`
+                },
+                {
+                  label: 'Next Period',
+                  value: format(nextPeriod, 'MMM d'),
+                  badge: `${daysToNextPeriod}d`,
+                  icon: Droplet,
+                  description: `In ${daysToNextPeriod} days`
+                }
+              ]
             },
-            { 
-              label: 'Hot Flash Severity', 
-              value: '6/10', 
-              progress: 60,
-              trend: 'down',
-              description: 'Improving with HRT'
+            {
+              title: 'Cycle Phases',
+              items: [
+                {
+                  label: 'Next Ovulation',
+                  value: format(nextOvulation, 'MMM d'),
+                  badge: `${Math.abs(daysToOvulation)}d`,
+                  icon: Sparkles,
+                  description: daysToOvulation > 0 ? `In ${daysToOvulation} days` : `Was ${Math.abs(daysToOvulation)} days ago`
+                },
+                {
+                  label: 'Cycle Regularity',
+                  value: '±2 days',
+                  badge: 'Regular',
+                  icon: CheckCircle2,
+                  description: 'Very consistent pattern'
+                },
+                {
+                  label: 'Period Flow',
+                  value: 'Medium',
+                  icon: Droplet,
+                  description: `${periodLength} days duration`
+                }
+              ]
             },
-            { 
-              label: 'Night Sweats', 
-              value: 'Moderate', 
-              progress: 50,
-              trend: 'stable',
-              description: '3-4 episodes/night'
-            },
-            { 
-              label: 'Sleep Disruption', 
-              value: '5 hrs', 
-              progress: 40,
-              trend: 'down',
-              description: 'Below optimal'
-            },
-            { 
-              label: 'Brain Fog', 
-              value: '5/10', 
-              progress: 50,
-              trend: 'stable',
-              description: 'Memory lapses'
-            },
-            { 
-              label: 'Days Since Period', 
-              value: '67 days', 
-              progress: 75,
-              trend: 'up',
-              description: 'Irregular pattern'
+            {
+              title: 'Health Metrics',
+              items: [
+                {
+                  label: 'PMS Severity',
+                  value: '4/10',
+                  progress: 40,
+                  icon: Activity,
+                  description: 'Mild symptoms expected'
+                },
+                {
+                  label: 'BBT Pattern',
+                  value: '97.8°F',
+                  icon: TrendingUp,
+                  description: 'Follicular phase temperature'
+                },
+                {
+                  label: 'Heart Rate Variability',
+                  value: '68 ms',
+                  progress: 80,
+                  icon: Heart,
+                  description: 'Good recovery status'
+                }
+              ]
             }
           ],
-          summary: 'Perimenopause symptoms improving with treatment.'
-        };
-      
-      case 'post-menopause':
-        return {
-          title: 'Post-Menopause Health',
-          metrics: [
-            { 
-              label: 'Bone Density', 
-              value: '-0.8 T-score', 
-              progress: 85,
-              trend: 'stable',
-              description: 'Normal range'
-            },
-            { 
-              label: 'Vaginal Dryness', 
-              value: '4/10', 
-              progress: 40,
-              trend: 'down',
-              description: 'Improved with moisturizer'
-            },
-            { 
-              label: 'Cardiovascular Risk', 
-              value: 'Low', 
-              progress: 20,
-              trend: 'stable',
-              description: 'BP: 118/76 mmHg'
-            },
-            { 
-              label: 'Urinary Incontinence', 
-              value: '2 episodes', 
-              progress: 30,
-              trend: 'stable',
-              description: 'Stress incontinence'
-            },
-            { 
-              label: 'Energy Level', 
-              value: '7/10', 
-              progress: 70,
-              trend: 'up',
-              description: 'Stable and good'
-            },
-            { 
-              label: 'Vitamin D', 
-              value: '45 ng/mL', 
-              progress: 90,
-              trend: 'stable',
-              description: 'Optimal levels'
-            }
-          ],
-          summary: 'Excellent health maintenance. Continue current regimen.'
-        };
-      
-      default: // menstrual-cycle, pre-menstrual
-        return {
-          title: 'Menstrual Cycle Health',
-          metrics: [
-            { 
-              label: 'Cycle Regularity', 
-              value: '±2 days', 
-              progress: 90,
-              trend: 'stable',
-              description: 'Very regular pattern'
-            },
-            { 
-              label: 'Period Flow', 
-              value: 'Medium', 
-              progress: 60,
-              trend: 'stable',
-              description: `${periodLength} days duration`
-            },
-            { 
-              label: 'PMS Severity', 
-              value: '4/10', 
-              progress: 40,
-              trend: 'down',
-              description: 'Mild symptoms'
-            },
-            { 
-              label: 'Basal Body Temp', 
-              value: '97.8°F', 
-              progress: 50,
-              trend: 'up',
-              description: 'Follicular phase'
-            },
-            { 
-              label: 'Resting Heart Rate', 
-              value: '62 bpm', 
-              progress: 75,
-              trend: 'stable',
-              description: 'Healthy range'
-            },
-            { 
-              label: 'HRV Score', 
-              value: '68 ms', 
-              progress: 80,
-              trend: 'up',
-              description: 'Good recovery'
-            }
-          ],
-          summary: 'Healthy regular cycle. Ovulation expected in ' + daysToOvulation + ' days.'
+          summary: daysToOvulation <= 5 && daysToOvulation > 0 
+            ? `Approaching ovulation in ${daysToOvulation} days`
+            : 'Healthy regular cycle pattern'
         };
     }
   };
@@ -579,31 +660,66 @@ const CycleCalendar = ({
       </Card>
       
       {/* Statistics Panel */}
-      <Card className="p-4 flex-1">
+      <Card className="p-5 flex-1">
         <div className="flex items-center justify-between mb-4">
-          <h4 className="text-base font-semibold">{modeStats.title}</h4>
+          <h4 className="text-lg font-semibold">{modeStats.title}</h4>
         </div>
-        <div className="space-y-4">
-          {modeStats.metrics.map((metric, index) => (
-            <div key={index} className="space-y-1.5">
-              <div className="flex justify-between items-start">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs text-muted-foreground">{metric.label}</span>
-                  {metric.trend === 'up' && <TrendingUp className="h-3 w-3 text-green-600" />}
-                  {metric.trend === 'down' && <TrendingDown className="h-3 w-3 text-orange-600" />}
-                  {metric.trend === 'stable' && <Activity className="h-3 w-3 text-blue-600" />}
-                </div>
-                <span className="text-sm font-semibold">{metric.value}</span>
-              </div>
-              <Progress value={metric.progress} className="h-1.5" />
-              <p className="text-[10px] text-muted-foreground">{metric.description}</p>
+        
+        <div className="space-y-5">
+          {modeStats.sections.map((section, sectionIdx) => (
+            <div 
+              key={sectionIdx} 
+              className={`space-y-3 ${section.highlight ? 'pb-4 border-b-2 border-primary/20' : 'pb-3 border-b'}`}
+            >
+              <h5 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                {section.title}
+              </h5>
+              
+              {section.items.map((item, itemIdx) => {
+                const IconComponent = item.icon;
+                return (
+                  <div key={itemIdx} className="space-y-2">
+                    <div className="flex justify-between items-start gap-3">
+                      <div className="flex items-start gap-2 flex-1">
+                        <IconComponent className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-medium text-muted-foreground">{item.label}</span>
+                            {item.badge && (
+                              <Badge 
+                                variant={
+                                  item.badge === 'High' || item.badge === 'Active' || item.badge === 'Protected' || item.badge === 'Excellent' || item.badge === 'Healthy' || item.badge === 'Today' ? 'default' :
+                                  item.badge === 'Medium' || item.badge === 'Upcoming' || item.badge === 'Caution' ? 'secondary' :
+                                  'outline'
+                                }
+                                className="text-[10px] h-4 px-1.5"
+                              >
+                                {item.badge}
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">{item.description}</p>
+                        </div>
+                      </div>
+                      <span className="text-sm font-bold whitespace-nowrap">{item.value}</span>
+                    </div>
+                    
+                    {item.progress !== undefined && (
+                      <Progress 
+                        value={item.progress} 
+                        className="h-2"
+                      />
+                    )}
+                  </div>
+                );
+              })}
             </div>
           ))}
           
-          <div className="pt-3 border-t mt-4">
-            <div className="flex items-start gap-2 p-2 bg-muted/30 rounded">
-              <Sparkles className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
-              <p className="text-xs font-medium">{modeStats.summary}</p>
+          <div className="pt-3 mt-3 border-t">
+            <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg">
+              <Sparkles className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+              <p className="text-sm font-medium leading-relaxed">{modeStats.summary}</p>
             </div>
           </div>
         </div>
