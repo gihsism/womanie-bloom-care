@@ -55,8 +55,31 @@ const PatientDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, session, loading } = useAuth();
-  const [profile, setProfile] = useState<{ full_name?: string } | null>(null);
+  const [profile, setProfile] = useState<{ full_name?: string; life_stage?: string } | null>(null);
   const [selectedMode, setSelectedMode] = useState<LifeStage>('menstrual-cycle');
+
+  // Save life stage to database when it changes
+  const handleModeChange = async (mode: LifeStage) => {
+    setSelectedMode(mode);
+    
+    if (user) {
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ life_stage: mode })
+          .eq('id', user.id);
+        
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error saving life stage:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to save life stage preference',
+          variant: 'destructive',
+        });
+      }
+    }
+  };
   const [activeSection, setActiveSection] = useState('overview');
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
   const [documentsLoading, setDocumentsLoading] = useState(true);
@@ -73,12 +96,17 @@ const PatientDashboard = () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('full_name')
+        .select('full_name, life_stage')
         .eq('id', userId)
         .maybeSingle();
 
       if (error) throw error;
       setProfile(data);
+      
+      // Load saved life stage if available
+      if (data?.life_stage) {
+        setSelectedMode(data.life_stage as LifeStage);
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
@@ -302,7 +330,7 @@ const PatientDashboard = () => {
               <DashboardHeader 
                 userName={getUserName()}
                 selectedMode={selectedMode}
-                onModeChange={setSelectedMode}
+                onModeChange={handleModeChange}
                 onNavigate={setActiveSection}
               />
             </div>
