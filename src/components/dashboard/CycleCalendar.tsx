@@ -777,8 +777,8 @@ const CycleCalendar = ({
 
 
   return (
-    <div className="flex gap-4">
-      <Card className="p-2 w-[507px]">
+    <div>
+      <Card className="p-2">
         <div className="space-y-2">
       {/* Period Tracking Header */}
       {showCycleInfo && (
@@ -1164,72 +1164,6 @@ const CycleCalendar = ({
       </div>
       )}
       </div>
-      </Card>
-      
-      {/* Statistics Panel */}
-      <Card className="p-5 flex-1">
-        <div className="flex items-center justify-between mb-4">
-          <h4 className="text-lg font-semibold">{modeStats.title}</h4>
-        </div>
-        
-        <div className="space-y-5">
-          {modeStats.sections.map((section, sectionIdx) => (
-            <div 
-              key={sectionIdx} 
-              className={`space-y-3 ${section.highlight ? 'pb-4 border-b-2 border-primary/20' : 'pb-3 border-b'}`}
-            >
-              <h5 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                {section.title}
-              </h5>
-              
-              {section.items.map((item, itemIdx) => {
-                const IconComponent = item.icon;
-                return (
-                  <div key={itemIdx} className="space-y-2">
-                    <div className="flex justify-between items-start gap-3">
-                      <div className="flex items-start gap-2 flex-1">
-                        <IconComponent className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs font-medium text-muted-foreground">{item.label}</span>
-                            {item.badge && (
-                              <Badge 
-                                variant={
-                                  item.badge === 'High' || item.badge === 'Active' || item.badge === 'Protected' || item.badge === 'Excellent' || item.badge === 'Healthy' || item.badge === 'Today' ? 'default' :
-                                  item.badge === 'Medium' || item.badge === 'Upcoming' || item.badge === 'Caution' ? 'secondary' :
-                                  'outline'
-                                }
-                                className="text-[10px] h-4 px-1.5"
-                              >
-                                {item.badge}
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-[10px] text-muted-foreground mt-0.5">{item.description}</p>
-                        </div>
-                      </div>
-                      <span className="text-sm font-bold whitespace-nowrap">{item.value}</span>
-                    </div>
-                    
-                    {item.progress !== undefined && (
-                      <Progress 
-                        value={item.progress} 
-                        className="h-2"
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-          
-          <div className="pt-3 mt-3 border-t">
-            <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg">
-              <Sparkles className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-              <p className="text-sm font-medium leading-relaxed">{modeStats.summary}</p>
-            </div>
-          </div>
-        </div>
       </Card>
       
       {/* Signal Tracking Dialog */}
