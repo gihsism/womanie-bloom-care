@@ -424,9 +424,9 @@ const PatientDashboard = () => {
           </div>
 
           <div className="w-full px-4 py-6">
-            {/* Health Statistics */}
+            {/* Cycle Health Section */}
             <div className="mb-6">
-              <h2 className="text-lg font-bold mb-3">Your Health Today</h2>
+              <h2 className="text-lg font-bold mb-3">Cycle Health</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                 {healthStats.map((stat) => {
                   const IconComponent = stat.icon;
