@@ -38,7 +38,8 @@ import {
   Clock,
   ClipboardList,
   FileCheck,
-  Bell
+  Bell,
+  Upload
 } from 'lucide-react';
 
 export type LifeStage = 
@@ -56,9 +57,10 @@ interface DashboardHeaderProps {
   selectedMode: LifeStage;
   onModeChange: (mode: LifeStage) => void;
   onNavigate: (section: string) => void;
+  onUploadClick?: () => void;
 }
 
-const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate }: DashboardHeaderProps) => {
+const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onUploadClick }: DashboardHeaderProps) => {
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
@@ -171,6 +173,19 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate }: D
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {/* Upload Documents Button */}
+            {onUploadClick && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onUploadClick}
+                className="flex flex-col items-center gap-1 h-auto py-2 px-3"
+              >
+                <Upload className="h-4 w-4 text-primary" />
+                <span className="text-xs">Upload</span>
+              </Button>
+            )}
 
             {quickActions.map((action) => {
               const IconComponent = action.icon;

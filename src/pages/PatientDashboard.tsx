@@ -412,6 +412,7 @@ const PatientDashboard = () => {
                 selectedMode={selectedMode}
                 onModeChange={handleModeChange}
                 onNavigate={setActiveSection}
+                onUploadClick={() => setActiveSection('B1.3')}
               />
             </div>
           </div>
