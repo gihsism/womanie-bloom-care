@@ -251,6 +251,35 @@ export const getModeStats = (mode: LifeStage, cycleDay: number = 14) => {
     }
   }
   
+  // Get detailed hormone explanations
+  const getHormoneDetails = () => {
+    let estrogenDetails = '';
+    let progesteroneDetails = '';
+    
+    if (cycleDay <= 5) {
+      estrogenDetails = 'Low estrogen may cause fatigue and low mood';
+      progesteroneDetails = 'Low progesterone during menstruation is normal';
+    } else if (cycleDay <= 13) {
+      estrogenDetails = 'Rising estrogen boosts mood and energy';
+      progesteroneDetails = 'Low progesterone allows estrogen dominance';
+    } else if (cycleDay === 14 || cycleDay === 15) {
+      estrogenDetails = 'Peak estrogen enhances confidence and sociability';
+      progesteroneDetails = 'Rising progesterone prepares body for pregnancy';
+    } else if (cycleDay <= 28) {
+      if (cycleDay > 24) {
+        estrogenDetails = 'Dropping estrogen may cause mood swings';
+        progesteroneDetails = 'Dropping progesterone can cause PMS symptoms';
+      } else {
+        estrogenDetails = 'Moderate estrogen supports calm mood';
+        progesteroneDetails = 'High progesterone promotes relaxation and focus';
+      }
+    }
+    
+    return { estrogenDetails, progesteroneDetails };
+  };
+  
+  const { estrogenDetails, progesteroneDetails } = getHormoneDetails();
+  
   switch (mode) {
     case 'menstrual-cycle':
     case 'contraception':
@@ -258,10 +287,10 @@ export const getModeStats = (mode: LifeStage, cycleDay: number = 14) => {
     case 'ivf':
       return [
         { title: 'Cycle Day', value: `${cycleDay}`, subtitle: `${phase.charAt(0).toUpperCase() + phase.slice(1)} phase`, icon: CalendarIcon, color: 'text-primary' },
-        { title: 'Estrogen', value: estrogen, subtitle: 'Current level', icon: TrendingUp, color: 'text-secondary' },
-        { title: 'Progesterone', value: progesterone, subtitle: 'Current level', icon: Activity, color: 'text-accent' },
-        { title: 'Mood', value: mood, subtitle: 'Hormone-influenced', icon: Heart, color: 'text-primary' },
-        { title: 'Energy', value: energy, subtitle: 'Physical vitality', icon: Flame, color: 'text-secondary' },
+        { title: 'Estrogen', value: estrogen, subtitle: estrogenDetails, icon: TrendingUp, color: 'text-secondary' },
+        { title: 'Progesterone', value: progesterone, subtitle: progesteroneDetails, icon: Activity, color: 'text-accent' },
+        { title: 'Mood Impact', value: mood, subtitle: 'How you might feel today', icon: Heart, color: 'text-primary' },
+        { title: 'Energy Level', value: energy, subtitle: 'Physical vitality today', icon: Flame, color: 'text-secondary' },
       ];
     
     case 'pregnancy':
