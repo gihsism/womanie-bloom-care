@@ -250,7 +250,12 @@ const PatientDashboard = () => {
     return 'there';
   };
 
-  const healthStats = selectedMode ? getModeStats(selectedMode) : [];
+  // Calculate current cycle day
+  const currentCycleDay = periodData 
+    ? Math.floor((new Date().getTime() - periodData.lastPeriodStart.getTime()) / (1000 * 60 * 60 * 24)) % periodData.cycleLength + 1
+    : 14;
+
+  const healthStats = selectedMode ? getModeStats(selectedMode, currentCycleDay) : [];
 
   const mainSections = [
     {
@@ -413,6 +418,7 @@ const PatientDashboard = () => {
                 onModeChange={handleModeChange}
                 onNavigate={setActiveSection}
                 onUploadClick={() => setActiveSection('B1.3')}
+                cycleDay={currentCycleDay}
               />
             </div>
           </div>

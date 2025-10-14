@@ -58,9 +58,11 @@ interface DashboardHeaderProps {
   onModeChange: (mode: LifeStage) => void;
   onNavigate: (section: string) => void;
   onUploadClick?: () => void;
+  cycleDay?: number;
+  cyclePhase?: string;
 }
 
-const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onUploadClick }: DashboardHeaderProps) => {
+const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onUploadClick, cycleDay = 14, cyclePhase = 'follicular' }: DashboardHeaderProps) => {
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
@@ -210,18 +212,56 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onU
 };
 
 // Health stats based on mode
-export const getModeStats = (mode: LifeStage) => {
+export const getModeStats = (mode: LifeStage, cycleDay: number = 14) => {
+  // Determine cycle phase
+  let phase = 'follicular';
+  let estrogen = 'Low';
+  let progesterone = 'Low';
+  let mood = 'Stable';
+  let energy = 'Moderate';
+  
+  if (cycleDay <= 5) {
+    phase = 'menstrual';
+    estrogen = 'Low';
+    progesterone = 'Low';
+    mood = 'Low energy, may feel tired';
+    energy = 'Low';
+  } else if (cycleDay <= 13) {
+    phase = 'follicular';
+    estrogen = 'Rising';
+    progesterone = 'Low';
+    mood = 'Optimistic, energetic';
+    energy = 'Increasing';
+  } else if (cycleDay === 14 || cycleDay === 15) {
+    phase = 'ovulation';
+    estrogen = 'Peak';
+    progesterone = 'Rising';
+    mood = 'Confident, social';
+    energy = 'High';
+  } else if (cycleDay <= 28) {
+    phase = 'luteal';
+    estrogen = 'Moderate → Low';
+    progesterone = 'High → Dropping';
+    if (cycleDay > 24) {
+      mood = 'May feel irritable or anxious';
+      energy = 'Declining';
+    } else {
+      mood = 'Calm, focused';
+      energy = 'Moderate';
+    }
+  }
+  
   switch (mode) {
     case 'menstrual-cycle':
     case 'contraception':
     case 'conception':
     case 'ivf':
       return [
-        { title: 'Cycle Day', value: '14', subtitle: 'Ovulation window', icon: CalendarIcon, color: 'text-primary' },
-        { title: 'Hormones', value: 'Optimal', subtitle: 'Estrogen & Progesterone', icon: TrendingUp, color: 'text-secondary' },
-        { title: 'Fertility', value: 'High', subtitle: 'Peak window', icon: Heart, color: 'text-accent' },
-        { title: 'Ovulation', value: 'Today', subtitle: 'Fertile day', icon: Droplet, color: 'text-primary' },
-        { title: 'Vitamins', value: '8/10', subtitle: 'Daily intake', icon: Pill, color: 'text-secondary' },
+        { title: 'Cycle Day', value: `${cycleDay}`, subtitle: `${phase.charAt(0).toUpperCase() + phase.slice(1)} phase`, icon: CalendarIcon, color: 'text-primary' },
+        { title: 'Estrogen', value: estrogen, subtitle: 'Current level', icon: TrendingUp, color: 'text-secondary' },
+        { title: 'Progesterone', value: progesterone, subtitle: 'Current level', icon: Activity, color: 'text-accent' },
+        { title: 'Mood', value: mood, subtitle: 'Hormone-influenced', icon: Heart, color: 'text-primary' },
+        { title: 'Energy', value: energy, subtitle: 'Physical vitality', icon: Flame, color: 'text-secondary' },
       ];
     
     case 'pregnancy':
