@@ -424,28 +424,6 @@ const PatientDashboard = () => {
           </div>
 
           <div className="w-full px-4 py-6">
-            {/* Cycle Health Section */}
-            <div className="mb-6">
-              <h2 className="text-lg font-bold mb-3">Cycle Health</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                {healthStats.map((stat) => {
-                  const IconComponent = stat.icon;
-                  return (
-                    <Card key={stat.title} className="p-4">
-                      <div className="flex items-start justify-between mb-2">
-                        <IconComponent className={`h-5 w-5 ${stat.color}`} />
-                      </div>
-                      <div className="text-2xl font-bold mb-1">{stat.value}</div>
-                      <div className="text-sm font-medium text-foreground mb-1">
-                        {stat.title}
-                      </div>
-                      <div className="text-xs text-muted-foreground">{stat.subtitle}</div>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
-
             {/* Profile Completion Banner */}
             <Card className="p-4 mb-6 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -466,18 +444,47 @@ const PatientDashboard = () => {
               </div>
             </Card>
 
-            {/* Health Tracking Section */}
+            {/* Health Tracking Section with Cycle Health on the right */}
             <div className="mb-6">
               <h3 className="text-base font-semibold mb-3">Health Tracking</h3>
-              {periodData && (
-                <CycleCalendar 
-                  lastPeriodStart={periodData.lastPeriodStart} 
-                  cycleLength={periodData.cycleLength} 
-                  periodLength={5}
-                  selectedMode={selectedMode}
-                  ovulationPrediction={ovulationPrediction}
-                />
-              )}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Calendar - Takes 2 columns */}
+                <div className="lg:col-span-2">
+                  {periodData && (
+                    <CycleCalendar 
+                      lastPeriodStart={periodData.lastPeriodStart} 
+                      cycleLength={periodData.cycleLength} 
+                      periodLength={5}
+                      selectedMode={selectedMode}
+                      ovulationPrediction={ovulationPrediction}
+                    />
+                  )}
+                </div>
+
+                {/* Cycle Health - Takes 1 column on the right */}
+                <div className="lg:col-span-1">
+                  <Card className="p-4">
+                    <h3 className="text-lg font-bold mb-4">Cycle Health</h3>
+                    <div className="space-y-4">
+                      {healthStats.map((stat) => {
+                        const IconComponent = stat.icon;
+                        return (
+                          <div key={stat.title} className="flex items-start gap-3 pb-3 border-b last:border-0 last:pb-0">
+                            <IconComponent className={`h-5 w-5 ${stat.color} mt-1`} />
+                            <div className="flex-1">
+                              <div className="text-sm font-medium text-muted-foreground mb-1">
+                                {stat.title}
+                              </div>
+                              <div className="text-lg font-bold mb-1">{stat.value}</div>
+                              <div className="text-xs text-muted-foreground">{stat.subtitle}</div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Card>
+                </div>
+              </div>
             </div>
 
             {/* Ovulation Prediction - Show for conception and menstrual cycle modes */}
