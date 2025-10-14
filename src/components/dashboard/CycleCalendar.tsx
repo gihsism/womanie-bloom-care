@@ -279,6 +279,13 @@ const CycleCalendar = ({
       return { type: 'regular', color: 'bg-muted/30', label: 'Day' };
     }
     
+    // First check if this date has EWCM discharge - that's the strongest ovulation indicator
+    const dateKey = format(date, 'yyyy-MM-dd');
+    const signal = daySignals[dateKey];
+    if (signal?.discharge === 'ewcm') {
+      return { type: 'ovulation', color: 'bg-secondary', label: 'Ovulation (EWCM detected)' };
+    }
+    
     const cycleDay = getCycleDay(date);
     
     // Period days (cycle days 1-5 for 5-day period)
@@ -292,11 +299,13 @@ const CycleCalendar = ({
       const fertileStart = ovulationPrediction.fertileWindowStart ? new Date(ovulationPrediction.fertileWindowStart) : null;
       const fertileEnd = ovulationPrediction.fertileWindowEnd ? new Date(ovulationPrediction.fertileWindowEnd) : null;
       
-      if (isSameDay(date, predictedOvDate)) {
+      // Check if date is within 1 day of predicted ovulation
+      const daysDiff = Math.abs(differenceInDays(date, predictedOvDate));
+      if (daysDiff === 0) {
         return { type: 'ovulation', color: 'bg-secondary', label: 'AI Predicted Ovulation' };
       }
       
-      if (fertileStart && fertileEnd && date >= fertileStart && date <= fertileEnd) {
+      if (fertileStart && fertileEnd && date >= fertileStart && date <= fertileEnd && !isSameDay(date, predictedOvDate)) {
         return { type: 'fertile', color: 'bg-accent', label: 'AI Fertile Window' };
       }
     }
