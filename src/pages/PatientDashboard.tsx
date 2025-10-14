@@ -58,6 +58,7 @@ const PatientDashboard = () => {
   const { user, session, loading } = useAuth();
   const [profile, setProfile] = useState<{ full_name?: string; life_stage?: string } | null>(null);
   const [selectedMode, setSelectedMode] = useState<LifeStage>('menstrual-cycle');
+  const [ovulationPrediction, setOvulationPrediction] = useState<any>(null);
 
   // Save life stage to database when it changes
   const handleModeChange = async (mode: LifeStage) => {
@@ -81,6 +82,48 @@ const PatientDashboard = () => {
       }
     }
   };
+
+  // Auto-fetch ovulation prediction
+  useEffect(() => {
+    if (user && (selectedMode === 'conception' || selectedMode === 'menstrual-cycle' || selectedMode === 'pre-menstrual')) {
+      fetchOvulationPrediction();
+    }
+  }, [user, selectedMode]);
+
+  const fetchOvulationPrediction = async () => {
+    if (!user) return;
+    
+    try {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const { data: healthData } = await supabase
+        .from('daily_health_signals')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('signal_date', thirtyDaysAgo.toISOString().split('T')[0])
+        .order('signal_date', { ascending: false });
+
+      if (!healthData || healthData.length === 0) return;
+
+      const { data } = await supabase.functions.invoke('predict-ovulation', {
+        body: {
+          healthData,
+          cycleData: {
+            cycleLength: 28,
+            lastPeriodStart: new Date(2025, 9, 1).toISOString(),
+          },
+        },
+      });
+
+      if (data?.prediction) {
+        setOvulationPrediction(data.prediction);
+      }
+    } catch (error) {
+      console.error('Auto-prediction error:', error);
+    }
+  };
+
   const [activeSection, setActiveSection] = useState('overview');
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
   const [documentsLoading, setDocumentsLoading] = useState(true);
@@ -388,6 +431,7 @@ const PatientDashboard = () => {
                 cycleLength={28} 
                 periodLength={5}
                 selectedMode={selectedMode}
+                ovulationPrediction={ovulationPrediction}
               />
             </div>
 
@@ -398,6 +442,7 @@ const PatientDashboard = () => {
                   userId={user.id}
                   lastPeriodStart={new Date(2025, 9, 1)}
                   cycleLength={28}
+                  onPredictionUpdate={setOvulationPrediction}
                 />
               </div>
             )}

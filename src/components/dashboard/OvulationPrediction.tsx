@@ -11,6 +11,7 @@ interface OvulationPredictionProps {
   userId: string;
   lastPeriodStart?: Date;
   cycleLength?: number;
+  onPredictionUpdate?: (prediction: Prediction | null) => void;
 }
 
 interface Prediction {
@@ -23,7 +24,7 @@ interface Prediction {
   recommendations: string[];
 }
 
-const OvulationPrediction = ({ userId, lastPeriodStart, cycleLength = 28 }: OvulationPredictionProps) => {
+const OvulationPrediction = ({ userId, lastPeriodStart, cycleLength = 28, onPredictionUpdate }: OvulationPredictionProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [prediction, setPrediction] = useState<Prediction | null>(null);
@@ -108,6 +109,7 @@ const OvulationPrediction = ({ userId, lastPeriodStart, cycleLength = 28 }: Ovul
       if (data?.prediction) {
         console.log('Prediction received:', data.prediction);
         setPrediction(data.prediction);
+        onPredictionUpdate?.(data.prediction);
         toast({
           title: 'Prediction Generated',
           description: 'Your ovulation prediction is ready!',

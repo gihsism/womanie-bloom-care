@@ -62,13 +62,21 @@ interface CycleCalendarProps {
   cycleLength?: number;
   periodLength?: number;
   selectedMode?: string;
+  ovulationPrediction?: {
+    predictedOvulationDate?: string;
+    fertileWindowStart?: string;
+    fertileWindowEnd?: string;
+    confidence: string;
+    keyIndicators: string[];
+  } | null;
 }
 
 const CycleCalendar = ({ 
   lastPeriodStart: initialPeriodStart,
   cycleLength: initialCycleLength = 28,
   periodLength: initialPeriodLength = 5,
-  selectedMode = 'menstrual-cycle'
+  selectedMode = 'menstrual-cycle',
+  ovulationPrediction
 }: CycleCalendarProps) => {
   const { toast } = useToast();
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -278,7 +286,22 @@ const CycleCalendar = ({
       return { type: 'period', color: 'bg-primary', label: 'Period' };
     }
     
-    // Ovulation day (14 days before next period, which is cycleLength - 13 in cycle day terms)
+    // Use AI prediction if available
+    if (ovulationPrediction?.predictedOvulationDate) {
+      const predictedOvDate = new Date(ovulationPrediction.predictedOvulationDate);
+      const fertileStart = ovulationPrediction.fertileWindowStart ? new Date(ovulationPrediction.fertileWindowStart) : null;
+      const fertileEnd = ovulationPrediction.fertileWindowEnd ? new Date(ovulationPrediction.fertileWindowEnd) : null;
+      
+      if (isSameDay(date, predictedOvDate)) {
+        return { type: 'ovulation', color: 'bg-secondary', label: 'AI Predicted Ovulation' };
+      }
+      
+      if (fertileStart && fertileEnd && date >= fertileStart && date <= fertileEnd) {
+        return { type: 'fertile', color: 'bg-accent', label: 'AI Fertile Window' };
+      }
+    }
+    
+    // Fallback to standard calculation
     const ovulationDay = cycleLength - 13;
     if (cycleDay === ovulationDay) {
       return { type: 'ovulation', color: 'bg-secondary', label: 'Ovulation' };
