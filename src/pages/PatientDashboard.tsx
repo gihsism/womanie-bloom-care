@@ -19,6 +19,7 @@ import DashboardHeader, { getModeStats, type LifeStage } from '@/components/dash
 import CycleCalendar from '@/components/dashboard/CycleCalendar';
 import DailyLogging from '@/components/dashboard/DailyLogging';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
+import OvulationPrediction from '@/components/dashboard/OvulationPrediction';
 import { format } from 'date-fns';
 import { 
   MessageSquare, 
@@ -389,6 +390,17 @@ const PatientDashboard = () => {
                 selectedMode={selectedMode}
               />
             </div>
+
+            {/* Ovulation Prediction - Show for conception and menstrual cycle modes */}
+            {(selectedMode === 'conception' || selectedMode === 'menstrual-cycle' || selectedMode === 'pre-menstrual') && user && (
+              <div className="mb-6">
+                <OvulationPrediction 
+                  userId={user.id}
+                  lastPeriodStart={new Date(2025, 9, 1)}
+                  cycleLength={28}
+                />
+              </div>
+            )}
 
             {/* Daily Logging */}
             <div className="mb-6">
