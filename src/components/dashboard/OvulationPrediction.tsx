@@ -56,6 +56,7 @@ const OvulationPrediction = ({ userId, lastPeriodStart, cycleLength = 28 }: Ovul
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
+      console.log('Fetching health data for user:', userId);
       const { data: healthData, error: healthError } = await supabase
         .from('daily_health_signals')
         .select('*')
@@ -63,7 +64,12 @@ const OvulationPrediction = ({ userId, lastPeriodStart, cycleLength = 28 }: Ovul
         .gte('signal_date', thirtyDaysAgo.toISOString().split('T')[0])
         .order('signal_date', { ascending: false });
 
-      if (healthError) throw healthError;
+      if (healthError) {
+        console.error('Health data fetch error:', healthError);
+        throw healthError;
+      }
+
+      console.log('Health data fetched:', healthData?.length, 'records');
 
       if (!healthData || healthData.length === 0) {
         toast({
@@ -75,6 +81,7 @@ const OvulationPrediction = ({ userId, lastPeriodStart, cycleLength = 28 }: Ovul
         return;
       }
 
+      console.log('Calling predict-ovulation function...');
       // Call the edge function for prediction
       const { data, error } = await supabase.functions.invoke('predict-ovulation', {
         body: {
@@ -86,20 +93,33 @@ const OvulationPrediction = ({ userId, lastPeriodStart, cycleLength = 28 }: Ovul
         },
       });
 
-      if (error) throw error;
+      console.log('Function response:', data);
+      console.log('Function error:', error);
 
-      if (data.prediction) {
+      if (error) {
+        console.error('Function invocation error:', error);
+        throw error;
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      if (data?.prediction) {
+        console.log('Prediction received:', data.prediction);
         setPrediction(data.prediction);
         toast({
           title: 'Prediction Generated',
           description: 'Your ovulation prediction is ready!',
         });
+      } else {
+        throw new Error('No prediction data returned');
       }
     } catch (error) {
       console.error('Prediction error:', error);
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to generate prediction',
+        description: error instanceof Error ? error.message : 'Failed to generate prediction. Please try again.',
         variant: 'destructive',
       });
     } finally {
