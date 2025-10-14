@@ -4,8 +4,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
 import type { LifeStage } from './DashboardHeader';
 
 interface DailyLoggingProps {
@@ -24,14 +26,90 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
     stress: 5,
     weight: '',
     waterIntake: 0,
+    // Cycle tracking
+    discharge: 'none',
+    symptoms: [] as string[],
+    periodFlow: 'none',
   });
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Load today's data on mount
+  useEffect(() => {
+    loadTodaysData();
+  }, []);
+
+  const loadTodaysData = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const today = format(new Date(), 'yyyy-MM-dd');
+      const { data } = await supabase
+        .from('daily_health_signals')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('signal_date', today)
+        .maybeSingle();
+
+      if (data) {
+        setFormData(prev => ({
+          ...prev,
+          mood: data.mood?.[0] === 'happy' ? 8 : data.mood?.[0] === 'sad' ? 3 : 5,
+          stress: data.mood?.includes('anxious') ? 7 : 4,
+          discharge: data.discharge || 'none',
+          symptoms: data.symptoms || [],
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading today data:', error);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: 'Daily log saved!',
-      description: 'Your health data has been recorded.',
-    });
+    setIsLoading(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const today = format(new Date(), 'yyyy-MM-dd');
+      
+      // Map mood score to mood array
+      const moodArray = formData.mood >= 7 ? ['happy', 'energetic'] : 
+                       formData.mood <= 4 ? ['sad'] : ['calm'];
+      
+      if (formData.stress >= 6) moodArray.push('anxious');
+
+      const { error } = await supabase
+        .from('daily_health_signals')
+        .upsert({
+          user_id: user.id,
+          signal_date: today,
+          mood: moodArray,
+          discharge: formData.discharge,
+          symptoms: formData.symptoms,
+          notes: `Sleep: ${formData.sleepHours}h (${formData.sleepQuality}/10), Exercise: ${formData.activityMinutes}min ${formData.activityType}, Water: ${formData.waterIntake} glasses`,
+        }, {
+          onConflict: 'user_id,signal_date'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Daily log saved!',
+        description: 'Your health data has been recorded and will be used for cycle predictions.',
+      });
+    } catch (error) {
+      console.error('Error saving daily log:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save daily log',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const updateField = (field: string, value: any) => {
@@ -150,8 +228,24 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
               <h4 className="font-semibold mb-3">Cycle Tracking</h4>
               <div className="space-y-4">
                 <div className="space-y-2">
+                  <Label>Cervical Discharge</Label>
+                  <Select value={formData.discharge} onValueChange={(val) => updateField('discharge', val)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="dry">Dry</SelectItem>
+                      <SelectItem value="sticky">Sticky</SelectItem>
+                      <SelectItem value="creamy">Creamy</SelectItem>
+                      <SelectItem value="watery">Watery</SelectItem>
+                      <SelectItem value="ewcm">EWCM (Egg White) - Fertile!</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
                   <Label>Period Flow</Label>
-                  <Select>
+                  <Select value={formData.periodFlow} onValueChange={(val) => updateField('periodFlow', val)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select flow" />
                     </SelectTrigger>
@@ -478,8 +572,8 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
 
         {getModeSpecificFields()}
 
-        <Button type="submit" className="w-full mt-6">
-          Save Daily Log
+        <Button type="submit" className="w-full mt-6" disabled={isLoading}>
+          {isLoading ? 'Saving...' : 'Save Daily Log'}
         </Button>
       </form>
     </Card>

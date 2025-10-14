@@ -20,7 +20,7 @@ import CycleCalendar from '@/components/dashboard/CycleCalendar';
 import DailyLogging from '@/components/dashboard/DailyLogging';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
 import OvulationPrediction from '@/components/dashboard/OvulationPrediction';
-import { format } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { 
   MessageSquare, 
   Activity, 
@@ -38,7 +38,9 @@ import {
   Info,
   User as UserIcon,
   LogOut,
-  Calendar
+  Calendar,
+  Sparkles,
+  Droplet
 } from 'lucide-react';
 
 interface DocumentSummary {
@@ -462,7 +464,8 @@ const PatientDashboard = () => {
                 </div>
 
                 {/* Cycle Health - Takes 1 column on the right */}
-                <div className="lg:col-span-1">
+                <div className="lg:col-span-1 space-y-4">
+                  {/* Hormone & Mood Card */}
                   <Card className="p-4">
                     <h3 className="text-lg font-bold mb-4">Cycle Health</h3>
                     <div className="space-y-4">
@@ -481,6 +484,43 @@ const PatientDashboard = () => {
                           </div>
                         );
                       })}
+                    </div>
+                  </Card>
+
+                  {/* Detailed Statistics Card */}
+                  <Card className="p-4">
+                    <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
+                      Cycle Phases
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-start gap-2 flex-1">
+                          <Sparkles className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                          <div className="flex-1">
+                            <div className="text-xs font-medium text-muted-foreground">Next Ovulation</div>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">
+                              {periodData ? `${Math.abs(Math.floor((addDays(periodData.lastPeriodStart, periodData.cycleLength - 13).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))} days` : 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-sm font-bold whitespace-nowrap">
+                          {periodData ? format(addDays(periodData.lastPeriodStart, periodData.cycleLength - 13), 'MMM d') : 'N/A'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-start gap-2 flex-1">
+                          <Droplet className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                          <div className="flex-1">
+                            <div className="text-xs font-medium text-muted-foreground">Next Period</div>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">
+                              {periodData ? `${Math.abs(Math.floor((addDays(periodData.lastPeriodStart, periodData.cycleLength).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))} days` : 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-sm font-bold whitespace-nowrap">
+                          {periodData ? format(addDays(periodData.lastPeriodStart, periodData.cycleLength), 'MMM d') : 'N/A'}
+                        </span>
+                      </div>
                     </div>
                   </Card>
                 </div>
