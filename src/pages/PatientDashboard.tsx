@@ -59,6 +59,7 @@ const PatientDashboard = () => {
   const [profile, setProfile] = useState<{ full_name?: string; life_stage?: string } | null>(null);
   const [selectedMode, setSelectedMode] = useState<LifeStage>('menstrual-cycle');
   const [ovulationPrediction, setOvulationPrediction] = useState<any>(null);
+  const [periodData, setPeriodData] = useState<{ lastPeriodStart: Date; cycleLength: number } | null>(null);
 
   // Save life stage to database when it changes
   const handleModeChange = async (mode: LifeStage) => {
@@ -83,15 +84,51 @@ const PatientDashboard = () => {
     }
   };
 
-  // Auto-fetch ovulation prediction
+  // Load period data
   useEffect(() => {
-    if (user && (selectedMode === 'conception' || selectedMode === 'menstrual-cycle' || selectedMode === 'pre-menstrual')) {
+    if (user) {
+      loadPeriodData();
+    }
+  }, [user]);
+
+  const loadPeriodData = async () => {
+    if (!user) return;
+    
+    try {
+      const { data } = await supabase
+        .from('period_tracking')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('period_start_date', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (data) {
+        setPeriodData({
+          lastPeriodStart: new Date(data.period_start_date),
+          cycleLength: data.cycle_length
+        });
+      } else {
+        // Default values if no data
+        setPeriodData({
+          lastPeriodStart: new Date(2025, 9, 1),
+          cycleLength: 28
+        });
+      }
+    } catch (error) {
+      console.error('Error loading period data:', error);
+    }
+  };
+
+  // Auto-fetch ovulation prediction when we have period data
+  useEffect(() => {
+    if (user && periodData && (selectedMode === 'conception' || selectedMode === 'menstrual-cycle' || selectedMode === 'pre-menstrual')) {
       fetchOvulationPrediction();
     }
-  }, [user, selectedMode]);
+  }, [user, selectedMode, periodData]);
 
   const fetchOvulationPrediction = async () => {
-    if (!user) return;
+    if (!user || !periodData) return;
     
     try {
       const thirtyDaysAgo = new Date();
@@ -110,8 +147,8 @@ const PatientDashboard = () => {
         body: {
           healthData,
           cycleData: {
-            cycleLength: 28,
-            lastPeriodStart: new Date(2025, 9, 1).toISOString(),
+            cycleLength: periodData.cycleLength,
+            lastPeriodStart: periodData.lastPeriodStart.toISOString(),
           },
         },
       });
@@ -426,22 +463,24 @@ const PatientDashboard = () => {
             {/* Health Tracking Section */}
             <div className="mb-6">
               <h3 className="text-base font-semibold mb-3">Health Tracking</h3>
-              <CycleCalendar 
-                lastPeriodStart={new Date(2025, 9, 1)} 
-                cycleLength={28} 
-                periodLength={5}
-                selectedMode={selectedMode}
-                ovulationPrediction={ovulationPrediction}
-              />
+              {periodData && (
+                <CycleCalendar 
+                  lastPeriodStart={periodData.lastPeriodStart} 
+                  cycleLength={periodData.cycleLength} 
+                  periodLength={5}
+                  selectedMode={selectedMode}
+                  ovulationPrediction={ovulationPrediction}
+                />
+              )}
             </div>
 
             {/* Ovulation Prediction - Show for conception and menstrual cycle modes */}
-            {(selectedMode === 'conception' || selectedMode === 'menstrual-cycle' || selectedMode === 'pre-menstrual') && user && (
+            {(selectedMode === 'conception' || selectedMode === 'menstrual-cycle' || selectedMode === 'pre-menstrual') && user && periodData && (
               <div className="mb-6">
                 <OvulationPrediction 
                   userId={user.id}
-                  lastPeriodStart={new Date(2025, 9, 1)}
-                  cycleLength={28}
+                  lastPeriodStart={periodData.lastPeriodStart}
+                  cycleLength={periodData.cycleLength}
                   onPredictionUpdate={setOvulationPrediction}
                 />
               </div>
