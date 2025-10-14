@@ -57,7 +57,7 @@ const PatientDashboard = () => {
   const { toast } = useToast();
   const { user, session, loading } = useAuth();
   const [profile, setProfile] = useState<{ full_name?: string; life_stage?: string } | null>(null);
-  const [selectedMode, setSelectedMode] = useState<LifeStage>('menstrual-cycle');
+  const [selectedMode, setSelectedMode] = useState<LifeStage | null>(null);
   const [ovulationPrediction, setOvulationPrediction] = useState<any>(null);
   const [periodData, setPeriodData] = useState<{ lastPeriodStart: Date; cycleLength: number } | null>(null);
 
@@ -184,12 +184,11 @@ const PatientDashboard = () => {
       if (error) throw error;
       setProfile(data);
       
-      // Load saved life stage if available
-      if (data?.life_stage) {
-        setSelectedMode(data.life_stage as LifeStage);
-      }
+      // Load saved life stage if available, otherwise default to menstrual-cycle
+      setSelectedMode((data?.life_stage as LifeStage) || 'menstrual-cycle');
     } catch (error) {
       console.error('Error fetching profile:', error);
+      setSelectedMode('menstrual-cycle');
     }
   };
 
@@ -251,7 +250,7 @@ const PatientDashboard = () => {
     return 'there';
   };
 
-  const healthStats = getModeStats(selectedMode);
+  const healthStats = selectedMode ? getModeStats(selectedMode) : [];
 
   const mainSections = [
     {
@@ -313,7 +312,7 @@ const PatientDashboard = () => {
     },
   ];
 
-  if (loading) {
+  if (loading || !selectedMode) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <p>Loading...</p>
