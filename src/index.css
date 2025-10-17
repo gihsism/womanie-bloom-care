@@ -19,27 +19,27 @@
     --popover-foreground: 220 9% 46%;
 
     /* Pink/Rose - Primary brand color */
-    --primary: 350 43% 81%;
+    --primary: 350 68% 75%;
     --primary-foreground: 220 9% 20%;
 
     /* Blue - Trust & calm */
-    --secondary: 211 28% 70%;
+    --secondary: 211 55% 65%;
     --secondary-foreground: 220 9% 20%;
 
     /* Green - Health & wellness */
-    --accent: 102 29% 70%;
+    --accent: 102 50% 65%;
     --accent-foreground: 220 9% 20%;
 
     /* Muted backgrounds */
-    --muted: 28 50% 95%;
+    --muted: 28 60% 92%;
     --muted-foreground: 220 9% 60%;
 
     /* Lavender - Premium & meditation */
-    --purple: 264 28% 77%;
+    --purple: 264 52% 70%;
     --purple-foreground: 220 9% 20%;
 
     /* Mint - Success & achievements */
-    --turquoise: 166 27% 78%;
+    --turquoise: 166 48% 68%;
     --turquoise-foreground: 220 9% 20%;
 
     /* Destructive */
@@ -55,27 +55,27 @@
     --radius: 1.5rem;
 
     /* Chart colors */
-    --chart-1: 350 43% 81%;
-    --chart-2: 102 29% 70%;
-    --chart-3: 211 28% 70%;
-    --chart-4: 264 28% 77%;
-    --chart-5: 166 27% 78%;
+    --chart-1: 350 68% 75%;
+    --chart-2: 102 50% 65%;
+    --chart-3: 211 55% 65%;
+    --chart-4: 264 52% 70%;
+    --chart-5: 166 48% 68%;
 
     /* Sidebar */
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 220 9% 46%;
-    --sidebar-primary: 350 43% 81%;
+    --sidebar-primary: 350 68% 75%;
     --sidebar-primary-foreground: 220 9% 20%;
-    --sidebar-accent: 28 50% 95%;
+    --sidebar-accent: 28 60% 92%;
     --sidebar-accent-foreground: 220 9% 46%;
     --sidebar-border: 28 30% 90%;
-    --sidebar-ring: 350 43% 81%;
+    --sidebar-ring: 350 68% 75%;
 
     /* Gradients */
-    --gradient-pink: linear-gradient(135deg, hsl(350 43% 81%) 0%, hsl(264 28% 77%) 100%);
-    --gradient-calm: linear-gradient(135deg, hsl(211 28% 70%) 0%, hsl(166 27% 78%) 100%);
-    --gradient-nature: linear-gradient(135deg, hsl(102 29% 70%) 0%, hsl(166 27% 78%) 100%);
-    --gradient-wellness: linear-gradient(135deg, hsl(350 43% 81%) 0%, hsl(211 28% 70%) 100%);
+    --gradient-pink: linear-gradient(135deg, hsl(350 68% 75%) 0%, hsl(264 52% 70%) 100%);
+    --gradient-calm: linear-gradient(135deg, hsl(211 55% 65%) 0%, hsl(166 48% 68%) 100%);
+    --gradient-nature: linear-gradient(135deg, hsl(102 50% 65%) 0%, hsl(166 48% 68%) 100%);
+    --gradient-wellness: linear-gradient(135deg, hsl(350 68% 75%) 0%, hsl(211 55% 65%) 100%);
   }
 
   .dark {
@@ -92,15 +92,15 @@
     --popover-foreground: 28 30% 92%;
 
     /* Pink/Rose - Adjusted for dark mode */
-    --primary: 350 40% 75%;
+    --primary: 350 65% 70%;
     --primary-foreground: 220 15% 10%;
 
     /* Blue - Adjusted for dark mode */
-    --secondary: 211 25% 65%;
+    --secondary: 211 48% 62%;
     --secondary-foreground: 220 15% 10%;
 
     /* Green - Adjusted for dark mode */
-    --accent: 102 25% 65%;
+    --accent: 102 45% 62%;
     --accent-foreground: 220 15% 10%;
 
     /* Dark muted */
@@ -108,11 +108,11 @@
     --muted-foreground: 220 9% 65%;
 
     /* Lavender - Adjusted for dark mode */
-    --purple: 264 25% 72%;
+    --purple: 264 48% 68%;
     --purple-foreground: 220 15% 10%;
 
     /* Mint - Adjusted for dark mode */
-    --turquoise: 166 22% 72%;
+    --turquoise: 166 42% 68%;
     --turquoise-foreground: 220 15% 10%;
 
     /* Destructive */
@@ -125,27 +125,27 @@
     --ring: 350 40% 75%;
 
     /* Chart colors - dark mode */
-    --chart-1: 350 40% 75%;
-    --chart-2: 102 25% 65%;
-    --chart-3: 211 25% 65%;
-    --chart-4: 264 25% 72%;
-    --chart-5: 166 22% 72%;
+    --chart-1: 350 65% 70%;
+    --chart-2: 102 45% 62%;
+    --chart-3: 211 48% 62%;
+    --chart-4: 264 48% 68%;
+    --chart-5: 166 42% 68%;
 
     /* Dark sidebar */
     --sidebar-background: 220 15% 14%;
     --sidebar-foreground: 28 30% 92%;
-    --sidebar-primary: 350 40% 75%;
+    --sidebar-primary: 350 65% 70%;
     --sidebar-primary-foreground: 220 15% 10%;
     --sidebar-accent: 220 15% 20%;
     --sidebar-accent-foreground: 28 30% 92%;
     --sidebar-border: 220 15% 22%;
-    --sidebar-ring: 350 40% 75%;
+    --sidebar-ring: 350 65% 70%;
 
     /* Gradients - dark mode */
-    --gradient-pink: linear-gradient(135deg, hsl(350 40% 75%) 0%, hsl(264 25% 72%) 100%);
-    --gradient-calm: linear-gradient(135deg, hsl(211 25% 65%) 0%, hsl(166 22% 72%) 100%);
-    --gradient-nature: linear-gradient(135deg, hsl(102 25% 65%) 0%, hsl(166 22% 72%) 100%);
-    --gradient-wellness: linear-gradient(135deg, hsl(350 40% 75%) 0%, hsl(211 25% 65%) 100%);
+    --gradient-pink: linear-gradient(135deg, hsl(350 65% 70%) 0%, hsl(264 48% 68%) 100%);
+    --gradient-calm: linear-gradient(135deg, hsl(211 48% 62%) 0%, hsl(166 42% 68%) 100%);
+    --gradient-nature: linear-gradient(135deg, hsl(102 45% 62%) 0%, hsl(166 42% 68%) 100%);
+    --gradient-wellness: linear-gradient(135deg, hsl(350 65% 70%) 0%, hsl(211 48% 62%) 100%);
   }
 }
 
