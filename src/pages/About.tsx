@@ -129,10 +129,10 @@ const About = () => {
               <h3 className="text-xl font-bold mb-1">Marina</h3>
               <p className="text-secondary font-semibold mb-4">CMO & Co-Founder</p>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                Practicing gynecologist in Zurich with over 15 years of experience. Marina's understanding 
-                of women's health is both professional and personal—she went through her own fertility 
-                challenges before successfully giving birth to her baby boy. She ensures every feature 
-                is medically sound and truly helpful.
+                Practicing gynecologist in Zurich with over 15 years of experience, having helped hundreds 
+                of women through their health journeys. Marina's understanding of women's health is both 
+                professional and personal—she went through her own fertility challenges before successfully 
+                giving birth to her baby boy. She ensures every feature is medically sound and truly helpful.
               </p>
             </Card>
 
