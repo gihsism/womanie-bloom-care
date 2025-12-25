@@ -1,12 +1,9 @@
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { useNavigate } from 'react-router-dom';
-import { Heart, Target, Users, Award, Shield } from 'lucide-react';
+import { Heart, Target, Users, Award, Shield, Stethoscope, Briefcase, Code } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 
 const About = () => {
-  const navigate = useNavigate();
 
   const values = [
     {
@@ -74,8 +71,9 @@ const About = () => {
             <h2 className="text-3xl lg:text-4xl font-bold mb-8">Our Story</h2>
             <div className="space-y-4 text-lg text-muted-foreground">
               <p>
-                Founded in 2023, Womanie emerged from the personal experiences of our founding team—women who
-                struggled to find comprehensive, accessible healthcare solutions that truly understood their needs.
+                Womanie was born from deeply personal experiences. Our founders—a patient who spent years navigating 
+                the complexities of women's healthcare, a gynecologist who walked the same fertility journey with her 
+                patients, and a tech entrepreneur who saw the gap between healthcare and technology.
               </p>
               <p>
                 We noticed a gap in the market: while there were plenty of period trackers, fertility apps, and
@@ -88,6 +86,63 @@ const About = () => {
                 worldwide and partner with thousands of healthcare providers.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Meet the Founders */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl lg:text-4xl font-bold text-center mb-4">Meet the Founders</h2>
+          <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-12">
+            Three people united by a shared mission: to transform women's healthcare through technology, 
+            empathy, and medical expertise.
+          </p>
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {/* Alena */}
+            <Card className="p-8 text-center hover:shadow-lg transition-shadow">
+              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
+                <Briefcase className="h-10 w-10 text-primary-foreground" />
+              </div>
+              <h3 className="text-xl font-bold mb-1">Alena</h3>
+              <p className="text-primary font-semibold mb-4">CEO & Co-Founder</p>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Former Senior Manager at a Big-4 firm. After hundreds of appointments with gynecologists, 
+                urologists, and fertility specialists, Alena experienced firsthand how fragmented and 
+                frustrating women's healthcare can be. Her personal fertility journey became the catalyst 
+                for building a better solution.
+              </p>
+            </Card>
+
+            {/* Marina */}
+            <Card className="p-8 text-center hover:shadow-lg transition-shadow">
+              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-secondary to-secondary/60 flex items-center justify-center">
+                <Stethoscope className="h-10 w-10 text-secondary-foreground" />
+              </div>
+              <h3 className="text-xl font-bold mb-1">Marina</h3>
+              <p className="text-secondary font-semibold mb-4">Chief Medical Officer</p>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Practicing gynecologist in Zurich with over 15 years of experience. Marina's understanding 
+                of women's health is both professional and personal—she went through her own fertility 
+                challenges before successfully giving birth to her baby boy. She ensures every feature 
+                is medically sound and truly helpful.
+              </p>
+            </Card>
+
+            {/* John */}
+            <Card className="p-8 text-center hover:shadow-lg transition-shadow">
+              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center">
+                <Code className="h-10 w-10 text-accent-foreground" />
+              </div>
+              <h3 className="text-xl font-bold mb-1">John</h3>
+              <p className="text-accent font-semibold mb-4">CTO & Co-Founder</p>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                A successful IT entrepreneur with an impressive track record spanning Roche, Oxford University, 
+                NHS, and businesses across the globe. John brings world-class technical expertise and a 
+                deep understanding of healthcare systems to build technology that truly serves patients 
+                and providers alike.
+              </p>
+            </Card>
           </div>
         </div>
       </section>
