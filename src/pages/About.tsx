@@ -4,6 +4,7 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import alenaPhoto from '@/assets/alena-photo.png';
 import marinaPhoto from '@/assets/marina-photo.jpg';
+import johnPhoto from '@/assets/john-photo.png';
 
 const About = () => {
 
@@ -137,9 +138,11 @@ const About = () => {
 
             {/* John */}
             <Card className="p-8 text-center hover:shadow-lg transition-shadow">
-              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center">
-                <Code className="h-10 w-10 text-accent-foreground" />
-              </div>
+              <img 
+                src={johnPhoto} 
+                alt="John - CTO & Co-Founder" 
+                className="w-24 h-24 mx-auto mb-6 rounded-full object-cover object-top"
+              />
               <h3 className="text-xl font-bold mb-1">John</h3>
               <p className="text-accent font-semibold mb-4">CTO & Co-Founder</p>
               <p className="text-muted-foreground text-sm leading-relaxed">
