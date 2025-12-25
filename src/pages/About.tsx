@@ -112,10 +112,11 @@ const About = () => {
               <h3 className="text-xl font-bold mb-1">Alena</h3>
               <p className="text-primary font-semibold mb-4">CEO & Co-Founder</p>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                Former Senior Manager at a Big-4 firm. After hundreds of appointments with gynecologists, 
-                urologists, and fertility specialists, Alena experienced firsthand how fragmented and 
-                frustrating women's healthcare can be. Her personal fertility journey became the catalyst 
-                for building a better solution.
+                Former Senior Manager at a Big-4 firm with experience in audit, technical accounting, and 
+                the energy sector. Holds ACCA and Swiss Audit License qualifications, with expertise in IFRS, 
+                US GAAP, Swiss CO, and Swiss FER. After hundreds of appointments with gynecologists, 
+                urologists, and fertility specialists, Alena experienced firsthand how fragmented women's 
+                healthcare can be—her personal fertility journey became the catalyst for building a better solution.
               </p>
             </Card>
 
