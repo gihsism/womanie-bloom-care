@@ -80,8 +80,10 @@ const About = () => {
               </p>
               <p>
                 We noticed a gap in the market: while there were plenty of period trackers, fertility apps, and
-                pregnancy monitors, there wasn't a unified platform that supported women through every stage of
-                their health journey—from adolescence through menopause and beyond.
+                pregnancy monitors, there wasn't a unified platform that supported women through every step of
+                their medical experience—whether it's finding the right doctor, navigating fertility treatments,
+                starting their sexual life and choosing contraception, managing menopause, or handling any health
+                concern in between.
               </p>
               <p>
                 Today, Womanie combines cutting-edge AI technology with expert medical care and a supportive
