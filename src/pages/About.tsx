@@ -1,7 +1,9 @@
 import { Card } from '@/components/ui/card';
-import { Heart, Target, Users, Award, Shield, Stethoscope, Briefcase, Code } from 'lucide-react';
+import { Heart, Target, Users, Award, Shield, Code } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import alenaPhoto from '@/assets/alena-photo.png';
+import marinaPhoto from '@/assets/marina-photo.jpg';
 
 const About = () => {
 
@@ -101,9 +103,11 @@ const About = () => {
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {/* Alena */}
             <Card className="p-8 text-center hover:shadow-lg transition-shadow">
-              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
-                <Briefcase className="h-10 w-10 text-primary-foreground" />
-              </div>
+              <img 
+                src={alenaPhoto} 
+                alt="Alena - CEO & Co-Founder" 
+                className="w-24 h-24 mx-auto mb-6 rounded-full object-cover object-top"
+              />
               <h3 className="text-xl font-bold mb-1">Alena</h3>
               <p className="text-primary font-semibold mb-4">CEO & Co-Founder</p>
               <p className="text-muted-foreground text-sm leading-relaxed">
@@ -116,11 +120,13 @@ const About = () => {
 
             {/* Marina */}
             <Card className="p-8 text-center hover:shadow-lg transition-shadow">
-              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-secondary to-secondary/60 flex items-center justify-center">
-                <Stethoscope className="h-10 w-10 text-secondary-foreground" />
-              </div>
+              <img 
+                src={marinaPhoto} 
+                alt="Marina - CMO & Co-Founder" 
+                className="w-24 h-24 mx-auto mb-6 rounded-full object-cover object-top"
+              />
               <h3 className="text-xl font-bold mb-1">Marina</h3>
-              <p className="text-secondary font-semibold mb-4">Chief Medical Officer</p>
+              <p className="text-secondary font-semibold mb-4">CMO & Co-Founder</p>
               <p className="text-muted-foreground text-sm leading-relaxed">
                 Practicing gynecologist in Zurich with over 15 years of experience. Marina's understanding 
                 of women's health is both professional and personal—she went through her own fertility 
