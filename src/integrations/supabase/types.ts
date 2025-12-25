@@ -14,6 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          consultation_type: string | null
+          created_at: string
+          doctor_id: string
+          duration: number | null
+          id: string
+          meeting_url: string | null
+          notes: string | null
+          patient_id: string
+          payment_intent_id: string | null
+          payment_status: string | null
+          scheduled_at: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          consultation_type?: string | null
+          created_at?: string
+          doctor_id: string
+          duration?: number | null
+          id?: string
+          meeting_url?: string | null
+          notes?: string | null
+          patient_id: string
+          payment_intent_id?: string | null
+          payment_status?: string | null
+          scheduled_at: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          consultation_type?: string | null
+          created_at?: string
+          doctor_id?: string
+          duration?: number | null
+          id?: string
+          meeting_url?: string | null
+          notes?: string | null
+          patient_id?: string
+          payment_intent_id?: string | null
+          payment_status?: string | null
+          scheduled_at?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      consultation_settings: {
+        Row: {
+          consultation_duration: number | null
+          consultation_price: number | null
+          created_at: string
+          currency: string | null
+          doctor_id: string
+          id: string
+          is_available: boolean | null
+          stripe_account_id: string | null
+          updated_at: string
+          video_enabled: boolean | null
+        }
+        Insert: {
+          consultation_duration?: number | null
+          consultation_price?: number | null
+          created_at?: string
+          currency?: string | null
+          doctor_id: string
+          id?: string
+          is_available?: boolean | null
+          stripe_account_id?: string | null
+          updated_at?: string
+          video_enabled?: boolean | null
+        }
+        Update: {
+          consultation_duration?: number | null
+          consultation_price?: number | null
+          created_at?: string
+          currency?: string | null
+          doctor_id?: string
+          id?: string
+          is_available?: boolean | null
+          stripe_account_id?: string | null
+          updated_at?: string
+          video_enabled?: boolean | null
+        }
+        Relationships: []
+      }
       daily_health_signals: {
         Row: {
           created_at: string
@@ -50,6 +137,150 @@ export type Database = {
           symptoms?: string[] | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      doctor_notes: {
+        Row: {
+          content: string
+          created_at: string
+          doctor_id: string
+          id: string
+          is_visible_to_patient: boolean | null
+          note_type: string | null
+          patient_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          doctor_id: string
+          id?: string
+          is_visible_to_patient?: boolean | null
+          note_type?: string | null
+          patient_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          doctor_id?: string
+          id?: string
+          is_visible_to_patient?: boolean | null
+          note_type?: string | null
+          patient_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      doctor_patient_connections: {
+        Row: {
+          approved_at: string | null
+          connection_type: string | null
+          created_at: string
+          doctor_id: string
+          id: string
+          patient_id: string
+          status: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          connection_type?: string | null
+          created_at?: string
+          doctor_id: string
+          id?: string
+          patient_id: string
+          status?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          connection_type?: string | null
+          created_at?: string
+          doctor_id?: string
+          id?: string
+          patient_id?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
+      doctor_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          full_name: string
+          id: string
+          is_verified: boolean | null
+          license_number: string | null
+          specialty: string | null
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+          verification_status: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          is_verified?: boolean | null
+          license_number?: string | null
+          specialty?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+          user_id: string
+          verification_status?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          is_verified?: boolean | null
+          license_number?: string | null
+          specialty?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+          verification_status?: string | null
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
+      doctor_schedule: {
+        Row: {
+          created_at: string
+          day_of_week: number | null
+          doctor_id: string
+          end_time: string
+          id: string
+          is_active: boolean | null
+          start_time: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week?: number | null
+          doctor_id: string
+          end_time: string
+          id?: string
+          is_active?: boolean | null
+          start_time: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number | null
+          doctor_id?: string
+          end_time?: string
+          id?: string
+          is_active?: boolean | null
+          start_time?: string
         }
         Relationships: []
       }
@@ -98,6 +329,33 @@ export type Database = {
           notes?: string | null
           uploaded_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      patient_access_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          is_used: boolean | null
+          patient_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          is_used?: boolean | null
+          patient_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_used?: boolean | null
+          patient_id?: string
         }
         Relationships: []
       }
@@ -155,15 +413,46 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_patient_access: {
+        Args: { _doctor_id: string; _patient_id: string }
+        Returns: boolean
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "patient" | "doctor" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -290,6 +579,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["patient", "doctor", "admin"],
+    },
   },
 } as const
