@@ -22,6 +22,7 @@ import About from "./pages/About";
 import Pricing from "./pages/Pricing";
 import Blog from "./pages/Blog";
 import HealthStatistics from "./pages/HealthStatistics";
+import Install from "./pages/Install";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/onboarding/life-stage" element={<LifeStageSelection />} />
             <Route path="/onboarding/mode-setup" element={<ModeSetup />} />
             <Route path="/onboarding/success" element={<OnboardingSuccess />} />
+            <Route path="/install" element={<Install />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
