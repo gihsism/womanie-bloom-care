@@ -10,7 +10,11 @@ import NotFound from "./pages/NotFound";
 import SelectUserType from "./pages/auth/SelectUserType";
 import PatientSignUp from "./pages/auth/PatientSignUp";
 import PatientLogIn from "./pages/auth/PatientLogIn";
+import DoctorLogIn from "./pages/auth/DoctorLogIn";
+import DoctorSignUp from "./pages/auth/DoctorSignUp";
 import PatientDashboard from "./pages/PatientDashboard";
+import DoctorDashboard from "./pages/doctor/DoctorDashboard";
+import PatientDetails from "./pages/doctor/PatientDetails";
 import BasicInformation from "./pages/onboarding/BasicInformation";
 import LifeStageSelection from "./pages/onboarding/LifeStageSelection";
 import ModeSetup from "./pages/onboarding/ModeSetup";
@@ -45,7 +49,11 @@ const App = () => (
             <Route path="/auth/select-type" element={<SelectUserType />} />
             <Route path="/auth/signup" element={<PatientSignUp />} />
             <Route path="/auth/login" element={<PatientLogIn />} />
+            <Route path="/auth/doctor-login" element={<DoctorLogIn />} />
+            <Route path="/auth/doctor-signup" element={<DoctorSignUp />} />
             <Route path="/dashboard" element={<PatientDashboard />} />
+            <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+            <Route path="/doctor/patient/:patientId" element={<PatientDetails />} />
             <Route path="/health-statistics" element={<HealthStatistics />} />
             <Route path="/onboarding/basic-info" element={<BasicInformation />} />
             <Route path="/onboarding/life-stage" element={<LifeStageSelection />} />
