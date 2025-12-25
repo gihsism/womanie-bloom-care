@@ -265,9 +265,9 @@ const PatientDashboard = () => {
       title: 'Healthcare Services',
       icon: MessageSquare,
       subsections: [
-        { id: 'B1.1', title: 'AI Health Assistant', description: 'Symptom checker & health guidance' },
-        { id: 'B1.2', title: 'Doctor Consultations', description: 'Start consultation & history' },
-        { id: 'B1.3', title: 'Upload Health Documents', description: 'Upload & get AI analysis' },
+        { id: 'B1.1', title: 'AI Health Assistant', description: 'Symptom checker & health guidance', visible: true },
+        { id: 'B1.2', title: 'Doctor Consultations', description: 'Find doctors & book appointments', action: () => navigate('/find-doctor'), visible: true },
+        { id: 'B1.3', title: 'Upload Health Documents', description: 'Upload & get AI analysis', visible: true },
       ],
     },
     {
@@ -275,14 +275,14 @@ const PatientDashboard = () => {
       title: 'My Health Dashboard',
       icon: Activity,
       subsections: [
-        { id: 'B2.1', title: "Today's Overview", description: 'Current status & insights' },
-        { id: 'B2.2', title: 'Cycle & Phase Tracking', description: 'Visual calendar & predictions' },
-        { id: 'B2.3', title: 'Body Insights & Patterns', description: 'Daily tracking & correlations' },
-        { id: 'B2.4', title: 'Medical Data & Test Results', description: 'Lab results & imaging' },
-        { id: 'B2.5', title: 'Medical History', description: 'Conditions & medications' },
+        { id: 'B2.1', title: "Today's Overview", description: 'Current status & insights', visible: true },
+        { id: 'B2.2', title: 'Cycle & Phase Tracking', description: 'Visual calendar & predictions', visible: true },
+        { id: 'B2.3', title: 'Body Insights & Patterns', description: 'Daily tracking & correlations', visible: true },
+        { id: 'B2.4', title: 'Medical Data & Test Results', description: 'Lab results & imaging', visible: true },
+        { id: 'B2.5', title: 'Medical History', description: 'Conditions & medications', visible: true },
         { id: 'B2.6', title: 'Pregnancy Tracker', description: 'Week-by-week development', visible: selectedMode === 'pregnancy' },
-        { id: 'B2.7', title: 'Wearable Device Data', description: 'Synced health metrics' },
-        { id: 'B2.8', title: 'Health Goals & Progress', description: 'Track your goals' },
+        { id: 'B2.7', title: 'Wearable Device Data', description: 'Synced health metrics', visible: true },
+        { id: 'B2.8', title: 'Health Goals & Progress', description: 'Track your goals', visible: true },
       ],
     },
     {
@@ -290,10 +290,10 @@ const PatientDashboard = () => {
       title: 'Personal Records',
       icon: FileText,
       subsections: [
-        { id: 'B3.1', title: 'My Profile', description: 'Essential & extended info' },
-        { id: 'B3.2', title: 'Document Library', description: 'Upload & organize documents' },
-        { id: 'B3.3', title: 'Health Timeline', description: 'Chronological health events' },
-        { id: 'B3.4', title: 'Settings & Preferences', description: 'Account & privacy settings' },
+        { id: 'B3.1', title: 'My Profile', description: 'Essential & extended info', visible: true },
+        { id: 'B3.2', title: 'Document Library', description: 'Upload & organize documents', visible: true },
+        { id: 'B3.3', title: 'Health Timeline', description: 'Chronological health events', visible: true },
+        { id: 'B3.4', title: 'Settings & Preferences', description: 'Account & privacy settings', visible: true },
       ],
     },
     {
@@ -301,9 +301,9 @@ const PatientDashboard = () => {
       title: 'Connected Devices',
       icon: Smartphone,
       subsections: [
-        { id: 'B4.1', title: 'Device Management', description: 'My devices & connection status' },
-        { id: 'B4.2', title: 'Sync Settings', description: 'Auto-sync & preferences' },
-        { id: 'B4.3', title: 'Troubleshooting', description: 'Connection & sync issues' },
+        { id: 'B4.1', title: 'Device Management', description: 'My devices & connection status', visible: true },
+        { id: 'B4.2', title: 'Sync Settings', description: 'Auto-sync & preferences', visible: true },
+        { id: 'B4.3', title: 'Troubleshooting', description: 'Connection & sync issues', visible: true },
       ],
     },
     {
@@ -311,10 +311,10 @@ const PatientDashboard = () => {
       title: 'Community & Support',
       icon: Users,
       subsections: [
-        { id: 'B5.1', title: 'My Groups', description: 'Joined groups & activity' },
-        { id: 'B5.2', title: 'Discover Groups', description: 'Browse recommended groups' },
-        { id: 'B5.3', title: 'Educational Content', description: 'Articles & videos' },
-        { id: 'B5.4', title: 'Upcoming Events', description: 'Webinars & sessions' },
+        { id: 'B5.1', title: 'My Groups', description: 'Joined groups & activity', visible: true },
+        { id: 'B5.2', title: 'Discover Groups', description: 'Browse recommended groups', visible: true },
+        { id: 'B5.3', title: 'Educational Content', description: 'Articles & videos', visible: true },
+        { id: 'B5.4', title: 'Upcoming Events', description: 'Webinars & sessions', visible: true },
       ],
     },
   ];
