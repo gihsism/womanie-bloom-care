@@ -16,6 +16,7 @@ import PatientDashboard from "./pages/PatientDashboard";
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import PatientDetails from "./pages/doctor/PatientDetails";
 import FindDoctor from "./pages/FindDoctor";
+import Settings from "./pages/dashboard/Settings";
 import BasicInformation from "./pages/onboarding/BasicInformation";
 import LifeStageSelection from "./pages/onboarding/LifeStageSelection";
 import ModeSetup from "./pages/onboarding/ModeSetup";
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="/auth/doctor-login" element={<DoctorLogIn />} />
             <Route path="/auth/doctor-signup" element={<DoctorSignUp />} />
             <Route path="/dashboard" element={<PatientDashboard />} />
+            <Route path="/dashboard/settings" element={<Settings />} />
             <Route path="/find-doctor" element={<FindDoctor />} />
             <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
             <Route path="/doctor/patient/:patientId" element={<PatientDetails />} />
