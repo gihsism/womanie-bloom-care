@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Play } from 'lucide-react';
+import heroIllustration from '@/assets/hero-illustration.png';
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -34,16 +35,15 @@ const Hero = () => {
             </div>
           </div>
 
-          {/* Right Visual */}
+          {/* Right Visual - Hero Illustration */}
           <div className="animate-fade-in-delay-1">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl blur-3xl"></div>
-              <div className="relative bg-gradient-to-br from-primary/10 to-secondary/10 rounded-3xl p-8 lg:p-12 aspect-square flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-32 h-32 lg:w-48 lg:h-48 mx-auto mb-4 bg-gradient-to-br from-primary to-secondary rounded-full opacity-20"></div>
-                  <p className="text-muted-foreground">Hero Illustration</p>
-                </div>
-              </div>
+              <img 
+                src={heroIllustration} 
+                alt="Woman in meditation pose surrounded by flowers - women's health illustration" 
+                className="relative w-full h-auto rounded-3xl"
+              />
             </div>
           </div>
         </div>
