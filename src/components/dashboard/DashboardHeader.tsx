@@ -88,6 +88,11 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onU
     { value: 'post-menopause', label: 'Post-Menopause Mode' },
   ];
 
+  const getModeLabel = (mode: LifeStage) => {
+    const option = modeOptions.find(o => o.value === mode);
+    return option?.label || 'Select Mode';
+  };
+
   return (
     <div className="space-y-4">
       {/* Greeting */}
@@ -96,28 +101,14 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onU
           {getGreeting()}, {userName}! 👋
         </h1>
         <p className="text-sm text-muted-foreground">
-          Your personalized health dashboard
+          Your personalized health dashboard • <span className="font-medium text-primary">{getModeLabel(selectedMode)}</span>
         </p>
       </div>
 
-      {/* Mode Selector */}
+      {/* Quick Actions */}
       <Card className="p-4">
         <div className="flex items-center justify-between gap-4">
-          <div className="flex-1">
-            <label className="text-sm font-medium mb-2 block">Life Stage Mode</label>
-            <Select value={selectedMode} onValueChange={(value) => onModeChange(value as LifeStage)}>
-              <SelectTrigger className="w-full max-w-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {modeOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <div className="flex-1" />
 
           {/* Quick Actions */}
           <div className="flex gap-2">
