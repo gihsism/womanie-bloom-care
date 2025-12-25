@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Apple, Smartphone } from 'lucide-react';
+import { Download } from 'lucide-react';
 
 const FinalCTA = () => {
   const navigate = useNavigate();
@@ -31,17 +31,10 @@ const FinalCTA = () => {
             variant="outline"
             size="lg"
             className="bg-background hover:bg-background/80"
+            onClick={() => navigate('/install')}
           >
-            <Apple className="mr-2 h-5 w-5" />
-            Download on the App Store
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="bg-background hover:bg-background/80"
-          >
-            <Smartphone className="mr-2 h-5 w-5" />
-            Get it on Google Play
+            <Download className="mr-2 h-5 w-5" />
+            Install App
           </Button>
         </div>
       </div>
