@@ -146,7 +146,7 @@ const About = () => {
               <h3 className="text-xl font-bold mb-1">John</h3>
               <p className="text-accent font-semibold mb-4">CTO & Co-Founder</p>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                A successful IT entrepreneur with an impressive track record spanning Roche, Oxford University, 
+                Serial entrepreneur bridging IT and healthcare, with an impressive track record spanning Roche, Oxford University, 
                 NHS, and businesses across the globe. John brings world-class technical expertise and a 
                 deep understanding of healthcare systems to build technology that truly serves patients 
                 and providers alike.
