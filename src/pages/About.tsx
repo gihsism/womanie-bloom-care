@@ -113,9 +113,10 @@ const About = () => {
               <p className="text-primary font-semibold mb-4">CEO & Co-Founder</p>
               <p className="text-muted-foreground text-sm leading-relaxed">
                 Former Senior Manager at a Big-4 firm, ACCA qualified and experienced in audit and technical 
-                accounting. After hundreds of appointments with gynecologists, urologists, and fertility 
-                specialists, Alena experienced firsthand how fragmented women's healthcare can be—her personal 
-                fertility journey became the catalyst for building a better solution.
+                accounting. After years of navigating fertility clinics across multiple countries—endless 
+                appointments with gynecologists, urologists, and specialists, repeating her story over and over, 
+                losing critical documents, and facing fragmented care at every turn—Alena knew there had to be 
+                a better way. Her painful journey became the catalyst for building Womanie.
               </p>
             </Card>
 
