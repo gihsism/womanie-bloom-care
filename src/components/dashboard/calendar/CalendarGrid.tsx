@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek, differenceInDays } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
 import { Droplet, Sparkles, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -24,6 +24,8 @@ interface CalendarGridProps {
     fertileWindowStart?: string;
     fertileWindowEnd?: string;
   } | null;
+  periodDays?: Set<string>;
+  markedOvulationDays?: Set<string>;
 }
 
 const CalendarGrid = ({
@@ -35,7 +37,9 @@ const CalendarGrid = ({
   periodLength,
   selectedMode,
   daySignals,
-  ovulationPrediction
+  ovulationPrediction,
+  periodDays = new Set(),
+  markedOvulationDays = new Set()
 }: CalendarGridProps) => {
   const calendarDays = useMemo(() => {
     const monthStart = startOfMonth(currentMonth);
@@ -48,7 +52,8 @@ const CalendarGrid = ({
   const getCycleDay = (date: Date) => {
     const diffTime = date.getTime() - lastPeriodStart.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    return (diffDays % cycleLength) + 1;
+    const day = (diffDays % cycleLength) + 1;
+    return day > 0 ? day : day + cycleLength;
   };
 
   const getDayType = (date: Date) => {
@@ -59,16 +64,26 @@ const CalendarGrid = ({
     const dateKey = format(date, 'yyyy-MM-dd');
     const signal = daySignals[dateKey];
     
+    // Check user-marked ovulation first
+    if (markedOvulationDays.has(dateKey)) {
+      return { type: 'ovulation', bgClass: 'bg-secondary', textClass: 'text-secondary-foreground' };
+    }
+    
     // Check for EWCM - strong ovulation indicator
     if (signal?.discharge === 'ewcm') {
       return { type: 'ovulation', bgClass: 'bg-secondary', textClass: 'text-secondary-foreground' };
     }
     
+    // Check if it's a logged period day
+    if (periodDays.has(dateKey)) {
+      return { type: 'period', bgClass: 'bg-primary', textClass: 'text-primary-foreground' };
+    }
+    
     const cycleDay = getCycleDay(date);
     
-    // Period days
+    // Predicted period days (based on cycle calculation)
     if (cycleDay <= periodLength) {
-      return { type: 'period', bgClass: 'bg-primary', textClass: 'text-primary-foreground' };
+      return { type: 'predicted-period', bgClass: 'bg-primary/30', textClass: 'text-foreground' };
     }
     
     // Use AI prediction if available
@@ -78,22 +93,22 @@ const CalendarGrid = ({
       const fertileEnd = ovulationPrediction.fertileWindowEnd ? new Date(ovulationPrediction.fertileWindowEnd) : null;
       
       if (isSameDay(date, predictedOvDate)) {
-        return { type: 'ovulation', bgClass: 'bg-secondary', textClass: 'text-secondary-foreground' };
+        return { type: 'predicted-ovulation', bgClass: 'bg-secondary/50', textClass: 'text-foreground' };
       }
       
       if (fertileStart && fertileEnd && date >= fertileStart && date <= fertileEnd) {
-        return { type: 'fertile', bgClass: 'bg-accent/80', textClass: 'text-accent-foreground' };
+        return { type: 'fertile', bgClass: 'bg-accent/50', textClass: 'text-foreground' };
       }
     }
     
-    // Fallback calculation
+    // Fallback calculation for fertile window
     const ovulationDay = cycleLength - 13;
     if (cycleDay === ovulationDay) {
-      return { type: 'ovulation', bgClass: 'bg-secondary', textClass: 'text-secondary-foreground' };
+      return { type: 'predicted-ovulation', bgClass: 'bg-secondary/50', textClass: 'text-foreground' };
     }
     
     if (cycleDay >= ovulationDay - 4 && cycleDay <= ovulationDay) {
-      return { type: 'fertile', bgClass: 'bg-accent/80', textClass: 'text-accent-foreground' };
+      return { type: 'fertile', bgClass: 'bg-accent/50', textClass: 'text-foreground' };
     }
     
     return { type: 'regular', bgClass: 'bg-transparent', textClass: 'text-foreground' };
