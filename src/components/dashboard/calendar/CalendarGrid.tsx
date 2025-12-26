@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
 import { Droplet, Sparkles, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CyclePrediction } from '@/hooks/useCyclePrediction';
 
 interface DaySignal {
   symptoms: string[];
@@ -26,6 +27,7 @@ interface CalendarGridProps {
   } | null;
   periodDays?: Set<string>;
   markedOvulationDays?: Set<string>;
+  prediction?: CyclePrediction | null;
 }
 
 const CalendarGrid = ({
@@ -39,7 +41,8 @@ const CalendarGrid = ({
   daySignals,
   ovulationPrediction,
   periodDays = new Set(),
-  markedOvulationDays = new Set()
+  markedOvulationDays = new Set(),
+  prediction
 }: CalendarGridProps) => {
   const calendarDays = useMemo(() => {
     const monthStart = startOfMonth(currentMonth);
@@ -86,7 +89,18 @@ const CalendarGrid = ({
       return { type: 'predicted-period', bgClass: 'bg-primary/30', textClass: 'text-foreground' };
     }
     
-    // Use AI prediction if available
+    // Use ML prediction if available
+    if (prediction) {
+      if (isSameDay(date, prediction.predictedOvulationDate)) {
+        return { type: 'predicted-ovulation', bgClass: 'bg-secondary/50', textClass: 'text-foreground' };
+      }
+      
+      if (date >= prediction.fertileWindowStart && date <= prediction.fertileWindowEnd) {
+        return { type: 'fertile', bgClass: 'bg-accent/50', textClass: 'text-foreground' };
+      }
+    }
+    
+    // Use AI ovulation prediction as secondary source
     if (ovulationPrediction?.predictedOvulationDate) {
       const predictedOvDate = new Date(ovulationPrediction.predictedOvulationDate);
       const fertileStart = ovulationPrediction.fertileWindowStart ? new Date(ovulationPrediction.fertileWindowStart) : null;
@@ -102,12 +116,12 @@ const CalendarGrid = ({
     }
     
     // Fallback calculation for fertile window
-    const ovulationDay = cycleLength - 13;
+    const ovulationDay = cycleLength - 14; // Standard luteal phase
     if (cycleDay === ovulationDay) {
       return { type: 'predicted-ovulation', bgClass: 'bg-secondary/50', textClass: 'text-foreground' };
     }
     
-    if (cycleDay >= ovulationDay - 4 && cycleDay <= ovulationDay) {
+    if (cycleDay >= ovulationDay - 5 && cycleDay <= ovulationDay + 1) {
       return { type: 'fertile', bgClass: 'bg-accent/50', textClass: 'text-foreground' };
     }
     
