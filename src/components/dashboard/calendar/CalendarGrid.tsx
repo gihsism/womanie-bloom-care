@@ -34,9 +34,6 @@ const CalendarGrid = ({
   currentMonth,
   selectedDate,
   onSelectDate,
-  lastPeriodStart,
-  cycleLength,
-  periodLength,
   selectedMode,
   daySignals,
   ovulationPrediction,
@@ -47,84 +44,72 @@ const CalendarGrid = ({
   const calendarDays = useMemo(() => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(currentMonth);
-    const calendarStart = startOfWeek(monthStart);
-    const calendarEnd = endOfWeek(monthEnd);
+    // Explicit Sunday-first weeks to match the "S M T W T F S" header
+    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
+    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
     return eachDayOfInterval({ start: calendarStart, end: calendarEnd });
   }, [currentMonth]);
-
-  const getCycleDay = (date: Date) => {
-    const diffTime = date.getTime() - lastPeriodStart.getTime();
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    const day = (diffDays % cycleLength) + 1;
-    return day > 0 ? day : day + cycleLength;
-  };
 
   const getDayType = (date: Date) => {
     if (['pregnancy', 'menopause', 'post-menopause'].includes(selectedMode)) {
       return { type: 'regular', bgClass: 'bg-muted/30', textClass: 'text-foreground' };
     }
-    
+
     const dateKey = format(date, 'yyyy-MM-dd');
     const signal = daySignals[dateKey];
-    
-    // Check user-marked ovulation first
+
+    // 1) User-confirmed ovulation (strongest signal)
     if (markedOvulationDays.has(dateKey)) {
       return { type: 'ovulation', bgClass: 'bg-secondary', textClass: 'text-secondary-foreground' };
     }
-    
-    // Check for EWCM - strong ovulation indicator
+
+    // 2) EWCM (strong ovulation indicator)
     if (signal?.discharge === 'ewcm') {
       return { type: 'ovulation', bgClass: 'bg-secondary', textClass: 'text-secondary-foreground' };
     }
-    
-    // Check if it's a logged period day
+
+    // 3) Logged period days ONLY (never infer)
     if (periodDays.has(dateKey)) {
       return { type: 'period', bgClass: 'bg-primary', textClass: 'text-primary-foreground' };
     }
-    
-    const cycleDay = getCycleDay(date);
-    
-    // Predicted period days (based on cycle calculation)
-    if (cycleDay <= periodLength) {
-      return { type: 'predicted-period', bgClass: 'bg-primary/30', textClass: 'text-foreground' };
-    }
-    
-    // Use ML prediction if available
+
+    // 4) Predictions (derived from predicted next period)
     if (prediction) {
+      // Predicted next period (outline, not filled)
+      if (date >= prediction.predictedPeriodStart && date <= prediction.predictedPeriodEnd) {
+        return {
+          type: 'predicted-period',
+          bgClass: 'bg-transparent border border-primary/50',
+          textClass: 'text-foreground'
+        };
+      }
+
+      // Ovulation = predicted next period start - 14 days
       if (isSameDay(date, prediction.predictedOvulationDate)) {
         return { type: 'predicted-ovulation', bgClass: 'bg-secondary/50', textClass: 'text-foreground' };
       }
-      
+
+      // Fertile window = ovulation - 5 to ovulation + 1
       if (date >= prediction.fertileWindowStart && date <= prediction.fertileWindowEnd) {
         return { type: 'fertile', bgClass: 'bg-accent/50', textClass: 'text-foreground' };
       }
     }
-    
-    // Use AI ovulation prediction as secondary source
+
+    // 5) Secondary source (external prediction), if present
     if (ovulationPrediction?.predictedOvulationDate) {
       const predictedOvDate = new Date(ovulationPrediction.predictedOvulationDate);
       const fertileStart = ovulationPrediction.fertileWindowStart ? new Date(ovulationPrediction.fertileWindowStart) : null;
       const fertileEnd = ovulationPrediction.fertileWindowEnd ? new Date(ovulationPrediction.fertileWindowEnd) : null;
-      
+
       if (isSameDay(date, predictedOvDate)) {
         return { type: 'predicted-ovulation', bgClass: 'bg-secondary/50', textClass: 'text-foreground' };
       }
-      
+
       if (fertileStart && fertileEnd && date >= fertileStart && date <= fertileEnd) {
         return { type: 'fertile', bgClass: 'bg-accent/50', textClass: 'text-foreground' };
       }
     }
-    
-    // Fallback calculation for fertile window
-    const ovulationDay = cycleLength - 14; // Standard luteal phase
-    if (cycleDay === ovulationDay) {
-      return { type: 'predicted-ovulation', bgClass: 'bg-secondary/50', textClass: 'text-foreground' };
-    }
-    
-    if (cycleDay >= ovulationDay - 5 && cycleDay <= ovulationDay + 1) {
-      return { type: 'fertile', bgClass: 'bg-accent/50', textClass: 'text-foreground' };
-    }
-    
+
     return { type: 'regular', bgClass: 'bg-transparent', textClass: 'text-foreground' };
   };
 
@@ -195,10 +180,10 @@ const CalendarGrid = ({
                     <div className="w-1.5 h-1.5 rounded-full bg-destructive" />
                   )}
                   {hasSignals.intercourse.length > 0 && (
-                    <div className="w-1.5 h-1.5 rounded-full bg-pink-400" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary/70" />
                   )}
                   {hasSignals.mood.length > 0 && (
-                    <div className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-secondary/70" />
                   )}
                 </div>
               )}

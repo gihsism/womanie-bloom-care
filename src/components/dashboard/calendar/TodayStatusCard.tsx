@@ -1,6 +1,6 @@
 import { Sparkles, TrendingUp, TrendingDown, AlertCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { addDays, format } from 'date-fns';
+import { addDays, differenceInDays, format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { CyclePrediction, SymptomPattern, getPredictionMessage } from '@/hooks/useCyclePrediction';
 
@@ -23,18 +23,20 @@ const TodayStatusCard = ({
   prediction,
   symptomPatterns = []
 }: TodayStatusCardProps) => {
+  const today = new Date();
+
   // Use prediction values if available, otherwise fall back to simple calculations
-  const ovulationDay = prediction 
-    ? cycleLength - 14 
+  const ovulationCycleDay = prediction
+    ? differenceInDays(prediction.predictedOvulationDate, lastPeriodStart) + 1
     : cycleLength - 13;
-    
-  const daysToNextPeriod = prediction 
-    ? Math.max(0, Math.ceil((prediction.predictedPeriodStart.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
+
+  const daysToNextPeriod = prediction
+    ? Math.max(0, Math.ceil((prediction.predictedPeriodStart.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)))
     : cycleLength >= cycleDay ? (cycleLength + 1) - cycleDay : 1;
-  
-  const isInFertileWindow = prediction 
-    ? new Date() >= prediction.fertileWindowStart && new Date() <= prediction.fertileWindowEnd
-    : cycleDay >= ovulationDay - 4 && cycleDay <= ovulationDay;
+
+  const isInFertileWindow = prediction
+    ? today >= prediction.fertileWindowStart && today <= prediction.fertileWindowEnd
+    : cycleDay >= ovulationCycleDay - 4 && cycleDay <= ovulationCycleDay;
     
   const isOnPeriod = cycleDay <= periodLength;
 
@@ -59,7 +61,15 @@ const TodayStatusCard = ({
       return { main: cycleDay, sub: `day of period` };
     }
     if (isInFertileWindow) {
-      const daysToOvulation = ovulationDay - cycleDay;
+      if (prediction) {
+        const daysToOvulation = differenceInDays(prediction.predictedOvulationDate, today);
+        if (daysToOvulation === 0) {
+          return { main: 'Ovulation', sub: 'High chance of pregnancy' };
+        }
+        return { main: Math.max(0, daysToOvulation), sub: 'days until ovulation' };
+      }
+
+      const daysToOvulation = ovulationCycleDay - cycleDay;
       if (daysToOvulation === 0) {
         return { main: 'Ovulation', sub: 'High chance of pregnancy' };
       }
