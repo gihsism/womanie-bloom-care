@@ -15,22 +15,8 @@ import CalendarLegend from './calendar/CalendarLegend';
 import DailyLogSheet from './calendar/DailyLogSheet';
 import DayActionSheet from './calendar/DayActionSheet';
 
-// Health signal types
-interface DaySignal {
-  date: string;
-  symptoms: string[];
-  intercourse: { protected: boolean; timestamp?: string }[];
-  mood: string[];
-  discharge: string;
-  notes: string;
-}
-
-interface PeriodRecord {
-  id?: string;
-  period_start_date: string;
-  period_end_date: string;
-  cycle_length: number;
-}
+// Import ML prediction hook
+import { useCyclePrediction, useSymptomPatterns, getCurrentCycleDay, type PeriodRecord, type DaySignal } from '@/hooks/useCyclePrediction';
 
 interface CycleCalendarProps {
   lastPeriodStart?: Date;
@@ -60,9 +46,9 @@ const CycleCalendar = ({
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Period tracking state - store all period records for better calculation
+  // Period tracking state - store all period records for ML calculations
   const [periodRecords, setPeriodRecords] = useState<PeriodRecord[]>([]);
-  const [cycleLength, setCycleLength] = useState(initialCycleLength);
+  const [manualCycleLength, setManualCycleLength] = useState<number | null>(null);
   
   // Marked ovulation days (user-confirmed)
   const [markedOvulationDays, setMarkedOvulationDays] = useState<Set<string>>(new Set());
@@ -77,6 +63,25 @@ const CycleCalendar = ({
   const [tempCycleLength, setTempCycleLength] = useState(initialCycleLength);
   const [isDayActionOpen, setIsDayActionOpen] = useState(false);
 
+  // ML Prediction - uses the new hook
+  const prediction = useCyclePrediction({
+    periodRecords,
+    daySignals,
+    defaultCycleLength: manualCycleLength || initialCycleLength,
+    defaultPeriodLength: initialPeriodLength
+  });
+  
+  // Symptom patterns for insights
+  const symptomPatterns = useSymptomPatterns(
+    periodRecords,
+    daySignals,
+    prediction?.averageCycleLength || initialCycleLength
+  );
+
+  // Use prediction values or fallbacks
+  const cycleLength = prediction?.averageCycleLength || manualCycleLength || initialCycleLength;
+  const periodLength = prediction?.averagePeriodLength || initialPeriodLength;
+
   // Load data from database on mount
   useEffect(() => {
     loadCalendarData();
@@ -87,7 +92,7 @@ const CycleCalendar = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Load ALL period tracking records for better cycle calculation
+      // Load ALL period tracking records for ML calculations
       const { data: periodData } = await supabase
         .from('period_tracking')
         .select('*')
@@ -96,10 +101,7 @@ const CycleCalendar = ({
 
       if (periodData && periodData.length > 0) {
         setPeriodRecords(periodData);
-        // Calculate average cycle length from historical data
-        const calculatedCycleLength = calculateAverageCycleLength(periodData);
-        setCycleLength(calculatedCycleLength);
-        setTempCycleLength(calculatedCycleLength);
+        setTempCycleLength(periodData[0]?.cycle_length || initialCycleLength);
       }
 
       // Load health signals
@@ -132,30 +134,6 @@ const CycleCalendar = ({
     } finally {
       setIsLoading(false);
     }
-  };
-  
-  // Calculate average cycle length from multiple period records
-  const calculateAverageCycleLength = (records: PeriodRecord[]): number => {
-    if (records.length < 2) return initialCycleLength;
-    
-    const cycleLengths: number[] = [];
-    for (let i = 0; i < records.length - 1; i++) {
-      const currentStart = parseISO(records[i].period_start_date);
-      const previousStart = parseISO(records[i + 1].period_start_date);
-      const diff = differenceInDays(currentStart, previousStart);
-      if (diff > 0 && diff <= 45) { // Reasonable cycle range
-        cycleLengths.push(diff);
-      }
-    }
-    
-    if (cycleLengths.length === 0) return records[0]?.cycle_length || initialCycleLength;
-    
-    // Return weighted average (more recent cycles have more weight)
-    const weights = cycleLengths.map((_, i) => cycleLengths.length - i);
-    const weightedSum = cycleLengths.reduce((sum, len, i) => sum + len * weights[i], 0);
-    const totalWeight = weights.reduce((sum, w) => sum + w, 0);
-    
-    return Math.round(weightedSum / totalWeight);
   };
   
   // Get period days as a Set for quick lookup
@@ -227,14 +205,12 @@ const CycleCalendar = ({
               .eq('period_start_date', affectedRecord.period_start_date);
           } else {
             // Middle day - need to split the record
-            // Update existing record to end before this day
             await supabase
               .from('period_tracking')
               .update({ period_end_date: format(addDays(date, -1), 'yyyy-MM-dd') })
               .eq('user_id', user.id)
               .eq('period_start_date', affectedRecord.period_start_date);
             
-            // Create new record starting after this day
             await supabase
               .from('period_tracking')
               .insert({
@@ -297,7 +273,7 @@ const CycleCalendar = ({
         toast({ title: 'Period day marked' });
       }
       
-      // Reload data to get updated records
+      // Reload data to get updated records and recalculate predictions
       loadCalendarData();
       
     } catch (error) {
@@ -319,7 +295,7 @@ const CycleCalendar = ({
         next.delete(dateKey);
         toast({ title: 'Ovulation marker removed' });
       } else {
-        // Only allow one ovulation per cycle - clear others in same cycle
+        // Only allow one ovulation per cycle - clear others
         next.clear();
         next.add(dateKey);
         toast({ title: 'Ovulation marked', description: format(date, 'MMMM d') });
@@ -389,22 +365,8 @@ const CycleCalendar = ({
   const lastPeriodStart = periodRecords.length > 0 
     ? parseISO(periodRecords[0].period_start_date)
     : initialPeriodStart || new Date(2025, 9, 1);
-    
-  const periodLength = periodRecords.length > 0
-    ? differenceInDays(
-        parseISO(periodRecords[0].period_end_date),
-        parseISO(periodRecords[0].period_start_date)
-      ) + 1
-    : initialPeriodLength;
 
-  const getCycleDay = (date: Date) => {
-    const diffTime = date.getTime() - lastPeriodStart.getTime();
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    const day = (diffDays % cycleLength) + 1;
-    return day > 0 ? day : day + cycleLength;
-  };
-
-  const currentCycleDay = getCycleDay(new Date());
+  const currentCycleDay = getCurrentCycleDay(lastPeriodStart, cycleLength);
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
@@ -412,7 +374,7 @@ const CycleCalendar = ({
   };
 
   const handleSaveCycleSettings = async () => {
-    setCycleLength(tempCycleLength);
+    setManualCycleLength(tempCycleLength);
     
     // Update the most recent period record with new cycle length
     if (periodRecords.length > 0) {
@@ -453,7 +415,7 @@ const CycleCalendar = ({
 
   return (
     <div className="space-y-4">
-      {/* Today's Status Card */}
+      {/* Today's Status Card with ML Predictions */}
       {showCycleInfo && (
         <TodayStatusCard
           cycleDay={currentCycleDay}
@@ -461,6 +423,8 @@ const CycleCalendar = ({
           periodLength={periodLength}
           lastPeriodStart={lastPeriodStart}
           selectedMode={selectedMode}
+          prediction={prediction}
+          symptomPatterns={symptomPatterns}
         />
       )}
 
@@ -503,7 +467,10 @@ const CycleCalendar = ({
                   <DialogHeader>
                     <DialogTitle>Cycle Settings</DialogTitle>
                     <DialogDescription>
-                      Adjust your average cycle length for better predictions
+                      {prediction 
+                        ? `Predicted cycle length: ${prediction.averageCycleLength} days (${prediction.isRegular ? 'regular' : 'irregular'})`
+                        : 'Set your average cycle length for predictions'
+                      }
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
@@ -519,22 +486,32 @@ const CycleCalendar = ({
                         <SelectContent>
                           {Array.from({ length: 24 }, (_, i) => i + 21).map((days) => (
                             <SelectItem key={days} value={days.toString()}>
-                              {days} days
+                              {days} days {prediction && days === prediction.averageCycleLength && '(predicted)'}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                       <p className="text-xs text-muted-foreground">
-                        Calculated from your {periodRecords.length} logged periods. 
-                        Normal cycles: 21-35 days.
+                        {prediction 
+                          ? `${prediction.dataQualityMessage}. Confidence: ${prediction.confidenceLevel}`
+                          : `Log periods to get personalized predictions. Normal cycles: 21-35 days.`
+                        }
                       </p>
                     </div>
+                    
+                    {prediction && (
+                      <div className="text-xs text-muted-foreground space-y-1">
+                        <p>• Standard deviation: ±{prediction.standardDeviation.toFixed(1)} days</p>
+                        <p>• Cycle trend: {prediction.cycleTrend}</p>
+                        <p>• Prediction window: ±{prediction.confidenceWindow} days</p>
+                      </div>
+                    )}
                     
                     <div className="flex gap-2">
                       <Button 
                         variant="outline"
                         onClick={() => {
-                          setTempCycleLength(cycleLength);
+                          setTempCycleLength(prediction?.averageCycleLength || cycleLength);
                           setIsSettingsOpen(false);
                         }} 
                         className="flex-1"
@@ -568,6 +545,7 @@ const CycleCalendar = ({
           ovulationPrediction={ovulationPrediction}
           periodDays={periodDays}
           markedOvulationDays={markedOvulationDays}
+          prediction={prediction}
         />
 
         {/* Legend */}
