@@ -1,73 +1,144 @@
-import { Droplet, Heart, Moon, Smile, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Heart, Smile, AlertCircle, Droplets } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface QuickLogButtonsProps {
-  onLogPeriod: () => void;
   onLogSymptoms: () => void;
   onLogMood: () => void;
   onLogIntimacy: () => void;
-  isPeriodActive?: boolean;
+  onLogDischarge: () => void;
 }
 
 const QuickLogButtons = ({
-  onLogPeriod,
   onLogSymptoms,
   onLogMood,
   onLogIntimacy,
-  isPeriodActive = false
+  onLogDischarge
 }: QuickLogButtonsProps) => {
-  const buttons = [
-    {
-      label: isPeriodActive ? 'End Period' : 'Log Period',
-      icon: Droplet,
-      onClick: onLogPeriod,
-      variant: 'primary' as const,
-      className: 'bg-primary hover:bg-primary/90 text-primary-foreground'
-    },
-    {
-      label: 'Symptoms',
-      icon: Plus,
-      onClick: onLogSymptoms,
-      variant: 'secondary' as const,
-      className: 'bg-muted hover:bg-muted/80 text-muted-foreground'
-    },
-    {
-      label: 'Mood',
-      icon: Smile,
-      onClick: onLogMood,
-      variant: 'secondary' as const,
-      className: 'bg-muted hover:bg-muted/80 text-muted-foreground'
-    },
-    {
-      label: 'Intimacy',
-      icon: Heart,
-      onClick: onLogIntimacy,
-      variant: 'secondary' as const,
-      className: 'bg-muted hover:bg-muted/80 text-muted-foreground'
-    }
-  ];
-
   return (
-    <div className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2">
-      {buttons.map((button) => {
-        const Icon = button.icon;
-        return (
-          <Button
-            key={button.label}
-            onClick={button.onClick}
-            variant="ghost"
-            size="sm"
-            className={cn(
-              "flex-shrink-0 gap-1.5 rounded-full px-4 h-9",
-              button.className
-            )}
+    <div className="space-y-4">
+      {/* Sexual activity section */}
+      <div>
+        <h4 className="text-sm font-medium text-muted-foreground mb-3 px-1">Sexual activity</h4>
+        <div className="grid grid-cols-4 gap-3">
+          <button
+            onClick={onLogIntimacy}
+            className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted/50 transition-colors"
           >
-            <Icon className="h-4 w-4" />
-            <span className="text-xs font-medium">{button.label}</span>
-          </Button>
-        );
-      })}
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Heart className="h-6 w-6 text-primary" fill="currentColor" />
+            </div>
+            <span className="text-xs text-muted-foreground text-center">Unprotected sex</span>
+          </button>
+          
+          <button
+            onClick={onLogIntimacy}
+            className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted/50 transition-colors"
+          >
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Heart className="h-6 w-6 text-primary" />
+            </div>
+            <span className="text-xs text-muted-foreground text-center">Protected sex</span>
+          </button>
+          
+          <button
+            onClick={onLogIntimacy}
+            className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted/50 transition-colors"
+          >
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Heart className="h-5 w-5 text-primary" />
+            </div>
+            <span className="text-xs text-muted-foreground text-center">Masturbation</span>
+          </button>
+          
+          <button
+            onClick={onLogIntimacy}
+            className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted/50 transition-colors"
+          >
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <span className="text-xl">💋</span>
+            </div>
+            <span className="text-xs text-muted-foreground text-center">Kissing</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Symptoms section */}
+      <div>
+        <div className="flex items-center justify-between mb-3 px-1">
+          <h4 className="text-sm font-medium text-muted-foreground">Symptoms</h4>
+          <button 
+            onClick={onLogSymptoms}
+            className="text-xs text-primary font-medium hover:underline"
+          >
+            Show all →
+          </button>
+        </div>
+        <div className="grid grid-cols-4 gap-3">
+          <button
+            onClick={onLogDischarge}
+            className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted/50 transition-colors"
+          >
+            <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
+              <Droplets className="h-6 w-6 text-secondary" />
+            </div>
+            <span className="text-xs text-muted-foreground text-center">Cervical mucus</span>
+          </button>
+          
+          <button
+            onClick={onLogSymptoms}
+            className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted/50 transition-colors"
+          >
+            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+              <span className="text-xl">🙍‍♀️</span>
+            </div>
+            <span className="text-xs text-muted-foreground text-center">Abdominal cramps</span>
+          </button>
+          
+          <button
+            onClick={onLogSymptoms}
+            className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted/50 transition-colors"
+          >
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <AlertCircle className="h-6 w-6 text-primary" />
+            </div>
+            <span className="text-xs text-muted-foreground text-center">Spotting</span>
+          </button>
+          
+          <button
+            onClick={onLogSymptoms}
+            className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted/50 transition-colors"
+          >
+            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+              <span className="text-xl">😩</span>
+            </div>
+            <span className="text-xs text-muted-foreground text-center">Fatigue</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Mood section */}
+      <div>
+        <div className="flex items-center justify-between mb-3 px-1">
+          <h4 className="text-sm font-medium text-muted-foreground">Mood</h4>
+          <button 
+            onClick={onLogMood}
+            className="text-xs text-primary font-medium hover:underline"
+          >
+            Show all →
+          </button>
+        </div>
+        <div className="grid grid-cols-5 gap-2">
+          {['😊', '😢', '😡', '😰', '🥰'].map((emoji, i) => (
+            <button
+              key={i}
+              onClick={onLogMood}
+              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-muted/50 transition-colors"
+            >
+              <span className="text-2xl">{emoji}</span>
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

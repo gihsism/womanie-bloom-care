@@ -3,10 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Settings2 } from 'lucide-react';
-import { format, addMonths, subMonths, addDays, differenceInDays } from 'date-fns';
+import { ChevronLeft, ChevronRight, Settings2, X } from 'lucide-react';
+import { format, addMonths, subMonths, addDays, differenceInDays, startOfDay, isSameDay } from 'date-fns';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 // Import sub-components
 import TodayStatusCard from './calendar/TodayStatusCard';
@@ -14,7 +15,6 @@ import QuickLogButtons from './calendar/QuickLogButtons';
 import CalendarGrid from './calendar/CalendarGrid';
 import CalendarLegend from './calendar/CalendarLegend';
 import DailyLogSheet from './calendar/DailyLogSheet';
-import PeriodLogSheet from './calendar/PeriodLogSheet';
 
 // Health signal types
 interface DaySignal {
@@ -61,20 +61,36 @@ const CycleCalendar = ({
   );
   const [cycleLength, setCycleLength] = useState(initialCycleLength);
   
+  // Current period tracking (for "period starts today" flow)
+  const [isCurrentlyOnPeriod, setIsCurrentlyOnPeriod] = useState(false);
+  const [currentPeriodStartDate, setCurrentPeriodStartDate] = useState<Date | null>(null);
+  
   // Health signals
   const [daySignals, setDaySignals] = useState<Record<string, DaySignal>>({});
   
   // Sheet/dialog states
-  const [isPeriodSheetOpen, setIsPeriodSheetOpen] = useState(false);
   const [isDailyLogSheetOpen, setIsDailyLogSheetOpen] = useState(false);
   const [dailyLogTab, setDailyLogTab] = useState<'symptoms' | 'mood' | 'intimacy' | 'discharge'>('symptoms');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [tempCycleLength, setTempCycleLength] = useState(initialCycleLength);
+  const [isDayDetailOpen, setIsDayDetailOpen] = useState(false);
 
   // Load data from database on mount
   useEffect(() => {
     loadCalendarData();
   }, []);
+  
+  // Check if currently on period based on dates
+  useEffect(() => {
+    const today = startOfDay(new Date());
+    if (periodStartDate && periodEndDate) {
+      const isActive = today >= startOfDay(periodStartDate) && today <= startOfDay(periodEndDate);
+      setIsCurrentlyOnPeriod(isActive);
+      if (isActive) {
+        setCurrentPeriodStartDate(periodStartDate);
+      }
+    }
+  }, [periodStartDate, periodEndDate]);
   
   const loadCalendarData = async () => {
     try {
@@ -146,11 +162,6 @@ const CycleCalendar = ({
         });
 
       if (error) throw error;
-      
-      toast({
-        title: 'Period logged',
-        description: 'Your period has been saved successfully',
-      });
     } catch (error) {
       console.error('Error saving period tracking:', error);
       toast({
@@ -232,10 +243,51 @@ const CycleCalendar = ({
   };
 
   const currentCycleDay = getCycleDay(new Date());
-  const isPeriodActive = currentCycleDay <= periodLength;
 
-  // Quick log handlers
-  const openPeriodLog = () => setIsPeriodSheetOpen(true);
+  // Period logging handlers - simple one-tap approach like MyPeriodCalendar
+  const handlePeriodStartToday = () => {
+    const today = startOfDay(new Date());
+    
+    if (isCurrentlyOnPeriod) {
+      // If already on period, this is a toggle off - end the period
+      handlePeriodEndToday();
+    } else {
+      // Start a new period today
+      setIsCurrentlyOnPeriod(true);
+      setCurrentPeriodStartDate(today);
+      // Set default end date 5 days from now (will be updated when user ends it)
+      const defaultEndDate = addDays(today, 4);
+      setPeriodStartDate(today);
+      setPeriodEndDate(defaultEndDate);
+      savePeriodTracking(today, defaultEndDate, cycleLength);
+      toast({
+        title: 'Period started',
+        description: 'Tap "Period ended?" when your period ends',
+      });
+    }
+  };
+
+  const handlePeriodEndToday = () => {
+    const today = startOfDay(new Date());
+    
+    if (currentPeriodStartDate) {
+      setIsCurrentlyOnPeriod(false);
+      setPeriodEndDate(today);
+      savePeriodTracking(currentPeriodStartDate, today, cycleLength);
+      toast({
+        title: 'Period ended',
+        description: `Period logged: ${differenceInDays(today, currentPeriodStartDate) + 1} days`,
+      });
+    }
+  };
+
+  const handleMarkOvulation = () => {
+    // For now, just show a toast - could be extended to mark ovulation in the database
+    toast({
+      title: 'Ovulation marked',
+      description: `Ovulation marked for ${format(new Date(), 'MMM d')}`,
+    });
+  };
   
   const openDailyLogWithTab = (tab: 'symptoms' | 'mood' | 'intimacy' | 'discharge') => {
     setSelectedDate(new Date());
@@ -245,13 +297,7 @@ const CycleCalendar = ({
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
-    setIsDailyLogSheetOpen(true);
-  };
-
-  const handlePeriodSave = (startDate: Date, endDate: Date) => {
-    setPeriodStartDate(startDate);
-    setPeriodEndDate(endDate);
-    savePeriodTracking(startDate, endDate, cycleLength);
+    setIsDayDetailOpen(true);
   };
 
   const handleSaveCycleSettings = () => {
@@ -282,7 +328,7 @@ const CycleCalendar = ({
 
   return (
     <div className="space-y-4">
-      {/* Today's Status Card */}
+      {/* Today's Status Card with one-tap period logging */}
       {showCycleInfo && (
         <TodayStatusCard
           cycleDay={currentCycleDay}
@@ -290,17 +336,10 @@ const CycleCalendar = ({
           periodLength={periodLength}
           lastPeriodStart={lastPeriodStart}
           selectedMode={selectedMode}
-        />
-      )}
-
-      {/* Quick Log Buttons */}
-      {showCycleInfo && (
-        <QuickLogButtons
-          onLogPeriod={openPeriodLog}
-          onLogSymptoms={() => openDailyLogWithTab('symptoms')}
-          onLogMood={() => openDailyLogWithTab('mood')}
-          onLogIntimacy={() => openDailyLogWithTab('intimacy')}
-          isPeriodActive={isPeriodActive}
+          isPeriodActive={isCurrentlyOnPeriod}
+          onPeriodStartToday={handlePeriodStartToday}
+          onPeriodEndToday={handlePeriodEndToday}
+          onMarkOvulation={handleMarkOvulation}
         />
       )}
 
@@ -308,26 +347,20 @@ const CycleCalendar = ({
       <Card className="p-4">
         {/* Calendar Header */}
         <div className="flex items-center justify-between mb-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+            className="h-8 w-8"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          
           <h4 className="text-lg font-semibold">
             {format(currentMonth, 'MMMM yyyy')}
           </h4>
+          
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-              className="h-8 w-8"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setCurrentMonth(new Date())}
-              className="h-8 px-3 text-xs font-medium"
-            >
-              Today
-            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -341,7 +374,7 @@ const CycleCalendar = ({
             {showCycleInfo && (
               <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 ml-1">
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
                     <Settings2 className="h-4 w-4" />
                   </Button>
                 </DialogTrigger>
@@ -417,15 +450,62 @@ const CycleCalendar = ({
         <CalendarLegend selectedMode={selectedMode} />
       </Card>
 
-      {/* Period Log Sheet */}
-      <PeriodLogSheet
-        open={isPeriodSheetOpen}
-        onOpenChange={setIsPeriodSheetOpen}
-        currentPeriodStart={periodStartDate}
-        currentPeriodEnd={periodEndDate}
-        cycleLength={cycleLength}
-        onSave={handlePeriodSave}
-      />
+      {/* Quick Log Buttons */}
+      {showCycleInfo && (
+        <Card className="p-4">
+          <QuickLogButtons
+            onLogSymptoms={() => openDailyLogWithTab('symptoms')}
+            onLogMood={() => openDailyLogWithTab('mood')}
+            onLogIntimacy={() => openDailyLogWithTab('intimacy')}
+            onLogDischarge={() => openDailyLogWithTab('discharge')}
+          />
+        </Card>
+      )}
+
+      {/* Day Detail Sheet */}
+      <Sheet open={isDayDetailOpen} onOpenChange={setIsDayDetailOpen}>
+        <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl">
+          <SheetHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <SheetTitle>
+                {selectedDate ? format(selectedDate, 'MMMM d') : 'Select Date'}
+              </SheetTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsDayDetailOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </SheetHeader>
+          
+          {selectedDate && (
+            <QuickLogButtons
+              onLogSymptoms={() => {
+                setIsDayDetailOpen(false);
+                setDailyLogTab('symptoms');
+                setIsDailyLogSheetOpen(true);
+              }}
+              onLogMood={() => {
+                setIsDayDetailOpen(false);
+                setDailyLogTab('mood');
+                setIsDailyLogSheetOpen(true);
+              }}
+              onLogIntimacy={() => {
+                setIsDayDetailOpen(false);
+                setDailyLogTab('intimacy');
+                setIsDailyLogSheetOpen(true);
+              }}
+              onLogDischarge={() => {
+                setIsDayDetailOpen(false);
+                setDailyLogTab('discharge');
+                setIsDailyLogSheetOpen(true);
+              }}
+            />
+          )}
+        </SheetContent>
+      </Sheet>
 
       {/* Daily Log Sheet */}
       <DailyLogSheet
