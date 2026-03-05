@@ -39,7 +39,8 @@ import {
   ClipboardList,
   FileCheck,
   Bell,
-  Upload
+  Upload,
+  Sparkles
 } from 'lucide-react';
 
 export type LifeStage = 
@@ -113,16 +114,60 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onU
 
           {/* Quick Actions */}
           <div className="flex gap-2">
-            {/* Doctor Chat Button - navigates directly */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onDoctorChatClick}
-              className="flex flex-col items-center gap-1 h-auto py-2 px-3"
-            >
-              <MessageSquare className="h-4 w-4 text-primary" />
-              <span className="text-xs">Doctor Chat</span>
-            </Button>
+            {/* Doctor Chat Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex flex-col items-center gap-1 h-auto py-2 px-3"
+                >
+                  <MessageSquare className="h-4 w-4 text-primary" />
+                  <span className="text-xs">Doctor Chat</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-72 bg-card z-50">
+                <DropdownMenuLabel className="flex items-center gap-2">
+                  <Bot className="h-4 w-4" />
+                  AI Health Assistant
+                </DropdownMenuLabel>
+                <DropdownMenuItem onClick={onDoctorChatClick}>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Chat with AI Doctor (GPT-5 & Gemini)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onNavigate('B1.1-symptom')}>
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  Symptom checker & assessment
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onNavigate('B1.1-recommendations')}>
+                  <Lightbulb className="mr-2 h-4 w-4" />
+                  Phase-specific recommendations
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuLabel className="flex items-center gap-2">
+                  <Stethoscope className="h-4 w-4" />
+                  Real Doctor Consultations
+                </DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => onNavigate('B1.2-new')}>
+                  <Video className="mr-2 h-4 w-4" />
+                  Start new consultation
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onNavigate('B1.2-history')}>
+                  <Clock className="mr-2 h-4 w-4" />
+                  Consultation history
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onNavigate('B1.2-treatment')}>
+                  <ClipboardList className="mr-2 h-4 w-4" />
+                  Treatment plans & prescriptions
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onNavigate('B1.2-followup')}>
+                  <Bell className="mr-2 h-4 w-4" />
+                  Follow-up reminders
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* Upload Documents Button */}
             {onUploadClick && (
