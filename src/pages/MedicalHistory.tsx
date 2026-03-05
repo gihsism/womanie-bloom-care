@@ -29,6 +29,21 @@ import {
   Heart,
 } from 'lucide-react';
 import { format } from 'date-fns';
+import {
+  PieChart as RechartsPie,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  Legend,
+} from 'recharts';
 
 interface MedicalDataItem {
   id: string;
@@ -135,7 +150,39 @@ export default function MedicalHistory() {
     const normalLabs = labResults.filter(i => i.status === 'normal').length;
     const labNormalPercent = labResults.length > 0 ? Math.round((normalLabs / labResults.length) * 100) : 0;
 
-    return { statusCounts, typeCounts, totalFindings, normalPercent, abnormalCount, activeConditions, activeMedications, labResults, labNormalPercent };
+    // Pie chart data for status
+    const pieData = [
+      { name: 'Normal', value: statusCounts.normal, color: '#22c55e' },
+      { name: 'Abnormal', value: statusCounts.abnormal, color: '#eab308' },
+      { name: 'Critical', value: statusCounts.critical, color: '#ef4444' },
+      { name: 'Active', value: statusCounts.active, color: '#3b82f6' },
+      { name: 'Resolved', value: statusCounts.resolved, color: '#94a3b8' },
+    ].filter(d => d.value > 0);
+
+    // Category bar chart data
+    const categoryBarData = Object.entries(typeCounts)
+      .map(([type, count]) => ({
+        name: (typeConfig[type]?.label || type).replace(/s$/, ''),
+        count,
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    // Timeline: group events by month
+    const timelineByMonth: Record<string, Record<string, number>> = {};
+    medicalData.forEach(item => {
+      if (!item.date_recorded) return;
+      const month = format(new Date(item.date_recorded), 'MMM yyyy');
+      if (!timelineByMonth[month]) timelineByMonth[month] = {};
+      const t = item.data_type || 'other';
+      timelineByMonth[month][t] = (timelineByMonth[month][t] || 0) + 1;
+    });
+
+    const allTypes = [...new Set(medicalData.map(i => i.data_type || 'other'))];
+    const timelineData = Object.entries(timelineByMonth)
+      .map(([month, counts]) => ({ month, ...counts }))
+      .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
+
+    return { statusCounts, typeCounts, totalFindings, normalPercent, abnormalCount, activeConditions, activeMedications, labResults, labNormalPercent, pieData, categoryBarData, timelineData, allTypes };
   }, [medicalData]);
 
   const dataTypes = Object.keys(typeConfig).filter((t) => groupedData[t]?.length);
@@ -304,6 +351,103 @@ export default function MedicalHistory() {
                       </CardContent>
                     </Card>
                   </div>
+                )}
+
+                {/* ===== RECHARTS VISUALIZATIONS ===== */}
+                {hasData && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Status Pie Chart */}
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <PieChart className="h-4 w-4 text-primary" />
+                          Findings by Status
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={220}>
+                          <RechartsPie>
+                            <Pie
+                              data={stats.pieData}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={50}
+                              outerRadius={80}
+                              paddingAngle={3}
+                              dataKey="value"
+                              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                              labelLine={false}
+                            >
+                              {stats.pieData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
+                              ))}
+                            </Pie>
+                            <Tooltip formatter={(value: number) => [value, 'Count']} />
+                          </RechartsPie>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+
+                    {/* Category Bar Chart */}
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <BarChart3 className="h-4 w-4 text-primary" />
+                          Findings by Category
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={220}>
+                          <BarChart data={stats.categoryBarData} layout="vertical" margin={{ left: 10, right: 20 }}>
+                            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                            <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
+                            <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={80} />
+                            <Tooltip formatter={(value: number) => [value, 'Findings']} />
+                            <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} barSize={18} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Medical Events Timeline Chart */}
+                {hasData && stats.timelineData.length > 1 && (
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4 text-primary" />
+                        Medical Events Over Time
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={240}>
+                        <AreaChart data={stats.timelineData} margin={{ left: 0, right: 10 }}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="month" tick={{ fontSize: 10 }} />
+                          <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                          <Tooltip />
+                          <Legend wrapperStyle={{ fontSize: 11 }} />
+                          {stats.allTypes.map((type, i) => {
+                            const palette = ['#f472b6', '#60a5fa', '#34d399', '#fbbf24', '#a78bfa', '#fb923c', '#94a3b8'];
+                            const label = typeConfig[type]?.label || type;
+                            return (
+                              <Area
+                                key={type}
+                                type="monotone"
+                                dataKey={type}
+                                name={label}
+                                stackId="1"
+                                stroke={palette[i % palette.length]}
+                                fill={palette[i % palette.length]}
+                                fillOpacity={0.5}
+                              />
+                            );
+                          })}
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
                 )}
 
                 {/* Active Conditions & Medications */}
