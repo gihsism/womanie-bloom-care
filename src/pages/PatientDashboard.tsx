@@ -278,8 +278,8 @@ const PatientDashboard = () => {
         { id: 'B2.1', title: "Today's Overview", description: 'Current status & insights', visible: true },
         { id: 'B2.2', title: 'Cycle & Phase Tracking', description: 'Visual calendar & predictions', visible: true },
         { id: 'B2.3', title: 'Body Insights & Patterns', description: 'Daily tracking & correlations', visible: true },
-        { id: 'B2.4', title: 'Medical Data & Test Results', description: 'Lab results & imaging', visible: true },
-        { id: 'B2.5', title: 'Medical History', description: 'Conditions & medications', visible: true },
+        { id: 'B2.4', title: 'Medical Data & Test Results', description: 'Lab results & imaging', action: () => navigate('/dashboard/medical-history'), visible: true },
+        { id: 'B2.5', title: 'Medical History', description: 'Conditions & medications', action: () => navigate('/dashboard/medical-history'), visible: true },
         { id: 'B2.6', title: 'Pregnancy Tracker', description: 'Week-by-week development', visible: selectedMode === 'pregnancy' },
         { id: 'B2.7', title: 'Wearable Device Data', description: 'Synced health metrics', visible: true },
         { id: 'B2.8', title: 'Health Goals & Progress', description: 'Track your goals', visible: true },
@@ -616,10 +616,14 @@ const PatientDashboard = () => {
                                 variant="outline"
                                 className="justify-start h-auto py-3 px-4 w-full"
                                 onClick={() => {
-                                  toast({
-                                    title: sub.title,
-                                    description: sub.description + ' - Coming soon!',
-                                  });
+                                  if ('action' in sub && typeof sub.action === 'function') {
+                                    sub.action();
+                                  } else {
+                                    toast({
+                                      title: sub.title,
+                                      description: sub.description + ' - Coming soon!',
+                                    });
+                                  }
                                 }}
                               >
                                 <div className="text-left">

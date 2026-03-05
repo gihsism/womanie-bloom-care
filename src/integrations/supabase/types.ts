@@ -332,6 +332,62 @@ export type Database = {
         }
         Relationships: []
       }
+      medical_extracted_data: {
+        Row: {
+          created_at: string
+          data_type: string
+          date_recorded: string | null
+          document_id: string | null
+          id: string
+          notes: string | null
+          raw_data: Json | null
+          reference_range: string | null
+          status: string | null
+          title: string
+          unit: string | null
+          user_id: string
+          value: string | null
+        }
+        Insert: {
+          created_at?: string
+          data_type: string
+          date_recorded?: string | null
+          document_id?: string | null
+          id?: string
+          notes?: string | null
+          raw_data?: Json | null
+          reference_range?: string | null
+          status?: string | null
+          title: string
+          unit?: string | null
+          user_id: string
+          value?: string | null
+        }
+        Update: {
+          created_at?: string
+          data_type?: string
+          date_recorded?: string | null
+          document_id?: string | null
+          id?: string
+          notes?: string | null
+          raw_data?: Json | null
+          reference_range?: string | null
+          status?: string | null
+          title?: string
+          unit?: string | null
+          user_id?: string
+          value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_extracted_data_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "health_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patient_access_codes: {
         Row: {
           code: string
