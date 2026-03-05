@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
@@ -15,21 +15,31 @@ import {
   Sparkles,
   Loader2,
   Trash2,
+  Cpu,
 } from 'lucide-react';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-doctor-chat`;
 
+const AI_MODELS = [
+  { id: 'google/gemini-3-flash-preview', label: 'Gemini Flash', description: 'Fast & efficient' },
+  { id: 'google/gemini-2.5-pro', label: 'Gemini Pro', description: 'Best reasoning' },
+  { id: 'openai/gpt-5', label: 'GPT-5', description: 'Powerful all-rounder' },
+  { id: 'openai/gpt-5-mini', label: 'GPT-5 Mini', description: 'Balanced performance' },
+];
+
 async function streamChat({
   messages,
   token,
+  model,
   onDelta,
   onDone,
   onError,
 }: {
   messages: Msg[];
   token: string;
+  model: string;
   onDelta: (text: string) => void;
   onDone: () => void;
   onError: (err: string) => void;
@@ -41,7 +51,7 @@ async function streamChat({
       Authorization: `Bearer ${token}`,
       apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
     },
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({ messages, model }),
   });
 
   if (!resp.ok) {
@@ -88,7 +98,6 @@ async function streamChat({
     }
   }
 
-  // Flush remaining
   if (buffer.trim()) {
     for (let raw of buffer.split('\n')) {
       if (!raw) continue;
@@ -130,6 +139,7 @@ export default function AIDoctorChat() {
   const [messages, setMessages] = useState<Msg[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('google/gemini-3-flash-preview');
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -151,7 +161,6 @@ export default function AIDoctorChat() {
     setInput('');
     setIsStreaming(true);
 
-    // Get fresh token
     const { data: sessionData } = await (await import('@/integrations/supabase/client')).supabase.auth.getSession();
     const token = sessionData.session?.access_token;
     if (!token) {
@@ -166,6 +175,7 @@ export default function AIDoctorChat() {
     await streamChat({
       messages: conversationForApi,
       token,
+      model: selectedModel,
       onDelta: (chunk) => {
         assistantSoFar += chunk;
         setMessages((prev) => {
@@ -211,6 +221,8 @@ export default function AIDoctorChat() {
     );
   }
 
+  const currentModelLabel = AI_MODELS.find(m => m.id === selectedModel)?.label || 'Gemini Flash';
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
@@ -224,10 +236,29 @@ export default function AIDoctorChat() {
               <Bot className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <h1 className="text-sm font-bold leading-tight">AI Health Assistant</h1>
-              <p className="text-[10px] text-muted-foreground">Powered by your medical records</p>
+              <h1 className="text-sm font-bold leading-tight">Doctor Chat</h1>
+              <p className="text-[10px] text-muted-foreground">AI-powered medical assistant</p>
             </div>
           </div>
+
+          {/* Model Selector */}
+          <Select value={selectedModel} onValueChange={setSelectedModel} disabled={isStreaming}>
+            <SelectTrigger className="w-auto h-8 text-xs gap-1 border-border">
+              <Cpu className="h-3 w-3" />
+              <SelectValue>{currentModelLabel}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {AI_MODELS.map((m) => (
+                <SelectItem key={m.id} value={m.id}>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-xs">{m.label}</span>
+                    <span className="text-[10px] text-muted-foreground">{m.description}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
           <Badge variant="outline" className="text-[10px] gap-1">
             <Sparkles className="h-3 w-3" />
             AI
@@ -285,7 +316,7 @@ export default function AIDoctorChat() {
         )}
       </div>
 
-      {/* Suggested Questions (only show at start) */}
+      {/* Suggested Questions */}
       {messages.length <= 1 && (
         <div className="px-4 pb-2">
           <div className="flex flex-wrap gap-2">

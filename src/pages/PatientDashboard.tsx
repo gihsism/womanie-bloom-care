@@ -265,7 +265,7 @@ const PatientDashboard = () => {
       title: 'Healthcare Services',
       icon: MessageSquare,
       subsections: [
-        { id: 'B1.1', title: 'AI Health Assistant', description: 'Symptom checker & health guidance', visible: true },
+        { id: 'B1.1', title: 'Doctor Chat', description: 'AI medical assistant · GPT-5 & Gemini', action: () => navigate('/dashboard/ai-doctor'), visible: true },
         { id: 'B1.2', title: 'Doctor Consultations', description: 'Find doctors & book appointments', action: () => navigate('/find-doctor'), visible: true },
         { id: 'B1.3', title: 'Upload Health Documents', description: 'Upload & get AI analysis', visible: true },
       ],
@@ -477,9 +477,9 @@ const PatientDashboard = () => {
                       <Sparkles className="h-6 w-6 text-primary" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold">AI Health Chat</h3>
+                      <h3 className="font-semibold">Doctor Chat</h3>
                       <p className="text-xs text-muted-foreground">
-                        Ask about your health records
+                        AI medical assistant · GPT-5 & Gemini
                       </p>
                     </div>
                     <Badge variant="outline" className="text-[10px]">AI</Badge>

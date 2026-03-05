@@ -7,11 +7,17 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const ALLOWED_MODELS = [
+  "google/gemini-3-flash-preview",
+  "google/gemini-2.5-pro",
+  "openai/gpt-5",
+  "openai/gpt-5-mini",
+];
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    // Auth
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -34,7 +40,7 @@ serve(async (req) => {
     }
     const userId = String(claimsData.claims.sub);
 
-    const { messages } = await req.json();
+    const { messages, model } = await req.json();
     if (!Array.isArray(messages) || messages.length === 0) {
       return new Response(JSON.stringify({ error: "Messages required" }), {
         status: 400,
@@ -42,10 +48,12 @@ serve(async (req) => {
       });
     }
 
+    // Validate model selection, default to gemini flash
+    const selectedModel = ALLOWED_MODELS.includes(model) ? model : "google/gemini-3-flash-preview";
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    // Fetch patient medical context
     const svc = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
@@ -61,7 +69,6 @@ serve(async (req) => {
     const extracted = extractedRes.data || [];
     const profile = profileRes.data;
 
-    // Build medical context
     let medicalContext = "";
 
     if (profile) {
@@ -123,7 +130,7 @@ ${medicalContext || "No medical records available yet. Encourage the patient to 
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: selectedModel,
         messages: [
           { role: "system", content: systemPrompt },
           ...messages,
