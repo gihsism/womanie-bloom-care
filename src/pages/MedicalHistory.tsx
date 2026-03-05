@@ -191,139 +191,180 @@ export default function MedicalHistory() {
               </Card>
             ) : (
               <>
-                {/* Per-Document Medical Analysis */}
-                {documents.map((doc) => {
-                  const docExtracted = medicalData.filter(m => m.document_id === doc.id);
-                  const isAnalyzed = !!doc.ai_summary;
-                  const isPending = !isAnalyzed;
+                {/* Health Summary Stats */}
+                {hasData && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <Card className="p-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <FileText className="h-4 w-4 text-primary" />
+                        <span className="text-xs text-muted-foreground">Documents</span>
+                      </div>
+                      <p className="text-2xl font-bold">{documents.length}</p>
+                      <p className="text-[10px] text-muted-foreground">{analyzedDocs.length} analyzed</p>
+                    </Card>
+                    <Card className="p-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <BarChart3 className="h-4 w-4 text-primary" />
+                        <span className="text-xs text-muted-foreground">Findings</span>
+                      </div>
+                      <p className="text-2xl font-bold">{stats.totalFindings}</p>
+                      <p className="text-[10px] text-muted-foreground">{stats.normalPercent}% normal</p>
+                    </Card>
+                    <Card className="p-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                        <span className="text-xs text-muted-foreground">Flagged</span>
+                      </div>
+                      <p className="text-2xl font-bold">{stats.abnormalCount}</p>
+                      <p className="text-[10px] text-muted-foreground">need attention</p>
+                    </Card>
+                    <Card className="p-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Heart className="h-4 w-4 text-primary" />
+                        <span className="text-xs text-muted-foreground">Lab Health</span>
+                      </div>
+                      <p className="text-2xl font-bold">{stats.labNormalPercent}%</p>
+                      <Progress value={stats.labNormalPercent} className="h-1.5 mt-1" />
+                    </Card>
+                  </div>
+                )}
 
-                  return (
-                    <Card key={doc.id} className="overflow-hidden">
-                      {/* Document header */}
-                      <CardHeader className="pb-2 bg-muted/30">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-start gap-3 flex-1 min-w-0">
-                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                              <FileText className="h-5 w-5 text-primary" />
-                            </div>
-                            <div className="min-w-0">
-                              <CardTitle className="text-base leading-tight">
-                                {doc.ai_suggested_name || doc.file_name}
-                              </CardTitle>
-                              <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                <Badge variant="outline" className="text-[10px]">
-                                  {doc.ai_suggested_category || doc.document_type}
-                                </Badge>
-                                {doc.uploaded_at && (
-                                  <span className="text-[10px] text-muted-foreground">
-                                    {format(new Date(doc.uploaded_at), 'MMM d, yyyy')}
-                                  </span>
-                                )}
-                                {isPending && (
-                                  <Badge className="text-[10px] bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
-                                    Analysis pending
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                {/* Status Distribution & Category Breakdown */}
+                {hasData && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Status Distribution */}
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <PieChart className="h-4 w-4 text-primary" />
+                          Status Distribution
+                        </CardTitle>
                       </CardHeader>
-
-                      <CardContent className="pt-4 space-y-4">
-                        {/* AI Medical Summary */}
-                        {doc.ai_summary && (
-                          <div>
-                            <div className="flex items-center gap-2 mb-2">
-                              <Stethoscope className="h-4 w-4 text-primary" />
-                              <span className="text-sm font-semibold">Medical Analysis</span>
-                            </div>
-                            <div className="bg-primary/5 rounded-lg p-4 border border-primary/10">
-                              <p className="text-sm leading-relaxed">{doc.ai_summary}</p>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Extracted Findings */}
-                        {docExtracted.length > 0 && (
-                          <div>
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <FlaskConical className="h-4 w-4 text-secondary" />
-                                <span className="text-sm font-semibold">Key Findings</span>
+                      <CardContent className="space-y-2.5">
+                        {([
+                          { key: 'normal', label: 'Normal', icon: CheckCircle2, color: 'bg-green-500' },
+                          { key: 'abnormal', label: 'Abnormal', icon: TrendingDown, color: 'bg-yellow-500' },
+                          { key: 'critical', label: 'Critical', icon: XCircle, color: 'bg-red-500' },
+                          { key: 'active', label: 'Active', icon: TrendingUp, color: 'bg-blue-500' },
+                          { key: 'resolved', label: 'Resolved', icon: CheckCircle2, color: 'bg-muted-foreground' },
+                        ] as const).map(({ key, label, icon: Icon, color }) => {
+                          const count = stats.statusCounts[key];
+                          if (count === 0) return null;
+                          const pct = Math.round((count / stats.totalFindings) * 100);
+                          return (
+                            <div key={key} className="flex items-center gap-3">
+                              <Icon className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                              <div className="flex-1">
+                                <div className="flex justify-between text-xs mb-1">
+                                  <span>{label}</span>
+                                  <span className="text-muted-foreground">{count} ({pct}%)</span>
+                                </div>
+                                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                  <div className={`h-full ${color} rounded-full`} style={{ width: `${pct}%` }} />
+                                </div>
                               </div>
-                              <Badge variant="secondary" className="text-[10px]">{docExtracted.length} items</Badge>
                             </div>
-                            <div className="space-y-2">
-                              {docExtracted.map(item => {
-                                const config = typeConfig[item.data_type] || { icon: Activity, label: item.data_type, color: 'text-foreground', bgColor: 'bg-muted' };
-                                const Icon = config.icon;
-                                return (
-                                  <div key={item.id} className="flex items-start gap-3 bg-muted/30 rounded-lg px-3 py-2.5">
-                                    <div className={`w-7 h-7 rounded-md ${config.bgColor} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                                      <Icon className={`h-3.5 w-3.5 ${config.color}`} />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      <div className="flex items-center gap-2 flex-wrap">
-                                        <span className="text-sm font-medium">{item.title}</span>
-                                        {item.status && (
-                                          <Badge className={`text-[9px] px-1.5 py-0 ${statusColors[item.status] || 'bg-muted'}`}>
-                                            {item.status}
-                                          </Badge>
-                                        )}
-                                      </div>
-                                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                                        {item.value && (
-                                          <span className="text-xs font-semibold">
-                                            {item.value}{item.unit ? ` ${item.unit}` : ''}
-                                          </span>
-                                        )}
-                                        {item.reference_range && (
-                                          <span className="text-[10px] text-muted-foreground">(Ref: {item.reference_range})</span>
-                                        )}
-                                      </div>
-                                      {item.notes && (
-                                        <p className="text-xs text-muted-foreground mt-1">{item.notes}</p>
-                                      )}
-                                    </div>
-                                    {item.date_recorded && (
-                                      <span className="text-[10px] text-muted-foreground whitespace-nowrap mt-1">
-                                        {format(new Date(item.date_recorded), 'MMM d, yyyy')}
-                                      </span>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* No analysis yet for this doc */}
-                        {isPending && docExtracted.length === 0 && (
-                          <div className="flex items-center gap-3 text-muted-foreground bg-muted/30 rounded-lg p-4">
-                            <Activity className="h-5 w-5 animate-pulse" />
-                            <div>
-                              <p className="text-sm font-medium">Analysis in progress</p>
-                              <p className="text-xs">The AI is analyzing this document. Results will appear here shortly.</p>
-                            </div>
-                          </div>
-                        )}
+                          );
+                        })}
                       </CardContent>
                     </Card>
-                  );
-                })}
 
-                {/* Flagged Items Summary */}
+                    {/* Category Breakdown */}
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <BarChart3 className="h-4 w-4 text-primary" />
+                          Data Categories
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-2.5">
+                        {Object.entries(stats.typeCounts)
+                          .sort(([, a], [, b]) => b - a)
+                          .map(([type, count]) => {
+                            const config = typeConfig[type] || { icon: Activity, label: type, color: 'text-foreground', bgColor: 'bg-muted' };
+                            const Icon = config.icon;
+                            const pct = Math.round((count / stats.totalFindings) * 100);
+                            return (
+                              <div key={type} className="flex items-center gap-3">
+                                <div className={`w-6 h-6 rounded ${config.bgColor} flex items-center justify-center flex-shrink-0`}>
+                                  <Icon className={`h-3.5 w-3.5 ${config.color}`} />
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex justify-between text-xs mb-1">
+                                    <span>{config.label}</span>
+                                    <span className="text-muted-foreground">{count} ({pct}%)</span>
+                                  </div>
+                                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                    <div className="h-full bg-primary rounded-full" style={{ width: `${pct}%` }} />
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Active Conditions & Medications */}
+                {(stats.activeConditions > 0 || stats.activeMedications > 0) && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {stats.activeConditions > 0 && (
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm flex items-center gap-2">
+                            <Stethoscope className="h-4 w-4 text-destructive" />
+                            Active Conditions
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                          {medicalData.filter(i => i.data_type === 'condition' && i.status === 'active').map(item => (
+                            <div key={item.id} className="flex items-center justify-between bg-destructive/5 rounded-lg px-3 py-2">
+                              <span className="text-sm font-medium">{item.title}</span>
+                              {item.date_recorded && (
+                                <span className="text-[10px] text-muted-foreground">{format(new Date(item.date_recorded), 'MMM d, yyyy')}</span>
+                              )}
+                            </div>
+                          ))}
+                        </CardContent>
+                      </Card>
+                    )}
+                    {stats.activeMedications > 0 && (
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm flex items-center gap-2">
+                            <Pill className="h-4 w-4 text-primary" />
+                            Current Medications
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                          {medicalData.filter(i => i.data_type === 'medication' && i.status === 'active').map(item => (
+                            <div key={item.id} className="flex items-center justify-between bg-primary/5 rounded-lg px-3 py-2">
+                              <div>
+                                <span className="text-sm font-medium">{item.title}</span>
+                                {item.value && <span className="text-xs text-muted-foreground ml-2">{item.value}</span>}
+                              </div>
+                            </div>
+                          ))}
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                )}
+
+                {/* Flagged Items */}
                 {stats.abnormalCount > 0 && (
-                  <Card className="p-4 border-yellow-200 dark:border-yellow-900/50">
-                    <div className="flex items-center gap-2 mb-3">
-                      <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                      <span className="text-sm font-semibold">Items Requiring Attention</span>
-                      <Badge className="ml-auto bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 text-[10px]">
-                        {stats.abnormalCount}
-                      </Badge>
-                    </div>
-                    <div className="space-y-2">
+                  <Card className="border-yellow-200 dark:border-yellow-900/50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                        Items Requiring Attention
+                        <Badge className="ml-auto bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 text-[10px]">
+                          {stats.abnormalCount}
+                        </Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
                       {medicalData
                         .filter(i => i.status === 'abnormal' || i.status === 'critical')
                         .map(item => (
@@ -349,9 +390,93 @@ export default function MedicalHistory() {
                             )}
                           </div>
                         ))}
-                    </div>
+                    </CardContent>
                   </Card>
                 )}
+
+                {/* Per-Document Analysis */}
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Document Analysis</h3>
+                  {documents.map((doc) => {
+                    const docExtracted = medicalData.filter(m => m.document_id === doc.id);
+                    const isAnalyzed = !!doc.ai_summary;
+                    const isPending = !isAnalyzed;
+
+                    return (
+                      <Card key={doc.id} className="overflow-hidden mb-3">
+                        <CardHeader className="pb-2 bg-muted/30">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <FileText className="h-5 w-5 text-primary" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <CardTitle className="text-base leading-tight">
+                                {doc.ai_suggested_name || doc.file_name}
+                              </CardTitle>
+                              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                <Badge variant="outline" className="text-[10px]">
+                                  {doc.ai_suggested_category || doc.document_type}
+                                </Badge>
+                                {doc.uploaded_at && (
+                                  <span className="text-[10px] text-muted-foreground">
+                                    {format(new Date(doc.uploaded_at), 'MMM d, yyyy')}
+                                  </span>
+                                )}
+                                {isPending && (
+                                  <Badge className="text-[10px] bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                                    Analysis pending
+                                  </Badge>
+                                )}
+                                {isAnalyzed && (
+                                  <Badge variant="secondary" className="text-[10px]">{docExtracted.length} findings</Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </CardHeader>
+
+                        <CardContent className="pt-4 space-y-3">
+                          {doc.ai_summary && (
+                            <div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
+                              <p className="text-sm leading-relaxed">{doc.ai_summary}</p>
+                            </div>
+                          )}
+
+                          {docExtracted.length > 0 && (
+                            <div className="space-y-1.5">
+                              {docExtracted.slice(0, 5).map(item => {
+                                const config = typeConfig[item.data_type] || { icon: Activity, label: item.data_type, color: 'text-foreground', bgColor: 'bg-muted' };
+                                const Icon = config.icon;
+                                return (
+                                  <div key={item.id} className="flex items-center gap-2 bg-muted/30 rounded px-2.5 py-1.5">
+                                    <Icon className={`h-3.5 w-3.5 ${config.color} flex-shrink-0`} />
+                                    <span className="text-xs font-medium flex-1 truncate">{item.title}</span>
+                                    {item.value && <span className="text-xs text-muted-foreground">{item.value}{item.unit ? ` ${item.unit}` : ''}</span>}
+                                    {item.status && (
+                                      <Badge className={`text-[8px] px-1 py-0 ${statusColors[item.status] || 'bg-muted'}`}>
+                                        {item.status}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                              {docExtracted.length > 5 && (
+                                <p className="text-[10px] text-muted-foreground text-center pt-1">+{docExtracted.length - 5} more findings</p>
+                              )}
+                            </div>
+                          )}
+
+                          {isPending && docExtracted.length === 0 && (
+                            <div className="flex items-center gap-3 text-muted-foreground bg-muted/30 rounded-lg p-3">
+                              <Activity className="h-4 w-4 animate-pulse" />
+                              <p className="text-xs">Analysis in progress...</p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
               </>
             )}
           </TabsContent>
