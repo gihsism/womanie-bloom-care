@@ -33,11 +33,11 @@ const DocumentUpload = () => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       
-      // Validate file size (50MB)
-      if (selectedFile.size > 50 * 1024 * 1024) {
+      // Validate file size (200MB)
+      if (selectedFile.size > 200 * 1024 * 1024) {
         toast({
           title: 'File too large',
-          description: 'Please select a file smaller than 50MB',
+          description: 'Please select a file smaller than 200MB',
           variant: 'destructive',
         });
         return;
@@ -163,7 +163,7 @@ const DocumentUpload = () => {
         <DialogHeader>
           <DialogTitle>Upload Health Document</DialogTitle>
           <DialogDescription>
-            Upload lab results, imaging reports, or other medical documents (Max 50MB)
+            Upload lab results, imaging reports, or other medical documents (Max 200MB)
           </DialogDescription>
         </DialogHeader>
         
