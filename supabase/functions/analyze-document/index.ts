@@ -17,24 +17,33 @@ async function analyzeDocument(documentId: string, filePath: string, fileName: s
     throw new Error('LOVABLE_API_KEY not configured');
   }
 
-  // Create a signed URL instead of downloading the file
-  const { data: signedUrlData, error: signedUrlError } = await supabaseClient
+  // Download the file from storage
+  const { data: fileData, error: downloadError } = await supabaseClient
     .storage
     .from('health-documents')
-    .createSignedUrl(filePath, 3600); // 1 hour expiry
+    .download(filePath);
 
-  if (signedUrlError || !signedUrlData?.signedUrl) {
-    console.error('Signed URL error:', signedUrlError);
-    throw new Error('Failed to create signed URL');
+  if (downloadError || !fileData) {
+    console.error('Download error:', downloadError);
+    throw new Error('Failed to download file');
   }
 
-  const fileUrl = signedUrlData.signedUrl;
+  // Convert file to base64
+  const arrayBuffer = await fileData.arrayBuffer();
+  const uint8Array = new Uint8Array(arrayBuffer);
+  let binary = '';
+  for (let i = 0; i < uint8Array.length; i++) {
+    binary += String.fromCharCode(uint8Array[i]);
+  }
+  const base64Data = btoa(binary);
+  const dataUrl = `data:${mimeType};base64,${base64Data}`;
 
-  // Build message content - use URL for supported image types, text description for PDFs
+  // Build message content with inline base64 data for all file types
   const isImage = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(mimeType);
+  const isPdf = mimeType === 'application/pdf';
   
   let userContent: any[];
-  if (isImage) {
+  if (isImage || isPdf) {
     userContent = [
       {
         type: 'text',
@@ -42,17 +51,14 @@ async function analyzeDocument(documentId: string, filePath: string, fileName: s
       },
       {
         type: 'image_url',
-        image_url: { url: fileUrl }
+        image_url: { url: dataUrl }
       }
     ];
   } else {
-    // For PDFs and other non-image files, use text-only analysis with file metadata
     userContent = [
       {
         type: 'text',
-        text: `Analyze this health document named "${fileName}" (type: ${mimeType}). The file is available at this URL: ${fileUrl}
-
-Please analyze and extract all medical data, lab results, conditions, medications, and any menstrual cycle information. If you cannot access the file directly, provide analysis based on the filename and document type, and note that the file could not be fully analyzed.`
+        text: `Analyze this health document named "${fileName}" (type: ${mimeType}). Please extract all medical data, lab results, conditions, medications, and any menstrual cycle information based on the document name and type.`
       }
     ];
   }
