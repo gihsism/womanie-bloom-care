@@ -27,6 +27,12 @@ import {
   BarChart3,
   PieChart,
   Heart,
+  Microscope,
+  Beaker,
+  ShieldAlert,
+  ArrowUpRight,
+  ArrowDownRight,
+  Minus,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import {
@@ -43,6 +49,17 @@ import {
   AreaChart,
   Area,
   Legend,
+  ReferenceLine,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  ScatterChart,
+  Scatter,
+  ZAxis,
+  ComposedChart,
+  Line,
 } from 'recharts';
 
 interface MedicalDataItem {
@@ -148,9 +165,77 @@ export default function MedicalHistory() {
     const activeMedications = medicalData.filter(i => i.data_type === 'medication' && i.status === 'active').length;
     const labResults = medicalData.filter(i => i.data_type === 'lab_result');
     const normalLabs = labResults.filter(i => i.status === 'normal').length;
+    const abnormalLabs = labResults.filter(i => i.status === 'abnormal').length;
+    const criticalLabs = labResults.filter(i => i.status === 'critical').length;
     const labNormalPercent = labResults.length > 0 ? Math.round((normalLabs / labResults.length) * 100) : 0;
 
-    // Pie chart data for status
+    // Lab results with numeric values for charting
+    const labsWithValues = labResults
+      .filter(l => l.value && !isNaN(parseFloat(l.value)))
+      .map(l => {
+        const numVal = parseFloat(l.value!);
+        let refLow: number | null = null;
+        let refHigh: number | null = null;
+        if (l.reference_range) {
+          const rangeMatch = l.reference_range.match(/([\d.]+)\s*[-–]\s*([\d.]+)/);
+          if (rangeMatch) {
+            refLow = parseFloat(rangeMatch[1]);
+            refHigh = parseFloat(rangeMatch[2]);
+          }
+        }
+        // Compute deviation percentage from midpoint of reference range
+        let deviationPct = 0;
+        if (refLow !== null && refHigh !== null) {
+          const mid = (refLow + refHigh) / 2;
+          deviationPct = mid > 0 ? Math.round(((numVal - mid) / mid) * 100) : 0;
+        }
+        return {
+          ...l,
+          numVal,
+          refLow,
+          refHigh,
+          deviationPct,
+          shortTitle: l.title.length > 18 ? l.title.slice(0, 16) + '…' : l.title,
+        };
+      });
+
+    // Lab deviation chart: bar chart showing how far each lab is from normal range center
+    const labDeviationData = labsWithValues
+      .filter(l => l.refLow !== null && l.refHigh !== null)
+      .sort((a, b) => Math.abs(b.deviationPct) - Math.abs(a.deviationPct))
+      .slice(0, 12)
+      .map(l => ({
+        name: l.shortTitle,
+        deviation: l.deviationPct,
+        value: l.numVal,
+        unit: l.unit || '',
+        refRange: l.reference_range || '',
+        status: l.status,
+        fill: l.status === 'critical' ? '#ef4444' : l.status === 'abnormal' ? '#eab308' : '#22c55e',
+      }));
+
+    // Lab value vs reference range (composed chart)
+    const labRangeData = labsWithValues
+      .filter(l => l.refLow !== null && l.refHigh !== null)
+      .slice(0, 10)
+      .map(l => ({
+        name: l.shortTitle,
+        value: l.numVal,
+        refLow: l.refLow!,
+        refHigh: l.refHigh!,
+        rangeSpan: l.refHigh! - l.refLow!,
+        unit: l.unit || '',
+        status: l.status,
+      }));
+
+    // Lab status pie
+    const labPieData = [
+      { name: 'Normal', value: normalLabs, color: '#22c55e' },
+      { name: 'Abnormal', value: abnormalLabs, color: '#eab308' },
+      { name: 'Critical', value: criticalLabs, color: '#ef4444' },
+    ].filter(d => d.value > 0);
+
+    // Pie chart data for overall status
     const pieData = [
       { name: 'Normal', value: statusCounts.normal, color: '#22c55e' },
       { name: 'Abnormal', value: statusCounts.abnormal, color: '#eab308' },
@@ -182,7 +267,13 @@ export default function MedicalHistory() {
       .map(([month, counts]) => ({ month, ...counts }))
       .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
 
-    return { statusCounts, typeCounts, totalFindings, normalPercent, abnormalCount, activeConditions, activeMedications, labResults, labNormalPercent, pieData, categoryBarData, timelineData, allTypes };
+    return {
+      statusCounts, typeCounts, totalFindings, normalPercent, abnormalCount,
+      activeConditions, activeMedications, labResults, labNormalPercent,
+      pieData, categoryBarData, timelineData, allTypes,
+      labsWithValues, labDeviationData, labRangeData, labPieData,
+      normalLabs, abnormalLabs, criticalLabs,
+    };
   }, [medicalData]);
 
   const dataTypes = Object.keys(typeConfig).filter((t) => groupedData[t]?.length);
@@ -353,7 +444,178 @@ export default function MedicalHistory() {
                   </div>
                 )}
 
-                {/* ===== RECHARTS VISUALIZATIONS ===== */}
+                {/* ===== LAB RESULTS FOCUS ===== */}
+                {hasData && stats.labResults.length > 0 && (
+                  <>
+                    <div className="mt-2">
+                      <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
+                        <FlaskConical className="h-4 w-4" />
+                        Lab Results Analysis
+                      </h3>
+                    </div>
+
+                    {/* Lab summary cards */}
+                    <div className="grid grid-cols-3 gap-3">
+                      <Card className="p-3 border-green-200 dark:border-green-900/40">
+                        <div className="flex items-center gap-2 mb-1">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wide">Normal</span>
+                        </div>
+                        <p className="text-xl font-bold text-green-600">{stats.normalLabs}</p>
+                        <p className="text-[10px] text-muted-foreground">of {stats.labResults.length} tests</p>
+                      </Card>
+                      <Card className="p-3 border-yellow-200 dark:border-yellow-900/40">
+                        <div className="flex items-center gap-2 mb-1">
+                          <AlertTriangle className="h-3.5 w-3.5 text-yellow-600" />
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wide">Abnormal</span>
+                        </div>
+                        <p className="text-xl font-bold text-yellow-600">{stats.abnormalLabs}</p>
+                        <p className="text-[10px] text-muted-foreground">needs review</p>
+                      </Card>
+                      <Card className="p-3 border-red-200 dark:border-red-900/40">
+                        <div className="flex items-center gap-2 mb-1">
+                          <XCircle className="h-3.5 w-3.5 text-destructive" />
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wide">Critical</span>
+                        </div>
+                        <p className="text-xl font-bold text-destructive">{stats.criticalLabs}</p>
+                        <p className="text-[10px] text-muted-foreground">urgent</p>
+                      </Card>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Lab Status Pie */}
+                      {stats.labPieData.length > 0 && (
+                        <Card>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-sm flex items-center gap-2">
+                              <PieChart className="h-4 w-4 text-primary" />
+                              Lab Results Status
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <ResponsiveContainer width="100%" height={200}>
+                              <RechartsPie>
+                                <Pie
+                                  data={stats.labPieData}
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius={45}
+                                  outerRadius={75}
+                                  paddingAngle={4}
+                                  dataKey="value"
+                                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                  labelLine={false}
+                                >
+                                  {stats.labPieData.map((entry, index) => (
+                                    <Cell key={`lab-cell-${index}`} fill={entry.color} />
+                                  ))}
+                                </Pie>
+                                <Tooltip formatter={(value: number) => [value, 'Tests']} />
+                              </RechartsPie>
+                            </ResponsiveContainer>
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {/* Lab Deviation from Normal */}
+                      {stats.labDeviationData.length > 0 && (
+                        <Card>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-sm flex items-center gap-2">
+                              <TrendingUp className="h-4 w-4 text-primary" />
+                              Deviation from Normal Range
+                            </CardTitle>
+                            <p className="text-[10px] text-muted-foreground">% above/below reference midpoint</p>
+                          </CardHeader>
+                          <CardContent>
+                            <ResponsiveContainer width="100%" height={200}>
+                              <BarChart data={stats.labDeviationData} layout="vertical" margin={{ left: 5, right: 15 }}>
+                                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                                <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
+                                <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} width={70} />
+                                <ReferenceLine x={0} stroke="hsl(var(--foreground))" strokeWidth={1.5} strokeOpacity={0.4} />
+                                <Tooltip
+                                  content={({ active, payload }) => {
+                                    if (!active || !payload?.length) return null;
+                                    const d = payload[0].payload;
+                                    return (
+                                      <div className="bg-background border border-border rounded-lg px-3 py-2 shadow-lg text-xs">
+                                        <p className="font-medium">{d.name}</p>
+                                        <p>Value: {d.value} {d.unit}</p>
+                                        <p>Ref: {d.refRange}</p>
+                                        <p className={d.deviation > 0 ? 'text-yellow-600' : d.deviation < 0 ? 'text-blue-600' : 'text-green-600'}>
+                                          {d.deviation > 0 ? '+' : ''}{d.deviation}% from midpoint
+                                        </p>
+                                      </div>
+                                    );
+                                  }}
+                                />
+                                <Bar dataKey="deviation" radius={[0, 4, 4, 0]} barSize={14}>
+                                  {stats.labDeviationData.map((entry, index) => (
+                                    <Cell key={`dev-${index}`} fill={entry.fill} />
+                                  ))}
+                                </Bar>
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+
+                    {/* Lab Results Detailed Table */}
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <FlaskConical className="h-4 w-4 text-primary" />
+                          All Lab Results
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-xs">
+                            <thead>
+                              <tr className="border-b border-border">
+                                <th className="text-left py-2 pr-3 font-medium text-muted-foreground">Test</th>
+                                <th className="text-right py-2 px-3 font-medium text-muted-foreground">Value</th>
+                                <th className="text-right py-2 px-3 font-medium text-muted-foreground">Reference</th>
+                                <th className="text-center py-2 px-3 font-medium text-muted-foreground">Status</th>
+                                <th className="text-right py-2 pl-3 font-medium text-muted-foreground">Date</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {stats.labResults.map(lab => {
+                                const isHigh = lab.status === 'abnormal' || lab.status === 'critical';
+                                return (
+                                  <tr key={lab.id} className="border-b border-border/50 last:border-0">
+                                    <td className="py-2 pr-3 font-medium">{lab.title}</td>
+                                    <td className="py-2 px-3 text-right font-mono tabular-nums">
+                                      <span className={isHigh ? 'text-yellow-600 dark:text-yellow-400 font-semibold' : ''}>
+                                        {lab.value || '—'}{lab.unit ? ` ${lab.unit}` : ''}
+                                      </span>
+                                    </td>
+                                    <td className="py-2 px-3 text-right text-muted-foreground">{lab.reference_range || '—'}</td>
+                                    <td className="py-2 px-3 text-center">
+                                      {lab.status && (
+                                        <Badge className={`text-[9px] px-1.5 py-0 ${statusColors[lab.status] || 'bg-muted'}`}>
+                                          {lab.status}
+                                        </Badge>
+                                      )}
+                                    </td>
+                                    <td className="py-2 pl-3 text-right text-muted-foreground whitespace-nowrap">
+                                      {lab.date_recorded ? format(new Date(lab.date_recorded), 'MMM d, yyyy') : '—'}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* ===== OVERALL FINDINGS CHARTS ===== */}
                 {hasData && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Status Pie Chart */}
@@ -361,7 +623,7 @@ export default function MedicalHistory() {
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm flex items-center gap-2">
                           <PieChart className="h-4 w-4 text-primary" />
-                          Findings by Status
+                          All Findings by Status
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
