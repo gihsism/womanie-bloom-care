@@ -28,6 +28,7 @@ import About from "./pages/About";
 import Pricing from "./pages/Pricing";
 import Blog from "./pages/Blog";
 import HealthStatistics from "./pages/HealthStatistics";
+import MedicalHistory from "./pages/MedicalHistory";
 import Install from "./pages/Install";
 
 const queryClient = new QueryClient();
@@ -59,6 +60,7 @@ const App = () => (
             <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
             <Route path="/doctor/patient/:patientId" element={<PatientDetails />} />
             <Route path="/health-statistics" element={<HealthStatistics />} />
+            <Route path="/dashboard/medical-history" element={<MedicalHistory />} />
             <Route path="/onboarding/basic-info" element={<BasicInformation />} />
             <Route path="/onboarding/life-stage" element={<LifeStageSelection />} />
             <Route path="/onboarding/mode-setup" element={<ModeSetup />} />

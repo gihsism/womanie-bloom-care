@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { documentId, filePath, fileName, mimeType } = await req.json();
+    const { documentId, filePath, fileName, mimeType, userId } = await req.json();
     
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -35,7 +35,6 @@ serve(async (req) => {
     const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
     const dataUrl = `data:${mimeType};base64,${base64}`;
 
-    // Prepare AI request
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY not configured');
@@ -52,14 +51,46 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a medical document analyzer. Analyze health documents and provide: 1) A concise, descriptive name (max 50 chars), 2) A category (lab_results, imaging, prescription, consultation_notes, vaccination_record, or other), 3) A brief summary highlighting key findings, dates, and important medical information.'
+            content: `You are a medical document analyzer specializing in women's health. Analyze health documents and extract structured data.
+
+Return a JSON object with:
+{
+  "name": "suggested document name (max 50 chars)",
+  "category": "lab_results | imaging | prescription | consultation_notes | vaccination_record | other",
+  "summary": "brief summary of key findings",
+  "extracted_data": [
+    {
+      "data_type": "condition | medication | lab_result | cycle_info | allergy | procedure | vaccination",
+      "title": "name of the finding",
+      "value": "value if applicable (e.g., '14.2' for hemoglobin, '28' for cycle length)",
+      "unit": "unit if applicable (e.g., 'g/dL', 'days')",
+      "reference_range": "normal range if applicable",
+      "status": "normal | abnormal | critical | active | resolved",
+      "date_recorded": "YYYY-MM-DD if found in document",
+      "notes": "additional context"
+    }
+  ],
+  "cycle_data": {
+    "cycle_length": null,
+    "last_period_date": null,
+    "period_length": null,
+    "irregular": null
+  }
+}
+
+For cycle_info type entries, extract menstrual cycle details like cycle length, period dates, irregularities. 
+For lab_results, extract specific values with units and reference ranges.
+For medications, include dosage in the value field.
+The cycle_data field should contain any cycle-related information found that could update the patient's cycle tracking.
+If no cycle data is found, set cycle_data values to null.
+Always return valid JSON.`
           },
           {
             role: 'user',
             content: [
               {
                 type: 'text',
-                text: `Analyze this health document (${fileName}). Return a JSON object with: {"name": "suggested name", "category": "category", "summary": "key findings and details"}`
+                text: `Analyze this health document (${fileName}). Extract all medical data, lab results, conditions, medications, and any menstrual cycle information.`
               },
               {
                 type: 'image_url',
@@ -84,20 +115,24 @@ serve(async (req) => {
       throw new Error('No response from AI');
     }
 
-    // Parse AI response (try to extract JSON, fallback to raw text)
+    // Parse AI response
     let analysis;
     try {
       const jsonMatch = aiContent.match(/\{[\s\S]*\}/);
       analysis = jsonMatch ? JSON.parse(jsonMatch[0]) : {
         name: fileName,
         category: 'other',
-        summary: aiContent
+        summary: aiContent,
+        extracted_data: [],
+        cycle_data: {}
       };
     } catch {
       analysis = {
         name: fileName,
         category: 'other',
-        summary: aiContent
+        summary: aiContent,
+        extracted_data: [],
+        cycle_data: {}
       };
     }
 
@@ -114,6 +149,67 @@ serve(async (req) => {
     if (updateError) {
       console.error('Update error:', updateError);
       throw updateError;
+    }
+
+    // Insert extracted medical data
+    if (analysis.extracted_data && analysis.extracted_data.length > 0 && userId) {
+      const medicalRecords = analysis.extracted_data.map((item: any) => ({
+        user_id: userId,
+        document_id: documentId,
+        data_type: item.data_type || 'other',
+        title: item.title || 'Unknown',
+        value: item.value || null,
+        unit: item.unit || null,
+        reference_range: item.reference_range || null,
+        status: item.status || null,
+        date_recorded: item.date_recorded || null,
+        notes: item.notes || null,
+        raw_data: item
+      }));
+
+      const { error: insertError } = await supabaseClient
+        .from('medical_extracted_data')
+        .insert(medicalRecords);
+
+      if (insertError) {
+        console.error('Medical data insert error:', insertError);
+      }
+    }
+
+    // Update cycle tracking if cycle data found
+    if (analysis.cycle_data && userId) {
+      const { cycle_length, last_period_date, period_length } = analysis.cycle_data;
+      
+      if (last_period_date && cycle_length) {
+        // Check if a period record already exists for this date
+        const { data: existing } = await supabaseClient
+          .from('period_tracking')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('period_start_date', last_period_date)
+          .maybeSingle();
+
+        if (!existing) {
+          const periodLen = period_length || 5;
+          const endDate = new Date(last_period_date);
+          endDate.setDate(endDate.getDate() + periodLen - 1);
+
+          const { error: periodError } = await supabaseClient
+            .from('period_tracking')
+            .insert({
+              user_id: userId,
+              period_start_date: last_period_date,
+              period_end_date: endDate.toISOString().split('T')[0],
+              cycle_length: parseInt(cycle_length) || 28
+            });
+
+          if (periodError) {
+            console.error('Period tracking update error:', periodError);
+          } else {
+            console.log('Cycle data updated from document:', { last_period_date, cycle_length });
+          }
+        }
+      }
     }
 
     console.log('Document analyzed successfully:', documentId);

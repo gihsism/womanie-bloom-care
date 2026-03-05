@@ -116,7 +116,8 @@ const DocumentUpload = () => {
           documentId: insertData.id,
           filePath: fileName,
           fileName: file.name,
-          mimeType: file.type
+          mimeType: file.type,
+          userId: user.id
         }
       }).catch(error => {
         console.error('AI analysis error:', error);
