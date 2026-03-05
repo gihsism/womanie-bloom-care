@@ -446,6 +446,47 @@ const PatientDashboard = () => {
               </div>
             </Card>
 
+            {/* Upload Health Documents Section */}
+            <div className="mb-6">
+              <h3 className="text-base font-semibold mb-3">Upload</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <DocumentUpload />
+                <Card 
+                  className="p-4 cursor-pointer hover:bg-accent/5 transition-colors"
+                  onClick={() => navigate('/dashboard/medical-history')}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center">
+                      <FileText className="h-6 w-6 text-secondary" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold">Medical History</h3>
+                      <p className="text-xs text-muted-foreground">
+                        View analyzed documents & extracted data
+                      </p>
+                    </div>
+                    <Badge variant="secondary">{documents.length}</Badge>
+                  </div>
+                </Card>
+              </div>
+              {/* Recent uploads preview */}
+              {documents.length > 0 && (
+                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {documents.slice(0, 2).map((doc) => (
+                    <div key={doc.id} className="bg-muted/50 rounded-lg p-3 flex items-start gap-2">
+                      <FileText className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium truncate">{doc.ai_suggested_name || doc.file_name}</p>
+                        <Badge variant="outline" className={`text-[10px] mt-1 ${getCategoryColor(doc.ai_suggested_category)}`}>
+                          {doc.ai_suggested_category || doc.document_type}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Health Tracking Section with Cycle Health on the right */}
             <div className="mb-6">
               <h3 className="text-base font-semibold mb-3">Health Tracking</h3>
