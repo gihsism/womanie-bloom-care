@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
+import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
@@ -21,12 +21,19 @@ import {
   Stethoscope,
   Upload,
   TrendingUp,
+  TrendingDown,
   CheckCircle2,
   XCircle,
-  Heart,
   ShieldAlert,
+  BarChart3,
+  Clock,
+  Target,
+  Zap,
+  ArrowUpRight,
+  ArrowDownRight,
+  Minus,
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, differenceInDays, addDays } from 'date-fns';
 import {
   Cell,
   BarChart,
@@ -37,6 +44,15 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
+  LineChart,
+  Line,
+  Area,
+  AreaChart,
+  Legend,
+  ComposedChart,
+  ReferenceArea,
+  PieChart as RechartsPie,
+  Pie,
 } from 'recharts';
 
 interface MedicalDataItem {
@@ -154,7 +170,6 @@ export default function MedicalHistory() {
             refHigh = parseFloat(rangeMatch[2]);
           }
         }
-        // Compute deviation percentage from midpoint of reference range
         let deviationPct = 0;
         if (refLow !== null && refHigh !== null) {
           const mid = (refLow + refHigh) / 2;
@@ -170,7 +185,6 @@ export default function MedicalHistory() {
         };
       });
 
-    // Lab deviation chart: bar chart showing how far each lab is from normal range center
     const labDeviationData = labsWithValues
       .filter(l => l.refLow !== null && l.refHigh !== null)
       .sort((a, b) => Math.abs(b.deviationPct) - Math.abs(a.deviationPct))
@@ -185,13 +199,150 @@ export default function MedicalHistory() {
         fill: l.status === 'critical' ? '#ef4444' : l.status === 'abnormal' ? '#eab308' : '#22c55e',
       }));
 
+    // ===== ANALYTICS DATA =====
+
+    // 1. Lab trends: group same-titled labs by date
+    const labsByTitle: Record<string, typeof labsWithValues> = {};
+    labsWithValues.forEach(l => {
+      if (l.date_recorded) {
+        const key = l.title;
+        if (!labsByTitle[key]) labsByTitle[key] = [];
+        labsByTitle[key].push(l);
+      }
+    });
+
+    // Get labs that have trends (multiple readings or single with ref range)
+    const labTrendData: Record<string, { data: { date: string; value: number; refLow: number | null; refHigh: number | null }[]; unit: string; latestStatus: string | null }> = {};
+    Object.entries(labsByTitle).forEach(([title, labs]) => {
+      const sorted = [...labs].sort((a, b) => new Date(a.date_recorded!).getTime() - new Date(b.date_recorded!).getTime());
+      labTrendData[title] = {
+        data: sorted.map(l => ({
+          date: format(new Date(l.date_recorded!), 'MMM d'),
+          value: l.numVal,
+          refLow: l.refLow,
+          refHigh: l.refHigh,
+        })),
+        unit: sorted[0].unit || '',
+        latestStatus: sorted[sorted.length - 1].status,
+      };
+    });
+
+    // 2. Health score over time (per document date)
+    const docDates = documents
+      .filter(d => d.uploaded_at && d.ai_summary)
+      .map(d => ({ date: new Date(d.uploaded_at!), id: d.id }))
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    const healthScoreTimeline = docDates.map(dd => {
+      const docItems = medicalData.filter(m => m.document_id === dd.id);
+      const totalLabs = docItems.filter(i => i.data_type === 'lab_result').length;
+      const normalCount = docItems.filter(i => i.data_type === 'lab_result' && i.status === 'normal').length;
+      const score = totalLabs > 0 ? Math.round((normalCount / totalLabs) * 100) : null;
+      return {
+        date: format(dd.date, 'MMM d, yyyy'),
+        score,
+        totalLabs,
+        normalCount,
+      };
+    }).filter(d => d.score !== null);
+
+    // 3. Timing analysis
+    const sortedDates = documents
+      .filter(d => d.uploaded_at)
+      .map(d => new Date(d.uploaded_at!))
+      .sort((a, b) => a.getTime() - b.getTime());
+    
+    let avgDaysBetweenDocs: number | null = null;
+    let nextCheckupEstimate: Date | null = null;
+    if (sortedDates.length >= 2) {
+      const gaps = [];
+      for (let i = 1; i < sortedDates.length; i++) {
+        gaps.push(differenceInDays(sortedDates[i], sortedDates[i - 1]));
+      }
+      avgDaysBetweenDocs = Math.round(gaps.reduce((s, g) => s + g, 0) / gaps.length);
+      nextCheckupEstimate = addDays(sortedDates[sortedDates.length - 1], avgDaysBetweenDocs);
+    }
+
+    const lastDocDate = sortedDates.length > 0 ? sortedDates[sortedDates.length - 1] : null;
+    const daysSinceLastDoc = lastDocDate ? differenceInDays(new Date(), lastDocDate) : null;
+
+    // 4. Prediction insights from lab trends
+    const predictions: { title: string; trend: 'improving' | 'worsening' | 'stable'; detail: string; icon: typeof TrendingUp }[] = [];
+    Object.entries(labTrendData).forEach(([title, info]) => {
+      if (info.data.length >= 2) {
+        const vals = info.data.map(d => d.value);
+        const first = vals[0];
+        const last = vals[vals.length - 1];
+        const refHigh = info.data[info.data.length - 1].refHigh;
+        const refLow = info.data[info.data.length - 1].refLow;
+        const changePct = first > 0 ? Math.round(((last - first) / first) * 100) : 0;
+        
+        let trend: 'improving' | 'worsening' | 'stable' = 'stable';
+        let detail = '';
+        
+        if (refHigh !== null && refLow !== null) {
+          const isInRange = last >= refLow && last <= refHigh;
+          const wasInRange = first >= refLow && first <= refHigh;
+          
+          if (!wasInRange && isInRange) {
+            trend = 'improving';
+            detail = `Returned to normal range (${changePct > 0 ? '+' : ''}${changePct}%)`;
+          } else if (wasInRange && !isInRange) {
+            trend = 'worsening';
+            detail = `Moved out of normal range (${changePct > 0 ? '+' : ''}${changePct}%)`;
+          } else if (Math.abs(changePct) <= 5) {
+            trend = 'stable';
+            detail = `Stable within ${isInRange ? 'normal' : 'abnormal'} range`;
+          } else if (isInRange) {
+            trend = changePct > 0 && last > (refLow + refHigh) / 2 ? 'stable' : 'improving';
+            detail = `${changePct > 0 ? '+' : ''}${changePct}% change, still in range`;
+          } else {
+            // Out of range
+            const movingToward = (last > refHigh && changePct < 0) || (last < refLow && changePct > 0);
+            trend = movingToward ? 'improving' : 'worsening';
+            detail = `${movingToward ? 'Moving toward' : 'Moving away from'} normal range (${changePct > 0 ? '+' : ''}${changePct}%)`;
+          }
+        } else {
+          if (Math.abs(changePct) <= 5) {
+            trend = 'stable';
+            detail = `Stable (${changePct > 0 ? '+' : ''}${changePct}%)`;
+          } else {
+            trend = changePct > 15 ? 'worsening' : changePct < -15 ? 'improving' : 'stable';
+            detail = `${changePct > 0 ? '+' : ''}${changePct}% change over ${info.data.length} readings`;
+          }
+        }
+        
+        predictions.push({
+          title,
+          trend,
+          detail,
+          icon: trend === 'improving' ? TrendingUp : trend === 'worsening' ? TrendingDown : Minus,
+        });
+      }
+    });
+
+    // 5. Lab status distribution pie
+    const labStatusPie = [
+      { name: 'Normal', value: normalLabs, color: '#22c55e' },
+      { name: 'Abnormal', value: abnormalLabs, color: '#eab308' },
+      { name: 'Critical', value: criticalLabs, color: '#ef4444' },
+    ].filter(d => d.value > 0);
+
+    // 6. Overall health score
+    const overallHealthScore = labResults.length > 0
+      ? Math.round((normalLabs / labResults.length) * 100)
+      : null;
+
     return {
       statusCounts, abnormalCount,
       activeConditions, activeMedications, labResults,
       labsWithValues, labDeviationData,
       normalLabs, abnormalLabs, criticalLabs,
+      labTrendData, healthScoreTimeline,
+      avgDaysBetweenDocs, nextCheckupEstimate, daysSinceLastDoc, lastDocDate,
+      predictions, labStatusPie, overallHealthScore,
     };
-  }, [medicalData]);
+  }, [medicalData, documents]);
 
   const dataTypes = Object.keys(typeConfig).filter((t) => groupedData[t]?.length);
 
@@ -229,12 +380,13 @@ export default function MedicalHistory() {
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="w-full flex overflow-x-auto">
             <TabsTrigger value="overview" className="flex-1">Overview</TabsTrigger>
+            <TabsTrigger value="analytics" className="flex-1">Analytics</TabsTrigger>
             <TabsTrigger value="details" className="flex-1">Details</TabsTrigger>
             <TabsTrigger value="documents" className="flex-1">Documents</TabsTrigger>
             <TabsTrigger value="timeline" className="flex-1">Timeline</TabsTrigger>
           </TabsList>
 
-          {/* ============ OVERVIEW TAB - LAB RESULTS & CONCLUSIONS ============ */}
+          {/* ============ OVERVIEW TAB ============ */}
           <TabsContent value="overview" className="space-y-4 mt-4">
             {!hasDocuments ? (
               <Card>
@@ -276,7 +428,7 @@ export default function MedicalHistory() {
                   </div>
                 )}
 
-                {/* Flagged / Abnormal Results */}
+                {/* Flagged Results */}
                 {stats.abnormalCount > 0 && (
                   <Card className="border-yellow-200 dark:border-yellow-900/50">
                     <CardHeader className="pb-2">
@@ -363,7 +515,7 @@ export default function MedicalHistory() {
                   </Card>
                 )}
 
-                {/* Complete Lab Results Table */}
+                {/* Lab Results Table */}
                 {hasData && stats.labResults.length > 0 && (
                   <Card>
                     <CardHeader className="pb-2">
@@ -466,7 +618,7 @@ export default function MedicalHistory() {
                   </div>
                 )}
 
-                {/* Doctor Conclusions / Document Summaries */}
+                {/* Doctor Conclusions */}
                 {analyzedDocs.length > 0 && (
                   <div>
                     <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
@@ -508,7 +660,313 @@ export default function MedicalHistory() {
             )}
           </TabsContent>
 
-          {/* ============ DETAILS TAB (old overview) ============ */}
+          {/* ============ ANALYTICS TAB ============ */}
+          <TabsContent value="analytics" className="space-y-4 mt-4">
+            {!hasData ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <BarChart3 className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground text-center mb-2 font-medium">No analytics available yet</p>
+                  <p className="text-sm text-muted-foreground text-center">Upload health documents to see trends, predictions, and statistics.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                {/* Health Score & Timing Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {stats.overallHealthScore !== null && (
+                    <Card className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Target className="h-4 w-4 text-primary" />
+                        <span className="text-xs text-muted-foreground">Health Score</span>
+                      </div>
+                      <p className={`text-2xl font-bold ${stats.overallHealthScore >= 80 ? 'text-green-600' : stats.overallHealthScore >= 50 ? 'text-yellow-600' : 'text-destructive'}`}>
+                        {stats.overallHealthScore}%
+                      </p>
+                      <Progress value={stats.overallHealthScore} className="h-1.5 mt-1" />
+                      <p className="text-[10px] text-muted-foreground mt-1">based on {stats.labResults.length} lab tests</p>
+                    </Card>
+                  )}
+                  <Card className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Clock className="h-4 w-4 text-primary" />
+                      <span className="text-xs text-muted-foreground">Last Checkup</span>
+                    </div>
+                    <p className="text-2xl font-bold">
+                      {stats.daysSinceLastDoc !== null ? `${stats.daysSinceLastDoc}d` : '—'}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {stats.lastDocDate ? `on ${format(stats.lastDocDate, 'MMM d')}` : 'no records'}
+                    </p>
+                  </Card>
+                  {stats.avgDaysBetweenDocs !== null && (
+                    <Card className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Calendar className="h-4 w-4 text-primary" />
+                        <span className="text-xs text-muted-foreground">Avg Interval</span>
+                      </div>
+                      <p className="text-2xl font-bold">{stats.avgDaysBetweenDocs}d</p>
+                      <p className="text-[10px] text-muted-foreground">between checkups</p>
+                    </Card>
+                  )}
+                  {stats.nextCheckupEstimate && (
+                    <Card className="p-4 border-primary/30">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Zap className="h-4 w-4 text-primary" />
+                        <span className="text-xs text-muted-foreground">Next Checkup</span>
+                      </div>
+                      <p className="text-lg font-bold">{format(stats.nextCheckupEstimate, 'MMM d')}</p>
+                      <p className="text-[10px] text-muted-foreground">estimated from pattern</p>
+                    </Card>
+                  )}
+                </div>
+
+                {/* Predictions / Trend Insights */}
+                {stats.predictions.length > 0 && (
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Zap className="h-4 w-4 text-primary" />
+                        Trend Predictions
+                      </CardTitle>
+                      <p className="text-[10px] text-muted-foreground">Based on changes across your lab results over time</p>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      {stats.predictions.map((pred, i) => {
+                        const Icon = pred.icon;
+                        const colorClass = pred.trend === 'improving'
+                          ? 'text-green-600 bg-green-50 dark:bg-green-900/10'
+                          : pred.trend === 'worsening'
+                          ? 'text-red-600 bg-red-50 dark:bg-red-900/10'
+                          : 'text-muted-foreground bg-muted/50';
+                        return (
+                          <div key={i} className={`flex items-start gap-3 rounded-lg px-3 py-2.5 ${colorClass}`}>
+                            <Icon className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium">{pred.title}</span>
+                                <Badge variant="outline" className="text-[9px] px-1.5 py-0">
+                                  {pred.trend}
+                                </Badge>
+                              </div>
+                              <p className="text-xs mt-0.5 opacity-80">{pred.detail}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Health Score Over Time */}
+                {stats.healthScoreTimeline.length > 1 && (
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Target className="h-4 w-4 text-primary" />
+                        Health Score Over Time
+                      </CardTitle>
+                      <p className="text-[10px] text-muted-foreground">% of lab results within normal range per checkup</p>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={220}>
+                        <AreaChart data={stats.healthScoreTimeline} margin={{ left: 0, right: 10, top: 5, bottom: 5 }}>
+                          <defs>
+                            <linearGradient id="healthGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
+                              <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                          <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
+                          <ReferenceLine y={80} stroke="#22c55e" strokeDasharray="3 3" strokeOpacity={0.5} label={{ value: "Good", position: "insideTopRight", fontSize: 9, fill: "#22c55e" }} />
+                          <Tooltip
+                            content={({ active, payload }) => {
+                              if (!active || !payload?.length) return null;
+                              const d = payload[0].payload;
+                              return (
+                                <div className="bg-background border border-border rounded-lg px-3 py-2 shadow-lg text-xs">
+                                  <p className="font-medium">{d.date}</p>
+                                  <p className="text-green-600 font-semibold">{d.score}% healthy</p>
+                                  <p className="text-muted-foreground">{d.normalCount}/{d.totalLabs} normal results</p>
+                                </div>
+                              );
+                            }}
+                          />
+                          <Area type="monotone" dataKey="score" stroke="#22c55e" fill="url(#healthGrad)" strokeWidth={2} dot={{ r: 4, fill: '#22c55e' }} />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Lab Trend Lines */}
+                {Object.keys(stats.labTrendData).length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4" />
+                      Lab Value Trends
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {Object.entries(stats.labTrendData)
+                        .filter(([, info]) => info.data.length >= 1)
+                        .slice(0, 8)
+                        .map(([title, info]) => {
+                          const hasRefRange = info.data.some(d => d.refLow !== null && d.refHigh !== null);
+                          const refLow = info.data.find(d => d.refLow !== null)?.refLow ?? undefined;
+                          const refHigh = info.data.find(d => d.refHigh !== null)?.refHigh ?? undefined;
+                          const latestVal = info.data[info.data.length - 1].value;
+                          const statusColor = info.latestStatus === 'critical' ? 'text-destructive' : info.latestStatus === 'abnormal' ? 'text-yellow-600' : 'text-green-600';
+
+                          return (
+                            <Card key={title}>
+                              <CardHeader className="pb-1">
+                                <CardTitle className="text-xs flex items-center justify-between">
+                                  <span className="truncate">{title}</span>
+                                  <span className={`font-mono text-sm ${statusColor}`}>
+                                    {latestVal}{info.unit ? ` ${info.unit}` : ''}
+                                  </span>
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent className="pt-0">
+                                {info.data.length >= 2 ? (
+                                  <ResponsiveContainer width="100%" height={120}>
+                                    <ComposedChart data={info.data} margin={{ left: 0, right: 5, top: 5, bottom: 0 }}>
+                                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                      <XAxis dataKey="date" tick={{ fontSize: 9 }} />
+                                      <YAxis tick={{ fontSize: 9 }} domain={['auto', 'auto']} />
+                                      {hasRefRange && refLow !== undefined && refHigh !== undefined && (
+                                        <ReferenceArea y1={refLow} y2={refHigh} fill="#22c55e" fillOpacity={0.08} label={{ value: "Normal", position: "insideTopLeft", fontSize: 8, fill: "#22c55e" }} />
+                                      )}
+                                      <Tooltip
+                                        content={({ active, payload }) => {
+                                          if (!active || !payload?.length) return null;
+                                          const d = payload[0].payload;
+                                          return (
+                                            <div className="bg-background border border-border rounded-lg px-2 py-1.5 shadow-lg text-xs">
+                                              <p>{d.date}: <span className="font-semibold">{d.value}{info.unit ? ` ${info.unit}` : ''}</span></p>
+                                              {d.refLow !== null && <p className="text-muted-foreground">Ref: {d.refLow}–{d.refHigh}</p>}
+                                            </div>
+                                          );
+                                        }}
+                                      />
+                                      <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3, fill: 'hsl(var(--primary))' }} />
+                                    </ComposedChart>
+                                  </ResponsiveContainer>
+                                ) : (
+                                  <div className="flex items-center justify-center h-20 text-muted-foreground text-xs">
+                                    <div className="text-center">
+                                      <p className="font-mono text-lg">{latestVal}{info.unit ? ` ${info.unit}` : ''}</p>
+                                      {hasRefRange && <p className="text-[10px]">Ref: {refLow}–{refHigh}</p>}
+                                      <p className="text-[10px] mt-1">Single reading — trends need ≥2</p>
+                                    </div>
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Lab Status Distribution */}
+                {stats.labStatusPie.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <FlaskConical className="h-4 w-4 text-primary" />
+                          Lab Status Distribution
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={200}>
+                          <RechartsPie>
+                            <Pie
+                              data={stats.labStatusPie}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={45}
+                              outerRadius={75}
+                              paddingAngle={4}
+                              dataKey="value"
+                              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                              labelLine={false}
+                            >
+                              {stats.labStatusPie.map((entry, index) => (
+                                <Cell key={`pie-${index}`} fill={entry.color} />
+                              ))}
+                            </Pie>
+                            <Tooltip formatter={(value: number) => [value, 'Tests']} />
+                          </RechartsPie>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+
+                    {/* Checkup Frequency */}
+                    {documents.length >= 2 && (
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-primary" />
+                            Checkup Timing
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-xs">
+                              <span className="text-muted-foreground">Total documents</span>
+                              <span className="font-semibold">{documents.length}</span>
+                            </div>
+                            <div className="flex justify-between text-xs">
+                              <span className="text-muted-foreground">AI-analyzed</span>
+                              <span className="font-semibold">{analyzedDocs.length}</span>
+                            </div>
+                            {stats.avgDaysBetweenDocs !== null && (
+                              <div className="flex justify-between text-xs">
+                                <span className="text-muted-foreground">Avg interval</span>
+                                <span className="font-semibold">{stats.avgDaysBetweenDocs} days</span>
+                              </div>
+                            )}
+                            {stats.daysSinceLastDoc !== null && (
+                              <div className="flex justify-between text-xs">
+                                <span className="text-muted-foreground">Since last checkup</span>
+                                <span className={`font-semibold ${stats.daysSinceLastDoc > (stats.avgDaysBetweenDocs || 90) ? 'text-yellow-600' : 'text-green-600'}`}>
+                                  {stats.daysSinceLastDoc} days
+                                </span>
+                              </div>
+                            )}
+                            {stats.nextCheckupEstimate && (
+                              <>
+                                <div className="border-t border-border pt-2 mt-2">
+                                  <div className="flex justify-between text-xs">
+                                    <span className="text-muted-foreground">Predicted next</span>
+                                    <span className="font-semibold text-primary">
+                                      {format(stats.nextCheckupEstimate, 'MMM d, yyyy')}
+                                    </span>
+                                  </div>
+                                  <p className="text-[10px] text-muted-foreground mt-1">
+                                    {differenceInDays(stats.nextCheckupEstimate, new Date()) > 0
+                                      ? `In ${differenceInDays(stats.nextCheckupEstimate, new Date())} days`
+                                      : `${Math.abs(differenceInDays(stats.nextCheckupEstimate, new Date()))} days overdue`
+                                    }
+                                  </p>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </TabsContent>
+
+          {/* ============ DETAILS TAB ============ */}
           <TabsContent value="details" className="space-y-4 mt-4">
             {dataTypes.length === 0 ? (
               <Card>
