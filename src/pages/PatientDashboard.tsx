@@ -449,7 +449,7 @@ const PatientDashboard = () => {
             {/* Upload Health Documents Section */}
             <div className="mb-6">
               <h3 className="text-base font-semibold mb-3">Upload</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <DocumentUpload />
                 <Card 
                   className="p-4 cursor-pointer hover:bg-accent/5 transition-colors"
@@ -462,10 +462,27 @@ const PatientDashboard = () => {
                     <div className="flex-1">
                       <h3 className="font-semibold">Medical History</h3>
                       <p className="text-xs text-muted-foreground">
-                        View analyzed documents & extracted data
+                        View analyzed documents & data
                       </p>
                     </div>
                     <Badge variant="secondary">{documents.length}</Badge>
+                  </div>
+                </Card>
+                <Card 
+                  className="p-4 cursor-pointer hover:bg-accent/5 transition-colors border-primary/20 bg-primary/[0.02]"
+                  onClick={() => navigate('/dashboard/ai-doctor')}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Sparkles className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold">AI Health Chat</h3>
+                      <p className="text-xs text-muted-foreground">
+                        Ask about your health records
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="text-[10px]">AI</Badge>
                   </div>
                 </Card>
               </div>
