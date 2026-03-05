@@ -179,220 +179,149 @@ export default function MedicalHistory() {
             <TabsTrigger value="timeline" className="flex-1">Timeline</TabsTrigger>
           </TabsList>
 
-          {/* ============ OVERVIEW TAB - STATISTICS ============ */}
+          {/* ============ OVERVIEW TAB - MEDICAL ANALYSIS ============ */}
           <TabsContent value="overview" className="space-y-4 mt-4">
-            {!hasData && !hasDocuments ? (
+            {!hasDocuments ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
-                  <BarChart3 className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground text-center mb-2 font-medium">No medical data yet</p>
-                  <p className="text-sm text-muted-foreground text-center">Upload health documents to see AI-generated statistics and insights here.</p>
+                  <Stethoscope className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground text-center mb-2 font-medium">No medical analysis yet</p>
+                  <p className="text-sm text-muted-foreground text-center">Upload health documents to receive AI-powered medical analysis.</p>
                 </CardContent>
               </Card>
             ) : (
               <>
-                {/* Summary Stats Cards */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Card className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <FileText className="h-4 w-4 text-primary" />
-                      <span className="text-xs text-muted-foreground">Documents</span>
-                    </div>
-                    <p className="text-2xl font-bold">{documents.length}</p>
-                    <p className="text-[10px] text-muted-foreground">{analyzedDocs.length} analyzed</p>
-                  </Card>
-                  <Card className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Activity className="h-4 w-4 text-secondary" />
-                      <span className="text-xs text-muted-foreground">Findings</span>
-                    </div>
-                    <p className="text-2xl font-bold">{stats.totalFindings}</p>
-                    <p className="text-[10px] text-muted-foreground">{dataTypes.length} categories</p>
-                  </Card>
-                  <Card className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600" />
-                      <span className="text-xs text-muted-foreground">Normal</span>
-                    </div>
-                    <p className="text-2xl font-bold text-green-600">{stats.normalPercent}%</p>
-                    <p className="text-[10px] text-muted-foreground">{stats.statusCounts.normal} findings</p>
-                  </Card>
-                  <Card className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                      <span className="text-xs text-muted-foreground">Attention</span>
-                    </div>
-                    <p className="text-2xl font-bold text-yellow-600">{stats.abnormalCount}</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {stats.statusCounts.critical > 0 ? `${stats.statusCounts.critical} critical` : 'abnormal findings'}
-                    </p>
-                  </Card>
-                </div>
+                {/* Per-Document Medical Analysis */}
+                {documents.map((doc) => {
+                  const docExtracted = medicalData.filter(m => m.document_id === doc.id);
+                  const isAnalyzed = !!doc.ai_summary;
+                  const isPending = !isAnalyzed;
 
-                {/* Health Score / Lab Results Bar */}
-                {stats.labResults.length > 0 && (
-                  <Card className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <FlaskConical className="h-4 w-4 text-secondary" />
-                        <span className="text-sm font-semibold">Lab Results Health Score</span>
-                      </div>
-                      <span className="text-lg font-bold">{stats.labNormalPercent}%</span>
-                    </div>
-                    <Progress value={stats.labNormalPercent} className="h-3" />
-                    <div className="flex justify-between mt-2">
-                      <span className="text-[10px] text-muted-foreground">
-                        {stats.labResults.filter(i => i.status === 'normal').length} normal
-                      </span>
-                      <span className="text-[10px] text-muted-foreground">
-                        {stats.labResults.filter(i => i.status !== 'normal').length} flagged
-                      </span>
-                    </div>
-                  </Card>
-                )}
-
-                {/* Active Conditions & Medications */}
-                {(stats.activeConditions > 0 || stats.activeMedications > 0) && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {stats.activeConditions > 0 && (
-                      <Card className="p-4">
-                        <div className="flex items-center gap-2 mb-3">
-                          <Stethoscope className="h-4 w-4 text-destructive" />
-                          <span className="text-sm font-semibold">Active Conditions</span>
-                        </div>
-                        <div className="space-y-2">
-                          {medicalData.filter(i => i.data_type === 'condition' && i.status === 'active').map(item => (
-                            <div key={item.id} className="flex items-center justify-between bg-destructive/5 rounded-lg px-3 py-2">
-                              <span className="text-sm font-medium">{item.title}</span>
-                              {item.date_recorded && (
-                                <span className="text-[10px] text-muted-foreground">
-                                  since {format(new Date(item.date_recorded), 'MMM yyyy')}
-                                </span>
-                              )}
+                  return (
+                    <Card key={doc.id} className="overflow-hidden">
+                      {/* Document header */}
+                      <CardHeader className="pb-2 bg-muted/30">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-start gap-3 flex-1 min-w-0">
+                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <FileText className="h-5 w-5 text-primary" />
                             </div>
-                          ))}
-                        </div>
-                      </Card>
-                    )}
-                    {stats.activeMedications > 0 && (
-                      <Card className="p-4">
-                        <div className="flex items-center gap-2 mb-3">
-                          <Pill className="h-4 w-4 text-primary" />
-                          <span className="text-sm font-semibold">Current Medications</span>
-                        </div>
-                        <div className="space-y-2">
-                          {medicalData.filter(i => i.data_type === 'medication' && i.status === 'active').map(item => (
-                            <div key={item.id} className="flex items-center justify-between bg-primary/5 rounded-lg px-3 py-2">
-                              <div>
-                                <span className="text-sm font-medium">{item.title}</span>
-                                {item.value && <span className="text-xs text-muted-foreground ml-2">{item.value}</span>}
+                            <div className="min-w-0">
+                              <CardTitle className="text-base leading-tight">
+                                {doc.ai_suggested_name || doc.file_name}
+                              </CardTitle>
+                              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                <Badge variant="outline" className="text-[10px]">
+                                  {doc.ai_suggested_category || doc.document_type}
+                                </Badge>
+                                {doc.uploaded_at && (
+                                  <span className="text-[10px] text-muted-foreground">
+                                    {format(new Date(doc.uploaded_at), 'MMM d, yyyy')}
+                                  </span>
+                                )}
+                                {isPending && (
+                                  <Badge className="text-[10px] bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                                    Analysis pending
+                                  </Badge>
+                                )}
                               </div>
                             </div>
-                          ))}
+                          </div>
                         </div>
-                      </Card>
-                    )}
-                  </div>
-                )}
+                      </CardHeader>
 
-                {/* Category Breakdown */}
-                {dataTypes.length > 0 && (
-                  <Card className="p-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <PieChart className="h-4 w-4 text-primary" />
-                      <span className="text-sm font-semibold">Data by Category</span>
-                    </div>
-                    <div className="space-y-3">
-                      {dataTypes.map((type) => {
-                        const config = typeConfig[type] || { icon: Activity, label: type, color: 'text-foreground', bgColor: 'bg-muted' };
-                        const Icon = config.icon;
-                        const count = stats.typeCounts[type] || 0;
-                        const percent = stats.totalFindings > 0 ? Math.round((count / stats.totalFindings) * 100) : 0;
-                        return (
-                          <div key={type}>
-                            <div className="flex items-center justify-between mb-1">
+                      <CardContent className="pt-4 space-y-4">
+                        {/* AI Medical Summary */}
+                        {doc.ai_summary && (
+                          <div>
+                            <div className="flex items-center gap-2 mb-2">
+                              <Stethoscope className="h-4 w-4 text-primary" />
+                              <span className="text-sm font-semibold">Medical Analysis</span>
+                            </div>
+                            <div className="bg-primary/5 rounded-lg p-4 border border-primary/10">
+                              <p className="text-sm leading-relaxed">{doc.ai_summary}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Extracted Findings */}
+                        {docExtracted.length > 0 && (
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-2">
-                                <div className={`w-7 h-7 rounded-md ${config.bgColor} flex items-center justify-center`}>
-                                  <Icon className={`h-3.5 w-3.5 ${config.color}`} />
-                                </div>
-                                <span className="text-sm font-medium">{config.label}</span>
+                                <FlaskConical className="h-4 w-4 text-secondary" />
+                                <span className="text-sm font-semibold">Key Findings</span>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-bold">{count}</span>
-                                <span className="text-[10px] text-muted-foreground w-8 text-right">{percent}%</span>
-                              </div>
+                              <Badge variant="secondary" className="text-[10px]">{docExtracted.length} items</Badge>
                             </div>
-                            <Progress value={percent} className="h-1.5" />
+                            <div className="space-y-2">
+                              {docExtracted.map(item => {
+                                const config = typeConfig[item.data_type] || { icon: Activity, label: item.data_type, color: 'text-foreground', bgColor: 'bg-muted' };
+                                const Icon = config.icon;
+                                return (
+                                  <div key={item.id} className="flex items-start gap-3 bg-muted/30 rounded-lg px-3 py-2.5">
+                                    <div className={`w-7 h-7 rounded-md ${config.bgColor} flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                                      <Icon className={`h-3.5 w-3.5 ${config.color}`} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        <span className="text-sm font-medium">{item.title}</span>
+                                        {item.status && (
+                                          <Badge className={`text-[9px] px-1.5 py-0 ${statusColors[item.status] || 'bg-muted'}`}>
+                                            {item.status}
+                                          </Badge>
+                                        )}
+                                      </div>
+                                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                                        {item.value && (
+                                          <span className="text-xs font-semibold">
+                                            {item.value}{item.unit ? ` ${item.unit}` : ''}
+                                          </span>
+                                        )}
+                                        {item.reference_range && (
+                                          <span className="text-[10px] text-muted-foreground">(Ref: {item.reference_range})</span>
+                                        )}
+                                      </div>
+                                      {item.notes && (
+                                        <p className="text-xs text-muted-foreground mt-1">{item.notes}</p>
+                                      )}
+                                    </div>
+                                    {item.date_recorded && (
+                                      <span className="text-[10px] text-muted-foreground whitespace-nowrap mt-1">
+                                        {format(new Date(item.date_recorded), 'MMM d, yyyy')}
+                                      </span>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  </Card>
-                )}
+                        )}
 
-                {/* Status Distribution */}
-                {hasData && (
-                  <Card className="p-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <BarChart3 className="h-4 w-4 text-secondary" />
-                      <span className="text-sm font-semibold">Status Distribution</span>
-                    </div>
-                    <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
-                      {[
-                        { key: 'normal', label: 'Normal', icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
-                        { key: 'abnormal', label: 'Abnormal', icon: TrendingDown, color: 'text-yellow-600', bg: 'bg-yellow-50 dark:bg-yellow-900/20' },
-                        { key: 'critical', label: 'Critical', icon: XCircle, color: 'text-red-600', bg: 'bg-red-50 dark:bg-red-900/20' },
-                        { key: 'active', label: 'Active', icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-                        { key: 'resolved', label: 'Resolved', icon: Heart, color: 'text-muted-foreground', bg: 'bg-muted' },
-                      ].map(({ key, label, icon: StatusIcon, color, bg }) => {
-                        const count = stats.statusCounts[key as keyof typeof stats.statusCounts];
-                        if (count === 0) return null;
-                        return (
-                          <div key={key} className={`${bg} rounded-lg p-3 text-center`}>
-                            <StatusIcon className={`h-5 w-5 mx-auto mb-1 ${color}`} />
-                            <p className={`text-lg font-bold ${color}`}>{count}</p>
-                            <p className="text-[10px] text-muted-foreground capitalize">{label}</p>
+                        {/* No analysis yet for this doc */}
+                        {isPending && docExtracted.length === 0 && (
+                          <div className="flex items-center gap-3 text-muted-foreground bg-muted/30 rounded-lg p-4">
+                            <Activity className="h-5 w-5 animate-pulse" />
+                            <div>
+                              <p className="text-sm font-medium">Analysis in progress</p>
+                              <p className="text-xs">The AI is analyzing this document. Results will appear here shortly.</p>
+                            </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  </Card>
-                )}
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
 
-                {/* Document Summaries */}
-                {analyzedDocs.length > 0 && (
-                  <Card className="p-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <FileText className="h-4 w-4 text-primary" />
-                      <span className="text-sm font-semibold">AI Document Summaries</span>
-                    </div>
-                    <div className="space-y-3">
-                      {analyzedDocs.map(doc => (
-                        <div key={doc.id} className="bg-muted/30 rounded-lg p-3">
-                          <div className="flex items-start justify-between gap-2 mb-2">
-                            <h4 className="text-sm font-semibold">{doc.ai_suggested_name || doc.file_name}</h4>
-                            <Badge variant="outline" className="text-[10px] flex-shrink-0">
-                              {doc.ai_suggested_category || doc.document_type}
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground leading-relaxed">{doc.ai_summary}</p>
-                          {doc.uploaded_at && (
-                            <p className="text-[10px] text-muted-foreground mt-2">
-                              Uploaded {format(new Date(doc.uploaded_at), 'MMM d, yyyy')}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </Card>
-                )}
-
-                {/* Flagged Items */}
+                {/* Flagged Items Summary */}
                 {stats.abnormalCount > 0 && (
                   <Card className="p-4 border-yellow-200 dark:border-yellow-900/50">
                     <div className="flex items-center gap-2 mb-3">
                       <AlertTriangle className="h-4 w-4 text-yellow-600" />
                       <span className="text-sm font-semibold">Items Requiring Attention</span>
+                      <Badge className="ml-auto bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 text-[10px]">
+                        {stats.abnormalCount}
+                      </Badge>
                     </div>
                     <div className="space-y-2">
                       {medicalData
