@@ -231,7 +231,51 @@ serve(async (req) => {
   }
 
   try {
-    const { documentId, filePath, fileName, mimeType, userId } = await req.json();
+    // Authenticate the caller
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const authClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    );
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const userId = claimsData.claims.sub as string;
+
+    const { documentId, filePath, fileName, mimeType } = await req.json();
+
+    // Verify the document belongs to the authenticated user
+    const verifyClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    const { data: doc, error: docError } = await verifyClient
+      .from('health_documents')
+      .select('id, user_id')
+      .eq('id', documentId)
+      .single();
+
+    if (docError || !doc || doc.user_id !== userId) {
+      return new Response(
+        JSON.stringify({ error: 'Document not found or access denied' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Use EdgeRuntime.waitUntil for background processing
     // @ts-ignore - EdgeRuntime is available in Supabase Edge Functions
@@ -243,7 +287,6 @@ serve(async (req) => {
         })
       );
     } else {
-      // Fallback: run inline (may timeout for large files)
       await analyzeDocument(documentId, filePath, fileName, mimeType, userId);
     }
 
@@ -255,7 +298,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in analyze-document function:', error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ error: 'Internal server error' }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
