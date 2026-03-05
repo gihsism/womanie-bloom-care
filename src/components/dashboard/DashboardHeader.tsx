@@ -58,11 +58,12 @@ interface DashboardHeaderProps {
   onModeChange: (mode: LifeStage) => void;
   onNavigate: (section: string) => void;
   onUploadClick?: () => void;
+  onDoctorChatClick?: () => void;
   cycleDay?: number;
   cyclePhase?: string;
 }
 
-const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onUploadClick, cycleDay = 14, cyclePhase = 'follicular' }: DashboardHeaderProps) => {
+const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onUploadClick, onDoctorChatClick, cycleDay = 14, cyclePhase = 'follicular' }: DashboardHeaderProps) => {
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
@@ -112,60 +113,16 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onU
 
           {/* Quick Actions */}
           <div className="flex gap-2">
-            {/* Doctor Chat Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex flex-col items-center gap-1 h-auto py-2 px-3"
-                >
-                  <MessageSquare className="h-4 w-4 text-primary" />
-                  <span className="text-xs">Doctor Chat</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-72 bg-card z-50">
-                <DropdownMenuLabel className="flex items-center gap-2">
-                  <Bot className="h-4 w-4" />
-                  B1.1: AI Health Assistant
-                </DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => onNavigate('B1.1-symptom')}>
-                  <CheckCircle className="mr-2 h-4 w-4" />
-                  Symptom checker & assessment
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onNavigate('B1.1-questions')}>
-                  <HelpCircle className="mr-2 h-4 w-4" />
-                  Health questions & guidance
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onNavigate('B1.1-recommendations')}>
-                  <Lightbulb className="mr-2 h-4 w-4" />
-                  Phase-specific recommendations
-                </DropdownMenuItem>
-                
-                <DropdownMenuSeparator />
-                
-                <DropdownMenuLabel className="flex items-center gap-2">
-                  <Stethoscope className="h-4 w-4" />
-                  B1.2: Doctor Consultations
-                </DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => onNavigate('B1.2-new')}>
-                  <Video className="mr-2 h-4 w-4" />
-                  Start new consultation
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onNavigate('B1.2-history')}>
-                  <Clock className="mr-2 h-4 w-4" />
-                  Consultation history
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onNavigate('B1.2-treatment')}>
-                  <ClipboardList className="mr-2 h-4 w-4" />
-                  Treatment plans & prescriptions
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onNavigate('B1.2-followup')}>
-                  <Bell className="mr-2 h-4 w-4" />
-                  Follow-up reminders
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Doctor Chat Button - navigates directly */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onDoctorChatClick}
+              className="flex flex-col items-center gap-1 h-auto py-2 px-3"
+            >
+              <MessageSquare className="h-4 w-4 text-primary" />
+              <span className="text-xs">Doctor Chat</span>
+            </Button>
 
             {/* Upload Documents Button */}
             {onUploadClick && (
