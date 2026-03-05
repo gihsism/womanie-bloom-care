@@ -6,52 +6,69 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+async function analyzeDocument(documentId: string, filePath: string, fileName: string, mimeType: string, userId: string) {
+  const supabaseClient = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  );
+
+  const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+  if (!LOVABLE_API_KEY) {
+    throw new Error('LOVABLE_API_KEY not configured');
   }
 
-  try {
-    const { documentId, filePath, fileName, mimeType, userId } = await req.json();
-    
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+  // Create a signed URL instead of downloading the file
+  const { data: signedUrlData, error: signedUrlError } = await supabaseClient
+    .storage
+    .from('health-documents')
+    .createSignedUrl(filePath, 3600); // 1 hour expiry
 
-    // Download the file from storage
-    const { data: fileData, error: downloadError } = await supabaseClient
-      .storage
-      .from('health-documents')
-      .download(filePath);
+  if (signedUrlError || !signedUrlData?.signedUrl) {
+    console.error('Signed URL error:', signedUrlError);
+    throw new Error('Failed to create signed URL');
+  }
 
-    if (downloadError) {
-      console.error('Download error:', downloadError);
-      throw downloadError;
-    }
+  const fileUrl = signedUrlData.signedUrl;
 
-    // Convert file to base64 for AI analysis
-    const arrayBuffer = await fileData.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-    const dataUrl = `data:${mimeType};base64,${base64}`;
-
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
-    }
-
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
+  // Build message content - use URL for supported image types, text description for PDFs
+  const isImage = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(mimeType);
+  
+  let userContent: any[];
+  if (isImage) {
+    userContent = [
+      {
+        type: 'text',
+        text: `Analyze this health document (${fileName}). Extract all medical data, lab results, conditions, medications, and any menstrual cycle information.`
       },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          {
-            role: 'system',
-            content: `You are a medical document analyzer specializing in women's health. Analyze health documents and extract structured data.
+      {
+        type: 'image_url',
+        image_url: { url: fileUrl }
+      }
+    ];
+  } else {
+    // For PDFs and other non-image files, use text-only analysis with file metadata
+    userContent = [
+      {
+        type: 'text',
+        text: `Analyze this health document named "${fileName}" (type: ${mimeType}). The file is available at this URL: ${fileUrl}
+
+Please analyze and extract all medical data, lab results, conditions, medications, and any menstrual cycle information. If you cannot access the file directly, provide analysis based on the filename and document type, and note that the file could not be fully analyzed.`
+      }
+    ];
+  }
+
+  const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'google/gemini-3-flash-preview',
+      messages: [
+        {
+          role: 'system',
+          content: `You are a medical document analyzer specializing in women's health. Analyze health documents and extract structured data.
 
 Return a JSON object with:
 {
@@ -62,8 +79,8 @@ Return a JSON object with:
     {
       "data_type": "condition | medication | lab_result | cycle_info | allergy | procedure | vaccination",
       "title": "name of the finding",
-      "value": "value if applicable (e.g., '14.2' for hemoglobin, '28' for cycle length)",
-      "unit": "unit if applicable (e.g., 'g/dL', 'days')",
+      "value": "value if applicable",
+      "unit": "unit if applicable",
       "reference_range": "normal range if applicable",
       "status": "normal | abnormal | critical | active | resolved",
       "date_recorded": "YYYY-MM-DD if found in document",
@@ -78,147 +95,154 @@ Return a JSON object with:
   }
 }
 
-For cycle_info type entries, extract menstrual cycle details like cycle length, period dates, irregularities. 
+For cycle_info entries, extract menstrual cycle details.
 For lab_results, extract specific values with units and reference ranges.
 For medications, include dosage in the value field.
-The cycle_data field should contain any cycle-related information found that could update the patient's cycle tracking.
+The cycle_data field should contain any cycle-related information found.
 If no cycle data is found, set cycle_data values to null.
 Always return valid JSON.`
-          },
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: `Analyze this health document (${fileName}). Extract all medical data, lab results, conditions, medications, and any menstrual cycle information.`
-              },
-              {
-                type: 'image_url',
-                image_url: { url: dataUrl }
-              }
-            ]
-          }
-        ]
-      })
-    });
+        },
+        {
+          role: 'user',
+          content: userContent
+        }
+      ]
+    })
+  });
 
-    if (!aiResponse.ok) {
-      const errorText = await aiResponse.text();
-      console.error('AI gateway error:', aiResponse.status, errorText);
-      throw new Error(`AI analysis failed: ${aiResponse.status}`);
+  if (!aiResponse.ok) {
+    const errorText = await aiResponse.text();
+    console.error('AI gateway error:', aiResponse.status, errorText);
+    throw new Error(`AI analysis failed: ${aiResponse.status}`);
+  }
+
+  const aiData = await aiResponse.json();
+  const aiContent = aiData.choices?.[0]?.message?.content;
+
+  if (!aiContent) {
+    throw new Error('No response from AI');
+  }
+
+  // Parse AI response
+  let analysis;
+  try {
+    const jsonMatch = aiContent.match(/\{[\s\S]*\}/);
+    analysis = jsonMatch ? JSON.parse(jsonMatch[0]) : {
+      name: fileName,
+      category: 'other',
+      summary: aiContent,
+      extracted_data: [],
+      cycle_data: {}
+    };
+  } catch {
+    analysis = {
+      name: fileName,
+      category: 'other',
+      summary: aiContent,
+      extracted_data: [],
+      cycle_data: {}
+    };
+  }
+
+  // Update document with AI analysis
+  const { error: updateError } = await supabaseClient
+    .from('health_documents')
+    .update({
+      ai_suggested_name: analysis.name,
+      ai_suggested_category: analysis.category,
+      ai_summary: analysis.summary
+    })
+    .eq('id', documentId);
+
+  if (updateError) {
+    console.error('Update error:', updateError);
+  }
+
+  // Insert extracted medical data
+  if (analysis.extracted_data && analysis.extracted_data.length > 0 && userId) {
+    const medicalRecords = analysis.extracted_data.map((item: any) => ({
+      user_id: userId,
+      document_id: documentId,
+      data_type: item.data_type || 'other',
+      title: item.title || 'Unknown',
+      value: item.value || null,
+      unit: item.unit || null,
+      reference_range: item.reference_range || null,
+      status: item.status || null,
+      date_recorded: item.date_recorded || null,
+      notes: item.notes || null,
+      raw_data: item
+    }));
+
+    const { error: insertError } = await supabaseClient
+      .from('medical_extracted_data')
+      .insert(medicalRecords);
+
+    if (insertError) {
+      console.error('Medical data insert error:', insertError);
     }
+  }
 
-    const aiData = await aiResponse.json();
-    const aiContent = aiData.choices?.[0]?.message?.content;
-    
-    if (!aiContent) {
-      throw new Error('No response from AI');
-    }
+  // Update cycle tracking if cycle data found
+  if (analysis.cycle_data && userId) {
+    const { cycle_length, last_period_date, period_length } = analysis.cycle_data;
 
-    // Parse AI response
-    let analysis;
-    try {
-      const jsonMatch = aiContent.match(/\{[\s\S]*\}/);
-      analysis = jsonMatch ? JSON.parse(jsonMatch[0]) : {
-        name: fileName,
-        category: 'other',
-        summary: aiContent,
-        extracted_data: [],
-        cycle_data: {}
-      };
-    } catch {
-      analysis = {
-        name: fileName,
-        category: 'other',
-        summary: aiContent,
-        extracted_data: [],
-        cycle_data: {}
-      };
-    }
+    if (last_period_date && cycle_length) {
+      const { data: existing } = await supabaseClient
+        .from('period_tracking')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('period_start_date', last_period_date)
+        .maybeSingle();
 
-    // Update document with AI analysis
-    const { error: updateError } = await supabaseClient
-      .from('health_documents')
-      .update({
-        ai_suggested_name: analysis.name,
-        ai_suggested_category: analysis.category,
-        ai_summary: analysis.summary
-      })
-      .eq('id', documentId);
+      if (!existing) {
+        const periodLen = period_length || 5;
+        const endDate = new Date(last_period_date);
+        endDate.setDate(endDate.getDate() + periodLen - 1);
 
-    if (updateError) {
-      console.error('Update error:', updateError);
-      throw updateError;
-    }
-
-    // Insert extracted medical data
-    if (analysis.extracted_data && analysis.extracted_data.length > 0 && userId) {
-      const medicalRecords = analysis.extracted_data.map((item: any) => ({
-        user_id: userId,
-        document_id: documentId,
-        data_type: item.data_type || 'other',
-        title: item.title || 'Unknown',
-        value: item.value || null,
-        unit: item.unit || null,
-        reference_range: item.reference_range || null,
-        status: item.status || null,
-        date_recorded: item.date_recorded || null,
-        notes: item.notes || null,
-        raw_data: item
-      }));
-
-      const { error: insertError } = await supabaseClient
-        .from('medical_extracted_data')
-        .insert(medicalRecords);
-
-      if (insertError) {
-        console.error('Medical data insert error:', insertError);
-      }
-    }
-
-    // Update cycle tracking if cycle data found
-    if (analysis.cycle_data && userId) {
-      const { cycle_length, last_period_date, period_length } = analysis.cycle_data;
-      
-      if (last_period_date && cycle_length) {
-        // Check if a period record already exists for this date
-        const { data: existing } = await supabaseClient
+        const { error: periodError } = await supabaseClient
           .from('period_tracking')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('period_start_date', last_period_date)
-          .maybeSingle();
+          .insert({
+            user_id: userId,
+            period_start_date: last_period_date,
+            period_end_date: endDate.toISOString().split('T')[0],
+            cycle_length: parseInt(cycle_length) || 28
+          });
 
-        if (!existing) {
-          const periodLen = period_length || 5;
-          const endDate = new Date(last_period_date);
-          endDate.setDate(endDate.getDate() + periodLen - 1);
-
-          const { error: periodError } = await supabaseClient
-            .from('period_tracking')
-            .insert({
-              user_id: userId,
-              period_start_date: last_period_date,
-              period_end_date: endDate.toISOString().split('T')[0],
-              cycle_length: parseInt(cycle_length) || 28
-            });
-
-          if (periodError) {
-            console.error('Period tracking update error:', periodError);
-          } else {
-            console.log('Cycle data updated from document:', { last_period_date, cycle_length });
-          }
+        if (periodError) {
+          console.error('Period tracking update error:', periodError);
         }
       }
     }
+  }
 
-    console.log('Document analyzed successfully:', documentId);
+  console.log('Document analyzed successfully:', documentId);
+}
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { documentId, filePath, fileName, mimeType, userId } = await req.json();
+
+    // Use EdgeRuntime.waitUntil for background processing
+    // @ts-ignore - EdgeRuntime is available in Supabase Edge Functions
+    if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
+      // @ts-ignore
+      EdgeRuntime.waitUntil(
+        analyzeDocument(documentId, filePath, fileName, mimeType, userId).catch((error) => {
+          console.error('Background analysis error:', error);
+        })
+      );
+    } else {
+      // Fallback: run inline (may timeout for large files)
+      await analyzeDocument(documentId, filePath, fileName, mimeType, userId);
+    }
 
     return new Response(
-      JSON.stringify({ 
-        success: true,
-        analysis 
-      }),
+      JSON.stringify({ success: true, message: 'Analysis started' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
@@ -226,7 +250,7 @@ Always return valid JSON.`
     console.error('Error in analyze-document function:', error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
-      { 
+      {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
