@@ -420,6 +420,7 @@ const PatientDashboard = () => {
                 onModeChange={handleModeChange}
                 onNavigate={setActiveSection}
                 onUploadClick={() => setActiveSection('B1.3')}
+                onDoctorChatClick={() => navigate('/dashboard/ai-doctor')}
                 cycleDay={currentCycleDay}
               />
             </div>
