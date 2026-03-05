@@ -492,7 +492,33 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      available_consultations: {
+        Row: {
+          consultation_duration: number | null
+          consultation_price: number | null
+          currency: string | null
+          doctor_id: string | null
+          is_available: boolean | null
+          video_enabled: boolean | null
+        }
+        Insert: {
+          consultation_duration?: number | null
+          consultation_price?: number | null
+          currency?: string | null
+          doctor_id?: string | null
+          is_available?: boolean | null
+          video_enabled?: boolean | null
+        }
+        Update: {
+          consultation_duration?: number | null
+          consultation_price?: number | null
+          currency?: string | null
+          doctor_id?: string | null
+          is_available?: boolean | null
+          video_enabled?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_patient_access: {

@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
+import { useRequireRole } from '@/hooks/useRequireRole';
 import {
   ArrowLeft,
   User,
@@ -69,7 +69,8 @@ const PatientDetails = () => {
   const navigate = useNavigate();
   const { patientId } = useParams();
   const { toast } = useToast();
-  const { user, loading } = useAuth();
+  const { hasRole, loading } = useRequireRole('doctor', '/auth/doctor-login');
+  const [user, setUser] = useState<any>(null);
   
   const [patient, setPatient] = useState<PatientProfile | null>(null);
   const [healthSignals, setHealthSignals] = useState<HealthSignal[]>([]);
@@ -89,10 +90,8 @@ const PatientDetails = () => {
   });
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth/doctor-login');
-    }
-  }, [user, loading, navigate]);
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+  }, []);
 
   useEffect(() => {
     if (user && patientId) {

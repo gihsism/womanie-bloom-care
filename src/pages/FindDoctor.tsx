@@ -74,9 +74,9 @@ const FindDoctor = () => {
 
       // Fetch consultation settings for available doctors
       const { data: settings, error: settingsError } = await supabase
-        .from('consultation_settings')
+        .from('available_consultations' as any)
         .select('*')
-        .eq('is_available', true);
+        .eq('is_available', true) as { data: any[] | null; error: any };
 
       if (settingsError) throw settingsError;
 
