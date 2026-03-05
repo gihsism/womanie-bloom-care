@@ -15,9 +15,10 @@ const WhatIsWomanie = () => {
         </h2>
         <p className="text-lg text-muted-foreground mb-12 max-w-3xl mx-auto">
           Womanie combines intelligent cycle tracking, personalized health insights,
-          and direct access to medical professionals in one secure platform. Whether
-          you're managing contraception, planning pregnancy, navigating IVF, or
-          transitioning through menopause, we're with you every step of the way.
+          direct access to medical professionals, and secure medical document management
+          in one platform. Whether you're managing contraception, planning pregnancy,
+          navigating IVF, or transitioning through menopause, we're with you every step
+          of the way.
         </p>
 
         {/* Trust Badges */}
