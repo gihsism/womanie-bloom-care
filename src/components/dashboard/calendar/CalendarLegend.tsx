@@ -5,21 +5,21 @@ interface CalendarLegendProps {
 }
 
 const CalendarLegend = ({ selectedMode }: CalendarLegendProps) => {
-  // Don't show legend for non-menstrual modes
   if (['pregnancy', 'menopause', 'post-menopause'].includes(selectedMode)) {
     return null;
   }
 
   const legendItems = [
     { label: 'Period', bgClass: 'bg-primary' },
+    { label: 'Predicted Period', bgClass: 'bg-primary/15 border border-primary/40' },
     { label: 'Fertile', bgClass: 'bg-accent' },
     { label: 'Ovulation', bgClass: 'bg-secondary' },
   ];
 
   const signalItems = [
     { label: 'Symptoms', bgClass: 'bg-destructive' },
-    { label: 'Intimacy', bgClass: 'bg-pink-400' },
-    { label: 'Mood', bgClass: 'bg-yellow-400' },
+    { label: 'Intimacy', bgClass: 'bg-primary/70' },
+    { label: 'Mood', bgClass: 'bg-secondary/70' },
   ];
 
   return (

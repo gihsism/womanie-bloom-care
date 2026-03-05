@@ -546,6 +546,7 @@ const CycleCalendar = ({
           periodDays={periodDays}
           markedOvulationDays={markedOvulationDays}
           prediction={prediction}
+          periodRecords={periodRecords}
         />
 
         {/* Legend */}

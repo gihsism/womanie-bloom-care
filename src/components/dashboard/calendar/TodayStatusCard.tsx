@@ -38,7 +38,11 @@ const TodayStatusCard = ({
     ? today >= prediction.fertileWindowStart && today <= prediction.fertileWindowEnd
     : cycleDay >= ovulationCycleDay - 4 && cycleDay <= ovulationCycleDay;
     
-  const isOnPeriod = cycleDay <= periodLength;
+  // Check if today is actually a logged period day
+  const todayKey = today.toISOString().slice(0, 10);
+  const isOnPeriod = prediction
+    ? today >= new Date(today.getFullYear(), today.getMonth(), today.getDate()) && cycleDay <= periodLength
+    : cycleDay <= periodLength;
 
   // For non-menstrual modes, show simplified status
   if (['pregnancy', 'menopause', 'post-menopause'].includes(selectedMode)) {
