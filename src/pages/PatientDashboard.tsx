@@ -419,7 +419,12 @@ const PatientDashboard = () => {
                 selectedMode={selectedMode}
                 onModeChange={handleModeChange}
                 onNavigate={setActiveSection}
-                onUploadClick={() => setActiveSection('B1.3')}
+                onUploadClick={() => {
+                  setActiveSection('B1');
+                  setTimeout(() => {
+                    document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }, 100);
+                }}
                 onDoctorChatClick={() => navigate('/dashboard/ai-doctor')}
                 cycleDay={currentCycleDay}
               />
@@ -632,7 +637,7 @@ const PatientDashboard = () => {
                         {visibleSubsections.map((sub) => (
                           <div key={sub.id}>
                             {sub.id === 'B1.3' ? (
-                              <div className="p-4 rounded-lg border border-border bg-card">
+                              <div id="upload-section" className="p-4 rounded-lg border border-border bg-card">
                                 <div className="mb-3">
                                   <div className="font-medium text-sm mb-1">{sub.title}</div>
                                   <div className="text-xs text-muted-foreground">{sub.description}</div>
