@@ -257,13 +257,33 @@ export const getModeStats = (mode: LifeStage, cycleDay: number = 14, pregnancyDu
         { title: 'Energy Level', value: energy, subtitle: 'Physical vitality today', icon: Flame, color: 'text-secondary' },
       ];
     
-    case 'pregnancy':
+    case 'pregnancy': {
+      if (!pregnancyDueDate) {
+        return [
+          { title: 'Status', value: 'Not set', subtitle: 'Set your due date to see stats', icon: Baby, color: 'text-primary' },
+        ];
+      }
+      const today = new Date();
+      const gestStart = new Date(pregnancyDueDate.getTime() - 280 * 24 * 60 * 60 * 1000);
+      const totalDays = Math.floor((today.getTime() - gestStart.getTime()) / (1000 * 60 * 60 * 24));
+      const weeks = Math.floor(totalDays / 7);
+      const days = totalDays % 7;
+      const daysLeft = Math.max(0, Math.floor((pregnancyDueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
+      const trimester = weeks < 13 ? 1 : weeks < 27 ? 2 : 3;
+      const trimesterLabel = trimester === 1 ? 'First trimester' : trimester === 2 ? 'Second trimester' : 'Third trimester';
+
+      const sizeMap: Record<number, string> = { 4:'Poppy seed',5:'Sesame seed',6:'Lentil',7:'Blueberry',8:'Raspberry',9:'Cherry',10:'Strawberry',11:'Fig',12:'Lime',13:'Peach',14:'Lemon',15:'Apple',16:'Avocado',17:'Pear',18:'Bell pepper',19:'Mango',20:'Banana',22:'Papaya',24:'Corn',26:'Lettuce',28:'Eggplant',30:'Cabbage',32:'Squash',34:'Cantaloupe',36:'Honeydew',38:'Pumpkin',40:'Watermelon' };
+      const sizeKeys = Object.keys(sizeMap).map(Number).sort((a, b) => a - b);
+      let babySize = sizeMap[4];
+      for (const k of sizeKeys) { if (k <= weeks) babySize = sizeMap[k]; }
+
       return [
-        { title: 'Week', value: '24', subtitle: 'Second trimester', icon: Baby, color: 'text-primary' },
-        { title: 'Baby Size', value: 'Papaya', subtitle: '~30cm length', icon: Heart, color: 'text-secondary' },
-        { title: 'Weight Gain', value: '+12kg', subtitle: 'On track', icon: TrendingUp, color: 'text-accent' },
-        { title: 'Next Appt', value: '5 days', subtitle: 'Ultrasound scan', icon: CalendarIcon, color: 'text-primary' },
-        { title: 'Vitamins', value: '10/10', subtitle: 'Prenatal complete', icon: Pill, color: 'text-secondary' },
+        { title: 'Week', value: `${weeks}+${days}`, subtitle: trimesterLabel, icon: Baby, color: 'text-primary' },
+        { title: 'Baby Size', value: babySize, subtitle: `Week ${weeks} of 40`, icon: Heart, color: 'text-secondary' },
+        { title: 'Due Date', value: daysLeft > 0 ? `${daysLeft} days` : 'Due!', subtitle: pregnancyDueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), icon: CalendarIcon, color: 'text-accent' },
+        { title: 'Progress', value: `${Math.min(100, Math.round((totalDays / 280) * 100))}%`, subtitle: `${280 - totalDays} days remaining`, icon: TrendingUp, color: 'text-primary' },
+      ];
+    }
       ];
     
     case 'menopause':
