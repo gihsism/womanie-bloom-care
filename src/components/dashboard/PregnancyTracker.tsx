@@ -332,6 +332,15 @@ const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
           <Baby className="h-4 w-4 text-primary" />
           Baby at Week {weeksPregnant}
         </h4>
+        
+        <div className="flex items-center gap-4 bg-muted/30 rounded-xl p-4">
+          <img src={getWeekImage(weeksPregnant)} alt={weekData.size} className="w-16 h-16 object-contain flex-shrink-0" />
+          <div>
+            <div className="text-lg font-semibold">Size of a {weekData.size}</div>
+            <div className="text-sm text-muted-foreground">{weekData.length} · {weekData.weight}</div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-3 gap-3 text-center">
           <div className="bg-muted/50 rounded-xl p-3">
             <Apple className="h-4 w-4 text-primary mx-auto mb-1" />
