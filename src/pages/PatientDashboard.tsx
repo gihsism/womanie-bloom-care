@@ -111,11 +111,8 @@ const PatientDashboard = () => {
           cycleLength: data.cycle_length
         });
       } else {
-        // Default values if no data
-        setPeriodData({
-          lastPeriodStart: new Date(2025, 9, 1),
-          cycleLength: 28
-        });
+        // No period data yet — leave as null so CycleCalendar shows empty state
+        setPeriodData(null);
       }
     } catch (error) {
       console.error('Error loading period data:', error);
