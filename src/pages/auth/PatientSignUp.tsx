@@ -159,18 +159,19 @@ const PatientSignUp = () => {
 
   const handleAppleSignUp = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'apple',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-        },
+      const result = await lovable.auth.signInWithOAuth('apple', {
+        redirect_uri: window.location.origin,
       });
 
-      if (error) {
+      if (result?.error) {
+        const message = result.error.message === 'Popup was blocked'
+          ? 'Please allow popups for this site, then try again.'
+          : result.error.message || 'Failed to sign up with Apple';
+
         toast({
           variant: 'destructive',
           title: 'Apple sign-up failed',
-          description: error.message,
+          description: message,
         });
       }
     } catch (error) {
