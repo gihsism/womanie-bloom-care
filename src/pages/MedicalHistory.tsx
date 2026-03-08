@@ -372,7 +372,7 @@ export default function MedicalHistory() {
             <h1 className="text-xl font-bold">Medical History</h1>
             <p className="text-sm text-muted-foreground">AI-analyzed health data & statistics</p>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
+          <Button variant="ghost" size="icon" onClick={() => navigate('/welcome')}>
             <Home className="h-5 w-5" />
           </Button>
         </div>

@@ -131,7 +131,7 @@ const Welcome = () => {
               className="w-full"
               onClick={() => navigate('/dashboard', { replace: true })}
             >
-              Explore dashboard first
+              Explore dashboard
             </Button>
             <Button
               variant="outline"
