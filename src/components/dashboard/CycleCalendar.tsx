@@ -37,6 +37,7 @@ const CycleCalendar = ({
   cycleLength: initialCycleLength = 28,
   periodLength: initialPeriodLength = 5,
   selectedMode = 'menstrual-cycle',
+  pregnancyDueDate,
 }: CycleCalendarProps) => {
   const { toast } = useToast();
   
