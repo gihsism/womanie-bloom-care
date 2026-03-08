@@ -609,7 +609,13 @@ const PatientDashboard = () => {
                     {periodData ? (
                       <>
                         <Card className="p-4">
-                          <h3 className="text-lg font-bold mb-4">Cycle Health</h3>
+                          <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-bold">Cycle Health</h3>
+                            <Button variant="outline" size="sm" className="h-7 gap-1.5 text-xs" onClick={() => navigate('/dashboard/settings')}>
+                              <Settings className="h-3.5 w-3.5" />
+                              Settings
+                            </Button>
+                          </div>
                           <div className="space-y-4">
                             {healthStats.map((stat) => {
                               const IconComponent = stat.icon;
