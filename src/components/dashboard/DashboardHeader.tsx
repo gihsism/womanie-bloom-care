@@ -114,30 +114,26 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onU
 
           {/* Quick Actions */}
           <div className="flex gap-2">
-            {/* Doctor Chat - scrolls to section */}
+            {/* Doctor Chat */}
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                document.getElementById('dashboard-upload-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }}
-              className="flex flex-col items-center gap-1 h-auto py-2 px-3"
+              onClick={onDoctorChatClick}
+              className="flex flex-col items-center gap-1 h-auto py-2 px-3 border-primary/20 hover:bg-primary/5"
             >
               <MessageSquare className="h-4 w-4 text-primary" />
-              <span className="text-xs">Doctor Chat</span>
+              <span className="text-xs font-medium">Doctor Chat</span>
             </Button>
 
-            {/* Upload - scrolls to section */}
+            {/* Upload */}
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                document.getElementById('dashboard-upload-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }}
-              className="flex flex-col items-center gap-1 h-auto py-2 px-3"
+              onClick={onUploadClick}
+              className="flex flex-col items-center gap-1 h-auto py-2 px-3 border-primary/20 hover:bg-primary/5"
             >
               <Upload className="h-4 w-4 text-primary" />
-              <span className="text-xs">Upload</span>
+              <span className="text-xs font-medium">Upload</span>
             </Button>
 
             {quickActions.map((action) => {
