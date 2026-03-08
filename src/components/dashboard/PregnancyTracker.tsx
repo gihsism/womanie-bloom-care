@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import BabyImage3DOverlay from './BabyImage3DOverlay';
 
 // Baby development illustrations
