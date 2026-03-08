@@ -116,8 +116,8 @@ export default function MedicalHistory() {
   const fetchData = async () => {
     try {
       const [medRes, docRes] = await Promise.all([
-        supabase.from('medical_extracted_data').select('*').order('date_recorded', { ascending: false, nullsFirst: false }),
-        supabase.from('health_documents').select('id, file_name, ai_suggested_name, ai_summary, ai_suggested_category, uploaded_at, document_type').order('uploaded_at', { ascending: false }),
+        supabase.from('medical_extracted_data').select('*').eq('user_id', user!.id).order('date_recorded', { ascending: false, nullsFirst: false }),
+        supabase.from('health_documents').select('id, file_name, ai_suggested_name, ai_summary, ai_suggested_category, uploaded_at, document_type').eq('user_id', user!.id).order('uploaded_at', { ascending: false }),
       ]);
       if (medRes.data) setMedicalData(medRes.data);
       if (docRes.data) setDocuments(docRes.data);
