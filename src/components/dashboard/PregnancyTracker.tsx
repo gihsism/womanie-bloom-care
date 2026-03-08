@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
-// Baby size fruit illustrations
+// Baby development illustrations
 import babyWeek04 from '@/assets/baby-week-04.png';
 import babyWeek07 from '@/assets/baby-week-07.png';
 import babyWeek12 from '@/assets/baby-week-12.png';
@@ -13,6 +13,18 @@ import babyWeek28 from '@/assets/baby-week-28.png';
 import babyWeek32 from '@/assets/baby-week-32.png';
 import babyWeek36 from '@/assets/baby-week-36.png';
 import babyWeek40 from '@/assets/baby-week-40.png';
+
+// Fruit size comparison illustrations
+import fruitWeek04 from '@/assets/fruit-week-04.png';
+import fruitWeek07 from '@/assets/fruit-week-07.png';
+import fruitWeek12 from '@/assets/fruit-week-12.png';
+import fruitWeek16 from '@/assets/fruit-week-16.png';
+import fruitWeek20 from '@/assets/fruit-week-20.png';
+import fruitWeek24 from '@/assets/fruit-week-24.png';
+import fruitWeek28 from '@/assets/fruit-week-28.png';
+import fruitWeek32 from '@/assets/fruit-week-32.png';
+import fruitWeek36 from '@/assets/fruit-week-36.png';
+import fruitWeek40 from '@/assets/fruit-week-40.png';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -82,6 +94,26 @@ const getWeekImage = (week: number): string => {
   if (week <= 3) return babyWeek04;
   if (week >= 40) return babyWeek40;
   return WEEK_IMAGES[week] || babyWeek36;
+};
+
+// Fruit size comparison images for the top status card
+const FRUIT_IMAGES: Record<number, string> = {
+  4: fruitWeek04, 5: fruitWeek04, 6: fruitWeek04,
+  7: fruitWeek07, 8: fruitWeek07, 9: fruitWeek07, 10: fruitWeek07, 11: fruitWeek07,
+  12: fruitWeek12, 13: fruitWeek12, 14: fruitWeek12, 15: fruitWeek12,
+  16: fruitWeek16, 17: fruitWeek16, 18: fruitWeek16, 19: fruitWeek16,
+  20: fruitWeek20, 21: fruitWeek20, 22: fruitWeek20, 23: fruitWeek20,
+  24: fruitWeek24, 25: fruitWeek24, 26: fruitWeek24, 27: fruitWeek24,
+  28: fruitWeek28, 29: fruitWeek28, 30: fruitWeek28, 31: fruitWeek28,
+  32: fruitWeek32, 33: fruitWeek32, 34: fruitWeek32, 35: fruitWeek32,
+  36: fruitWeek36, 37: fruitWeek36, 38: fruitWeek36, 39: fruitWeek36,
+  40: fruitWeek40,
+};
+
+const getFruitImage = (week: number): string => {
+  if (week <= 3) return fruitWeek04;
+  if (week >= 40) return fruitWeek40;
+  return FRUIT_IMAGES[week] || fruitWeek36;
 };
 
 // ─── Pregnancy symptoms by trimester ───
@@ -282,7 +314,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
       {/* Main pregnancy status */}
       <div className="bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 rounded-2xl p-5">
         <div className="text-center mb-4">
-          <img src={getWeekImage(weeksPregnant)} alt={`Baby size: ${weekData.size}`} className="w-24 h-24 mx-auto mb-2 object-contain" />
+          <img src={getFruitImage(weeksPregnant)} alt={`Size of a ${weekData.size}`} className="w-24 h-24 mx-auto mb-2 object-contain" />
           <div className="text-4xl font-light text-foreground mb-1">
             Week {weeksPregnant}
             <span className="text-lg text-muted-foreground ml-1">+{daysExtra}d</span>
@@ -334,9 +366,13 @@ const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
         </h4>
         
         <div className="flex items-center gap-4 bg-muted/30 rounded-xl p-4">
-          <img src={getWeekImage(weeksPregnant)} alt={weekData.size} className="w-16 h-16 object-contain flex-shrink-0" />
+          <img src={getWeekImage(weeksPregnant)} alt="Baby development" className="w-20 h-20 object-contain flex-shrink-0" />
           <div>
-            <div className="text-lg font-semibold">Size of a {weekData.size}</div>
+            <div className="text-lg font-semibold">Your baby at week {weeksPregnant}</div>
+            <div className="flex items-center gap-2 mt-1">
+              <img src={getFruitImage(weeksPregnant)} alt={weekData.size} className="w-6 h-6 object-contain" />
+              <span className="text-sm text-muted-foreground">Size of a {weekData.size}</span>
+            </div>
             <div className="text-sm text-muted-foreground">{weekData.length} · {weekData.weight}</div>
           </div>
         </div>
