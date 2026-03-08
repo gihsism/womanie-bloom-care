@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FileText, Calendar } from "lucide-react";
+import { FileText, Calendar, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 
 interface DocumentSummary {
@@ -65,9 +66,14 @@ export default function HealthStatistics() {
   if (loading) {
     return (
       <div className="container mx-auto p-6 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Health Statistics</h1>
-          <p className="text-muted-foreground">AI-analyzed summaries of your health documents</p>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold mb-1">Health Statistics</h1>
+            <p className="text-muted-foreground">AI-analyzed summaries of your health documents</p>
+          </div>
         </div>
         <div className="grid gap-4">
           {[1, 2, 3].map((i) => (
@@ -88,9 +94,14 @@ export default function HealthStatistics() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Health Statistics</h1>
-        <p className="text-muted-foreground">AI-analyzed summaries of your health documents</p>
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold mb-1">Health Statistics</h1>
+          <p className="text-muted-foreground">AI-analyzed summaries of your health documents</p>
+        </div>
       </div>
 
       {documents.length === 0 ? (
