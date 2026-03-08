@@ -88,8 +88,9 @@ interface PregnancyTrackerProps {
 
 const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
   const [dueDateInput, setDueDateInput] = useState('');
-  const [lmpInput, setLmpInput] = useState('');
-  const [setupMethod, setSetupMethod] = useState<'due_date' | 'lmp'>('due_date');
+  const [setupMethod, setSetupMethod] = useState<'due_date' | 'lmp' | 'ivf'>('due_date');
+  const [ivfTransferInput, setIvfTransferInput] = useState('');
+  const [ivfEmbryoAge, setIvfEmbryoAge] = useState<3 | 5>(5);
 
   const pregnancyInfo = useMemo(() => {
     if (!dueDate) return null;
