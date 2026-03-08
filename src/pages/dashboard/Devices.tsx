@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Watch, Heart, Activity, Bluetooth, Smartphone, CheckCircle2, AlertCircle, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Watch, Heart, Activity, Bluetooth, Smartphone, CheckCircle2, AlertCircle, ExternalLink, Loader2 } from 'lucide-react';
+import { healthKitService } from '@/services/healthkit';
+import { toast } from 'sonner';
 
 interface Device {
   id: string;
