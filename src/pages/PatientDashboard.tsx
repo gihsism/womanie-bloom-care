@@ -645,12 +645,11 @@ const PatientDashboard = () => {
               })}
             </div>
           </div>
-        </div>
         
-        {/* Upload dialog triggered from header */}
-        <DocumentUpload open={uploadDialogOpen} onOpenChange={setUploadDialogOpen} showTrigger={false} />
+          {/* Upload dialog triggered from header */}
+          <DocumentUpload open={uploadDialogOpen} onOpenChange={setUploadDialogOpen} showTrigger={false} />
+        </div>
       </div>
-    </div>
   );
 };
 
