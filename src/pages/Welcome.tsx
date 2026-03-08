@@ -21,6 +21,7 @@ const features = [
     description: 'Log your period, track symptoms, and get personalised predictions.',
     bg: 'bg-primary/10',
     color: 'text-primary',
+    path: '/dashboard',
   },
   {
     icon: MessageSquare,
@@ -28,6 +29,7 @@ const features = [
     description: 'Get instant health guidance powered by latest AI models.',
     bg: 'bg-secondary/10',
     color: 'text-secondary',
+    path: '/ai-doctor',
   },
   {
     icon: FileText,
@@ -35,6 +37,7 @@ const features = [
     description: 'Upload lab results for AI-powered summaries and insights.',
     bg: 'bg-purple/10',
     color: 'text-purple',
+    path: '/medical-history',
   },
   {
     icon: Activity,
@@ -42,6 +45,7 @@ const features = [
     description: 'Track patterns in mood, symptoms, and overall wellbeing.',
     bg: 'bg-accent/10',
     color: 'text-accent',
+    path: '/health-statistics',
   },
 ];
 
@@ -94,14 +98,19 @@ const Welcome = () => {
             {features.map((feature) => {
               const Icon = feature.icon;
               return (
-                <Card key={feature.title} className="p-3.5 flex items-start gap-3.5">
+                <Card
+                  key={feature.title}
+                  className="p-3.5 flex items-center gap-3.5 cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => navigate(feature.path)}
+                >
                   <div className={`w-9 h-9 rounded-lg ${feature.bg} flex items-center justify-center flex-shrink-0`}>
                     <Icon className={`h-4.5 w-4.5 ${feature.color}`} />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h3 className="font-semibold text-foreground text-sm">{feature.title}</h3>
                     <p className="text-xs text-muted-foreground mt-0.5">{feature.description}</p>
                   </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 </Card>
               );
             })}
