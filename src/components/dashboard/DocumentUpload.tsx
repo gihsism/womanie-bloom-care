@@ -11,8 +11,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
-const DocumentUpload = () => {
-  const [isOpen, setIsOpen] = useState(false);
+interface DocumentUploadProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  showTrigger?: boolean;
+}
+
+const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true }: DocumentUploadProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setIsOpen = (v: boolean) => {
+    onOpenChange?.(v);
+    setInternalOpen(v);
+  };
   const [file, setFile] = useState<File | null>(null);
   const [documentType, setDocumentType] = useState('');
   const [notes, setNotes] = useState('');
