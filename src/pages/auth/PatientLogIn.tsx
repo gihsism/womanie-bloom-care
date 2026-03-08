@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { lovable } from '@/integrations/lovable/index';
 
 const PatientLogIn = () => {
   const navigate = useNavigate();
@@ -75,16 +76,19 @@ const PatientLogIn = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      const { lovable } = await import('@/integrations/lovable/index');
       const result = await lovable.auth.signInWithOAuth('google', {
         redirect_uri: window.location.origin,
       });
 
       if (result?.error) {
+        const message = result.error.message === 'Popup was blocked'
+          ? 'Please allow popups for this site, then try again. If this is preview mode on mobile, open the app in a new tab first.'
+          : result.error.message || 'Failed to sign in with Google';
+
         toast({
           variant: 'destructive',
           title: 'Google sign-in failed',
-          description: result.error.message || 'Failed to sign in with Google',
+          description: message,
         });
       }
     } catch (error: any) {
