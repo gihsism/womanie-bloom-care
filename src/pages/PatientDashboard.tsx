@@ -128,7 +128,7 @@ const PatientDashboard = () => {
 
   // Auto-fetch ovulation prediction when we have period data
   useEffect(() => {
-    if (user && periodData && (selectedMode === 'conception' || selectedMode === 'menstrual-cycle' || selectedMode === 'pre-menstrual')) {
+    if (user && periodData && (selectedMode === 'conception' || selectedMode === 'menstrual-cycle')) {
       fetchOvulationPrediction();
     }
   }, [user, selectedMode, periodData]);
