@@ -24,6 +24,7 @@ import DocumentUpload from '@/components/dashboard/DocumentUpload';
 import OvulationPrediction from '@/components/dashboard/OvulationPrediction';
 import PreMenstrualDashboard from '@/components/dashboard/PreMenstrualDashboard';
 import MenopauseDashboard from '@/components/dashboard/MenopauseDashboard';
+import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
 import { format, addDays } from 'date-fns';
 import { 
   MessageSquare, 
@@ -629,6 +630,9 @@ const PatientDashboard = () => {
               ) : (selectedMode === 'menopause' || selectedMode === 'post-menopause') ? (
                 /* ─── Menopause / Post-Menopause Mode ─── */
                 <MenopauseDashboard isPostMenopause={selectedMode === 'post-menopause'} />
+              ) : selectedMode === 'contraception' ? (
+                /* ─── Contraception Mode ─── */
+                <ContraceptionDashboard onNavigateToDoctorChat={() => navigate('/dashboard/ai-doctor')} />
               ) : (
                 /* ─── Cycle Mode ─── */
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
