@@ -44,6 +44,7 @@ const CycleCalendar = ({
   const [isLoading, setIsLoading] = useState(true);
   const [periodRecords, setPeriodRecords] = useState<PeriodRecord[]>([]);
   const [manualCycleLength, setManualCycleLength] = useState<number | null>(null);
+  const [manualPeriodLength, setManualPeriodLength] = useState<number | null>(null);
   const [markedOvulationDays, setMarkedOvulationDays] = useState<Set<string>>(new Set());
   const [daySignals, setDaySignals] = useState<Record<string, DaySignal>>({});
   
@@ -51,13 +52,14 @@ const CycleCalendar = ({
   const [dailyLogTab, setDailyLogTab] = useState<'symptoms' | 'mood' | 'intimacy' | 'discharge'>('symptoms');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [tempCycleLength, setTempCycleLength] = useState(initialCycleLength);
+  const [tempPeriodLength, setTempPeriodLength] = useState(initialPeriodLength);
   const [isDayActionOpen, setIsDayActionOpen] = useState(false);
 
   const onboardingEstimates = useMemo(() => ({
     cycleLength: manualCycleLength || initialCycleLength,
-    periodLength: initialPeriodLength,
+    periodLength: manualPeriodLength || initialPeriodLength,
     lastPeriodStart: initialPeriodStart ? format(initialPeriodStart, 'yyyy-MM-dd') : undefined,
-  }), [manualCycleLength, initialCycleLength, initialPeriodLength, initialPeriodStart]);
+  }), [manualCycleLength, manualPeriodLength, initialCycleLength, initialPeriodLength, initialPeriodStart]);
 
   const prediction = useCyclePrediction({
     periodRecords,
@@ -359,6 +361,7 @@ const CycleCalendar = ({
 
   const handleSaveCycleSettings = async () => {
     setManualCycleLength(tempCycleLength);
+    setManualPeriodLength(tempPeriodLength);
     if (periodRecords.length > 0) {
       try {
         const { data: { user } } = await supabase.auth.getUser();
@@ -374,6 +377,7 @@ const CycleCalendar = ({
       }
     }
     setIsSettingsOpen(false);
+    toast({ title: 'Settings saved', description: `Cycle: ${tempCycleLength} days, Period: ${tempPeriodLength} days` });
   };
 
   const showCycleInfo = !['pregnancy', 'menopause', 'post-menopause'].includes(selectedMode);
@@ -466,13 +470,29 @@ const CycleCalendar = ({
                         {`${prediction.dataQualityMessage}. Confidence: ${prediction.confidenceLevel}`}
                       </p>
                     </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Average Period Length</label>
+                      <Select value={tempPeriodLength.toString()} onValueChange={(v) => setTempPeriodLength(parseInt(v))}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 10 }, (_, i) => i + 2).map((days) => (
+                            <SelectItem key={days} value={days.toString()}>
+                              {days} days {days === prediction.averagePeriodLength && '(predicted)'}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">
+                        How many days your period typically lasts
+                      </p>
+                    </div>
                     <div className="text-xs text-muted-foreground space-y-1">
                       <p>• Standard deviation: ±{prediction.standardDeviation.toFixed(1)} days</p>
                       <p>• Cycle trend: {prediction.cycleTrend}</p>
                       <p>• Prediction window: ±{prediction.confidenceWindow} days</p>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" onClick={() => { setTempCycleLength(prediction.averageCycleLength); setIsSettingsOpen(false); }} className="flex-1">Cancel</Button>
+                      <Button variant="outline" onClick={() => { setTempCycleLength(prediction.averageCycleLength); setTempPeriodLength(prediction.averagePeriodLength); setIsSettingsOpen(false); }} className="flex-1">Cancel</Button>
                       <Button onClick={handleSaveCycleSettings} className="flex-1">Save</Button>
                     </div>
                   </div>
