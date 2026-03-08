@@ -37,7 +37,7 @@ const features = [
     description: 'Upload lab results for AI-powered summaries and insights.',
     bg: 'bg-purple/10',
     color: 'text-purple',
-    path: '/medical-history',
+    path: '/dashboard/medical-history',
   },
   {
     icon: Activity,
