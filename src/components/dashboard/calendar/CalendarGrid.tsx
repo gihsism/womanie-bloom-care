@@ -111,6 +111,25 @@ const CalendarGrid = ({
     return { futurePeriodSet: fPeriod, predictedOvulationSet: pOvulation, fertileSet: pFertile, pmsSet: pPms };
   }, [prediction, periodRecords]);
 
+  const isPregnancyMode = selectedMode === 'pregnancy' && pregnancyDueDate;
+  const gestationStart = pregnancyDueDate ? addDays(pregnancyDueDate, -280) : null;
+
+  const getPregnancyWeek = (date: Date): number | null => {
+    if (!gestationStart) return null;
+    const days = differenceInDays(date, gestationStart);
+    if (days < 0) return null;
+    return Math.floor(days / 7);
+  };
+
+  // Group calendar days into weeks (rows of 7)
+  const calendarWeeks = useMemo(() => {
+    const weeks: Date[][] = [];
+    for (let i = 0; i < calendarDays.length; i += 7) {
+      weeks.push(calendarDays.slice(i, i + 7));
+    }
+    return weeks;
+  }, [calendarDays]);
+
   const today = new Date();
 
   const getDayType = (date: Date) => {
