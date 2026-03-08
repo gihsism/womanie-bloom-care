@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import BabyImage3DOverlay from './BabyImage3DOverlay';
 
 // Baby development illustrations
 import babyWeek04 from '@/assets/baby-week-04.png';
@@ -385,29 +386,13 @@ const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
           </div>
         </div>
 
-        {/* Full-size image overlay */}
+        {/* Full-size 3D image overlay */}
         {showFullImage && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6"
-            onClick={() => setShowFullImage(false)}
-          >
-            <div className="relative max-w-sm w-full animate-in zoom-in-95 fade-in duration-200">
-              <img
-                src={getWeekImage(weeksPregnant)}
-                alt={`Baby at week ${weeksPregnant}`}
-                className="w-full h-auto object-contain rounded-2xl shadow-2xl"
-              />
-              <div className="text-center mt-3 text-white font-medium text-lg">
-                Baby at Week {weeksPregnant}
-              </div>
-              <button
-                onClick={() => setShowFullImage(false)}
-                className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-background text-foreground flex items-center justify-center shadow-lg text-sm font-bold"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
+          <BabyImage3DOverlay
+            src={getWeekImage(weeksPregnant)}
+            week={weeksPregnant}
+            onClose={() => setShowFullImage(false)}
+          />
         )}
 
         <div className="grid grid-cols-3 gap-3 text-center">
