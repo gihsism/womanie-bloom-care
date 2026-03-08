@@ -29,7 +29,7 @@ const features = [
     description: 'Get instant health guidance powered by latest AI models.',
     bg: 'bg-secondary/10',
     color: 'text-secondary',
-    path: '/ai-doctor',
+    path: '/dashboard/ai-doctor',
   },
   {
     icon: FileText,
