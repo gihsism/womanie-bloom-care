@@ -129,21 +129,19 @@ const PatientSignUp = () => {
 
   const handleGoogleSignUp = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-        },
+      const { lovable } = await import('@/integrations/lovable/index');
+      const result = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: window.location.origin,
       });
 
-      if (error) {
+      if (result?.error) {
         toast({
           variant: 'destructive',
           title: 'Google sign-up failed',
-          description: error.message,
+          description: result.error.message || 'Failed to sign up with Google',
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Error',
