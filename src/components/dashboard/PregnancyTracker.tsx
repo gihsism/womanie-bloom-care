@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import BabyImage3DOverlay from './BabyImage3DOverlay';
 
 // Baby development illustrations
 import babyWeek04 from '@/assets/baby-week-04.png';
