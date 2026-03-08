@@ -31,6 +31,7 @@ import HealthStatistics from "./pages/HealthStatistics";
 import MedicalHistory from "./pages/MedicalHistory";
 import AIDoctorChat from "./pages/AIDoctorChat";
 import Install from "./pages/Install";
+import Devices from "./pages/dashboard/Devices";
 
 const queryClient = new QueryClient();
 
