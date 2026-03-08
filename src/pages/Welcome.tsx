@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -9,46 +9,45 @@ import {
   FileText, 
   Activity, 
   ArrowRight, 
-  Sparkles,
   Heart,
-  Shield
+  Shield,
+  Sparkles
 } from 'lucide-react';
 
 const features = [
   {
     icon: Calendar,
     title: 'Cycle Tracking',
-    description: 'Log your period, track symptoms, and get personalised cycle predictions.',
-    color: 'text-primary',
+    description: 'Log your period, track symptoms, and get personalised predictions.',
     bg: 'bg-primary/10',
+    color: 'text-primary',
   },
   {
     icon: MessageSquare,
     title: 'AI Health Assistant',
-    description: 'Chat with our AI doctor for instant health guidance powered by latest models.',
-    color: 'text-secondary',
+    description: 'Get instant health guidance powered by latest AI models.',
     bg: 'bg-secondary/10',
+    color: 'text-secondary',
   },
   {
     icon: FileText,
     title: 'Document Analysis',
-    description: 'Upload lab results and medical documents for AI-powered summaries.',
-    color: 'text-purple',
+    description: 'Upload lab results for AI-powered summaries and insights.',
     bg: 'bg-purple/10',
+    color: 'text-purple',
   },
   {
     icon: Activity,
     title: 'Health Insights',
-    description: 'Track patterns in your mood, symptoms, and overall wellbeing over time.',
-    color: 'text-accent',
+    description: 'Track patterns in mood, symptoms, and overall wellbeing.',
     bg: 'bg-accent/10',
+    color: 'text-accent',
   },
 ];
 
 const Welcome = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
-  const [step, setStep] = useState(0);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -71,107 +70,71 @@ const Welcome = () => {
           onClick={() => navigate('/dashboard', { replace: true })}
           className="text-muted-foreground"
         >
-          Skip to dashboard
+          Go to dashboard
         </Button>
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-lg">
-          {step === 0 && (
-            <div className="text-center space-y-6 animate-in fade-in duration-500">
-              {/* Welcome illustration area */}
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 via-secondary/10 to-accent/10 flex items-center justify-center mx-auto">
-                <Heart className="h-10 w-10 text-primary" />
-              </div>
-
-              <div>
-                <h2 className="text-3xl font-bold text-foreground mb-2">
-                  Welcome, {userName}! 🎉
-                </h2>
-                <p className="text-muted-foreground text-lg">
-                  We're so glad you're here. Let's set up your personal health companion.
-                </p>
-              </div>
-
-              <Card className="p-5 text-left space-y-3 bg-primary/5 border-primary/20">
-                <div className="flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-primary" />
-                  <span className="font-semibold text-sm text-foreground">Your data is private & secure</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Everything you log stays encrypted and visible only to you. We never share your health data.
-                </p>
-              </Card>
-
-              <Button
-                size="lg"
-                className="w-full gap-2"
-                onClick={() => setStep(1)}
-              >
-                Let's get started
-                <ArrowRight className="h-4 w-4" />
-              </Button>
+        <div className="w-full max-w-lg space-y-6">
+          {/* Greeting */}
+          <div className="text-center space-y-3">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 via-secondary/10 to-accent/10 flex items-center justify-center mx-auto">
+              <Heart className="h-8 w-8 text-primary" />
             </div>
-          )}
+            <h2 className="text-3xl font-bold text-foreground">
+              Welcome, {userName}! 🎉
+            </h2>
+            <p className="text-muted-foreground text-base">
+              Your personal health companion is ready. Here's what you can do:
+            </p>
+          </div>
 
-          {step === 1 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                  <span className="text-sm font-medium text-primary">What you can do</span>
-                </div>
-                <h2 className="text-2xl font-bold text-foreground">
-                  Your health toolkit
-                </h2>
-                <p className="text-muted-foreground mt-1">
-                  Here's what Womanie can help you with
-                </p>
-              </div>
+          {/* Features */}
+          <div className="space-y-2.5">
+            {features.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <Card key={feature.title} className="p-3.5 flex items-start gap-3.5">
+                  <div className={`w-9 h-9 rounded-lg ${feature.bg} flex items-center justify-center flex-shrink-0`}>
+                    <Icon className={`h-4.5 w-4.5 ${feature.color}`} />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground text-sm">{feature.title}</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">{feature.description}</p>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
 
-              <div className="space-y-3">
-                {features.map((feature) => {
-                  const Icon = feature.icon;
-                  return (
-                    <Card key={feature.title} className="p-4 flex items-start gap-4">
-                      <div className={`w-10 h-10 rounded-xl ${feature.bg} flex items-center justify-center flex-shrink-0`}>
-                        <Icon className={`h-5 w-5 ${feature.color}`} />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground text-sm">{feature.title}</h3>
-                        <p className="text-xs text-muted-foreground mt-0.5">{feature.description}</p>
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
+          {/* Privacy note */}
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-primary/5 border border-primary/10">
+            <Shield className="h-4 w-4 text-primary flex-shrink-0" />
+            <span className="text-xs text-muted-foreground">
+              Your data is encrypted and visible only to you. We never share your health data.
+            </span>
+          </div>
 
-              <div className="space-y-3">
-                <Button
-                  size="lg"
-                  className="w-full gap-2"
-                  onClick={() => navigate('/onboarding/basic-info')}
-                >
-                  Complete my profile
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full"
-                  onClick={() => navigate('/dashboard', { replace: true })}
-                >
-                  Go to dashboard
-                </Button>
-              </div>
-
-              {/* Step dots */}
-              <div className="flex justify-center gap-2">
-                <button onClick={() => setStep(0)} className="w-2 h-2 rounded-full bg-muted-foreground/30" />
-                <div className="w-2 h-2 rounded-full bg-primary" />
-              </div>
-            </div>
-          )}
+          {/* Actions */}
+          <div className="space-y-3 pt-1">
+            <Button
+              size="lg"
+              className="w-full gap-2"
+              onClick={() => navigate('/onboarding/basic-info')}
+            >
+              <Sparkles className="h-4 w-4" />
+              Personalise my experience
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full"
+              onClick={() => navigate('/dashboard', { replace: true })}
+            >
+              Explore dashboard first
+            </Button>
+          </div>
         </div>
       </div>
     </div>
