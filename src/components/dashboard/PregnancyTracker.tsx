@@ -16,7 +16,73 @@ import babyWeek28 from '@/assets/baby-week-28.png';
 import babyWeek32 from '@/assets/baby-week-32.png';
 import babyWeek36 from '@/assets/baby-week-36.png';
 import babyWeek40 from '@/assets/baby-week-40.png';
-...
+
+// Fruit size comparison illustrations
+import fruitWeek04 from '@/assets/fruit-week-04.png';
+import fruitWeek07 from '@/assets/fruit-week-07.png';
+import fruitWeek09 from '@/assets/fruit-week-09.png';
+import fruitWeek12 from '@/assets/fruit-week-12.png';
+import fruitWeek16 from '@/assets/fruit-week-16.png';
+import fruitWeek20 from '@/assets/fruit-week-20.png';
+import fruitWeek24 from '@/assets/fruit-week-24.png';
+import fruitWeek28 from '@/assets/fruit-week-28.png';
+import fruitWeek32 from '@/assets/fruit-week-32.png';
+import fruitWeek36 from '@/assets/fruit-week-36.png';
+import fruitWeek40 from '@/assets/fruit-week-40.png';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { differenceInDays, differenceInWeeks, addDays, format, parseISO } from 'date-fns';
+import {
+  Baby,
+  Calendar,
+  Heart,
+  Activity,
+  AlertCircle,
+  Sparkles,
+  ChevronRight,
+  Ruler,
+  Scale,
+  Apple,
+  Pencil,
+  RotateCcw,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+// ─── Pregnancy week-by-week data ───
+const WEEK_DATA: Record<number, { size: string; sizeComparison: string; length: string; weight: string; developments: string[]; tips: string[] }> = {
+  4: { size: 'Poppy seed', sizeComparison: '🌱', length: '~1mm', weight: '<1g', developments: ['Embryo implants in uterus', 'Placenta begins forming'], tips: ['Start prenatal vitamins', 'Avoid alcohol and smoking'] },
+  5: { size: 'Sesame seed', sizeComparison: '🫘', length: '~2mm', weight: '<1g', developments: ['Heart begins to beat', 'Neural tube forming'], tips: ['Schedule your first prenatal visit', 'Stay hydrated'] },
+  6: { size: 'Lentil', sizeComparison: '🫘', length: '~6mm', weight: '<1g', developments: ['Nose, mouth, ears forming', 'Heart beats 110 times/min'], tips: ['Manage morning sickness with small meals', 'Get plenty of rest'] },
+  7: { size: 'Blueberry', sizeComparison: '🫐', length: '~13mm', weight: '<1g', developments: ['Arms and legs developing', 'Brain growing rapidly'], tips: ['Eat folate-rich foods', 'Start gentle exercise routine'] },
+  8: { size: 'Raspberry', sizeComparison: '🍇', length: '~16mm', weight: '~1g', developments: ['Fingers and toes forming', 'Baby starts moving (you can\'t feel it yet)'], tips: ['Wear comfortable clothing', 'Stay active with walks'] },
+  9: { size: 'Cherry', sizeComparison: '🍒', length: '~23mm', weight: '~2g', developments: ['All essential organs have begun forming', 'Tiny muscles begin to work'], tips: ['Consider prenatal yoga', 'Eat balanced meals'] },
+  10: { size: 'Strawberry', sizeComparison: '🍓', length: '~31mm', weight: '~4g', developments: ['Vital organs fully formed', 'Fingernails start to develop'], tips: ['Schedule nuchal translucency scan', 'Monitor weight gain'] },
+  11: { size: 'Fig', sizeComparison: '🫒', length: '~41mm', weight: '~7g', developments: ['Bones beginning to harden', 'Baby can open and close fists'], tips: ['Second trimester approaching', 'Energy levels may improve soon'] },
+  12: { size: 'Lime', sizeComparison: '🍋', length: '~54mm', weight: '~14g', developments: ['Reflexes developing', 'Intestines moving into abdomen'], tips: ['End of first trimester!', 'Risk of miscarriage drops significantly'] },
+  13: { size: 'Peach', sizeComparison: '🍑', length: '~74mm', weight: '~23g', developments: ['Fingerprints forming', 'Vocal cords developing'], tips: ['Welcome to second trimester', 'You may start showing'] },
+  16: { size: 'Avocado', sizeComparison: '🥑', length: '~12cm', weight: '~100g', developments: ['Can make facial expressions', 'Skeleton hardening'], tips: ['You might feel first kicks (quickening)', 'Schedule anomaly scan around week 20'] },
+  20: { size: 'Banana', sizeComparison: '🍌', length: '~26cm', weight: '~300g', developments: ['Can hear sounds', 'Developing sleep patterns'], tips: ['Halfway there!', 'Start planning nursery'] },
+  24: { size: 'Corn on the cob', sizeComparison: '🌽', length: '~30cm', weight: '~600g', developments: ['Lungs developing surfactant', 'Responds to light and sound'], tips: ['Glucose tolerance test around now', 'Start kick counting'] },
+  28: { size: 'Eggplant', sizeComparison: '🍆', length: '~38cm', weight: '~1kg', developments: ['Eyes can open and close', 'Baby may dream (REM sleep)'], tips: ['Third trimester begins', 'Monitor for swelling'] },
+  32: { size: 'Squash', sizeComparison: '🎃', length: '~42cm', weight: '~1.7kg', developments: ['Practicing breathing movements', 'Bones fully developed but still soft'], tips: ['Start birth plan', 'Pack hospital bag'] },
+  36: { size: 'Honeydew melon', sizeComparison: '🍈', length: '~47cm', weight: '~2.6kg', developments: ['Fat layers filling out', 'Head may engage in pelvis'], tips: ['Weekly check-ups now', 'Rest as much as possible'] },
+  38: { size: 'Pumpkin', sizeComparison: '🎃', length: '~50cm', weight: '~3kg', developments: ['Fully developed lungs', 'Brain and lungs continue maturing'], tips: ['Full term!', 'Watch for signs of labour'] },
+  40: { size: 'Watermelon', sizeComparison: '🍉', length: '~51cm', weight: '~3.4kg', developments: ['Ready to be born!', 'All organs mature and functioning'], tips: ['Due date week!', 'Stay calm and prepared'] },
+};
+
+const getWeekData = (week: number) => {
+  const keys = Object.keys(WEEK_DATA).map(Number).sort((a, b) => a - b);
+  let bestKey = keys[0];
+  for (const k of keys) {
+    if (k <= week) bestKey = k;
+    else break;
+  }
+  return WEEK_DATA[bestKey] || WEEK_DATA[4];
+};
+
 const WEEK_IMAGES: Record<number, string> = {
   4: babyWeek04, 5: babyWeek04, 6: babyWeek04,
   7: babyWeek07, 8: babyWeek07, 9: babyWeek07, 10: babyWeek07, 11: babyWeek07,
