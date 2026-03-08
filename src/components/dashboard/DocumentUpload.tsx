@@ -11,8 +11,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
-const DocumentUpload = () => {
-  const [isOpen, setIsOpen] = useState(false);
+interface DocumentUploadProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  showTrigger?: boolean;
+}
+
+const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true }: DocumentUploadProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setIsOpen = (v: boolean) => {
+    onOpenChange?.(v);
+    setInternalOpen(v);
+  };
   const [file, setFile] = useState<File | null>(null);
   const [documentType, setDocumentType] = useState('');
   const [notes, setNotes] = useState('');
@@ -141,22 +152,24 @@ const DocumentUpload = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Card className="p-4 cursor-pointer hover:bg-accent/5 transition-colors border-dashed">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Upload className="h-6 w-6 text-primary" />
+      {showTrigger && (
+        <DialogTrigger asChild>
+          <Card className="p-4 cursor-pointer hover:bg-accent/5 transition-colors border-dashed">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Upload className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold">Upload Health Document</h3>
+                <p className="text-xs text-muted-foreground">
+                  Lab results, imaging, medical records
+                </p>
+              </div>
+              <FileText className="h-5 w-5 text-muted-foreground" />
             </div>
-            <div className="flex-1">
-              <h3 className="font-semibold">Upload Health Document</h3>
-              <p className="text-xs text-muted-foreground">
-                Lab results, imaging, medical records
-              </p>
-            </div>
-            <FileText className="h-5 w-5 text-muted-foreground" />
-          </div>
-        </Card>
-      </DialogTrigger>
+          </Card>
+        </DialogTrigger>
+      )}
       
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
