@@ -86,7 +86,7 @@ const getWeekData = (week: number) => {
 const WEEK_IMAGES: Record<number, string> = {
   4: babyWeek04, 5: babyWeek04, 6: babyWeek04,
   7: babyWeek07, 8: babyWeek07, 9: babyWeek07, 10: babyWeek07, 11: babyWeek07,
-  12: babyWeek12, 13: babyWeek13, 14: babyWeek16, 15: babyWeek16,
+  12: babyWeek12, 13: babyWeek12, 14: babyWeek16, 15: babyWeek16,
   16: babyWeek16, 17: babyWeek16, 18: babyWeek20, 19: babyWeek20,
   20: babyWeek20, 21: babyWeek20, 22: babyWeek24, 23: babyWeek24,
   24: babyWeek24, 25: babyWeek24, 26: babyWeek28, 27: babyWeek28,
