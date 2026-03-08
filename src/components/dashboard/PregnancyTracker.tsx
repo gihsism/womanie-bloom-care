@@ -152,6 +152,7 @@ interface PregnancyTrackerProps {
 }
 
 const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
+  const [showFullImage, setShowFullImage] = useState(false);
   const [dueDateInput, setDueDateInput] = useState('');
   const [lmpInput, setLmpInput] = useState('');
   const [setupMethod, setSetupMethod] = useState<'due_date' | 'lmp' | 'ivf'>('due_date');
@@ -368,7 +369,12 @@ const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
         </h4>
         
         <div className="flex items-center gap-4 bg-muted/30 rounded-xl p-4">
-          <img src={getWeekImage(weeksPregnant)} alt="Baby development" className="w-20 h-20 object-contain flex-shrink-0" />
+          <img
+            src={getWeekImage(weeksPregnant)}
+            alt="Baby development"
+            className="w-20 h-20 object-contain flex-shrink-0 cursor-pointer hover:scale-105 transition-transform rounded-lg"
+            onClick={() => setShowFullImage(true)}
+          />
           <div>
             <div className="text-lg font-semibold">Your baby at week {weeksPregnant}</div>
             <div className="flex items-center gap-2 mt-1">
@@ -378,6 +384,31 @@ const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
             <div className="text-sm text-muted-foreground">{weekData.length} · {weekData.weight}</div>
           </div>
         </div>
+
+        {/* Full-size image overlay */}
+        {showFullImage && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6"
+            onClick={() => setShowFullImage(false)}
+          >
+            <div className="relative max-w-sm w-full animate-in zoom-in-95 fade-in duration-200">
+              <img
+                src={getWeekImage(weeksPregnant)}
+                alt={`Baby at week ${weeksPregnant}`}
+                className="w-full h-auto object-contain rounded-2xl shadow-2xl"
+              />
+              <div className="text-center mt-3 text-white font-medium text-lg">
+                Baby at Week {weeksPregnant}
+              </div>
+              <button
+                onClick={() => setShowFullImage(false)}
+                className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-background text-foreground flex items-center justify-center shadow-lg text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-3 gap-3 text-center">
           <div className="bg-muted/50 rounded-xl p-3">
