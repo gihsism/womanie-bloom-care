@@ -42,7 +42,8 @@ class HealthKitService {
       // The HealthKit plugin will be available after native setup
       // Users need to install: npm install @niceplugins/capacitor-healthkit
       try {
-        const mod = await import('@niceplugins/capacitor-healthkit' as string);
+        const pluginName = '@niceplugins/capacitor-healthkit';
+        const mod = await import(/* @vite-ignore */ pluginName);
         this.plugin = mod.HealthKit || mod.default;
       } catch {
         console.log('HealthKit: Plugin not installed. Install @niceplugins/capacitor-healthkit after adding iOS platform.');
