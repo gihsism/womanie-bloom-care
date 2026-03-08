@@ -198,7 +198,7 @@ const CycleCalendar = ({
     return merged;
   }, [confirmedPeriodDays, activePeriodConfirmedDays]);
 
-  const hasActivePeriod = periodRecords.some(isActivePeriod);
+  const hasActivePeriod = periodRecords.some(r => getEffectiveEnd(r) === null);
   
   const isPeriodDay = (date: Date): boolean => {
     return allConfirmedPeriodDays.has(format(date, 'yyyy-MM-dd'));
