@@ -22,6 +22,7 @@ import IVFTracker from '@/components/dashboard/IVFTracker';
 import DailyLogging from '@/components/dashboard/DailyLogging';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
 import OvulationPrediction from '@/components/dashboard/OvulationPrediction';
+import PreMenstrualDashboard from '@/components/dashboard/PreMenstrualDashboard';
 import { format, addDays } from 'date-fns';
 import { 
   MessageSquare, 
