@@ -71,6 +71,7 @@ export default function HealthStatistics() {
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
+          </Button>
           <div>
             <h1 className="text-3xl font-bold mb-1">Health Statistics</h1>
             <p className="text-muted-foreground">AI-analyzed summaries of your health documents</p>
