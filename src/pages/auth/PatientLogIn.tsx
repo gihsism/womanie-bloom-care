@@ -76,7 +76,6 @@ const PatientLogIn = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      const { lovable } = await import('@/integrations/lovable/index');
       const result = await lovable.auth.signInWithOAuth('google', {
         redirect_uri: window.location.origin,
       });
