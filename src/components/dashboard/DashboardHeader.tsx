@@ -284,7 +284,6 @@ export const getModeStats = (mode: LifeStage, cycleDay: number = 14, pregnancyDu
         { title: 'Progress', value: `${Math.min(100, Math.round((totalDays / 280) * 100))}%`, subtitle: `${280 - totalDays} days remaining`, icon: TrendingUp, color: 'text-primary' },
       ];
     }
-      ];
     
     case 'menopause':
     case 'post-menopause':
