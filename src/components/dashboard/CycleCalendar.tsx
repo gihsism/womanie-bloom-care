@@ -409,7 +409,7 @@ const CycleCalendar = ({
   return (
     <div className="space-y-4">
       {/* Period End Confirmation Banner */}
-      {showCycleInfo && (
+      {showCycleInfo && hasAnyData && (
         <PeriodEndBanner
           periodRecords={periodRecords}
           avgPeriodLength={periodLength}
@@ -418,8 +418,21 @@ const CycleCalendar = ({
         />
       )}
 
-      {/* Today's Status Card */}
-      {showCycleInfo && (
+      {/* Empty state when no period data */}
+      {showCycleInfo && !hasAnyData && (
+        <Card className="p-6 text-center space-y-3 border-dashed border-2 border-primary/30 bg-primary/5">
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+            <Sparkles className="h-6 w-6 text-primary" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground">Start tracking your cycle</h3>
+          <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+            Tap any day on the calendar below to mark the first day of your period. We'll use that to build personalised predictions.
+          </p>
+        </Card>
+      )}
+
+      {/* Today's Status Card — only when we have data */}
+      {showCycleInfo && hasAnyData && (
         <TodayStatusCard
           cycleDay={currentCycleDay}
           cycleLength={cycleLength}
