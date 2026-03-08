@@ -184,13 +184,49 @@ const Devices = () => {
 
                     {device.status === 'available' && (
                       <div className="space-y-2">
-                        <Button className="w-full gap-2" size="lg">
-                          <CheckCircle2 className="h-4 w-4" />
-                          Connect {device.name}
+                        <Button 
+                          className="w-full gap-2" 
+                          size="lg"
+                          disabled={connecting || (device.id === 'apple-health' && !isNative)}
+                          onClick={async () => {
+                            if (device.id === 'apple-health') {
+                              setConnecting(true);
+                              try {
+                                const granted = await healthKitService.requestPermissions();
+                                if (granted) {
+                                  setHealthKitConnected(true);
+                                  const data = await healthKitService.getAllHealthData();
+                                  toast.success('Apple Health connected!', {
+                                    description: `Synced ${data.steps} steps, ${data.heartRate?.length || 0} heart rate readings`,
+                                  });
+                                } else {
+                                  toast.error('Permission denied', { description: 'Please allow HealthKit access in Settings.' });
+                                }
+                              } catch {
+                                toast.error('Connection failed');
+                              } finally {
+                                setConnecting(false);
+                              }
+                            }
+                          }}
+                        >
+                          {connecting ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <CheckCircle2 className="h-4 w-4" />
+                          )}
+                          {connecting ? 'Connecting...' : `Connect ${device.name}`}
                         </Button>
-                        <p className="text-[10px] text-center text-muted-foreground">
-                          You'll be redirected to authorize access to your health data
-                        </p>
+                        {device.id === 'apple-health' && !isNative && (
+                          <p className="text-[10px] text-center text-amber-600 dark:text-amber-400">
+                            Build the native iOS app with Capacitor to enable Apple Health
+                          </p>
+                        )}
+                        {(device.id !== 'apple-health' || isNative) && (
+                          <p className="text-[10px] text-center text-muted-foreground">
+                            You'll be redirected to authorize access to your health data
+                          </p>
+                        )}
                       </div>
                     )}
 
