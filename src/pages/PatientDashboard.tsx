@@ -420,13 +420,7 @@ const PatientDashboard = () => {
                 selectedMode={selectedMode}
                 onModeChange={handleModeChange}
                 onNavigate={setActiveSection}
-                onUploadClick={() => {
-                  requestAnimationFrame(() => {
-                    document
-                      .getElementById('dashboard-upload-section')
-                      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  });
-                }}
+                onUploadClick={() => setUploadDialogOpen(true)}
                 onDoctorChatClick={() => navigate('/dashboard/ai-doctor')}
                 cycleDay={currentCycleDay}
               />
