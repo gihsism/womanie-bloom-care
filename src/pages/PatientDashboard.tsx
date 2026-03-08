@@ -454,7 +454,7 @@ const PatientDashboard = () => {
             </Card>
 
             {/* Upload Health Documents Section */}
-            <div className="mb-6">
+            <div id="dashboard-upload-section" className="mb-6">
               <h3 className="text-base font-semibold mb-3">Upload</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <DocumentUpload />
