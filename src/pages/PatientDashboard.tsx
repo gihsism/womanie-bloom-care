@@ -339,7 +339,7 @@ const PatientDashboard = () => {
           <div className="flex items-center justify-between mb-4">
              <div className="flex items-center gap-2">
               <button
-                onClick={() => navigate(-1)}
+                onClick={() => navigate('/welcome')}
                 className="flex items-center justify-center h-9 w-9 rounded-md hover:bg-muted transition-colors"
                 aria-label="Go back"
               >
