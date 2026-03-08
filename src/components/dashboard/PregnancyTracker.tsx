@@ -100,7 +100,8 @@ const getWeekImage = (week: number): string => {
 // Fruit size comparison images for the top status card
 const FRUIT_IMAGES: Record<number, string> = {
   4: fruitWeek04, 5: fruitWeek04, 6: fruitWeek04,
-  7: fruitWeek07, 8: fruitWeek07, 9: fruitWeek07, 10: fruitWeek07, 11: fruitWeek07,
+  7: fruitWeek07, 8: fruitWeek07,
+  9: fruitWeek09, 10: fruitWeek09, 11: fruitWeek09,
   12: fruitWeek12, 13: fruitWeek12, 14: fruitWeek12, 15: fruitWeek12,
   16: fruitWeek16, 17: fruitWeek16, 18: fruitWeek16, 19: fruitWeek16,
   20: fruitWeek20, 21: fruitWeek20, 22: fruitWeek20, 23: fruitWeek20,
