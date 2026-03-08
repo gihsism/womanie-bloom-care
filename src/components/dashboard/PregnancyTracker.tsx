@@ -1,6 +1,18 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+
+// Baby size fruit illustrations
+import babyWeek04 from '@/assets/baby-week-04.png';
+import babyWeek07 from '@/assets/baby-week-07.png';
+import babyWeek12 from '@/assets/baby-week-12.png';
+import babyWeek16 from '@/assets/baby-week-16.png';
+import babyWeek20 from '@/assets/baby-week-20.png';
+import babyWeek24 from '@/assets/baby-week-24.png';
+import babyWeek28 from '@/assets/baby-week-28.png';
+import babyWeek32 from '@/assets/baby-week-32.png';
+import babyWeek36 from '@/assets/baby-week-36.png';
+import babyWeek40 from '@/assets/baby-week-40.png';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -51,6 +63,25 @@ const getWeekData = (week: number) => {
     else break;
   }
   return WEEK_DATA[bestKey] || WEEK_DATA[4];
+};
+
+const WEEK_IMAGES: Record<number, string> = {
+  4: babyWeek04, 5: babyWeek04, 6: babyWeek04,
+  7: babyWeek07, 8: babyWeek07, 9: babyWeek07, 10: babyWeek07, 11: babyWeek07,
+  12: babyWeek12, 13: babyWeek12, 14: babyWeek12, 15: babyWeek12,
+  16: babyWeek16, 17: babyWeek16, 18: babyWeek16, 19: babyWeek16,
+  20: babyWeek20, 21: babyWeek20, 22: babyWeek20, 23: babyWeek20,
+  24: babyWeek24, 25: babyWeek24, 26: babyWeek24, 27: babyWeek24,
+  28: babyWeek28, 29: babyWeek28, 30: babyWeek28, 31: babyWeek28,
+  32: babyWeek32, 33: babyWeek32, 34: babyWeek32, 35: babyWeek32,
+  36: babyWeek36, 37: babyWeek36, 38: babyWeek36, 39: babyWeek36,
+  40: babyWeek40,
+};
+
+const getWeekImage = (week: number): string => {
+  if (week <= 3) return babyWeek04;
+  if (week >= 40) return babyWeek40;
+  return WEEK_IMAGES[week] || babyWeek36;
 };
 
 // ─── Pregnancy symptoms by trimester ───
@@ -251,7 +282,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
       {/* Main pregnancy status */}
       <div className="bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 rounded-2xl p-5">
         <div className="text-center mb-4">
-          <div className="text-5xl mb-2">{weekData.sizeComparison}</div>
+          <img src={getWeekImage(weeksPregnant)} alt={`Baby size: ${weekData.size}`} className="w-24 h-24 mx-auto mb-2 object-contain" />
           <div className="text-4xl font-light text-foreground mb-1">
             Week {weeksPregnant}
             <span className="text-lg text-muted-foreground ml-1">+{daysExtra}d</span>
@@ -301,6 +332,15 @@ const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
           <Baby className="h-4 w-4 text-primary" />
           Baby at Week {weeksPregnant}
         </h4>
+        
+        <div className="flex items-center gap-4 bg-muted/30 rounded-xl p-4">
+          <img src={getWeekImage(weeksPregnant)} alt={weekData.size} className="w-16 h-16 object-contain flex-shrink-0" />
+          <div>
+            <div className="text-lg font-semibold">Size of a {weekData.size}</div>
+            <div className="text-sm text-muted-foreground">{weekData.length} · {weekData.weight}</div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-3 gap-3 text-center">
           <div className="bg-muted/50 rounded-xl p-3">
             <Apple className="h-4 w-4 text-primary mx-auto mb-1" />
