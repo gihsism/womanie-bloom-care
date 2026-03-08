@@ -280,8 +280,7 @@ const CycleCalendar = ({
             title: 'Period started', 
             description: `Auto-filled ${periodLength} days (${format(date, 'MMM d')} – ${format(predictedEnd, 'MMM d')}). Tap days to adjust.` 
           });
-        
-        toast({ title: 'Period day marked' });
+        }
       }
       
       // Reload data to get updated records and recalculate predictions
