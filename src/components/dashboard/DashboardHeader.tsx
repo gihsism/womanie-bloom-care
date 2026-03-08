@@ -20,7 +20,6 @@ import {
 import { 
   MessageSquare, 
   Activity, 
-  FileText, 
   Smartphone, 
   Users,
   Calendar as CalendarIcon,
