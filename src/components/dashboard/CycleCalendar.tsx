@@ -354,11 +354,13 @@ const CycleCalendar = ({
     saveHealthSignal(date, updatedSignal);
   };
 
+  const hasAnyData = periodRecords.length > 0 || !!initialPeriodStart;
+
   const lastPeriodStart = periodRecords.length > 0 
     ? parseISO(periodRecords[0].period_start_date)
     : initialPeriodStart || new Date(2025, 9, 1);
 
-  const currentCycleDay = getCurrentCycleDay(lastPeriodStart, cycleLength);
+  const currentCycleDay = hasAnyData ? getCurrentCycleDay(lastPeriodStart, cycleLength) : 0;
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
