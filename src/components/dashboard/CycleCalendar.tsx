@@ -22,6 +22,7 @@ interface CycleCalendarProps {
   cycleLength?: number;
   periodLength?: number;
   selectedMode?: string;
+  pregnancyDueDate?: Date | null;
   ovulationPrediction?: {
     predictedOvulationDate?: string;
     fertileWindowStart?: string;
