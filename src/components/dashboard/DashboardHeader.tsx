@@ -66,6 +66,8 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onUploadClick, onDoctorChatClick, cycleDay = 14, cyclePhase = 'follicular' }: DashboardHeaderProps) => {
+  const navigate = useNavigate();
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
@@ -74,10 +76,10 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onU
   };
 
   const quickActions = [
-    { id: 'B2', icon: Activity, label: 'Dashboard', color: 'text-secondary' },
-    { id: 'B3', icon: FileText, label: 'Records', color: 'text-accent' },
-    { id: 'B4', icon: Smartphone, label: 'Devices', color: 'text-muted-foreground' },
-    { id: 'B5', icon: Users, label: 'Community', color: 'text-primary' },
+    { id: 'B2', icon: Activity, label: 'Dashboard', color: 'text-secondary', action: () => onNavigate('B2') },
+    { id: 'B3', icon: FileText, label: 'Records', color: 'text-accent', action: () => navigate('/dashboard/medical-history') },
+    { id: 'B4', icon: Smartphone, label: 'Devices', color: 'text-muted-foreground', action: () => onNavigate('B4') },
+    { id: 'B5', icon: Users, label: 'Community', color: 'text-primary', action: () => onNavigate('B5') },
   ];
 
   const modeOptions = [
