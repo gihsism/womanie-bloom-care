@@ -166,6 +166,7 @@ const PatientDashboard = () => {
   const [activeSection, setActiveSection] = useState('overview');
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
   const [documentsLoading, setDocumentsLoading] = useState(true);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
   // Fetch profile and documents when user is available
   useEffect(() => {
