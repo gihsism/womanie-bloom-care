@@ -139,7 +139,7 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onU
           return (
             <button
               key={action.id}
-              onClick={() => onNavigate(action.id)}
+              onClick={action.action}
               className="flex flex-col items-center gap-1.5 min-w-[72px] group"
             >
               <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center group-hover:bg-muted transition-colors shadow-sm">
