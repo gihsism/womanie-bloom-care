@@ -121,13 +121,29 @@ const CycleCalendar = ({
     }
   };
   
+  // Determine which record is the "active" (ongoing) period:
+  // - end_date is null, OR
+  // - end_date === start_date AND start is within avgPeriodLength+2 days of today (legacy single-day record)
+  const getEffectiveEnd = (record: PeriodRecord): string | null => {
+    if (record.period_end_date === null) return null;
+    // Legacy: if end === start and it's recent, treat as active
+    if (
+      record.period_end_date === record.period_start_date &&
+      differenceInDays(new Date(), parseISO(record.period_start_date)) <= periodLength + 2
+    ) {
+      return null; // treat as active/unconfirmed
+    }
+    return record.period_end_date;
+  };
+
   // Confirmed period days: from start to confirmed end_date (solid)
   const confirmedPeriodDays = useMemo(() => {
     const days = new Set<string>();
     periodRecords.forEach(record => {
-      if (!record.period_end_date) return; // skip active periods for confirmed set
+      const effectiveEnd = getEffectiveEnd(record);
+      if (effectiveEnd === null) return; // skip active periods
       const start = parseISO(record.period_start_date);
-      const end = parseISO(record.period_end_date);
+      const end = parseISO(effectiveEnd);
       let current = start;
       while (current <= end) {
         days.add(format(current, 'yyyy-MM-dd'));
@@ -135,27 +151,27 @@ const CycleCalendar = ({
       }
     });
     return days;
-  }, [periodRecords]);
+  }, [periodRecords, periodLength]);
 
   // Active (unconfirmed) period days: start is confirmed, end is predicted
   const { activePeriodConfirmedDays, activePeriodPredictedDays } = useMemo(() => {
     const confirmed = new Set<string>();
     const predicted = new Set<string>();
     
-    const activeRecord = periodRecords.find(isActivePeriod);
+    const activeRecord = periodRecords.find(r => getEffectiveEnd(r) === null);
     if (!activeRecord) return { activePeriodConfirmedDays: confirmed, activePeriodPredictedDays: predicted };
 
     const start = parseISO(activeRecord.period_start_date);
-    const today = new Date();
+    const today = startOfDay(new Date());
     const predictedEnd = addDays(start, periodLength - 1);
 
-    // Days from start to today (or predicted end, whichever is less) are "confirmed so far"
+    // Days from start up to min(today, predictedEnd) → solid
     let d = start;
     while (d <= today && d <= predictedEnd) {
       confirmed.add(format(d, 'yyyy-MM-dd'));
       d = addDays(d, 1);
     }
-    // If today is before predicted end, remaining days are predicted
+    // If today is before predicted end, remaining days → dashed
     if (today < predictedEnd) {
       d = addDays(today, 1);
       while (d <= predictedEnd) {
@@ -163,7 +179,7 @@ const CycleCalendar = ({
         d = addDays(d, 1);
       }
     }
-    // If today is past predicted end but no confirmation yet, mark those too as confirmed
+    // If today is past predicted end but no confirmation yet, extend solid
     if (today > predictedEnd) {
       d = addDays(predictedEnd, 1);
       while (d <= today) {
@@ -182,7 +198,7 @@ const CycleCalendar = ({
     return merged;
   }, [confirmedPeriodDays, activePeriodConfirmedDays]);
 
-  const hasActivePeriod = periodRecords.some(isActivePeriod);
+  const hasActivePeriod = periodRecords.some(r => getEffectiveEnd(r) === null);
   
   const isPeriodDay = (date: Date): boolean => {
     return allConfirmedPeriodDays.has(format(date, 'yyyy-MM-dd'));
