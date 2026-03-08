@@ -96,7 +96,7 @@ const BabyImage3DOverlay = ({ src, week, onClose }: BabyImage3DOverlayProps) => 
           <img
             src={src}
             alt={`Baby at week ${week}`}
-            className="w-full h-auto object-contain bg-gradient-to-b from-muted/80 to-muted rounded-2xl select-none"
+            className="w-full h-auto object-contain select-none"
             draggable={false}
             style={{ transform: 'translateZ(20px)' }}
           />
