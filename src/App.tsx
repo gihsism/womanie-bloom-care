@@ -32,6 +32,7 @@ import MedicalHistory from "./pages/MedicalHistory";
 import AIDoctorChat from "./pages/AIDoctorChat";
 import Install from "./pages/Install";
 import Devices from "./pages/dashboard/Devices";
+import Welcome from "./pages/Welcome";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,7 @@ const App = () => (
             <Route path="/onboarding/success" element={<OnboardingSuccess />} />
             <Route path="/install" element={<Install />} />
             <Route path="/dashboard/devices" element={<Devices />} />
+            <Route path="/welcome" element={<Welcome />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
