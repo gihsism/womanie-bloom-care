@@ -37,9 +37,11 @@ export default function HealthStatistics() {
 
   const fetchDocuments = async () => {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const { data, error } = await supabase
         .from('health_documents')
         .select('id, file_name, ai_suggested_name, ai_suggested_category, ai_summary, uploaded_at, document_type')
+        .eq('user_id', session?.user?.id ?? '')
         .order('uploaded_at', { ascending: false });
 
       if (error) throw error;
