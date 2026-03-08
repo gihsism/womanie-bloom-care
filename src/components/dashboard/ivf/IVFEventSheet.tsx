@@ -19,9 +19,13 @@ interface IVFEventSheetProps {
 }
 
 const QUICK_ITEMS = [
-  { title: 'Injection', type: 'injection', icon: '💉', time: '20:00' },
-  { title: 'Trigger Shot', type: 'injection', icon: '⏰', time: null },
-  { title: 'Medication', type: 'medication', icon: '💊', time: '09:00' },
+  { title: 'FSH (Follitropin)', type: 'injection', icon: '💉', time: '20:00' },
+  { title: 'hMG (Menotropin)', type: 'injection', icon: '💉', time: '20:00' },
+  { title: 'GnRH Antagonist', type: 'injection', icon: '💉', time: '08:00' },
+  { title: 'GnRH Agonist', type: 'injection', icon: '💉', time: '08:00' },
+  { title: 'hCG Trigger', type: 'injection', icon: '⏰', time: null },
+  { title: 'Progesterone', type: 'medication', icon: '💊', time: '09:00' },
+  { title: 'Estradiol', type: 'medication', icon: '💊', time: '09:00' },
   { title: 'Vitamins', type: 'medication', icon: '🫶', time: '09:00' },
   { title: 'Blood Work', type: 'test', icon: '🩸', time: null },
   { title: 'Ultrasound', type: 'appointment', icon: '🔬', time: null },
