@@ -152,6 +152,7 @@ interface PregnancyTrackerProps {
 }
 
 const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
+  const [showFullImage, setShowFullImage] = useState(false);
   const [dueDateInput, setDueDateInput] = useState('');
   const [lmpInput, setLmpInput] = useState('');
   const [setupMethod, setSetupMethod] = useState<'due_date' | 'lmp' | 'ivf'>('due_date');
