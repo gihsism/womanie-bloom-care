@@ -626,6 +626,9 @@ const PatientDashboard = () => {
               ) : selectedMode === 'pre-menstrual' ? (
                 /* ─── Pre-Menstrual Mode ─── */
                 <PreMenstrualDashboard />
+              ) : (selectedMode === 'menopause' || selectedMode === 'post-menopause') ? (
+                /* ─── Menopause Mode ─── */
+                <MenopauseDashboard />
               ) : (
                 /* ─── Cycle Mode ─── */
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
