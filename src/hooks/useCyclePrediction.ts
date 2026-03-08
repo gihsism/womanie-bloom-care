@@ -109,6 +109,7 @@ export function useCyclePrediction({
   periodRecords,
   daySignals,
   onboardingEstimates,
+  manualOverrides,
 }: CyclePredictionInput): CyclePrediction {
   return useMemo(() => {
     const sortedRecords = [...periodRecords].sort(
