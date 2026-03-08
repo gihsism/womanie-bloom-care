@@ -21,6 +21,7 @@ const features = [
     description: 'Log your period, track symptoms, and get personalised predictions.',
     bg: 'bg-primary/10',
     color: 'text-primary',
+    path: '/dashboard',
   },
   {
     icon: MessageSquare,
@@ -28,6 +29,7 @@ const features = [
     description: 'Get instant health guidance powered by latest AI models.',
     bg: 'bg-secondary/10',
     color: 'text-secondary',
+    path: '/ai-doctor',
   },
   {
     icon: FileText,
@@ -35,6 +37,7 @@ const features = [
     description: 'Upload lab results for AI-powered summaries and insights.',
     bg: 'bg-purple/10',
     color: 'text-purple',
+    path: '/medical-history',
   },
   {
     icon: Activity,
@@ -42,6 +45,7 @@ const features = [
     description: 'Track patterns in mood, symptoms, and overall wellbeing.',
     bg: 'bg-accent/10',
     color: 'text-accent',
+    path: '/health-statistics',
   },
 ];
 
