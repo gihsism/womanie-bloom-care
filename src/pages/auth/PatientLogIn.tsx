@@ -106,7 +106,7 @@ const PatientLogIn = () => {
   const handleAppleSignIn = async () => {
     try {
       const result = await lovable.auth.signInWithOAuth('apple', {
-        redirect_uri: `${window.location.origin}/dashboard`,
+        redirect_uri: window.location.origin,
       });
 
       if (result?.error) {
