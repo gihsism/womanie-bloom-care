@@ -183,19 +183,23 @@ const PatientDashboard = () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('full_name, life_stage, pregnancy_due_date')
+        .select('full_name, life_stage, pregnancy_due_date, ivf_start_date, ivf_phase')
         .eq('id', userId)
         .maybeSingle();
 
       if (error) throw error;
       setProfile(data);
       
-      // Load saved life stage if available, otherwise default to menstrual-cycle
       setSelectedMode((data?.life_stage as LifeStage) || 'menstrual-cycle');
       
-      // Load pregnancy due date
       if (data?.pregnancy_due_date) {
         setPregnancyDueDate(new Date(data.pregnancy_due_date));
+      }
+      if (data?.ivf_start_date) {
+        setIvfStartDate(new Date(data.ivf_start_date));
+      }
+      if (data?.ivf_phase) {
+        setIvfPhase(data.ivf_phase);
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -213,6 +217,36 @@ const PatientDashboard = () => {
           .eq('id', user.id);
       } catch (error) {
         console.error('Error saving due date:', error);
+      }
+    }
+  };
+
+  const handleSetIVFStart = async (date: Date, phase: string) => {
+    setIvfStartDate(date);
+    setIvfPhase(phase);
+    if (user) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({ ivf_start_date: format(date, 'yyyy-MM-dd'), ivf_phase: phase })
+          .eq('id', user.id);
+      } catch (error) {
+        console.error('Error saving IVF data:', error);
+      }
+    }
+  };
+
+  const handleUpdateIVFPhase = async (phase: string) => {
+    setIvfPhase(phase);
+    setIvfStartDate(new Date()); // reset phase start to today
+    if (user) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({ ivf_phase: phase, ivf_start_date: format(new Date(), 'yyyy-MM-dd') })
+          .eq('id', user.id);
+      } catch (error) {
+        console.error('Error updating IVF phase:', error);
       }
     }
   };
