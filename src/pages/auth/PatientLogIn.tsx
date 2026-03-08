@@ -77,7 +77,7 @@ const PatientLogIn = () => {
   const handleGoogleSignIn = async () => {
     try {
       const result = await lovable.auth.signInWithOAuth('google', {
-        redirect_uri: window.location.origin,
+        redirect_uri: `${window.location.origin}/dashboard`,
         extraParams: {
           prompt: 'select_account',
         },
@@ -106,7 +106,7 @@ const PatientLogIn = () => {
   const handleAppleSignIn = async () => {
     try {
       const result = await lovable.auth.signInWithOAuth('apple', {
-        redirect_uri: window.location.origin,
+        redirect_uri: `${window.location.origin}/dashboard`,
       });
 
       if (result?.error) {
