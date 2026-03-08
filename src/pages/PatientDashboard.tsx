@@ -40,7 +40,8 @@ import {
   LogOut,
   Calendar,
   Sparkles,
-  Droplet
+  Droplet,
+  ArrowLeft
 } from 'lucide-react';
 
 interface DocumentSummary {
