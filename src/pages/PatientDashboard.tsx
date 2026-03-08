@@ -315,7 +315,7 @@ const PatientDashboard = () => {
     ? Math.floor((new Date().getTime() - periodData.lastPeriodStart.getTime()) / (1000 * 60 * 60 * 24)) % periodData.cycleLength + 1
     : 14;
 
-  const healthStats = selectedMode ? getModeStats(selectedMode, currentCycleDay) : [];
+  const healthStats = selectedMode ? getModeStats(selectedMode, currentCycleDay, pregnancyDueDate) : [];
 
   const mainSections = [
     {
