@@ -176,7 +176,7 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onU
 };
 
 // Health stats based on mode
-export const getModeStats = (mode: LifeStage, cycleDay: number = 14) => {
+export const getModeStats = (mode: LifeStage, cycleDay: number = 14, pregnancyDueDate?: Date | null) => {
   // Determine cycle phase
   let phase = 'follicular';
   let estrogen = 'Low';
