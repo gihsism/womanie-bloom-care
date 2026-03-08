@@ -141,9 +141,9 @@ export default function MenopauseDashboard({ isPostMenopause = false }: Menopaus
       {isPostMenopause && (
         <div className="grid grid-cols-3 gap-2">
           {[
-            { icon: Bone, label: 'Bones', emoji: '🦴', color: 'bg-amber-100 dark:bg-amber-900/30' },
-            { icon: HeartPulse, label: 'Heart', emoji: '❤️', color: 'bg-red-100 dark:bg-red-900/30' },
-            { icon: Brain, label: 'Brain', emoji: '🧠', color: 'bg-purple-100 dark:bg-purple-900/30' },
+            { icon: Bone, label: 'Bones', emoji: '🦴', color: 'bg-primary/5' },
+            { icon: HeartPulse, label: 'Heart', emoji: '❤️', color: 'bg-destructive/5' },
+            { icon: Brain, label: 'Brain', emoji: '🧠', color: 'bg-secondary/10' },
           ].map(p => (
             <Card key={p.label} className={`p-3 text-center ${p.color}`}>
               <span className="text-2xl">{p.emoji}</span>
