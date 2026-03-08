@@ -105,8 +105,29 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onU
         <h1 className="text-2xl font-bold">
           {getGreeting()}, {userName}! 👋
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Your personalized health dashboard • <span className="font-medium text-primary">{getModeLabel(selectedMode)}</span>
+        <p className="text-sm text-muted-foreground flex items-center flex-wrap gap-0.5">
+          Your personalized health dashboard •{' '}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="inline-flex items-center gap-1 font-medium text-primary hover:underline focus:outline-none">
+                {getModeLabel(selectedMode)}
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-primary"><path d="M3 5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-52">
+              <DropdownMenuLabel className="text-xs text-muted-foreground">Switch mode</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {modeOptions.map((option) => (
+                <DropdownMenuItem
+                  key={option.value}
+                  onClick={() => onModeChange(option.value as LifeStage)}
+                  className={selectedMode === option.value ? 'bg-primary/10 font-medium' : ''}
+                >
+                  {option.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </p>
       </div>
 
