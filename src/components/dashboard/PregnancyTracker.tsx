@@ -17,6 +17,7 @@ import babyWeek40 from '@/assets/baby-week-40.png';
 // Fruit size comparison illustrations
 import fruitWeek04 from '@/assets/fruit-week-04.png';
 import fruitWeek07 from '@/assets/fruit-week-07.png';
+import fruitWeek09 from '@/assets/fruit-week-09.png';
 import fruitWeek12 from '@/assets/fruit-week-12.png';
 import fruitWeek16 from '@/assets/fruit-week-16.png';
 import fruitWeek20 from '@/assets/fruit-week-20.png';
