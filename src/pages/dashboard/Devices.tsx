@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Watch, Heart, Activity, Bluetooth, Smartphone, CheckCircle2, AlertCircle, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Watch, Heart, Activity, Bluetooth, Smartphone, CheckCircle2, AlertCircle, ExternalLink, Loader2 } from 'lucide-react';
+import { healthKitService } from '@/services/healthkit';
+import { toast } from 'sonner';
 
 interface Device {
   id: string;
@@ -20,6 +22,15 @@ interface Device {
 const Devices = () => {
   const navigate = useNavigate();
   const [expandedDevice, setExpandedDevice] = useState<string | null>(null);
+  const [connecting, setConnecting] = useState(false);
+  const [healthKitConnected, setHealthKitConnected] = useState(false);
+  const [isNative, setIsNative] = useState(false);
+
+  useEffect(() => {
+    healthKitService.initialize().then((available) => {
+      setIsNative(available);
+    });
+  }, []);
 
   const devices: Device[] = [
     {
@@ -28,8 +39,8 @@ const Devices = () => {
       brand: 'Apple',
       icon: <Heart className="h-7 w-7" />,
       description: 'Sync cycle data, heart rate, sleep, and activity from Apple Health. Works with Apple Watch, iPhone, and all HealthKit-compatible devices.',
-      status: 'available',
-      requirement: 'Requires native iOS app (install via TestFlight)',
+      status: healthKitConnected ? 'connected' : 'available',
+      requirement: !isNative ? 'Requires native iOS app (install via TestFlight or build with Capacitor)' : undefined,
       features: ['Menstrual cycle sync', 'Heart rate monitoring', 'Sleep tracking', 'Step count & activity', 'Body temperature'],
       color: 'text-primary',
     },
@@ -173,13 +184,49 @@ const Devices = () => {
 
                     {device.status === 'available' && (
                       <div className="space-y-2">
-                        <Button className="w-full gap-2" size="lg">
-                          <CheckCircle2 className="h-4 w-4" />
-                          Connect {device.name}
+                        <Button 
+                          className="w-full gap-2" 
+                          size="lg"
+                          disabled={connecting || (device.id === 'apple-health' && !isNative)}
+                          onClick={async () => {
+                            if (device.id === 'apple-health') {
+                              setConnecting(true);
+                              try {
+                                const granted = await healthKitService.requestPermissions();
+                                if (granted) {
+                                  setHealthKitConnected(true);
+                                  const data = await healthKitService.getAllHealthData();
+                                  toast.success('Apple Health connected!', {
+                                    description: `Synced ${data.steps} steps, ${data.heartRate?.length || 0} heart rate readings`,
+                                  });
+                                } else {
+                                  toast.error('Permission denied', { description: 'Please allow HealthKit access in Settings.' });
+                                }
+                              } catch {
+                                toast.error('Connection failed');
+                              } finally {
+                                setConnecting(false);
+                              }
+                            }
+                          }}
+                        >
+                          {connecting ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <CheckCircle2 className="h-4 w-4" />
+                          )}
+                          {connecting ? 'Connecting...' : `Connect ${device.name}`}
                         </Button>
-                        <p className="text-[10px] text-center text-muted-foreground">
-                          You'll be redirected to authorize access to your health data
-                        </p>
+                        {device.id === 'apple-health' && !isNative && (
+                          <p className="text-[10px] text-center text-amber-600 dark:text-amber-400">
+                            Build the native iOS app with Capacitor to enable Apple Health
+                          </p>
+                        )}
+                        {(device.id !== 'apple-health' || isNative) && (
+                          <p className="text-[10px] text-center text-muted-foreground">
+                            You'll be redirected to authorize access to your health data
+                          </p>
+                        )}
                       </div>
                     )}
 
