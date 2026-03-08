@@ -129,11 +129,11 @@ export function useCyclePrediction({
     );
     const excludedCycles = rawCycleLengths.length - validCycleLengths.length;
 
-    // Calculate CONFIRMED period lengths (only from records with end_date)
+    // Calculate CONFIRMED period lengths (only from records with a real end_date, not legacy end===start)
     const confirmedPeriodLengths = sortedRecords
-      .filter(r => r.period_end_date !== null)
+      .filter(r => r.period_end_date !== null && r.period_end_date !== r.period_start_date)
       .map(r => differenceInDays(parseISO(r.period_end_date!), parseISO(r.period_start_date)) + 1)
-      .filter(len => len > 0 && len <= 14);
+      .filter(len => len >= 2 && len <= 14);
 
     // ─── Determine Tier & averages ───
     let tier: PredictionTier;
