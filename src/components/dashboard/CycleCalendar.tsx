@@ -510,7 +510,7 @@ const CycleCalendar = ({
                       <Button 
                         variant="outline"
                         onClick={() => {
-                          setTempCycleLength(prediction?.averageCycleLength || cycleLength);
+                          setTempCycleLength(prediction.averageCycleLength);
                           setIsSettingsOpen(false);
                         }} 
                         className="flex-1"
