@@ -454,15 +454,13 @@ const PatientDashboard = () => {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Calendar - Takes 2 columns */}
                 <div className="lg:col-span-2">
-                  {periodData && (
                     <CycleCalendar 
-                      lastPeriodStart={periodData.lastPeriodStart} 
-                      cycleLength={periodData.cycleLength} 
+                      lastPeriodStart={periodData?.lastPeriodStart} 
+                      cycleLength={periodData?.cycleLength ?? 28} 
                       periodLength={5}
                       selectedMode={selectedMode}
                       ovulationPrediction={ovulationPrediction}
                     />
-                  )}
                 </div>
 
                 {/* Cycle Health - Takes 1 column on the right */}
