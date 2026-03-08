@@ -177,6 +177,10 @@ export function useCyclePrediction({
       avgPeriodLength = getAvgPeriodLength();
     }
 
+    // Manual overrides always win
+    if (manualOverrides?.cycleLength) avgCycleLength = manualOverrides.cycleLength;
+    if (manualOverrides?.periodLength) avgPeriodLength = manualOverrides.periodLength;
+
     // ─── Compute Dates ───
     const now = new Date();
 
