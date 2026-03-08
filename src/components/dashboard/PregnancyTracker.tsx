@@ -8,7 +8,9 @@ import BabyImage3DOverlay from './BabyImage3DOverlay';
 import babyWeek04 from '@/assets/baby-week-04.png';
 import babyWeek07 from '@/assets/baby-week-07.png';
 import babyWeek12 from '@/assets/baby-week-12.png';
+import babyWeek14 from '@/assets/baby-week-14.png';
 import babyWeek16 from '@/assets/baby-week-16.png';
+import babyWeek18 from '@/assets/baby-week-18.png';
 import babyWeek20 from '@/assets/baby-week-20.png';
 import babyWeek24 from '@/assets/baby-week-24.png';
 import babyWeek28 from '@/assets/baby-week-28.png';
@@ -83,14 +85,16 @@ const getWeekData = (week: number) => {
 };
 
 const WEEK_IMAGES: Record<number, string> = {
-  4: babyWeek04, 5: babyWeek04, 6: babyWeek04,
-  7: babyWeek07, 8: babyWeek07, 9: babyWeek07, 10: babyWeek07, 11: babyWeek07,
-  12: babyWeek12, 13: babyWeek12, 14: babyWeek12, 15: babyWeek12,
-  16: babyWeek16, 17: babyWeek16, 18: babyWeek16, 19: babyWeek16,
-  20: babyWeek20, 21: babyWeek20, 22: babyWeek20, 23: babyWeek20,
-  24: babyWeek24, 25: babyWeek24, 26: babyWeek24, 27: babyWeek24,
-  28: babyWeek28, 29: babyWeek28, 30: babyWeek28, 31: babyWeek28,
-  32: babyWeek32, 33: babyWeek32, 34: babyWeek32, 35: babyWeek32,
+  4: babyWeek04, 5: babyWeek04, 6: babyWeek07,
+  7: babyWeek07, 8: babyWeek07, 9: babyWeek07, 10: babyWeek07, 11: babyWeek12,
+  12: babyWeek12, 13: babyWeek14,
+  14: babyWeek14, 15: babyWeek14,
+  16: babyWeek16, 17: babyWeek18,
+  18: babyWeek18, 19: babyWeek18,
+  20: babyWeek20, 21: babyWeek20, 22: babyWeek20, 23: babyWeek24,
+  24: babyWeek24, 25: babyWeek24, 26: babyWeek24, 27: babyWeek28,
+  28: babyWeek28, 29: babyWeek28, 30: babyWeek28, 31: babyWeek32,
+  32: babyWeek32, 33: babyWeek32, 34: babyWeek32, 35: babyWeek36,
   36: babyWeek36, 37: babyWeek36, 38: babyWeek36, 39: babyWeek36,
   40: babyWeek40,
 };
