@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek, addDays, parseISO } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek, addDays, parseISO, differenceInDays } from 'date-fns';
 import { Droplet, Sparkles, Heart, CloudRain } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CyclePrediction, PeriodRecord, isActivePeriod, getEffectiveEndDate } from '@/hooks/useCyclePrediction';
