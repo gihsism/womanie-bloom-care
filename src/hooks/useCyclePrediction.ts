@@ -172,9 +172,9 @@ export function useCyclePrediction({
     const lastPeriodEnd = parseISO(sortedRecords[0].period_end_date);
     
     // Predict next period - advance until it's in the future
-    const today = new Date();
+    const now = new Date();
     let predictedPeriodStart = addDays(lastPeriodStart, averageCycleLength);
-    while (predictedPeriodStart < today) {
+    while (predictedPeriodStart < now) {
       predictedPeriodStart = addDays(predictedPeriodStart, averageCycleLength);
     }
     const predictedPeriodEnd = addDays(predictedPeriodStart, averagePeriodLength - 1);
