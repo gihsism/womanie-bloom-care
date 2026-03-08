@@ -135,10 +135,14 @@ const PatientSignUp = () => {
       });
 
       if (result?.error) {
+        const message = result.error.message === 'Popup was blocked'
+          ? 'Please allow popups for this site, then try again. If this is preview mode on mobile, open the app in a new tab first.'
+          : result.error.message || 'Failed to sign up with Google';
+
         toast({
           variant: 'destructive',
           title: 'Google sign-up failed',
-          description: result.error.message || 'Failed to sign up with Google',
+          description: message,
         });
       }
     } catch (error: any) {
