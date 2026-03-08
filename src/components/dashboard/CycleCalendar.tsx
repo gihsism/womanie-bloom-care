@@ -8,15 +8,14 @@ import { format, addMonths, subMonths, addDays, differenceInDays, startOfDay, is
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-// Import sub-components
 import TodayStatusCard from './calendar/TodayStatusCard';
 import CalendarGrid from './calendar/CalendarGrid';
 import CalendarLegend from './calendar/CalendarLegend';
 import DailyLogSheet from './calendar/DailyLogSheet';
 import DayActionSheet from './calendar/DayActionSheet';
+import PeriodEndBanner from './calendar/PeriodEndBanner';
 
-// Import ML prediction hook
-import { useCyclePrediction, useSymptomPatterns, getCurrentCycleDay, type PeriodRecord, type DaySignal } from '@/hooks/useCyclePrediction';
+import { useCyclePrediction, useSymptomPatterns, getCurrentCycleDay, isActivePeriod, getEffectiveEndDate, type PeriodRecord, type DaySignal } from '@/hooks/useCyclePrediction';
 
 interface CycleCalendarProps {
   lastPeriodStart?: Date;
@@ -37,58 +36,44 @@ const CycleCalendar = ({
   cycleLength: initialCycleLength = 28,
   periodLength: initialPeriodLength = 5,
   selectedMode = 'menstrual-cycle',
-  ovulationPrediction
 }: CycleCalendarProps) => {
   const { toast } = useToast();
   
-  // Calendar state
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
-  // Period tracking state - store all period records for ML calculations
   const [periodRecords, setPeriodRecords] = useState<PeriodRecord[]>([]);
   const [manualCycleLength, setManualCycleLength] = useState<number | null>(null);
-  
-  // Marked ovulation days (user-confirmed)
   const [markedOvulationDays, setMarkedOvulationDays] = useState<Set<string>>(new Set());
-  
-  // Health signals
   const [daySignals, setDaySignals] = useState<Record<string, DaySignal>>({});
   
-  // Sheet/dialog states
   const [isDailyLogSheetOpen, setIsDailyLogSheetOpen] = useState(false);
   const [dailyLogTab, setDailyLogTab] = useState<'symptoms' | 'mood' | 'intimacy' | 'discharge'>('symptoms');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [tempCycleLength, setTempCycleLength] = useState(initialCycleLength);
   const [isDayActionOpen, setIsDayActionOpen] = useState(false);
 
-  // Build onboarding estimates for the prediction hook
   const onboardingEstimates = useMemo(() => ({
     cycleLength: manualCycleLength || initialCycleLength,
     periodLength: initialPeriodLength,
     lastPeriodStart: initialPeriodStart ? format(initialPeriodStart, 'yyyy-MM-dd') : undefined,
   }), [manualCycleLength, initialCycleLength, initialPeriodLength, initialPeriodStart]);
 
-  // ML Prediction - always returns a prediction (never null)
   const prediction = useCyclePrediction({
     periodRecords,
     daySignals,
     onboardingEstimates,
   });
   
-  // Symptom patterns for insights
   const symptomPatterns = useSymptomPatterns(
     periodRecords,
     daySignals,
     prediction.averageCycleLength
   );
 
-  // Use prediction values
   const cycleLength = prediction.averageCycleLength;
   const periodLength = prediction.averagePeriodLength;
 
-  // Load data from database on mount
   useEffect(() => {
     loadCalendarData();
   }, []);
@@ -98,7 +83,6 @@ const CycleCalendar = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Load ALL period tracking records for ML calculations
       const { data: periodData } = await supabase
         .from('period_tracking')
         .select('*')
@@ -110,7 +94,6 @@ const CycleCalendar = ({
         setTempCycleLength(periodData[0]?.cycle_length || initialCycleLength);
       }
 
-      // Load health signals
       const { data: signalsData } = await supabase
         .from('daily_health_signals')
         .select('*')
@@ -132,20 +115,17 @@ const CycleCalendar = ({
       }
     } catch (error) {
       console.error('Error loading calendar data:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load calendar data',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Failed to load calendar data', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
   };
   
-  // Get period days as a Set for quick lookup
-  const periodDays = useMemo(() => {
+  // Confirmed period days: from start to confirmed end_date (solid)
+  const confirmedPeriodDays = useMemo(() => {
     const days = new Set<string>();
     periodRecords.forEach(record => {
+      if (!record.period_end_date) return; // skip active periods for confirmed set
       const start = parseISO(record.period_start_date);
       const end = parseISO(record.period_end_date);
       let current = start;
@@ -156,147 +136,150 @@ const CycleCalendar = ({
     });
     return days;
   }, [periodRecords]);
+
+  // Active (unconfirmed) period days: start is confirmed, end is predicted
+  const { activePeriodConfirmedDays, activePeriodPredictedDays } = useMemo(() => {
+    const confirmed = new Set<string>();
+    const predicted = new Set<string>();
+    
+    const activeRecord = periodRecords.find(isActivePeriod);
+    if (!activeRecord) return { activePeriodConfirmedDays: confirmed, activePeriodPredictedDays: predicted };
+
+    const start = parseISO(activeRecord.period_start_date);
+    const today = new Date();
+    const predictedEnd = addDays(start, periodLength - 1);
+
+    // Days from start to today (or predicted end, whichever is less) are "confirmed so far"
+    let d = start;
+    while (d <= today && d <= predictedEnd) {
+      confirmed.add(format(d, 'yyyy-MM-dd'));
+      d = addDays(d, 1);
+    }
+    // If today is before predicted end, remaining days are predicted
+    if (today < predictedEnd) {
+      d = addDays(today, 1);
+      while (d <= predictedEnd) {
+        predicted.add(format(d, 'yyyy-MM-dd'));
+        d = addDays(d, 1);
+      }
+    }
+    // If today is past predicted end but no confirmation yet, mark those too as confirmed
+    if (today > predictedEnd) {
+      d = addDays(predictedEnd, 1);
+      while (d <= today) {
+        confirmed.add(format(d, 'yyyy-MM-dd'));
+        d = addDays(d, 1);
+      }
+    }
+
+    return { activePeriodConfirmedDays: confirmed, activePeriodPredictedDays: predicted };
+  }, [periodRecords, periodLength]);
+
+  // Merge all confirmed period days
+  const allConfirmedPeriodDays = useMemo(() => {
+    const merged = new Set(confirmedPeriodDays);
+    activePeriodConfirmedDays.forEach(d => merged.add(d));
+    return merged;
+  }, [confirmedPeriodDays, activePeriodConfirmedDays]);
+
+  const hasActivePeriod = periodRecords.some(isActivePeriod);
   
-  // Check if a date is a period day
   const isPeriodDay = (date: Date): boolean => {
-    return periodDays.has(format(date, 'yyyy-MM-dd'));
+    return allConfirmedPeriodDays.has(format(date, 'yyyy-MM-dd'));
   };
   
-  // Check if a date is marked as ovulation
-  const isOvulationDay = (date: Date): boolean => {
+  const isOvulationMarked = (date: Date): boolean => {
     return markedOvulationDays.has(format(date, 'yyyy-MM-dd'));
   };
-  
-  // Toggle period day
-  const handleTogglePeriodDay = async (date: Date) => {
-    const dateKey = format(date, 'yyyy-MM-dd');
-    const isCurrentlyPeriod = periodDays.has(dateKey);
-    
+
+  // ─── Period Start (new flow) ───
+  const handleStartPeriod = async (date: Date) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      
-      if (isCurrentlyPeriod) {
-        // Remove this day from period - find the record it belongs to and update/split
-        const affectedRecord = periodRecords.find(record => {
-          const start = parseISO(record.period_start_date);
-          const end = parseISO(record.period_end_date);
-          return date >= start && date <= end;
-        });
-        
-        if (affectedRecord) {
-          const start = parseISO(affectedRecord.period_start_date);
-          const end = parseISO(affectedRecord.period_end_date);
-          
-          if (isSameDay(date, start) && isSameDay(date, end)) {
-            // Only day in period - delete entire record
-            await supabase
-              .from('period_tracking')
-              .delete()
-              .eq('user_id', user.id)
-              .eq('period_start_date', affectedRecord.period_start_date);
-          } else if (isSameDay(date, start)) {
-            // First day - move start forward
-            await supabase
-              .from('period_tracking')
-              .update({ period_start_date: format(addDays(date, 1), 'yyyy-MM-dd') })
-              .eq('user_id', user.id)
-              .eq('period_start_date', affectedRecord.period_start_date);
-          } else if (isSameDay(date, end)) {
-            // Last day - move end backward
-            await supabase
-              .from('period_tracking')
-              .update({ period_end_date: format(addDays(date, -1), 'yyyy-MM-dd') })
-              .eq('user_id', user.id)
-              .eq('period_start_date', affectedRecord.period_start_date);
-          } else {
-            // Middle day - need to split the record
-            await supabase
-              .from('period_tracking')
-              .update({ period_end_date: format(addDays(date, -1), 'yyyy-MM-dd') })
-              .eq('user_id', user.id)
-              .eq('period_start_date', affectedRecord.period_start_date);
-            
-            await supabase
-              .from('period_tracking')
-              .insert({
-                user_id: user.id,
-                period_start_date: format(addDays(date, 1), 'yyyy-MM-dd'),
-                period_end_date: affectedRecord.period_end_date,
-                cycle_length: cycleLength
-              });
-          }
-        }
-        
-        toast({ title: 'Period day removed' });
-      } else {
-        // Add this day as period - check if adjacent to existing period
-        const dayBefore = format(addDays(date, -1), 'yyyy-MM-dd');
-        const dayAfter = format(addDays(date, 1), 'yyyy-MM-dd');
-        
-        const adjacentBefore = periodRecords.find(r => r.period_end_date === dayBefore);
-        const adjacentAfter = periodRecords.find(r => r.period_start_date === dayAfter);
-        
-        if (adjacentBefore && adjacentAfter) {
-          // Merge two periods
-          await supabase
-            .from('period_tracking')
-            .update({ period_end_date: adjacentAfter.period_end_date })
-            .eq('user_id', user.id)
-            .eq('period_start_date', adjacentBefore.period_start_date);
-          
-          await supabase
-            .from('period_tracking')
-            .delete()
-            .eq('user_id', user.id)
-            .eq('period_start_date', adjacentAfter.period_start_date);
-        } else if (adjacentBefore) {
-          // Extend previous period
-          await supabase
-            .from('period_tracking')
-            .update({ period_end_date: dateKey })
-            .eq('user_id', user.id)
-            .eq('period_start_date', adjacentBefore.period_start_date);
-        } else if (adjacentAfter) {
-          // Extend next period backward
-          await supabase
-            .from('period_tracking')
-            .update({ period_start_date: dateKey })
-            .eq('user_id', user.id)
-            .eq('period_start_date', adjacentAfter.period_start_date);
-        } else {
-          // Create new period auto-filled to predicted length
-          const predictedEnd = addDays(date, periodLength - 1);
-          await supabase
-            .from('period_tracking')
-            .insert({
-              user_id: user.id,
-              period_start_date: dateKey,
-              period_end_date: format(predictedEnd, 'yyyy-MM-dd'),
-              cycle_length: cycleLength
-            });
-          
-          toast({ 
-            title: 'Period started', 
-            description: `Auto-filled ${periodLength} days (${format(date, 'MMM d')} – ${format(predictedEnd, 'MMM d')}). Tap days to adjust.` 
-          });
-        }
-      }
-      
-      // Reload data to get updated records and recalculate predictions
-      loadCalendarData();
-      
-    } catch (error) {
-      console.error('Error updating period:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update period',
-        variant: 'destructive',
+
+      const dateKey = format(date, 'yyyy-MM-dd');
+
+      // Insert with null end_date (active period)
+      await supabase.from('period_tracking').insert({
+        user_id: user.id,
+        period_start_date: dateKey,
+        period_end_date: null,
+        cycle_length: cycleLength,
       });
+
+      toast({
+        title: 'Period started',
+        description: `Predicted to last ~${periodLength} days. We'll check in with you.`,
+      });
+
+      loadCalendarData();
+    } catch (error) {
+      console.error('Error starting period:', error);
+      toast({ title: 'Error', description: 'Failed to log period start', variant: 'destructive' });
+    }
+  };
+
+  // ─── Period End Confirmation ───
+  const handleEndPeriod = async (endDate: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const activeRecord = periodRecords.find(isActivePeriod);
+      if (!activeRecord) return;
+
+      await supabase
+        .from('period_tracking')
+        .update({ period_end_date: endDate })
+        .eq('user_id', user.id)
+        .eq('period_start_date', activeRecord.period_start_date);
+
+      const duration = differenceInDays(parseISO(endDate), parseISO(activeRecord.period_start_date)) + 1;
+      toast({
+        title: 'Period ended',
+        description: `Logged ${duration} day period. Predictions updated.`,
+      });
+
+      loadCalendarData();
+    } catch (error) {
+      console.error('Error ending period:', error);
+      toast({ title: 'Error', description: 'Failed to update period end', variant: 'destructive' });
+    }
+  };
+
+  const handleStillGoing = () => {
+    toast({ title: 'Got it!', description: "We'll check again tomorrow." });
+  };
+
+  // ─── Remove a period record ───
+  const handleRemovePeriod = async (date: Date) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const record = periodRecords.find(r => {
+        const start = parseISO(r.period_start_date);
+        const end = r.period_end_date ? parseISO(r.period_end_date) : addDays(start, periodLength);
+        return date >= start && date <= end;
+      });
+
+      if (record) {
+        await supabase
+          .from('period_tracking')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('period_start_date', record.period_start_date);
+        
+        toast({ title: 'Period removed' });
+        loadCalendarData();
+      }
+    } catch (error) {
+      console.error('Error removing period:', error);
+      toast({ title: 'Error', description: 'Failed to remove period', variant: 'destructive' });
     }
   };
   
-  // Toggle ovulation day
   const handleToggleOvulationDay = (date: Date) => {
     const dateKey = format(date, 'yyyy-MM-dd');
     setMarkedOvulationDays(prev => {
@@ -305,7 +288,6 @@ const CycleCalendar = ({
         next.delete(dateKey);
         toast({ title: 'Ovulation marker removed' });
       } else {
-        // Only allow one ovulation per cycle - clear others
         next.clear();
         next.add(dateKey);
         toast({ title: 'Ovulation marked', description: format(date, 'MMMM d') });
@@ -318,7 +300,6 @@ const CycleCalendar = ({
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-
       const { error } = await supabase
         .from('daily_health_signals')
         .upsert({
@@ -329,49 +310,26 @@ const CycleCalendar = ({
           mood: signal.mood,
           discharge: signal.discharge,
           notes: signal.notes,
-        }, {
-          onConflict: 'user_id,signal_date'
-        });
-
+        }, { onConflict: 'user_id,signal_date' });
       if (error) throw error;
     } catch (error) {
       console.error('Error saving health signal:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to save health signal',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Failed to save health signal', variant: 'destructive' });
     }
   };
 
-  // Get or create signal for a date
   const getSignalForDate = (date: Date): DaySignal => {
     const dateKey = format(date, 'yyyy-MM-dd');
-    return daySignals[dateKey] || {
-      date: dateKey,
-      symptoms: [],
-      intercourse: [],
-      mood: [],
-      discharge: 'none',
-      notes: '',
-    };
+    return daySignals[dateKey] || { date: dateKey, symptoms: [], intercourse: [], mood: [], discharge: 'none', notes: '' };
   };
   
-  // Update signal for a date
   const updateSignalForDate = (date: Date, updates: Partial<DaySignal>) => {
     const dateKey = format(date, 'yyyy-MM-dd');
-    const updatedSignal = {
-      ...getSignalForDate(date),
-      ...updates,
-    };
-    setDaySignals(prev => ({
-      ...prev,
-      [dateKey]: updatedSignal
-    }));
+    const updatedSignal = { ...getSignalForDate(date), ...updates };
+    setDaySignals(prev => ({ ...prev, [dateKey]: updatedSignal }));
     saveHealthSignal(date, updatedSignal);
   };
 
-  // Computed values - use most recent period for calculations
   const lastPeriodStart = periodRecords.length > 0 
     ? parseISO(periodRecords[0].period_start_date)
     : initialPeriodStart || new Date(2025, 9, 1);
@@ -385,8 +343,6 @@ const CycleCalendar = ({
 
   const handleSaveCycleSettings = async () => {
     setManualCycleLength(tempCycleLength);
-    
-    // Update the most recent period record with new cycle length
     if (periodRecords.length > 0) {
       try {
         const { data: { user } } = await supabase.auth.getUser();
@@ -401,7 +357,6 @@ const CycleCalendar = ({
         console.error('Error updating cycle length:', error);
       }
     }
-    
     setIsSettingsOpen(false);
   };
 
@@ -425,7 +380,17 @@ const CycleCalendar = ({
 
   return (
     <div className="space-y-4">
-      {/* Today's Status Card with ML Predictions */}
+      {/* Period End Confirmation Banner */}
+      {showCycleInfo && (
+        <PeriodEndBanner
+          periodRecords={periodRecords}
+          avgPeriodLength={periodLength}
+          onEndPeriod={handleEndPeriod}
+          onStillGoing={handleStillGoing}
+        />
+      )}
+
+      {/* Today's Status Card */}
       {showCycleInfo && (
         <TodayStatusCard
           cycleDay={currentCycleDay}
@@ -440,14 +405,8 @@ const CycleCalendar = ({
 
       {/* Calendar Card */}
       <Card className="p-4">
-        {/* Calendar Header */}
         <div className="flex items-center justify-between mb-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-            className="h-8 w-8"
-          >
+          <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="h-8 w-8">
             <ChevronLeft className="h-4 w-4" />
           </Button>
           
@@ -456,16 +415,10 @@ const CycleCalendar = ({
           </h4>
           
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-              className="h-8 w-8"
-            >
+            <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="h-8 w-8">
               <ChevronRight className="h-4 w-4" />
             </Button>
             
-            {/* Settings button */}
             {showCycleInfo && (
               <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
                 <DialogTrigger asChild>
@@ -483,13 +436,8 @@ const CycleCalendar = ({
                   <div className="space-y-4 py-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Average Cycle Length</label>
-                      <Select
-                        value={tempCycleLength.toString()}
-                        onValueChange={(value) => setTempCycleLength(parseInt(value))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
+                      <Select value={tempCycleLength.toString()} onValueChange={(v) => setTempCycleLength(parseInt(v))}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {Array.from({ length: 24 }, (_, i) => i + 21).map((days) => (
                             <SelectItem key={days} value={days.toString()}>
@@ -502,30 +450,14 @@ const CycleCalendar = ({
                         {`${prediction.dataQualityMessage}. Confidence: ${prediction.confidenceLevel}`}
                       </p>
                     </div>
-                    
                     <div className="text-xs text-muted-foreground space-y-1">
                       <p>• Standard deviation: ±{prediction.standardDeviation.toFixed(1)} days</p>
                       <p>• Cycle trend: {prediction.cycleTrend}</p>
                       <p>• Prediction window: ±{prediction.confidenceWindow} days</p>
                     </div>
-                    
                     <div className="flex gap-2">
-                      <Button 
-                        variant="outline"
-                        onClick={() => {
-                          setTempCycleLength(prediction.averageCycleLength);
-                          setIsSettingsOpen(false);
-                        }} 
-                        className="flex-1"
-                      >
-                        Cancel
-                      </Button>
-                      <Button 
-                        onClick={handleSaveCycleSettings} 
-                        className="flex-1"
-                      >
-                        Save
-                      </Button>
+                      <Button variant="outline" onClick={() => { setTempCycleLength(prediction.averageCycleLength); setIsSettingsOpen(false); }} className="flex-1">Cancel</Button>
+                      <Button onClick={handleSaveCycleSettings} className="flex-1">Save</Button>
                     </div>
                   </div>
                 </DialogContent>
@@ -534,7 +466,6 @@ const CycleCalendar = ({
           </div>
         </div>
 
-        {/* Calendar Grid */}
         <CalendarGrid
           currentMonth={currentMonth}
           selectedDate={selectedDate}
@@ -544,46 +475,31 @@ const CycleCalendar = ({
           periodLength={periodLength}
           selectedMode={selectedMode}
           daySignals={daySignals}
-          ovulationPrediction={ovulationPrediction}
-          periodDays={periodDays}
+          periodDays={allConfirmedPeriodDays}
+          predictedPeriodDays={activePeriodPredictedDays}
           markedOvulationDays={markedOvulationDays}
           prediction={prediction}
           periodRecords={periodRecords}
         />
 
-        {/* Legend */}
         <CalendarLegend selectedMode={selectedMode} />
       </Card>
 
-      {/* Day Action Sheet - Period and quick log options */}
+      {/* Day Action Sheet */}
       <DayActionSheet
         open={isDayActionOpen}
         onOpenChange={setIsDayActionOpen}
         date={selectedDate}
         isPeriodDay={selectedDate ? isPeriodDay(selectedDate) : false}
-        isOvulationDay={selectedDate ? isOvulationDay(selectedDate) : false}
-        onTogglePeriod={() => selectedDate && handleTogglePeriodDay(selectedDate)}
+        isOvulationDay={selectedDate ? isOvulationMarked(selectedDate) : false}
+        hasActivePeriod={hasActivePeriod}
+        onStartPeriod={() => selectedDate && handleStartPeriod(selectedDate)}
+        onRemovePeriodDay={() => selectedDate && handleRemovePeriod(selectedDate)}
         onMarkOvulation={() => selectedDate && handleToggleOvulationDay(selectedDate)}
-        onLogSymptoms={() => {
-          setIsDayActionOpen(false);
-          setDailyLogTab('symptoms');
-          setIsDailyLogSheetOpen(true);
-        }}
-        onLogMood={() => {
-          setIsDayActionOpen(false);
-          setDailyLogTab('mood');
-          setIsDailyLogSheetOpen(true);
-        }}
-        onLogIntimacy={() => {
-          setIsDayActionOpen(false);
-          setDailyLogTab('intimacy');
-          setIsDailyLogSheetOpen(true);
-        }}
-        onLogDischarge={() => {
-          setIsDayActionOpen(false);
-          setDailyLogTab('discharge');
-          setIsDailyLogSheetOpen(true);
-        }}
+        onLogSymptoms={() => { setIsDayActionOpen(false); setDailyLogTab('symptoms'); setIsDailyLogSheetOpen(true); }}
+        onLogMood={() => { setIsDayActionOpen(false); setDailyLogTab('mood'); setIsDailyLogSheetOpen(true); }}
+        onLogIntimacy={() => { setIsDayActionOpen(false); setDailyLogTab('intimacy'); setIsDailyLogSheetOpen(true); }}
+        onLogDischarge={() => { setIsDayActionOpen(false); setDailyLogTab('discharge'); setIsDailyLogSheetOpen(true); }}
       />
 
       {/* Daily Log Sheet */}
@@ -591,19 +507,8 @@ const CycleCalendar = ({
         open={isDailyLogSheetOpen}
         onOpenChange={setIsDailyLogSheetOpen}
         date={selectedDate}
-        signal={selectedDate ? getSignalForDate(selectedDate) : {
-          date: '',
-          symptoms: [],
-          intercourse: [],
-          mood: [],
-          discharge: 'none',
-          notes: ''
-        }}
-        onUpdateSignal={(updates) => {
-          if (selectedDate) {
-            updateSignalForDate(selectedDate, updates);
-          }
-        }}
+        signal={selectedDate ? getSignalForDate(selectedDate) : { date: '', symptoms: [], intercourse: [], mood: [], discharge: 'none', notes: '' }}
+        onUpdateSignal={(updates) => { if (selectedDate) updateSignalForDate(selectedDate, updates); }}
         activeTab={dailyLogTab}
       />
     </div>

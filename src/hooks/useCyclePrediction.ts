@@ -5,7 +5,7 @@ import { parseISO, differenceInDays, addDays, format, isSameDay } from 'date-fns
 export interface PeriodRecord {
   id?: string;
   period_start_date: string;
-  period_end_date: string;
+  period_end_date: string | null; // null = active/unconfirmed period
   cycle_length: number;
 }
 
@@ -21,38 +21,23 @@ export interface DaySignal {
 export type PredictionTier = 1 | 2 | 3 | 4;
 
 export interface CyclePrediction {
-  // Next period prediction
   predictedPeriodStart: Date;
   predictedPeriodEnd: Date;
-  confidenceWindow: number; // ± days
-
-  // Cycle metrics
+  confidenceWindow: number;
   averageCycleLength: number;
   averagePeriodLength: number;
   standardDeviation: number;
-  isRegular: boolean; // std dev < 3 days
-
-  // Ovulation & fertility
+  isRegular: boolean;
   predictedOvulationDate: Date;
   fertileWindowStart: Date;
   fertileWindowEnd: Date;
-
-  // PMS window
   pmsWindowStart: Date;
-
-  // Confidence & data quality
   confidenceLevel: 'low' | 'medium' | 'high';
   cyclesLogged: number;
   dataQualityMessage: string;
-
-  // Tier system
   tier: PredictionTier;
   tierLabel: string;
-
-  // Trend analysis
   cycleTrend: 'stable' | 'lengthening' | 'shortening' | 'irregular';
-
-  // Anomaly detection
   currentCycleAnomaly: boolean;
   anomalyMessage?: string;
   excludedCycles: number;
@@ -60,14 +45,14 @@ export interface CyclePrediction {
 
 export interface SymptomPattern {
   symptom: string;
-  typicalDays: number[]; // cycle days where this symptom typically occurs
-  frequency: number; // percentage of cycles where it occurs
+  typicalDays: number[];
+  frequency: number;
 }
 
 export interface OnboardingEstimates {
   cycleLength?: number;
   periodLength?: number;
-  lastPeriodStart?: string; // ISO date
+  lastPeriodStart?: string;
 }
 
 interface CyclePredictionInput {
@@ -76,14 +61,14 @@ interface CyclePredictionInput {
   onboardingEstimates?: OnboardingEstimates;
 }
 
-// Population baseline constants
+// Constants
 const POPULATION_CYCLE_LENGTH = 28.5;
 const POPULATION_PERIOD_LENGTH = 5;
 const LUTEAL_PHASE = 14;
 const MIN_VALID_CYCLE = 18;
 const MAX_VALID_CYCLE = 60;
 
-// Statistical helpers
+// Stats helpers
 const calculateMean = (values: number[]): number => {
   if (values.length === 0) return 0;
   return values.reduce((sum, v) => sum + v, 0) / values.length;
@@ -92,18 +77,31 @@ const calculateMean = (values: number[]): number => {
 const calculateStandardDeviation = (values: number[]): number => {
   if (values.length < 2) return 0;
   const mean = calculateMean(values);
-  const squaredDiffs = values.map(v => Math.pow(v - mean, 2));
-  return Math.sqrt(calculateMean(squaredDiffs));
+  return Math.sqrt(calculateMean(values.map(v => Math.pow(v - mean, 2))));
 };
 
 const calculateWeightedAverage = (values: number[]): number => {
   if (values.length === 0) return 0;
   if (values.length === 1) return values[0];
-
-  // Most recent = highest weight
   const totalWeight = values.reduce((sum, _, i) => sum + (values.length - i), 0);
   return values.reduce((sum, val, i) => sum + val * ((values.length - i) / totalWeight), 0);
 };
+
+/**
+ * Get the effective end date for a period record.
+ * If end_date is null (active period), use start + avgPeriodLength as predicted end.
+ */
+export function getEffectiveEndDate(record: PeriodRecord, avgPeriodLength: number): string {
+  if (record.period_end_date) return record.period_end_date;
+  return format(addDays(parseISO(record.period_start_date), avgPeriodLength - 1), 'yyyy-MM-dd');
+}
+
+/**
+ * Check if a period record is still active (no confirmed end date).
+ */
+export function isActivePeriod(record: PeriodRecord): boolean {
+  return record.period_end_date === null;
+}
 
 // Main prediction hook — always returns a prediction (never null)
 export function useCyclePrediction({
@@ -112,7 +110,6 @@ export function useCyclePrediction({
   onboardingEstimates,
 }: CyclePredictionInput): CyclePrediction {
   return useMemo(() => {
-    // Sort records most recent first
     const sortedRecords = [...periodRecords].sort(
       (a, b) => new Date(b.period_start_date).getTime() - new Date(a.period_start_date).getTime()
     );
@@ -127,18 +124,18 @@ export function useCyclePrediction({
       rawCycleLengths.push(differenceInDays(currentStart, previousStart));
     }
 
-    // Filter valid cycles (18-60 days)
     const validCycleLengths = rawCycleLengths.filter(
       len => len >= MIN_VALID_CYCLE && len <= MAX_VALID_CYCLE
     );
     const excludedCycles = rawCycleLengths.length - validCycleLengths.length;
 
-    // Calculate period lengths
-    const periodLengths = sortedRecords
-      .map(r => differenceInDays(parseISO(r.period_end_date), parseISO(r.period_start_date)) + 1)
+    // Calculate CONFIRMED period lengths (only from records with end_date)
+    const confirmedPeriodLengths = sortedRecords
+      .filter(r => r.period_end_date !== null)
+      .map(r => differenceInDays(parseISO(r.period_end_date!), parseISO(r.period_start_date)) + 1)
       .filter(len => len > 0 && len <= 14);
 
-    // ─── Determine Tier ───
+    // ─── Determine Tier & averages ───
     let tier: PredictionTier;
     let tierLabel: string;
     let avgCycleLength: number;
@@ -147,81 +144,66 @@ export function useCyclePrediction({
     const hasOnboarding = !!(onboardingEstimates?.cycleLength);
     const hasValidPersonalCycles = validCycleLengths.length > 0;
 
+    // Period length fallback cascade: confirmed personal → onboarding → population
+    const getAvgPeriodLength = () => {
+      if (confirmedPeriodLengths.length > 0) return Math.round(calculateMean(confirmedPeriodLengths));
+      if (onboardingEstimates?.periodLength) return onboardingEstimates.periodLength;
+      return POPULATION_PERIOD_LENGTH;
+    };
+
     if (cyclesLogged === 0 && !hasOnboarding) {
-      // Tier 1: population baseline
       tier = 1;
       tierLabel = 'Based on typical cycle statistics — start tracking to personalise';
       avgCycleLength = Math.round(POPULATION_CYCLE_LENGTH);
       avgPeriodLength = POPULATION_PERIOD_LENGTH;
     } else if (cyclesLogged === 0 && hasOnboarding) {
-      // Tier 2: onboarding estimates only
       tier = 2;
       tierLabel = 'Based on your estimates';
       avgCycleLength = onboardingEstimates!.cycleLength!;
       avgPeriodLength = onboardingEstimates?.periodLength || POPULATION_PERIOD_LENGTH;
-    } else if (validCycleLengths.length >= 0 && validCycleLengths.length < 3 && cyclesLogged >= 1) {
-      // Tier 3: 1-2 logged cycles (or 3+ records but <3 valid inter-cycle lengths)
+    } else if (validCycleLengths.length < 3 && cyclesLogged >= 1) {
       tier = 3;
       tierLabel = 'Based on your tracked cycles';
-
-      if (hasValidPersonalCycles) {
-        avgCycleLength = Math.round(calculateMean(validCycleLengths));
-      } else if (hasOnboarding) {
-        // All cycles were outliers — fall back to onboarding
-        avgCycleLength = onboardingEstimates!.cycleLength!;
-      } else {
-        avgCycleLength = Math.round(POPULATION_CYCLE_LENGTH);
-      }
-      avgPeriodLength = periodLengths.length > 0
-        ? Math.round(calculateMean(periodLengths))
-        : onboardingEstimates?.periodLength || POPULATION_PERIOD_LENGTH;
+      avgCycleLength = hasValidPersonalCycles
+        ? Math.round(calculateMean(validCycleLengths))
+        : hasOnboarding ? onboardingEstimates!.cycleLength! : Math.round(POPULATION_CYCLE_LENGTH);
+      avgPeriodLength = getAvgPeriodLength();
     } else {
-      // Tier 4: 3+ valid cycle lengths — weighted average, personal only
       tier = 4;
       tierLabel = 'Based on your personal cycle pattern';
       avgCycleLength = Math.round(calculateWeightedAverage(validCycleLengths));
-      avgPeriodLength = periodLengths.length > 0
-        ? Math.round(calculateMean(periodLengths))
-        : onboardingEstimates?.periodLength || POPULATION_PERIOD_LENGTH;
+      avgPeriodLength = getAvgPeriodLength();
     }
 
     // ─── Compute Dates ───
     const now = new Date();
 
-    // Determine last cycle start
     let lastCycleStart: Date;
     if (sortedRecords.length > 0) {
       lastCycleStart = parseISO(sortedRecords[0].period_start_date);
     } else if (onboardingEstimates?.lastPeriodStart) {
       lastCycleStart = parseISO(onboardingEstimates.lastPeriodStart);
     } else {
-      // No data at all — assume period started ~14 days ago for a reasonable calendar
       lastCycleStart = addDays(now, -14);
     }
 
-    // Next period — advance until future
     let predictedPeriodStart = addDays(lastCycleStart, avgCycleLength);
     while (predictedPeriodStart < now) {
       predictedPeriodStart = addDays(predictedPeriodStart, avgCycleLength);
     }
     const predictedPeriodEnd = addDays(predictedPeriodStart, avgPeriodLength - 1);
 
-    // Ovulation & fertile window
     const predictedOvulationDate = addDays(predictedPeriodStart, -LUTEAL_PHASE);
     const fertileWindowStart = addDays(predictedOvulationDate, -5);
     const fertileWindowEnd = addDays(predictedOvulationDate, 1);
-
-    // PMS window
     const pmsWindowStart = addDays(predictedPeriodStart, -5);
 
     // ─── Statistics ───
     const standardDeviation = validCycleLengths.length >= 2
-      ? calculateStandardDeviation(validCycleLengths)
-      : 0;
+      ? calculateStandardDeviation(validCycleLengths) : 0;
     const isRegular = standardDeviation < 3;
     const confidenceWindow = isRegular ? 1 : Math.min(Math.ceil(standardDeviation), 7);
 
-    // Confidence level
     let confidenceLevel: 'low' | 'medium' | 'high' = 'low';
     let dataQualityMessage = '';
 
@@ -235,14 +217,10 @@ export function useCyclePrediction({
       confidenceLevel = cyclesLogged >= 2 ? 'medium' : 'low';
       dataQualityMessage = `Based on ${cyclesLogged} tracked cycle${cyclesLogged > 1 ? 's' : ''}. Log more for better accuracy.`;
     } else {
-      // Tier 4
-      if (cyclesLogged >= 6) {
-        confidenceLevel = 'high';
-        dataQualityMessage = `Based on ${cyclesLogged} logged cycles`;
-      } else {
-        confidenceLevel = 'medium';
-        dataQualityMessage = `Based on ${cyclesLogged} cycles. More data = higher accuracy.`;
-      }
+      confidenceLevel = cyclesLogged >= 6 ? 'high' : 'medium';
+      dataQualityMessage = cyclesLogged >= 6
+        ? `Based on ${cyclesLogged} logged cycles`
+        : `Based on ${cyclesLogged} cycles. More data = higher accuracy.`;
     }
 
     // ─── Trend analysis ───
@@ -251,10 +229,10 @@ export function useCyclePrediction({
       if (standardDeviation > 7) {
         cycleTrend = 'irregular';
       } else {
-        const recentCycles = validCycleLengths.slice(0, 3);
-        const olderCycles = validCycleLengths.slice(3, 6);
-        if (olderCycles.length > 0) {
-          const diff = calculateMean(recentCycles) - calculateMean(olderCycles);
+        const recent = validCycleLengths.slice(0, 3);
+        const older = validCycleLengths.slice(3, 6);
+        if (older.length > 0) {
+          const diff = calculateMean(recent) - calculateMean(older);
           if (diff > 2) cycleTrend = 'lengthening';
           else if (diff < -2) cycleTrend = 'shortening';
         }
@@ -266,43 +244,32 @@ export function useCyclePrediction({
     let anomalyMessage: string | undefined;
 
     if (sortedRecords.length > 0) {
-      const lastPeriodEnd = parseISO(sortedRecords[0].period_end_date);
-      const daysSinceLastPeriod = differenceInDays(now, lastPeriodEnd);
-      const expectedCycleEnd = avgCycleLength + (2 * standardDeviation);
-
-      if (daysSinceLastPeriod > expectedCycleEnd && daysSinceLastPeriod > 45) {
-        currentCycleAnomaly = true;
-        anomalyMessage = `Your period is ${Math.round(daysSinceLastPeriod - avgCycleLength)} days late. If concerned, consider consulting a healthcare provider.`;
+      const lastEndStr = sortedRecords[0].period_end_date;
+      if (lastEndStr) {
+        const lastPeriodEnd = parseISO(lastEndStr);
+        const daysSince = differenceInDays(now, lastPeriodEnd);
+        const expected = avgCycleLength + (2 * standardDeviation);
+        if (daysSince > expected && daysSince > 45) {
+          currentCycleAnomaly = true;
+          anomalyMessage = `Your period is ${Math.round(daysSince - avgCycleLength)} days late. If concerned, consider consulting a healthcare provider.`;
+        }
       }
     }
 
     if (excludedCycles > 0) {
-      const outlierMsg = 'One of your cycles was excluded — it may have been logged incorrectly. You can review it in Cycle History.';
-      anomalyMessage = anomalyMessage ? `${anomalyMessage} ${outlierMsg}` : outlierMsg;
+      const msg = 'One of your cycles was excluded — it may have been logged incorrectly. You can review it in Cycle History.';
+      anomalyMessage = anomalyMessage ? `${anomalyMessage} ${msg}` : msg;
       currentCycleAnomaly = true;
     }
 
     return {
-      predictedPeriodStart,
-      predictedPeriodEnd,
-      confidenceWindow,
-      averageCycleLength: avgCycleLength,
-      averagePeriodLength: avgPeriodLength,
-      standardDeviation,
-      isRegular,
-      predictedOvulationDate,
-      fertileWindowStart,
-      fertileWindowEnd,
-      pmsWindowStart,
-      confidenceLevel,
-      cyclesLogged,
-      dataQualityMessage,
-      tier,
-      tierLabel,
-      cycleTrend,
-      currentCycleAnomaly,
-      anomalyMessage,
-      excludedCycles,
+      predictedPeriodStart, predictedPeriodEnd, confidenceWindow,
+      averageCycleLength: avgCycleLength, averagePeriodLength: avgPeriodLength,
+      standardDeviation, isRegular,
+      predictedOvulationDate, fertileWindowStart, fertileWindowEnd, pmsWindowStart,
+      confidenceLevel, cyclesLogged, dataQualityMessage,
+      tier, tierLabel, cycleTrend,
+      currentCycleAnomaly, anomalyMessage, excludedCycles,
     };
   }, [periodRecords, daySignals, onboardingEstimates]);
 }
@@ -315,26 +282,18 @@ export function useSymptomPatterns(
 ): SymptomPattern[] {
   return useMemo(() => {
     if (periodRecords.length < 3) return [];
-
     const symptomOccurrences: Record<string, Record<number, number>> = {};
     const cycleCount = Math.min(periodRecords.length, 6);
 
     periodRecords.slice(0, cycleCount).forEach((record) => {
       const cycleStart = parseISO(record.period_start_date);
-
       for (let day = 0; day < cycleLength; day++) {
-        const date = addDays(cycleStart, day);
-        const dateKey = format(date, 'yyyy-MM-dd');
+        const dateKey = format(addDays(cycleStart, day), 'yyyy-MM-dd');
         const signal = daySignals[dateKey];
-
         if (signal?.symptoms) {
           signal.symptoms.forEach(symptom => {
-            if (!symptomOccurrences[symptom]) {
-              symptomOccurrences[symptom] = {};
-            }
-            if (!symptomOccurrences[symptom][day + 1]) {
-              symptomOccurrences[symptom][day + 1] = 0;
-            }
+            if (!symptomOccurrences[symptom]) symptomOccurrences[symptom] = {};
+            if (!symptomOccurrences[symptom][day + 1]) symptomOccurrences[symptom][day + 1] = 0;
             symptomOccurrences[symptom][day + 1]++;
           });
         }
@@ -343,62 +302,40 @@ export function useSymptomPatterns(
 
     const patterns: SymptomPattern[] = [];
     const threshold = cycleCount * 0.7;
-
     Object.entries(symptomOccurrences).forEach(([symptom, dayOccurrences]) => {
       const typicalDays: number[] = [];
-      let totalOccurrences = 0;
-
+      let total = 0;
       Object.entries(dayOccurrences).forEach(([day, count]) => {
-        if (count >= threshold) {
-          typicalDays.push(parseInt(day));
-        }
-        totalOccurrences += count;
+        if (count >= threshold) typicalDays.push(parseInt(day));
+        total += count;
       });
-
       if (typicalDays.length > 0) {
-        patterns.push({
-          symptom,
-          typicalDays: typicalDays.sort((a, b) => a - b),
-          frequency: (totalOccurrences / cycleCount) * 100
-        });
+        patterns.push({ symptom, typicalDays: typicalDays.sort((a, b) => a - b), frequency: (total / cycleCount) * 100 });
       }
     });
-
     return patterns.sort((a, b) => b.frequency - a.frequency);
   }, [periodRecords, daySignals, cycleLength]);
 }
 
-// Get current cycle day
 export function getCurrentCycleDay(lastPeriodStart: Date, cycleLength: number): number {
-  const today = new Date();
-  const diffDays = differenceInDays(today, lastPeriodStart);
+  const diffDays = differenceInDays(new Date(), lastPeriodStart);
   const day = (diffDays % cycleLength) + 1;
   return day > 0 ? day : day + cycleLength;
 }
 
-// Check if a date falls within fertile window
-export function isInFertileWindow(
-  date: Date,
-  fertileWindowStart: Date,
-  fertileWindowEnd: Date
-): boolean {
-  return date.getTime() >= fertileWindowStart.getTime() && date.getTime() <= fertileWindowEnd.getTime();
+export function isInFertileWindow(date: Date, start: Date, end: Date): boolean {
+  return date.getTime() >= start.getTime() && date.getTime() <= end.getTime();
 }
 
-// Check if it's ovulation day
-export function isOvulationDay(date: Date, predictedOvulationDate: Date): boolean {
-  return isSameDay(date, predictedOvulationDate);
+export function isOvulationDay(date: Date, predicted: Date): boolean {
+  return isSameDay(date, predicted);
 }
 
-// Get prediction message for display
 export function getPredictionMessage(prediction: CyclePrediction): string {
-  const { confidenceWindow, isRegular } = prediction;
-
-  if (isRegular) {
+  if (prediction.isRegular) {
     return `Expected ${format(prediction.predictedPeriodStart, 'MMM d')}`;
   }
-
-  const rangeStart = addDays(prediction.predictedPeriodStart, -confidenceWindow);
-  const rangeEnd = addDays(prediction.predictedPeriodStart, confidenceWindow);
+  const rangeStart = addDays(prediction.predictedPeriodStart, -prediction.confidenceWindow);
+  const rangeEnd = addDays(prediction.predictedPeriodStart, prediction.confidenceWindow);
   return `Expected ${format(rangeStart, 'MMM d')}-${format(rangeEnd, 'd')}`;
 }

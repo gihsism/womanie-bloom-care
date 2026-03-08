@@ -420,7 +420,7 @@ export type Database = {
           created_at: string
           cycle_length: number
           id: string
-          period_end_date: string
+          period_end_date: string | null
           period_start_date: string
           updated_at: string
           user_id: string
@@ -429,7 +429,7 @@ export type Database = {
           created_at?: string
           cycle_length?: number
           id?: string
-          period_end_date: string
+          period_end_date?: string | null
           period_start_date: string
           updated_at?: string
           user_id: string
@@ -438,7 +438,7 @@ export type Database = {
           created_at?: string
           cycle_length?: number
           id?: string
-          period_end_date?: string
+          period_end_date?: string | null
           period_start_date?: string
           updated_at?: string
           user_id?: string

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek, addDays, parseISO } from 'date-fns';
 import { Droplet, Sparkles, Heart, CloudRain } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { CyclePrediction, PeriodRecord } from '@/hooks/useCyclePrediction';
+import { CyclePrediction, PeriodRecord, isActivePeriod, getEffectiveEndDate } from '@/hooks/useCyclePrediction';
 
 interface DaySignal {
   symptoms: string[];
@@ -20,12 +20,8 @@ interface CalendarGridProps {
   periodLength: number;
   selectedMode: string;
   daySignals: Record<string, DaySignal>;
-  ovulationPrediction?: {
-    predictedOvulationDate?: string;
-    fertileWindowStart?: string;
-    fertileWindowEnd?: string;
-  } | null;
   periodDays?: Set<string>;
+  predictedPeriodDays?: Set<string>;
   markedOvulationDays?: Set<string>;
   prediction: CyclePrediction;
   periodRecords?: PeriodRecord[];
@@ -38,6 +34,7 @@ const CalendarGrid = ({
   selectedMode,
   daySignals,
   periodDays = new Set(),
+  predictedPeriodDays = new Set(),
   markedOvulationDays = new Set(),
   prediction,
   periodRecords = []
@@ -50,9 +47,9 @@ const CalendarGrid = ({
     return eachDayOfInterval({ start: calendarStart, end: calendarEnd });
   }, [currentMonth]);
 
-  // Build prediction sets for multi-cycle display (past & future)
-  const { predictedPeriodSet, predictedOvulationSet, fertileSet, pmsSet } = useMemo(() => {
-    const pPeriod = new Set<string>();
+  // Build prediction sets for multi-cycle display
+  const { futurePeriodSet, predictedOvulationSet, fertileSet, pmsSet } = useMemo(() => {
+    const fPeriod = new Set<string>();
     const pOvulation = new Set<string>();
     const pFertile = new Set<string>();
     const pPms = new Set<string>();
@@ -61,127 +58,114 @@ const CalendarGrid = ({
     const avgPeriod = prediction.averagePeriodLength;
     const lutealPhase = 14;
 
-    // Sort records oldest first
     const sorted = [...periodRecords].sort(
       (a, b) => new Date(a.period_start_date).getTime() - new Date(b.period_start_date).getTime()
     );
 
-    // For each logged period, calculate ovulation & fertile window for THAT cycle
+    // Past cycles: calculate ovulation/fertile for each
     for (let i = 0; i < sorted.length; i++) {
       const currentStart = parseISO(sorted[i].period_start_date);
       const nextStart = i < sorted.length - 1
         ? parseISO(sorted[i + 1].period_start_date)
         : addDays(currentStart, avgCycle);
 
-      const ovulationDate = addDays(nextStart, -lutealPhase);
-      const fertileStart = addDays(ovulationDate, -5);
-      const fertileEnd = addDays(ovulationDate, 1);
-      const pmsStart = addDays(nextStart, -5);
+      const ovDate = addDays(nextStart, -lutealPhase);
+      pOvulation.add(format(ovDate, 'yyyy-MM-dd'));
 
-      pOvulation.add(format(ovulationDate, 'yyyy-MM-dd'));
-      let d = fertileStart;
-      while (d <= fertileEnd) {
-        pFertile.add(format(d, 'yyyy-MM-dd'));
-        d = addDays(d, 1);
-      }
-      d = pmsStart;
-      while (d < nextStart) {
-        pPms.add(format(d, 'yyyy-MM-dd'));
-        d = addDays(d, 1);
-      }
+      let d = addDays(ovDate, -5);
+      const fEnd = addDays(ovDate, 1);
+      while (d <= fEnd) { pFertile.add(format(d, 'yyyy-MM-dd')); d = addDays(d, 1); }
+
+      d = addDays(nextStart, -5);
+      while (d < nextStart) { pPms.add(format(d, 'yyyy-MM-dd')); d = addDays(d, 1); }
     }
 
-    // Future predictions: generate up to 3 future cycles
+    // Future predictions: 3 cycles
     const lastStart = sorted.length > 0
       ? parseISO(sorted[sorted.length - 1].period_start_date)
-      : addDays(new Date(), -14); // fallback for tier 1/2
+      : addDays(new Date(), -14);
 
     for (let cycle = 1; cycle <= 3; cycle++) {
       const futureStart = addDays(lastStart, avgCycle * cycle);
       const futureEnd = addDays(futureStart, avgPeriod - 1);
-
       let d = futureStart;
-      while (d <= futureEnd) {
-        pPeriod.add(format(d, 'yyyy-MM-dd'));
-        d = addDays(d, 1);
-      }
+      while (d <= futureEnd) { fPeriod.add(format(d, 'yyyy-MM-dd')); d = addDays(d, 1); }
 
       const nextCycleStart = addDays(lastStart, avgCycle * (cycle + 1));
       const ovDate = addDays(nextCycleStart, -lutealPhase);
       pOvulation.add(format(ovDate, 'yyyy-MM-dd'));
 
-      const fStart = addDays(ovDate, -5);
+      d = addDays(ovDate, -5);
       const fEnd = addDays(ovDate, 1);
-      d = fStart;
-      while (d <= fEnd) {
-        pFertile.add(format(d, 'yyyy-MM-dd'));
-        d = addDays(d, 1);
-      }
+      while (d <= fEnd) { pFertile.add(format(d, 'yyyy-MM-dd')); d = addDays(d, 1); }
 
-      // PMS for future cycle
-      const pmsStart = addDays(nextCycleStart, -5);
-      d = pmsStart;
-      while (d < nextCycleStart) {
-        pPms.add(format(d, 'yyyy-MM-dd'));
-        d = addDays(d, 1);
-      }
+      d = addDays(nextCycleStart, -5);
+      while (d < nextCycleStart) { pPms.add(format(d, 'yyyy-MM-dd')); d = addDays(d, 1); }
     }
 
-    return { predictedPeriodSet: pPeriod, predictedOvulationSet: pOvulation, fertileSet: pFertile, pmsSet: pPms };
+    return { futurePeriodSet: fPeriod, predictedOvulationSet: pOvulation, fertileSet: pFertile, pmsSet: pPms };
   }, [prediction, periodRecords]);
+
+  const today = new Date();
 
   const getDayType = (date: Date) => {
     if (['pregnancy', 'menopause', 'post-menopause'].includes(selectedMode)) {
-      return { type: 'regular' as const, bgClass: 'bg-muted/30', textClass: 'text-foreground', border: false };
+      return { type: 'regular' as const, bgClass: 'bg-muted/30', textClass: 'text-foreground', dashed: false, active: false };
     }
 
     const dateKey = format(date, 'yyyy-MM-dd');
     const signal = daySignals[dateKey];
+    const isConfirmedPeriod = periodDays.has(dateKey);
+    const isPredictedActivePeriod = predictedPeriodDays.has(dateKey);
+    const isToday = isSameDay(date, today);
 
     // 1) User-confirmed ovulation
     if (markedOvulationDays.has(dateKey)) {
-      return { type: 'ovulation' as const, bgClass: 'bg-secondary', textClass: 'text-secondary-foreground', border: false };
+      return { type: 'ovulation' as const, bgClass: 'bg-secondary', textClass: 'text-secondary-foreground', dashed: false, active: false };
     }
 
     // 2) EWCM discharge
     if (signal?.discharge === 'ewcm') {
-      return { type: 'ovulation' as const, bgClass: 'bg-secondary', textClass: 'text-secondary-foreground', border: false };
+      return { type: 'ovulation' as const, bgClass: 'bg-secondary', textClass: 'text-secondary-foreground', dashed: false, active: false };
     }
 
-    // 3) Logged period days (solid)
-    if (periodDays.has(dateKey)) {
-      return { type: 'period' as const, bgClass: 'bg-primary', textClass: 'text-primary-foreground', border: false };
+    // 3) Confirmed period days (solid)
+    if (isConfirmedPeriod) {
+      return { type: 'period' as const, bgClass: 'bg-primary', textClass: 'text-primary-foreground', dashed: false, active: isToday };
     }
 
-    // 4) Predicted ovulation
-    if (predictedOvulationSet.has(dateKey) && !periodDays.has(dateKey)) {
-      return { type: 'predicted-ovulation' as const, bgClass: 'bg-secondary/50', textClass: 'text-secondary-foreground', border: true };
+    // 4) Predicted period for active (unconfirmed) period — dashed
+    if (isPredictedActivePeriod) {
+      return { type: 'predicted-active-period' as const, bgClass: 'bg-primary/20', textClass: 'text-foreground', dashed: true, active: isToday };
     }
 
-    // 5) Predicted period (dashed border)
-    if (predictedPeriodSet.has(dateKey)) {
-      return { type: 'predicted-period' as const, bgClass: 'bg-primary/15', textClass: 'text-foreground', border: true };
+    // 5) Predicted ovulation
+    if (predictedOvulationSet.has(dateKey) && !isConfirmedPeriod) {
+      return { type: 'predicted-ovulation' as const, bgClass: 'bg-secondary/50', textClass: 'text-secondary-foreground', dashed: true, active: false };
     }
 
-    // 6) Fertile window
-    if (fertileSet.has(dateKey) && !periodDays.has(dateKey)) {
-      return { type: 'fertile' as const, bgClass: 'bg-accent/50', textClass: 'text-foreground', border: false };
+    // 6) Future predicted period
+    if (futurePeriodSet.has(dateKey)) {
+      return { type: 'predicted-period' as const, bgClass: 'bg-primary/15', textClass: 'text-foreground', dashed: true, active: false };
     }
 
-    // 7) PMS window
-    if (pmsSet.has(dateKey) && !periodDays.has(dateKey)) {
-      return { type: 'pms' as const, bgClass: 'bg-amber-100 dark:bg-amber-900/30', textClass: 'text-foreground', border: false };
+    // 7) Fertile window
+    if (fertileSet.has(dateKey) && !isConfirmedPeriod) {
+      return { type: 'fertile' as const, bgClass: 'bg-accent/50', textClass: 'text-foreground', dashed: false, active: false };
     }
 
-    return { type: 'regular' as const, bgClass: 'bg-transparent', textClass: 'text-foreground', border: false };
+    // 8) PMS window
+    if (pmsSet.has(dateKey) && !isConfirmedPeriod) {
+      return { type: 'pms' as const, bgClass: 'bg-amber-100 dark:bg-amber-900/30', textClass: 'text-foreground', dashed: false, active: false };
+    }
+
+    return { type: 'regular' as const, bgClass: 'bg-transparent', textClass: 'text-foreground', dashed: false, active: false };
   };
 
   const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-  const today = new Date();
 
   return (
     <div className="space-y-2">
-      {/* Weekday headers */}
       <div className="grid grid-cols-7 gap-1">
         {weekDays.map((day, i) => (
           <div key={i} className="text-center text-xs font-medium text-muted-foreground py-2">
@@ -190,7 +174,6 @@ const CalendarGrid = ({
         ))}
       </div>
 
-      {/* Calendar days */}
       <div className="grid grid-cols-7 gap-1">
         {calendarDays.map((date) => {
           const dayInfo = getDayType(date);
@@ -214,7 +197,7 @@ const CalendarGrid = ({
                 "hover:scale-105 active:scale-95",
                 inCurrentMonth ? 'opacity-100' : 'opacity-30',
                 dayInfo.bgClass,
-                dayInfo.border && 'border-2 border-dashed border-primary/40',
+                dayInfo.dashed && 'border-2 border-dashed border-primary/40',
                 dayInfo.type === 'predicted-ovulation' && 'border-2 border-dashed border-secondary/60',
                 isToday && dayInfo.type === 'regular' && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
                 isSelected && 'ring-2 ring-foreground ring-offset-2 ring-offset-background'
@@ -224,11 +207,19 @@ const CalendarGrid = ({
                 {format(date, 'd')}
               </span>
 
+              {/* Active period pulsing dot */}
+              {dayInfo.active && (
+                <span className="absolute top-0 right-0 flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
+                </span>
+              )}
+
               {/* Phase icons */}
-              {(dayInfo.type === 'ovulation' || dayInfo.type === 'predicted-ovulation') && (
+              {!dayInfo.active && (dayInfo.type === 'ovulation' || dayInfo.type === 'predicted-ovulation') && (
                 <Sparkles className="absolute -top-0.5 -right-0.5 h-3 w-3 text-secondary-foreground" />
               )}
-              {dayInfo.type === 'period' && (
+              {!dayInfo.active && dayInfo.type === 'period' && (
                 <Droplet className="absolute -top-0.5 -right-0.5 h-3 w-3 text-primary-foreground fill-current" />
               )}
               {dayInfo.type === 'fertile' && (
@@ -241,15 +232,9 @@ const CalendarGrid = ({
               {/* Data indicator dots */}
               {hasAnyData && (
                 <div className="absolute -bottom-1 flex gap-0.5">
-                  {hasSignals.symptoms.length > 0 && (
-                    <div className="w-1.5 h-1.5 rounded-full bg-destructive" />
-                  )}
-                  {hasSignals.intercourse.length > 0 && (
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary/70" />
-                  )}
-                  {hasSignals.mood.length > 0 && (
-                    <div className="w-1.5 h-1.5 rounded-full bg-secondary/70" />
-                  )}
+                  {hasSignals.symptoms.length > 0 && <div className="w-1.5 h-1.5 rounded-full bg-destructive" />}
+                  {hasSignals.intercourse.length > 0 && <div className="w-1.5 h-1.5 rounded-full bg-primary/70" />}
+                  {hasSignals.mood.length > 0 && <div className="w-1.5 h-1.5 rounded-full bg-secondary/70" />}
                 </div>
               )}
             </button>
