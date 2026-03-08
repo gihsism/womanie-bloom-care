@@ -282,7 +282,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
       {/* Main pregnancy status */}
       <div className="bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 rounded-2xl p-5">
         <div className="text-center mb-4">
-          <div className="text-5xl mb-2">{weekData.sizeComparison}</div>
+          <img src={getWeekImage(weeksPregnant)} alt={`Baby size: ${weekData.size}`} className="w-24 h-24 mx-auto mb-2 object-contain" />
           <div className="text-4xl font-light text-foreground mb-1">
             Week {weeksPregnant}
             <span className="text-lg text-muted-foreground ml-1">+{daysExtra}d</span>
