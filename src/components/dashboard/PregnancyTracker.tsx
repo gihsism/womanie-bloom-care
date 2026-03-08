@@ -96,6 +96,26 @@ const getWeekImage = (week: number): string => {
   return WEEK_IMAGES[week] || babyWeek36;
 };
 
+// Fruit size comparison images for the top status card
+const FRUIT_IMAGES: Record<number, string> = {
+  4: fruitWeek04, 5: fruitWeek04, 6: fruitWeek04,
+  7: fruitWeek07, 8: fruitWeek07, 9: fruitWeek07, 10: fruitWeek07, 11: fruitWeek07,
+  12: fruitWeek12, 13: fruitWeek12, 14: fruitWeek12, 15: fruitWeek12,
+  16: fruitWeek16, 17: fruitWeek16, 18: fruitWeek16, 19: fruitWeek16,
+  20: fruitWeek20, 21: fruitWeek20, 22: fruitWeek20, 23: fruitWeek20,
+  24: fruitWeek24, 25: fruitWeek24, 26: fruitWeek24, 27: fruitWeek24,
+  28: fruitWeek28, 29: fruitWeek28, 30: fruitWeek28, 31: fruitWeek28,
+  32: fruitWeek32, 33: fruitWeek32, 34: fruitWeek32, 35: fruitWeek32,
+  36: fruitWeek36, 37: fruitWeek36, 38: fruitWeek36, 39: fruitWeek36,
+  40: fruitWeek40,
+};
+
+const getFruitImage = (week: number): string => {
+  if (week <= 3) return fruitWeek04;
+  if (week >= 40) return fruitWeek40;
+  return FRUIT_IMAGES[week] || fruitWeek36;
+};
+
 // ─── Pregnancy symptoms by trimester ───
 const PREGNANCY_SYMPTOMS: Record<string, { label: string; icon: string }[]> = {
   first: [
