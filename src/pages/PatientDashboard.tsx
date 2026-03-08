@@ -503,12 +503,22 @@ const PatientDashboard = () => {
                           <div className="flex-1">
                             <div className="text-xs font-medium text-muted-foreground">Next Ovulation</div>
                             <p className="text-[10px] text-muted-foreground mt-0.5">
-                              {periodData ? `${Math.abs(Math.floor((addDays(periodData.lastPeriodStart, periodData.cycleLength - 13).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))} days` : 'N/A'}
+                              {periodData ? (() => {
+                                const now = new Date();
+                                let nextOv = addDays(periodData.lastPeriodStart, periodData.cycleLength - 13);
+                                while (nextOv < now) nextOv = addDays(nextOv, periodData.cycleLength);
+                                return `${Math.ceil((nextOv.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))} days`;
+                              })() : 'N/A'}
                             </p>
                           </div>
                         </div>
                         <span className="text-sm font-bold whitespace-nowrap">
-                          {periodData ? format(addDays(periodData.lastPeriodStart, periodData.cycleLength - 13), 'MMM d') : 'N/A'}
+                          {periodData ? (() => {
+                            const now = new Date();
+                            let nextOv = addDays(periodData.lastPeriodStart, periodData.cycleLength - 13);
+                            while (nextOv < now) nextOv = addDays(nextOv, periodData.cycleLength);
+                            return format(nextOv, 'MMM d');
+                          })() : 'N/A'}
                         </span>
                       </div>
                       <div className="flex justify-between items-start">
@@ -517,12 +527,22 @@ const PatientDashboard = () => {
                           <div className="flex-1">
                             <div className="text-xs font-medium text-muted-foreground">Next Period</div>
                             <p className="text-[10px] text-muted-foreground mt-0.5">
-                              {periodData ? `${Math.abs(Math.floor((addDays(periodData.lastPeriodStart, periodData.cycleLength).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))} days` : 'N/A'}
+                              {periodData ? (() => {
+                                const now = new Date();
+                                let nextP = addDays(periodData.lastPeriodStart, periodData.cycleLength);
+                                while (nextP < now) nextP = addDays(nextP, periodData.cycleLength);
+                                return `${Math.ceil((nextP.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))} days`;
+                              })() : 'N/A'}
                             </p>
                           </div>
                         </div>
                         <span className="text-sm font-bold whitespace-nowrap">
-                          {periodData ? format(addDays(periodData.lastPeriodStart, periodData.cycleLength), 'MMM d') : 'N/A'}
+                          {periodData ? (() => {
+                            const now = new Date();
+                            let nextP = addDays(periodData.lastPeriodStart, periodData.cycleLength);
+                            while (nextP < now) nextP = addDays(nextP, periodData.cycleLength);
+                            return format(nextP, 'MMM d');
+                          })() : 'N/A'}
                         </span>
                       </div>
                     </div>

@@ -171,15 +171,17 @@ export function useCyclePrediction({
     const lastPeriodStart = parseISO(sortedRecords[0].period_start_date);
     const lastPeriodEnd = parseISO(sortedRecords[0].period_end_date);
     
-    // Predict next period
-    const predictedPeriodStart = addDays(lastPeriodStart, averageCycleLength);
+    // Predict next period - advance until it's in the future
+    const now = new Date();
+    let predictedPeriodStart = addDays(lastPeriodStart, averageCycleLength);
+    while (predictedPeriodStart < now) {
+      predictedPeriodStart = addDays(predictedPeriodStart, averageCycleLength);
+    }
     const predictedPeriodEnd = addDays(predictedPeriodStart, averagePeriodLength - 1);
     
     // Ovulation prediction (luteal phase is typically 14 days)
-    // Using standard deviation to adjust if irregular
     const lutealPhase = 14;
-    const ovulationDay = averageCycleLength - lutealPhase;
-    const predictedOvulationDate = addDays(lastPeriodStart, ovulationDay);
+    const predictedOvulationDate = addDays(predictedPeriodStart, -lutealPhase);
     
     // Fertile window: 5 days before ovulation to 1 day after
     const fertileWindowStart = addDays(predictedOvulationDate, -5);
