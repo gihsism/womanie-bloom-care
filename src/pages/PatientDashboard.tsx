@@ -735,7 +735,7 @@ const PatientDashboard = () => {
             </div>
 
             {/* Ovulation Prediction - Show for conception and menstrual cycle modes */}
-            {(selectedMode === 'conception' || selectedMode === 'menstrual-cycle' || selectedMode === 'pre-menstrual') && user && periodData && (
+            {(selectedMode === 'conception' || selectedMode === 'menstrual-cycle') && user && periodData && (
               <div className="mb-6">
                 <OvulationPrediction 
                   userId={user.id}
