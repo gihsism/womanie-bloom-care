@@ -44,6 +44,7 @@ const CycleCalendar = ({
   const [isLoading, setIsLoading] = useState(true);
   const [periodRecords, setPeriodRecords] = useState<PeriodRecord[]>([]);
   const [manualCycleLength, setManualCycleLength] = useState<number | null>(null);
+  const [manualPeriodLength, setManualPeriodLength] = useState<number | null>(null);
   const [markedOvulationDays, setMarkedOvulationDays] = useState<Set<string>>(new Set());
   const [daySignals, setDaySignals] = useState<Record<string, DaySignal>>({});
   
