@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Settings2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Settings2, Sparkles } from 'lucide-react';
 import { format, addMonths, subMonths, addDays, differenceInDays, startOfDay, isSameDay, parseISO } from 'date-fns';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -354,11 +354,13 @@ const CycleCalendar = ({
     saveHealthSignal(date, updatedSignal);
   };
 
+  const hasAnyData = periodRecords.length > 0 || !!initialPeriodStart;
+
   const lastPeriodStart = periodRecords.length > 0 
     ? parseISO(periodRecords[0].period_start_date)
     : initialPeriodStart || new Date(2025, 9, 1);
 
-  const currentCycleDay = getCurrentCycleDay(lastPeriodStart, cycleLength);
+  const currentCycleDay = hasAnyData ? getCurrentCycleDay(lastPeriodStart, cycleLength) : 0;
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
@@ -407,7 +409,7 @@ const CycleCalendar = ({
   return (
     <div className="space-y-4">
       {/* Period End Confirmation Banner */}
-      {showCycleInfo && (
+      {showCycleInfo && hasAnyData && (
         <PeriodEndBanner
           periodRecords={periodRecords}
           avgPeriodLength={periodLength}
@@ -416,8 +418,21 @@ const CycleCalendar = ({
         />
       )}
 
-      {/* Today's Status Card */}
-      {showCycleInfo && (
+      {/* Empty state when no period data */}
+      {showCycleInfo && !hasAnyData && (
+        <Card className="p-6 text-center space-y-3 border-dashed border-2 border-primary/30 bg-primary/5">
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+            <Sparkles className="h-6 w-6 text-primary" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground">Start tracking your cycle</h3>
+          <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+            Tap any day on the calendar below to mark the first day of your period. We'll use that to build personalised predictions.
+          </p>
+        </Card>
+      )}
+
+      {/* Today's Status Card — only when we have data */}
+      {showCycleInfo && hasAnyData && (
         <TodayStatusCard
           cycleDay={currentCycleDay}
           cycleLength={cycleLength}

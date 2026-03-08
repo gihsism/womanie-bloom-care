@@ -54,6 +54,11 @@ const CalendarGrid = ({
     const pFertile = new Set<string>();
     const pPms = new Set<string>();
 
+    // Don't generate any predictions if there are no period records
+    if (periodRecords.length === 0) {
+      return { futurePeriodSet: fPeriod, predictedOvulationSet: pOvulation, fertileSet: pFertile, pmsSet: pPms };
+    }
+
     const avgCycle = prediction.averageCycleLength;
     const avgPeriod = prediction.averagePeriodLength;
     const lutealPhase = 14;
@@ -81,9 +86,7 @@ const CalendarGrid = ({
     }
 
     // Future predictions: 3 cycles
-    const lastStart = sorted.length > 0
-      ? parseISO(sorted[sorted.length - 1].period_start_date)
-      : addDays(new Date(), -14);
+    const lastStart = parseISO(sorted[sorted.length - 1].period_start_date);
 
     for (let cycle = 1; cycle <= 3; cycle++) {
       const futureStart = addDays(lastStart, avgCycle * cycle);
