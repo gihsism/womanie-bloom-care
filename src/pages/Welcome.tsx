@@ -98,14 +98,19 @@ const Welcome = () => {
             {features.map((feature) => {
               const Icon = feature.icon;
               return (
-                <Card key={feature.title} className="p-3.5 flex items-start gap-3.5">
+                <Card
+                  key={feature.title}
+                  className="p-3.5 flex items-center gap-3.5 cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => navigate(feature.path)}
+                >
                   <div className={`w-9 h-9 rounded-lg ${feature.bg} flex items-center justify-center flex-shrink-0`}>
                     <Icon className={`h-4.5 w-4.5 ${feature.color}`} />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h3 className="font-semibold text-foreground text-sm">{feature.title}</h3>
                     <p className="text-xs text-muted-foreground mt-0.5">{feature.description}</p>
                   </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 </Card>
               );
             })}
