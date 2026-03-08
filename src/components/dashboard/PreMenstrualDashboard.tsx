@@ -53,7 +53,7 @@ const funFacts = [
   'Periods usually last 3–7 days and come every 21–35 days.',
   'The uterus is about the size of your fist!',
   'Exercise can actually help reduce cramps when you get your period.',
-  'Everyone's cycle is different — there's no "wrong" way.',
+  "Everyone's cycle is different - there is no wrong way.",
 ];
 
 export default function PreMenstrualDashboard() {
