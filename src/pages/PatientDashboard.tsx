@@ -337,7 +337,14 @@ const PatientDashboard = () => {
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="w-full px-4 py-4">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
+             <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center justify-center h-9 w-9 rounded-md hover:bg-muted transition-colors"
+                aria-label="Go back"
+              >
+                <ArrowLeft className="h-5 w-5 text-foreground" />
+              </button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-2">
