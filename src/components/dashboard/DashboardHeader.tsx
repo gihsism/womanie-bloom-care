@@ -76,7 +76,7 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onU
   };
 
   const quickActions = [
-    { id: 'B3', icon: FileText, label: 'Dashboard', color: 'text-accent', action: () => navigate('/dashboard/medical-history') },
+    { id: 'B3', icon: ClipboardList, label: 'Med Records', color: 'text-accent', action: () => navigate('/dashboard/medical-history') },
     { id: 'B4', icon: Smartphone, label: 'Devices', color: 'text-muted-foreground', action: () => navigate('/dashboard/devices') },
     { id: 'B5', icon: Users, label: 'Community', color: 'text-primary', action: () => onNavigate('B5') },
   ];
