@@ -540,6 +540,7 @@ const CycleCalendar = ({
           markedOvulationDays={markedOvulationDays}
           prediction={prediction}
           periodRecords={periodRecords}
+          pregnancyDueDate={pregnancyDueDate}
         />
 
         <CalendarLegend selectedMode={selectedMode} />
