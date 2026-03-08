@@ -153,15 +153,20 @@ const PREGNANCY_SYMPTOMS: Record<string, { label: string; icon: string }[]> = {
 interface PregnancyTrackerProps {
   dueDate: Date | null;
   onSetDueDate: (date: Date) => void;
+  onResetPregnancy?: () => void;
 }
 
-const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
+const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy }: PregnancyTrackerProps) => {
   const [showFullImage, setShowFullImage] = useState(false);
   const [dueDateInput, setDueDateInput] = useState('');
   const [lmpInput, setLmpInput] = useState('');
   const [setupMethod, setSetupMethod] = useState<'due_date' | 'lmp' | 'ivf'>('due_date');
   const [ivfTransferInput, setIvfTransferInput] = useState('');
   const [ivfEmbryoAge, setIvfEmbryoAge] = useState<3 | 5>(5);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editDueDateInput, setEditDueDateInput] = useState('');
+  const [editWeekInput, setEditWeekInput] = useState('');
+  const [editMethod, setEditMethod] = useState<'due_date' | 'week'>('due_date');
 
   const pregnancyInfo = useMemo(() => {
     if (!dueDate) return null;
