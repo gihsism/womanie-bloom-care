@@ -89,7 +89,9 @@ interface PregnancyTrackerProps {
 const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
   const [dueDateInput, setDueDateInput] = useState('');
   const [lmpInput, setLmpInput] = useState('');
-  const [setupMethod, setSetupMethod] = useState<'due_date' | 'lmp'>('due_date');
+  const [setupMethod, setSetupMethod] = useState<'due_date' | 'lmp' | 'ivf'>('due_date');
+  const [ivfTransferInput, setIvfTransferInput] = useState('');
+  const [ivfEmbryoAge, setIvfEmbryoAge] = useState<3 | 5>(5);
 
   const pregnancyInfo = useMemo(() => {
     if (!dueDate) return null;
@@ -123,9 +125,15 @@ const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
     if (setupMethod === 'due_date' && dueDateInput) {
       onSetDueDate(parseISO(dueDateInput));
     } else if (setupMethod === 'lmp' && lmpInput) {
-      // Due date = LMP + 280 days
       const lmpDate = parseISO(lmpInput);
       const calculatedDueDate = addDays(lmpDate, 280);
+      onSetDueDate(calculatedDueDate);
+    } else if (setupMethod === 'ivf' && ivfTransferInput) {
+      // IVF due date: transfer date + (280 - embryo age at transfer - 14 days for ovulation)
+      // Simplified: transfer date + (266 - embryo age)
+      const transferDate = parseISO(ivfTransferInput);
+      const daysToAdd = 266 - ivfEmbryoAge;
+      const calculatedDueDate = addDays(transferDate, daysToAdd);
       onSetDueDate(calculatedDueDate);
     }
   };
@@ -143,7 +151,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
             Enter your due date or last menstrual period to start tracking your pregnancy week by week.
           </p>
 
-          <div className="flex gap-2 justify-center">
+          <div className="flex flex-wrap gap-2 justify-center">
             <Button
               variant={setupMethod === 'due_date' ? 'default' : 'outline'}
               size="sm"
@@ -158,6 +166,13 @@ const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
             >
               From last period
             </Button>
+            <Button
+              variant={setupMethod === 'ivf' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSetupMethod('ivf')}
+            >
+              IVF transfer
+            </Button>
           </div>
 
           {setupMethod === 'due_date' ? (
@@ -169,7 +184,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
                 onChange={(e) => setDueDateInput(e.target.value)}
               />
             </div>
-          ) : (
+          ) : setupMethod === 'lmp' ? (
             <div className="space-y-2 max-w-xs mx-auto">
               <label className="text-sm font-medium">First day of last period</label>
               <Input
@@ -178,11 +193,45 @@ const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
                 onChange={(e) => setLmpInput(e.target.value)}
               />
             </div>
+          ) : (
+            <div className="space-y-3 max-w-xs mx-auto">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Embryo transfer date</label>
+                <Input
+                  type="date"
+                  value={ivfTransferInput}
+                  onChange={(e) => setIvfTransferInput(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Embryo age at transfer</label>
+                <div className="flex gap-2 justify-center">
+                  <Button
+                    variant={ivfEmbryoAge === 3 ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setIvfEmbryoAge(3)}
+                  >
+                    Day 3
+                  </Button>
+                  <Button
+                    variant={ivfEmbryoAge === 5 ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setIvfEmbryoAge(5)}
+                  >
+                    Day 5 (Blastocyst)
+                  </Button>
+                </div>
+              </div>
+            </div>
           )}
 
           <Button
             onClick={handleSetDueDate}
-            disabled={setupMethod === 'due_date' ? !dueDateInput : !lmpInput}
+            disabled={
+              setupMethod === 'due_date' ? !dueDateInput :
+              setupMethod === 'lmp' ? !lmpInput :
+              !ivfTransferInput
+            }
             className="w-full max-w-xs"
           >
             Start Tracking
