@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
 import {
-  ArrowLeft,
+  Home,
   FileText,
   Pill,
   Activity,
@@ -364,8 +364,9 @@ export default function MedicalHistory() {
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="px-4 py-4 flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
-            <ArrowLeft className="h-5 w-5" />
+          <Button variant="ghost" size="sm" className="gap-2" onClick={() => navigate('/dashboard')}>
+            <Home className="h-4 w-4" />
+            Dashboard
           </Button>
           <div className="flex-1">
             <h1 className="text-xl font-bold">Medical History</h1>
