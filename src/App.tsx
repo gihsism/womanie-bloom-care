@@ -69,6 +69,7 @@ const App = () => (
             <Route path="/onboarding/mode-setup" element={<ModeSetup />} />
             <Route path="/onboarding/success" element={<OnboardingSuccess />} />
             <Route path="/install" element={<Install />} />
+            <Route path="/dashboard/devices" element={<Devices />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
