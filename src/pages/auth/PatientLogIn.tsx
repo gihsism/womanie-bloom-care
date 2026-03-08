@@ -61,7 +61,7 @@ const PatientLogIn = () => {
           title: 'Welcome back!',
           description: 'You have successfully logged in.',
         });
-        navigate('/dashboard');
+        navigate('/welcome');
       }
     } catch (error) {
       toast({

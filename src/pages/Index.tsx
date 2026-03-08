@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import Navigation from '@/components/Navigation';
 import Hero from '@/components/Hero';
 import WhatIsWomanie from '@/components/WhatIsWomanie';
@@ -15,10 +16,23 @@ import Footer from '@/components/Footer';
 const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [checking, setChecking] = useState(false);
 
   useEffect(() => {
     if (!loading && user) {
-      navigate('/dashboard', { replace: true });
+      setChecking(true);
+      supabase
+        .from('profiles')
+        .select('life_stage')
+        .eq('id', user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data?.life_stage) {
+            navigate('/dashboard', { replace: true });
+          } else {
+            navigate('/welcome', { replace: true });
+          }
+        });
     }
   }, [user, loading, navigate]);
 
