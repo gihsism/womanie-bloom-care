@@ -420,10 +420,11 @@ const PatientDashboard = () => {
                 onModeChange={handleModeChange}
                 onNavigate={setActiveSection}
                 onUploadClick={() => {
-                  setActiveSection('B1');
-                  setTimeout(() => {
-                    document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }, 100);
+                  requestAnimationFrame(() => {
+                    document
+                      .getElementById('dashboard-upload-section')
+                      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  });
                 }}
                 onDoctorChatClick={() => navigate('/dashboard/ai-doctor')}
                 cycleDay={currentCycleDay}
@@ -453,7 +454,7 @@ const PatientDashboard = () => {
             </Card>
 
             {/* Upload Health Documents Section */}
-            <div className="mb-6">
+            <div id="dashboard-upload-section" className="mb-6">
               <h3 className="text-base font-semibold mb-3">Upload</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <DocumentUpload />
