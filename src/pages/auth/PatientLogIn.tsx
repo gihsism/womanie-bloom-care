@@ -20,10 +20,10 @@ const PatientLogIn = () => {
     password: '',
   });
 
-  // Redirect to dashboard if already logged in
+  // Redirect if already logged in
   useEffect(() => {
     if (!loading && user) {
-      navigate('/dashboard');
+      navigate('/welcome');
     }
   }, [user, loading, navigate]);
 
