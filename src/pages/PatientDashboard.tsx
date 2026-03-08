@@ -18,6 +18,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import DashboardHeader, { getModeStats, type LifeStage } from '@/components/dashboard/DashboardHeader';
 import CycleCalendar from '@/components/dashboard/CycleCalendar';
 import PregnancyTracker from '@/components/dashboard/PregnancyTracker';
+import IVFTracker from '@/components/dashboard/IVFTracker';
 import DailyLogging from '@/components/dashboard/DailyLogging';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
 import OvulationPrediction from '@/components/dashboard/OvulationPrediction';
@@ -60,11 +61,13 @@ const PatientDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, session, loading } = useAuth();
-  const [profile, setProfile] = useState<{ full_name?: string; life_stage?: string; pregnancy_due_date?: string | null } | null>(null);
+  const [profile, setProfile] = useState<{ full_name?: string; life_stage?: string; pregnancy_due_date?: string | null; ivf_start_date?: string | null; ivf_phase?: string | null } | null>(null);
   const [selectedMode, setSelectedMode] = useState<LifeStage | null>(null);
   const [ovulationPrediction, setOvulationPrediction] = useState<any>(null);
   const [periodData, setPeriodData] = useState<{ lastPeriodStart: Date; cycleLength: number } | null>(null);
   const [pregnancyDueDate, setPregnancyDueDate] = useState<Date | null>(null);
+  const [ivfStartDate, setIvfStartDate] = useState<Date | null>(null);
+  const [ivfPhase, setIvfPhase] = useState<string | null>(null);
 
   // Save life stage to database when it changes
   const handleModeChange = async (mode: LifeStage) => {
@@ -180,19 +183,23 @@ const PatientDashboard = () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('full_name, life_stage, pregnancy_due_date')
+        .select('full_name, life_stage, pregnancy_due_date, ivf_start_date, ivf_phase')
         .eq('id', userId)
         .maybeSingle();
 
       if (error) throw error;
       setProfile(data);
       
-      // Load saved life stage if available, otherwise default to menstrual-cycle
       setSelectedMode((data?.life_stage as LifeStage) || 'menstrual-cycle');
       
-      // Load pregnancy due date
       if (data?.pregnancy_due_date) {
         setPregnancyDueDate(new Date(data.pregnancy_due_date));
+      }
+      if (data?.ivf_start_date) {
+        setIvfStartDate(new Date(data.ivf_start_date));
+      }
+      if (data?.ivf_phase) {
+        setIvfPhase(data.ivf_phase);
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -210,6 +217,36 @@ const PatientDashboard = () => {
           .eq('id', user.id);
       } catch (error) {
         console.error('Error saving due date:', error);
+      }
+    }
+  };
+
+  const handleSetIVFStart = async (date: Date, phase: string) => {
+    setIvfStartDate(date);
+    setIvfPhase(phase);
+    if (user) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({ ivf_start_date: format(date, 'yyyy-MM-dd'), ivf_phase: phase })
+          .eq('id', user.id);
+      } catch (error) {
+        console.error('Error saving IVF data:', error);
+      }
+    }
+  };
+
+  const handleUpdateIVFPhase = async (phase: string) => {
+    setIvfPhase(phase);
+    setIvfStartDate(new Date()); // reset phase start to today
+    if (user) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({ ivf_phase: phase, ivf_start_date: format(new Date(), 'yyyy-MM-dd') })
+          .eq('id', user.id);
+      } catch (error) {
+        console.error('Error updating IVF phase:', error);
       }
     }
   };
@@ -480,10 +517,42 @@ const PatientDashboard = () => {
             {/* Health Tracking Section */}
             <div className="mb-6">
               <h3 className="text-base font-semibold mb-3">
-                {selectedMode === 'pregnancy' ? 'Pregnancy Tracking' : 'Health Tracking'}
+                {selectedMode === 'pregnancy' ? 'Pregnancy Tracking' : selectedMode === 'ivf' ? 'IVF Tracking' : 'Health Tracking'}
               </h3>
 
-              {selectedMode === 'pregnancy' ? (
+              {selectedMode === 'ivf' ? (
+                /* ─── IVF Mode ─── */
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2">
+                    <IVFTracker
+                      ivfStartDate={ivfStartDate}
+                      ivfPhase={ivfPhase}
+                      onSetIVFStart={handleSetIVFStart}
+                      onUpdatePhase={handleUpdateIVFPhase}
+                    />
+                  </div>
+                  <div className="lg:col-span-1 space-y-4">
+                    <Card className="p-4">
+                      <h3 className="text-lg font-bold mb-4">IVF Health</h3>
+                      <div className="space-y-4">
+                        {healthStats.map((stat) => {
+                          const IconComponent = stat.icon;
+                          return (
+                            <div key={stat.title} className="flex items-start gap-3 pb-3 border-b last:border-0 last:pb-0">
+                              <IconComponent className={`h-5 w-5 ${stat.color} mt-1`} />
+                              <div className="flex-1">
+                                <div className="text-sm font-medium text-muted-foreground mb-1">{stat.title}</div>
+                                <div className="text-lg font-bold mb-1">{stat.value}</div>
+                                <div className="text-xs text-muted-foreground">{stat.subtitle}</div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </Card>
+                  </div>
+                </div>
+              ) : selectedMode === 'pregnancy' ? (
                 /* ─── Pregnancy Mode ─── */
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="lg:col-span-2">
