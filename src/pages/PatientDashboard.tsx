@@ -23,6 +23,7 @@ import DailyLogging from '@/components/dashboard/DailyLogging';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
 import OvulationPrediction from '@/components/dashboard/OvulationPrediction';
 import PreMenstrualDashboard from '@/components/dashboard/PreMenstrualDashboard';
+import MenopauseDashboard from '@/components/dashboard/MenopauseDashboard';
 import { format, addDays } from 'date-fns';
 import { 
   MessageSquare, 
@@ -625,6 +626,9 @@ const PatientDashboard = () => {
               ) : selectedMode === 'pre-menstrual' ? (
                 /* ─── Pre-Menstrual Mode ─── */
                 <PreMenstrualDashboard />
+              ) : (selectedMode === 'menopause' || selectedMode === 'post-menopause') ? (
+                /* ─── Menopause Mode ─── */
+                <MenopauseDashboard />
               ) : (
                 /* ─── Cycle Mode ─── */
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
