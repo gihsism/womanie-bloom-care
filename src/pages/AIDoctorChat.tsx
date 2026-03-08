@@ -16,8 +16,16 @@ import {
   Loader2,
   Trash2,
   Cpu,
+  Stethoscope,
+  MessageCircle,
+  Search,
+  Calendar,
+  Star,
+  Shield,
 } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
+type ChatMode = 'ai' | 'real';
 type Msg = { role: 'user' | 'assistant'; content: string };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-doctor-chat`;
@@ -132,10 +140,65 @@ Here are some things I can help with:
 How can I help you today?`,
 };
 
+// ─── Real Doctor Panel ───
+function RealDoctorPanel() {
+  const navigate = useNavigate();
+
+  const features = [
+    { icon: Search, label: 'Browse verified specialists', description: 'Find gynecologists, fertility experts, and more' },
+    { icon: Calendar, label: 'Book appointments', description: 'Schedule video or in-person consultations' },
+    { icon: MessageCircle, label: 'Secure messaging', description: 'Chat directly with your connected doctor' },
+    { icon: Shield, label: 'Verified professionals', description: 'All doctors are license-verified' },
+  ];
+
+  return (
+    <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+      {/* Hero */}
+      <div className="text-center space-y-3 pt-4">
+        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+          <Stethoscope className="h-8 w-8 text-primary" />
+        </div>
+        <h2 className="text-xl font-bold">Consult a Real Doctor</h2>
+        <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+          Connect with verified healthcare professionals for personalized medical advice and consultations.
+        </p>
+      </div>
+
+      {/* Features */}
+      <div className="space-y-3 max-w-md mx-auto">
+        {features.map((f) => (
+          <Card key={f.label} className="p-4 flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <f.icon className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">{f.label}</p>
+              <p className="text-xs text-muted-foreground">{f.description}</p>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {/* CTA */}
+      <div className="max-w-md mx-auto space-y-3">
+        <Button className="w-full h-12 text-sm font-semibold rounded-xl" onClick={() => navigate('/find-doctor')}>
+          <Search className="h-4 w-4 mr-2" />
+          Find a Doctor
+        </Button>
+        <p className="text-[10px] text-muted-foreground text-center">
+          All consultations are private and HIPAA-compliant.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Component ───
 export default function AIDoctorChat() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
+  const [chatMode, setChatMode] = useState<ChatMode>('ai');
   const [messages, setMessages] = useState<Msg[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
@@ -233,141 +296,170 @@ export default function AIDoctorChat() {
           </Button>
           <div className="flex items-center gap-2 flex-1">
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <Bot className="h-4 w-4 text-primary" />
+              {chatMode === 'ai' ? <Bot className="h-4 w-4 text-primary" /> : <Stethoscope className="h-4 w-4 text-primary" />}
             </div>
             <div>
               <h1 className="text-sm font-bold leading-tight">Doctor Chat</h1>
-              <p className="text-[10px] text-muted-foreground">AI-powered medical assistant</p>
+              <p className="text-[10px] text-muted-foreground">
+                {chatMode === 'ai' ? 'AI-powered assistant' : 'Connect with real doctors'}
+              </p>
             </div>
           </div>
 
-          {/* Model Selector */}
-          <Select value={selectedModel} onValueChange={setSelectedModel} disabled={isStreaming}>
-            <SelectTrigger className="w-auto h-8 text-xs gap-1 border-border">
-              <Cpu className="h-3 w-3" />
-              <SelectValue>{currentModelLabel}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {AI_MODELS.map((m) => (
-                <SelectItem key={m.id} value={m.id}>
-                  <div className="flex flex-col">
-                    <span className="font-medium text-xs">{m.label}</span>
-                    <span className="text-[10px] text-muted-foreground">{m.description}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Badge variant="outline" className="text-[10px] gap-1">
-            <Sparkles className="h-3 w-3" />
-            AI
-          </Badge>
-          <Button variant="ghost" size="icon" onClick={clearChat} title="Clear chat">
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            {msg.role === 'assistant' && (
-              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
-                <Bot className="h-3.5 w-3.5 text-primary" />
-              </div>
-            )}
-            <div
-              className={`max-w-[85%] md:max-w-[70%] rounded-2xl px-4 py-3 ${
-                msg.role === 'user'
-                  ? 'bg-primary text-primary-foreground rounded-br-md'
-                  : 'bg-muted rounded-bl-md'
-              }`}
-            >
-              {msg.role === 'assistant' ? (
-                <div className="prose prose-sm dark:prose-invert max-w-none text-sm [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&>h1]:text-base [&>h2]:text-sm [&>h3]:text-sm">
-                  <ReactMarkdown>{msg.content}</ReactMarkdown>
-                </div>
-              ) : (
-                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-              )}
-            </div>
-            {msg.role === 'user' && (
-              <div className="w-7 h-7 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0 mt-1">
-                <User className="h-3.5 w-3.5 text-secondary" />
-              </div>
-            )}
-          </div>
-        ))}
-
-        {isStreaming && messages[messages.length - 1]?.role !== 'assistant' && (
-          <div className="flex gap-3">
-            <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <Bot className="h-3.5 w-3.5 text-primary" />
-            </div>
-            <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Suggested Questions */}
-      {messages.length <= 1 && (
-        <div className="px-4 pb-2">
-          <div className="flex flex-wrap gap-2">
-            {suggestedQuestions.map((q) => (
-              <Button
-                key={q}
-                variant="outline"
-                size="sm"
-                className="text-xs h-auto py-1.5 px-3 rounded-full"
-                onClick={() => {
-                  setInput(q);
-                  setTimeout(() => textareaRef.current?.focus(), 0);
-                }}
-              >
-                {q}
+          {chatMode === 'ai' && (
+            <>
+              <Select value={selectedModel} onValueChange={setSelectedModel} disabled={isStreaming}>
+                <SelectTrigger className="w-auto h-8 text-xs gap-1 border-border">
+                  <Cpu className="h-3 w-3" />
+                  <SelectValue>{currentModelLabel}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {AI_MODELS.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-xs">{m.label}</span>
+                        <span className="text-[10px] text-muted-foreground">{m.description}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button variant="ghost" size="icon" onClick={clearChat} title="Clear chat">
+                <Trash2 className="h-4 w-4" />
               </Button>
-            ))}
-          </div>
+            </>
+          )}
         </div>
-      )}
 
-      {/* Input Area */}
-      <div className="border-t border-border bg-card p-4">
-        <div className="max-w-4xl mx-auto flex gap-2 items-end">
-          <Textarea
-            ref={textareaRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Ask about your health records..."
-            className="min-h-[44px] max-h-[120px] resize-none text-sm rounded-xl"
-            rows={1}
-            disabled={isStreaming}
-          />
+        {/* Mode Switcher */}
+        <div className="px-4 pb-3 flex gap-2">
           <Button
-            onClick={handleSend}
-            disabled={!input.trim() || isStreaming}
-            size="icon"
-            className="rounded-xl h-[44px] w-[44px] flex-shrink-0"
+            variant={chatMode === 'ai' ? 'default' : 'outline'}
+            size="sm"
+            className="flex-1 rounded-xl h-9 text-xs font-semibold gap-1.5"
+            onClick={() => setChatMode('ai')}
           >
-            {isStreaming ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
+            <Bot className="h-3.5 w-3.5" />
+            AI Assistant
+          </Button>
+          <Button
+            variant={chatMode === 'real' ? 'default' : 'outline'}
+            size="sm"
+            className="flex-1 rounded-xl h-9 text-xs font-semibold gap-1.5"
+            onClick={() => setChatMode('real')}
+          >
+            <Stethoscope className="h-3.5 w-3.5" />
+            Real Doctor
           </Button>
         </div>
-        <p className="text-[10px] text-muted-foreground text-center mt-2">
-          AI responses are informational only. Always consult your doctor for medical decisions.
-        </p>
       </div>
+
+      {/* Content based on mode */}
+      {chatMode === 'real' ? (
+        <RealDoctorPanel />
+      ) : (
+        <>
+          {/* Messages */}
+          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+            {messages.map((msg, i) => (
+              <div
+                key={i}
+                className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                {msg.role === 'assistant' && (
+                  <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+                    <Bot className="h-3.5 w-3.5 text-primary" />
+                  </div>
+                )}
+                <div
+                  className={`max-w-[85%] md:max-w-[70%] rounded-2xl px-4 py-3 ${
+                    msg.role === 'user'
+                      ? 'bg-primary text-primary-foreground rounded-br-md'
+                      : 'bg-muted rounded-bl-md'
+                  }`}
+                >
+                  {msg.role === 'assistant' ? (
+                    <div className="prose prose-sm dark:prose-invert max-w-none text-sm [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&>h1]:text-base [&>h2]:text-sm [&>h3]:text-sm">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                  )}
+                </div>
+                {msg.role === 'user' && (
+                  <div className="w-7 h-7 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0 mt-1">
+                    <User className="h-3.5 w-3.5 text-secondary" />
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {isStreaming && messages[messages.length - 1]?.role !== 'assistant' && (
+              <div className="flex gap-3">
+                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Bot className="h-3.5 w-3.5 text-primary" />
+                </div>
+                <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Suggested Questions */}
+          {messages.length <= 1 && (
+            <div className="px-4 pb-2">
+              <div className="flex flex-wrap gap-2">
+                {suggestedQuestions.map((q) => (
+                  <Button
+                    key={q}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-auto py-1.5 px-3 rounded-full"
+                    onClick={() => {
+                      setInput(q);
+                      setTimeout(() => textareaRef.current?.focus(), 0);
+                    }}
+                  >
+                    {q}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Input Area */}
+          <div className="border-t border-border bg-card p-4">
+            <div className="max-w-4xl mx-auto flex gap-2 items-end">
+              <Textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask about your health records..."
+                className="min-h-[44px] max-h-[120px] resize-none text-sm rounded-xl"
+                rows={1}
+                disabled={isStreaming}
+              />
+              <Button
+                onClick={handleSend}
+                disabled={!input.trim() || isStreaming}
+                size="icon"
+                className="rounded-xl h-[44px] w-[44px] flex-shrink-0"
+              >
+                {isStreaming ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+            <p className="text-[10px] text-muted-foreground text-center mt-2">
+              AI responses are informational only. Always consult your doctor for medical decisions.
+            </p>
+          </div>
+        </>
+      )}
     </div>
   );
 }
