@@ -450,6 +450,8 @@ export type Database = {
           created_at: string | null
           full_name: string | null
           id: string
+          ivf_phase: string | null
+          ivf_start_date: string | null
           life_stage: string | null
           pregnancy_due_date: string | null
           updated_at: string | null
@@ -458,6 +460,8 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id: string
+          ivf_phase?: string | null
+          ivf_start_date?: string | null
           life_stage?: string | null
           pregnancy_due_date?: string | null
           updated_at?: string | null
@@ -466,6 +470,8 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id?: string
+          ivf_phase?: string | null
+          ivf_start_date?: string | null
           life_stage?: string | null
           pregnancy_due_date?: string | null
           updated_at?: string | null
