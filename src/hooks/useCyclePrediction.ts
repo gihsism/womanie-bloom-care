@@ -59,6 +59,7 @@ interface CyclePredictionInput {
   periodRecords: PeriodRecord[];
   daySignals: Record<string, DaySignal>;
   onboardingEstimates?: OnboardingEstimates;
+  manualOverrides?: { cycleLength?: number; periodLength?: number };
 }
 
 // Constants
