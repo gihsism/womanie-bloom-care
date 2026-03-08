@@ -108,52 +108,45 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onU
       </div>
 
       {/* Quick Actions */}
-      <Card className="p-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex-1" />
-
-          {/* Quick Actions */}
-          <div className="flex gap-2">
-            {/* Doctor Chat */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onDoctorChatClick}
-              className="flex flex-col items-center gap-1 h-auto py-2 px-3 border-primary/20 hover:bg-primary/5"
-            >
-              <MessageSquare className="h-4 w-4 text-primary" />
-              <span className="text-xs font-medium">Doctor Chat</span>
-            </Button>
-
-            {/* Upload */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onUploadClick}
-              className="flex flex-col items-center gap-1 h-auto py-2 px-3 border-primary/20 hover:bg-primary/5"
-            >
-              <Upload className="h-4 w-4 text-primary" />
-              <span className="text-xs font-medium">Upload</span>
-            </Button>
-
-            {quickActions.map((action) => {
-              const IconComponent = action.icon;
-              return (
-                <Button
-                  key={action.id}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onNavigate(action.id)}
-                  className="flex flex-col items-center gap-1 h-auto py-2 px-3"
-                >
-                  <IconComponent className={`h-4 w-4 ${action.color}`} />
-                  <span className="text-xs">{action.label}</span>
-                </Button>
-              );
-            })}
+      <div className="flex items-center justify-center gap-3 overflow-x-auto pb-1">
+        {/* Doctor Chat */}
+        <button
+          onClick={onDoctorChatClick}
+          className="flex flex-col items-center gap-1.5 min-w-[72px] group"
+        >
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shadow-sm">
+            <MessageSquare className="h-5 w-5 text-primary" />
           </div>
-        </div>
-      </Card>
+          <span className="text-xs font-medium text-foreground/80">Doctor Chat</span>
+        </button>
+
+        {/* Upload */}
+        <button
+          onClick={onUploadClick}
+          className="flex flex-col items-center gap-1.5 min-w-[72px] group"
+        >
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shadow-sm">
+            <Upload className="h-5 w-5 text-primary" />
+          </div>
+          <span className="text-xs font-medium text-foreground/80">Upload</span>
+        </button>
+
+        {quickActions.map((action) => {
+          const IconComponent = action.icon;
+          return (
+            <button
+              key={action.id}
+              onClick={() => onNavigate(action.id)}
+              className="flex flex-col items-center gap-1.5 min-w-[72px] group"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center group-hover:bg-muted transition-colors shadow-sm">
+                <IconComponent className={`h-5 w-5 ${action.color}`} />
+              </div>
+              <span className="text-xs font-medium text-foreground/80">{action.label}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };
