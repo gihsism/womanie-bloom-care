@@ -492,7 +492,7 @@ const CycleCalendar = ({
                       <p>• Prediction window: ±{prediction.confidenceWindow} days</p>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" onClick={() => { setTempCycleLength(prediction.averageCycleLength); setIsSettingsOpen(false); }} className="flex-1">Cancel</Button>
+                      <Button variant="outline" onClick={() => { setTempCycleLength(prediction.averageCycleLength); setTempPeriodLength(prediction.averagePeriodLength); setIsSettingsOpen(false); }} className="flex-1">Cancel</Button>
                       <Button onClick={handleSaveCycleSettings} className="flex-1">Save</Button>
                     </div>
                   </div>
