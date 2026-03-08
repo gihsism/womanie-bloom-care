@@ -94,9 +94,14 @@ export default function HealthStatistics() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Health Statistics</h1>
-        <p className="text-muted-foreground">AI-analyzed summaries of your health documents</p>
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold mb-1">Health Statistics</h1>
+          <p className="text-muted-foreground">AI-analyzed summaries of your health documents</p>
+        </div>
       </div>
 
       {documents.length === 0 ? (
