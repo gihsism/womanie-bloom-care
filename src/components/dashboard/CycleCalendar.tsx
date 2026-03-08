@@ -501,10 +501,9 @@ const CycleCalendar = ({
                     
                     <div className="text-xs text-muted-foreground space-y-1">
                       <p>• Standard deviation: ±{prediction.standardDeviation.toFixed(1)} days</p>
-                        <p>• Cycle trend: {prediction.cycleTrend}</p>
-                        <p>• Prediction window: ±{prediction.confidenceWindow} days</p>
-                      </div>
-                    )}
+                      <p>• Cycle trend: {prediction.cycleTrend}</p>
+                      <p>• Prediction window: ±{prediction.confidenceWindow} days</p>
+                    </div>
                     
                     <div className="flex gap-2">
                       <Button 
