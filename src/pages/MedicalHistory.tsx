@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
 import {
+  ArrowLeft,
   Home,
   FileText,
   Pill,
