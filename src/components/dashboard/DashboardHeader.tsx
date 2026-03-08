@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -65,6 +66,8 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onUploadClick, onDoctorChatClick, cycleDay = 14, cyclePhase = 'follicular' }: DashboardHeaderProps) => {
+  const navigate = useNavigate();
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
@@ -73,10 +76,10 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onU
   };
 
   const quickActions = [
-    { id: 'B2', icon: Activity, label: 'Dashboard', color: 'text-secondary' },
-    { id: 'B3', icon: FileText, label: 'Records', color: 'text-accent' },
-    { id: 'B4', icon: Smartphone, label: 'Devices', color: 'text-muted-foreground' },
-    { id: 'B5', icon: Users, label: 'Community', color: 'text-primary' },
+    { id: 'B2', icon: Activity, label: 'Dashboard', color: 'text-secondary', action: () => onNavigate('B2') },
+    { id: 'B3', icon: FileText, label: 'Records', color: 'text-accent', action: () => navigate('/dashboard/medical-history') },
+    { id: 'B4', icon: Smartphone, label: 'Devices', color: 'text-muted-foreground', action: () => onNavigate('B4') },
+    { id: 'B5', icon: Users, label: 'Community', color: 'text-primary', action: () => onNavigate('B5') },
   ];
 
   const modeOptions = [
@@ -136,7 +139,7 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onU
           return (
             <button
               key={action.id}
-              onClick={() => onNavigate(action.id)}
+              onClick={action.action}
               className="flex flex-col items-center gap-1.5 min-w-[72px] group"
             >
               <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center group-hover:bg-muted transition-colors shadow-sm">
