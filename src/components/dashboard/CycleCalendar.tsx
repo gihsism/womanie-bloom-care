@@ -473,10 +473,7 @@ const CycleCalendar = ({
                   <DialogHeader>
                     <DialogTitle>Cycle Settings</DialogTitle>
                     <DialogDescription>
-                      {prediction 
-                        ? `Predicted cycle length: ${prediction.averageCycleLength} days (${prediction.isRegular ? 'regular' : 'irregular'})`
-                        : 'Set your average cycle length for predictions'
-                      }
+                      {`Predicted cycle length: ${prediction.averageCycleLength} days (${prediction.isRegular ? 'regular' : 'irregular'})`}
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
@@ -492,22 +489,18 @@ const CycleCalendar = ({
                         <SelectContent>
                           {Array.from({ length: 24 }, (_, i) => i + 21).map((days) => (
                             <SelectItem key={days} value={days.toString()}>
-                              {days} days {prediction && days === prediction.averageCycleLength && '(predicted)'}
+                              {days} days {days === prediction.averageCycleLength && '(predicted)'}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                       <p className="text-xs text-muted-foreground">
-                        {prediction 
-                          ? `${prediction.dataQualityMessage}. Confidence: ${prediction.confidenceLevel}`
-                          : `Log periods to get personalized predictions. Normal cycles: 21-35 days.`
-                        }
+                        {`${prediction.dataQualityMessage}. Confidence: ${prediction.confidenceLevel}`}
                       </p>
                     </div>
                     
-                    {prediction && (
-                      <div className="text-xs text-muted-foreground space-y-1">
-                        <p>• Standard deviation: ±{prediction.standardDeviation.toFixed(1)} days</p>
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      <p>• Standard deviation: ±{prediction.standardDeviation.toFixed(1)} days</p>
                         <p>• Cycle trend: {prediction.cycleTrend}</p>
                         <p>• Prediction window: ±{prediction.confidenceWindow} days</p>
                       </div>
