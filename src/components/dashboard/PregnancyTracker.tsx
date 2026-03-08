@@ -125,9 +125,15 @@ const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
     if (setupMethod === 'due_date' && dueDateInput) {
       onSetDueDate(parseISO(dueDateInput));
     } else if (setupMethod === 'lmp' && lmpInput) {
-      // Due date = LMP + 280 days
       const lmpDate = parseISO(lmpInput);
       const calculatedDueDate = addDays(lmpDate, 280);
+      onSetDueDate(calculatedDueDate);
+    } else if (setupMethod === 'ivf' && ivfTransferInput) {
+      // IVF due date: transfer date + (280 - embryo age at transfer - 14 days for ovulation)
+      // Simplified: transfer date + (266 - embryo age)
+      const transferDate = parseISO(ivfTransferInput);
+      const daysToAdd = 266 - ivfEmbryoAge;
+      const calculatedDueDate = addDays(transferDate, daysToAdd);
       onSetDueDate(calculatedDueDate);
     }
   };
