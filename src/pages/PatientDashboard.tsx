@@ -60,10 +60,11 @@ const PatientDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, session, loading } = useAuth();
-  const [profile, setProfile] = useState<{ full_name?: string; life_stage?: string } | null>(null);
+  const [profile, setProfile] = useState<{ full_name?: string; life_stage?: string; pregnancy_due_date?: string | null } | null>(null);
   const [selectedMode, setSelectedMode] = useState<LifeStage | null>(null);
   const [ovulationPrediction, setOvulationPrediction] = useState<any>(null);
   const [periodData, setPeriodData] = useState<{ lastPeriodStart: Date; cycleLength: number } | null>(null);
+  const [pregnancyDueDate, setPregnancyDueDate] = useState<Date | null>(null);
 
   // Save life stage to database when it changes
   const handleModeChange = async (mode: LifeStage) => {
