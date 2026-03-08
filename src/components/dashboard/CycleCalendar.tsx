@@ -265,18 +265,22 @@ const CycleCalendar = ({
             .eq('user_id', user.id)
             .eq('period_start_date', adjacentAfter.period_start_date);
         } else {
-          // Create new single-day period
+          // Create new period auto-filled to predicted length
+          const predictedEnd = addDays(date, periodLength - 1);
           await supabase
             .from('period_tracking')
             .insert({
               user_id: user.id,
               period_start_date: dateKey,
-              period_end_date: dateKey,
+              period_end_date: format(predictedEnd, 'yyyy-MM-dd'),
               cycle_length: cycleLength
             });
+          
+          toast({ 
+            title: 'Period started', 
+            description: `Auto-filled ${periodLength} days (${format(date, 'MMM d')} – ${format(predictedEnd, 'MMM d')}). Tap days to adjust.` 
+          });
         }
-        
-        toast({ title: 'Period day marked' });
       }
       
       // Reload data to get updated records and recalculate predictions
