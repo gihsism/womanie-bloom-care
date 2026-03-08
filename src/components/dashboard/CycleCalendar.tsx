@@ -63,24 +63,30 @@ const CycleCalendar = ({
   const [tempCycleLength, setTempCycleLength] = useState(initialCycleLength);
   const [isDayActionOpen, setIsDayActionOpen] = useState(false);
 
-  // ML Prediction - uses the new hook
+  // Build onboarding estimates for the prediction hook
+  const onboardingEstimates = useMemo(() => ({
+    cycleLength: manualCycleLength || initialCycleLength,
+    periodLength: initialPeriodLength,
+    lastPeriodStart: initialPeriodStart ? format(initialPeriodStart, 'yyyy-MM-dd') : undefined,
+  }), [manualCycleLength, initialCycleLength, initialPeriodLength, initialPeriodStart]);
+
+  // ML Prediction - always returns a prediction (never null)
   const prediction = useCyclePrediction({
     periodRecords,
     daySignals,
-    defaultCycleLength: manualCycleLength || initialCycleLength,
-    defaultPeriodLength: initialPeriodLength
+    onboardingEstimates,
   });
   
   // Symptom patterns for insights
   const symptomPatterns = useSymptomPatterns(
     periodRecords,
     daySignals,
-    prediction?.averageCycleLength || initialCycleLength
+    prediction.averageCycleLength
   );
 
-  // Use prediction values or fallbacks
-  const cycleLength = prediction?.averageCycleLength || manualCycleLength || initialCycleLength;
-  const periodLength = prediction?.averagePeriodLength || initialPeriodLength;
+  // Use prediction values
+  const cycleLength = prediction.averageCycleLength;
+  const periodLength = prediction.averagePeriodLength;
 
   // Load data from database on mount
   useEffect(() => {
