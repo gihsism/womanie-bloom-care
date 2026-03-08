@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN pregnancy_due_date date DEFAULT NULL;
