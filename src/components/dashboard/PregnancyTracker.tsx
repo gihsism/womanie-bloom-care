@@ -8,7 +8,7 @@ import BabyImage3DOverlay from './BabyImage3DOverlay';
 import babyWeek04 from '@/assets/baby-week-04.png';
 import babyWeek07 from '@/assets/baby-week-07.png';
 import babyWeek12 from '@/assets/baby-week-12.png';
-
+import babyWeek13 from '@/assets/baby-week-13.png';
 import babyWeek16 from '@/assets/baby-week-16.png';
 import babyWeek20 from '@/assets/baby-week-20.png';
 import babyWeek24 from '@/assets/baby-week-24.png';
