@@ -180,7 +180,7 @@ const PatientDashboard = () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('full_name, life_stage')
+        .select('full_name, life_stage, pregnancy_due_date')
         .eq('id', userId)
         .maybeSingle();
 
@@ -189,9 +189,28 @@ const PatientDashboard = () => {
       
       // Load saved life stage if available, otherwise default to menstrual-cycle
       setSelectedMode((data?.life_stage as LifeStage) || 'menstrual-cycle');
+      
+      // Load pregnancy due date
+      if (data?.pregnancy_due_date) {
+        setPregnancyDueDate(new Date(data.pregnancy_due_date));
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
       setSelectedMode('menstrual-cycle');
+    }
+  };
+
+  const handleSetPregnancyDueDate = async (date: Date) => {
+    setPregnancyDueDate(date);
+    if (user) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({ pregnancy_due_date: format(date, 'yyyy-MM-dd') })
+          .eq('id', user.id);
+      } catch (error) {
+        console.error('Error saving due date:', error);
+      }
     }
   };
 
