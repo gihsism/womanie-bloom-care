@@ -277,7 +277,7 @@ export function useCyclePrediction({
       tier, tierLabel, cycleTrend,
       currentCycleAnomaly, anomalyMessage, excludedCycles,
     };
-  }, [periodRecords, daySignals, onboardingEstimates]);
+  }, [periodRecords, daySignals, onboardingEstimates, manualOverrides]);
 }
 
 // Symptom pattern recognition
