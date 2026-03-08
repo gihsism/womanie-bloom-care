@@ -1,6 +1,18 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+
+// Baby size fruit illustrations
+import babyWeek04 from '@/assets/baby-week-04.png';
+import babyWeek07 from '@/assets/baby-week-07.png';
+import babyWeek12 from '@/assets/baby-week-12.png';
+import babyWeek16 from '@/assets/baby-week-16.png';
+import babyWeek20 from '@/assets/baby-week-20.png';
+import babyWeek24 from '@/assets/baby-week-24.png';
+import babyWeek28 from '@/assets/baby-week-28.png';
+import babyWeek32 from '@/assets/baby-week-32.png';
+import babyWeek36 from '@/assets/baby-week-36.png';
+import babyWeek40 from '@/assets/baby-week-40.png';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
