@@ -59,6 +59,7 @@ interface CyclePredictionInput {
   periodRecords: PeriodRecord[];
   daySignals: Record<string, DaySignal>;
   onboardingEstimates?: OnboardingEstimates;
+  manualOverrides?: { cycleLength?: number; periodLength?: number };
 }
 
 // Constants
@@ -108,6 +109,7 @@ export function useCyclePrediction({
   periodRecords,
   daySignals,
   onboardingEstimates,
+  manualOverrides,
 }: CyclePredictionInput): CyclePrediction {
   return useMemo(() => {
     const sortedRecords = [...periodRecords].sort(
@@ -174,6 +176,10 @@ export function useCyclePrediction({
       avgCycleLength = Math.round(calculateWeightedAverage(validCycleLengths));
       avgPeriodLength = getAvgPeriodLength();
     }
+
+    // Manual overrides always win
+    if (manualOverrides?.cycleLength) avgCycleLength = manualOverrides.cycleLength;
+    if (manualOverrides?.periodLength) avgPeriodLength = manualOverrides.periodLength;
 
     // ─── Compute Dates ───
     const now = new Date();
@@ -271,7 +277,7 @@ export function useCyclePrediction({
       tier, tierLabel, cycleTrend,
       currentCycleAnomaly, anomalyMessage, excludedCycles,
     };
-  }, [periodRecords, daySignals, onboardingEstimates]);
+  }, [periodRecords, daySignals, onboardingEstimates, manualOverrides]);
 }
 
 // Symptom pattern recognition

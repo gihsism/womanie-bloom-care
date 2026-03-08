@@ -61,10 +61,16 @@ const CycleCalendar = ({
     lastPeriodStart: initialPeriodStart ? format(initialPeriodStart, 'yyyy-MM-dd') : undefined,
   }), [manualCycleLength, manualPeriodLength, initialCycleLength, initialPeriodLength, initialPeriodStart]);
 
+  const manualOverrides = useMemo(() => ({
+    cycleLength: manualCycleLength || undefined,
+    periodLength: manualPeriodLength || undefined,
+  }), [manualCycleLength, manualPeriodLength]);
+
   const prediction = useCyclePrediction({
     periodRecords,
     daySignals,
     onboardingEstimates,
+    manualOverrides,
   });
   
   const symptomPatterns = useSymptomPatterns(
