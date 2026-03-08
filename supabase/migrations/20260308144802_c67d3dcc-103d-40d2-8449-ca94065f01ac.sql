@@ -1,0 +1,1 @@
+ALTER TABLE public.period_tracking ALTER COLUMN period_end_date DROP NOT NULL;
