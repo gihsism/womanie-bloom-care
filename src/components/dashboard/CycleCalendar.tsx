@@ -57,9 +57,9 @@ const CycleCalendar = ({
 
   const onboardingEstimates = useMemo(() => ({
     cycleLength: manualCycleLength || initialCycleLength,
-    periodLength: initialPeriodLength,
+    periodLength: manualPeriodLength || initialPeriodLength,
     lastPeriodStart: initialPeriodStart ? format(initialPeriodStart, 'yyyy-MM-dd') : undefined,
-  }), [manualCycleLength, initialCycleLength, initialPeriodLength, initialPeriodStart]);
+  }), [manualCycleLength, manualPeriodLength, initialCycleLength, initialPeriodLength, initialPeriodStart]);
 
   const prediction = useCyclePrediction({
     periodRecords,
