@@ -128,20 +128,20 @@ const Welcome = () => {
           <div className="space-y-3 pt-1">
             <Button
               size="lg"
+              className="w-full"
+              onClick={() => navigate('/dashboard', { replace: true })}
+            >
+              Explore dashboard first
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
               className="w-full gap-2"
               onClick={() => navigate('/onboarding/basic-info')}
             >
               <Sparkles className="h-4 w-4" />
               Personalise my experience
               <ArrowRight className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full"
-              onClick={() => navigate('/dashboard', { replace: true })}
-            >
-              Explore dashboard first
             </Button>
           </div>
         </div>
