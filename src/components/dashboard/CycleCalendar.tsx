@@ -52,6 +52,7 @@ const CycleCalendar = ({
   const [dailyLogTab, setDailyLogTab] = useState<'symptoms' | 'mood' | 'intimacy' | 'discharge'>('symptoms');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [tempCycleLength, setTempCycleLength] = useState(initialCycleLength);
+  const [tempPeriodLength, setTempPeriodLength] = useState(initialPeriodLength);
   const [isDayActionOpen, setIsDayActionOpen] = useState(false);
 
   const onboardingEstimates = useMemo(() => ({
