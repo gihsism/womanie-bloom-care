@@ -22,6 +22,15 @@ interface Device {
 const Devices = () => {
   const navigate = useNavigate();
   const [expandedDevice, setExpandedDevice] = useState<string | null>(null);
+  const [connecting, setConnecting] = useState(false);
+  const [healthKitConnected, setHealthKitConnected] = useState(false);
+  const [isNative, setIsNative] = useState(false);
+
+  useEffect(() => {
+    healthKitService.initialize().then((available) => {
+      setIsNative(available);
+    });
+  }, []);
 
   const devices: Device[] = [
     {
