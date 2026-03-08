@@ -45,6 +45,8 @@ import {
   Ruler,
   Scale,
   Apple,
+  Pencil,
+  RotateCcw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
