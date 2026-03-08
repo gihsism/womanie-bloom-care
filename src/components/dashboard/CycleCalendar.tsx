@@ -63,24 +63,30 @@ const CycleCalendar = ({
   const [tempCycleLength, setTempCycleLength] = useState(initialCycleLength);
   const [isDayActionOpen, setIsDayActionOpen] = useState(false);
 
-  // ML Prediction - uses the new hook
+  // Build onboarding estimates for the prediction hook
+  const onboardingEstimates = useMemo(() => ({
+    cycleLength: manualCycleLength || initialCycleLength,
+    periodLength: initialPeriodLength,
+    lastPeriodStart: initialPeriodStart ? format(initialPeriodStart, 'yyyy-MM-dd') : undefined,
+  }), [manualCycleLength, initialCycleLength, initialPeriodLength, initialPeriodStart]);
+
+  // ML Prediction - always returns a prediction (never null)
   const prediction = useCyclePrediction({
     periodRecords,
     daySignals,
-    defaultCycleLength: manualCycleLength || initialCycleLength,
-    defaultPeriodLength: initialPeriodLength
+    onboardingEstimates,
   });
   
   // Symptom patterns for insights
   const symptomPatterns = useSymptomPatterns(
     periodRecords,
     daySignals,
-    prediction?.averageCycleLength || initialCycleLength
+    prediction.averageCycleLength
   );
 
-  // Use prediction values or fallbacks
-  const cycleLength = prediction?.averageCycleLength || manualCycleLength || initialCycleLength;
-  const periodLength = prediction?.averagePeriodLength || initialPeriodLength;
+  // Use prediction values
+  const cycleLength = prediction.averageCycleLength;
+  const periodLength = prediction.averagePeriodLength;
 
   // Load data from database on mount
   useEffect(() => {
@@ -467,10 +473,7 @@ const CycleCalendar = ({
                   <DialogHeader>
                     <DialogTitle>Cycle Settings</DialogTitle>
                     <DialogDescription>
-                      {prediction 
-                        ? `Predicted cycle length: ${prediction.averageCycleLength} days (${prediction.isRegular ? 'regular' : 'irregular'})`
-                        : 'Set your average cycle length for predictions'
-                      }
+                      {`Predicted cycle length: ${prediction.averageCycleLength} days (${prediction.isRegular ? 'regular' : 'irregular'})`}
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
@@ -486,32 +489,27 @@ const CycleCalendar = ({
                         <SelectContent>
                           {Array.from({ length: 24 }, (_, i) => i + 21).map((days) => (
                             <SelectItem key={days} value={days.toString()}>
-                              {days} days {prediction && days === prediction.averageCycleLength && '(predicted)'}
+                              {days} days {days === prediction.averageCycleLength && '(predicted)'}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                       <p className="text-xs text-muted-foreground">
-                        {prediction 
-                          ? `${prediction.dataQualityMessage}. Confidence: ${prediction.confidenceLevel}`
-                          : `Log periods to get personalized predictions. Normal cycles: 21-35 days.`
-                        }
+                        {`${prediction.dataQualityMessage}. Confidence: ${prediction.confidenceLevel}`}
                       </p>
                     </div>
                     
-                    {prediction && (
-                      <div className="text-xs text-muted-foreground space-y-1">
-                        <p>• Standard deviation: ±{prediction.standardDeviation.toFixed(1)} days</p>
-                        <p>• Cycle trend: {prediction.cycleTrend}</p>
-                        <p>• Prediction window: ±{prediction.confidenceWindow} days</p>
-                      </div>
-                    )}
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      <p>• Standard deviation: ±{prediction.standardDeviation.toFixed(1)} days</p>
+                      <p>• Cycle trend: {prediction.cycleTrend}</p>
+                      <p>• Prediction window: ±{prediction.confidenceWindow} days</p>
+                    </div>
                     
                     <div className="flex gap-2">
                       <Button 
                         variant="outline"
                         onClick={() => {
-                          setTempCycleLength(prediction?.averageCycleLength || cycleLength);
+                          setTempCycleLength(prediction.averageCycleLength);
                           setIsSettingsOpen(false);
                         }} 
                         className="flex-1"

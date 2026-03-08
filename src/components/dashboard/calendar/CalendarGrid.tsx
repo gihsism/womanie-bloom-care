@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek, addDays, parseISO } from 'date-fns';
-import { Droplet, Sparkles, Heart } from 'lucide-react';
+import { Droplet, Sparkles, Heart, CloudRain } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CyclePrediction, PeriodRecord } from '@/hooks/useCyclePrediction';
 
@@ -27,7 +27,7 @@ interface CalendarGridProps {
   } | null;
   periodDays?: Set<string>;
   markedOvulationDays?: Set<string>;
-  prediction?: CyclePrediction | null;
+  prediction: CyclePrediction;
   periodRecords?: PeriodRecord[];
 }
 
@@ -37,7 +37,6 @@ const CalendarGrid = ({
   onSelectDate,
   selectedMode,
   daySignals,
-  ovulationPrediction,
   periodDays = new Set(),
   markedOvulationDays = new Set(),
   prediction,
@@ -51,26 +50,23 @@ const CalendarGrid = ({
     return eachDayOfInterval({ start: calendarStart, end: calendarEnd });
   }, [currentMonth]);
 
-  // Build sets for multi-cycle predictions (past & future)
-  const { predictedPeriodSet, predictedOvulationSet, fertileSet } = useMemo(() => {
+  // Build prediction sets for multi-cycle display (past & future)
+  const { predictedPeriodSet, predictedOvulationSet, fertileSet, pmsSet } = useMemo(() => {
     const pPeriod = new Set<string>();
     const pOvulation = new Set<string>();
     const pFertile = new Set<string>();
-
-    if (!prediction || periodRecords.length === 0) return { predictedPeriodSet: pPeriod, predictedOvulationSet: pOvulation, fertileSet: pFertile };
+    const pPms = new Set<string>();
 
     const avgCycle = prediction.averageCycleLength;
     const avgPeriod = prediction.averagePeriodLength;
     const lutealPhase = 14;
 
-    // Sort records oldest first to find cycles
+    // Sort records oldest first
     const sorted = [...periodRecords].sort(
       (a, b) => new Date(a.period_start_date).getTime() - new Date(b.period_start_date).getTime()
     );
 
     // For each logged period, calculate ovulation & fertile window for THAT cycle
-    // Ovulation = next period start - 14 days
-    // If we know the next period start (from the next record), use that; otherwise use avgCycle
     for (let i = 0; i < sorted.length; i++) {
       const currentStart = parseISO(sorted[i].period_start_date);
       const nextStart = i < sorted.length - 1
@@ -80,6 +76,7 @@ const CalendarGrid = ({
       const ovulationDate = addDays(nextStart, -lutealPhase);
       const fertileStart = addDays(ovulationDate, -5);
       const fertileEnd = addDays(ovulationDate, 1);
+      const pmsStart = addDays(nextStart, -5);
 
       pOvulation.add(format(ovulationDate, 'yyyy-MM-dd'));
       let d = fertileStart;
@@ -87,22 +84,28 @@ const CalendarGrid = ({
         pFertile.add(format(d, 'yyyy-MM-dd'));
         d = addDays(d, 1);
       }
+      d = pmsStart;
+      while (d < nextStart) {
+        pPms.add(format(d, 'yyyy-MM-dd'));
+        d = addDays(d, 1);
+      }
     }
 
-    // Future predictions: generate up to 3 future cycles from last period
-    const lastStart = parseISO(sorted[sorted.length - 1].period_start_date);
+    // Future predictions: generate up to 3 future cycles
+    const lastStart = sorted.length > 0
+      ? parseISO(sorted[sorted.length - 1].period_start_date)
+      : addDays(new Date(), -14); // fallback for tier 1/2
+
     for (let cycle = 1; cycle <= 3; cycle++) {
       const futureStart = addDays(lastStart, avgCycle * cycle);
       const futureEnd = addDays(futureStart, avgPeriod - 1);
 
-      // Predicted period days
       let d = futureStart;
       while (d <= futureEnd) {
         pPeriod.add(format(d, 'yyyy-MM-dd'));
         d = addDays(d, 1);
       }
 
-      // Ovulation for this future cycle
       const nextCycleStart = addDays(lastStart, avgCycle * (cycle + 1));
       const ovDate = addDays(nextCycleStart, -lutealPhase);
       pOvulation.add(format(ovDate, 'yyyy-MM-dd'));
@@ -114,14 +117,22 @@ const CalendarGrid = ({
         pFertile.add(format(d, 'yyyy-MM-dd'));
         d = addDays(d, 1);
       }
+
+      // PMS for future cycle
+      const pmsStart = addDays(nextCycleStart, -5);
+      d = pmsStart;
+      while (d < nextCycleStart) {
+        pPms.add(format(d, 'yyyy-MM-dd'));
+        d = addDays(d, 1);
+      }
     }
 
-    return { predictedPeriodSet: pPeriod, predictedOvulationSet: pOvulation, fertileSet: pFertile };
+    return { predictedPeriodSet: pPeriod, predictedOvulationSet: pOvulation, fertileSet: pFertile, pmsSet: pPms };
   }, [prediction, periodRecords]);
 
   const getDayType = (date: Date) => {
     if (['pregnancy', 'menopause', 'post-menopause'].includes(selectedMode)) {
-      return { type: 'regular', bgClass: 'bg-muted/30', textClass: 'text-foreground' };
+      return { type: 'regular' as const, bgClass: 'bg-muted/30', textClass: 'text-foreground', border: false };
     }
 
     const dateKey = format(date, 'yyyy-MM-dd');
@@ -129,53 +140,40 @@ const CalendarGrid = ({
 
     // 1) User-confirmed ovulation
     if (markedOvulationDays.has(dateKey)) {
-      return { type: 'ovulation', bgClass: 'bg-secondary', textClass: 'text-secondary-foreground' };
+      return { type: 'ovulation' as const, bgClass: 'bg-secondary', textClass: 'text-secondary-foreground', border: false };
     }
 
     // 2) EWCM discharge
     if (signal?.discharge === 'ewcm') {
-      return { type: 'ovulation', bgClass: 'bg-secondary', textClass: 'text-secondary-foreground' };
+      return { type: 'ovulation' as const, bgClass: 'bg-secondary', textClass: 'text-secondary-foreground', border: false };
     }
 
     // 3) Logged period days (solid)
     if (periodDays.has(dateKey)) {
-      return { type: 'period', bgClass: 'bg-primary', textClass: 'text-primary-foreground' };
+      return { type: 'period' as const, bgClass: 'bg-primary', textClass: 'text-primary-foreground', border: false };
     }
 
-    // 4) Predicted ovulation (from calculated sets)
+    // 4) Predicted ovulation
     if (predictedOvulationSet.has(dateKey) && !periodDays.has(dateKey)) {
-      return { type: 'predicted-ovulation', bgClass: 'bg-secondary/60', textClass: 'text-secondary-foreground' };
+      return { type: 'predicted-ovulation' as const, bgClass: 'bg-secondary/50', textClass: 'text-secondary-foreground', border: true };
     }
 
-    // 5) Predicted period (outline, not filled)
+    // 5) Predicted period (dashed border)
     if (predictedPeriodSet.has(dateKey)) {
-      return {
-        type: 'predicted-period',
-        bgClass: 'bg-primary/15 border border-primary/40',
-        textClass: 'text-foreground'
-      };
+      return { type: 'predicted-period' as const, bgClass: 'bg-primary/15', textClass: 'text-foreground', border: true };
     }
 
-    // 6) Fertile window (from calculated sets)
+    // 6) Fertile window
     if (fertileSet.has(dateKey) && !periodDays.has(dateKey)) {
-      return { type: 'fertile', bgClass: 'bg-accent/50', textClass: 'text-foreground' };
+      return { type: 'fertile' as const, bgClass: 'bg-accent/50', textClass: 'text-foreground', border: false };
     }
 
-    // 7) Fallback to external ovulation prediction
-    if (ovulationPrediction?.predictedOvulationDate) {
-      const predictedOvDate = new Date(ovulationPrediction.predictedOvulationDate);
-      const fertileStart = ovulationPrediction.fertileWindowStart ? new Date(ovulationPrediction.fertileWindowStart) : null;
-      const fertileEnd = ovulationPrediction.fertileWindowEnd ? new Date(ovulationPrediction.fertileWindowEnd) : null;
-
-      if (isSameDay(date, predictedOvDate)) {
-        return { type: 'predicted-ovulation', bgClass: 'bg-secondary/50', textClass: 'text-foreground' };
-      }
-      if (fertileStart && fertileEnd && date >= fertileStart && date <= fertileEnd) {
-        return { type: 'fertile', bgClass: 'bg-accent/50', textClass: 'text-foreground' };
-      }
+    // 7) PMS window
+    if (pmsSet.has(dateKey) && !periodDays.has(dateKey)) {
+      return { type: 'pms' as const, bgClass: 'bg-amber-100 dark:bg-amber-900/30', textClass: 'text-foreground', border: false };
     }
 
-    return { type: 'regular', bgClass: 'bg-transparent', textClass: 'text-foreground' };
+    return { type: 'regular' as const, bgClass: 'bg-transparent', textClass: 'text-foreground', border: false };
   };
 
   const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -216,6 +214,8 @@ const CalendarGrid = ({
                 "hover:scale-105 active:scale-95",
                 inCurrentMonth ? 'opacity-100' : 'opacity-30',
                 dayInfo.bgClass,
+                dayInfo.border && 'border-2 border-dashed border-primary/40',
+                dayInfo.type === 'predicted-ovulation' && 'border-2 border-dashed border-secondary/60',
                 isToday && dayInfo.type === 'regular' && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
                 isSelected && 'ring-2 ring-foreground ring-offset-2 ring-offset-background'
               )}
@@ -233,6 +233,9 @@ const CalendarGrid = ({
               )}
               {dayInfo.type === 'fertile' && (
                 <Heart className="absolute -top-0.5 -right-0.5 h-3 w-3 text-accent-foreground" />
+              )}
+              {dayInfo.type === 'pms' && (
+                <CloudRain className="absolute -top-0.5 -right-0.5 h-3 w-3 text-amber-600 dark:text-amber-400" />
               )}
 
               {/* Data indicator dots */}

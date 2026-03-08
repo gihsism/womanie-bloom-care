@@ -2,7 +2,7 @@ import { Sparkles, TrendingUp, TrendingDown, AlertCircle, Info } from 'lucide-re
 import { cn } from '@/lib/utils';
 import { addDays, differenceInDays, format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
-import { CyclePrediction, SymptomPattern, getPredictionMessage } from '@/hooks/useCyclePrediction';
+import { CyclePrediction, SymptomPattern } from '@/hooks/useCyclePrediction';
 
 interface TodayStatusCardProps {
   cycleDay: number;
@@ -10,7 +10,7 @@ interface TodayStatusCardProps {
   periodLength: number;
   lastPeriodStart: Date;
   selectedMode: string;
-  prediction?: CyclePrediction | null;
+  prediction: CyclePrediction;
   symptomPatterns?: SymptomPattern[];
 }
 
@@ -25,66 +25,47 @@ const TodayStatusCard = ({
 }: TodayStatusCardProps) => {
   const today = new Date();
 
-  // Use prediction values if available, otherwise fall back to simple calculations
-  const ovulationCycleDay = prediction
-    ? differenceInDays(prediction.predictedOvulationDate, lastPeriodStart) + 1
-    : cycleLength - 13;
+  const ovulationCycleDay = differenceInDays(prediction.predictedOvulationDate, lastPeriodStart) + 1;
+  const daysToNextPeriod = Math.max(0, Math.ceil((prediction.predictedPeriodStart.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
+  const isInFertileWindow = today >= prediction.fertileWindowStart && today <= prediction.fertileWindowEnd;
+  const isOnPeriod = cycleDay <= periodLength;
 
-  const daysToNextPeriod = prediction
-    ? Math.max(0, Math.ceil((prediction.predictedPeriodStart.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)))
-    : cycleLength >= cycleDay ? (cycleLength + 1) - cycleDay : 1;
-
-  const isInFertileWindow = prediction
-    ? today >= prediction.fertileWindowStart && today <= prediction.fertileWindowEnd
-    : cycleDay >= ovulationCycleDay - 4 && cycleDay <= ovulationCycleDay;
-    
-  // Check if today is actually a logged period day
-  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-  const isOnPeriod = prediction
-    ? today >= new Date(today.getFullYear(), today.getMonth(), today.getDate()) && cycleDay <= periodLength
-    : cycleDay <= periodLength;
-
-  // For non-menstrual modes, show simplified status
   if (['pregnancy', 'menopause', 'post-menopause'].includes(selectedMode)) {
     return null;
   }
 
-  // Get confidence badge color
   const getConfidenceBadgeVariant = () => {
-    if (!prediction) return 'secondary';
     switch (prediction.confidenceLevel) {
-      case 'high': return 'default';
-      case 'medium': return 'secondary';
-      case 'low': return 'outline';
+      case 'high': return 'default' as const;
+      case 'medium': return 'secondary' as const;
+      case 'low': return 'outline' as const;
     }
   };
 
-  // Determine what to show based on cycle phase
+  const getTierBadgeColor = () => {
+    switch (prediction.tier) {
+      case 1: return 'bg-muted text-muted-foreground';
+      case 2: return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300';
+      case 3: return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300';
+      case 4: return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300';
+    }
+  };
+
   const getStatusText = () => {
     if (isOnPeriod) {
-      return { main: cycleDay, sub: `day of period` };
+      return { main: cycleDay, sub: 'day of period' };
     }
     if (isInFertileWindow) {
-      if (prediction) {
-        const daysToOvulation = differenceInDays(prediction.predictedOvulationDate, today);
-        if (daysToOvulation === 0) {
-          return { main: 'Ovulation', sub: 'High chance of pregnancy' };
-        }
-        return { main: Math.max(0, daysToOvulation), sub: 'days until ovulation' };
-      }
-
-      const daysToOvulation = ovulationCycleDay - cycleDay;
+      const daysToOvulation = differenceInDays(prediction.predictedOvulationDate, today);
       if (daysToOvulation === 0) {
         return { main: 'Ovulation', sub: 'High chance of pregnancy' };
       }
-      return { main: daysToOvulation, sub: 'days until ovulation' };
+      return { main: Math.max(0, daysToOvulation), sub: 'days until ovulation' };
     }
     return { main: daysToNextPeriod, sub: 'days until next period' };
   };
 
-  // Get trend icon
   const getTrendIcon = () => {
-    if (!prediction) return null;
     switch (prediction.cycleTrend) {
       case 'lengthening':
         return <TrendingUp className="h-3 w-3 text-amber-500" />;
@@ -97,9 +78,8 @@ const TodayStatusCard = ({
     }
   };
 
-  // Get predicted symptoms for today
   const getTodaySymptomPredictions = () => {
-    return symptomPatterns.filter(pattern => 
+    return symptomPatterns.filter(pattern =>
       pattern.typicalDays.includes(cycleDay) && pattern.frequency >= 70
     );
   };
@@ -118,34 +98,37 @@ const TodayStatusCard = ({
           <div className="text-muted-foreground text-sm">
             {status.sub}
           </div>
-          
-          {/* Prediction confidence indicator */}
-          {prediction && (
-            <div className="flex items-center justify-center gap-2 mt-2">
-              <Badge variant={getConfidenceBadgeVariant()} className="text-xs">
-                {prediction.confidenceLevel} confidence
-              </Badge>
-              {getTrendIcon()}
-            </div>
-          )}
+
+          {/* Tier label badge */}
+          <div className="flex items-center justify-center gap-2 mt-2 flex-wrap">
+            <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-medium", getTierBadgeColor())}>
+              {prediction.tierLabel}
+            </span>
+          </div>
+
+          {/* Confidence & trend */}
+          <div className="flex items-center justify-center gap-2 mt-1.5">
+            <Badge variant={getConfidenceBadgeVariant()} className="text-xs">
+              {prediction.confidenceLevel} confidence
+            </Badge>
+            {getTrendIcon()}
+          </div>
         </div>
 
-        {/* Pagination dots - decorative like the reference app */}
+        {/* Pagination dots */}
         <div className="flex justify-center gap-1.5 mb-4">
           <div className="w-2 h-2 rounded-full bg-primary" />
           <div className="w-2 h-2 rounded-full bg-muted-foreground/30" />
         </div>
-        
+
         {/* Next period prediction */}
-        {prediction && (
-          <div className="text-center text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">Next period: </span>
-            {prediction.isRegular 
-              ? format(prediction.predictedPeriodStart, 'MMM d')
-              : `${format(addDays(prediction.predictedPeriodStart, -prediction.confidenceWindow), 'MMM d')}-${format(addDays(prediction.predictedPeriodStart, prediction.confidenceWindow), 'd')}`
-            }
-          </div>
-        )}
+        <div className="text-center text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">Next period: </span>
+          {prediction.isRegular
+            ? format(prediction.predictedPeriodStart, 'MMM d')
+            : `${format(addDays(prediction.predictedPeriodStart, -prediction.confidenceWindow), 'MMM d')}-${format(addDays(prediction.predictedPeriodStart, prediction.confidenceWindow), 'd')}`
+          }
+        </div>
       </div>
 
       {/* Fertility info card */}
@@ -176,40 +159,38 @@ const TodayStatusCard = ({
         </div>
       </div>
 
-      {/* Cycle insights card - only show if we have predictions */}
-      {prediction && (prediction.cyclesLogged >= 3 || prediction.currentCycleAnomaly) && (
+      {/* Cycle insights card */}
+      {(prediction.cyclesLogged >= 3 || prediction.currentCycleAnomaly) && (
         <div className="bg-card rounded-2xl border p-4 space-y-3">
           <div className="flex items-center gap-2">
             <Info className="h-4 w-4 text-muted-foreground" />
             <span className="font-medium text-sm">Cycle Insights</span>
           </div>
-          
+
           <div className="space-y-2 text-sm text-muted-foreground">
-            {/* Cycle regularity */}
-            <p>
-              Your cycles are <span className="font-medium text-foreground">
-                {prediction.isRegular ? 'regular' : 'somewhat irregular'}
-              </span> (±{prediction.standardDeviation.toFixed(0)} days)
-            </p>
-            
-            {/* Trend info */}
+            {prediction.isRegular !== undefined && prediction.cyclesLogged >= 3 && (
+              <p>
+                Your cycles are <span className="font-medium text-foreground">
+                  {prediction.isRegular ? 'regular' : 'somewhat irregular'}
+                </span> (±{prediction.standardDeviation.toFixed(0)} days)
+              </p>
+            )}
+
             {prediction.cycleTrend !== 'stable' && (
               <p className="flex items-center gap-1">
                 {getTrendIcon()}
-                Cycles are {prediction.cycleTrend === 'lengthening' ? 'getting longer' : 
+                Cycles are {prediction.cycleTrend === 'lengthening' ? 'getting longer' :
                   prediction.cycleTrend === 'shortening' ? 'getting shorter' : 'irregular'}
               </p>
             )}
-            
-            {/* Anomaly warning */}
+
             {prediction.currentCycleAnomaly && prediction.anomalyMessage && (
               <p className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
                 <AlertCircle className="h-3 w-3" />
                 {prediction.anomalyMessage}
               </p>
             )}
-            
-            {/* Data quality */}
+
             <p className="text-xs">
               {prediction.dataQualityMessage}
             </p>

@@ -11,9 +11,10 @@ const CalendarLegend = ({ selectedMode }: CalendarLegendProps) => {
 
   const legendItems = [
     { label: 'Period', bgClass: 'bg-primary' },
-    { label: 'Predicted Period', bgClass: 'bg-primary/15 border border-primary/40' },
+    { label: 'Predicted', bgClass: 'bg-primary/15 border-2 border-dashed border-primary/40' },
     { label: 'Fertile', bgClass: 'bg-accent' },
     { label: 'Ovulation', bgClass: 'bg-secondary' },
+    { label: 'PMS', bgClass: 'bg-amber-100 dark:bg-amber-900/30' },
   ];
 
   const signalItems = [
