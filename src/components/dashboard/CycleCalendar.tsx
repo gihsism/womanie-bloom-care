@@ -22,6 +22,7 @@ interface CycleCalendarProps {
   cycleLength?: number;
   periodLength?: number;
   selectedMode?: string;
+  pregnancyDueDate?: Date | null;
   ovulationPrediction?: {
     predictedOvulationDate?: string;
     fertileWindowStart?: string;
@@ -36,6 +37,7 @@ const CycleCalendar = ({
   cycleLength: initialCycleLength = 28,
   periodLength: initialPeriodLength = 5,
   selectedMode = 'menstrual-cycle',
+  pregnancyDueDate,
 }: CycleCalendarProps) => {
   const { toast } = useToast();
   
@@ -538,6 +540,7 @@ const CycleCalendar = ({
           markedOvulationDays={markedOvulationDays}
           prediction={prediction}
           periodRecords={periodRecords}
+          pregnancyDueDate={pregnancyDueDate}
         />
 
         <CalendarLegend selectedMode={selectedMode} />

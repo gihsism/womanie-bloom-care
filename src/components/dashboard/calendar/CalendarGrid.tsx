@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek, addDays, parseISO } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek, addDays, parseISO, differenceInDays } from 'date-fns';
 import { Droplet, Sparkles, Heart, CloudRain } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CyclePrediction, PeriodRecord, isActivePeriod, getEffectiveEndDate } from '@/hooks/useCyclePrediction';
@@ -25,6 +25,7 @@ interface CalendarGridProps {
   markedOvulationDays?: Set<string>;
   prediction: CyclePrediction;
   periodRecords?: PeriodRecord[];
+  pregnancyDueDate?: Date | null;
 }
 
 const CalendarGrid = ({
@@ -37,7 +38,8 @@ const CalendarGrid = ({
   predictedPeriodDays = new Set(),
   markedOvulationDays = new Set(),
   prediction,
-  periodRecords = []
+  periodRecords = [],
+  pregnancyDueDate
 }: CalendarGridProps) => {
   const calendarDays = useMemo(() => {
     const monthStart = startOfMonth(currentMonth);
@@ -109,6 +111,25 @@ const CalendarGrid = ({
     return { futurePeriodSet: fPeriod, predictedOvulationSet: pOvulation, fertileSet: pFertile, pmsSet: pPms };
   }, [prediction, periodRecords]);
 
+  const isPregnancyMode = selectedMode === 'pregnancy' && pregnancyDueDate;
+  const gestationStart = pregnancyDueDate ? addDays(pregnancyDueDate, -280) : null;
+
+  const getPregnancyWeek = (date: Date): number | null => {
+    if (!gestationStart) return null;
+    const days = differenceInDays(date, gestationStart);
+    if (days < 0) return null;
+    return Math.floor(days / 7);
+  };
+
+  // Group calendar days into weeks (rows of 7)
+  const calendarWeeks = useMemo(() => {
+    const weeks: Date[][] = [];
+    for (let i = 0; i < calendarDays.length; i += 7) {
+      weeks.push(calendarDays.slice(i, i + 7));
+    }
+    return weeks;
+  }, [calendarDays]);
+
   const today = new Date();
 
   const getDayType = (date: Date) => {
@@ -169,7 +190,10 @@ const CalendarGrid = ({
 
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-7 gap-1">
+      <div className={cn("grid gap-1", isPregnancyMode ? "grid-cols-[2rem_repeat(7,1fr)]" : "grid-cols-7")}>
+        {isPregnancyMode && (
+          <div className="text-center text-[10px] font-medium text-muted-foreground py-2">Wk</div>
+        )}
         {weekDays.map((day, i) => (
           <div key={i} className="text-center text-xs font-medium text-muted-foreground py-2">
             {day}
@@ -177,70 +201,94 @@ const CalendarGrid = ({
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-1">
-        {calendarDays.map((date) => {
-          const dayInfo = getDayType(date);
-          const isToday = isSameDay(date, today);
-          const inCurrentMonth = isSameMonth(date, currentMonth);
-          const isSelected = selectedDate && isSameDay(date, selectedDate);
-          const dateKey = format(date, 'yyyy-MM-dd');
-          const hasSignals = daySignals[dateKey];
-          const hasAnyData = hasSignals && (
-            hasSignals.symptoms.length > 0 ||
-            hasSignals.intercourse.length > 0 ||
-            hasSignals.mood.length > 0
-          );
+      <div className="space-y-1">
+        {calendarWeeks.map((week, weekIdx) => {
+          // Get pregnancy week from the middle of the row (Wednesday)
+          const midDay = week[3] || week[0];
+          const pregWeek = isPregnancyMode ? getPregnancyWeek(midDay) : null;
 
           return (
-            <button
-              key={date.toISOString()}
-              onClick={() => onSelectDate(date)}
-              className={cn(
-                "relative aspect-square flex flex-col items-center justify-center rounded-full transition-all duration-200",
-                "hover:scale-105 active:scale-95",
-                inCurrentMonth ? 'opacity-100' : 'opacity-30',
-                dayInfo.bgClass,
-                dayInfo.dashed && 'border-2 border-dashed border-primary/40',
-                dayInfo.type === 'predicted-ovulation' && 'border-2 border-dashed border-secondary/60',
-                isToday && dayInfo.type === 'regular' && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
-                isSelected && 'ring-2 ring-foreground ring-offset-2 ring-offset-background'
-              )}
-            >
-              <span className={cn("text-sm font-semibold", dayInfo.textClass)}>
-                {format(date, 'd')}
-              </span>
-
-              {/* Active period pulsing dot */}
-              {dayInfo.active && (
-                <span className="absolute top-0 right-0 flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
-                </span>
-              )}
-
-              {/* Phase icons */}
-              {!dayInfo.active && (dayInfo.type === 'ovulation' || dayInfo.type === 'predicted-ovulation') && (
-                <Sparkles className="absolute -top-0.5 -right-0.5 h-3 w-3 text-secondary-foreground" />
-              )}
-              {!dayInfo.active && dayInfo.type === 'period' && (
-                <Droplet className="absolute -top-0.5 -right-0.5 h-3 w-3 text-primary-foreground fill-current" />
-              )}
-              {dayInfo.type === 'fertile' && (
-                <Heart className="absolute -top-0.5 -right-0.5 h-3 w-3 text-accent-foreground" />
-              )}
-              {dayInfo.type === 'pms' && (
-                <CloudRain className="absolute -top-0.5 -right-0.5 h-3 w-3 text-amber-600 dark:text-amber-400" />
-              )}
-
-              {/* Data indicator dots */}
-              {hasAnyData && (
-                <div className="absolute -bottom-1 flex gap-0.5">
-                  {hasSignals.symptoms.length > 0 && <div className="w-1.5 h-1.5 rounded-full bg-destructive" />}
-                  {hasSignals.intercourse.length > 0 && <div className="w-1.5 h-1.5 rounded-full bg-primary/70" />}
-                  {hasSignals.mood.length > 0 && <div className="w-1.5 h-1.5 rounded-full bg-secondary/70" />}
+            <div key={weekIdx} className={cn("grid gap-1", isPregnancyMode ? "grid-cols-[2rem_repeat(7,1fr)]" : "grid-cols-7")}>
+              {isPregnancyMode && (
+                <div className="flex items-center justify-center">
+                  {pregWeek !== null && pregWeek >= 0 && pregWeek <= 42 ? (
+                    <span className={cn(
+                      "text-[10px] font-bold rounded-md px-1 py-0.5",
+                      pregWeek === getPregnancyWeek(today) ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+                    )}>
+                      {pregWeek}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-muted-foreground/30">–</span>
+                  )}
                 </div>
               )}
-            </button>
+              {week.map((date) => {
+                const dayInfo = getDayType(date);
+                const isToday = isSameDay(date, today);
+                const inCurrentMonth = isSameMonth(date, currentMonth);
+                const isSelected = selectedDate && isSameDay(date, selectedDate);
+                const dateKey = format(date, 'yyyy-MM-dd');
+                const hasSignals = daySignals[dateKey];
+                const hasAnyData = hasSignals && (
+                  hasSignals.symptoms.length > 0 ||
+                  hasSignals.intercourse.length > 0 ||
+                  hasSignals.mood.length > 0
+                );
+
+                return (
+                  <button
+                    key={date.toISOString()}
+                    onClick={() => onSelectDate(date)}
+                    className={cn(
+                      "relative aspect-square flex flex-col items-center justify-center rounded-full transition-all duration-200",
+                      "hover:scale-105 active:scale-95",
+                      inCurrentMonth ? 'opacity-100' : 'opacity-30',
+                      dayInfo.bgClass,
+                      dayInfo.dashed && 'border-2 border-dashed border-primary/40',
+                      dayInfo.type === 'predicted-ovulation' && 'border-2 border-dashed border-secondary/60',
+                      isToday && dayInfo.type === 'regular' && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
+                      isSelected && 'ring-2 ring-foreground ring-offset-2 ring-offset-background'
+                    )}
+                  >
+                    <span className={cn("text-sm font-semibold", dayInfo.textClass)}>
+                      {format(date, 'd')}
+                    </span>
+
+                    {/* Active period pulsing dot */}
+                    {dayInfo.active && (
+                      <span className="absolute top-0 right-0 flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
+                      </span>
+                    )}
+
+                    {/* Phase icons */}
+                    {!dayInfo.active && (dayInfo.type === 'ovulation' || dayInfo.type === 'predicted-ovulation') && (
+                      <Sparkles className="absolute -top-0.5 -right-0.5 h-3 w-3 text-secondary-foreground" />
+                    )}
+                    {!dayInfo.active && dayInfo.type === 'period' && (
+                      <Droplet className="absolute -top-0.5 -right-0.5 h-3 w-3 text-primary-foreground fill-current" />
+                    )}
+                    {dayInfo.type === 'fertile' && (
+                      <Heart className="absolute -top-0.5 -right-0.5 h-3 w-3 text-accent-foreground" />
+                    )}
+                    {dayInfo.type === 'pms' && (
+                      <CloudRain className="absolute -top-0.5 -right-0.5 h-3 w-3 text-amber-600 dark:text-amber-400" />
+                    )}
+
+                    {/* Data indicator dots */}
+                    {hasAnyData && (
+                      <div className="absolute -bottom-1 flex gap-0.5">
+                        {hasSignals.symptoms.length > 0 && <div className="w-1.5 h-1.5 rounded-full bg-destructive" />}
+                        {hasSignals.intercourse.length > 0 && <div className="w-1.5 h-1.5 rounded-full bg-primary/70" />}
+                        {hasSignals.mood.length > 0 && <div className="w-1.5 h-1.5 rounded-full bg-secondary/70" />}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           );
         })}
       </div>
