@@ -38,7 +38,8 @@ const CalendarGrid = ({
   predictedPeriodDays = new Set(),
   markedOvulationDays = new Set(),
   prediction,
-  periodRecords = []
+  periodRecords = [],
+  pregnancyDueDate
 }: CalendarGridProps) => {
   const calendarDays = useMemo(() => {
     const monthStart = startOfMonth(currentMonth);
