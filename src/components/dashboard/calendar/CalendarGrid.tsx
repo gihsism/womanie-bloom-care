@@ -25,6 +25,7 @@ interface CalendarGridProps {
   markedOvulationDays?: Set<string>;
   prediction: CyclePrediction;
   periodRecords?: PeriodRecord[];
+  pregnancyDueDate?: Date | null;
 }
 
 const CalendarGrid = ({
