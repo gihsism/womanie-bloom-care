@@ -470,6 +470,22 @@ const CycleCalendar = ({
                         {`${prediction.dataQualityMessage}. Confidence: ${prediction.confidenceLevel}`}
                       </p>
                     </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Average Period Length</label>
+                      <Select value={tempPeriodLength.toString()} onValueChange={(v) => setTempPeriodLength(parseInt(v))}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 10 }, (_, i) => i + 2).map((days) => (
+                            <SelectItem key={days} value={days.toString()}>
+                              {days} days {days === prediction.averagePeriodLength && '(predicted)'}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">
+                        How many days your period typically lasts
+                      </p>
+                    </div>
                     <div className="text-xs text-muted-foreground space-y-1">
                       <p>• Standard deviation: ±{prediction.standardDeviation.toFixed(1)} days</p>
                       <p>• Cycle trend: {prediction.cycleTrend}</p>
