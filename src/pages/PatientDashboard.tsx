@@ -465,84 +465,95 @@ const PatientDashboard = () => {
 
                 {/* Cycle Health - Takes 1 column on the right */}
                 <div className="lg:col-span-1 space-y-4">
-                  {/* Hormone & Mood Card */}
-                  <Card className="p-4">
-                    <h3 className="text-lg font-bold mb-4">Cycle Health</h3>
-                    <div className="space-y-4">
-                      {healthStats.map((stat) => {
-                        const IconComponent = stat.icon;
-                        return (
-                          <div key={stat.title} className="flex items-start gap-3 pb-3 border-b last:border-0 last:pb-0">
-                            <IconComponent className={`h-5 w-5 ${stat.color} mt-1`} />
-                            <div className="flex-1">
-                              <div className="text-sm font-medium text-muted-foreground mb-1">
-                                {stat.title}
+                  {periodData ? (
+                    <>
+                      {/* Hormone & Mood Card */}
+                      <Card className="p-4">
+                        <h3 className="text-lg font-bold mb-4">Cycle Health</h3>
+                        <div className="space-y-4">
+                          {healthStats.map((stat) => {
+                            const IconComponent = stat.icon;
+                            return (
+                              <div key={stat.title} className="flex items-start gap-3 pb-3 border-b last:border-0 last:pb-0">
+                                <IconComponent className={`h-5 w-5 ${stat.color} mt-1`} />
+                                <div className="flex-1">
+                                  <div className="text-sm font-medium text-muted-foreground mb-1">
+                                    {stat.title}
+                                  </div>
+                                  <div className="text-lg font-bold mb-1">{stat.value}</div>
+                                  <div className="text-xs text-muted-foreground">{stat.subtitle}</div>
+                                </div>
                               </div>
-                              <div className="text-lg font-bold mb-1">{stat.value}</div>
-                              <div className="text-xs text-muted-foreground">{stat.subtitle}</div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </Card>
+                            );
+                          })}
+                        </div>
+                      </Card>
 
-                  {/* Detailed Statistics Card */}
-                  <Card className="p-4">
-                    <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
-                      Cycle Phases
-                    </h4>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-start gap-2 flex-1">
-                          <Sparkles className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
-                          <div className="flex-1">
-                            <div className="text-xs font-medium text-muted-foreground">Next Ovulation</div>
-                            <p className="text-[10px] text-muted-foreground mt-0.5">
-                              {periodData ? (() => {
+                      {/* Detailed Statistics Card */}
+                      <Card className="p-4">
+                        <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
+                          Cycle Phases
+                        </h4>
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-start gap-2 flex-1">
+                              <Sparkles className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                              <div className="flex-1">
+                                <div className="text-xs font-medium text-muted-foreground">Next Ovulation</div>
+                                <p className="text-[10px] text-muted-foreground mt-0.5">
+                                  {(() => {
+                                    const now = new Date();
+                                    let nextOv = addDays(periodData.lastPeriodStart, periodData.cycleLength - 13);
+                                    while (nextOv < now) nextOv = addDays(nextOv, periodData.cycleLength);
+                                    return `${Math.ceil((nextOv.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))} days`;
+                                  })()}
+                                </p>
+                              </div>
+                            </div>
+                            <span className="text-sm font-bold whitespace-nowrap">
+                              {(() => {
                                 const now = new Date();
                                 let nextOv = addDays(periodData.lastPeriodStart, periodData.cycleLength - 13);
                                 while (nextOv < now) nextOv = addDays(nextOv, periodData.cycleLength);
-                                return `${Math.ceil((nextOv.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))} days`;
-                              })() : 'N/A'}
-                            </p>
+                                return format(nextOv, 'MMM d');
+                              })()}
+                            </span>
                           </div>
-                        </div>
-                        <span className="text-sm font-bold whitespace-nowrap">
-                          {periodData ? (() => {
-                            const now = new Date();
-                            let nextOv = addDays(periodData.lastPeriodStart, periodData.cycleLength - 13);
-                            while (nextOv < now) nextOv = addDays(nextOv, periodData.cycleLength);
-                            return format(nextOv, 'MMM d');
-                          })() : 'N/A'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-start gap-2 flex-1">
-                          <Droplet className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
-                          <div className="flex-1">
-                            <div className="text-xs font-medium text-muted-foreground">Next Period</div>
-                            <p className="text-[10px] text-muted-foreground mt-0.5">
-                              {periodData ? (() => {
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-start gap-2 flex-1">
+                              <Droplet className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                              <div className="flex-1">
+                                <div className="text-xs font-medium text-muted-foreground">Next Period</div>
+                                <p className="text-[10px] text-muted-foreground mt-0.5">
+                                  {(() => {
+                                    const now = new Date();
+                                    let nextP = addDays(periodData.lastPeriodStart, periodData.cycleLength);
+                                    while (nextP < now) nextP = addDays(nextP, periodData.cycleLength);
+                                    return `${Math.ceil((nextP.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))} days`;
+                                  })()}
+                                </p>
+                              </div>
+                            </div>
+                            <span className="text-sm font-bold whitespace-nowrap">
+                              {(() => {
                                 const now = new Date();
                                 let nextP = addDays(periodData.lastPeriodStart, periodData.cycleLength);
                                 while (nextP < now) nextP = addDays(nextP, periodData.cycleLength);
-                                return `${Math.ceil((nextP.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))} days`;
-                              })() : 'N/A'}
-                            </p>
+                                return format(nextP, 'MMM d');
+                              })()}
+                            </span>
                           </div>
                         </div>
-                        <span className="text-sm font-bold whitespace-nowrap">
-                          {periodData ? (() => {
-                            const now = new Date();
-                            let nextP = addDays(periodData.lastPeriodStart, periodData.cycleLength);
-                            while (nextP < now) nextP = addDays(nextP, periodData.cycleLength);
-                            return format(nextP, 'MMM d');
-                          })() : 'N/A'}
-                        </span>
-                      </div>
-                    </div>
-                  </Card>
+                      </Card>
+                    </>
+                  ) : (
+                    <Card className="p-4 text-center">
+                      <h3 className="text-lg font-bold mb-2">Cycle Health</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Mark your first period day on the calendar to see cycle insights and predictions here.
+                      </p>
+                    </Card>
+                  )}
                 </div>
               </div>
             </div>
