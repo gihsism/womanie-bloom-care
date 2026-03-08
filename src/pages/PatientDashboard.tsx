@@ -574,6 +574,7 @@ const PatientDashboard = () => {
                     <PregnancyTracker
                       dueDate={pregnancyDueDate}
                       onSetDueDate={handleSetPregnancyDueDate}
+                      onResetPregnancy={handleResetPregnancy}
                     />
                     {pregnancyDueDate && (
                       <CycleCalendar
