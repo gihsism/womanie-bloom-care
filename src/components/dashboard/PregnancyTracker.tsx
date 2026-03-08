@@ -65,6 +65,25 @@ const getWeekData = (week: number) => {
   return WEEK_DATA[bestKey] || WEEK_DATA[4];
 };
 
+const WEEK_IMAGES: Record<number, string> = {
+  4: babyWeek04, 5: babyWeek04, 6: babyWeek04,
+  7: babyWeek07, 8: babyWeek07, 9: babyWeek07, 10: babyWeek07, 11: babyWeek07,
+  12: babyWeek12, 13: babyWeek12, 14: babyWeek12, 15: babyWeek12,
+  16: babyWeek16, 17: babyWeek16, 18: babyWeek16, 19: babyWeek16,
+  20: babyWeek20, 21: babyWeek20, 22: babyWeek20, 23: babyWeek20,
+  24: babyWeek24, 25: babyWeek24, 26: babyWeek24, 27: babyWeek24,
+  28: babyWeek28, 29: babyWeek28, 30: babyWeek28, 31: babyWeek28,
+  32: babyWeek32, 33: babyWeek32, 34: babyWeek32, 35: babyWeek32,
+  36: babyWeek36, 37: babyWeek36, 38: babyWeek36, 39: babyWeek36,
+  40: babyWeek40,
+};
+
+const getWeekImage = (week: number): string => {
+  if (week <= 3) return babyWeek04;
+  if (week >= 40) return babyWeek40;
+  return WEEK_IMAGES[week] || babyWeek36;
+};
+
 // ─── Pregnancy symptoms by trimester ───
 const PREGNANCY_SYMPTOMS: Record<string, { label: string; icon: string }[]> = {
   first: [
