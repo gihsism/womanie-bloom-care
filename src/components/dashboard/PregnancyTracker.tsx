@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import BabyImage3DOverlay from './BabyImage3DOverlay';
 
 // Baby development illustrations
@@ -44,6 +45,8 @@ import {
   Ruler,
   Scale,
   Apple,
+  Pencil,
+  RotateCcw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -150,15 +153,20 @@ const PREGNANCY_SYMPTOMS: Record<string, { label: string; icon: string }[]> = {
 interface PregnancyTrackerProps {
   dueDate: Date | null;
   onSetDueDate: (date: Date) => void;
+  onResetPregnancy?: () => void;
 }
 
-const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
+const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy }: PregnancyTrackerProps) => {
   const [showFullImage, setShowFullImage] = useState(false);
   const [dueDateInput, setDueDateInput] = useState('');
   const [lmpInput, setLmpInput] = useState('');
   const [setupMethod, setSetupMethod] = useState<'due_date' | 'lmp' | 'ivf'>('due_date');
   const [ivfTransferInput, setIvfTransferInput] = useState('');
   const [ivfEmbryoAge, setIvfEmbryoAge] = useState<3 | 5>(5);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editDueDateInput, setEditDueDateInput] = useState('');
+  const [editWeekInput, setEditWeekInput] = useState('');
+  const [editMethod, setEditMethod] = useState<'due_date' | 'week'>('due_date');
 
   const pregnancyInfo = useMemo(() => {
     if (!dueDate) return null;
@@ -349,7 +357,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
         </div>
       </div>
 
-      {/* Due date info */}
+      {/* Due date info + edit */}
       <Card className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -359,8 +367,110 @@ const PregnancyTracker = ({ dueDate, onSetDueDate }: PregnancyTrackerProps) => {
               <div className="text-lg font-bold">{format(dueDate, 'MMMM d, yyyy')}</div>
             </div>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5"
+            onClick={() => {
+              setEditDueDateInput(format(dueDate, 'yyyy-MM-dd'));
+              setEditWeekInput(String(weeksPregnant));
+              setEditMethod('due_date');
+              setEditDialogOpen(true);
+            }}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            Edit
+          </Button>
         </div>
       </Card>
+
+      {/* Edit Pregnancy Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Edit Pregnancy Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="flex gap-2">
+              <Button
+                variant={editMethod === 'due_date' ? 'default' : 'outline'}
+                size="sm"
+                className="flex-1"
+                onClick={() => setEditMethod('due_date')}
+              >
+                Change Due Date
+              </Button>
+              <Button
+                variant={editMethod === 'week' ? 'default' : 'outline'}
+                size="sm"
+                className="flex-1"
+                onClick={() => setEditMethod('week')}
+              >
+                Set by Week
+              </Button>
+            </div>
+
+            {editMethod === 'due_date' ? (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">New Due Date</label>
+                <Input
+                  type="date"
+                  value={editDueDateInput}
+                  onChange={(e) => setEditDueDateInput(e.target.value)}
+                />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Current Week of Pregnancy (1-42)</label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="42"
+                  value={editWeekInput}
+                  onChange={(e) => setEditWeekInput(e.target.value)}
+                  placeholder="e.g. 20"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Due date will be calculated automatically.
+                </p>
+              </div>
+            )}
+
+            {onResetPregnancy && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full gap-2 text-destructive border-destructive/30 hover:bg-destructive/10"
+                onClick={() => {
+                  onResetPregnancy();
+                  setEditDialogOpen(false);
+                }}
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                End / Reset Pregnancy Tracking
+              </Button>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                if (editMethod === 'due_date' && editDueDateInput) {
+                  onSetDueDate(parseISO(editDueDateInput));
+                } else if (editMethod === 'week' && editWeekInput) {
+                  const week = Math.max(1, Math.min(42, Number(editWeekInput)));
+                  const newDueDate = addDays(new Date(), (40 - week) * 7);
+                  onSetDueDate(newDueDate);
+                }
+                setEditDialogOpen(false);
+              }}
+              disabled={editMethod === 'due_date' ? !editDueDateInput : !editWeekInput}
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Baby development */}
       <Card className="p-4 space-y-3">

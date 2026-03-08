@@ -221,6 +221,21 @@ const PatientDashboard = () => {
     }
   };
 
+  const handleResetPregnancy = async () => {
+    setPregnancyDueDate(null);
+    if (user) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({ pregnancy_due_date: null })
+          .eq('id', user.id);
+        toast({ title: 'Pregnancy tracking reset', description: 'You can set it up again anytime.' });
+      } catch (error) {
+        console.error('Error resetting pregnancy:', error);
+      }
+    }
+  };
+
   const handleSetIVFStart = async (date: Date, phase: string) => {
     setIvfStartDate(date);
     setIvfPhase(phase);
@@ -559,6 +574,7 @@ const PatientDashboard = () => {
                     <PregnancyTracker
                       dueDate={pregnancyDueDate}
                       onSetDueDate={handleSetPregnancyDueDate}
+                      onResetPregnancy={handleResetPregnancy}
                     />
                     {pregnancyDueDate && (
                       <CycleCalendar
