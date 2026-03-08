@@ -361,6 +361,7 @@ const CycleCalendar = ({
 
   const handleSaveCycleSettings = async () => {
     setManualCycleLength(tempCycleLength);
+    setManualPeriodLength(tempPeriodLength);
     if (periodRecords.length > 0) {
       try {
         const { data: { user } } = await supabase.auth.getUser();
@@ -376,6 +377,7 @@ const CycleCalendar = ({
       }
     }
     setIsSettingsOpen(false);
+    toast({ title: 'Settings saved', description: `Cycle: ${tempCycleLength} days, Period: ${tempPeriodLength} days` });
   };
 
   const showCycleInfo = !['pregnancy', 'menopause', 'post-menopause'].includes(selectedMode);
