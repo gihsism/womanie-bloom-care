@@ -451,6 +451,7 @@ export type Database = {
           full_name: string | null
           id: string
           life_stage: string | null
+          pregnancy_due_date: string | null
           updated_at: string | null
         }
         Insert: {
@@ -458,6 +459,7 @@ export type Database = {
           full_name?: string | null
           id: string
           life_stage?: string | null
+          pregnancy_due_date?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -465,6 +467,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           life_stage?: string | null
+          pregnancy_due_date?: string | null
           updated_at?: string | null
         }
         Relationships: []

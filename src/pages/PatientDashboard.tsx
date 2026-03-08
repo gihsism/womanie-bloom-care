@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardHeader, { getModeStats, type LifeStage } from '@/components/dashboard/DashboardHeader';
 import CycleCalendar from '@/components/dashboard/CycleCalendar';
+import PregnancyTracker from '@/components/dashboard/PregnancyTracker';
 import DailyLogging from '@/components/dashboard/DailyLogging';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
 import OvulationPrediction from '@/components/dashboard/OvulationPrediction';
@@ -59,10 +60,11 @@ const PatientDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, session, loading } = useAuth();
-  const [profile, setProfile] = useState<{ full_name?: string; life_stage?: string } | null>(null);
+  const [profile, setProfile] = useState<{ full_name?: string; life_stage?: string; pregnancy_due_date?: string | null } | null>(null);
   const [selectedMode, setSelectedMode] = useState<LifeStage | null>(null);
   const [ovulationPrediction, setOvulationPrediction] = useState<any>(null);
   const [periodData, setPeriodData] = useState<{ lastPeriodStart: Date; cycleLength: number } | null>(null);
+  const [pregnancyDueDate, setPregnancyDueDate] = useState<Date | null>(null);
 
   // Save life stage to database when it changes
   const handleModeChange = async (mode: LifeStage) => {
@@ -178,7 +180,7 @@ const PatientDashboard = () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('full_name, life_stage')
+        .select('full_name, life_stage, pregnancy_due_date')
         .eq('id', userId)
         .maybeSingle();
 
@@ -187,9 +189,28 @@ const PatientDashboard = () => {
       
       // Load saved life stage if available, otherwise default to menstrual-cycle
       setSelectedMode((data?.life_stage as LifeStage) || 'menstrual-cycle');
+      
+      // Load pregnancy due date
+      if (data?.pregnancy_due_date) {
+        setPregnancyDueDate(new Date(data.pregnancy_due_date));
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
       setSelectedMode('menstrual-cycle');
+    }
+  };
+
+  const handleSetPregnancyDueDate = async (date: Date) => {
+    setPregnancyDueDate(date);
+    if (user) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({ pregnancy_due_date: format(date, 'yyyy-MM-dd') })
+          .eq('id', user.id);
+      } catch (error) {
+        console.error('Error saving due date:', error);
+      }
     }
   };
 
@@ -456,12 +477,57 @@ const PatientDashboard = () => {
 
 
 
-            {/* Health Tracking Section with Cycle Health on the right */}
+            {/* Health Tracking Section */}
             <div className="mb-6">
-              <h3 className="text-base font-semibold mb-3">Health Tracking</h3>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Calendar - Takes 2 columns */}
-                <div className="lg:col-span-2">
+              <h3 className="text-base font-semibold mb-3">
+                {selectedMode === 'pregnancy' ? 'Pregnancy Tracking' : 'Health Tracking'}
+              </h3>
+
+              {selectedMode === 'pregnancy' ? (
+                /* ─── Pregnancy Mode ─── */
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2">
+                    <PregnancyTracker
+                      dueDate={pregnancyDueDate}
+                      onSetDueDate={handleSetPregnancyDueDate}
+                    />
+                  </div>
+                  <div className="lg:col-span-1 space-y-4">
+                    {pregnancyDueDate ? (
+                      <>
+                        <Card className="p-4">
+                          <h3 className="text-lg font-bold mb-4">Pregnancy Health</h3>
+                          <div className="space-y-4">
+                            {healthStats.map((stat) => {
+                              const IconComponent = stat.icon;
+                              return (
+                                <div key={stat.title} className="flex items-start gap-3 pb-3 border-b last:border-0 last:pb-0">
+                                  <IconComponent className={`h-5 w-5 ${stat.color} mt-1`} />
+                                  <div className="flex-1">
+                                    <div className="text-sm font-medium text-muted-foreground mb-1">{stat.title}</div>
+                                    <div className="text-lg font-bold mb-1">{stat.value}</div>
+                                    <div className="text-xs text-muted-foreground">{stat.subtitle}</div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </Card>
+                      </>
+                    ) : (
+                      <Card className="p-4 text-center">
+                        <h3 className="text-lg font-bold mb-2">Pregnancy Health</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Set your due date to see pregnancy insights here.
+                        </p>
+                      </Card>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                /* ─── Cycle Mode ─── */
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2">
                     <CycleCalendar 
                       lastPeriodStart={periodData?.lastPeriodStart} 
                       cycleLength={periodData?.cycleLength ?? 28} 
@@ -469,101 +535,96 @@ const PatientDashboard = () => {
                       selectedMode={selectedMode}
                       ovulationPrediction={ovulationPrediction}
                     />
-                </div>
-
-                {/* Cycle Health - Takes 1 column on the right */}
-                <div className="lg:col-span-1 space-y-4">
-                  {periodData ? (
-                    <>
-                      {/* Hormone & Mood Card */}
-                      <Card className="p-4">
-                        <h3 className="text-lg font-bold mb-4">Cycle Health</h3>
-                        <div className="space-y-4">
-                          {healthStats.map((stat) => {
-                            const IconComponent = stat.icon;
-                            return (
-                              <div key={stat.title} className="flex items-start gap-3 pb-3 border-b last:border-0 last:pb-0">
-                                <IconComponent className={`h-5 w-5 ${stat.color} mt-1`} />
-                                <div className="flex-1">
-                                  <div className="text-sm font-medium text-muted-foreground mb-1">
-                                    {stat.title}
+                  </div>
+                  <div className="lg:col-span-1 space-y-4">
+                    {periodData ? (
+                      <>
+                        <Card className="p-4">
+                          <h3 className="text-lg font-bold mb-4">Cycle Health</h3>
+                          <div className="space-y-4">
+                            {healthStats.map((stat) => {
+                              const IconComponent = stat.icon;
+                              return (
+                                <div key={stat.title} className="flex items-start gap-3 pb-3 border-b last:border-0 last:pb-0">
+                                  <IconComponent className={`h-5 w-5 ${stat.color} mt-1`} />
+                                  <div className="flex-1">
+                                    <div className="text-sm font-medium text-muted-foreground mb-1">{stat.title}</div>
+                                    <div className="text-lg font-bold mb-1">{stat.value}</div>
+                                    <div className="text-xs text-muted-foreground">{stat.subtitle}</div>
                                   </div>
-                                  <div className="text-lg font-bold mb-1">{stat.value}</div>
-                                  <div className="text-xs text-muted-foreground">{stat.subtitle}</div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </Card>
+
+                        <Card className="p-4">
+                          <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
+                            Cycle Phases
+                          </h4>
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-start">
+                              <div className="flex items-start gap-2 flex-1">
+                                <Sparkles className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                                <div className="flex-1">
+                                  <div className="text-xs font-medium text-muted-foreground">Next Ovulation</div>
+                                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                                    {(() => {
+                                      const now = new Date();
+                                      let nextOv = addDays(periodData.lastPeriodStart, periodData.cycleLength - 13);
+                                      while (nextOv < now) nextOv = addDays(nextOv, periodData.cycleLength);
+                                      return `${Math.ceil((nextOv.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))} days`;
+                                    })()}
+                                  </p>
                                 </div>
                               </div>
-                            );
-                          })}
-                        </div>
-                      </Card>
-
-                      {/* Detailed Statistics Card */}
-                      <Card className="p-4">
-                        <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
-                          Cycle Phases
-                        </h4>
-                        <div className="space-y-3">
-                          <div className="flex justify-between items-start">
-                            <div className="flex items-start gap-2 flex-1">
-                              <Sparkles className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
-                              <div className="flex-1">
-                                <div className="text-xs font-medium text-muted-foreground">Next Ovulation</div>
-                                <p className="text-[10px] text-muted-foreground mt-0.5">
-                                  {(() => {
-                                    const now = new Date();
-                                    let nextOv = addDays(periodData.lastPeriodStart, periodData.cycleLength - 13);
-                                    while (nextOv < now) nextOv = addDays(nextOv, periodData.cycleLength);
-                                    return `${Math.ceil((nextOv.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))} days`;
-                                  })()}
-                                </p>
-                              </div>
+                              <span className="text-sm font-bold whitespace-nowrap">
+                                {(() => {
+                                  const now = new Date();
+                                  let nextOv = addDays(periodData.lastPeriodStart, periodData.cycleLength - 13);
+                                  while (nextOv < now) nextOv = addDays(nextOv, periodData.cycleLength);
+                                  return format(nextOv, 'MMM d');
+                                })()}
+                              </span>
                             </div>
-                            <span className="text-sm font-bold whitespace-nowrap">
-                              {(() => {
-                                const now = new Date();
-                                let nextOv = addDays(periodData.lastPeriodStart, periodData.cycleLength - 13);
-                                while (nextOv < now) nextOv = addDays(nextOv, periodData.cycleLength);
-                                return format(nextOv, 'MMM d');
-                              })()}
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-start">
-                            <div className="flex items-start gap-2 flex-1">
-                              <Droplet className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
-                              <div className="flex-1">
-                                <div className="text-xs font-medium text-muted-foreground">Next Period</div>
-                                <p className="text-[10px] text-muted-foreground mt-0.5">
-                                  {(() => {
-                                    const now = new Date();
-                                    let nextP = addDays(periodData.lastPeriodStart, periodData.cycleLength);
-                                    while (nextP < now) nextP = addDays(nextP, periodData.cycleLength);
-                                    return `${Math.ceil((nextP.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))} days`;
-                                  })()}
-                                </p>
+                            <div className="flex justify-between items-start">
+                              <div className="flex items-start gap-2 flex-1">
+                                <Droplet className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                                <div className="flex-1">
+                                  <div className="text-xs font-medium text-muted-foreground">Next Period</div>
+                                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                                    {(() => {
+                                      const now = new Date();
+                                      let nextP = addDays(periodData.lastPeriodStart, periodData.cycleLength);
+                                      while (nextP < now) nextP = addDays(nextP, periodData.cycleLength);
+                                      return `${Math.ceil((nextP.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))} days`;
+                                    })()}
+                                  </p>
+                                </div>
                               </div>
+                              <span className="text-sm font-bold whitespace-nowrap">
+                                {(() => {
+                                  const now = new Date();
+                                  let nextP = addDays(periodData.lastPeriodStart, periodData.cycleLength);
+                                  while (nextP < now) nextP = addDays(nextP, periodData.cycleLength);
+                                  return format(nextP, 'MMM d');
+                                })()}
+                              </span>
                             </div>
-                            <span className="text-sm font-bold whitespace-nowrap">
-                              {(() => {
-                                const now = new Date();
-                                let nextP = addDays(periodData.lastPeriodStart, periodData.cycleLength);
-                                while (nextP < now) nextP = addDays(nextP, periodData.cycleLength);
-                                return format(nextP, 'MMM d');
-                              })()}
-                            </span>
                           </div>
-                        </div>
+                        </Card>
+                      </>
+                    ) : (
+                      <Card className="p-4 text-center">
+                        <h3 className="text-lg font-bold mb-2">Cycle Health</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Mark your first period day on the calendar to see cycle insights and predictions here.
+                        </p>
                       </Card>
-                    </>
-                  ) : (
-                    <Card className="p-4 text-center">
-                      <h3 className="text-lg font-bold mb-2">Cycle Health</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Mark your first period day on the calendar to see cycle insights and predictions here.
-                      </p>
-                    </Card>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Ovulation Prediction - Show for conception and menstrual cycle modes */}
