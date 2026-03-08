@@ -8,6 +8,7 @@ import BabyImage3DOverlay from './BabyImage3DOverlay';
 import babyWeek04 from '@/assets/baby-week-04.png';
 import babyWeek07 from '@/assets/baby-week-07.png';
 import babyWeek12 from '@/assets/baby-week-12.png';
+import babyWeek13 from '@/assets/baby-week-13.png';
 import babyWeek16 from '@/assets/baby-week-16.png';
 import babyWeek20 from '@/assets/baby-week-20.png';
 import babyWeek24 from '@/assets/baby-week-24.png';
@@ -85,7 +86,7 @@ const getWeekData = (week: number) => {
 const WEEK_IMAGES: Record<number, string> = {
   4: babyWeek04, 5: babyWeek04, 6: babyWeek04,
   7: babyWeek07, 8: babyWeek07, 9: babyWeek07, 10: babyWeek07, 11: babyWeek07,
-  12: babyWeek12, 13: babyWeek12, 14: babyWeek16, 15: babyWeek16,
+  12: babyWeek12, 13: babyWeek13, 14: babyWeek16, 15: babyWeek16,
   16: babyWeek16, 17: babyWeek16, 18: babyWeek20, 19: babyWeek20,
   20: babyWeek20, 21: babyWeek20, 22: babyWeek24, 23: babyWeek24,
   24: babyWeek24, 25: babyWeek24, 26: babyWeek28, 27: babyWeek28,
