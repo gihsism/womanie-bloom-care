@@ -1,25 +1,18 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { differenceInDays, addDays, format, parseISO } from 'date-fns';
-import {
-  Syringe,
-  Calendar,
-  Heart,
-  Activity,
-  Sparkles,
-  Baby,
-  FlaskConical,
-  Timer,
-  CheckCircle2,
-  Circle,
-  ArrowRight,
-} from 'lucide-react';
+import { differenceInDays, format, parseISO } from 'date-fns';
+import { FlaskConical, Timer, CheckCircle2, ArrowRight, Sparkles, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import IVFCalendar from './ivf/IVFCalendar';
+import IVFEventSheet from './ivf/IVFEventSheet';
+import IVFReminders from './ivf/IVFReminders';
+import type { IVFEvent } from './ivf/IVFCalendar';
 
 // ─── IVF phases ───
 const IVF_PHASES = [
@@ -41,8 +34,61 @@ interface IVFTrackerProps {
 }
 
 const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IVFTrackerProps) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [startDateInput, setStartDateInput] = useState('');
   const [selectedStartPhase, setSelectedStartPhase] = useState('prep');
+  const [events, setEvents] = useState<IVFEvent[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  // Load events
+  const loadEvents = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('ivf_events')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('event_date', { ascending: true });
+    if (data) setEvents(data as IVFEvent[]);
+  }, [user]);
+
+  useEffect(() => { loadEvents(); }, [loadEvents]);
+
+  const handleSelectDate = (date: Date) => {
+    setSelectedDate(date);
+    setSheetOpen(true);
+  };
+
+  const handleAddEvent = async (ev: { title: string; event_type: string; event_time: string | null; description: string | null; remind_before_minutes: number | null }) => {
+    if (!user || !selectedDate) return;
+    const { error } = await supabase.from('ivf_events').insert({
+      user_id: user.id,
+      event_date: format(selectedDate, 'yyyy-MM-dd'),
+      ...ev,
+    });
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to add event', variant: 'destructive' });
+    } else {
+      toast({ title: 'Treatment added', description: ev.title });
+      loadEvents();
+    }
+  };
+
+  const handleToggleComplete = async (eventId: string, completed: boolean) => {
+    const { error } = await supabase.from('ivf_events').update({ is_completed: completed }).eq('id', eventId);
+    if (!error) loadEvents();
+  };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    const { error } = await supabase.from('ivf_events').delete().eq('id', eventId);
+    if (!error) loadEvents();
+  };
+
+  const handleMarkCompleteFromReminder = async (eventId: string) => {
+    await handleToggleComplete(eventId, true);
+    toast({ title: '✅ Treatment completed!', description: 'Great job staying on track.' });
+  };
 
   const currentPhaseData = useMemo(() => {
     if (!ivfPhase) return null;
@@ -51,6 +97,12 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
 
   const currentPhaseIndex = IVF_PHASES.findIndex(p => p.key === ivfPhase);
   const daysInPhase = ivfStartDate ? differenceInDays(new Date(), ivfStartDate) : 0;
+
+  // Today's upcoming events count
+  const todayEvents = useMemo(() => {
+    const todayKey = format(new Date(), 'yyyy-MM-dd');
+    return events.filter(e => e.event_date === todayKey && !e.is_completed);
+  }, [events]);
 
   // ─── Setup screen ───
   if (!ivfStartDate || !ivfPhase) {
@@ -62,9 +114,8 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
           </div>
           <h3 className="text-lg font-semibold">Set up IVF Tracking</h3>
           <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-            Track your IVF journey phase by phase. Select your current phase and when it started.
+            Track your IVF journey phase by phase with a treatment calendar and reminders.
           </p>
-
           <div className="space-y-3 max-w-xs mx-auto text-left">
             <div className="space-y-2">
               <label className="text-sm font-medium">Current Phase</label>
@@ -86,23 +137,13 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
                 ))}
               </div>
             </div>
-
             <div className="space-y-2">
               <label className="text-sm font-medium">Phase start date</label>
-              <Input
-                type="date"
-                value={startDateInput}
-                onChange={(e) => setStartDateInput(e.target.value)}
-              />
+              <Input type="date" value={startDateInput} onChange={(e) => setStartDateInput(e.target.value)} />
             </div>
           </div>
-
           <Button
-            onClick={() => {
-              if (startDateInput) {
-                onSetIVFStart(parseISO(startDateInput), selectedStartPhase);
-              }
-            }}
+            onClick={() => { if (startDateInput) onSetIVFStart(parseISO(startDateInput), selectedStartPhase); }}
             disabled={!startDateInput}
             className="w-full max-w-xs"
           >
@@ -117,25 +158,48 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
 
   return (
     <div className="space-y-4">
+      {/* Reminders popup */}
+      <IVFReminders events={events} onMarkComplete={handleMarkCompleteFromReminder} />
+
+      {/* Today's treatments banner */}
+      {todayEvents.length > 0 && (
+        <Card className="p-3 bg-primary/5 border-primary/20">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="animate-pulse">💉</span>
+            <span className="font-medium">
+              {todayEvents.length} treatment{todayEvents.length > 1 ? 's' : ''} remaining today
+            </span>
+            <Button variant="ghost" size="sm" className="ml-auto h-7 text-xs" onClick={() => { setSelectedDate(new Date()); setSheetOpen(true); }}>
+              View
+            </Button>
+          </div>
+        </Card>
+      )}
+
       {/* Current phase status */}
       <div className="bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 rounded-2xl p-5">
         <div className="text-center mb-4">
           <div className="text-5xl mb-2">{currentPhaseData.icon}</div>
-          <div className="text-2xl font-semibold text-foreground mb-1">
-            {currentPhaseData.label}
-          </div>
-          <div className="text-sm text-muted-foreground">
-            Day {daysInPhase + 1} • Duration: {currentPhaseData.duration}
-          </div>
-          <Badge variant="secondary" className="mt-2">
-            Phase {currentPhaseIndex + 1} of {IVF_PHASES.length}
-          </Badge>
+          <div className="text-2xl font-semibold text-foreground mb-1">{currentPhaseData.label}</div>
+          <div className="text-sm text-muted-foreground">Day {daysInPhase + 1} • Duration: {currentPhaseData.duration}</div>
+          <Badge variant="secondary" className="mt-2">Phase {currentPhaseIndex + 1} of {IVF_PHASES.length}</Badge>
         </div>
-
-        <p className="text-sm text-center text-muted-foreground max-w-sm mx-auto">
-          {currentPhaseData.description}
-        </p>
+        <p className="text-sm text-center text-muted-foreground max-w-sm mx-auto">{currentPhaseData.description}</p>
       </div>
+
+      {/* Treatment Calendar */}
+      <IVFCalendar events={events} currentPhase={ivfPhase} onSelectDate={handleSelectDate} selectedDate={selectedDate} />
+
+      {/* Event sheet */}
+      <IVFEventSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        date={selectedDate}
+        events={events}
+        onAddEvent={handleAddEvent}
+        onToggleComplete={handleToggleComplete}
+        onDeleteEvent={handleDeleteEvent}
+      />
 
       {/* Phase timeline */}
       <Card className="p-4 space-y-3">
@@ -148,7 +212,6 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
             const isActive = phase.key === ivfPhase;
             const isPast = i < currentPhaseIndex;
             const isFuture = i > currentPhaseIndex;
-
             return (
               <button
                 key={phase.key}
@@ -183,7 +246,7 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
         </div>
       </Card>
 
-      {/* Tips for current phase */}
+      {/* Tips */}
       <Card className="p-4 space-y-3">
         <h4 className="font-semibold flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" />
@@ -199,13 +262,9 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
         </div>
       </Card>
 
-      {/* Quick phase advance */}
+      {/* Quick advance */}
       {currentPhaseIndex < IVF_PHASES.length - 1 && (
-        <Button
-          variant="outline"
-          className="w-full gap-2"
-          onClick={() => onUpdatePhase(IVF_PHASES[currentPhaseIndex + 1].key)}
-        >
+        <Button variant="outline" className="w-full gap-2" onClick={() => onUpdatePhase(IVF_PHASES[currentPhaseIndex + 1].key)}>
           Move to {IVF_PHASES[currentPhaseIndex + 1].label}
           <ArrowRight className="h-4 w-4" />
         </Button>
