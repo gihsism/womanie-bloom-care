@@ -22,6 +22,7 @@ import IVFTracker from '@/components/dashboard/IVFTracker';
 import DailyLogging from '@/components/dashboard/DailyLogging';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
 import OvulationPrediction from '@/components/dashboard/OvulationPrediction';
+import PreMenstrualDashboard from '@/components/dashboard/PreMenstrualDashboard';
 import { format, addDays } from 'date-fns';
 import { 
   MessageSquare, 
@@ -127,7 +128,7 @@ const PatientDashboard = () => {
 
   // Auto-fetch ovulation prediction when we have period data
   useEffect(() => {
-    if (user && periodData && (selectedMode === 'conception' || selectedMode === 'menstrual-cycle' || selectedMode === 'pre-menstrual')) {
+    if (user && periodData && (selectedMode === 'conception' || selectedMode === 'menstrual-cycle')) {
       fetchOvulationPrediction();
     }
   }, [user, selectedMode, periodData]);
@@ -621,6 +622,9 @@ const PatientDashboard = () => {
                     )}
                   </div>
                 </div>
+              ) : selectedMode === 'pre-menstrual' ? (
+                /* ─── Pre-Menstrual Mode ─── */
+                <PreMenstrualDashboard />
               ) : (
                 /* ─── Cycle Mode ─── */
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -731,7 +735,7 @@ const PatientDashboard = () => {
             </div>
 
             {/* Ovulation Prediction - Show for conception and menstrual cycle modes */}
-            {(selectedMode === 'conception' || selectedMode === 'menstrual-cycle' || selectedMode === 'pre-menstrual') && user && periodData && (
+            {(selectedMode === 'conception' || selectedMode === 'menstrual-cycle') && user && periodData && (
               <div className="mb-6">
                 <OvulationPrediction 
                   userId={user.id}
