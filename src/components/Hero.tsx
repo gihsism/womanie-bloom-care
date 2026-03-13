@@ -41,7 +41,7 @@ const Hero = () => {
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl blur-3xl"></div>
               <img 
                 src={heroIllustration} 
-                alt="Woman in meditation pose surrounded by flowers - women's health illustration" 
+                alt="Woman holding smartphone with health tracking dashboard showing cycle calendar and heart rate metrics" 
                 className="relative w-full h-auto rounded-3xl"
               />
             </div>
