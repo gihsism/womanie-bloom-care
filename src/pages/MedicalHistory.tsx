@@ -30,9 +30,10 @@ import {
   Clock,
   Target,
   Zap,
-  ArrowUpRight,
-  ArrowDownRight,
   Minus,
+  Info,
+  Lightbulb,
+  ArrowRight,
 } from 'lucide-react';
 import { format, differenceInDays, addDays } from 'date-fns';
 import {
@@ -45,11 +46,9 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
-  LineChart,
   Line,
   Area,
   AreaChart,
-  Legend,
   ComposedChart,
   ReferenceArea,
   PieChart as RechartsPie,
@@ -68,6 +67,11 @@ interface MedicalDataItem {
   notes: string | null;
   created_at: string;
   document_id: string | null;
+  raw_data?: {
+    priority?: string;
+    panel?: string;
+    is_repeat_test?: boolean;
+  } | null;
 }
 
 interface DocumentInfo {
@@ -94,9 +98,79 @@ const statusColors: Record<string, string> = {
   normal: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
   abnormal: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
   critical: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+  expected: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+  informational: 'bg-muted text-muted-foreground',
   active: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
   resolved: 'bg-muted text-muted-foreground',
 };
+
+const statusLabels: Record<string, string> = {
+  normal: '✓ Normal',
+  abnormal: '⚠ Needs Review',
+  critical: '🚨 Urgent',
+  expected: '✓ Expected',
+  informational: 'ℹ Informational',
+  active: 'Active',
+  resolved: 'Resolved',
+};
+
+const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
+
+function renderEnhancedSummary(summary: string) {
+  const sections = summary.split('\n\n');
+  return (
+    <div className="space-y-3">
+      {sections.map((section, i) => {
+        const trimmed = section.trim();
+        if (!trimmed) return null;
+
+        if (trimmed.startsWith('📋 Key Takeaways:')) {
+          const items = trimmed.replace('📋 Key Takeaways:', '').trim().split('\n').filter(l => l.trim());
+          return (
+            <div key={i} className="bg-primary/5 rounded-lg p-3 border border-primary/10">
+              <div className="flex items-center gap-2 mb-2">
+                <Lightbulb className="h-4 w-4 text-primary" />
+                <span className="text-xs font-semibold text-primary">Key Takeaways</span>
+              </div>
+              <ul className="space-y-1">
+                {items.map((item, j) => (
+                  <li key={j} className="text-sm leading-relaxed flex items-start gap-2">
+                    <span className="text-primary mt-1 flex-shrink-0">•</span>
+                    <span>{item.replace(/^[•\-]\s*/, '')}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        }
+
+        if (trimmed.startsWith('⚡ Action Items:')) {
+          const items = trimmed.replace('⚡ Action Items:', '').trim().split('\n').filter(l => l.trim());
+          return (
+            <div key={i} className="bg-amber-50 dark:bg-amber-900/10 rounded-lg p-3 border border-amber-200 dark:border-amber-900/30">
+              <div className="flex items-center gap-2 mb-2">
+                <ArrowRight className="h-4 w-4 text-amber-600" />
+                <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">Next Steps</span>
+              </div>
+              <ul className="space-y-1">
+                {items.map((item, j) => (
+                  <li key={j} className="text-sm leading-relaxed flex items-start gap-2">
+                    <span className="text-amber-600 mt-1 flex-shrink-0">→</span>
+                    <span>{item.replace(/^[•\-]\s*/, '')}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        }
+
+        return (
+          <p key={i} className="text-sm leading-relaxed">{trimmed}</p>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function MedicalHistory() {
   const navigate = useNavigate();
@@ -119,7 +193,7 @@ export default function MedicalHistory() {
         supabase.from('medical_extracted_data').select('*').eq('user_id', user!.id).order('date_recorded', { ascending: false, nullsFirst: false }),
         supabase.from('health_documents').select('id, file_name, ai_suggested_name, ai_summary, ai_suggested_category, uploaded_at, document_type').eq('user_id', user!.id).order('uploaded_at', { ascending: false }),
       ]);
-      if (medRes.data) setMedicalData(medRes.data);
+      if (medRes.data) setMedicalData(medRes.data as MedicalDataItem[]);
       if (docRes.data) setDocuments(docRes.data);
     } catch (error) {
       console.error('Error fetching medical history:', error);
@@ -139,25 +213,17 @@ export default function MedicalHistory() {
 
   // Statistics calculations
   const stats = useMemo(() => {
-    const statusCounts = { normal: 0, abnormal: 0, critical: 0, active: 0, resolved: 0, unknown: 0 };
-
-    medicalData.forEach((item) => {
-      if (item.status && statusCounts.hasOwnProperty(item.status)) {
-        statusCounts[item.status as keyof typeof statusCounts]++;
-      } else {
-        statusCounts.unknown++;
-      }
-    });
-
-    const abnormalCount = statusCounts.abnormal + statusCounts.critical;
-    const activeConditions = medicalData.filter(i => i.data_type === 'condition' && i.status === 'active').length;
-    const activeMedications = medicalData.filter(i => i.data_type === 'medication' && i.status === 'active').length;
     const labResults = medicalData.filter(i => i.data_type === 'lab_result');
-    const normalLabs = labResults.filter(i => i.status === 'normal').length;
+    const normalLabs = labResults.filter(i => i.status === 'normal' || i.status === 'expected').length;
     const abnormalLabs = labResults.filter(i => i.status === 'abnormal').length;
     const criticalLabs = labResults.filter(i => i.status === 'critical').length;
+    const expectedLabs = labResults.filter(i => i.status === 'expected').length;
+    const abnormalCount = abnormalLabs + criticalLabs;
 
-    // Lab results with numeric values for charting
+    const activeConditions = medicalData.filter(i => i.data_type === 'condition' && i.status === 'active').length;
+    const activeMedications = medicalData.filter(i => i.data_type === 'medication' && i.status === 'active').length;
+
+    // Lab results with numeric values
     const labsWithValues = labResults
       .filter(l => l.value && !isNaN(parseFloat(l.value)))
       .map(l => {
@@ -176,18 +242,22 @@ export default function MedicalHistory() {
           const mid = (refLow + refHigh) / 2;
           deviationPct = mid > 0 ? Math.round(((numVal - mid) / mid) * 100) : 0;
         }
+        const rawData = l.raw_data as any;
         return {
           ...l,
           numVal,
           refLow,
           refHigh,
           deviationPct,
+          priority: rawData?.priority || 'low',
+          panel: rawData?.panel || null,
+          isRepeat: rawData?.is_repeat_test || false,
           shortTitle: l.title.length > 18 ? l.title.slice(0, 16) + '…' : l.title,
         };
       });
 
     const labDeviationData = labsWithValues
-      .filter(l => l.refLow !== null && l.refHigh !== null)
+      .filter(l => l.refLow !== null && l.refHigh !== null && l.status !== 'expected')
       .sort((a, b) => Math.abs(b.deviationPct) - Math.abs(a.deviationPct))
       .slice(0, 12)
       .map(l => ({
@@ -200,9 +270,7 @@ export default function MedicalHistory() {
         fill: l.status === 'critical' ? '#ef4444' : l.status === 'abnormal' ? '#eab308' : '#22c55e',
       }));
 
-    // ===== ANALYTICS DATA =====
-
-    // 1. Lab trends: group same-titled labs by date
+    // Lab trends: group same-titled labs by date
     const labsByTitle: Record<string, typeof labsWithValues> = {};
     labsWithValues.forEach(l => {
       if (l.date_recorded) {
@@ -212,23 +280,23 @@ export default function MedicalHistory() {
       }
     });
 
-    // Get labs that have trends (multiple readings or single with ref range)
-    const labTrendData: Record<string, { data: { date: string; value: number; refLow: number | null; refHigh: number | null }[]; unit: string; latestStatus: string | null }> = {};
+    const labTrendData: Record<string, { data: { date: string; value: number; refLow: number | null; refHigh: number | null }[]; unit: string; latestStatus: string | null; isRepeat: boolean }> = {};
     Object.entries(labsByTitle).forEach(([title, labs]) => {
       const sorted = [...labs].sort((a, b) => new Date(a.date_recorded!).getTime() - new Date(b.date_recorded!).getTime());
       labTrendData[title] = {
         data: sorted.map(l => ({
-          date: format(new Date(l.date_recorded!), 'MMM d'),
+          date: format(new Date(l.date_recorded!), 'MMM d, yy'),
           value: l.numVal,
           refLow: l.refLow,
           refHigh: l.refHigh,
         })),
         unit: sorted[0].unit || '',
         latestStatus: sorted[sorted.length - 1].status,
+        isRepeat: sorted.length > 1,
       };
     });
 
-    // 2. Health score over time (per document date)
+    // Health score over time
     const docDates = documents
       .filter(d => d.uploaded_at && d.ai_summary)
       .map(d => ({ date: new Date(d.uploaded_at!), id: d.id }))
@@ -237,37 +305,25 @@ export default function MedicalHistory() {
     const healthScoreTimeline = docDates.map(dd => {
       const docItems = medicalData.filter(m => m.document_id === dd.id);
       const totalLabs = docItems.filter(i => i.data_type === 'lab_result').length;
-      const normalCount = docItems.filter(i => i.data_type === 'lab_result' && i.status === 'normal').length;
+      const normalCount = docItems.filter(i => i.data_type === 'lab_result' && (i.status === 'normal' || i.status === 'expected')).length;
       const score = totalLabs > 0 ? Math.round((normalCount / totalLabs) * 100) : null;
-      return {
-        date: format(dd.date, 'MMM d, yyyy'),
-        score,
-        totalLabs,
-        normalCount,
-      };
+      return { date: format(dd.date, 'MMM d, yyyy'), score, totalLabs, normalCount };
     }).filter(d => d.score !== null);
 
-    // 3. Timing analysis
-    const sortedDates = documents
-      .filter(d => d.uploaded_at)
-      .map(d => new Date(d.uploaded_at!))
-      .sort((a, b) => a.getTime() - b.getTime());
-    
+    // Timing analysis
+    const sortedDates = documents.filter(d => d.uploaded_at).map(d => new Date(d.uploaded_at!)).sort((a, b) => a.getTime() - b.getTime());
     let avgDaysBetweenDocs: number | null = null;
     let nextCheckupEstimate: Date | null = null;
     if (sortedDates.length >= 2) {
       const gaps = [];
-      for (let i = 1; i < sortedDates.length; i++) {
-        gaps.push(differenceInDays(sortedDates[i], sortedDates[i - 1]));
-      }
+      for (let i = 1; i < sortedDates.length; i++) gaps.push(differenceInDays(sortedDates[i], sortedDates[i - 1]));
       avgDaysBetweenDocs = Math.round(gaps.reduce((s, g) => s + g, 0) / gaps.length);
       nextCheckupEstimate = addDays(sortedDates[sortedDates.length - 1], avgDaysBetweenDocs);
     }
-
     const lastDocDate = sortedDates.length > 0 ? sortedDates[sortedDates.length - 1] : null;
     const daysSinceLastDoc = lastDocDate ? differenceInDays(new Date(), lastDocDate) : null;
 
-    // 4. Prediction insights from lab trends
+    // Predictions from lab trends
     const predictions: { title: string; trend: 'improving' | 'worsening' | 'stable'; detail: string; icon: typeof TrendingUp }[] = [];
     Object.entries(labTrendData).forEach(([title, info]) => {
       if (info.data.length >= 2) {
@@ -287,21 +343,20 @@ export default function MedicalHistory() {
           
           if (!wasInRange && isInRange) {
             trend = 'improving';
-            detail = `Returned to normal range (${changePct > 0 ? '+' : ''}${changePct}%)`;
+            detail = `Back to normal range (${changePct > 0 ? '+' : ''}${changePct}% change)`;
           } else if (wasInRange && !isInRange) {
             trend = 'worsening';
-            detail = `Moved out of normal range (${changePct > 0 ? '+' : ''}${changePct}%)`;
+            detail = `Moved outside normal range (${changePct > 0 ? '+' : ''}${changePct}% change)`;
           } else if (Math.abs(changePct) <= 5) {
             trend = 'stable';
-            detail = `Stable within ${isInRange ? 'normal' : 'abnormal'} range`;
+            detail = `Stable — ${isInRange ? 'within normal range' : 'still outside range'}`;
           } else if (isInRange) {
-            trend = changePct > 0 && last > (refLow + refHigh) / 2 ? 'stable' : 'improving';
-            detail = `${changePct > 0 ? '+' : ''}${changePct}% change, still in range`;
+            trend = 'stable';
+            detail = `${changePct > 0 ? '+' : ''}${changePct}% change, still within normal`;
           } else {
-            // Out of range
             const movingToward = (last > refHigh && changePct < 0) || (last < refLow && changePct > 0);
             trend = movingToward ? 'improving' : 'worsening';
-            detail = `${movingToward ? 'Moving toward' : 'Moving away from'} normal range (${changePct > 0 ? '+' : ''}${changePct}%)`;
+            detail = `${movingToward ? 'Getting closer to' : 'Moving further from'} normal range`;
           }
         } else {
           if (Math.abs(changePct) <= 5) {
@@ -322,26 +377,52 @@ export default function MedicalHistory() {
       }
     });
 
-    // 5. Lab status distribution pie
+    // Sort predictions: worsening first, then improving, then stable
+    predictions.sort((a, b) => {
+      const order = { worsening: 0, improving: 1, stable: 2 };
+      return order[a.trend] - order[b.trend];
+    });
+
     const labStatusPie = [
-      { name: 'Normal', value: normalLabs, color: '#22c55e' },
+      { name: 'Normal', value: normalLabs - expectedLabs, color: '#22c55e' },
+      { name: 'Expected', value: expectedLabs, color: '#3b82f6' },
       { name: 'Abnormal', value: abnormalLabs, color: '#eab308' },
       { name: 'Critical', value: criticalLabs, color: '#ef4444' },
     ].filter(d => d.value > 0);
 
-    // 6. Overall health score
     const overallHealthScore = labResults.length > 0
       ? Math.round((normalLabs / labResults.length) * 100)
       : null;
 
+    // Group labs by panel
+    const labsByPanel: Record<string, MedicalDataItem[]> = {};
+    labResults.forEach(lab => {
+      const rawData = lab.raw_data as any;
+      const panel = rawData?.panel || 'Other Tests';
+      if (!labsByPanel[panel]) labsByPanel[panel] = [];
+      labsByPanel[panel].push(lab);
+    });
+
+    // Sort panels: panels with abnormal/critical results first
+    const sortedPanels = Object.entries(labsByPanel).sort((a, b) => {
+      const aHasIssue = a[1].some(l => l.status === 'critical' || l.status === 'abnormal');
+      const bHasIssue = b[1].some(l => l.status === 'critical' || l.status === 'abnormal');
+      if (aHasIssue && !bHasIssue) return -1;
+      if (!aHasIssue && bHasIssue) return 1;
+      return 0;
+    });
+
+    // Repeated tests with timeline data
+    const repeatedTests = Object.entries(labTrendData).filter(([, info]) => info.data.length >= 2);
+
     return {
-      statusCounts, abnormalCount,
-      activeConditions, activeMedications, labResults,
+      abnormalCount, activeConditions, activeMedications, labResults,
       labsWithValues, labDeviationData,
-      normalLabs, abnormalLabs, criticalLabs,
+      normalLabs, abnormalLabs, criticalLabs, expectedLabs,
       labTrendData, healthScoreTimeline,
       avgDaysBetweenDocs, nextCheckupEstimate, daysSinceLastDoc, lastDocDate,
       predictions, labStatusPie, overallHealthScore,
+      labsByPanel: sortedPanels, repeatedTests,
     };
   }, [medicalData, documents]);
 
@@ -360,6 +441,15 @@ export default function MedicalHistory() {
   const hasDocuments = documents.length > 0;
   const analyzedDocs = documents.filter(d => d.ai_summary);
 
+  // Sort items by priority
+  const sortedByPriority = [...medicalData].sort((a, b) => {
+    const aPri = (a.raw_data as any)?.priority || 'low';
+    const bPri = (b.raw_data as any)?.priority || 'low';
+    return (priorityOrder[aPri] ?? 2) - (priorityOrder[bPri] ?? 2);
+  });
+
+  const flaggedItems = sortedByPriority.filter(i => i.status === 'abnormal' || i.status === 'critical');
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -370,7 +460,7 @@ export default function MedicalHistory() {
           </Button>
           <div className="flex-1">
             <h1 className="text-xl font-bold">Medical History</h1>
-            <p className="text-sm text-muted-foreground">AI-analyzed health data & statistics</p>
+            <p className="text-sm text-muted-foreground">AI-analyzed health data & insights</p>
           </div>
           <Button variant="ghost" size="icon" onClick={() => navigate('/welcome')}>
             <Home className="h-5 w-5" />
@@ -385,9 +475,13 @@ export default function MedicalHistory() {
           <TabsList className="w-full flex overflow-x-auto">
             <TabsTrigger value="overview" className="flex-1">Overview</TabsTrigger>
             <TabsTrigger value="analytics" className="flex-1">Analytics</TabsTrigger>
-            <TabsTrigger value="details" className="flex-1">Details</TabsTrigger>
+            <TabsTrigger value="trends" className="flex-1">
+              Trends
+              {stats.repeatedTests.length > 0 && (
+                <Badge variant="secondary" className="ml-1 text-[9px] px-1 py-0">{stats.repeatedTests.length}</Badge>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="documents" className="flex-1">Documents</TabsTrigger>
-            <TabsTrigger value="timeline" className="flex-1">Timeline</TabsTrigger>
           </TabsList>
 
           {/* ============ OVERVIEW TAB ============ */}
@@ -402,175 +496,151 @@ export default function MedicalHistory() {
               </Card>
             ) : (
               <>
-                {/* Lab Quick Summary */}
+                {/* Quick Stats */}
                 {hasData && stats.labResults.length > 0 && (
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <Card className="p-4 border-green-200 dark:border-green-900/40">
                       <div className="flex items-center gap-2 mb-1">
                         <CheckCircle2 className="h-4 w-4 text-green-600" />
                         <span className="text-xs text-muted-foreground">Normal</span>
                       </div>
                       <p className="text-2xl font-bold text-green-600">{stats.normalLabs}</p>
-                      <p className="text-[10px] text-muted-foreground">lab tests in range</p>
+                      <p className="text-[10px] text-muted-foreground">results in range</p>
                     </Card>
+                    {stats.expectedLabs > 0 && (
+                      <Card className="p-4 border-blue-200 dark:border-blue-900/40">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Info className="h-4 w-4 text-blue-600" />
+                          <span className="text-xs text-muted-foreground">Expected</span>
+                        </div>
+                        <p className="text-2xl font-bold text-blue-600">{stats.expectedLabs}</p>
+                        <p className="text-[10px] text-muted-foreground">normal for your stage</p>
+                      </Card>
+                    )}
                     <Card className="p-4 border-yellow-200 dark:border-yellow-900/40">
                       <div className="flex items-center gap-2 mb-1">
                         <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                        <span className="text-xs text-muted-foreground">Abnormal</span>
+                        <span className="text-xs text-muted-foreground">Review</span>
                       </div>
                       <p className="text-2xl font-bold text-yellow-600">{stats.abnormalLabs}</p>
-                      <p className="text-[10px] text-muted-foreground">needs review</p>
+                      <p className="text-[10px] text-muted-foreground">needs attention</p>
                     </Card>
                     <Card className="p-4 border-red-200 dark:border-red-900/40">
                       <div className="flex items-center gap-2 mb-1">
                         <XCircle className="h-4 w-4 text-destructive" />
-                        <span className="text-xs text-muted-foreground">Critical</span>
+                        <span className="text-xs text-muted-foreground">Urgent</span>
                       </div>
                       <p className="text-2xl font-bold text-destructive">{stats.criticalLabs}</p>
-                      <p className="text-[10px] text-muted-foreground">urgent attention</p>
+                      <p className="text-[10px] text-muted-foreground">needs action</p>
                     </Card>
                   </div>
                 )}
 
-                {/* Flagged Results */}
-                {stats.abnormalCount > 0 && (
+                {/* Flagged Results - only truly abnormal/critical */}
+                {flaggedItems.length > 0 && (
                   <Card className="border-yellow-200 dark:border-yellow-900/50">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm flex items-center gap-2">
                         <ShieldAlert className="h-4 w-4 text-yellow-600" />
-                        Flagged Results
+                        Results That Need Attention
                         <Badge className="ml-auto bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 text-[10px]">
-                          {stats.abnormalCount}
+                          {flaggedItems.length}
                         </Badge>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      {medicalData
-                        .filter(i => i.status === 'abnormal' || i.status === 'critical')
-                        .map(item => (
-                          <div key={item.id} className={`rounded-lg px-3 py-2.5 ${item.status === 'critical' ? 'bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30' : 'bg-yellow-50 dark:bg-yellow-900/10'}`}>
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <span className="text-sm font-medium">{item.title}</span>
-                                <Badge className={`text-[9px] px-1.5 py-0 ${statusColors[item.status || ''] || 'bg-muted'}`}>
-                                  {item.status}
-                                </Badge>
-                              </div>
-                              {item.date_recorded && (
-                                <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                                  {format(new Date(item.date_recorded), 'MMM d, yyyy')}
-                                </span>
-                              )}
+                      {flaggedItems.map(item => (
+                        <div key={item.id} className={`rounded-lg px-3 py-2.5 ${item.status === 'critical' ? 'bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30' : 'bg-yellow-50 dark:bg-yellow-900/10'}`}>
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <span className="text-sm font-medium">{item.title}</span>
+                              <Badge className={`text-[9px] px-1.5 py-0 ${statusColors[item.status || ''] || 'bg-muted'}`}>
+                                {statusLabels[item.status || ''] || item.status}
+                              </Badge>
                             </div>
-                            {item.value && (
-                              <p className="text-xs mt-1 font-mono">
-                                <span className="font-semibold">{item.value}{item.unit ? ` ${item.unit}` : ''}</span>
-                                {item.reference_range && <span className="text-muted-foreground ml-2">(Ref: {item.reference_range})</span>}
-                              </p>
+                            {item.date_recorded && (
+                              <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                                {format(new Date(item.date_recorded), 'MMM d, yyyy')}
+                              </span>
                             )}
-                            {item.notes && <p className="text-xs text-muted-foreground mt-1">{item.notes}</p>}
                           </div>
-                        ))}
+                          {item.value && (
+                            <p className="text-xs mt-1 font-mono">
+                              <span className="font-semibold">{item.value}{item.unit ? ` ${item.unit}` : ''}</span>
+                              {item.reference_range && <span className="text-muted-foreground ml-2">(Normal: {item.reference_range})</span>}
+                            </p>
+                          )}
+                          {item.notes && (
+                            <p className="text-xs text-muted-foreground mt-1.5 bg-background/50 rounded px-2 py-1">
+                              💡 {item.notes}
+                            </p>
+                          )}
+                        </div>
+                      ))}
                     </CardContent>
                   </Card>
                 )}
 
-                {/* Lab Deviation Chart */}
-                {stats.labDeviationData.length > 0 && (
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4 text-primary" />
-                        Lab Values — Deviation from Normal
-                      </CardTitle>
-                      <p className="text-[10px] text-muted-foreground">How far each result is from the reference range center</p>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={Math.max(180, stats.labDeviationData.length * 28)}>
-                        <BarChart data={stats.labDeviationData} layout="vertical" margin={{ left: 5, right: 15 }}>
-                          <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                          <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
-                          <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} width={70} />
-                          <ReferenceLine x={0} stroke="hsl(var(--foreground))" strokeWidth={1.5} strokeOpacity={0.4} />
-                          <Tooltip
-                            content={({ active, payload }) => {
-                              if (!active || !payload?.length) return null;
-                              const d = payload[0].payload;
-                              return (
-                                <div className="bg-background border border-border rounded-lg px-3 py-2 shadow-lg text-xs">
-                                  <p className="font-medium">{d.name}</p>
-                                  <p>Value: {d.value} {d.unit}</p>
-                                  <p>Ref: {d.refRange}</p>
-                                  <p className={d.deviation > 0 ? 'text-yellow-600' : d.deviation < 0 ? 'text-blue-600' : 'text-green-600'}>
-                                    {d.deviation > 0 ? '+' : ''}{d.deviation}% from midpoint
-                                  </p>
-                                </div>
-                              );
-                            }}
-                          />
-                          <Bar dataKey="deviation" radius={[0, 4, 4, 0]} barSize={14}>
-                            {stats.labDeviationData.map((entry, index) => (
-                              <Cell key={`dev-${index}`} fill={entry.fill} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Lab Results Table */}
-                {hasData && stats.labResults.length > 0 && (
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm flex items-center gap-2">
-                        <FlaskConical className="h-4 w-4 text-primary" />
-                        All Lab Results
-                        <Badge variant="secondary" className="ml-auto text-[10px]">{stats.labResults.length} tests</Badge>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-xs">
-                          <thead>
-                            <tr className="border-b border-border">
-                              <th className="text-left py-2 pr-3 font-medium text-muted-foreground">Test</th>
-                              <th className="text-right py-2 px-3 font-medium text-muted-foreground">Value</th>
-                              <th className="text-right py-2 px-3 font-medium text-muted-foreground">Reference</th>
-                              <th className="text-center py-2 px-3 font-medium text-muted-foreground">Status</th>
-                              <th className="text-right py-2 pl-3 font-medium text-muted-foreground">Date</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {stats.labResults.map(lab => {
-                              const isHigh = lab.status === 'abnormal' || lab.status === 'critical';
-                              return (
-                                <tr key={lab.id} className={`border-b border-border/50 last:border-0 ${isHigh ? 'bg-yellow-50/50 dark:bg-yellow-900/5' : ''}`}>
-                                  <td className="py-2 pr-3 font-medium">{lab.title}</td>
-                                  <td className="py-2 px-3 text-right font-mono tabular-nums">
-                                    <span className={isHigh ? 'text-yellow-600 dark:text-yellow-400 font-semibold' : ''}>
+                {/* Lab Results by Panel */}
+                {stats.labsByPanel.length > 0 && (
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                      <FlaskConical className="h-4 w-4" />
+                      Lab Results by Panel
+                    </h3>
+                    {stats.labsByPanel.map(([panelName, labs]) => {
+                      const hasIssues = labs.some(l => l.status === 'critical' || l.status === 'abnormal');
+                      return (
+                        <Card key={panelName} className={hasIssues ? 'border-yellow-200 dark:border-yellow-900/30' : ''}>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-sm flex items-center gap-2">
+                              {panelName}
+                              <Badge variant="secondary" className="ml-auto text-[10px]">{labs.length} tests</Badge>
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-2">
+                              {labs.sort((a, b) => {
+                                const aPri = (a.raw_data as any)?.priority || 'low';
+                                const bPri = (b.raw_data as any)?.priority || 'low';
+                                return (priorityOrder[aPri] ?? 2) - (priorityOrder[bPri] ?? 2);
+                              }).map(lab => (
+                                <div key={lab.id} className="flex items-start justify-between gap-2 py-1.5 border-b border-border/30 last:border-0">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <span className="text-sm font-medium">{lab.title}</span>
+                                      {lab.status && (
+                                        <Badge className={`text-[9px] px-1.5 py-0 ${statusColors[lab.status] || 'bg-muted'}`}>
+                                          {statusLabels[lab.status] || lab.status}
+                                        </Badge>
+                                      )}
+                                      {(lab.raw_data as any)?.is_repeat_test && (
+                                        <Badge variant="outline" className="text-[9px] px-1 py-0">📊 tracked</Badge>
+                                      )}
+                                    </div>
+                                    {lab.notes && (
+                                      <p className="text-xs text-muted-foreground mt-0.5">{lab.notes}</p>
+                                    )}
+                                  </div>
+                                  <div className="text-right flex-shrink-0">
+                                    <span className={`text-sm font-mono tabular-nums ${
+                                      lab.status === 'critical' ? 'text-destructive font-bold' : 
+                                      lab.status === 'abnormal' ? 'text-yellow-600 font-semibold' : ''
+                                    }`}>
                                       {lab.value || '—'}{lab.unit ? ` ${lab.unit}` : ''}
                                     </span>
-                                  </td>
-                                  <td className="py-2 px-3 text-right text-muted-foreground">{lab.reference_range || '—'}</td>
-                                  <td className="py-2 px-3 text-center">
-                                    {lab.status && (
-                                      <Badge className={`text-[9px] px-1.5 py-0 ${statusColors[lab.status] || 'bg-muted'}`}>
-                                        {lab.status}
-                                      </Badge>
+                                    {lab.reference_range && (
+                                      <p className="text-[10px] text-muted-foreground">Normal: {lab.reference_range}</p>
                                     )}
-                                  </td>
-                                  <td className="py-2 pl-3 text-right text-muted-foreground whitespace-nowrap">
-                                    {lab.date_recorded ? format(new Date(lab.date_recorded), 'MMM d, yyyy') : '—'}
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    </CardContent>
-                  </Card>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
                 )}
 
                 {/* Active Conditions & Medications */}
@@ -586,14 +656,9 @@ export default function MedicalHistory() {
                         </CardHeader>
                         <CardContent className="space-y-2">
                           {medicalData.filter(i => i.data_type === 'condition' && i.status === 'active').map(item => (
-                            <div key={item.id} className="flex items-center justify-between bg-destructive/5 rounded-lg px-3 py-2">
-                              <div>
-                                <span className="text-sm font-medium">{item.title}</span>
-                                {item.notes && <p className="text-xs text-muted-foreground mt-0.5">{item.notes}</p>}
-                              </div>
-                              {item.date_recorded && (
-                                <span className="text-[10px] text-muted-foreground">{format(new Date(item.date_recorded), 'MMM d, yyyy')}</span>
-                              )}
+                            <div key={item.id} className="bg-destructive/5 rounded-lg px-3 py-2">
+                              <span className="text-sm font-medium">{item.title}</span>
+                              {item.notes && <p className="text-xs text-muted-foreground mt-0.5">{item.notes}</p>}
                             </div>
                           ))}
                         </CardContent>
@@ -609,11 +674,10 @@ export default function MedicalHistory() {
                         </CardHeader>
                         <CardContent className="space-y-2">
                           {medicalData.filter(i => i.data_type === 'medication' && i.status === 'active').map(item => (
-                            <div key={item.id} className="flex items-center justify-between bg-primary/5 rounded-lg px-3 py-2">
-                              <div>
-                                <span className="text-sm font-medium">{item.title}</span>
-                                {item.value && <span className="text-xs text-muted-foreground ml-2">{item.value}</span>}
-                              </div>
+                            <div key={item.id} className="bg-primary/5 rounded-lg px-3 py-2">
+                              <span className="text-sm font-medium">{item.title}</span>
+                              {item.value && <span className="text-xs text-muted-foreground ml-2">{item.value}</span>}
+                              {item.notes && <p className="text-xs text-muted-foreground mt-0.5">{item.notes}</p>}
                             </div>
                           ))}
                         </CardContent>
@@ -622,12 +686,12 @@ export default function MedicalHistory() {
                   </div>
                 )}
 
-                {/* Doctor Conclusions */}
+                {/* AI Summaries */}
                 {analyzedDocs.length > 0 && (
                   <div>
                     <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
                       <Stethoscope className="h-4 w-4" />
-                      Doctor Conclusions & Summaries
+                      Analysis Summaries
                     </h3>
                     <div className="space-y-3">
                       {analyzedDocs.map((doc) => (
@@ -650,7 +714,7 @@ export default function MedicalHistory() {
                                   )}
                                 </div>
                                 <div className="bg-muted/40 rounded-lg p-3 mt-2 border border-border/50">
-                                  <p className="text-sm leading-relaxed">{doc.ai_summary}</p>
+                                  {doc.ai_summary && renderEnhancedSummary(doc.ai_summary)}
                                 </div>
                               </div>
                             </div>
@@ -671,12 +735,12 @@ export default function MedicalHistory() {
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <BarChart3 className="h-12 w-12 text-muted-foreground mb-4" />
                   <p className="text-muted-foreground text-center mb-2 font-medium">No analytics available yet</p>
-                  <p className="text-sm text-muted-foreground text-center">Upload health documents to see trends, predictions, and statistics.</p>
+                  <p className="text-sm text-muted-foreground text-center">Upload health documents to see trends and statistics.</p>
                 </CardContent>
               </Card>
             ) : (
               <>
-                {/* Health Score & Timing Cards */}
+                {/* Health Score & Timing */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {stats.overallHealthScore !== null && (
                     <Card className="p-4">
@@ -688,7 +752,7 @@ export default function MedicalHistory() {
                         {stats.overallHealthScore}%
                       </p>
                       <Progress value={stats.overallHealthScore} className="h-1.5 mt-1" />
-                      <p className="text-[10px] text-muted-foreground mt-1">based on {stats.labResults.length} lab tests</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">based on {stats.labResults.length} tests</p>
                     </Card>
                   )}
                   <Card className="p-4">
@@ -696,12 +760,8 @@ export default function MedicalHistory() {
                       <Clock className="h-4 w-4 text-primary" />
                       <span className="text-xs text-muted-foreground">Last Checkup</span>
                     </div>
-                    <p className="text-2xl font-bold">
-                      {stats.daysSinceLastDoc !== null ? `${stats.daysSinceLastDoc}d` : '—'}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {stats.lastDocDate ? `on ${format(stats.lastDocDate, 'MMM d')}` : 'no records'}
-                    </p>
+                    <p className="text-2xl font-bold">{stats.daysSinceLastDoc !== null ? `${stats.daysSinceLastDoc}d` : '—'}</p>
+                    <p className="text-[10px] text-muted-foreground">{stats.lastDocDate ? `on ${format(stats.lastDocDate, 'MMM d')}` : 'no records'}</p>
                   </Card>
                   {stats.avgDaysBetweenDocs !== null && (
                     <Card className="p-4">
@@ -725,15 +785,15 @@ export default function MedicalHistory() {
                   )}
                 </div>
 
-                {/* Predictions / Trend Insights */}
+                {/* Predictions */}
                 {stats.predictions.length > 0 && (
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm flex items-center gap-2">
                         <Zap className="h-4 w-4 text-primary" />
-                        Trend Predictions
+                        How Your Results Are Changing
                       </CardTitle>
-                      <p className="text-[10px] text-muted-foreground">Based on changes across your lab results over time</p>
+                      <p className="text-[10px] text-muted-foreground">Trends based on your repeated tests over time</p>
                     </CardHeader>
                     <CardContent className="space-y-2">
                       {stats.predictions.map((pred, i) => {
@@ -750,7 +810,7 @@ export default function MedicalHistory() {
                               <div className="flex items-center gap-2">
                                 <span className="text-sm font-medium">{pred.title}</span>
                                 <Badge variant="outline" className="text-[9px] px-1.5 py-0">
-                                  {pred.trend}
+                                  {pred.trend === 'improving' ? '↗ Improving' : pred.trend === 'worsening' ? '↘ Needs attention' : '→ Stable'}
                                 </Badge>
                               </div>
                               <p className="text-xs mt-0.5 opacity-80">{pred.detail}</p>
@@ -770,7 +830,7 @@ export default function MedicalHistory() {
                         <Target className="h-4 w-4 text-primary" />
                         Health Score Over Time
                       </CardTitle>
-                      <p className="text-[10px] text-muted-foreground">% of lab results within normal range per checkup</p>
+                      <p className="text-[10px] text-muted-foreground">% of results within normal range per checkup</p>
                     </CardHeader>
                     <CardContent>
                       <ResponsiveContainer width="100%" height={220}>
@@ -784,7 +844,7 @@ export default function MedicalHistory() {
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="date" tick={{ fontSize: 10 }} />
                           <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
-                          <ReferenceLine y={80} stroke="#22c55e" strokeDasharray="3 3" strokeOpacity={0.5} label={{ value: "Good", position: "insideTopRight", fontSize: 9, fill: "#22c55e" }} />
+                          <ReferenceLine y={80} stroke="#22c55e" strokeDasharray="3 3" strokeOpacity={0.5} />
                           <Tooltip
                             content={({ active, payload }) => {
                               if (!active || !payload?.length) return null;
@@ -805,74 +865,48 @@ export default function MedicalHistory() {
                   </Card>
                 )}
 
-                {/* Lab Trend Lines */}
-                {Object.keys(stats.labTrendData).length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4" />
-                      Lab Value Trends
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {Object.entries(stats.labTrendData)
-                        .filter(([, info]) => info.data.length >= 1)
-                        .slice(0, 8)
-                        .map(([title, info]) => {
-                          const hasRefRange = info.data.some(d => d.refLow !== null && d.refHigh !== null);
-                          const refLow = info.data.find(d => d.refLow !== null)?.refLow ?? undefined;
-                          const refHigh = info.data.find(d => d.refHigh !== null)?.refHigh ?? undefined;
-                          const latestVal = info.data[info.data.length - 1].value;
-                          const statusColor = info.latestStatus === 'critical' ? 'text-destructive' : info.latestStatus === 'abnormal' ? 'text-yellow-600' : 'text-green-600';
-
-                          return (
-                            <Card key={title}>
-                              <CardHeader className="pb-1">
-                                <CardTitle className="text-xs flex items-center justify-between">
-                                  <span className="truncate">{title}</span>
-                                  <span className={`font-mono text-sm ${statusColor}`}>
-                                    {latestVal}{info.unit ? ` ${info.unit}` : ''}
-                                  </span>
-                                </CardTitle>
-                              </CardHeader>
-                              <CardContent className="pt-0">
-                                {info.data.length >= 2 ? (
-                                  <ResponsiveContainer width="100%" height={120}>
-                                    <ComposedChart data={info.data} margin={{ left: 0, right: 5, top: 5, bottom: 0 }}>
-                                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                      <XAxis dataKey="date" tick={{ fontSize: 9 }} />
-                                      <YAxis tick={{ fontSize: 9 }} domain={['auto', 'auto']} />
-                                      {hasRefRange && refLow !== undefined && refHigh !== undefined && (
-                                        <ReferenceArea y1={refLow} y2={refHigh} fill="#22c55e" fillOpacity={0.08} label={{ value: "Normal", position: "insideTopLeft", fontSize: 8, fill: "#22c55e" }} />
-                                      )}
-                                      <Tooltip
-                                        content={({ active, payload }) => {
-                                          if (!active || !payload?.length) return null;
-                                          const d = payload[0].payload;
-                                          return (
-                                            <div className="bg-background border border-border rounded-lg px-2 py-1.5 shadow-lg text-xs">
-                                              <p>{d.date}: <span className="font-semibold">{d.value}{info.unit ? ` ${info.unit}` : ''}</span></p>
-                                              {d.refLow !== null && <p className="text-muted-foreground">Ref: {d.refLow}–{d.refHigh}</p>}
-                                            </div>
-                                          );
-                                        }}
-                                      />
-                                      <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3, fill: 'hsl(var(--primary))' }} />
-                                    </ComposedChart>
-                                  </ResponsiveContainer>
-                                ) : (
-                                  <div className="flex items-center justify-center h-20 text-muted-foreground text-xs">
-                                    <div className="text-center">
-                                      <p className="font-mono text-lg">{latestVal}{info.unit ? ` ${info.unit}` : ''}</p>
-                                      {hasRefRange && <p className="text-[10px]">Ref: {refLow}–{refHigh}</p>}
-                                      <p className="text-[10px] mt-1">Single reading — trends need ≥2</p>
-                                    </div>
-                                  </div>
-                                )}
-                              </CardContent>
-                            </Card>
-                          );
-                        })}
-                    </div>
-                  </div>
+                {/* Lab Deviation Chart */}
+                {stats.labDeviationData.length > 0 && (
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4 text-primary" />
+                        How Far from Normal
+                      </CardTitle>
+                      <p className="text-[10px] text-muted-foreground">How each result compares to the middle of its normal range</p>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={Math.max(180, stats.labDeviationData.length * 28)}>
+                        <BarChart data={stats.labDeviationData} layout="vertical" margin={{ left: 5, right: 15 }}>
+                          <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                          <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
+                          <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} width={70} />
+                          <ReferenceLine x={0} stroke="hsl(var(--foreground))" strokeWidth={1.5} strokeOpacity={0.4} />
+                          <Tooltip
+                            content={({ active, payload }) => {
+                              if (!active || !payload?.length) return null;
+                              const d = payload[0].payload;
+                              return (
+                                <div className="bg-background border border-border rounded-lg px-3 py-2 shadow-lg text-xs">
+                                  <p className="font-medium">{d.name}</p>
+                                  <p>Your result: {d.value} {d.unit}</p>
+                                  <p>Normal range: {d.refRange}</p>
+                                  <p className={d.deviation > 0 ? 'text-yellow-600' : d.deviation < 0 ? 'text-blue-600' : 'text-green-600'}>
+                                    {d.deviation > 0 ? '+' : ''}{d.deviation}% from center of normal
+                                  </p>
+                                </div>
+                              );
+                            }}
+                          />
+                          <Bar dataKey="deviation" radius={[0, 4, 4, 0]} barSize={14}>
+                            {stats.labDeviationData.map((entry, index) => (
+                              <Cell key={`dev-${index}`} fill={entry.fill} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
                 )}
 
                 {/* Lab Status Distribution */}
@@ -882,7 +916,7 @@ export default function MedicalHistory() {
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm flex items-center gap-2">
                           <FlaskConical className="h-4 w-4 text-primary" />
-                          Lab Status Distribution
+                          Results Breakdown
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
@@ -909,7 +943,6 @@ export default function MedicalHistory() {
                       </CardContent>
                     </Card>
 
-                    {/* Checkup Frequency */}
                     {documents.length >= 2 && (
                       <Card>
                         <CardHeader className="pb-2">
@@ -943,22 +976,17 @@ export default function MedicalHistory() {
                               </div>
                             )}
                             {stats.nextCheckupEstimate && (
-                              <>
-                                <div className="border-t border-border pt-2 mt-2">
-                                  <div className="flex justify-between text-xs">
-                                    <span className="text-muted-foreground">Predicted next</span>
-                                    <span className="font-semibold text-primary">
-                                      {format(stats.nextCheckupEstimate, 'MMM d, yyyy')}
-                                    </span>
-                                  </div>
-                                  <p className="text-[10px] text-muted-foreground mt-1">
-                                    {differenceInDays(stats.nextCheckupEstimate, new Date()) > 0
-                                      ? `In ${differenceInDays(stats.nextCheckupEstimate, new Date())} days`
-                                      : `${Math.abs(differenceInDays(stats.nextCheckupEstimate, new Date()))} days overdue`
-                                    }
-                                  </p>
+                              <div className="border-t border-border pt-2 mt-2">
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-muted-foreground">Predicted next</span>
+                                  <span className="font-semibold text-primary">{format(stats.nextCheckupEstimate, 'MMM d, yyyy')}</span>
                                 </div>
-                              </>
+                                <p className="text-[10px] text-muted-foreground mt-1">
+                                  {differenceInDays(stats.nextCheckupEstimate, new Date()) > 0
+                                    ? `In ${differenceInDays(stats.nextCheckupEstimate, new Date())} days`
+                                    : `${Math.abs(differenceInDays(stats.nextCheckupEstimate, new Date()))} days overdue`}
+                                </p>
+                              </div>
                             )}
                           </div>
                         </CardContent>
@@ -970,58 +998,151 @@ export default function MedicalHistory() {
             )}
           </TabsContent>
 
-          {/* ============ DETAILS TAB ============ */}
-          <TabsContent value="details" className="space-y-4 mt-4">
-            {dataTypes.length === 0 ? (
+          {/* ============ TRENDS TAB (replaces Details + Timeline) ============ */}
+          <TabsContent value="trends" className="space-y-4 mt-4">
+            {stats.repeatedTests.length === 0 && Object.keys(stats.labTrendData).length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
-                  <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground text-center">No extracted data yet.</p>
+                  <TrendingUp className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground text-center mb-2 font-medium">No trends available yet</p>
+                  <p className="text-sm text-muted-foreground text-center">
+                    Upload multiple documents with the same tests to see how your values change over time.
+                  </p>
                 </CardContent>
               </Card>
             ) : (
-              dataTypes.map((type) => {
-                const config = typeConfig[type] || { icon: Activity, label: type, color: 'text-foreground', bgColor: 'bg-muted' };
-                const Icon = config.icon;
-                const items = groupedData[type];
-                return (
-                  <Card key={type}>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="flex items-center gap-2 text-base">
-                        <Icon className={`h-5 w-5 ${config.color}`} />
-                        {config.label}
-                        <Badge variant="secondary" className="ml-auto">{items.length}</Badge>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      {items.map((item) => (
-                        <div key={item.id} className="flex items-start justify-between gap-3 pb-3 border-b last:border-0 last:pb-0">
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-sm">{item.title}</div>
-                            <div className="flex items-center gap-2 mt-1 flex-wrap">
-                              {item.value && (
-                                <span className="text-sm font-semibold">{item.value}{item.unit ? ` ${item.unit}` : ''}</span>
+              <>
+                {/* Repeated tests with timeline charts */}
+                {stats.repeatedTests.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4" />
+                      Test History & Predictions
+                    </h3>
+                    <p className="text-xs text-muted-foreground mb-4">
+                      These tests appear in multiple documents. Track how your values change over time.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {stats.repeatedTests.map(([title, info]) => {
+                        const hasRefRange = info.data.some(d => d.refLow !== null && d.refHigh !== null);
+                        const refLow = info.data.find(d => d.refLow !== null)?.refLow ?? undefined;
+                        const refHigh = info.data.find(d => d.refHigh !== null)?.refHigh ?? undefined;
+                        const latestVal = info.data[info.data.length - 1].value;
+                        const firstVal = info.data[0].value;
+                        const changePct = firstVal > 0 ? Math.round(((latestVal - firstVal) / firstVal) * 100) : 0;
+                        const statusColor = info.latestStatus === 'critical' ? 'text-destructive' : info.latestStatus === 'abnormal' ? 'text-yellow-600' : 'text-green-600';
+
+                        // Simple linear prediction for next value
+                        let predictedNext: number | null = null;
+                        if (info.data.length >= 3) {
+                          const vals = info.data.map(d => d.value);
+                          const avgChange = (vals[vals.length - 1] - vals[0]) / (vals.length - 1);
+                          predictedNext = Math.round((vals[vals.length - 1] + avgChange) * 100) / 100;
+                        }
+
+                        return (
+                          <Card key={title}>
+                            <CardHeader className="pb-1">
+                              <CardTitle className="text-xs flex items-center justify-between">
+                                <span className="truncate">{title}</span>
+                                <div className="flex items-center gap-1.5">
+                                  <span className={`font-mono text-sm ${statusColor}`}>
+                                    {latestVal}{info.unit ? ` ${info.unit}` : ''}
+                                  </span>
+                                  <Badge variant="outline" className={`text-[9px] px-1 py-0 ${changePct > 0 ? 'text-yellow-600' : changePct < 0 ? 'text-blue-600' : ''}`}>
+                                    {changePct > 0 ? '+' : ''}{changePct}%
+                                  </Badge>
+                                </div>
+                              </CardTitle>
+                              <p className="text-[10px] text-muted-foreground">{info.data.length} readings</p>
+                            </CardHeader>
+                            <CardContent className="pt-0">
+                              <ResponsiveContainer width="100%" height={140}>
+                                <ComposedChart data={[
+                                  ...info.data,
+                                  ...(predictedNext !== null ? [{ date: 'Predicted', value: predictedNext, refLow: refLow ?? null, refHigh: refHigh ?? null }] : [])
+                                ]} margin={{ left: 0, right: 5, top: 5, bottom: 0 }}>
+                                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                  <XAxis dataKey="date" tick={{ fontSize: 9 }} />
+                                  <YAxis tick={{ fontSize: 9 }} domain={['auto', 'auto']} />
+                                  {hasRefRange && refLow !== undefined && refHigh !== undefined && (
+                                    <ReferenceArea y1={refLow} y2={refHigh} fill="#22c55e" fillOpacity={0.08} label={{ value: "Normal", position: "insideTopLeft", fontSize: 8, fill: "#22c55e" }} />
+                                  )}
+                                  <Tooltip
+                                    content={({ active, payload }) => {
+                                      if (!active || !payload?.length) return null;
+                                      const d = payload[0].payload;
+                                      const isPredicted = d.date === 'Predicted';
+                                      return (
+                                        <div className="bg-background border border-border rounded-lg px-2 py-1.5 shadow-lg text-xs">
+                                          <p className={isPredicted ? 'text-primary font-medium' : ''}>
+                                            {isPredicted ? '🔮 Predicted next' : d.date}: <span className="font-semibold">{d.value}{info.unit ? ` ${info.unit}` : ''}</span>
+                                          </p>
+                                          {d.refLow !== null && <p className="text-muted-foreground">Normal: {d.refLow}–{d.refHigh}</p>}
+                                        </div>
+                                      );
+                                    }}
+                                  />
+                                  <Line
+                                    type="monotone"
+                                    dataKey="value"
+                                    stroke="hsl(var(--primary))"
+                                    strokeWidth={2}
+                                    dot={(props: any) => {
+                                      const { cx, cy, payload } = props;
+                                      if (payload.date === 'Predicted') {
+                                        return <circle key="predicted" cx={cx} cy={cy} r={4} fill="hsl(var(--primary))" stroke="hsl(var(--primary))" strokeWidth={2} strokeDasharray="4 2" opacity={0.5} />;
+                                      }
+                                      return <circle key={payload.date} cx={cx} cy={cy} r={3} fill="hsl(var(--primary))" />;
+                                    }}
+                                    strokeDasharray={predictedNext !== null ? undefined : undefined}
+                                  />
+                                </ComposedChart>
+                              </ResponsiveContainer>
+                              {predictedNext !== null && (
+                                <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
+                                  <span className="text-primary">🔮</span> Predicted next value: <span className="font-semibold">{predictedNext}{info.unit ? ` ${info.unit}` : ''}</span>
+                                  {hasRefRange && refLow !== undefined && refHigh !== undefined && (
+                                    <span className={predictedNext >= refLow && predictedNext <= refHigh ? 'text-green-600' : 'text-yellow-600'}>
+                                      ({predictedNext >= refLow && predictedNext <= refHigh ? 'within normal' : 'outside normal'})
+                                    </span>
+                                  )}
+                                </p>
                               )}
-                              {item.reference_range && (
-                                <span className="text-xs text-muted-foreground">(Ref: {item.reference_range})</span>
-                              )}
-                              {item.status && (
-                                <Badge className={`text-[10px] px-1.5 py-0 ${statusColors[item.status] || 'bg-muted'}`}>{item.status}</Badge>
-                              )}
-                            </div>
-                            {item.notes && <p className="text-xs text-muted-foreground mt-1">{item.notes}</p>}
-                          </div>
-                          {item.date_recorded && (
-                            <span className="text-xs text-muted-foreground whitespace-nowrap">
-                              {format(new Date(item.date_recorded), 'MMM d, yyyy')}
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                );
-              })
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Single readings */}
+                {Object.entries(stats.labTrendData).filter(([, info]) => info.data.length === 1).length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+                      Single Readings
+                    </h3>
+                    <p className="text-xs text-muted-foreground mb-3">These tests have only one reading. Upload more documents with these tests to see trends.</p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {Object.entries(stats.labTrendData)
+                        .filter(([, info]) => info.data.length === 1)
+                        .map(([title, info]) => {
+                          const d = info.data[0];
+                          const statusColor = info.latestStatus === 'critical' ? 'text-destructive' : info.latestStatus === 'abnormal' ? 'text-yellow-600' : info.latestStatus === 'expected' ? 'text-blue-600' : 'text-green-600';
+                          return (
+                            <Card key={title} className="p-3">
+                              <p className="text-xs font-medium truncate">{title}</p>
+                              <p className={`text-lg font-mono font-bold ${statusColor}`}>{d.value}{info.unit ? ` ${info.unit}` : ''}</p>
+                              {d.refLow !== null && <p className="text-[10px] text-muted-foreground">Normal: {d.refLow}–{d.refHigh}</p>}
+                              <p className="text-[10px] text-muted-foreground">{d.date}</p>
+                            </Card>
+                          );
+                        })}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </TabsContent>
 
@@ -1050,20 +1171,21 @@ export default function MedicalHistory() {
                         </div>
                         {doc.ai_summary && (
                           <div className="bg-muted/50 rounded-lg p-3 mt-2">
-                            <p className="text-xs leading-relaxed">{doc.ai_summary}</p>
+                            {renderEnhancedSummary(doc.ai_summary)}
                           </div>
                         )}
                         {medicalData.filter(m => m.document_id === doc.id).length > 0 && (
                           <div className="mt-2 space-y-1">
                             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Extracted Data</p>
-                            {medicalData.filter(m => m.document_id === doc.id).map(item => (
-                              <div key={item.id} className="flex items-center gap-2 text-xs">
-                                <Badge variant="outline" className="text-[9px] px-1">{item.data_type}</Badge>
+                            {medicalData.filter(m => m.document_id === doc.id)
+                              .sort((a, b) => (priorityOrder[(a.raw_data as any)?.priority || 'low'] ?? 2) - (priorityOrder[(b.raw_data as any)?.priority || 'low'] ?? 2))
+                              .map(item => (
+                              <div key={item.id} className="flex items-center gap-2 text-xs py-0.5">
+                                <Badge className={`text-[9px] px-1 py-0 ${statusColors[item.status || ''] || 'bg-muted'}`}>
+                                  {statusLabels[item.status || ''] || item.status || item.data_type}
+                                </Badge>
                                 <span className="font-medium">{item.title}</span>
-                                {item.value && <span className="text-muted-foreground">{item.value}{item.unit ? ` ${item.unit}` : ''}</span>}
-                                {item.status && (
-                                  <Badge className={`text-[9px] px-1 py-0 ${statusColors[item.status] || 'bg-muted'}`}>{item.status}</Badge>
-                                )}
+                                {item.value && <span className="text-muted-foreground font-mono">{item.value}{item.unit ? ` ${item.unit}` : ''}</span>}
                               </div>
                             ))}
                           </div>
@@ -1073,56 +1195,6 @@ export default function MedicalHistory() {
                   </CardContent>
                 </Card>
               ))
-            )}
-          </TabsContent>
-
-          {/* ============ TIMELINE TAB ============ */}
-          <TabsContent value="timeline" className="mt-4">
-            {medicalData.length === 0 ? (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground text-center">No timeline data available yet.</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="relative">
-                <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
-                <div className="space-y-4">
-                  {medicalData
-                    .filter(item => item.date_recorded)
-                    .sort((a, b) => new Date(b.date_recorded!).getTime() - new Date(a.date_recorded!).getTime())
-                    .map((item) => {
-                      const config = typeConfig[item.data_type] || { icon: Activity, label: item.data_type, color: 'text-foreground', bgColor: 'bg-muted' };
-                      const Icon = config.icon;
-                      return (
-                        <div key={item.id} className="relative pl-10">
-                          <div className={`absolute left-2.5 w-3 h-3 rounded-full border-2 border-background ${item.status === 'critical' ? 'bg-destructive' : item.status === 'abnormal' ? 'bg-yellow-500' : 'bg-primary'}`} />
-                          <Card className="p-3">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex items-start gap-2 flex-1">
-                                <Icon className={`h-4 w-4 mt-0.5 ${config.color} flex-shrink-0`} />
-                                <div className="min-w-0">
-                                  <p className="font-medium text-sm">{item.title}</p>
-                                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                                    {item.value && <span className="text-xs font-semibold">{item.value}{item.unit ? ` ${item.unit}` : ''}</span>}
-                                    {item.status && (
-                                      <Badge className={`text-[10px] px-1.5 py-0 ${statusColors[item.status] || 'bg-muted'}`}>{item.status}</Badge>
-                                    )}
-                                  </div>
-                                  {item.notes && <p className="text-xs text-muted-foreground mt-1">{item.notes}</p>}
-                                </div>
-                              </div>
-                              <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                                {format(new Date(item.date_recorded!), 'MMM d, yyyy')}
-                              </span>
-                            </div>
-                          </Card>
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
             )}
           </TabsContent>
         </Tabs>
