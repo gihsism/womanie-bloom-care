@@ -1,6 +1,6 @@
-import { createRoot } from "react-dom/client";
-import App from "./App.tsx";
-import "./index.css";
+import { createRoot } from 'react-dom/client';
+import App from './App.tsx';
+import './index.css';
 
 // Prevent stale PWA Service Worker caches from breaking the dev preview
 if (import.meta.env.DEV && "serviceWorker" in navigator) {
