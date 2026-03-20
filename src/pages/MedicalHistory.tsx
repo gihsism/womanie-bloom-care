@@ -71,6 +71,7 @@ interface MedicalDataItem {
     priority?: string;
     panel?: string;
     is_repeat_test?: boolean;
+    possible_conditions?: string[];
   } | null;
 }
 
