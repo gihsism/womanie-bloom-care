@@ -309,6 +309,8 @@ export default function MedicalHistory() {
   const [documents, setDocuments] = useState<DocumentInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedPanels, setExpandedPanels] = useState<Set<string>>(new Set());
+  const [reanalyzing, setReanalyzing] = useState(false);
+  const [reanalyzeProgress, setReanalyzeProgress] = useState({ done: 0, total: 0 });
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/auth/login');
