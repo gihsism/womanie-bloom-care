@@ -78,6 +78,8 @@ interface MedicalDataItem {
 interface DocumentInfo {
   id: string;
   file_name: string;
+  file_path: string;
+  mime_type: string;
   ai_suggested_name: string | null;
   ai_summary: string | null;
   ai_suggested_category: string | null;
