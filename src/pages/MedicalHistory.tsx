@@ -78,6 +78,8 @@ interface MedicalDataItem {
 interface DocumentInfo {
   id: string;
   file_name: string;
+  file_path: string;
+  mime_type: string;
   ai_suggested_name: string | null;
   ai_summary: string | null;
   ai_suggested_category: string | null;
@@ -307,6 +309,8 @@ export default function MedicalHistory() {
   const [documents, setDocuments] = useState<DocumentInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedPanels, setExpandedPanels] = useState<Set<string>>(new Set());
+  const [reanalyzing, setReanalyzing] = useState(false);
+  const [reanalyzeProgress, setReanalyzeProgress] = useState({ done: 0, total: 0 });
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/auth/login');
@@ -320,7 +324,7 @@ export default function MedicalHistory() {
     try {
       const [medRes, docRes] = await Promise.all([
         supabase.from('medical_extracted_data').select('*').eq('user_id', user!.id).order('date_recorded', { ascending: false, nullsFirst: false }),
-        supabase.from('health_documents').select('id, file_name, ai_suggested_name, ai_summary, ai_suggested_category, uploaded_at, document_type').eq('user_id', user!.id).order('uploaded_at', { ascending: false }),
+        supabase.from('health_documents').select('id, file_name, file_path, mime_type, ai_suggested_name, ai_summary, ai_suggested_category, uploaded_at, document_type').eq('user_id', user!.id).order('uploaded_at', { ascending: false }),
       ]);
       if (medRes.data) setMedicalData(medRes.data as MedicalDataItem[]);
       if (docRes.data) setDocuments(docRes.data);
@@ -338,6 +342,26 @@ export default function MedicalHistory() {
       else next.add(panel);
       return next;
     });
+  };
+
+  const reanalyzeAll = async () => {
+    if (!user || documents.length === 0) return;
+    setReanalyzing(true);
+    setReanalyzeProgress({ done: 0, total: documents.length });
+    await supabase.from('medical_extracted_data').delete().eq('user_id', user.id);
+    for (let i = 0; i < documents.length; i++) {
+      const doc = documents[i];
+      try {
+        await supabase.functions.invoke('analyze-document', {
+          body: { documentId: doc.id, filePath: doc.file_path, fileName: doc.file_name, mimeType: doc.mime_type },
+        });
+      } catch (err) {
+        console.error('Re-analysis failed for', doc.file_name, err);
+      }
+      setReanalyzeProgress({ done: i + 1, total: documents.length });
+    }
+    await fetchData();
+    setReanalyzing(false);
   };
 
   const stats = useMemo(() => {
@@ -514,6 +538,23 @@ export default function MedicalHistory() {
       </div>
 
       <div className="px-4 py-6 max-w-4xl mx-auto space-y-6">
+        {hasDocuments && (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={reanalyzeAll}
+              disabled={reanalyzing}
+              className="ml-auto"
+            >
+              {reanalyzing ? (
+                <>Analyzing {reanalyzeProgress.done}/{reanalyzeProgress.total}…</>
+              ) : (
+                <>🔄 Re-analyze all documents</>
+              )}
+            </Button>
+          </div>
+        )}
         <DocumentUpload />
 
         <Tabs defaultValue="overview" className="w-full">
