@@ -538,6 +538,23 @@ export default function MedicalHistory() {
       </div>
 
       <div className="px-4 py-6 max-w-4xl mx-auto space-y-6">
+        {hasDocuments && (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={reanalyzeAll}
+              disabled={reanalyzing}
+              className="ml-auto"
+            >
+              {reanalyzing ? (
+                <>Analyzing {reanalyzeProgress.done}/{reanalyzeProgress.total}…</>
+              ) : (
+                <>🔄 Re-analyze all documents</>
+              )}
+            </Button>
+          </div>
+        )}
         <DocumentUpload />
 
         <Tabs defaultValue="overview" className="w-full">
