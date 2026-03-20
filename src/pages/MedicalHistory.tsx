@@ -267,6 +267,30 @@ function ResultCard({ item }: { item: MedicalDataItem }) {
           </p>
         </div>
       )}
+      {/* Possible conditions — only for abnormal/critical */}
+      {(item.status === 'abnormal' || item.status === 'critical') &&
+        (item.raw_data as any)?.possible_conditions?.length > 0 && (
+        <div className="mt-2.5 bg-background/80 rounded-lg px-3 py-2.5 border border-border/40">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5 flex items-center gap-1">
+            <HelpCircle className="h-3 w-3" />
+            What this could mean
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {((item.raw_data as any).possible_conditions as string[]).map((condition: string, idx: number) => (
+              <span key={idx} className={`text-xs px-2.5 py-1 rounded-full border ${
+                item.status === 'critical'
+                  ? 'bg-red-50 dark:bg-red-900/15 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800'
+                  : 'bg-amber-50 dark:bg-amber-900/15 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800'
+              }`}>
+                {condition}
+              </span>
+            ))}
+          </div>
+          <p className="text-[9px] text-muted-foreground mt-2 italic">
+            ⚕️ These are possibilities, not diagnoses. Only your doctor can make a diagnosis.
+          </p>
+        </div>
+      )}
       {item.date_recorded && (
         <p className="text-[10px] text-muted-foreground mt-2">
           📅 {format(new Date(item.date_recorded), 'MMMM d, yyyy')}
