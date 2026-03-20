@@ -213,6 +213,7 @@ Return STRICT JSON with this shape:
       "date_recorded": "YYYY-MM-DD if found in document",
       "notes": "Plain-language explanation of what this result means for the patient. Be helpful, not alarming.",
       "panel": "name of test panel if applicable (e.g., 'Complete Blood Count', 'Thyroid Panel', 'Coagulation Panel', 'Autoimmune Panel')",
+      "possible_conditions": ["Only for abnormal/critical results: list 1-3 possible conditions this could indicate, in plain language. E.g., for low ferritin in pregnancy: ['Iron deficiency anemia', 'Increased risk of preterm birth']. For positive anticardiolipin: ['Antiphospholipid syndrome (APS)', 'Increased blood clot risk']. For normal results, use empty array []."],
       "is_repeat_test": false
     }
   ],
