@@ -16,6 +16,7 @@ import CycleUpdateSuggestions from '@/components/dashboard/CycleUpdateSuggestion
 import HealthCategories from '@/components/dashboard/HealthCategories';
 import SmartRecommendations from '@/components/dashboard/SmartRecommendations';
 import TestComparisonTable from '@/components/dashboard/TestComparisonTable';
+import { useToast } from '@/hooks/use-toast';
 import {
   ArrowLeft,
   Home,
@@ -557,6 +558,54 @@ export default function MedicalHistory() {
   const [expandedPanels, setExpandedPanels] = useState<Set<string>>(new Set());
   const [reanalyzing, setReanalyzing] = useState(false);
   const [reanalyzeProgress, setReanalyzeProgress] = useState({ done: 0, total: 0 });
+  const { toast } = useToast();
+
+  // Handle cycle update suggestions (e.g., switch to pregnancy mode)
+  const handleCycleUpdate = async (suggestion: { type: string; id: string }) => {
+    if (!user) return;
+
+    try {
+      let updates: Record<string, string | null> = {};
+
+      switch (suggestion.type) {
+        case 'pregnancy_detected':
+          updates = { life_stage: 'pregnancy' };
+          break;
+        case 'menopause_indicator':
+          updates = { life_stage: 'menopause' };
+          break;
+        case 'ovulation_confirmed':
+        case 'phase_update':
+        case 'cycle_length_adjust':
+        case 'irregularity_flag':
+          // These don't change life stage, just acknowledged
+          toast({ title: 'Noted!', description: 'This will be factored into your predictions.' });
+          return;
+        default:
+          return;
+      }
+
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      setLifeStage(updates.life_stage || lifeStage);
+      toast({
+        title: 'Mode updated!',
+        description: `Your dashboard has been switched to ${updates.life_stage?.replace('-', ' ')} mode.`,
+      });
+    } catch (error) {
+      console.error('Error updating cycle:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to update your mode. Please try again.',
+      });
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/auth/login');
@@ -929,7 +978,7 @@ export default function MedicalHistory() {
                 </div>
 
                 {/* Suggests cycle tracker updates based on hormone lab results */}
-                <CycleUpdateSuggestions labResults={stats.labResults} lifeStage={lifeStage} />
+                <CycleUpdateSuggestions labResults={stats.labResults} lifeStage={lifeStage} onUpdateCycle={handleCycleUpdate} />
 
                 {/* Detects cycle phase from hormones and explains what each means */}
                 <CycleImpactSection labResults={stats.labResults} lifeStage={lifeStage} />
