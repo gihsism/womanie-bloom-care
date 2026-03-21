@@ -82,7 +82,7 @@ const Navigation = () => {
                   <Button variant="outline" size="sm" onClick={async () => {
                     const { supabase } = await import('@/integrations/supabase/client');
                     await supabase.auth.signOut();
-                    window.location.reload();
+                    window.location.href = '/';
                   }}>
                     Log Out
                   </Button>
@@ -159,7 +159,7 @@ const Navigation = () => {
                         const { supabase } = await import('@/integrations/supabase/client');
                         await supabase.auth.signOut();
                         setIsMobileMenuOpen(false);
-                        window.location.reload();
+                        window.location.href = '/';
                       }}
                     >
                       Log Out
