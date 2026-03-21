@@ -14,32 +14,6 @@ import FinalCTA from '@/components/FinalCTA';
 import Footer from '@/components/Footer';
 
 const Index = () => {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
-  const [checking, setChecking] = useState(false);
-
-  useEffect(() => {
-    if (!loading && user) {
-      setChecking(true);
-      supabase
-        .from('profiles')
-        .select('life_stage')
-        .eq('id', user.id)
-        .maybeSingle()
-        .then(({ data }) => {
-          if (data?.life_stage) {
-            navigate('/dashboard', { replace: true });
-          } else {
-            navigate('/welcome', { replace: true });
-          }
-        });
-    }
-  }, [user, loading, navigate]);
-
-  if (!loading && user) {
-    return null;
-  }
-
   return (
     <div className="min-h-screen">
       <Navigation />
