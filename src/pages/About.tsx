@@ -81,9 +81,9 @@ const About = () => {
                 concern in between.
               </p>
               <p>
-                Today, Womanie combines cutting-edge AI technology with expert medical care and a supportive
-                community to provide truly personalized health insights. We're proud to serve over 500,000 women
-                worldwide and partner with thousands of healthcare providers.
+              Today, Womanie combines cutting-edge AI technology with expert medical care and a supportive
+              community to provide truly personalized health insights. We're finalizing our platform and 
+              can't wait to welcome women worldwide very soon.
               </p>
             </div>
           </div>
