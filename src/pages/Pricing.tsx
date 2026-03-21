@@ -116,9 +116,9 @@ const Pricing = () => {
                 <Button
                   className="w-full"
                   variant={plan.popular ? 'default' : 'outline'}
-                  onClick={() => navigate('/auth/select-type')}
+                  onClick={() => navigate(user ? '/dashboard' : '/auth/select-type')}
                 >
-                  {plan.cta}
+                  {user ? (plan.cta === 'Contact Sales' ? 'Contact Sales' : 'Go to Dashboard') : plan.cta}
                 </Button>
               </Card>
             ))}
