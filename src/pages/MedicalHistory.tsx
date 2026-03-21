@@ -19,7 +19,6 @@ import TestComparisonTable from '@/components/dashboard/TestComparisonTable';
 import { useToast } from '@/hooks/use-toast';
 import {
   ArrowLeft,
-  Home,
   FileText,
   Pill,
   Activity,

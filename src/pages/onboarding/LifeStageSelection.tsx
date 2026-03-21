@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Home } from 'lucide-react';
+import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -57,10 +57,6 @@ const LifeStageSelection = () => {
   const handleBack = () => {
     setCurrentStep(1);
     navigate('/onboarding/basic-info');
-  };
-
-  const handleHome = () => {
-    navigate('/dashboard');
   };
 
   return (

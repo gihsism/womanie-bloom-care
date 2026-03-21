@@ -11,7 +11,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Loader2 } from 'lucide-react';
 import {
-  Home,
   Users,
   Calendar,
   Settings,

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar as CalendarIcon, Home, ArrowLeft } from 'lucide-react';
+import { Calendar as CalendarIcon, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -54,9 +54,6 @@ const BasicInformation = () => {
     navigate('/onboarding/life-stage');
   };
 
-  const handleHome = () => {
-    navigate('/dashboard');
-  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col px-4 py-8">

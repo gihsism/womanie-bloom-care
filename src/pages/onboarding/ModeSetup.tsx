@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Home } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import ProgressBar from '@/components/onboarding/ProgressBar';
 import RegularCycleForm from '@/components/onboarding/RegularCycleForm';
@@ -15,10 +15,6 @@ const ModeSetup = () => {
   const handleBack = () => {
     setCurrentStep(2);
     navigate('/onboarding/life-stage');
-  };
-
-  const handleHome = () => {
-    navigate('/dashboard');
   };
 
   const renderForm = () => {

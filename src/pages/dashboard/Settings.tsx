@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Home, Baby, Calendar, Heart, Flower2, Sunset, Pill, Shield, Bell, User } from 'lucide-react';
+import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Pill, Shield, Bell, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
