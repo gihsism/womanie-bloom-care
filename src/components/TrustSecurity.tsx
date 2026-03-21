@@ -44,7 +44,7 @@ const TrustSecurity = () => {
           {features.map((feature, index) => (
             <div key={index} className="text-center">
               <div className="w-16 h-16 bg-gradient-to-br from-accent/20 to-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <feature.icon className="h-8 w-8 text-accent" />
+                <feature.icon className="h-8 w-8 text-accent" aria-hidden="true" />
               </div>
               <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">

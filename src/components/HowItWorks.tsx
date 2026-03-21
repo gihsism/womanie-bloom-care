@@ -47,7 +47,7 @@ const HowItWorks = () => {
               <div className="bg-background border border-border rounded-2xl p-6 h-full shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
-                    <step.icon className="h-6 w-6 text-white" />
+                    <step.icon className="h-6 w-6 text-white" aria-hidden="true" />
                   </div>
                   <div className="text-3xl font-bold text-primary/20">
                     {String(index + 1).padStart(2, '0')}

@@ -64,7 +64,7 @@ const KeyFeatures = () => {
               className="bg-background rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-border group hover:-translate-y-1"
             >
               <div className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <feature.icon className="h-7 w-7 text-white" />
+                <feature.icon className="h-7 w-7 text-white" aria-hidden="true" />
               </div>
               <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
               <p className="text-muted-foreground leading-relaxed">

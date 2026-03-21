@@ -40,8 +40,13 @@ const Hero = () => {
                   Get Started Free
                 </Button>
               )}
-              <Button size="lg" variant="outline" className="text-lg px-8">
-                <Play className="mr-2 h-5 w-5" />
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-lg px-8"
+                onClick={() => navigate('/product')}
+              >
+                <Play className="mr-2 h-5 w-5" aria-hidden="true" />
                 See How It Works
               </Button>
             </div>
@@ -51,10 +56,14 @@ const Hero = () => {
           <div className="animate-fade-in-delay-1 flex items-center justify-center">
             <div className="relative max-w-md lg:max-w-lg">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl blur-3xl"></div>
-              <img 
-                src={heroIllustration} 
-                alt="Woman holding smartphone with health tracking dashboard showing cycle calendar and heart rate metrics" 
+              <img
+                src={heroIllustration}
+                alt="Woman holding smartphone with health tracking dashboard showing cycle calendar and heart rate metrics"
                 className="relative w-full h-auto rounded-3xl"
+                width={512}
+                height={512}
+                loading="eager"
+                fetchPriority="high"
               />
             </div>
           </div>
