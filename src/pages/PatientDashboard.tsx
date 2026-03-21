@@ -28,14 +28,11 @@ import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboar
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import { format, addDays, differenceInDays } from 'date-fns';
 import { useMemo } from 'react';
-import { 
-  MessageSquare, 
-  Activity, 
-  FileText, 
-  Smartphone, 
-  Users, 
-  ChevronRight,
-  Home,
+import {
+  MessageSquare,
+  Activity,
+  FileText,
+  Smartphone,
   Menu,
   Settings,
   Phone,
@@ -50,17 +47,6 @@ import {
   Droplet,
   ArrowLeft
 } from 'lucide-react';
-
-interface DocumentSummary {
-  id: string;
-  file_name: string;
-  ai_suggested_name: string | null;
-  ai_suggested_category: string | null;
-  ai_summary: string | null;
-  uploaded_at: string;
-  document_type: string;
-}
-
 
 const PatientDashboard = () => {
   const navigate = useNavigate();
@@ -176,16 +162,12 @@ const PatientDashboard = () => {
     }
   };
 
-  const [activeSection, setActiveSection] = useState('overview');
-  const [documents, setDocuments] = useState<DocumentSummary[]>([]);
-  const [documentsLoading, setDocumentsLoading] = useState(true);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
-  // Fetch profile and documents when user is available
+  // Fetch profile when user is available
   useEffect(() => {
     if (user) {
       fetchProfile(user.id);
-      fetchDocuments();
     }
   }, [user]);
 
@@ -276,34 +258,6 @@ const PatientDashboard = () => {
     }
   };
 
-  const fetchDocuments = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('health_documents')
-        .select('id, file_name, ai_suggested_name, ai_suggested_category, ai_summary, uploaded_at, document_type')
-        .eq('user_id', user!.id)
-        .order('uploaded_at', { ascending: false });
-
-      if (error) throw error;
-      setDocuments(data || []);
-    } catch (error) {
-      console.error('Error fetching documents:', error);
-    } finally {
-      setDocumentsLoading(false);
-    }
-  };
-
-  const getCategoryColor = (category: string | null) => {
-    const colors: Record<string, string> = {
-      lab_results: 'bg-primary/10 text-primary',
-      imaging: 'bg-secondary/10 text-secondary',
-      prescription: 'bg-accent/10 text-accent',
-      consultation_notes: 'bg-muted',
-      vaccination_record: 'bg-primary/20 text-primary',
-      other: 'bg-muted'
-    };
-    return colors[category || 'other'] || 'bg-muted';
-  };
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -358,64 +312,13 @@ const PatientDashboard = () => {
     };
   }, [periodData]);
 
-  const mainSections = [
-    {
-      id: 'B1',
-      title: 'Healthcare Services',
-      icon: MessageSquare,
-      subsections: [
-        { id: 'B1.1', title: 'Doctor Chat', description: 'AI medical assistant · GPT-5 & Gemini', action: () => navigate('/dashboard/ai-doctor'), visible: true },
-        { id: 'B1.2', title: 'Doctor Consultations', description: 'Find doctors & book appointments', action: () => navigate('/find-doctor'), visible: true },
-        { id: 'B1.3', title: 'Upload Health Documents', description: 'Upload & get AI analysis', visible: true },
-      ],
-    },
-    {
-      id: 'B2',
-      title: 'My Health Dashboard',
-      icon: Activity,
-      subsections: [
-        { id: 'B2.1', title: "Today's Overview", description: 'Current status & insights', visible: true },
-        { id: 'B2.2', title: 'Cycle & Phase Tracking', description: 'Visual calendar & predictions', visible: true },
-        { id: 'B2.3', title: 'Body Insights & Patterns', description: 'Daily tracking & correlations', visible: true },
-        { id: 'B2.4', title: 'Medical Data & Test Results', description: 'Lab results & imaging', action: () => navigate('/dashboard/medical-history'), visible: true },
-        { id: 'B2.5', title: 'Medical History', description: 'Conditions & medications', action: () => navigate('/dashboard/medical-history'), visible: true },
-        { id: 'B2.6', title: 'Pregnancy Tracker', description: 'Week-by-week development', visible: selectedMode === 'pregnancy' },
-        { id: 'B2.7', title: 'Wearable Device Data', description: 'Synced health metrics', visible: true },
-        { id: 'B2.8', title: 'Health Goals & Progress', description: 'Track your goals', visible: true },
-      ],
-    },
-    {
-      id: 'B3',
-      title: 'Personal Records',
-      icon: FileText,
-      subsections: [
-        { id: 'B3.1', title: 'My Profile', description: 'Essential & extended info', visible: true },
-        { id: 'B3.2', title: 'Document Library', description: 'Upload & organize documents', visible: true },
-        { id: 'B3.3', title: 'Health Timeline', description: 'Chronological health events', visible: true },
-        { id: 'B3.4', title: 'Settings & Preferences', description: 'Account & privacy settings', visible: true },
-      ],
-    },
-    {
-      id: 'B4',
-      title: 'Connected Devices',
-      icon: Smartphone,
-      subsections: [
-        { id: 'B4.1', title: 'Device Management', description: 'My devices & connection status', visible: true },
-        { id: 'B4.2', title: 'Sync Settings', description: 'Auto-sync & preferences', visible: true },
-        { id: 'B4.3', title: 'Troubleshooting', description: 'Connection & sync issues', visible: true },
-      ],
-    },
-    {
-      id: 'B5',
-      title: 'Community & Support',
-      icon: Users,
-      subsections: [
-        { id: 'B5.1', title: 'My Groups', description: 'Joined groups & activity', visible: true },
-        { id: 'B5.2', title: 'Discover Groups', description: 'Browse recommended groups', visible: true },
-        { id: 'B5.3', title: 'Educational Content', description: 'Articles & videos', visible: true },
-        { id: 'B5.4', title: 'Upcoming Events', description: 'Webinars & sessions', visible: true },
-      ],
-    },
+  // Quick links to working features — no "coming soon" items
+  const quickLinks = [
+    { icon: MessageSquare, label: 'AI Doctor', description: 'Health assistant', action: () => navigate('/dashboard/ai-doctor'), color: 'bg-primary/10 text-primary' },
+    { icon: FileText, label: 'Health Records', description: 'Analysis & trends', action: () => navigate('/dashboard/medical-history'), color: 'bg-secondary/10 text-secondary' },
+    { icon: Activity, label: 'Find Doctor', description: 'Book consultation', action: () => navigate('/find-doctor'), color: 'bg-accent/10 text-accent' },
+    { icon: Smartphone, label: 'Devices', description: 'Connect wearables', action: () => navigate('/dashboard/devices'), color: 'bg-muted text-muted-foreground' },
+    { icon: Settings, label: 'Settings', description: 'Preferences', action: () => navigate('/dashboard/settings'), color: 'bg-muted text-muted-foreground' },
   ];
 
   if (loading || !selectedMode) {
@@ -514,19 +417,7 @@ const PatientDashboard = () => {
                 Womanie
               </a>
             </div>
-                <div className="flex items-center gap-2">
-                  {activeSection !== 'overview' && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => setActiveSection('overview')}
-                      className="gap-2"
-                    >
-                      <Home className="h-4 w-4" />
-                      Dashboard Home
-                    </Button>
-                  )}
-                </div>
+                <div className="flex items-center gap-2" />
               </div>
               <DashboardHeader 
                 userName={getUserName()}
@@ -775,101 +666,27 @@ const PatientDashboard = () => {
               <DailyLogging selectedMode={selectedMode} />
             </div>
 
-            {/* Main Sections */}
-            <div className="space-y-4">
-              {mainSections.map((section) => {
-                const IconComponent = section.icon;
-                const visibleSubsections = section.subsections.filter(sub => sub.visible !== false);
-                
-                return (
-                  <Card key={section.id} className="p-4">
-                    <div 
-                      className="flex items-center justify-between cursor-pointer"
-                      onClick={() => setActiveSection(section.id)}
+            {/* Quick Links */}
+            <div>
+              <h3 className="text-base font-semibold mb-3">Quick Access</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                {quickLinks.map(link => {
+                  const Icon = link.icon;
+                  return (
+                    <Card
+                      key={link.label}
+                      className="p-3 cursor-pointer hover:shadow-md transition-all hover:-translate-y-0.5"
+                      onClick={link.action}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <IconComponent className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold">{section.title}</h3>
-                          <p className="text-xs text-muted-foreground">{visibleSubsections.length} features</p>
-                        </div>
+                      <div className={`w-9 h-9 rounded-lg ${link.color} flex items-center justify-center mb-2`}>
+                        <Icon className="h-4.5 w-4.5" aria-hidden="true" />
                       </div>
-                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    
-                    {activeSection === section.id && (
-                      <div className="mt-4 grid md:grid-cols-2 gap-3">
-                        {visibleSubsections.map((sub) => (
-                          <div key={sub.id}>
-                            {sub.id === 'B1.3' ? (
-                              <div id="upload-section" className="p-4 rounded-lg border border-border bg-card">
-                                <div className="mb-3">
-                                  <div className="font-medium text-sm mb-1">{sub.title}</div>
-                                  <div className="text-xs text-muted-foreground">{sub.description}</div>
-                                </div>
-                                <DocumentUpload />
-                                
-                                {/* Recent Documents Preview */}
-                                {documents.length > 0 && (
-                                  <div className="mt-4">
-                                    <h5 className="text-xs font-semibold mb-2">Recent Uploads</h5>
-                                    <div className="space-y-2">
-                                      {documents.slice(0, 2).map((doc) => (
-                                        <div key={doc.id} className="bg-muted/50 rounded-lg p-2">
-                                          <div className="flex items-start justify-between gap-2">
-                                            <div className="flex-1 min-w-0">
-                                              <div className="text-xs font-medium truncate">
-                                                {doc.ai_suggested_name || doc.file_name}
-                                              </div>
-                                              <div className="flex items-center gap-1 mt-1">
-                                                <Badge variant="outline" className={`text-[10px] px-1 py-0 ${getCategoryColor(doc.ai_suggested_category)}`}>
-                                                  {doc.ai_suggested_category || doc.document_type}
-                                                </Badge>
-                                              </div>
-                                            </div>
-                                            <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                          </div>
-                                          {doc.ai_summary && (
-                                            <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2">
-                                              {doc.ai_summary}
-                                            </p>
-                                          )}
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            ) : (
-                              <Button
-                                variant="outline"
-                                className="justify-start h-auto py-3 px-4 w-full"
-                                onClick={() => {
-                                  if ('action' in sub && typeof sub.action === 'function') {
-                                    sub.action();
-                                  } else {
-                                    toast({
-                                      title: sub.title,
-                                      description: sub.description + ' - Coming soon!',
-                                    });
-                                  }
-                                }}
-                              >
-                                <div className="text-left">
-                                  <div className="font-medium text-sm">{sub.title}</div>
-                                  <div className="text-xs text-muted-foreground">{sub.description}</div>
-                                </div>
-                              </Button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </Card>
-                );
-              })}
+                      <p className="text-sm font-semibold">{link.label}</p>
+                      <p className="text-[10px] text-muted-foreground">{link.description}</p>
+                    </Card>
+                  );
+                })}
+              </div>
             </div>
           </div>
         
