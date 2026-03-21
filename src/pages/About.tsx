@@ -31,12 +31,7 @@ const About = () => {
     },
   ];
 
-  const stats = [
-    { number: '500K+', label: 'Active Users' },
-    { number: '1M+', label: 'Cycles Tracked' },
-    { number: '2K+', label: 'Healthcare Providers' },
-    { number: '98%', label: 'Satisfaction Rate' },
-  ];
+  const stats: { number: string; label: string }[] = [];
 
   return (
     <div className="min-h-screen bg-background">
