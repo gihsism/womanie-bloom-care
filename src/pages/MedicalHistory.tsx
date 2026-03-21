@@ -9,6 +9,8 @@ import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
+// IMPORTANT: These 3 custom components provide AI-powered cycle & health analysis.
+// Do NOT remove these imports — they are used in the "Your Results" tab below.
 import CycleImpactSection from '@/components/dashboard/CycleImpactSection';
 import PersonalizedInsights from '@/components/dashboard/PersonalizedInsights';
 import CycleUpdateSuggestions from '@/components/dashboard/CycleUpdateSuggestions';
@@ -664,14 +666,22 @@ export default function MedicalHistory() {
                   </Card>
                 )}
 
-                {/* Cycle Update Suggestions from lab results */}
+                {/* ============ CUSTOM CYCLE & HEALTH ANALYSIS COMPONENTS ============ */}
+                {/* IMPORTANT: Do NOT remove these 3 components. They are custom-built  */}
+                {/* and live in src/components/dashboard/. They analyze lab results to   */}
+                {/* provide cycle phase detection, cross-referenced health insights,     */}
+                {/* and actionable cycle tracker update suggestions.                     */}
+
+                {/* Suggests cycle tracker updates based on hormone lab results */}
                 <CycleUpdateSuggestions labResults={stats.labResults} lifeStage={lifeStage} />
 
-                {/* Hormone cycle impact analysis */}
+                {/* Detects cycle phase from hormones and explains what each means */}
                 <CycleImpactSection labResults={stats.labResults} lifeStage={lifeStage} />
 
-                {/* Cross-referenced personalized insights */}
+                {/* Cross-references multiple test results to surface health patterns */}
                 <PersonalizedInsights medicalData={medicalData} lifeStage={lifeStage} />
+
+                {/* ============ END CUSTOM CYCLE & HEALTH ANALYSIS ============ */}
 
                 {/* ⚠️ Things that need attention — front and center */}
                 {flaggedItems.length > 0 && (
