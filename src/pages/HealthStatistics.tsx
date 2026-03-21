@@ -105,7 +105,7 @@ export default function HealthStatistics() {
           <h1 className="text-3xl font-bold mb-1">Health Statistics</h1>
           <p className="text-muted-foreground">AI-analyzed summaries of your health documents</p>
         </div>
-        <a href="/" className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
+        <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
           Womanie
         </a>
       </div>

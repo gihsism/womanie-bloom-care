@@ -829,7 +829,7 @@ export default function MedicalHistory() {
             <h1 className="text-xl font-bold">My Health Records</h1>
             <p className="text-sm text-muted-foreground">Your results explained in plain language</p>
           </div>
-          <a href="/" className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
+          <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
             Womanie
           </a>
         </div>

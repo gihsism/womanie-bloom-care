@@ -210,7 +210,7 @@ const DoctorDashboard = () => {
                 <ArrowRightLeft className="h-4 w-4 mr-2" />
                 Patient Mode
               </Button>
-              <a href="/" className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
+              <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
                 Womanie
               </a>
               <Button variant="ghost" size="sm" onClick={handleLogout}>

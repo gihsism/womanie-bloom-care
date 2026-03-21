@@ -19,7 +19,7 @@ const SelectUserType = () => {
           <ArrowLeft className="h-5 w-5" />
           <span className="text-sm">Back</span>
         </button>
-        <a href="/" className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
+        <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
           Womanie
         </a>
       </div>
@@ -29,7 +29,7 @@ const SelectUserType = () => {
         <div className="w-full max-w-4xl">
           {/* Logo */}
           <div className="text-center mb-8">
-            <a href="/" className="text-4xl font-bold text-primary hover:opacity-80 transition-opacity">Womanie</a>
+            <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-4xl font-bold text-primary hover:opacity-80 transition-opacity">Womanie</a>
           </div>
 
           {/* Heading */}

@@ -80,7 +80,11 @@ const Welcome = () => {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <div className="p-4 flex items-center justify-between border-b border-border">
-        <a href="/" className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
+        <a
+          href="/"
+          onClick={(e) => { e.preventDefault(); window.location.href = '/'; }}
+          className="text-xl font-bold text-primary hover:opacity-80 transition-opacity"
+        >
           Womanie
         </a>
         <Button
