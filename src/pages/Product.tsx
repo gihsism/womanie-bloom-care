@@ -4,9 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { Activity, Calendar, MessageSquare, FileText, Shield, Zap } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Product = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const features = [
     {
@@ -56,8 +58,8 @@ const Product = () => {
               Womanie combines AI-powered insights, expert medical care, and community support
               to help you take control of your health journey.
             </p>
-            <Button size="lg" onClick={() => navigate('/auth/select-type')}>
-              Get Started Free
+            <Button size="lg" onClick={() => navigate(user ? '/dashboard' : '/auth/select-type')}>
+              {user ? 'Go to Dashboard' : 'Get Started Free'}
             </Button>
           </div>
 

@@ -4,9 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { Check } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Pricing = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const plans = [
     {
@@ -114,9 +116,9 @@ const Pricing = () => {
                 <Button
                   className="w-full"
                   variant={plan.popular ? 'default' : 'outline'}
-                  onClick={() => navigate('/auth/select-type')}
+                  onClick={() => navigate(user ? '/dashboard' : '/auth/select-type')}
                 >
-                  {plan.cta}
+                  {user ? (plan.cta === 'Contact Sales' ? 'Contact Sales' : 'Go to Dashboard') : plan.cta}
                 </Button>
               </Card>
             ))}
