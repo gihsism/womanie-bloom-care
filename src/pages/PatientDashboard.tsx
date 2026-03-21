@@ -25,7 +25,8 @@ import OvulationPrediction from '@/components/dashboard/OvulationPrediction';
 import PreMenstrualDashboard from '@/components/dashboard/PreMenstrualDashboard';
 import MenopauseDashboard from '@/components/dashboard/MenopauseDashboard';
 import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
-import { format, addDays } from 'date-fns';
+import { format, addDays, differenceInDays } from 'date-fns';
+import { useMemo } from 'react';
 import { 
   MessageSquare, 
   Activity, 
@@ -335,6 +336,22 @@ const PatientDashboard = () => {
 
   const healthStats = selectedMode ? getModeStats(selectedMode, currentCycleDay, pregnancyDueDate) : [];
 
+  // Pre-compute next ovulation and period dates to avoid repeated inline calculations
+  const cyclePhases = useMemo(() => {
+    if (!periodData) return null;
+    const now = new Date();
+    let nextOvulation = addDays(periodData.lastPeriodStart, periodData.cycleLength - 13);
+    while (nextOvulation < now) nextOvulation = addDays(nextOvulation, periodData.cycleLength);
+    let nextPeriod = addDays(periodData.lastPeriodStart, periodData.cycleLength);
+    while (nextPeriod < now) nextPeriod = addDays(nextPeriod, periodData.cycleLength);
+    return {
+      nextOvulation,
+      nextPeriod,
+      daysToOvulation: differenceInDays(nextOvulation, now),
+      daysToPeriod: differenceInDays(nextPeriod, now),
+    };
+  }, [periodData]);
+
   const mainSections = [
     {
       id: 'B1',
@@ -397,8 +414,24 @@ const PatientDashboard = () => {
 
   if (loading || !selectedMode) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p>Loading...</p>
+      <div className="min-h-screen bg-background">
+        <div className="border-b border-border bg-card p-4">
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-9 w-9 rounded-md" />
+            <Skeleton className="h-8 w-24" />
+            <Skeleton className="h-6 w-20 ml-auto" />
+          </div>
+          <div className="mt-4 flex gap-3">
+            <Skeleton className="h-10 w-32 rounded-lg" />
+            <Skeleton className="h-10 w-32 rounded-lg" />
+            <Skeleton className="h-10 w-32 rounded-lg" />
+          </div>
+        </div>
+        <div className="px-4 py-6 space-y-4">
+          <Skeleton className="h-24 w-full rounded-xl" />
+          <Skeleton className="h-64 w-full rounded-xl" />
+          <Skeleton className="h-40 w-full rounded-xl" />
+        </div>
       </div>
     );
   }
@@ -669,56 +702,38 @@ const PatientDashboard = () => {
                           <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
                             Cycle Phases
                           </h4>
+                          {cyclePhases && (
                           <div className="space-y-3">
                             <div className="flex justify-between items-start">
                               <div className="flex items-start gap-2 flex-1">
-                                <Sparkles className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                                <Sparkles className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" aria-hidden="true" />
                                 <div className="flex-1">
                                   <div className="text-xs font-medium text-muted-foreground">Next Ovulation</div>
                                   <p className="text-[10px] text-muted-foreground mt-0.5">
-                                    {(() => {
-                                      const now = new Date();
-                                      let nextOv = addDays(periodData.lastPeriodStart, periodData.cycleLength - 13);
-                                      while (nextOv < now) nextOv = addDays(nextOv, periodData.cycleLength);
-                                      return `${Math.ceil((nextOv.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))} days`;
-                                    })()}
+                                    {cyclePhases.daysToOvulation} days
                                   </p>
                                 </div>
                               </div>
                               <span className="text-sm font-bold whitespace-nowrap">
-                                {(() => {
-                                  const now = new Date();
-                                  let nextOv = addDays(periodData.lastPeriodStart, periodData.cycleLength - 13);
-                                  while (nextOv < now) nextOv = addDays(nextOv, periodData.cycleLength);
-                                  return format(nextOv, 'MMM d');
-                                })()}
+                                {format(cyclePhases.nextOvulation, 'MMM d')}
                               </span>
                             </div>
                             <div className="flex justify-between items-start">
                               <div className="flex items-start gap-2 flex-1">
-                                <Droplet className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                                <Droplet className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" aria-hidden="true" />
                                 <div className="flex-1">
                                   <div className="text-xs font-medium text-muted-foreground">Next Period</div>
                                   <p className="text-[10px] text-muted-foreground mt-0.5">
-                                    {(() => {
-                                      const now = new Date();
-                                      let nextP = addDays(periodData.lastPeriodStart, periodData.cycleLength);
-                                      while (nextP < now) nextP = addDays(nextP, periodData.cycleLength);
-                                      return `${Math.ceil((nextP.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))} days`;
-                                    })()}
+                                    {cyclePhases.daysToPeriod} days
                                   </p>
                                 </div>
                               </div>
                               <span className="text-sm font-bold whitespace-nowrap">
-                                {(() => {
-                                  const now = new Date();
-                                  let nextP = addDays(periodData.lastPeriodStart, periodData.cycleLength);
-                                  while (nextP < now) nextP = addDays(nextP, periodData.cycleLength);
-                                  return format(nextP, 'MMM d');
-                                })()}
+                                {format(cyclePhases.nextPeriod, 'MMM d')}
                               </span>
                             </div>
                           </div>
+                          )}
                         </Card>
                       </>
                     ) : (

@@ -135,9 +135,10 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onU
         <button
           onClick={onDoctorChatClick}
           className="flex flex-col items-center gap-1.5 min-w-[72px] group"
+          aria-label="Open AI Doctor Chat"
         >
           <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shadow-sm">
-            <MessageSquare className="h-5 w-5 text-primary" />
+            <MessageSquare className="h-5 w-5 text-primary" aria-hidden="true" />
           </div>
           <span className="text-xs font-medium text-foreground/80">Doctor Chat</span>
         </button>
@@ -146,9 +147,10 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onU
         <button
           onClick={onUploadClick}
           className="flex flex-col items-center gap-1.5 min-w-[72px] group"
+          aria-label="Upload health document"
         >
           <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shadow-sm">
-            <Upload className="h-5 w-5 text-primary" />
+            <Upload className="h-5 w-5 text-primary" aria-hidden="true" />
           </div>
           <span className="text-xs font-medium text-foreground/80">Upload</span>
         </button>
@@ -160,9 +162,10 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onU
               key={action.id}
               onClick={action.action}
               className="flex flex-col items-center gap-1.5 min-w-[72px] group"
+              aria-label={action.label}
             >
               <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center group-hover:bg-muted transition-colors shadow-sm">
-                <IconComponent className={`h-5 w-5 ${action.color}`} />
+                <IconComponent className={`h-5 w-5 ${action.color}`} aria-hidden="true" />
               </div>
               <span className="text-xs font-medium text-foreground/80">{action.label}</span>
             </button>

@@ -215,6 +215,34 @@ const Settings = () => {
           </CardContent>
         </Card>
 
+        {/* Account Info */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Account
+            </CardTitle>
+            <CardDescription>
+              Your account details
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Email</span>
+              <span className="text-sm font-medium">{user?.email || '—'}</span>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Member since</span>
+              <span className="text-sm font-medium">
+                {user?.created_at
+                  ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                  : '—'}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Notifications */}
         <Card>
           <CardHeader>
@@ -234,9 +262,10 @@ const Settings = () => {
               </div>
               <Switch
                 checked={notifications.cycleReminders}
-                onCheckedChange={(checked) => 
-                  setNotifications(prev => ({ ...prev, cycleReminders: checked }))
-                }
+                onCheckedChange={(checked) => {
+                  setNotifications(prev => ({ ...prev, cycleReminders: checked }));
+                  toast({ title: checked ? 'Cycle reminders enabled' : 'Cycle reminders disabled' });
+                }}
               />
             </div>
             <Separator />
@@ -247,9 +276,10 @@ const Settings = () => {
               </div>
               <Switch
                 checked={notifications.appointmentReminders}
-                onCheckedChange={(checked) => 
-                  setNotifications(prev => ({ ...prev, appointmentReminders: checked }))
-                }
+                onCheckedChange={(checked) => {
+                  setNotifications(prev => ({ ...prev, appointmentReminders: checked }));
+                  toast({ title: checked ? 'Appointment reminders enabled' : 'Appointment reminders disabled' });
+                }}
               />
             </div>
             <Separator />
@@ -260,9 +290,10 @@ const Settings = () => {
               </div>
               <Switch
                 checked={notifications.healthTips}
-                onCheckedChange={(checked) => 
-                  setNotifications(prev => ({ ...prev, healthTips: checked }))
-                }
+                onCheckedChange={(checked) => {
+                  setNotifications(prev => ({ ...prev, healthTips: checked }));
+                  toast({ title: checked ? 'Health tips enabled' : 'Health tips disabled' });
+                }}
               />
             </div>
           </CardContent>
