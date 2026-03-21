@@ -78,9 +78,9 @@ const Welcome = () => {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <div className="p-4 flex items-center justify-between border-b border-border">
-        <button onClick={() => navigate('/')} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
+        <a href="/" className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
           Womanie
-        </button>
+        </a>
         <Button
           variant="ghost"
           size="sm"

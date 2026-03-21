@@ -509,9 +509,9 @@ const PatientDashboard = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
               
-              <button onClick={() => navigate('/')} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
+              <a href="/" className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
                 Womanie
-              </button>
+              </a>
             </div>
                 <div className="flex items-center gap-2">
                   {activeSection !== 'overview' && (

@@ -17,12 +17,9 @@ const SelectUserType = () => {
           <ArrowLeft className="h-5 w-5" />
           <span className="text-sm">Back</span>
         </button>
-        <button
-          onClick={() => navigate('/')}
-          className="text-xl font-bold text-primary hover:opacity-80 transition-opacity"
-        >
+        <a href="/" className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
           Womanie
-        </button>
+        </a>
       </div>
 
       {/* Main Content */}
@@ -30,7 +27,7 @@ const SelectUserType = () => {
         <div className="w-full max-w-4xl">
           {/* Logo */}
           <div className="text-center mb-8">
-            <button onClick={() => navigate('/')} className="text-4xl font-bold text-primary hover:opacity-80 transition-opacity">Womanie</button>
+            <a href="/" className="text-4xl font-bold text-primary hover:opacity-80 transition-opacity">Womanie</a>
           </div>
 
           {/* Heading */}
