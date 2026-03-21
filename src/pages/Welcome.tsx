@@ -68,25 +68,17 @@ const Welcome = () => {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <div className="p-4 flex items-center justify-between border-b border-border">
-        <h1 className="text-xl font-bold text-primary">Womanie</h1>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/dashboard', { replace: true })}
-            className="text-muted-foreground"
-          >
-            Go to dashboard
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => navigate('/')}
-            className="h-9 w-9"
-          >
-            <Home className="h-4 w-4" />
-          </Button>
-        </div>
+        <button onClick={() => navigate('/')} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
+          Womanie
+        </button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/dashboard', { replace: true })}
+          className="text-muted-foreground"
+        >
+          Go to dashboard
+        </Button>
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4 py-8">
