@@ -60,7 +60,7 @@ const DoctorDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { hasRole, loading } = useRequireRole('doctor', '/auth/doctor-login');
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [doctorProfile, setDoctorProfile] = useState<DoctorProfile | null>(null);
   const [patients, setPatients] = useState<PatientConnection[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);

@@ -76,7 +76,7 @@ const PatientDetails = () => {
   const { patientId } = useParams();
   const { toast } = useToast();
   const { hasRole, loading } = useRequireRole('doctor', '/auth/doctor-login');
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ id: string } | null>(null);
   
   const [patient, setPatient] = useState<PatientProfile | null>(null);
   const [healthSignals, setHealthSignals] = useState<HealthSignal[]>([]);

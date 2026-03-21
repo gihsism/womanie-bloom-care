@@ -67,7 +67,12 @@ const PatientDashboard = () => {
   const { user, session, loading } = useAuth();
   const [profile, setProfile] = useState<{ full_name?: string; life_stage?: string; pregnancy_due_date?: string | null; ivf_start_date?: string | null; ivf_phase?: string | null } | null>(null);
   const [selectedMode, setSelectedMode] = useState<LifeStage | null>(null);
-  const [ovulationPrediction, setOvulationPrediction] = useState<any>(null);
+  const [ovulationPrediction, setOvulationPrediction] = useState<{
+    ovulationDate?: string;
+    fertileWindowStart?: string;
+    fertileWindowEnd?: string;
+    confidence?: string;
+  } | null>(null);
   const [periodData, setPeriodData] = useState<{ lastPeriodStart: Date; cycleLength: number } | null>(null);
   const [pregnancyDueDate, setPregnancyDueDate] = useState<Date | null>(null);
   const [ivfStartDate, setIvfStartDate] = useState<Date | null>(null);
