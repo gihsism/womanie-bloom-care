@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, ArrowLeft, Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,10 +7,24 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
+import { useAuth } from '@/contexts/AuthContext';
 
 const PatientSignUp = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, loading } = useAuth();
+
+  // If user is already authenticated (e.g. after Google sign-in), redirect
+  useEffect(() => {
+    if (!loading && user) {
+      sessionStorage.setItem('womanie_show_welcome', 'true');
+      toast({
+        title: 'Welcome!',
+        description: 'You have successfully signed in. Redirecting to your space...',
+      });
+      navigate('/welcome', { replace: true });
+    }
+  }, [user, loading, navigate, toast]);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
