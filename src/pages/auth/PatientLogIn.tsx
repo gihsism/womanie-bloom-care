@@ -68,7 +68,7 @@ const PatientLogIn = () => {
           title: 'Welcome back!',
           description: 'You have successfully logged in.',
         });
-        navigate('/welcome');
+        sessionStorage.setItem('womanie_show_welcome', 'true');
       }
     } catch (error) {
       toast({
