@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -803,20 +802,8 @@ export default function MedicalHistory() {
         )}
         <DocumentUpload />
 
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="w-full flex overflow-x-auto">
-            <TabsTrigger value="overview" className="flex-1 text-xs sm:text-sm">Your Results</TabsTrigger>
-            <TabsTrigger value="trends" className="flex-1 text-xs sm:text-sm">
-              Changes
-              {stats.repeatedTests.length > 0 && (
-                <Badge variant="secondary" className="ml-1 text-[9px] px-1 py-0">{stats.repeatedTests.length}</Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="documents" className="flex-1 text-xs sm:text-sm">Documents</TabsTrigger>
-          </TabsList>
-
-          {/* ============ YOUR RESULTS TAB ============ */}
-          <TabsContent value="overview" className="space-y-5 mt-4">
+        <div className="space-y-6">
+          {/* ============ MAIN CONTENT — SINGLE SCROLLABLE PAGE ============ */}
             {!hasDocuments ? (
               <Card className="border-dashed">
                 <CardContent className="flex flex-col items-center justify-center py-16">
@@ -1071,26 +1058,42 @@ export default function MedicalHistory() {
                     </div>
                   </div>
                 )}
-              </>
-            )}
-          </TabsContent>
 
-          {/* ============ TRENDS / CHANGES TAB ============ */}
-          <TabsContent value="trends" className="space-y-5 mt-4">
-            {stats.repeatedTests.length === 0 && Object.keys(stats.labTrendData).length === 0 ? (
-              <Card className="border-dashed">
-                <CardContent className="flex flex-col items-center justify-center py-16">
-                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                    <TrendingUp className="h-8 w-8 text-primary" />
-                  </div>
-                  <p className="text-foreground text-center mb-2 font-semibold text-lg">No changes to show yet</p>
-                  <p className="text-sm text-muted-foreground text-center max-w-sm">
-                    When you upload documents with the same tests taken at different times, we'll show you how your values are changing.
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <>
+                {/* ============ RESULTS BREAKDOWN PIE CHART ============ */}
+                {stats.labStatusPie.length > 0 && (
+                  <Card className="overflow-hidden">
+                    <CardContent className="p-5">
+                      <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
+                        <BarChart3 className="h-4 w-4 text-primary" />
+                        Results Breakdown
+                      </h3>
+                      <div className="flex items-center gap-6">
+                        <ResponsiveContainer width={120} height={120}>
+                          <RechartsPie>
+                            <Pie data={stats.labStatusPie} dataKey="value" cx="50%" cy="50%" innerRadius={30} outerRadius={55} paddingAngle={2}>
+                              {stats.labStatusPie.map((entry, i) => (
+                                <Cell key={i} fill={entry.color} />
+                              ))}
+                            </Pie>
+                          </RechartsPie>
+                        </ResponsiveContainer>
+                        <div className="flex-1 space-y-2">
+                          {stats.labStatusPie.map((entry, i) => (
+                            <div key={i} className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
+                              <span className="text-xs text-muted-foreground flex-1">{entry.name}</span>
+                              <span className="text-xs font-bold">{entry.value}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* ============ TRENDS & PREDICTIONS (INLINE) ============ */}
+                {stats.repeatedTests.length > 0 && (
+                  <>
                 {/* Predictions — friendly language */}
                 {stats.predictions.length > 0 && (
                   <div>
@@ -1285,24 +1288,18 @@ export default function MedicalHistory() {
                     </CardContent>
                   </Card>
                 )}
-              </>
-            )}
-          </TabsContent>
+                  </>
+                )}
 
-          {/* ============ DOCUMENTS TAB ============ */}
-          <TabsContent value="documents" className="space-y-4 mt-4">
-            {documents.length === 0 ? (
-              <Card className="border-dashed">
-                <CardContent className="flex flex-col items-center justify-center py-16">
-                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                    <Upload className="h-8 w-8 text-primary" />
-                  </div>
-                  <p className="text-foreground font-semibold text-lg">No documents yet</p>
-                  <p className="text-sm text-muted-foreground text-center">Upload your first health document above.</p>
-                </CardContent>
-              </Card>
-            ) : (
-              documents.map((doc) => (
+                {/* ============ UPLOADED DOCUMENTS ============ */}
+                {documents.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-primary" />
+                      Uploaded Documents ({documents.length})
+                    </h3>
+                    <div className="space-y-3">
+              {documents.map((doc) => (
                 <Card key={doc.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
@@ -1343,10 +1340,13 @@ export default function MedicalHistory() {
                     </div>
                   </CardContent>
                 </Card>
-              ))
+              ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
-          </TabsContent>
-        </Tabs>
+        </div>
       </div>
     </div>
   );
