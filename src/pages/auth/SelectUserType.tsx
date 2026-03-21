@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { User, Stethoscope, Home, ArrowLeft } from 'lucide-react';
+import { User, Stethoscope, ArrowLeft } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 const SelectUserType = () => {
