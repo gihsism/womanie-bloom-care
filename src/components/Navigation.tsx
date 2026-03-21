@@ -50,8 +50,8 @@ const Navigation = () => {
             Womanie
           </button>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
+          {/* Desktop Navigation Links - only on large screens */}
+          <div className="hidden xl:flex items-center gap-8">
             {navLinks.map((link) => (
               <button
                 key={link.label}
@@ -70,48 +70,51 @@ const Navigation = () => {
             ))}
           </div>
 
-          {/* Desktop CTAs */}
-          <div className="hidden md:flex items-center gap-3">
-            {user ? (
-              <>
-                <Button variant="ghost" onClick={() => navigate('/welcome')}>
-                  My Space
-                </Button>
-                <Button onClick={() => navigate('/dashboard')}>
-                  Dashboard
-                </Button>
-                <Button variant="outline" size="sm" onClick={async () => {
-                  const { supabase } = await import('@/integrations/supabase/client');
-                  await supabase.auth.signOut();
-                  window.location.reload();
-                }}>
-                  Log Out
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="ghost" onClick={() => navigate('/auth/login')}>
-                  Log In
-                </Button>
-                <Button onClick={() => navigate('/auth/select-type')}>
-                  Get Started
-                </Button>
-              </>
-            )}
-          </div>
+          {/* Right side: auth buttons (always visible on md+) + hamburger for nav links */}
+          <div className="flex items-center gap-3">
+            {/* Auth buttons - visible from md up */}
+            <div className="hidden md:flex items-center gap-2">
+              {user ? (
+                <>
+                  <Button variant="ghost" size="sm" onClick={() => navigate('/welcome')}>
+                    My Space
+                  </Button>
+                  <Button size="sm" onClick={() => navigate('/dashboard')}>
+                    Dashboard
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={async () => {
+                    const { supabase } = await import('@/integrations/supabase/client');
+                    await supabase.auth.signOut();
+                    window.location.reload();
+                  }}>
+                    Log Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="ghost" size="sm" onClick={() => navigate('/auth/login')}>
+                    Log In
+                  </Button>
+                  <Button size="sm" onClick={() => navigate('/auth/select-type')}>
+                    Get Started
+                  </Button>
+                </>
+              )}
+            </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+            {/* Hamburger - visible below xl (nav links) and below md (everything) */}
+            <button
+              className="xl:hidden p-2"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile/Tablet Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border bg-background shadow-lg">
+          <div className="xl:hidden py-4 border-t border-border bg-background shadow-lg">
             <div className="flex flex-col gap-4">
               {navLinks.map((link) => (
                 <button
@@ -127,10 +130,10 @@ const Navigation = () => {
                   }`}
                 >
                   {link.label}
-                  {isActive(link.href) && ' (Current)'}
                 </button>
               ))}
-              <div className="flex flex-col gap-2 pt-4 border-t border-border">
+              {/* Auth buttons only in menu on small screens (below md) */}
+              <div className="flex flex-col gap-2 pt-4 border-t border-border md:hidden">
                 {user ? (
                   <>
                     <Button 
