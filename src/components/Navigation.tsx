@@ -133,7 +133,16 @@ const Navigation = () => {
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 {user ? (
                   <>
-                    <span className="text-sm text-muted-foreground px-2">Logged in</span>
+                    <Button 
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => {
+                        navigate('/welcome');
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      My Space
+                    </Button>
                     <Button 
                       className="w-full"
                       onClick={() => {
