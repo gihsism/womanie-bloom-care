@@ -821,7 +821,7 @@ export default function MedicalHistory() {
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="px-4 py-4 flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Go back">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">

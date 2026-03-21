@@ -10,7 +10,7 @@ const SelectUserType = () => {
       {/* Navigation */}
       <div className="p-4 flex items-center justify-between">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/')}
           className="flex items-center gap-2 text-foreground hover:text-primary"
           aria-label="Go back"
         >

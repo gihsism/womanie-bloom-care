@@ -60,7 +60,7 @@ const Install = () => {
         <div className="container mx-auto max-w-2xl">
           <Button
             variant="ghost"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/')}
             className="mb-8"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
