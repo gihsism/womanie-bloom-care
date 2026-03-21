@@ -209,10 +209,9 @@ const DoctorDashboard = () => {
                 <ArrowRightLeft className="h-4 w-4 mr-2" />
                 Patient Mode
               </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate('/')}>
-                <Home className="h-4 w-4 mr-2" />
-                Home
-              </Button>
+              <a href="/" className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
+                Womanie
+              </a>
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="h-4 w-4" />
               </Button>

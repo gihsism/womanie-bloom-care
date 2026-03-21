@@ -821,35 +821,43 @@ export default function MedicalHistory() {
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="px-4 py-4 flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Go back">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">
             <h1 className="text-xl font-bold">My Health Records</h1>
             <p className="text-sm text-muted-foreground">Your results explained in plain language</p>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => navigate('/welcome')}>
-            <Home className="h-5 w-5" />
-          </Button>
+          <a href="/" className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
+            Womanie
+          </a>
         </div>
       </div>
 
       <div className="px-4 py-6 max-w-4xl mx-auto space-y-6">
         {hasDocuments && (
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={reanalyzeAll}
-              disabled={reanalyzing}
-              className="ml-auto"
-            >
-              {reanalyzing ? (
-                <>Analyzing {reanalyzeProgress.done}/{reanalyzeProgress.total}…</>
-              ) : (
-                <>🔄 Re-analyze all documents</>
-              )}
-            </Button>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <p className="text-xs text-muted-foreground flex-1">
+                {documents.length} document{documents.length !== 1 ? 's' : ''} uploaded
+                {stats.daysSinceLastDoc !== null && ` • Last upload ${stats.daysSinceLastDoc} days ago`}
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={reanalyzeAll}
+                disabled={reanalyzing}
+              >
+                {reanalyzing ? (
+                  <>Analyzing {reanalyzeProgress.done}/{reanalyzeProgress.total}…</>
+                ) : (
+                  <>🔄 Re-analyze all</>
+                )}
+              </Button>
+            </div>
+            {reanalyzing && (
+              <Progress value={reanalyzeProgress.total > 0 ? (reanalyzeProgress.done / reanalyzeProgress.total) * 100 : 0} className="h-1.5" />
+            )}
           </div>
         )}
         <DocumentUpload />

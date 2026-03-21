@@ -148,15 +148,9 @@ const Settings = () => {
               <div className="h-6 w-px bg-border" />
               <h1 className="text-xl font-bold text-primary">Settings</h1>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/')}
-              className="gap-2"
-            >
-              <Home className="h-4 w-4" />
-              Main Site
-            </Button>
+            <a href="/" className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
+              Womanie
+            </a>
           </div>
         </div>
       </div>
