@@ -103,13 +103,16 @@ const Devices = () => {
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="w-full px-4 py-4">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
+            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div>
+            <div className="flex-1">
               <h1 className="text-xl font-bold">Connected Devices</h1>
               <p className="text-xs text-muted-foreground">Sync health data from your wearables</p>
             </div>
+            <a href="/" className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
+              Womanie
+            </a>
           </div>
         </div>
       </div>

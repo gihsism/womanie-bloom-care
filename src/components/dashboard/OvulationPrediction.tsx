@@ -57,7 +57,7 @@ const OvulationPrediction = ({ userId, lastPeriodStart, cycleLength = 28, onPred
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      console.log('Fetching health data for user:', userId);
+
       const { data: healthData, error: healthError } = await supabase
         .from('daily_health_signals')
         .select('*')
@@ -70,7 +70,6 @@ const OvulationPrediction = ({ userId, lastPeriodStart, cycleLength = 28, onPred
         throw healthError;
       }
 
-      console.log('Health data fetched:', healthData?.length, 'records');
 
       if (!healthData || healthData.length === 0) {
         toast({
@@ -82,7 +81,6 @@ const OvulationPrediction = ({ userId, lastPeriodStart, cycleLength = 28, onPred
         return;
       }
 
-      console.log('Calling predict-ovulation function...');
       // Call the edge function for prediction
       const { data, error } = await supabase.functions.invoke('predict-ovulation', {
         body: {
@@ -94,8 +92,6 @@ const OvulationPrediction = ({ userId, lastPeriodStart, cycleLength = 28, onPred
         },
       });
 
-      console.log('Function response:', data);
-      console.log('Function error:', error);
 
       if (error) {
         console.error('Function invocation error:', error);
@@ -107,7 +103,6 @@ const OvulationPrediction = ({ userId, lastPeriodStart, cycleLength = 28, onPred
       }
 
       if (data?.prediction) {
-        console.log('Prediction received:', data.prediction);
         setPrediction(data.prediction);
         onPredictionUpdate?.(data.prediction);
         toast({
