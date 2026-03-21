@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, ArrowLeft, Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -378,7 +378,7 @@ const PatientSignUp = () => {
               className="w-full"
               disabled={!isFormValid() || isLoading}
             >
-              {isLoading ? 'Creating Account...' : 'Create Account'}
+              {isLoading ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Creating Account...</>) : 'Create Account'}
             </Button>
 
             {/* Divider */}

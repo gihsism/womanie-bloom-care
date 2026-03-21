@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, ArrowLeft, Eye, EyeOff, Mail, Lock, Stethoscope } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Mail, Lock, Stethoscope, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -182,7 +182,7 @@ const DoctorLogIn = () => {
               className="w-full bg-secondary hover:bg-secondary/90"
               disabled={!isFormValid() || isLoading}
             >
-              {isLoading ? 'Logging in...' : 'Log In as Doctor'}
+              {isLoading ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Logging in...</>) : 'Log In as Doctor'}
             </Button>
 
             {/* Bottom Link */}

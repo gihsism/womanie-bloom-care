@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, ArrowLeft, Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -136,18 +136,12 @@ const PatientLogIn = () => {
     }
   };
 
-  // Show loading while checking auth state
-  if (loading) {
+  if (loading || user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p>Loading...</p>
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     );
-  }
-
-  // Don't render login form if user is already logged in (will redirect)
-  if (user) {
-    return null;
   }
 
   return (
@@ -203,16 +197,27 @@ const PatientLogIn = () => {
                 <label htmlFor="password" className="text-sm font-medium">
                   Password
                 </label>
-                <a
-                  href="#"
+                <button
+                  type="button"
                   className="text-sm text-primary hover:underline"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    toast({ title: 'Coming soon', description: 'Password reset will be available soon' });
+                  onClick={async () => {
+                    if (!formData.email) {
+                      toast({ variant: 'destructive', title: 'Enter your email', description: 'Type your email above, then click "Forgot password?"' });
+                      return;
+                    }
+                    try {
+                      const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
+                        redirectTo: `${window.location.origin}/auth/login`,
+                      });
+                      if (error) throw error;
+                      toast({ title: 'Reset email sent!', description: `Check ${formData.email} for a password reset link.` });
+                    } catch {
+                      toast({ variant: 'destructive', title: 'Error', description: 'Failed to send reset email. Please try again.' });
+                    }
                   }}
                 >
                   Forgot password?
-                </a>
+                </button>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
@@ -242,7 +247,7 @@ const PatientLogIn = () => {
               className="w-full"
               disabled={!isFormValid() || isLoading}
             >
-              {isLoading ? 'Logging in...' : 'Log In'}
+              {isLoading ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Logging in...</>) : 'Log In'}
             </Button>
 
             {/* Divider */}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, ArrowLeft, Eye, EyeOff, Mail, Lock, User, Stethoscope, FileText, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Mail, Lock, User, Stethoscope, FileText, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -342,7 +342,7 @@ const DoctorSignUp = () => {
                   className="w-full bg-secondary hover:bg-secondary/90"
                   disabled={!isStep2Valid() || isLoading}
                 >
-                  {isLoading ? 'Submitting...' : 'Submit for Verification'}
+                  {isLoading ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Submitting...</>) : 'Submit for Verification'}
                 </Button>
               </>
             )}
