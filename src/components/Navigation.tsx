@@ -159,7 +159,7 @@ const Navigation = () => {
                         const { supabase } = await import('@/integrations/supabase/client');
                         await supabase.auth.signOut();
                         setIsMobileMenuOpen(false);
-                        window.location.reload();
+                        window.location.href = '/';
                       }}
                     >
                       Log Out
