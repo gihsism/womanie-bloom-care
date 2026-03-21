@@ -9,6 +9,9 @@ import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
+import CycleImpactSection from '@/components/dashboard/CycleImpactSection';
+import PersonalizedInsights from '@/components/dashboard/PersonalizedInsights';
+import CycleUpdateSuggestions from '@/components/dashboard/CycleUpdateSuggestions';
 import {
   ArrowLeft,
   Home,
@@ -307,6 +310,7 @@ export default function MedicalHistory() {
   const { user, loading: authLoading } = useAuth();
   const [medicalData, setMedicalData] = useState<MedicalDataItem[]>([]);
   const [documents, setDocuments] = useState<DocumentInfo[]>([]);
+  const [lifeStage, setLifeStage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedPanels, setExpandedPanels] = useState<Set<string>>(new Set());
   const [reanalyzing, setReanalyzing] = useState(false);
@@ -322,12 +326,14 @@ export default function MedicalHistory() {
 
   const fetchData = async () => {
     try {
-      const [medRes, docRes] = await Promise.all([
+      const [medRes, docRes, profileRes] = await Promise.all([
         supabase.from('medical_extracted_data').select('*').eq('user_id', user!.id).order('date_recorded', { ascending: false, nullsFirst: false }),
         supabase.from('health_documents').select('id, file_name, file_path, mime_type, ai_suggested_name, ai_summary, ai_suggested_category, uploaded_at, document_type').eq('user_id', user!.id).order('uploaded_at', { ascending: false }),
+        supabase.from('profiles').select('life_stage').eq('id', user!.id).single(),
       ]);
       if (medRes.data) setMedicalData(medRes.data as MedicalDataItem[]);
       if (docRes.data) setDocuments(docRes.data);
+      if (profileRes.data) setLifeStage(profileRes.data.life_stage);
     } catch (error) {
       console.error('Error fetching medical history:', error);
     } finally {
@@ -657,6 +663,15 @@ export default function MedicalHistory() {
                     </div>
                   </Card>
                 )}
+
+                {/* Cycle Update Suggestions from lab results */}
+                <CycleUpdateSuggestions labResults={stats.labResults} lifeStage={lifeStage} />
+
+                {/* Hormone cycle impact analysis */}
+                <CycleImpactSection labResults={stats.labResults} lifeStage={lifeStage} />
+
+                {/* Cross-referenced personalized insights */}
+                <PersonalizedInsights medicalData={medicalData} lifeStage={lifeStage} />
 
                 {/* ⚠️ Things that need attention — front and center */}
                 {flaggedItems.length > 0 && (
