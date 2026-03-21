@@ -79,9 +79,6 @@ const Navigation = () => {
                   <Button variant="ghost" size="sm" onClick={() => navigate('/welcome')}>
                     My Space
                   </Button>
-                  <Button size="sm" onClick={() => navigate('/dashboard')}>
-                    Dashboard
-                  </Button>
                   <Button variant="outline" size="sm" onClick={async () => {
                     const { supabase } = await import('@/integrations/supabase/client');
                     await supabase.auth.signOut();
