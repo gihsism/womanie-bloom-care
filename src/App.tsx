@@ -34,6 +34,7 @@ import AIDoctorChat from "./pages/AIDoctorChat";
 import Install from "./pages/Install";
 import Devices from "./pages/dashboard/Devices";
 import Welcome from "./pages/Welcome";
+import Community from "./pages/Community";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const App = () => (
             <Route path="/install" element={<Install />} />
             <Route path="/dashboard/devices" element={<Devices />} />
             <Route path="/welcome" element={<Welcome />} />
+            <Route path="/community" element={<Community />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
