@@ -805,6 +805,29 @@ export default function MedicalHistory() {
         )}
         <DocumentUpload />
 
+        {/* Section quick nav — only show when there's data */}
+        {hasData && (
+          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+            {[
+              { id: 'snapshot', label: 'Snapshot' },
+              { id: 'categories', label: 'Categories' },
+              { id: 'insights', label: 'Insights' },
+              ...(flaggedItems.length > 0 ? [{ id: 'attention', label: 'Attention' }] : []),
+              ...(stats.labsByPanel.length > 0 ? [{ id: 'results', label: 'Results' }] : []),
+              ...(stats.repeatedTests.length > 0 ? [{ id: 'trends', label: 'Trends' }] : []),
+              { id: 'documents', label: 'Documents' },
+            ].map(section => (
+              <button
+                key={section.id}
+                onClick={() => document.getElementById(section.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                className="text-xs px-3 py-1.5 rounded-full bg-muted hover:bg-primary/10 hover:text-primary transition-colors whitespace-nowrap font-medium text-muted-foreground"
+              >
+                {section.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="space-y-6">
           {/* ============ MAIN CONTENT — SINGLE SCROLLABLE PAGE ============ */}
             {!hasDocuments ? (
@@ -823,7 +846,7 @@ export default function MedicalHistory() {
               <>
                 {/* Quick Summary — friendly language */}
                 {hasData && stats.labResults.length > 0 && (
-                  <Card className="overflow-hidden">
+                  <Card id="snapshot" className="overflow-hidden scroll-mt-20">
                     <div className="p-5">
                       <div className="flex items-center gap-3 mb-4">
                         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -901,7 +924,9 @@ export default function MedicalHistory() {
                 {/* recommendations, and test comparison tables.                        */}
 
                 {/* Health by body system category with per-category scores */}
+                <div id="categories" className="scroll-mt-20">
                 <HealthCategories medicalData={medicalData} />
+                </div>
 
                 {/* Suggests cycle tracker updates based on hormone lab results */}
                 <CycleUpdateSuggestions labResults={stats.labResults} lifeStage={lifeStage} />
@@ -910,7 +935,9 @@ export default function MedicalHistory() {
                 <CycleImpactSection labResults={stats.labResults} lifeStage={lifeStage} />
 
                 {/* Cross-references multiple test results to surface health patterns */}
+                <div id="insights" className="scroll-mt-20">
                 <PersonalizedInsights medicalData={medicalData} lifeStage={lifeStage} />
+                </div>
 
                 {/* Smart recommendations: missing tests, stale results, retests needed */}
                 <SmartRecommendations medicalData={medicalData} lifeStage={lifeStage} />
@@ -919,7 +946,7 @@ export default function MedicalHistory() {
 
                 {/* ⚠️ Things that need attention — front and center */}
                 {flaggedItems.length > 0 && (
-                  <div>
+                  <div id="attention" className="scroll-mt-20">
                     <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
                       <Eye className="h-4 w-4 text-amber-600" />
                       Things to discuss with your doctor
@@ -977,7 +1004,7 @@ export default function MedicalHistory() {
 
                 {/* All results grouped by panel — collapsible, friendly */}
                 {stats.labsByPanel.length > 0 && (
-                  <div>
+                  <div id="results" className="scroll-mt-20">
                     <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
                       <FlaskConical className="h-4 w-4 text-primary" />
                       All Your Test Results
@@ -1100,8 +1127,10 @@ export default function MedicalHistory() {
                   </Card>
                 )}
 
-                {/* ============ TEST COMPARISON TABLE ============ */}
+                {/* ============ TEST COMPARISON & TRENDS ============ */}
+                <div id="trends" className="scroll-mt-20">
                 <TestComparisonTable medicalData={medicalData} />
+                </div>
 
                 {/* ============ TRENDS & PREDICTIONS (INLINE) ============ */}
                 {stats.repeatedTests.length > 0 && (
@@ -1305,7 +1334,7 @@ export default function MedicalHistory() {
 
                 {/* ============ UPLOADED DOCUMENTS ============ */}
                 {documents.length > 0 && (
-                  <div>
+                  <div id="documents" className="scroll-mt-20">
                     <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
                       <FileText className="h-4 w-4 text-primary" />
                       Uploaded Documents ({documents.length})

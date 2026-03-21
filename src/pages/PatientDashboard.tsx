@@ -25,6 +25,7 @@ import OvulationPrediction from '@/components/dashboard/OvulationPrediction';
 import PreMenstrualDashboard from '@/components/dashboard/PreMenstrualDashboard';
 import MenopauseDashboard from '@/components/dashboard/MenopauseDashboard';
 import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
+import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import { format, addDays, differenceInDays } from 'date-fns';
 import { useMemo } from 'react';
 import { 
@@ -560,7 +561,8 @@ const PatientDashboard = () => {
               </div>
             </Card>
 
-
+            {/* Health Summary from medical documents */}
+            <HealthSummaryWidget />
 
             {/* Health Tracking Section */}
             <div className="mb-6">
