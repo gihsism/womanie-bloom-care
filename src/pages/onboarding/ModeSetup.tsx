@@ -51,11 +51,9 @@ const ModeSetup = () => {
         </button>
         <button
           onClick={handleHome}
-          className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
-          aria-label="Go to home"
+          className="text-xl font-bold text-primary hover:opacity-80 transition-opacity"
         >
-          <Home className="h-5 w-5" />
-          <span className="text-sm">Home</span>
+          Womanie
         </button>
       </div>
 

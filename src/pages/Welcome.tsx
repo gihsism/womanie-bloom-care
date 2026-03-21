@@ -89,7 +89,7 @@ const Welcome = () => {
             <ArrowLeft className="h-4 w-4" />
             Main Site
           </Button>
-          <span className="text-xl font-bold text-primary">Womanie</span>
+          <button onClick={() => navigate('/')} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">Womanie</button>
         </div>
         <Button
           variant="ghost"
