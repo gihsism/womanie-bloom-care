@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -57,6 +58,7 @@ interface Appointment {
 
 const DoctorDashboard = () => {
   const navigate = useNavigate();
+  usePageTitle('Doctor Portal');
   const { toast } = useToast();
   const { hasRole, loading } = useRequireRole('doctor', '/auth/doctor-login');
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);

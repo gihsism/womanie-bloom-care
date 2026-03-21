@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -51,6 +52,7 @@ const features = [
 
 const Welcome = () => {
   const navigate = useNavigate();
+  usePageTitle('Welcome');
   const { user, loading } = useAuth();
 
   useEffect(() => {

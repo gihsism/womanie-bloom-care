@@ -26,6 +26,7 @@ import PreMenstrualDashboard from '@/components/dashboard/PreMenstrualDashboard'
 import MenopauseDashboard from '@/components/dashboard/MenopauseDashboard';
 import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { format, addDays, differenceInDays } from 'date-fns';
 import { useMemo } from 'react';
 import {
@@ -52,6 +53,7 @@ const PatientDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, session, loading } = useAuth();
+  usePageTitle('Dashboard');
   const [profile, setProfile] = useState<{ full_name?: string; life_stage?: string; pregnancy_due_date?: string | null; ivf_start_date?: string | null; ivf_phase?: string | null } | null>(null);
   const [selectedMode, setSelectedMode] = useState<LifeStage | null>(null);
   const [ovulationPrediction, setOvulationPrediction] = useState<{

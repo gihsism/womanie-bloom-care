@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { ArrowLeft, Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const PatientSignUp = () => {
   const navigate = useNavigate();
+  usePageTitle('Sign Up');
   const { toast } = useToast();
   const { user, loading } = useAuth();
 

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -144,6 +145,7 @@ How can I help you today?`,
 // ─── Real Doctor Panel ───
 function RealDoctorPanel() {
   const navigate = useNavigate();
+  usePageTitle('AI Doctor');
 
   const features = [
     { icon: Search, label: 'Browse verified specialists', description: 'Find gynecologists, fertility experts, and more' },

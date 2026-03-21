@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { User, Stethoscope, Home, ArrowLeft } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 const SelectUserType = () => {
   const navigate = useNavigate();
+  usePageTitle('Get Started');
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

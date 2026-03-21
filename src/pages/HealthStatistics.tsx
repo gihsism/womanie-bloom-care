@@ -20,6 +20,7 @@ interface DocumentSummary {
 
 export default function HealthStatistics() {
   const navigate = useNavigate();
+  usePageTitle('Health Statistics');
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
   const [loading, setLoading] = useState(true);
 

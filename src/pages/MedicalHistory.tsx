@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -549,6 +550,7 @@ function ResultCard({ item }: { item: MedicalDataItem }) {
 
 export default function MedicalHistory() {
   const navigate = useNavigate();
+  usePageTitle('Health Records');
   const { user, loading: authLoading } = useAuth();
   const [medicalData, setMedicalData] = useState<MedicalDataItem[]>([]);
   const [documents, setDocuments] = useState<DocumentInfo[]>([]);

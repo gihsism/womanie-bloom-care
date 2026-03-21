@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Pill, Shield, Bell, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -65,6 +66,7 @@ const lifeStageOptions = [
 
 const Settings = () => {
   const navigate = useNavigate();
+  usePageTitle('Settings');
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedStage, setSelectedStage] = useState<LifeStage>('menstrual-cycle');

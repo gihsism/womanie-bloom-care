@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { ArrowLeft, Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +11,7 @@ import { lovable } from '@/integrations/lovable/index';
 
 const PatientLogIn = () => {
   const navigate = useNavigate();
+  usePageTitle('Log In');
   const { toast } = useToast();
   const { user, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);

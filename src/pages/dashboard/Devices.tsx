@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +22,7 @@ interface Device {
 
 const Devices = () => {
   const navigate = useNavigate();
+  usePageTitle('Connected Devices');
   const [expandedDevice, setExpandedDevice] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
   const [healthKitConnected, setHealthKitConnected] = useState(false);
