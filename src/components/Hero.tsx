@@ -48,8 +48,8 @@ const Hero = () => {
           </div>
 
           {/* Right Visual - Hero Illustration */}
-          <div className="animate-fade-in-delay-1">
-            <div className="relative">
+          <div className="animate-fade-in-delay-1 flex items-center justify-center">
+            <div className="relative max-w-md lg:max-w-lg">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl blur-3xl"></div>
               <img 
                 src={heroIllustration} 
