@@ -74,11 +74,13 @@ const Navigation = () => {
           <div className="hidden lg:flex items-center gap-4">
             {user ? (
               <>
-                <span className="text-sm text-muted-foreground">Logged in</span>
+                <Button variant="ghost" onClick={() => navigate('/welcome')}>
+                  My Space
+                </Button>
                 <Button onClick={() => navigate('/dashboard')}>
                   Dashboard
                 </Button>
-                <Button variant="outline" onClick={async () => {
+                <Button variant="outline" size="sm" onClick={async () => {
                   const { supabase } = await import('@/integrations/supabase/client');
                   await supabase.auth.signOut();
                   window.location.reload();
