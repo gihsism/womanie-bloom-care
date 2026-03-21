@@ -426,7 +426,7 @@ const PatientDashboard = () => {
                 userName={getUserName()}
                 selectedMode={selectedMode}
                 onModeChange={handleModeChange}
-                onNavigate={setActiveSection}
+                onNavigate={() => {}}
                 onUploadClick={() => setUploadDialogOpen(true)}
                 onDoctorChatClick={() => navigate('/dashboard/ai-doctor')}
                 cycleDay={currentCycleDay}
