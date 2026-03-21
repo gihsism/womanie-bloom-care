@@ -9,10 +9,10 @@ import {
   FileText, 
   Activity, 
   ArrowRight, 
+  ArrowLeft,
   Heart,
   Shield,
   Sparkles,
-  Home
 } from 'lucide-react';
 
 const features = [
