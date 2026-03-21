@@ -4,9 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { Activity, Calendar, MessageSquare, FileText, Shield, Zap } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Product = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const features = [
     {
