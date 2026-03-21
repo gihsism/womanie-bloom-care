@@ -291,10 +291,13 @@ const PatientDetails = () => {
                 Life stage: {patient?.life_stage || 'Not specified'}
               </p>
             </div>
-            <Button onClick={() => setShowNoteForm(true)}>
+            <Button onClick={() => setShowNoteForm(true)} size="sm">
               <Plus className="h-4 w-4 mr-2" />
               Add Note
             </Button>
+            <button type="button" onClick={() => { window.location.href = '/'; }} className="text-lg font-bold text-primary hover:opacity-80 transition-opacity ml-2">
+              Womanie
+            </button>
           </div>
         </div>
       </div>

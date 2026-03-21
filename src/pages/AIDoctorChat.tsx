@@ -367,6 +367,9 @@ export default function AIDoctorChat() {
               </p>
             </div>
           </div>
+          <button type="button" onClick={() => { window.location.href = '/'; }} className="text-sm font-bold text-primary hover:opacity-80 transition-opacity">
+            Womanie
+          </button>
 
           {chatMode === 'ai' && (
             <>

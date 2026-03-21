@@ -18,7 +18,13 @@ const NotFound = () => {
   const visibleSuggestions = suggestions.filter(s => !s.auth || user);
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex flex-col">
+      <div className="p-4 flex justify-center border-b border-border">
+        <button type="button" onClick={() => { window.location.href = '/'; }} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
+          Womanie
+        </button>
+      </div>
+      <div className="flex-1 flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center space-y-6">
         <div className="space-y-3">
           <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
@@ -57,6 +63,7 @@ const NotFound = () => {
           <ArrowLeft className="h-4 w-4" />
           Go back
         </Button>
+      </div>
       </div>
     </div>
   );

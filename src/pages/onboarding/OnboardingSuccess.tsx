@@ -13,7 +13,13 @@ const OnboardingSuccess = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex flex-col">
+      <div className="p-4 flex justify-center border-b border-border">
+        <button type="button" onClick={() => { window.location.href = '/'; }} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
+          Womanie
+        </button>
+      </div>
+      <div className="flex-1 flex items-center justify-center px-4">
       <div className="w-full max-w-md text-center space-y-6">
         {/* Success icon */}
         <div className="flex justify-center">
@@ -54,6 +60,7 @@ const OnboardingSuccess = () => {
             See what I can do first
           </Button>
         </div>
+      </div>
       </div>
     </div>
   );
