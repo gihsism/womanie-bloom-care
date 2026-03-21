@@ -66,8 +66,8 @@ const ForDoctors = () => {
               reach more patients, and grow their practice.
             </p>
             <div className="flex gap-4 justify-center">
-              <Button size="lg">Join as a Doctor</Button>
-              <Button size="lg" variant="outline">Schedule a Demo</Button>
+              <Button size="lg" onClick={() => navigate('/auth/doctor-signup')}>Join as a Doctor</Button>
+              <Button size="lg" variant="outline" onClick={() => navigate('/auth/doctor-signup')}>Get Started</Button>
             </div>
           </div>
 
@@ -75,7 +75,7 @@ const ForDoctors = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature) => (
               <Card key={feature.title} className="p-6">
-                <feature.icon className="h-12 w-12 text-primary mb-4" />
+                <feature.icon className="h-12 w-12 text-primary mb-4" aria-hidden="true" />
                 <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
                 <p className="text-muted-foreground">{feature.description}</p>
               </Card>
