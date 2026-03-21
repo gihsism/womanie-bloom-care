@@ -204,8 +204,62 @@ export default function AIDoctorChat() {
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [selectedModel, setSelectedModel] = useState('google/gemini-3-flash-preview');
+  const [medicalContext, setMedicalContext] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Load user's medical context for personalized AI responses
+  useEffect(() => {
+    if (!user) return;
+    const loadContext = async () => {
+      try {
+        const { supabase } = await import('@/integrations/supabase/client');
+        const [profileRes, docsRes, extractedRes] = await Promise.all([
+          supabase.from('profiles').select('life_stage').eq('id', user.id).maybeSingle(),
+          supabase.from('health_documents').select('ai_suggested_name, ai_summary, document_type').eq('user_id', user.id).order('uploaded_at', { ascending: false }).limit(5),
+          supabase.from('medical_extracted_data').select('title, value, unit, status, data_type').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
+        ]);
+
+        const parts: string[] = [];
+        if (profileRes.data?.life_stage) {
+          parts.push(`Life stage: ${profileRes.data.life_stage}`);
+        }
+        if (extractedRes.data && extractedRes.data.length > 0) {
+          const labs = extractedRes.data
+            .filter(d => d.data_type === 'lab_result' && d.value)
+            .map(d => `${d.title}: ${d.value}${d.unit ? ' ' + d.unit : ''}${d.status && d.status !== 'normal' ? ' (' + d.status + ')' : ''}`)
+            .join('; ');
+          if (labs) parts.push(`Recent lab results: ${labs}`);
+
+          const conditions = extractedRes.data
+            .filter(d => d.data_type === 'condition')
+            .map(d => d.title)
+            .join(', ');
+          if (conditions) parts.push(`Conditions: ${conditions}`);
+
+          const medications = extractedRes.data
+            .filter(d => d.data_type === 'medication')
+            .map(d => `${d.title}${d.value ? ' ' + d.value : ''}`)
+            .join(', ');
+          if (medications) parts.push(`Medications: ${medications}`);
+        }
+        if (docsRes.data && docsRes.data.length > 0) {
+          const summaries = docsRes.data
+            .filter(d => d.ai_summary)
+            .map(d => `${d.ai_suggested_name || d.document_type}: ${d.ai_summary!.slice(0, 200)}`)
+            .join('\n');
+          if (summaries) parts.push(`Document summaries:\n${summaries}`);
+        }
+
+        if (parts.length > 0) {
+          setMedicalContext(parts.join('\n'));
+        }
+      } catch (error) {
+        console.error('Error loading medical context:', error);
+      }
+    };
+    loadContext();
+  }, [user]);
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/auth/login');
@@ -236,8 +290,13 @@ export default function AIDoctorChat() {
     let assistantSoFar = '';
     const conversationForApi = newMessages.filter(m => m !== WELCOME_MESSAGE);
 
+    // Prepend medical context as a system-style message so the AI knows the user's health background
+    const messagesWithContext: Msg[] = medicalContext
+      ? [{ role: 'user', content: `[SYSTEM CONTEXT — do not repeat this to the user, use it to personalize your answers]\n${medicalContext}` }, { role: 'assistant', content: 'I have your health records loaded. How can I help?' }, ...conversationForApi]
+      : conversationForApi;
+
     await streamChat({
-      messages: conversationForApi,
+      messages: messagesWithContext,
       token,
       model: selectedModel,
       onDelta: (chunk) => {

@@ -10,6 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRequireRole } from '@/hooks/useRequireRole';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import {
   ArrowLeft,
   User,
@@ -23,6 +26,8 @@ import {
   MessageSquare,
   Download,
   Eye,
+  Loader2,
+  ExternalLink,
 } from 'lucide-react';
 
 interface PatientProfile {
@@ -43,6 +48,7 @@ interface HealthSignal {
 interface HealthDocument {
   id: string;
   file_name: string;
+  file_path: string;
   document_type: string;
   ai_summary: string | null;
   uploaded_at: string | null;
@@ -82,6 +88,7 @@ const PatientDetails = () => {
   
   // New note form
   const [showNoteForm, setShowNoteForm] = useState(false);
+  const [isSavingNote, setIsSavingNote] = useState(false);
   const [newNote, setNewNote] = useState({
     title: '',
     content: '',
@@ -190,6 +197,7 @@ const PatientDetails = () => {
 
   const handleAddNote = async () => {
     if (!user || !patientId || !newNote.title || !newNote.content) return;
+    setIsSavingNote(true);
 
     try {
       const { error } = await supabase
@@ -225,13 +233,30 @@ const PatientDetails = () => {
         title: 'Error',
         description: 'Failed to add note.',
       });
+    } finally {
+      setIsSavingNote(false);
     }
   };
 
   if (loading || isLoadingData) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p>Loading...</p>
+      <div className="min-h-screen bg-background">
+        <div className="border-b border-border bg-card p-4">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-8 w-16" />
+            <div className="space-y-2 flex-1">
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          </div>
+        </div>
+        <div className="p-6 max-w-7xl mx-auto space-y-6">
+          <Skeleton className="h-10 w-[500px]" />
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
+          </div>
+          <Skeleton className="h-48 rounded-xl" />
+        </div>
       </div>
     );
   }
@@ -460,8 +485,21 @@ const PatientDetails = () => {
                             )}
                           </div>
                         </div>
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4 mr-2" />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={async () => {
+                            const { data } = await supabase.storage
+                              .from('health-documents')
+                              .createSignedUrl(doc.file_path, 3600);
+                            if (data?.signedUrl) {
+                              window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
+                            } else {
+                              toast({ variant: 'destructive', title: 'Error', description: 'Could not open document.' });
+                            }
+                          }}
+                        >
+                          <ExternalLink className="h-4 w-4 mr-2" />
                           View
                         </Button>
                       </div>
@@ -535,10 +573,21 @@ const PatientDetails = () => {
                     />
                   </div>
                   <div className="flex gap-2">
-                    <Button onClick={handleAddNote} className="bg-secondary hover:bg-secondary/90">
-                      Save Note
+                    <Button
+                      onClick={handleAddNote}
+                      className="bg-secondary hover:bg-secondary/90"
+                      disabled={!newNote.title || !newNote.content || isSavingNote}
+                    >
+                      {isSavingNote ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        'Save Note'
+                      )}
                     </Button>
-                    <Button variant="outline" onClick={() => setShowNoteForm(false)}>
+                    <Button variant="outline" onClick={() => setShowNoteForm(false)} disabled={isSavingNote}>
                       Cancel
                     </Button>
                   </div>
