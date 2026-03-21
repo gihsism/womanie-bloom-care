@@ -34,6 +34,7 @@ import AIDoctorChat from "./pages/AIDoctorChat";
 import Install from "./pages/Install";
 import Devices from "./pages/dashboard/Devices";
 import Welcome from "./pages/Welcome";
+import Community from "./pages/Community";
 
 const queryClient = new QueryClient();
 
