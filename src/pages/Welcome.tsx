@@ -9,7 +9,6 @@ import {
   FileText, 
   Activity, 
   ArrowRight, 
-  ArrowLeft,
   Heart,
   Shield,
   Sparkles,
@@ -79,18 +78,9 @@ const Welcome = () => {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <div className="p-4 flex items-center justify-between border-b border-border">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/')}
-            className="gap-1.5 text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Main Site
-          </Button>
-          <button onClick={() => navigate('/')} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">Womanie</button>
-        </div>
+        <button onClick={() => navigate('/')} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
+          Womanie
+        </button>
         <Button
           variant="ghost"
           size="sm"
