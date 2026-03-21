@@ -471,18 +471,10 @@ const PatientDashboard = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
               
-              <Button 
-                variant="ghost" 
-                size="sm"
-                    onClick={() => navigate('/')}
-                    className="gap-2"
-                  >
-                    <Home className="h-4 w-4" />
-                    Main Site
-                  </Button>
-                  <div className="h-6 w-px bg-border" />
-                  <h1 className="text-xl font-bold text-primary">Womanie</h1>
-                </div>
+              <button onClick={() => navigate('/')} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
+                Womanie
+              </button>
+            </div>
                 <div className="flex items-center gap-2">
                   {activeSection !== 'overview' && (
                     <Button 
