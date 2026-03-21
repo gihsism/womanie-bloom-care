@@ -31,7 +31,7 @@ export default function HealthStatistics() {
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      navigate('/auth/patient-login');
+      navigate('/auth/login');
     }
   };
 
@@ -110,9 +110,12 @@ export default function HealthStatistics() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground text-center">
+            <p className="text-muted-foreground text-center mb-4">
               No documents uploaded yet. Upload health documents to see AI-generated summaries here.
             </p>
+            <Button variant="outline" onClick={() => navigate('/dashboard/medical-history')}>
+              Go to Medical Records
+            </Button>
           </CardContent>
         </Card>
       ) : (

@@ -11,7 +11,8 @@ import { Calendar } from '@/components/ui/calendar';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Search, Star, Clock, Video, Calendar as CalendarIcon, CheckCircle, User } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ArrowLeft, Search, Star, Clock, Video, Calendar as CalendarIcon, CheckCircle, User, Loader2 } from 'lucide-react';
 import { format, addDays, setHours, setMinutes } from 'date-fns';
 
 interface Doctor {
@@ -191,8 +192,16 @@ const FindDoctor = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p>Loading...</p>
+      <div className="min-h-screen bg-background">
+        <div className="border-b border-border bg-card p-4">
+          <Skeleton className="h-8 w-48" />
+        </div>
+        <div className="max-w-6xl mx-auto px-4 py-6 space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map(i => <Skeleton key={i} className="h-64 w-full rounded-xl" />)}
+          </div>
+        </div>
       </div>
     );
   }
@@ -241,8 +250,25 @@ const FindDoctor = () => {
 
         {/* Doctors List */}
         {loadingDoctors ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Loading available doctors...</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map(i => (
+              <Card key={i} className="overflow-hidden">
+                <CardHeader className="pb-4">
+                  <div className="flex items-start gap-4">
+                    <Skeleton className="h-16 w-16 rounded-full" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-5 w-32" />
+                      <Skeleton className="h-4 w-20" />
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-9 w-full" />
+                </CardContent>
+              </Card>
+            ))}
           </div>
         ) : filteredDoctors.length === 0 ? (
           <Card className="p-12 text-center">
@@ -347,23 +373,34 @@ const FindDoctor = () => {
                           />
                         </div>
 
-                        {selectedDate && (
-                          <div>
-                            <label className="text-sm font-medium mb-2 block">Select Time</label>
-                            <div className="grid grid-cols-4 gap-2 max-h-40 overflow-y-auto">
-                              {getAvailableTimeSlots(doctor, selectedDate).map(time => (
-                                <Button
-                                  key={time}
-                                  variant={selectedTime === time ? 'default' : 'outline'}
-                                  size="sm"
-                                  onClick={() => setSelectedTime(time)}
-                                >
-                                  {time}
-                                </Button>
-                              ))}
+                        {selectedDate && (() => {
+                          const slots = getAvailableTimeSlots(doctor, selectedDate);
+                          return (
+                            <div>
+                              <label className="text-sm font-medium mb-2 block">Select Time</label>
+                              {slots.length === 0 ? (
+                                <div className="text-center py-4 bg-muted/50 rounded-lg">
+                                  <Clock className="h-5 w-5 mx-auto text-muted-foreground mb-1.5" aria-hidden="true" />
+                                  <p className="text-sm text-muted-foreground">No time slots available on this day.</p>
+                                  <p className="text-xs text-muted-foreground mt-1">Try selecting a different date.</p>
+                                </div>
+                              ) : (
+                                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-40 overflow-y-auto">
+                                  {slots.map(time => (
+                                    <Button
+                                      key={time}
+                                      variant={selectedTime === time ? 'default' : 'outline'}
+                                      className="h-10 text-sm"
+                                      onClick={() => setSelectedTime(time)}
+                                    >
+                                      {time}
+                                    </Button>
+                                  ))}
+                                </div>
+                              )}
                             </div>
-                          </div>
-                        )}
+                          );
+                        })()}
 
                         {selectedDate && selectedTime && (
                           <div className="p-4 bg-muted rounded-lg">
@@ -382,12 +419,19 @@ const FindDoctor = () => {
                           </div>
                         )}
 
-                        <Button 
-                          className="w-full" 
+                        <Button
+                          className="w-full"
                           disabled={!selectedDate || !selectedTime || bookingLoading}
                           onClick={handleBookAppointment}
                         >
-                          {bookingLoading ? 'Booking...' : 'Confirm Booking'}
+                          {bookingLoading ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Booking...
+                            </>
+                          ) : (
+                            'Confirm Booking'
+                          )}
                         </Button>
                       </div>
                     </DialogContent>
