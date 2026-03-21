@@ -116,28 +116,39 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
 
       if (dbError) throw dbError;
 
-      toast({
-        title: 'Success',
-        description: 'Document uploaded successfully. AI analysis in progress...',
-      });
-
-      // Trigger AI analysis in background
-      supabase.functions.invoke('analyze-document', {
-        body: {
-          documentId: insertData.id,
-          filePath: fileName,
-          fileName: file.name,
-          mimeType: file.type
-        }
-      }).catch(error => {
-        console.error('AI analysis error:', error);
-      });
-
-      // Reset form
+      // Reset form and close dialog
       setFile(null);
       setDocumentType('');
       setNotes('');
       setIsOpen(false);
+
+      toast({
+        title: 'Uploaded!',
+        description: 'Analyzing your document with AI... This may take a moment.',
+      });
+
+      // Trigger AI analysis and notify when done
+      try {
+        await supabase.functions.invoke('analyze-document', {
+          body: {
+            documentId: insertData.id,
+            filePath: fileName,
+            fileName: file.name,
+            mimeType: file.type
+          }
+        });
+        toast({
+          title: 'Analysis complete!',
+          description: 'Your document has been analyzed. View your results in Health Records.',
+        });
+      } catch (error) {
+        console.error('AI analysis error:', error);
+        toast({
+          title: 'Upload saved',
+          description: 'Document uploaded but AI analysis failed. You can re-analyze later from Health Records.',
+          variant: 'destructive',
+        });
+      }
     } catch (error) {
       console.error('Upload error:', error);
       toast({
