@@ -7,6 +7,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRequireRole } from '@/hooks/useRequireRole';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
+import { Loader2 } from 'lucide-react';
 import {
   Home,
   Users,
@@ -63,6 +66,7 @@ const DoctorDashboard = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [consultationPrice, setConsultationPrice] = useState<{ price: number; currency: string } | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
@@ -105,6 +109,20 @@ const DoctorDashboard = () => {
         .order('scheduled_at', { ascending: true });
 
       setAppointments(appts || []);
+
+      // Load consultation price
+      const { data: consultSettings } = await supabase
+        .from('consultation_settings')
+        .select('consultation_price, currency')
+        .eq('doctor_id', user.id)
+        .maybeSingle();
+
+      if (consultSettings?.consultation_price) {
+        setConsultationPrice({
+          price: consultSettings.consultation_price,
+          currency: consultSettings.currency || 'CHF',
+        });
+      }
     } catch (error) {
       console.error('Error loading doctor data:', error);
     } finally {
@@ -146,8 +164,22 @@ const DoctorDashboard = () => {
 
   if (loading || isLoadingData) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p>Loading...</p>
+      <div className="min-h-screen bg-background">
+        <div className="border-b border-border bg-card p-4">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-10 w-10 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          </div>
+        </div>
+        <div className="p-6 max-w-7xl mx-auto space-y-6">
+          <Skeleton className="h-10 w-[500px]" />
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 rounded-xl" />)}
+          </div>
+        </div>
       </div>
     );
   }
@@ -253,8 +285,12 @@ const DoctorDashboard = () => {
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">CHF 80</div>
-                  <p className="text-xs text-muted-foreground">Per session</p>
+                  <div className="text-2xl font-bold">
+                    {consultationPrice ? `${consultationPrice.currency} ${consultationPrice.price}` : 'Not set'}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {consultationPrice ? 'Per session' : 'Set in Settings'}
+                  </p>
                 </CardContent>
               </Card>
             </div>
@@ -663,7 +699,12 @@ const ConsultationSettings = ({ doctorId }: { doctorId: string }) => {
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading settings...</div>;
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-48 w-full rounded-xl" />
+        <Skeleton className="h-32 w-full rounded-xl" />
+      </div>
+    );
   }
 
   return (
@@ -683,12 +724,11 @@ const ConsultationSettings = ({ doctorId }: { doctorId: string }) => {
               <p className="font-medium">Available for Consultations</p>
               <p className="text-sm text-muted-foreground">Turn on to accept new appointments</p>
             </div>
-            <button
-              onClick={() => setSettings(s => ({ ...s, is_available: !s.is_available }))}
-              className={`w-12 h-6 rounded-full transition-colors ${settings.is_available ? 'bg-secondary' : 'bg-muted'}`}
-            >
-              <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${settings.is_available ? 'translate-x-6' : 'translate-x-0.5'}`} />
-            </button>
+            <Switch
+              checked={settings.is_available}
+              onCheckedChange={(checked) => setSettings(s => ({ ...s, is_available: checked }))}
+              aria-label="Toggle consultation availability"
+            />
           </div>
 
           {/* Pricing */}
@@ -740,17 +780,16 @@ const ConsultationSettings = ({ doctorId }: { doctorId: string }) => {
           <div className="flex items-center justify-between p-4 border rounded-lg">
             <div>
               <p className="font-medium flex items-center gap-2">
-                <Video className="h-4 w-4" />
+                <Video className="h-4 w-4" aria-hidden="true" />
                 Video Consultations
               </p>
               <p className="text-sm text-muted-foreground">Enable video call appointments</p>
             </div>
-            <button
-              onClick={() => setSettings(s => ({ ...s, video_enabled: !s.video_enabled }))}
-              className={`w-12 h-6 rounded-full transition-colors ${settings.video_enabled ? 'bg-secondary' : 'bg-muted'}`}
-            >
-              <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${settings.video_enabled ? 'translate-x-6' : 'translate-x-0.5'}`} />
-            </button>
+            <Switch
+              checked={settings.video_enabled}
+              onCheckedChange={(checked) => setSettings(s => ({ ...s, video_enabled: checked }))}
+              aria-label="Toggle video consultations"
+            />
           </div>
 
           {/* Payment Info */}
@@ -790,6 +829,8 @@ const ConsultationSettings = ({ doctorId }: { doctorId: string }) => {
 };
 
 const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
+  const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
   const [schedule, setSchedule] = useState<Record<number, { start: string; end: string; active: boolean }>>({
     0: { start: '09:00', end: '17:00', active: false },
     1: { start: '09:00', end: '17:00', active: true },
@@ -801,6 +842,62 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
   });
 
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  // Load existing schedule
+  useEffect(() => {
+    const loadSchedule = async () => {
+      const { data } = await supabase
+        .from('doctor_schedule')
+        .select('*')
+        .eq('doctor_id', doctorId);
+
+      if (data && data.length > 0) {
+        const loaded = { ...schedule };
+        data.forEach(s => {
+          if (s.day_of_week !== null) {
+            loaded[s.day_of_week] = {
+              start: s.start_time,
+              end: s.end_time,
+              active: s.is_active ?? true,
+            };
+          }
+        });
+        setSchedule(loaded);
+      }
+    };
+    loadSchedule();
+  }, [doctorId]);
+
+  const handleSaveSchedule = async () => {
+    setIsSaving(true);
+    try {
+      // Delete existing schedule
+      await supabase.from('doctor_schedule').delete().eq('doctor_id', doctorId);
+
+      // Insert new schedule for active days
+      const rows = Object.entries(schedule)
+        .filter(([, s]) => s.active)
+        .map(([day, s]) => ({
+          doctor_id: doctorId,
+          day_of_week: Number(day),
+          start_time: s.start,
+          end_time: s.end,
+          is_active: true,
+        }));
+
+      if (rows.length > 0) {
+        const { error } = await supabase.from('doctor_schedule').insert(rows);
+        if (error) throw error;
+      }
+
+      toast({ title: 'Schedule saved', description: 'Your weekly schedule has been updated.' });
+    } catch (error) {
+      console.error('Error saving schedule:', error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to save schedule.' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const toggleDay = (day: number) => {
     setSchedule(s => ({
@@ -852,8 +949,19 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
           )}
         </div>
       ))}
-      <Button className="w-full mt-4 bg-secondary hover:bg-secondary/90">
-        Save Schedule
+      <Button
+        className="w-full mt-4 bg-secondary hover:bg-secondary/90"
+        onClick={handleSaveSchedule}
+        disabled={isSaving}
+      >
+        {isSaving ? (
+          <>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            Saving...
+          </>
+        ) : (
+          'Save Schedule'
+        )}
       </Button>
     </div>
   );
