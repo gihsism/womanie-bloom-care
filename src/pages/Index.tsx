@@ -1,7 +1,4 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import Navigation from '@/components/Navigation';
 import Navigation from '@/components/Navigation';
 import Hero from '@/components/Hero';
 import WhatIsWomanie from '@/components/WhatIsWomanie';
