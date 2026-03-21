@@ -112,19 +112,92 @@ const friendlyTestNames: Record<string, string> = {
   'TSH': 'TSH — thyroid function',
   'HCG': 'HCG — pregnancy hormone',
   'Vitamin D': 'Vitamin D — bone & immune health',
+  'Vitamin B12': 'Vitamin B12 — nerve & blood cell health',
+  'Folate': 'Folate — cell growth & pregnancy support',
+  'Folic Acid': 'Folic Acid — cell growth & pregnancy support',
   'Iron': 'Iron — mineral for energy',
   'Glucose': 'Glucose — blood sugar',
+  'Fasting Glucose': 'Fasting Glucose — blood sugar (fasting)',
+  'HbA1c': 'HbA1c — average blood sugar over 3 months',
   'Platelets': 'Platelets — blood clotting cells',
   'White Blood Cells': 'White Blood Cells — infection fighters',
   'Red Blood Cells': 'Red Blood Cells — oxygen carriers',
   'ALT': 'ALT — liver health marker',
   'AST': 'AST — liver health marker',
+  'GGT': 'GGT — liver & bile duct marker',
+  'Bilirubin': 'Bilirubin — liver processing marker',
   'Estradiol': 'Estradiol — main estrogen hormone',
-  'Progesterone': 'Progesterone — supports pregnancy',
+  'Progesterone': 'Progesterone — supports pregnancy & cycle',
   'FSH': 'FSH — reproductive hormone',
   'LH': 'LH — ovulation hormone',
+  'AMH': 'AMH — ovarian reserve (egg supply)',
+  'Prolactin': 'Prolactin — hormone affecting periods & fertility',
+  'Testosterone': 'Testosterone — hormone affecting skin, hair & cycle',
+  'DHEA-S': 'DHEA-S — adrenal hormone',
   'Creatinine': 'Creatinine — kidney function',
+  'Urea': 'Urea — kidney function',
+  'Total Cholesterol': 'Total Cholesterol — heart health',
+  'LDL': 'LDL — "bad" cholesterol',
+  'HDL': 'HDL — "good" cholesterol',
+  'Triglycerides': 'Triglycerides — blood fat levels',
+  'CRP': 'CRP — inflammation marker',
+  'D-Dimer': 'D-Dimer — blood clotting marker',
+  'Fibrinogen': 'Fibrinogen — blood clotting protein',
+  'Calcium': 'Calcium — bone & muscle health',
+  'Magnesium': 'Magnesium — muscle, nerve & sleep support',
+  'Sodium': 'Sodium — fluid balance',
+  'Potassium': 'Potassium — heart & muscle function',
+  'Phosphate': 'Phosphate — bone health',
+  'Total Protein': 'Total Protein — overall nutrition',
+  'Albumin': 'Albumin — liver function & nutrition',
+  'ANA': 'ANA — autoimmune screening',
+  'Anti-TPO': 'Anti-TPO — thyroid autoimmune marker',
+  'Anticardiolipin': 'Anticardiolipin — blood clotting disorder marker',
+  'INR': 'INR — blood clotting speed',
+  'PT': 'PT — blood clotting time',
+  'APTT': 'APTT — blood clotting time',
+  'Hematocrit': 'Hematocrit — red blood cell proportion',
+  'MCV': 'MCV — red blood cell size',
+  'MCH': 'MCH — hemoglobin per red blood cell',
+  'MCHC': 'MCHC — hemoglobin concentration',
+  'RDW': 'RDW — red blood cell size variation',
+  'Neutrophils': 'Neutrophils — main infection fighters',
+  'Lymphocytes': 'Lymphocytes — immune system cells',
+  'Monocytes': 'Monocytes — immune cells',
+  'Eosinophils': 'Eosinophils — allergy & parasite fighters',
+  'Basophils': 'Basophils — allergy-related immune cells',
 };
+
+// Generate a helpful explanation when the AI didn't provide notes
+function generateFallbackNote(item: MedicalDataItem): string | null {
+  if (item.notes) return null; // AI already provided notes
+
+  const val = item.value ? parseFloat(item.value) : null;
+  const hasValue = val !== null && !isNaN(val);
+
+  if (item.status === 'normal' || item.status === 'expected') return null; // no note needed for normal
+
+  if (item.status === 'abnormal' || item.status === 'critical') {
+    // Try to determine if high or low
+    let direction = '';
+    if (hasValue && item.reference_range) {
+      const match = item.reference_range.match(/([\d.]+)\s*[-–]\s*([\d.]+)/);
+      if (match) {
+        const low = parseFloat(match[1]);
+        const high = parseFloat(match[2]);
+        if (val! < low) direction = 'below';
+        else if (val! > high) direction = 'above';
+      }
+    }
+
+    const testName = item.title.toLowerCase();
+    const dirLabel = direction === 'below' ? 'lower than' : direction === 'above' ? 'higher than' : 'outside';
+
+    return `Your ${item.title} is ${dirLabel} the normal range${item.reference_range ? ` (${item.reference_range}${item.unit ? ' ' + item.unit : ''})` : ''}. This is worth mentioning to your doctor at your next visit — they can explain what it means for your specific situation and whether any follow-up is needed.`;
+  }
+
+  return null;
+}
 
 function getFriendlyName(title: string): string {
   return friendlyTestNames[title] || title;
@@ -250,6 +323,8 @@ function renderEnhancedSummary(summary: string) {
 // A single result card — friendly, visual, no jargon
 function ResultCard({ item }: { item: MedicalDataItem }) {
   const statusInfo = getStatusInfo(item.status);
+  const fallbackNote = generateFallbackNote(item);
+  const displayNote = item.notes || fallbackNote;
 
   return (
     <div className={`rounded-xl p-4 border ${statusInfo.bgColor} transition-all`}>
@@ -267,10 +342,10 @@ function ResultCard({ item }: { item: MedicalDataItem }) {
           <ValueGauge value={item.value} unit={item.unit} refRange={item.reference_range} status={item.status} />
         </div>
       </div>
-      {item.notes && (
+      {displayNote && (
         <div className="mt-3 bg-background/60 rounded-lg px-3 py-2.5 border border-border/30">
           <p className="text-sm leading-relaxed text-foreground/80">
-            {item.notes}
+            {displayNote}
           </p>
         </div>
       )}

@@ -183,7 +183,12 @@ STEP 2 — APPLY CONDITION-SPECIFIC REFERENCE RANGES:
 
 5. **Menopause context**: elevated FSH and low estradiol are EXPECTED, not abnormal.
 
-6. **Plain language notes**: For each finding, write a brief explanation a non-medical person would understand. Be specific: "Your iron stores (ferritin) are low at 15 ng/mL — during pregnancy this should be at least 30. Low iron can cause fatigue and may affect your baby's growth."
+6. **Plain language notes — MANDATORY for every item**: For EVERY extracted result, you MUST write a "notes" field explaining what this result means. Never leave notes empty. Be specific and helpful:
+   - For normal results: briefly confirm what it means (e.g., "Your thyroid function looks healthy — no concerns here.")
+   - For abnormal results: explain the value, what the healthy range is, what this could mean for the patient, and what they can do (e.g., "Your iron stores (ferritin) are low at 15 ng/mL — during pregnancy this should be at least 30. Low iron can cause fatigue and may affect your baby's growth. Ask your doctor about iron supplements.")
+   - For expected results: explain why it's expected (e.g., "Your HCG is elevated, which is completely normal during pregnancy — this hormone supports your baby's development.")
+   - For informational items: explain what the test measures and why it's tracked
+   - NEVER write vague notes like "discuss with your doctor" without explaining WHY. Always explain the result first, then suggest discussing if needed.
 
 7. **Group related tests**: If multiple tests belong to the same panel (CBC, thyroid panel, coagulation panel, autoimmune panel, etc.), note the panel name.
 
@@ -193,7 +198,7 @@ Return STRICT JSON with this shape:
 {
   "name": "suggested document name (max 50 chars)",
   "category": "lab_results | imaging | prescription | consultation_notes | vaccination_record | other",
-  "summary": "A 2-3 sentence plain-language summary for the patient. Lead with what's most important — anything abnormal or needing attention first. Be specific about values and what they mean. Then reassure about normal results.",
+  "summary": "A 3-5 sentence plain-language summary written directly to the patient. Lead with the most important finding. For each abnormal result, state the value, what the healthy range is, and what it could mean. Do NOT just say 'some results need attention' — be specific. End by reassuring about anything that looks good. Example: 'Your ferritin is 12 ng/mL, which is below the healthy range of 30-150 — this means your iron stores are low, which can cause tiredness. Your thyroid (TSH 1.8) and blood sugar (glucose 4.5) look great. Overall, most results are healthy but your iron needs attention.'",
   "key_takeaways": [
     "One-line plain-language takeaway the patient should know",
     "Another key point"
