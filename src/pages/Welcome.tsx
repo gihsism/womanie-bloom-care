@@ -68,9 +68,18 @@ const Welcome = () => {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <div className="p-4 flex items-center justify-between border-b border-border">
-        <button onClick={() => navigate('/')} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
-          Womanie
-        </button>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/')}
+            className="gap-1.5 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Main Site
+          </Button>
+          <span className="text-xl font-bold text-primary">Womanie</span>
+        </div>
         <Button
           variant="ghost"
           size="sm"
