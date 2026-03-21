@@ -23,6 +23,7 @@ const Navigation = () => {
     { label: 'Product', href: '/product' },
     { label: 'For Patients', href: '/for-patients' },
     { label: 'For Doctors', href: '/for-doctors' },
+    { label: 'Community', href: '/community' },
     { label: 'About', href: '/about' },
     { label: 'Pricing', href: '/pricing' },
     { label: 'Blog', href: '/blog' },
