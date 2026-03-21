@@ -31,12 +31,7 @@ const About = () => {
     },
   ];
 
-  const stats = [
-    { number: '500K+', label: 'Active Users' },
-    { number: '1M+', label: 'Cycles Tracked' },
-    { number: '2K+', label: 'Healthcare Providers' },
-    { number: '98%', label: 'Satisfaction Rate' },
-  ];
+  const stats: { number: string; label: string }[] = [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -86,9 +81,9 @@ const About = () => {
                 concern in between.
               </p>
               <p>
-                Today, Womanie combines cutting-edge AI technology with expert medical care and a supportive
-                community to provide truly personalized health insights. We're proud to serve over 500,000 women
-                worldwide and partner with thousands of healthcare providers.
+              Today, Womanie combines cutting-edge AI technology with expert medical care and a supportive
+              community to provide truly personalized health insights. We're finalizing our platform and 
+              can't wait to welcome women worldwide very soon.
               </p>
             </div>
           </div>
