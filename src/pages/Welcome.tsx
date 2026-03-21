@@ -60,7 +60,18 @@ const Welcome = () => {
     }
   }, [user, loading, navigate]);
 
-  if (loading || !user) return null;
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 via-secondary/10 to-accent/10 flex items-center justify-center animate-pulse">
+            <Heart className="h-8 w-8 text-primary" />
+          </div>
+          <p className="text-sm text-muted-foreground">Loading your space...</p>
+        </div>
+      </div>
+    );
+  }
 
   const userName = user.user_metadata?.full_name?.split(' ')[0] || 'there';
 

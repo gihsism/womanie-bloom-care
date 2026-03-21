@@ -1,36 +1,44 @@
+import { useNavigate } from 'react-router-dom';
 import { Pill, Baby, HeartPulse, Microscope, Flame } from 'lucide-react';
 
 const WhoItsFor = () => {
+  const navigate = useNavigate();
+
   const journeys = [
     {
       icon: Pill,
       title: 'Contraception',
       description:
         'Track your birth control, manage side effects, and get expert guidance on the best options for you.',
+      stage: 'contraception',
     },
     {
       icon: Baby,
       title: 'Conception',
       description:
         'Optimize your fertility window with predictive tracking and connect with fertility specialists.',
+      stage: 'conception',
     },
     {
       icon: HeartPulse,
       title: 'Pregnancy',
       description:
         'Monitor your pregnancy journey with week-by-week guidance and on-demand prenatal care.',
+      stage: 'pregnancy',
     },
     {
       icon: Microscope,
       title: 'IVF',
       description:
         'Navigate your IVF journey with medication tracking, appointment management, and emotional support.',
+      stage: 'ivf',
     },
     {
       icon: Flame,
       title: 'Menopause',
       description:
         'Manage symptoms, track hormone changes, and get specialized care for this transition.',
+      stage: 'menopause',
     },
   ];
 
@@ -46,20 +54,22 @@ const WhoItsFor = () => {
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {journeys.map((journey, index) => (
-            <div
+            <button
               key={index}
-              className="bg-gradient-to-br from-background to-muted/50 rounded-2xl p-6 border border-border hover:border-primary/50 transition-all duration-300 hover:-translate-y-2 cursor-pointer group"
+              onClick={() => navigate('/auth/select-type')}
+              className="bg-gradient-to-br from-background to-muted/50 rounded-2xl p-6 border border-border hover:border-primary/50 transition-all duration-300 hover:-translate-y-2 group text-left"
+              aria-label={`Get started with ${journey.title} tracking`}
             >
               <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <journey.icon className="h-6 w-6 text-white" />
+                <journey.icon className="h-6 w-6 text-white" aria-hidden="true" />
               </div>
               <h3 className="text-lg font-semibold mb-2">{journey.title}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {journey.description}
               </p>
-            </div>
+            </button>
           ))}
         </div>
       </div>

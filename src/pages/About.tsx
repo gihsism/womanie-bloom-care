@@ -31,7 +31,12 @@ const About = () => {
     },
   ];
 
-  const stats: { number: string; label: string }[] = [];
+  const stats = [
+    { number: '8', label: 'Life Stages Supported' },
+    { number: '40+', label: 'Pregnancy Weeks Tracked' },
+    { number: '4', label: 'AI Models Available' },
+    { number: '100%', label: 'Data Encrypted' },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
