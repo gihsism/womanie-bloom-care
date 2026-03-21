@@ -11,7 +11,8 @@ import {
   ArrowRight, 
   Heart,
   Shield,
-  Sparkles
+  Sparkles,
+  Home
 } from 'lucide-react';
 
 const features = [
