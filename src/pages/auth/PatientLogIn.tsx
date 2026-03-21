@@ -23,7 +23,14 @@ const PatientLogIn = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (!loading && user) {
-      navigate('/welcome');
+      // Only go to welcome if this is a fresh login (flag set below), otherwise go to dashboard
+      const showWelcome = sessionStorage.getItem('womanie_show_welcome');
+      if (showWelcome === 'true') {
+        sessionStorage.removeItem('womanie_show_welcome');
+        navigate('/welcome', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     }
   }, [user, loading, navigate]);
 
@@ -61,7 +68,7 @@ const PatientLogIn = () => {
           title: 'Welcome back!',
           description: 'You have successfully logged in.',
         });
-        navigate('/welcome');
+        sessionStorage.setItem('womanie_show_welcome', 'true');
       }
     } catch (error) {
       toast({

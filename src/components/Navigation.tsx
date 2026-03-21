@@ -74,11 +74,13 @@ const Navigation = () => {
           <div className="hidden lg:flex items-center gap-4">
             {user ? (
               <>
-                <span className="text-sm text-muted-foreground">Logged in</span>
+                <Button variant="ghost" onClick={() => navigate('/welcome')}>
+                  My Space
+                </Button>
                 <Button onClick={() => navigate('/dashboard')}>
                   Dashboard
                 </Button>
-                <Button variant="outline" onClick={async () => {
+                <Button variant="outline" size="sm" onClick={async () => {
                   const { supabase } = await import('@/integrations/supabase/client');
                   await supabase.auth.signOut();
                   window.location.reload();
@@ -131,7 +133,16 @@ const Navigation = () => {
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 {user ? (
                   <>
-                    <span className="text-sm text-muted-foreground px-2">Logged in</span>
+                    <Button 
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => {
+                        navigate('/welcome');
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      My Space
+                    </Button>
                     <Button 
                       className="w-full"
                       onClick={() => {
