@@ -71,7 +71,7 @@ const Navigation = () => {
           </div>
 
           {/* Desktop CTAs */}
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
                 <Button variant="ghost" onClick={() => navigate('/welcome')}>
