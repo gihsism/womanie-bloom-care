@@ -566,39 +566,50 @@ export default function MedicalHistory() {
     if (!user) return;
 
     try {
-      let updates: Record<string, string | null> = {};
+      let newLifeStage: string | null = null;
 
       switch (suggestion.type) {
         case 'pregnancy_detected':
-          updates = { life_stage: 'pregnancy' };
+          newLifeStage = 'pregnancy';
           break;
         case 'menopause_indicator':
-          updates = { life_stage: 'menopause' };
+          newLifeStage = 'menopause';
           break;
         case 'ovulation_confirmed':
         case 'phase_update':
         case 'cycle_length_adjust':
         case 'irregularity_flag':
-          // These don't change life stage, just acknowledged
           toast({ title: 'Noted!', description: 'This will be factored into your predictions.' });
           return;
         default:
           return;
       }
 
-      const { error, count } = await supabase
+      // Update profile
+      const { data, error } = await supabase
         .from('profiles')
-        .update(updates)
+        .update({ life_stage: newLifeStage })
         .eq('id', user.id)
-        .select();
+        .select('life_stage')
+        .single();
 
       if (error) throw error;
 
-      setLifeStage(updates.life_stage || lifeStage);
+      // Verify it actually changed
+      if (data?.life_stage !== newLifeStage) {
+        throw new Error('Update did not apply');
+      }
+
+      setLifeStage(newLifeStage);
       toast({
         title: 'Mode updated!',
-        description: `Your dashboard has been switched to ${updates.life_stage?.replace('-', ' ')} mode. Go to your dashboard to see the changes.`,
+        description: `Switching to ${newLifeStage.replace('-', ' ')} mode...`,
       });
+
+      // Auto-navigate to dashboard so user sees the change
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1000);
     } catch (error) {
       console.error('Error updating cycle:', error);
       toast({
