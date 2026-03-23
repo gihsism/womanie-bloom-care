@@ -606,9 +606,9 @@ export default function MedicalHistory() {
         description: `Switching to ${newLifeStage.replace('-', ' ')} mode...`,
       });
 
-      // Auto-navigate to dashboard so user sees the change
+      // Force full page reload to dashboard so profile is re-fetched fresh
       setTimeout(() => {
-        navigate('/dashboard');
+        window.location.href = '/dashboard';
       }, 1000);
     } catch (error) {
       console.error('Error updating cycle:', error);
