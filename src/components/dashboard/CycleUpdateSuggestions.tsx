@@ -86,19 +86,29 @@ function generateSuggestions(labs: LabResult[], lifeStage?: string | null): Cycl
   }
 
   // Pregnancy detection via HCG
-  if (hcg && hcg.value > 5) {
+  if (hcg && hcg.value > 1000) {
     suggestions.push({
       id: 'pregnancy_hcg',
       type: 'pregnancy_detected',
-      title: hcg.value > 1000 ? 'Pregnancy confirmed' : 'Possible early pregnancy',
+      title: 'Pregnancy confirmed',
       emoji: '🤰',
-      description: `Your HCG level (${hcg.value} ${labs.find(l => l.title.toLowerCase().includes('hcg'))?.unit || 'mIU/mL'}) ${hcg.value > 1000 ? 'confirms pregnancy' : 'suggests early pregnancy'}.`,
-      actionLabel: hcg.value > 1000 ? 'Switch to pregnancy mode' : 'Monitor & retest',
-      detail: hcg.value > 1000
-        ? 'Would you like to switch your app to pregnancy tracking mode? This will update your dashboard with pregnancy milestones, baby development info, and prenatal care reminders.'
-        : 'A mildly elevated HCG may indicate very early pregnancy. A repeat test in 48-72 hours can confirm if levels are doubling (a healthy sign). Consider switching to pregnancy mode if confirmed.',
-      confidence: hcg.value > 1000 ? 'high' : 'low',
+      description: `Your HCG level (${hcg.value} ${labs.find(l => l.title.toLowerCase().includes('hcg'))?.unit || 'mIU/mL'}) confirms pregnancy.`,
+      actionLabel: 'Switch to pregnancy mode',
+      detail: 'Would you like to switch your app to pregnancy tracking mode? This will update your dashboard with pregnancy milestones, baby development info, and prenatal care reminders.',
+      confidence: 'high',
       priority: 0,
+    });
+  } else if (hcg && hcg.value > 5) {
+    suggestions.push({
+      id: 'pregnancy_hcg_early',
+      type: 'irregularity_flag',
+      title: 'Possible early pregnancy',
+      emoji: '🤰',
+      description: `Your HCG level (${hcg.value} ${labs.find(l => l.title.toLowerCase().includes('hcg'))?.unit || 'mIU/mL'}) suggests early pregnancy.`,
+      actionLabel: 'Monitor & retest',
+      detail: 'A mildly elevated HCG may indicate very early pregnancy. A repeat test in 48-72 hours can confirm if levels are doubling (a healthy sign).',
+      confidence: 'low',
+      priority: 1,
     });
   }
 

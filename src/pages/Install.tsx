@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Download, Smartphone, Check, ArrowLeft } from 'lucide-react';
@@ -13,6 +14,7 @@ interface BeforeInstallPromptEvent extends Event {
 
 const Install = () => {
   const navigate = useNavigate();
+  usePageTitle('Install App');
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isIOS, setIsIOS] = useState(false);

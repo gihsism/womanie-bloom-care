@@ -1,12 +1,14 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { Users, Calendar, FileText, BarChart, Shield, Clock } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 
 const ForDoctors = () => {
   const navigate = useNavigate();
+  usePageTitle('For Doctors');
 
   const features = [
     {

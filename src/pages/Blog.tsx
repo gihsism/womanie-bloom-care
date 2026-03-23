@@ -1,12 +1,14 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { Calendar, User, ArrowRight } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 
 const Blog = () => {
   const navigate = useNavigate();
+  usePageTitle('Blog');
 
   const articles = [
     {

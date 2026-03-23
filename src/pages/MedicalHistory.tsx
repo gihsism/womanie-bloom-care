@@ -586,17 +586,18 @@ export default function MedicalHistory() {
           return;
       }
 
-      const { error } = await supabase
+      const { error, count } = await supabase
         .from('profiles')
         .update(updates)
-        .eq('id', user.id);
+        .eq('id', user.id)
+        .select();
 
       if (error) throw error;
 
       setLifeStage(updates.life_stage || lifeStage);
       toast({
         title: 'Mode updated!',
-        description: `Your dashboard has been switched to ${updates.life_stage?.replace('-', ' ')} mode.`,
+        description: `Your dashboard has been switched to ${updates.life_stage?.replace('-', ' ')} mode. Go to your dashboard to see the changes.`,
       });
     } catch (error) {
       console.error('Error updating cycle:', error);

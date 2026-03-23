@@ -1,12 +1,14 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { Heart, Users, BookOpen, Calendar, MessageCircle, TrendingUp } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 
 const ForPatients = () => {
   const navigate = useNavigate();
+  usePageTitle('For Patients');
 
   const benefits = [
     {
