@@ -86,16 +86,16 @@ function generateSuggestions(labs: LabResult[], lifeStage?: string | null): Cycl
   }
 
   // Pregnancy detection via HCG
-  if (hcg && hcg.value > 1000) {
+  if (hcg && hcg.value > 25) {
     suggestions.push({
       id: 'pregnancy_hcg',
       type: 'pregnancy_detected',
-      title: 'Pregnancy confirmed',
+      title: hcg.value > 1000 ? 'Pregnancy confirmed' : 'Pregnancy likely',
       emoji: '🤰',
-      description: `Your HCG level (${hcg.value} ${labs.find(l => l.title.toLowerCase().includes('hcg'))?.unit || 'mIU/mL'}) confirms pregnancy.`,
+      description: `Your HCG level (${hcg.value} ${labs.find(l => l.title.toLowerCase().includes('hcg'))?.unit || 'mIU/mL'}) ${hcg.value > 1000 ? 'confirms pregnancy' : 'indicates pregnancy'}.`,
       actionLabel: 'Switch to pregnancy mode',
       detail: 'Would you like to switch your app to pregnancy tracking mode? This will update your dashboard with pregnancy milestones, baby development info, and prenatal care reminders.',
-      confidence: 'high',
+      confidence: hcg.value > 1000 ? 'high' : 'medium',
       priority: 0,
     });
   } else if (hcg && hcg.value > 5) {
@@ -104,9 +104,9 @@ function generateSuggestions(labs: LabResult[], lifeStage?: string | null): Cycl
       type: 'irregularity_flag',
       title: 'Possible early pregnancy',
       emoji: '🤰',
-      description: `Your HCG level (${hcg.value} ${labs.find(l => l.title.toLowerCase().includes('hcg'))?.unit || 'mIU/mL'}) suggests early pregnancy.`,
+      description: `Your HCG level (${hcg.value} ${labs.find(l => l.title.toLowerCase().includes('hcg'))?.unit || 'mIU/mL'}) is mildly elevated.`,
       actionLabel: 'Monitor & retest',
-      detail: 'A mildly elevated HCG may indicate very early pregnancy. A repeat test in 48-72 hours can confirm if levels are doubling (a healthy sign).',
+      detail: 'A mildly elevated HCG may indicate very early pregnancy. A repeat test in 48-72 hours can confirm if levels are doubling.',
       confidence: 'low',
       priority: 1,
     });
