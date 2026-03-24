@@ -878,12 +878,9 @@ export default function MedicalHistory() {
 
       <div className="px-4 py-6 max-w-4xl mx-auto space-y-6">
         {hasDocuments && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <p className="text-xs text-muted-foreground flex-1">
-                {documents.length} document{documents.length !== 1 ? 's' : ''} uploaded
-                {stats.daysSinceLastDoc !== null && ` • Last upload ${stats.daysSinceLastDoc} days ago`}
-              </p>
+          <Card className="p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold">My Documents ({documents.length})</h3>
               <Button
                 variant="outline"
                 size="sm"
@@ -900,7 +897,41 @@ export default function MedicalHistory() {
             {reanalyzing && (
               <Progress value={reanalyzeProgress.total > 0 ? (reanalyzeProgress.done / reanalyzeProgress.total) * 100 : 0} className="h-1.5" />
             )}
-          </div>
+            <div className="space-y-1.5">
+              {documents.map(doc => {
+                const docResults = medicalData.filter(m => m.document_id === doc.id);
+                const abnormals = docResults.filter(m => m.status === 'abnormal' || m.status === 'critical').length;
+                return (
+                  <div key={doc.id} className="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-muted/50 group">
+                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                      abnormals > 0 ? 'bg-amber-500' : docResults.length > 0 ? 'bg-green-500' : 'bg-muted-foreground'
+                    }`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium truncate">{doc.ai_suggested_name || doc.file_name}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {doc.uploaded_at ? format(new Date(doc.uploaded_at), 'MMM d, yyyy') : ''}
+                        {docResults.length > 0 && ` • ${docResults.length} results`}
+                        {abnormals > 0 && ` • ${abnormals} flagged`}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
+                      onClick={() => {
+                        if (window.confirm(`Delete "${doc.ai_suggested_name || doc.file_name}"?`)) {
+                          deleteDocument(doc.id, doc.file_path);
+                        }
+                      }}
+                      aria-label="Delete document"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
         )}
         <DocumentUpload />
 
