@@ -18,6 +18,8 @@ import HealthCategories from '@/components/dashboard/HealthCategories';
 import SmartRecommendations from '@/components/dashboard/SmartRecommendations';
 import TestComparisonTable from '@/components/dashboard/TestComparisonTable';
 import HealthTimeline from '@/components/dashboard/HealthTimeline';
+import ResultsRangeChart from '@/components/dashboard/ResultsRangeChart';
+import DocumentCycleAlert from '@/components/dashboard/DocumentCycleAlert';
 import { useToast } from '@/hooks/use-toast';
 import {
   ArrowLeft,
@@ -1046,6 +1048,26 @@ export default function MedicalHistory() {
                     </div>
                   </Card>
                 )}
+
+                {/* ============ DOCUMENT-CYCLE CONNECTION ALERT ============ */}
+                <DocumentCycleAlert
+                  medicalData={medicalData}
+                  lifeStage={lifeStage}
+                  onSwitchMode={async (mode) => {
+                    if (!user) return;
+                    try {
+                      await supabase.from('profiles').update({ life_stage: mode }).eq('id', user.id);
+                      setLifeStage(mode);
+                      toast({ title: 'Mode updated!', description: `Switching to ${mode.replace('-', ' ')} mode...` });
+                      setTimeout(() => { window.location.href = '/dashboard'; }, 1000);
+                    } catch {
+                      toast({ variant: 'destructive', title: 'Error', description: 'Failed to switch mode.' });
+                    }
+                  }}
+                />
+
+                {/* ============ VISUAL RANGE CHART ============ */}
+                <ResultsRangeChart medicalData={medicalData} />
 
                 {/* ============ CUSTOM HEALTH ANALYSIS COMPONENTS ============ */}
                 {/* IMPORTANT: Do NOT remove these components. They are custom-built   */}
