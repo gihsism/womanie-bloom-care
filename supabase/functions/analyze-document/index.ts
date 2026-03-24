@@ -246,8 +246,10 @@ Additional rules:
 - Use PREGNANCY-SPECIFIC reference ranges when patient is pregnant — do NOT use general population ranges.
 - Do NOT mention inaccessible links.
 - If information is missing, keep extracted_data empty and explain shortly in summary.
-- Return valid JSON only.
-- Sort extracted_data by priority: high first, then medium, then low.`;
+- Return valid JSON only — no markdown, no explanation, just the JSON object.
+- Sort extracted_data by priority: high first, then medium, then low.
+- CRITICAL: Extract EVERY SINGLE test result from the document as a separate item in extracted_data. If the document has 20 lab values, return 20 items. Do NOT summarize multiple results into one item. Each blood test, hormone level, vitamin level, etc. must be its own entry with value, unit, reference_range, status, and notes.
+- The extracted_data array should be COMPREHENSIVE — missing individual results means the patient won't see them in their health dashboard.`;
 
   const aiResponse = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -257,8 +259,8 @@ Additional rules:
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 4000,
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 8000,
       system: systemPrompt,
       messages: [
         { role: "user", content: userContent },
