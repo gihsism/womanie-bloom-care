@@ -1322,15 +1322,15 @@ export default function MedicalHistory() {
                   </div>
                 )}
 
-                {/* Timeline charts */}
+                {/* Timeline charts — for repeated tests with trend lines */}
                 {stats.repeatedTests.length > 0 && (
                   <div>
                     <h3 className="text-sm font-bold mb-1 flex items-center gap-2">
                       <BarChart3 className="h-4 w-4 text-primary" />
-                      Your test history
+                      Test Trends Over Time
                     </h3>
                     <p className="text-xs text-muted-foreground mb-4">
-                      See how each test value has changed over time. The green area shows the healthy range.
+                      Tests with multiple readings. Green area = healthy range. Dashed dot = predicted next value.
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {stats.repeatedTests.map(([title, info]) => {
@@ -1423,26 +1423,72 @@ export default function MedicalHistory() {
                   </div>
                 )}
 
-                {/* Single readings */}
+                {/* Single readings — with visual range bars */}
                 {Object.entries(stats.labTrendData).filter(([, info]) => info.data.length === 1).length > 0 && (
                   <div>
                     <h3 className="text-sm font-bold mb-1">Single Readings</h3>
-                    <p className="text-xs text-muted-foreground mb-3">These tests only have one reading so far. Upload more documents to see trends.</p>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <p className="text-xs text-muted-foreground mb-3">Upload more documents with the same tests to see trends and predictions.</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {Object.entries(stats.labTrendData)
                         .filter(([, info]) => info.data.length === 1)
+                        .sort(([, a], [, b]) => {
+                          const order: Record<string, number> = { critical: 0, abnormal: 1, expected: 2, normal: 3 };
+                          return (order[a.latestStatus || 'normal'] ?? 3) - (order[b.latestStatus || 'normal'] ?? 3);
+                        })
                         .map(([title, info]) => {
                           const d = info.data[0];
                           const statusInfo = getStatusInfo(info.latestStatus);
+                          const refLow = d.refLow;
+                          const refHigh = d.refHigh;
+                          const hasRange = refLow !== null && refHigh !== null;
+
+                          // Calculate bar position
+                          let barPercent = 50;
+                          if (hasRange && refLow !== null && refHigh !== null) {
+                            const range = refHigh - refLow;
+                            const ext = range * 0.3;
+                            barPercent = Math.max(0, Math.min(100, ((d.value - (refLow - ext)) / (range + ext * 2)) * 100));
+                          }
+
                           return (
-                            <Card key={title} className="p-3">
-                              <p className="text-xs font-medium truncate">{getFriendlyName(title)}</p>
-                              <p className={`text-lg font-mono font-bold ${statusInfo.color}`}>{d.value}{info.unit ? ` ${info.unit}` : ''}</p>
-                              <div className="flex items-center gap-1 mt-0.5">
-                                <span className="text-xs">{statusInfo.emoji}</span>
-                                <span className={`text-[10px] ${statusInfo.color}`}>{statusInfo.label}</span>
+                            <Card key={title} className={`p-3.5 ${
+                              info.latestStatus === 'critical' ? 'border-red-200 dark:border-red-900/30' :
+                              info.latestStatus === 'abnormal' ? 'border-amber-200 dark:border-amber-900/30' : ''
+                            }`}>
+                              <div className="flex items-start justify-between gap-2 mb-2">
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-semibold truncate">{getFriendlyName(title)}</p>
+                                  <p className="text-[10px] text-muted-foreground">{d.date}</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className={`text-base font-mono font-bold ${statusInfo.color}`}>
+                                    {d.value}{info.unit ? ` ${info.unit}` : ''}
+                                  </p>
+                                  <div className="flex items-center gap-1 justify-end">
+                                    <span className="text-[10px]">{statusInfo.emoji}</span>
+                                    <span className={`text-[10px] ${statusInfo.color}`}>{statusInfo.label}</span>
+                                  </div>
+                                </div>
                               </div>
-                              <p className="text-[10px] text-muted-foreground mt-1">{d.date}</p>
+                              {hasRange && (
+                                <div className="space-y-0.5">
+                                  <div className="h-3 bg-muted rounded-full overflow-hidden relative">
+                                    <div className="absolute top-0 bottom-0 bg-green-200/60 dark:bg-green-900/30 rounded-full" style={{ left: '23%', width: '54%' }} />
+                                    <div
+                                      className={`absolute top-0.5 bottom-0.5 w-2 rounded-full shadow-sm ${
+                                        info.latestStatus === 'critical' ? 'bg-red-500' :
+                                        info.latestStatus === 'abnormal' ? 'bg-amber-500' : 'bg-green-500'
+                                      }`}
+                                      style={{ left: `calc(${barPercent}% - 4px)` }}
+                                    />
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-[9px] text-muted-foreground">{refLow}</span>
+                                    <span className="text-[9px] text-green-600">Healthy range</span>
+                                    <span className="text-[9px] text-muted-foreground">{refHigh}</span>
+                                  </div>
+                                </div>
+                              )}
                             </Card>
                           );
                         })}
