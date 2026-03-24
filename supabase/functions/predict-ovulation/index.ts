@@ -12,13 +12,12 @@ serve(async (req) => {
 
   try {
     const { healthData, cycleData } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+
+    if (!ANTHROPIC_API_KEY) {
+      throw new Error("ANTHROPIC_API_KEY is not configured");
     }
 
-    // Prepare health data summary for AI analysis
     const healthSummary = healthData.map((day: any) => ({
       date: day.signal_date,
       discharge: day.discharge,
@@ -29,15 +28,24 @@ serve(async (req) => {
 
     const systemPrompt = `You are an expert women's health AI assistant specializing in ovulation prediction and cycle tracking.
 
-Your task is to analyze the patient's health signals and predict ovulation timing based on:
-1. Cervical mucus/discharge patterns (especially looking for "egg white" or watery discharge which indicates peak fertility)
+Analyze the patient's health signals and predict ovulation timing based on:
+1. Cervical mucus/discharge patterns (egg white or watery = peak fertility)
 2. Symptoms like ovulation pain, breast tenderness, increased libido
 3. Mood changes and energy levels
 4. Cycle history and patterns
 
-Provide predictions in a supportive, educational tone. Be specific but acknowledge that these are predictions, not guarantees.`;
+Return ONLY valid JSON with this exact shape:
+{
+  "predictedOvulationDate": "YYYY-MM-DD",
+  "fertileWindowStart": "YYYY-MM-DD",
+  "fertileWindowEnd": "YYYY-MM-DD",
+  "confidence": "low" | "medium" | "high",
+  "keyIndicators": ["indicator 1", "indicator 2"],
+  "analysis": "Detailed analysis text",
+  "recommendations": ["recommendation 1", "recommendation 2"]
+}`;
 
-    const userPrompt = `Please analyze this health data and predict ovulation timing:
+    const userPrompt = `Analyze this health data and predict ovulation:
 
 Recent Health Signals (last 30 days):
 ${JSON.stringify(healthSummary, null, 2)}
@@ -46,75 +54,21 @@ Cycle Information:
 - Average cycle length: ${cycleData.cycleLength} days
 - Last period start: ${cycleData.lastPeriodStart}
 
-Based on this data, please provide:
-1. Predicted ovulation date
-2. Fertile window (most fertile days)
-3. Key indicators you noticed in the data
-4. Confidence level (low/medium/high)
-5. Recommendations for tracking
+Return ONLY the JSON object, no other text.`;
 
-Format your response as a clear, structured analysis.`;
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "provide_ovulation_prediction",
-              description: "Return ovulation prediction with structured data",
-              parameters: {
-                type: "object",
-                properties: {
-                  predictedOvulationDate: {
-                    type: "string",
-                    description: "ISO date string of predicted ovulation"
-                  },
-                  fertileWindowStart: {
-                    type: "string",
-                    description: "ISO date string of fertile window start"
-                  },
-                  fertileWindowEnd: {
-                    type: "string",
-                    description: "ISO date string of fertile window end"
-                  },
-                  confidence: {
-                    type: "string",
-                    enum: ["low", "medium", "high"],
-                    description: "Confidence level of prediction"
-                  },
-                  keyIndicators: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "List of key health signals that influenced the prediction"
-                  },
-                  analysis: {
-                    type: "string",
-                    description: "Detailed analysis and explanation"
-                  },
-                  recommendations: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "Personalized recommendations for tracking"
-                  }
-                },
-                required: ["predictedOvulationDate", "confidence", "keyIndicators", "analysis", "recommendations"],
-                additionalProperties: false
-              }
-            }
-          }
-        ],
-        tool_choice: { type: "function", function: { name: "provide_ovulation_prediction" } }
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 2000,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userPrompt }],
+        temperature: 0.2,
       }),
     });
 
@@ -125,29 +79,23 @@ Format your response as a clear, structured analysis.`;
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Payment required. Please add credits to your workspace." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      throw new Error("AI gateway error");
+      console.error("Anthropic API error:", response.status, errorText);
+      throw new Error("AI service error");
     }
 
     const aiResponse = await response.json();
-    console.log("AI Response:", JSON.stringify(aiResponse, null, 2));
+    const content = aiResponse.content?.[0]?.text;
 
-    // Extract the function call result
-    const toolCall = aiResponse.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall) {
+    if (!content) {
       throw new Error("No prediction data returned from AI");
     }
 
-    const prediction = JSON.parse(toolCall.function.arguments);
-    
+    // Parse JSON from response (strip markdown code fences if present)
+    const jsonStr = content.replace(/^```json?\s*/i, "").replace(/```\s*$/i, "").trim();
+    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+    const prediction = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(jsonStr);
+
     return new Response(JSON.stringify({ prediction }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -155,12 +103,12 @@ Format your response as a clear, structured analysis.`;
   } catch (error) {
     console.error("Ovulation prediction error:", error);
     return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : "Unknown error occurred" 
+      JSON.stringify({
+        error: error instanceof Error ? error.message : "Unknown error occurred"
       }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
       }
     );
   }
