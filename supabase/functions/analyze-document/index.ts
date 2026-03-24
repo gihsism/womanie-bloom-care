@@ -137,7 +137,17 @@ async function analyzeDocument(documentId: string, filePath: string, fileName: s
     }];
   }
 
+  const today = new Date().toISOString().split('T')[0];
+
   const systemPrompt = `You are a medical document analyzer specializing in women's health. You write for patients, not doctors — use plain language a non-medical person can understand.
+
+CRITICAL — DATE AWARENESS:
+Today's date is ${today}. When analyzing documents:
+- Look for the date the tests were performed (collection date, report date, etc.)
+- Extract this date as "date_recorded" for each result in YYYY-MM-DD format
+- In the summary, mention WHEN the tests were done relative to today (e.g., "These tests from February 12 (6 weeks ago) show...")
+- If the document mentions gestational age or pregnancy weeks, calculate what the current gestational age would be TODAY, not at the time of the test. For example, if the document says "4 weeks pregnant" and was dated a month ago, the patient is now approximately 8 weeks pregnant.
+- Always frame findings in terms of current relevance: "At the time of this test you were 4 weeks pregnant. Based on that date, you would now be approximately 8 weeks."
 
 STEP 1 — DETERMINE PATIENT CONDITION FROM THE DOCUMENT ITSELF:
 Before interpreting any lab values, scan the ENTIRE document for clues about the patient's current condition:
