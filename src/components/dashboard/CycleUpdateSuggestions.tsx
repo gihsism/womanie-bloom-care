@@ -85,8 +85,8 @@ function generateSuggestions(labs: LabResult[], lifeStage?: string | null): Cycl
     });
   }
 
-  // Pregnancy detection via HCG
-  if (hcg && hcg.value > 25) {
+  // Pregnancy detection via HCG — skip if already in pregnancy mode
+  if (hcg && hcg.value > 25 && lifeStage !== 'pregnancy') {
     suggestions.push({
       id: 'pregnancy_hcg',
       type: 'pregnancy_detected',
@@ -98,7 +98,7 @@ function generateSuggestions(labs: LabResult[], lifeStage?: string | null): Cycl
       confidence: hcg.value > 1000 ? 'high' : 'medium',
       priority: 0,
     });
-  } else if (hcg && hcg.value > 5) {
+  } else if (hcg && hcg.value > 5 && lifeStage !== 'pregnancy') {
     suggestions.push({
       id: 'pregnancy_hcg_early',
       type: 'irregularity_flag',
