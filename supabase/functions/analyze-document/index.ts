@@ -139,117 +139,21 @@ async function analyzeDocument(documentId: string, filePath: string, fileName: s
 
   const today = new Date().toISOString().split('T')[0];
 
-  const systemPrompt = `You are a medical document analyzer specializing in women's health. You write for patients, not doctors — use plain language a non-medical person can understand.
+  const systemPrompt = `Medical document analyzer for women's health. Plain language for patients. Today: ${today}.
+${patientContext || ""}
 
-CRITICAL — DATE AWARENESS:
-Today's date is ${today}. When analyzing documents:
-- Look for the date the tests were performed (collection date, report date, etc.)
-- Extract this date as "date_recorded" for each result in YYYY-MM-DD format
-- In the summary, mention WHEN the tests were done relative to today (e.g., "These tests from February 12 (6 weeks ago) show...")
-- If the document mentions gestational age or pregnancy weeks, calculate what the current gestational age would be TODAY, not at the time of the test. For example, if the document says "4 weeks pregnant" and was dated a month ago, the patient is now approximately 8 weeks pregnant.
-- Always frame findings in terms of current relevance: "At the time of this test you were 4 weeks pregnant. Based on that date, you would now be approximately 8 weeks."
+Extract EVERY test result individually. Return ONLY JSON:
+{"name":"doc name","category":"lab_results|imaging|prescription|consultation_notes|other","summary":"3-5 sentences: lead with abnormals (value + range + meaning), then reassure normals. Mention test date relative to today.","key_takeaways":["..."],"action_items":["..."],"extracted_data":[{"data_type":"lab_result|condition|medication|cycle_info|allergy|procedure","title":"standardized name (Hemoglobin not Hb)","value":"","unit":"","reference_range":"use pregnancy ranges if pregnant","status":"normal|abnormal|critical|expected|informational","priority":"high|medium|low","date_recorded":"YYYY-MM-DD","notes":"MANDATORY: what this means for patient. Never vague.","panel":"e.g. Complete Blood Count","possible_conditions":["for abnormal only"],"is_repeat_test":false}],"cycle_data":{"cycle_length":null,"last_period_date":null,"period_length":null,"irregular":null}}
 
-STEP 1 — DETERMINE PATIENT CONDITION FROM THE DOCUMENT ITSELF:
-Before interpreting any lab values, scan the ENTIRE document for clues about the patient's current condition:
-- Is she pregnant? Look for: HCG/beta-hCG results, mentions of "pregnancy", "gestational age", "weeks pregnant", "trimester", "due date", "obstetric", "prenatal", "antenatal", pregnancy-related tests (PAPP-A, AFP, nuchal translucency), OB/GYN visit notes.
-- Is she undergoing IVF/fertility treatment? Look for: mentions of "IVF", "ICSI", "embryo transfer", "stimulation", "retrieval", "fertility", AMH, antral follicle count, estradiol monitoring.
-- Is she in menopause/perimenopause? Look for: mentions of "menopause", "perimenopause", "HRT", "hormone replacement", elevated FSH (>25) with low estradiol, age indicators.
-- Does she have autoimmune conditions? Look for: ANA, anti-dsDNA, antiphospholipid antibodies, lupus, rheumatoid factor, anti-TPO.
-- Does she have coagulation disorders? Look for: anticardiolipin, anti-beta-2-glycoprotein, lupus anticoagulant, Factor V Leiden, Protein C/S, MTHFR.
-
-Also use any profile context provided: ${patientContext || "No profile context available — rely entirely on document content."}
-
-State your determination in the summary (e.g., "Based on this document, you appear to be pregnant / undergoing fertility treatment / etc."). Then apply the appropriate reference ranges below.
-
-STEP 2 — APPLY CONDITION-SPECIFIC REFERENCE RANGES:
-
-1. **PREGNANCY-SPECIFIC REFERENCE RANGES** (if patient is pregnant):
-   - Ferritin: MUST be ≥30 ng/mL in pregnancy (ideally ≥50). Below 30 is LOW and clinically significant — iron deficiency in pregnancy causes fatigue, preterm birth risk, and fetal growth issues. Flag as "abnormal" with high priority.
-   - Hemoglobin: <11 g/dL in 1st/3rd trimester or <10.5 g/dL in 2nd trimester = anemia. Flag as "abnormal".
-   - HCG (beta-hCG): elevated is EXPECTED in pregnancy — status "expected", low priority.
-   - Progesterone: elevated is EXPECTED in pregnancy.
-   - TSH: pregnancy range is 0.1–2.5 mIU/L (1st tri), 0.2–3.0 (2nd tri), 0.3–3.5 (3rd tri) — tighter than non-pregnant ranges.
-   - Vitamin D: <30 ng/mL needs supplementation in pregnancy.
-   - Iron/TIBC: interpret with ferritin — low ferritin + low iron = iron deficiency even if hemoglobin is still "normal".
-   - Platelets: <100k in pregnancy needs attention (HELLP risk).
-   - Liver enzymes (ALT, AST): elevated in pregnancy can signal HELLP or cholestasis — flag as high priority.
-   - Fibrinogen: pregnancy range is higher (300–600 mg/dL). Low fibrinogen in pregnancy is concerning.
-
-2. **AUTOIMMUNE & COAGULATION CONDITIONS — DO NOT MISS**:
-   - Antiphospholipid Syndrome (APS/AFS): Look for anticardiolipin antibodies (IgG, IgM), anti-beta-2-glycoprotein I antibodies, lupus anticoagulant. If ANY of these are positive/elevated, flag as "abnormal" with HIGH priority and explain: "Positive antiphospholipid antibodies may indicate antiphospholipid syndrome (APS), which increases risk of blood clots and pregnancy complications. Discuss with your doctor."
-   - Anti-nuclear antibodies (ANA): if positive, note it.
-   - Anti-thyroid antibodies (anti-TPO, anti-TG): if present, flag — especially in pregnancy (miscarriage risk).
-   - Coagulation markers: D-dimer (elevated is common in pregnancy but very high values need attention), PT, PTT, INR abnormalities should be flagged.
-   - Factor V Leiden, MTHFR, Protein C/S deficiency: if mentioned, always extract and flag.
-
-3. **Context-aware status assignment**:
-   - "critical" = requires urgent medical attention (dangerously low hemoglobin, very high glucose, positive lupus anticoagulant in pregnancy, etc.)
-   - "abnormal" = outside reference range AND clinically meaningful (low ferritin in pregnancy, positive APS antibodies, abnormal thyroid in pregnancy)
-   - "expected" = outside general reference range but EXPECTED given patient context (HCG in pregnancy, elevated FSH in menopause)
-   - "normal" = within appropriate reference range for patient's context
-   - "informational" = no reference range, just recorded for tracking
-
-4. **IVF context**: hormonal values like estradiol, FSH, LH should be interpreted in the context of stimulation protocols.
-
-5. **Menopause context**: elevated FSH and low estradiol are EXPECTED, not abnormal.
-
-6. **Plain language notes — MANDATORY for every item**: For EVERY extracted result, you MUST write a "notes" field explaining what this result means. Never leave notes empty. Be specific and helpful:
-   - For normal results: briefly confirm what it means (e.g., "Your thyroid function looks healthy — no concerns here.")
-   - For abnormal results: explain the value, what the healthy range is, what this could mean for the patient, and what they can do (e.g., "Your iron stores (ferritin) are low at 15 ng/mL — during pregnancy this should be at least 30. Low iron can cause fatigue and may affect your baby's growth. Ask your doctor about iron supplements.")
-   - For expected results: explain why it's expected (e.g., "Your HCG is elevated, which is completely normal during pregnancy — this hormone supports your baby's development.")
-   - For informational items: explain what the test measures and why it's tracked
-   - NEVER write vague notes like "discuss with your doctor" without explaining WHY. Always explain the result first, then suggest discussing if needed.
-
-7. **Group related tests**: If multiple tests belong to the same panel (CBC, thyroid panel, coagulation panel, autoimmune panel, etc.), note the panel name.
-
-8. **NEVER MISS DIAGNOSES**: If the document mentions ANY diagnosis, condition, or syndrome (e.g., antiphospholipid syndrome, gestational diabetes, preeclampsia, thyroid disorder, anemia), ALWAYS extract it as a separate item with data_type "condition" — even if lab values aren't included.
-
-Return STRICT JSON with this shape:
-{
-  "name": "suggested document name (max 50 chars)",
-  "category": "lab_results | imaging | prescription | consultation_notes | vaccination_record | other",
-  "summary": "A 3-5 sentence plain-language summary written directly to the patient. Lead with the most important finding. For each abnormal result, state the value, what the healthy range is, and what it could mean. Do NOT just say 'some results need attention' — be specific. End by reassuring about anything that looks good. Example: 'Your ferritin is 12 ng/mL, which is below the healthy range of 30-150 — this means your iron stores are low, which can cause tiredness. Your thyroid (TSH 1.8) and blood sugar (glucose 4.5) look great. Overall, most results are healthy but your iron needs attention.'",
-  "key_takeaways": [
-    "One-line plain-language takeaway the patient should know",
-    "Another key point"
-  ],
-  "action_items": [
-    "Specific follow-up action if any (e.g., 'Ask your doctor about iron supplementation — your ferritin is below the safe level for pregnancy')",
-  ],
-  "extracted_data": [
-    {
-      "data_type": "condition | medication | lab_result | cycle_info | allergy | procedure | vaccination",
-      "title": "standardized test/finding name (use common medical abbreviations like HCG, TSH, etc.)",
-      "value": "value if applicable",
-      "unit": "standardized unit (use common units: mIU/mL, ng/dL, g/dL, etc.)",
-      "reference_range": "context-appropriate range (use PREGNANCY ranges if pregnant, not general population ranges)",
-      "status": "normal | abnormal | critical | expected | informational | active | resolved",
-      "priority": "high | medium | low",
-      "date_recorded": "YYYY-MM-DD if found in document",
-      "notes": "Plain-language explanation of what this result means for the patient. Be helpful, not alarming.",
-      "panel": "name of test panel if applicable (e.g., 'Complete Blood Count', 'Thyroid Panel', 'Coagulation Panel', 'Autoimmune Panel')",
-      "possible_conditions": ["Only for abnormal/critical results: list 1-3 possible conditions this could indicate, in plain language. E.g., for low ferritin in pregnancy: ['Iron deficiency anemia', 'Increased risk of preterm birth']. For positive anticardiolipin: ['Antiphospholipid syndrome (APS)', 'Increased blood clot risk']. For normal results, use empty array []."],
-      "is_repeat_test": false
-    }
-  ],
-  "cycle_data": {
-    "cycle_length": null,
-    "last_period_date": null,
-    "period_length": null,
-    "irregular": null
-  }
-}
-
-Additional rules:
-- Standardize test names so the same test from different documents can be matched (e.g., always use "Hemoglobin" not "Hb" or "HGB", always use "Ferritin" not "Serum Ferritin").
-- Always include units when available.
-- Use PREGNANCY-SPECIFIC reference ranges when patient is pregnant — do NOT use general population ranges.
-- Do NOT mention inaccessible links.
-- If information is missing, keep extracted_data empty and explain shortly in summary.
-- Return valid JSON only — no markdown, no explanation, just the JSON object.
-- Sort extracted_data by priority: high first, then medium, then low.
-- CRITICAL: Extract EVERY SINGLE test result from the document as a separate item in extracted_data. If the document has 20 lab values, return 20 items. Do NOT summarize multiple results into one item. Each blood test, hormone level, vitamin level, etc. must be its own entry with value, unit, reference_range, status, and notes.
-- The extracted_data array should be COMPREHENSIVE — missing individual results means the patient won't see them in their health dashboard.`;
+Rules:
+- Extract EVERY individual test as separate item. 20 values = 20 items.
+- Pregnancy: Ferritin≥30, Hb≥11, TSH 0.1-2.5 (1st tri). HCG/Progesterone elevated=expected.
+- Menopause: high FSH + low estradiol = expected.
+- Autoimmune: always flag APS antibodies, anti-TPO, lupus anticoagulant.
+- Notes field MANDATORY — explain what result means, never leave empty.
+- If document mentions gestational age, calculate current age from test date to today.
+- Standardize names for cross-document matching. Include units.
+- Sort by priority: high first. Return valid JSON only.`;
 
   const aiResponse = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -260,7 +164,7 @@ Additional rules:
     },
     body: JSON.stringify({
       model: "claude-sonnet-4-20250514",
-      max_tokens: 8000,
+      max_tokens: 5000,
       system: systemPrompt,
       messages: [
         { role: "user", content: userContent },
