@@ -658,19 +658,26 @@ export default function MedicalHistory() {
   const reanalyzeAll = async () => {
     if (!user || documents.length === 0) return;
     setReanalyzing(true);
-    setReanalyzeProgress({ done: 0, total: documents.length });
+    const total = documents.length;
+    setReanalyzeProgress({ done: 0, total });
     await supabase.from('medical_extracted_data').delete().eq('user_id', user.id);
-    for (let i = 0; i < documents.length; i++) {
-      const doc = documents[i];
-      try {
-        await supabase.functions.invoke('analyze-document', {
-          body: { documentId: doc.id, filePath: doc.file_path, fileName: doc.file_name, mimeType: doc.mime_type },
-        });
-      } catch (err) {
-        console.error('Re-analysis failed for', doc.file_name, err);
-      }
-      setReanalyzeProgress({ done: i + 1, total: documents.length });
+
+    // Process 3 documents in parallel for speed
+    let done = 0;
+    const batch = 3;
+    for (let i = 0; i < total; i += batch) {
+      const chunk = documents.slice(i, i + batch);
+      await Promise.allSettled(
+        chunk.map(doc =>
+          supabase.functions.invoke('analyze-document', {
+            body: { documentId: doc.id, filePath: doc.file_path, fileName: doc.file_name, mimeType: doc.mime_type },
+          })
+        )
+      );
+      done += chunk.length;
+      setReanalyzeProgress({ done, total });
     }
+
     await fetchData();
     setReanalyzing(false);
   };
