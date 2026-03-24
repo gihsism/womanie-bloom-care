@@ -17,6 +17,7 @@ import CycleUpdateSuggestions from '@/components/dashboard/CycleUpdateSuggestion
 import HealthCategories from '@/components/dashboard/HealthCategories';
 import SmartRecommendations from '@/components/dashboard/SmartRecommendations';
 import TestComparisonTable from '@/components/dashboard/TestComparisonTable';
+import HealthTimeline from '@/components/dashboard/HealthTimeline';
 import { useToast } from '@/hooks/use-toast';
 import {
   ArrowLeft,
@@ -1405,12 +1406,17 @@ export default function MedicalHistory() {
                   </>
                 )}
 
-                {/* ============ UPLOADED DOCUMENTS ============ */}
+                {/* ============ HEALTH TIMELINE ============ */}
+                <div id="documents" className="scroll-mt-20">
+                  <HealthTimeline documents={documents} medicalData={medicalData} />
+                </div>
+
+                {/* ============ UPLOADED DOCUMENTS (detailed) ============ */}
                 {documents.length > 0 && (
-                  <div id="documents" className="scroll-mt-20">
+                  <div>
                     <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
                       <FileText className="h-4 w-4 text-primary" />
-                      Uploaded Documents ({documents.length})
+                      Document Details ({documents.length})
                     </h3>
                     <div className="space-y-3">
               {documents.map((doc) => (
