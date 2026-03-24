@@ -124,7 +124,7 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
 
       toast({
         title: 'Uploaded!',
-        description: 'Analyzing your document with AI... This may take a moment.',
+        description: 'Analyzing your document with AI...',
       });
 
       // Trigger AI analysis and notify when done
@@ -139,13 +139,14 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
         });
         toast({
           title: 'Analysis complete!',
-          description: 'Your document has been analyzed. View your results in Health Records.',
+          description: 'View your results in Health Records.',
+          action: undefined,
         });
       } catch (error) {
         console.error('AI analysis error:', error);
         toast({
           title: 'Upload saved',
-          description: 'Document uploaded but AI analysis failed. You can re-analyze later from Health Records.',
+          description: 'Document uploaded but AI analysis had an issue. Try re-analyzing from Health Records.',
           variant: 'destructive',
         });
       }
@@ -165,18 +166,17 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {showTrigger && (
         <DialogTrigger asChild>
-          <Card className="p-4 cursor-pointer hover:bg-accent/5 transition-colors border-dashed">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Upload className="h-6 w-6 text-primary" />
+          <Card className="p-5 cursor-pointer hover:bg-primary/5 hover:border-primary/30 transition-all border-dashed border-2">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/10 flex items-center justify-center flex-shrink-0">
+                <Upload className="h-7 w-7 text-primary" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold">Upload Health Document</h3>
-                <p className="text-xs text-muted-foreground">
-                  Lab results, imaging, medical records
+                <h3 className="font-semibold text-base">Upload Health Document</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Lab results, prescriptions, imaging reports — AI will analyze and explain everything
                 </p>
               </div>
-              <FileText className="h-5 w-5 text-muted-foreground" />
             </div>
           </Card>
         </DialogTrigger>
