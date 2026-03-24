@@ -664,13 +664,8 @@ const PatientDashboard = () => {
               </div>
             )}
 
-            {/* Daily Logging */}
+            {/* Quick Links — moved above daily log for better visibility */}
             <div className="mb-6">
-              <DailyLogging selectedMode={selectedMode} />
-            </div>
-
-            {/* Quick Links */}
-            <div>
               <h3 className="text-base font-semibold mb-3">Quick Access</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                 {quickLinks.map(link => {
@@ -691,8 +686,18 @@ const PatientDashboard = () => {
                 })}
               </div>
             </div>
+
+            {/* Upload Document — prominent card */}
+            <div className="mb-6">
+              <DocumentUpload />
+            </div>
+
+            {/* Daily Logging */}
+            <div className="mb-6">
+              <DailyLogging selectedMode={selectedMode} />
+            </div>
           </div>
-        
+
         {/* Upload dialog triggered from header */}
         <DocumentUpload open={uploadDialogOpen} onOpenChange={setUploadDialogOpen} showTrigger={false} />
       </div>

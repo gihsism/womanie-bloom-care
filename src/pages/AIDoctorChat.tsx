@@ -331,12 +331,21 @@ export default function AIDoctorChat() {
     setInput('');
   };
 
-  const suggestedQuestions = [
+  // Context-aware suggested questions based on medical data
+  const baseSuggestions = [
     'Summarize my medical history',
     'What do my latest lab results mean?',
-    'What medications am I currently on?',
-    'Are there any concerning findings?',
   ];
+
+  const contextSuggestions = medicalContext?.includes('pregnancy') || medicalContext?.includes('HCG')
+    ? ['Is my pregnancy progressing normally?', 'What supplements should I take?']
+    : medicalContext?.includes('menopause')
+    ? ['How are my hormone levels for menopause?', 'What can help with my symptoms?']
+    : medicalContext?.includes('abnormal') || medicalContext?.includes('critical')
+    ? ['Which results should I worry about?', 'What lifestyle changes could help?']
+    : ['Are there any concerning findings?', 'What tests should I do next?'];
+
+  const suggestedQuestions = [...baseSuggestions, ...contextSuggestions];
 
   if (authLoading) {
     return (
