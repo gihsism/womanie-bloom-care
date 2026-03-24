@@ -49,6 +49,7 @@ import {
   Eye,
   HelpCircle,
   Trash2,
+  Pencil,
 } from 'lucide-react';
 import { format, differenceInDays, addDays } from 'date-fns';
 import {
@@ -658,6 +659,18 @@ export default function MedicalHistory() {
     });
   };
 
+  const renameDocument = async (docId: string, currentName: string) => {
+    const newName = window.prompt('Rename document:', currentName);
+    if (!newName || newName === currentName) return;
+    try {
+      await supabase.from('health_documents').update({ ai_suggested_name: newName }).eq('id', docId);
+      toast({ title: 'Renamed' });
+      await fetchData();
+    } catch {
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to rename.' });
+    }
+  };
+
   const deleteDocument = async (docId: string, filePath: string) => {
     if (!user) return;
     try {
@@ -916,6 +929,15 @@ export default function MedicalHistory() {
                         {abnormals > 0 && ` • ${abnormals} flagged`}
                       </p>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition-opacity"
+                      onClick={() => renameDocument(doc.id, doc.ai_suggested_name || doc.file_name)}
+                      aria-label="Rename document"
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
