@@ -210,6 +210,128 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
     });
   }
 
+  // Pregnancy: Iron + Vitamin D + Folate combo
+  if (lifeStage === 'pregnancy') {
+    const issues = [];
+    if (ferritin && ferritin.value < 30) issues.push(`Ferritin ${ferritin.value} (need ≥30)`);
+    if (vitD && vitD.value < 30) issues.push(`Vitamin D ${vitD.value} (need ≥30)`);
+    if (folate && folate.value < 5) issues.push(`Folate ${folate.value} (need ≥5)`);
+    if (vitB12 && vitB12.value < 200) issues.push(`B12 ${vitB12.value} (need ≥200)`);
+
+    if (issues.length >= 2) {
+      insights.push({
+        title: `Multiple nutritional gaps during pregnancy`,
+        emoji: '⚠️',
+        connectedTests: ['Ferritin', 'Vitamin D', 'Folate', 'Vitamin B12'].filter(t =>
+          data.some(d => d.title.toLowerCase().includes(t.toLowerCase()))
+        ),
+        explanation: `You have ${issues.length} nutrients below optimal pregnancy levels: ${issues.join('; ')}. During pregnancy, your body needs significantly more of these nutrients for baby's development and your own health.`,
+        recommendation: 'Discuss a comprehensive prenatal supplement plan with your doctor. A good prenatal vitamin plus individual supplements (especially iron and vitamin D) may be needed. Prioritize iron-rich foods and safe sun exposure.',
+        severity: 'urgent',
+      });
+    }
+  }
+
+  // Pregnancy: Thyroid + Pregnancy risk
+  if (lifeStage === 'pregnancy' && tsh && (tsh.value > 2.5 || tsh.value < 0.1)) {
+    const connected = ['TSH'];
+    if (progesterone) connected.push('Progesterone');
+    insights.push({
+      title: tsh.value > 2.5 ? 'Thyroid needs monitoring during pregnancy' : 'Thyroid overactive — monitor in pregnancy',
+      emoji: '🦋',
+      connectedTests: connected,
+      explanation: tsh.value > 2.5
+        ? `Your TSH (${tsh.value}) is above the pregnancy-safe range of 0.1-2.5 for the first trimester. Untreated hypothyroidism in pregnancy increases risk of miscarriage, preeclampsia, and developmental issues.`
+        : `Your TSH (${tsh.value}) is very low, suggesting overactive thyroid. This needs close monitoring during pregnancy as it can affect baby's growth.`,
+      recommendation: 'Your doctor should monitor TSH every 4-6 weeks during pregnancy. Medication dosage may need adjustment as pregnancy progresses.',
+      severity: 'urgent',
+    });
+  }
+
+  // Pregnancy: Platelets + Liver enzymes (HELLP risk)
+  if (lifeStage === 'pregnancy') {
+    const alt = findTest(data, ['ALT']);
+    const ast = findTest(data, ['AST']);
+    const lowPlatelets = platelets && platelets.value < 150;
+    const highLiver = (alt && alt.value > 35) || (ast && ast.value > 35);
+
+    if (lowPlatelets && highLiver) {
+      insights.push({
+        title: 'Low platelets + elevated liver enzymes — needs immediate attention',
+        emoji: '🚨',
+        connectedTests: ['Platelets', ...(alt ? ['ALT'] : []), ...(ast ? ['AST'] : [])],
+        explanation: 'The combination of low platelets and elevated liver enzymes during pregnancy can indicate HELLP syndrome, a serious pregnancy complication. This needs immediate medical evaluation.',
+        recommendation: 'Contact your doctor today. Do NOT wait for your next scheduled appointment. Watch for symptoms: severe headache, vision changes, upper right abdominal pain, nausea.',
+        severity: 'urgent',
+      });
+    }
+  }
+
+  // Vitamin D + Calcium absorption
+  if (vitD && vitD.value < 20 && calcium && calcium.value < 8.5) {
+    insights.push({
+      title: 'Low vitamin D is impairing calcium absorption',
+      emoji: '🦴',
+      connectedTests: ['Vitamin D', 'Calcium'],
+      explanation: 'Your vitamin D is very low, and your calcium is also below normal. Vitamin D is essential for absorbing calcium from food. Without enough D, your body can\'t use the calcium you consume, weakening bones.',
+      recommendation: 'Start vitamin D supplementation (2000-4000 IU daily) — this should help your calcium levels improve too. Get calcium from dairy, fortified foods, or supplements.',
+      severity: 'attention',
+    });
+  }
+
+  // Iron + B12 + Folate — triple deficiency = fatigue combo
+  if (ferritin && ferritin.value < 30 && vitB12 && vitB12.value < 300 && folate && folate.value < 10) {
+    insights.push({
+      title: 'Triple nutrient gap — likely causing significant fatigue',
+      emoji: '😴',
+      connectedTests: ['Ferritin', 'Vitamin B12', 'Folate'],
+      explanation: 'Iron, B12, and folate all contribute to making healthy red blood cells. When all three are low, fatigue can be severe. You may also experience brain fog, hair loss, and poor concentration.',
+      recommendation: 'Address all three: iron supplement (with vitamin C for absorption), B12 supplement or injections, and folate/folic acid. Your energy should improve within 4-8 weeks of supplementation.',
+      severity: 'attention',
+    });
+  }
+
+  // Inflammation + Thyroid connection
+  if (crp && crp.value > 3 && tsh && tsh.value > 4) {
+    insights.push({
+      title: 'Inflammation may be linked to your thyroid',
+      emoji: '🔗',
+      connectedTests: ['CRP', 'TSH'],
+      explanation: 'You have both elevated inflammation (CRP) and an underactive thyroid (TSH). Autoimmune thyroiditis (Hashimoto\'s) is the most common cause of hypothyroidism and causes chronic inflammation. The two conditions feed each other.',
+      recommendation: 'Ask your doctor to check thyroid antibodies (anti-TPO) if not already tested. Treating the thyroid often helps reduce inflammation too.',
+      severity: 'attention',
+    });
+  }
+
+  // Cholesterol ratio insight
+  if (ldl && hdl) {
+    const ratio = ldl.value / hdl.value;
+    if (ratio > 3.5) {
+      insights.push({
+        title: 'Your cholesterol ratio needs attention',
+        emoji: '❤️',
+        connectedTests: ['LDL Cholesterol', 'HDL Cholesterol'],
+        explanation: `Your LDL/HDL ratio is ${ratio.toFixed(1)} (ideal is below 3.0). This means your "bad" cholesterol is high relative to your "good" cholesterol, increasing cardiovascular risk.`,
+        recommendation: 'Increase HDL: regular exercise (especially cardio), omega-3 fatty acids (fish, walnuts), olive oil. Reduce LDL: less saturated fat, more fiber, consider oat bran or psyllium.',
+        severity: 'attention',
+      });
+    }
+  }
+
+  // HbA1c + Glucose together
+  if (hba1c && hba1c.value > 5.7 && glucose && glucose.value > 100) {
+    insights.push({
+      title: 'Both blood sugar markers are elevated',
+      emoji: '🍬',
+      connectedTests: ['HbA1c', 'Glucose'],
+      explanation: `Your HbA1c (${hba1c.value}%) and fasting glucose (${glucose.value}) are both above normal. HbA1c above 5.7% suggests prediabetes. Together, these strongly indicate insulin resistance.${lifeStage === 'pregnancy' ? ' During pregnancy, this increases risk of gestational diabetes.' : ''}`,
+      recommendation: lifeStage === 'pregnancy'
+        ? 'You may need a glucose tolerance test (GTT). Gestational diabetes is manageable with diet, exercise, and sometimes medication.'
+        : 'Lifestyle changes can reverse prediabetes: reduce refined carbs and sugar, exercise 30 min/day, maintain healthy weight. Ask about metformin if lifestyle changes aren\'t enough.',
+      severity: 'attention',
+    });
+  }
+
   // Positive: everything looks good
   const allNormal = data.filter(d => d.data_type === 'lab_result').every(d => d.status === 'normal' || d.status === 'expected');
   if (allNormal && data.filter(d => d.data_type === 'lab_result').length >= 3 && insights.length === 0) {
