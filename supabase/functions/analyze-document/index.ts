@@ -393,13 +393,14 @@ serve(async (req) => {
       });
     }
 
-    const authClient = createClient(
+    // Use service role client to verify the user's JWT token
+    const svcClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { global: { headers: { Authorization: authHeader } } },
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     );
 
-    const { data: userData, error: userError } = await authClient.auth.getUser();
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData, error: userError } = await svcClient.auth.getUser(token);
 
     if (userError || !userData?.user?.id) {
       console.error("Auth error:", userError);
