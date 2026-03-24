@@ -58,8 +58,8 @@ async function analyzeDocument(documentId: string, filePath: string, fileName: s
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
   );
 
-  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-  if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+  const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+  if (!ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY not configured");
 
   console.log("Starting analysis for document:", { documentId, filePath, mimeType });
 
@@ -239,16 +239,18 @@ Additional rules:
 - Return valid JSON only.
 - Sort extracted_data by priority: high first, then medium, then low.`;
 
-  const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const aiResponse = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      "x-api-key": ANTHROPIC_API_KEY,
+      "anthropic-version": "2023-06-01",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "google/gemini-3-flash-preview",
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 8000,
+      system: systemPrompt,
       messages: [
-        { role: "system", content: systemPrompt },
         { role: "user", content: userContent },
       ],
       temperature: 0.2,
@@ -257,12 +259,12 @@ Additional rules:
 
   if (!aiResponse.ok) {
     const errorText = await aiResponse.text();
-    console.error("AI gateway error:", aiResponse.status, errorText);
+    console.error("Anthropic API error:", aiResponse.status, errorText);
     throw new Error(`AI analysis failed with status ${aiResponse.status}`);
   }
 
   const aiData = await aiResponse.json();
-  const aiContent = aiData.choices?.[0]?.message?.content;
+  const aiContent = aiData.content?.[0]?.text;
 
   if (!aiContent || typeof aiContent !== "string") {
     throw new Error("AI did not return content");
