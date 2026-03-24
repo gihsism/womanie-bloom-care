@@ -46,6 +46,7 @@ import {
   ThumbsUp,
   Eye,
   HelpCircle,
+  Trash2,
 } from 'lucide-react';
 import { format, differenceInDays, addDays } from 'date-fns';
 import {
@@ -653,6 +654,23 @@ export default function MedicalHistory() {
       else next.add(panel);
       return next;
     });
+  };
+
+  const deleteDocument = async (docId: string, filePath: string) => {
+    if (!user) return;
+    try {
+      // Delete extracted data first
+      await supabase.from('medical_extracted_data').delete().eq('document_id', docId);
+      // Delete document record
+      await supabase.from('health_documents').delete().eq('id', docId).eq('user_id', user.id);
+      // Delete file from storage
+      await supabase.storage.from('health-documents').remove([filePath]);
+      toast({ title: 'Document deleted' });
+      await fetchData();
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete document.' });
+    }
   };
 
   const reanalyzeAll = async () => {
@@ -1435,10 +1453,23 @@ export default function MedicalHistory() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="font-semibold text-sm">{doc.ai_suggested_name || doc.file_name}</h4>
+                          <h4 className="font-semibold text-sm flex-1">{doc.ai_suggested_name || doc.file_name}</h4>
                           {doc.uploaded_at && (
                             <span className="text-xs text-muted-foreground">{format(new Date(doc.uploaded_at), 'MMMM d, yyyy')}</span>
                           )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                            onClick={() => {
+                              if (window.confirm(`Delete "${doc.ai_suggested_name || doc.file_name}"? This will also remove all extracted results.`)) {
+                                deleteDocument(doc.id, doc.file_path);
+                              }
+                            }}
+                            aria-label="Delete document"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
                         </div>
                         {doc.ai_summary && (
                           <div className="bg-muted/30 rounded-xl p-4 mt-3 border border-border/30">
