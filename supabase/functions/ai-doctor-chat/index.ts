@@ -7,12 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const ALLOWED_MODELS = [
-  "google/gemini-3-flash-preview",
-  "google/gemini-2.5-pro",
-  "openai/gpt-5",
-  "openai/gpt-5-mini",
-];
+// All chat uses Claude via Anthropic API
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -47,9 +42,6 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    // Validate model selection, default to gemini flash
-    const selectedModel = ALLOWED_MODELS.includes(model) ? model : "google/gemini-3-flash-preview";
 
     const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
     if (!ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY not configured");
@@ -137,8 +129,8 @@ ${medicalContext || "No medical records available yet. Encourage the patient to 
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 4000,
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 2000,
         system: systemPrompt,
         messages: anthropicMessages,
         stream: true,

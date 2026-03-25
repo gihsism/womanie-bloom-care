@@ -33,10 +33,7 @@ type Msg = { role: 'user' | 'assistant'; content: string };
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-doctor-chat`;
 
 const AI_MODELS = [
-  { id: 'google/gemini-3-flash-preview', label: 'Gemini Flash', description: 'Fast & efficient' },
-  { id: 'google/gemini-2.5-pro', label: 'Gemini Pro', description: 'Best reasoning' },
-  { id: 'openai/gpt-5', label: 'GPT-5', description: 'Powerful all-rounder' },
-  { id: 'openai/gpt-5-mini', label: 'GPT-5 Mini', description: 'Balanced performance' },
+  { id: 'claude-sonnet', label: 'Claude Sonnet', description: 'Best for medical analysis' },
 ];
 
 async function streamChat({
@@ -205,7 +202,7 @@ export default function AIDoctorChat() {
   const [messages, setMessages] = useState<Msg[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
-  const [selectedModel, setSelectedModel] = useState('google/gemini-3-flash-preview');
+  const [selectedModel, setSelectedModel] = useState('claude-sonnet');
   const [medicalContext, setMedicalContext] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
