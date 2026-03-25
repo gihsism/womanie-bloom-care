@@ -969,7 +969,7 @@ export default function MedicalHistory() {
               ...(flaggedItems.length > 0 ? [{ id: 'attention', label: 'Attention' }] : []),
               ...(stats.labsByPanel.length > 0 ? [{ id: 'results', label: 'Results' }] : []),
               ...(stats.repeatedTests.length > 0 ? [{ id: 'trends', label: 'Trends' }] : []),
-              { id: 'documents', label: 'Documents' },
+              { id: 'documents', label: 'Timeline' },
             ].map(section => (
               <button
                 key={section.id}
@@ -1557,72 +1557,8 @@ export default function MedicalHistory() {
                   <HealthTimeline documents={documents} medicalData={medicalData} />
                 </div>
 
-                {/* ============ UPLOADED DOCUMENTS (detailed) ============ */}
-                {documents.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-primary" />
-                      Document Details ({documents.length})
-                    </h3>
-                    <div className="space-y-3">
-              {documents.map((doc) => (
-                <Card key={doc.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <FileText className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="font-semibold text-sm flex-1">{doc.ai_suggested_name || doc.file_name}</h4>
-                          {doc.uploaded_at && (
-                            <span className="text-xs text-muted-foreground">{format(new Date(doc.uploaded_at), 'MMMM d, yyyy')}</span>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                            onClick={() => {
-                              if (window.confirm(`Delete "${doc.ai_suggested_name || doc.file_name}"? This will also remove all extracted results.`)) {
-                                deleteDocument(doc.id, doc.file_path);
-                              }
-                            }}
-                            aria-label="Delete document"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                        {doc.ai_summary && (
-                          <div className="bg-muted/30 rounded-xl p-4 mt-3 border border-border/30">
-                            {renderEnhancedSummary(doc.ai_summary)}
-                          </div>
-                        )}
-                        {medicalData.filter(m => m.document_id === doc.id).length > 0 && (
-                          <div className="mt-3 space-y-1.5">
-                            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">What we found</p>
-                            {medicalData.filter(m => m.document_id === doc.id)
-                              .sort((a, b) => (priorityOrder[(a.raw_data as any)?.priority || 'low'] ?? 2) - (priorityOrder[(b.raw_data as any)?.priority || 'low'] ?? 2))
-                              .map(item => {
-                                const si = getStatusInfo(item.status);
-                                return (
-                                  <div key={item.id} className="flex items-center gap-2 text-xs py-0.5">
-                                    <span>{si.emoji}</span>
-                                    <span className="font-medium">{item.title}</span>
-                                    {item.value && <span className="text-muted-foreground font-mono">{item.value}{item.unit ? ` ${item.unit}` : ''}</span>}
-                                    <span className={`text-[10px] ${si.color}`}>{si.label}</span>
-                                  </div>
-                                );
-                              })}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-                    </div>
-                  </div>
-                )}
+                {/* Document Details section removed — info is in document list,
+                     timeline, AI summaries, and health categories above */}
               </>
             )}
         </div>
