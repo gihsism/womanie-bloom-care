@@ -128,17 +128,16 @@ async function streamChat({
 
 const WELCOME_MESSAGE: Msg = {
   role: 'assistant',
-  content: `👋 Hi! I'm your **AI Health Assistant**. I have access to your uploaded medical documents and can help you understand your health data.
+  content: `Hi! I'm your **AI Health Assistant** powered by Claude. I can see your uploaded medical documents and help you understand your health.
 
-Here are some things I can help with:
-- 📋 **Explain your lab results** in plain language
-- 💊 **Review your medications** and what they're for
-- 🔍 **Summarize your medical history**
-- ❓ **Answer health questions** based on your records
+**What I can do:**
+- 📋 Explain your lab results in plain language
+- 🔗 Find connections between different test results
+- 🤰 Give pregnancy/cycle-specific guidance
+- 💊 Explain medications and supplements
+- ❓ Answer any health questions
 
-*Remember: I'm not a replacement for your doctor. Always consult a healthcare professional for medical decisions.*
-
-How can I help you today?`,
+*I'm not a replacement for your doctor — always consult a professional for medical decisions.*`,
 };
 
 // ─── Real Doctor Panel ───
@@ -201,7 +200,16 @@ export default function AIDoctorChat() {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [chatMode, setChatMode] = useState<ChatMode>('ai');
-  const [messages, setMessages] = useState<Msg[]>([WELCOME_MESSAGE]);
+  const [messages, setMessages] = useState<Msg[]>(() => {
+    try {
+      const saved = localStorage.getItem('womanie_chat_history');
+      if (saved) {
+        const parsed = JSON.parse(saved) as Msg[];
+        if (parsed.length > 1) return parsed;
+      }
+    } catch { /* ignore */ }
+    return [WELCOME_MESSAGE];
+  });
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [selectedModel, setSelectedModel] = useState('claude-haiku-4-5-20251001');
@@ -268,6 +276,10 @@ export default function AIDoctorChat() {
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+    // Save chat history (skip if only welcome message)
+    if (messages.length > 1) {
+      try { localStorage.setItem('womanie_chat_history', JSON.stringify(messages)); } catch { /* ignore */ }
+    }
   }, [messages]);
 
   const handleSend = async () => {
@@ -312,6 +324,17 @@ export default function AIDoctorChat() {
       },
       onDone: () => setIsStreaming(false),
       onError: (err) => {
+        // If we got partial response, keep it and add error note
+        if (assistantSoFar) {
+          assistantSoFar += '\n\n*[Response interrupted — try asking again]*';
+          setMessages(prev => {
+            const last = prev[prev.length - 1];
+            if (last?.role === 'assistant' && last !== WELCOME_MESSAGE) {
+              return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
+            }
+            return prev;
+          });
+        }
         toast({ variant: 'destructive', title: 'AI Error', description: err });
         setIsStreaming(false);
       },
@@ -328,6 +351,7 @@ export default function AIDoctorChat() {
   const clearChat = () => {
     setMessages([WELCOME_MESSAGE]);
     setInput('');
+    try { localStorage.removeItem('womanie_chat_history'); } catch { /* ignore */ }
   };
 
   // Context-aware suggested questions based on medical data
