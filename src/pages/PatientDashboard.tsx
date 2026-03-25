@@ -315,14 +315,38 @@ const PatientDashboard = () => {
     };
   }, [periodData]);
 
-  // Quick links to working features — no "coming soon" items
+  // Context-aware quick links based on life stage
   const quickLinks = [
-    { icon: MessageSquare, label: 'AI Doctor', description: 'Health assistant', action: () => navigate('/dashboard/ai-doctor'), color: 'bg-primary/10 text-primary' },
+    { icon: MessageSquare, label: 'AI Doctor', description: 'Ask health questions', action: () => navigate('/dashboard/ai-doctor'), color: 'bg-primary/10 text-primary' },
     { icon: FileText, label: 'Health Records', description: 'Analysis & trends', action: () => navigate('/dashboard/medical-history'), color: 'bg-secondary/10 text-secondary' },
     { icon: Activity, label: 'Find Doctor', description: 'Book consultation', action: () => navigate('/find-doctor'), color: 'bg-accent/10 text-accent' },
-    { icon: Smartphone, label: 'Devices', description: 'Connect wearables', action: () => navigate('/dashboard/devices'), color: 'bg-muted text-muted-foreground' },
     { icon: Settings, label: 'Settings', description: 'Preferences', action: () => navigate('/dashboard/settings'), color: 'bg-muted text-muted-foreground' },
   ];
+
+  // Life-stage specific tips
+  const stageTips: Record<string, { emoji: string; tip: string }[]> = {
+    'pregnancy': [
+      { emoji: '💊', tip: 'Take your prenatal vitamins daily' },
+      { emoji: '💧', tip: 'Drink at least 8 glasses of water' },
+      { emoji: '🚶', tip: '30 minutes of gentle exercise helps' },
+      { emoji: '📋', tip: 'Upload your latest scan results for analysis' },
+    ],
+    'conception': [
+      { emoji: '🥚', tip: 'Track your ovulation signs daily' },
+      { emoji: '🌡️', tip: 'Log basal temperature for better predictions' },
+      { emoji: '🥬', tip: 'Start folic acid at least 3 months before' },
+    ],
+    'menstrual-cycle': [
+      { emoji: '📅', tip: 'Log your period start day for better predictions' },
+      { emoji: '💤', tip: 'Sleep quality affects your cycle' },
+      { emoji: '🩸', tip: 'Upload blood test results for personalized insights' },
+    ],
+    'menopause': [
+      { emoji: '🌡️', tip: 'Log hot flashes to track patterns' },
+      { emoji: '🦴', tip: 'Check vitamin D and calcium levels' },
+      { emoji: '🏃', tip: 'Weight-bearing exercise supports bone health' },
+    ],
+  };
 
   if (loading || !selectedMode) {
     return (
@@ -664,36 +688,52 @@ const PatientDashboard = () => {
               </div>
             )}
 
-            {/* Quick Links — moved above daily log for better visibility */}
-            <div className="mb-6">
-              <h3 className="text-base font-semibold mb-3">Quick Access</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                {quickLinks.map(link => {
-                  const Icon = link.icon;
-                  return (
-                    <Card
-                      key={link.label}
-                      className="p-3 cursor-pointer hover:shadow-md transition-all hover:-translate-y-0.5"
-                      onClick={link.action}
-                    >
-                      <div className={`w-9 h-9 rounded-lg ${link.color} flex items-center justify-center mb-2`}>
-                        <Icon className="h-4.5 w-4.5" aria-hidden="true" />
+            {/* Two-column layout: Tips + Quick Links */}
+            <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Daily Tips */}
+              {stageTips[selectedMode] && (
+                <Card className="p-4">
+                  <h3 className="text-sm font-bold mb-3">Daily Reminders</h3>
+                  <div className="space-y-2">
+                    {stageTips[selectedMode].map((item, i) => (
+                      <div key={i} className="flex items-center gap-2.5 text-sm">
+                        <span className="text-base">{item.emoji}</span>
+                        <span className="text-muted-foreground">{item.tip}</span>
                       </div>
-                      <p className="text-sm font-semibold">{link.label}</p>
-                      <p className="text-[10px] text-muted-foreground">{link.description}</p>
-                    </Card>
-                  );
-                })}
-              </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {/* Quick Links */}
+              <Card className="p-4">
+                <h3 className="text-sm font-bold mb-3">Quick Access</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  {quickLinks.map(link => {
+                    const Icon = link.icon;
+                    return (
+                      <button
+                        key={link.label}
+                        onClick={link.action}
+                        className="flex items-center gap-2.5 p-2.5 rounded-lg hover:bg-muted/50 transition-colors text-left"
+                      >
+                        <div className={`w-8 h-8 rounded-lg ${link.color} flex items-center justify-center flex-shrink-0`}>
+                          <Icon className="h-4 w-4" aria-hidden="true" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold">{link.label}</p>
+                          <p className="text-[10px] text-muted-foreground">{link.description}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </Card>
             </div>
 
-            {/* Upload Document — prominent card */}
-            <div className="mb-6">
+            {/* Upload + Daily Log side by side */}
+            <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
               <DocumentUpload />
-            </div>
-
-            {/* Daily Logging */}
-            <div className="mb-6">
               <DailyLogging selectedMode={selectedMode} />
             </div>
           </div>
