@@ -33,7 +33,9 @@ type Msg = { role: 'user' | 'assistant'; content: string };
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-doctor-chat`;
 
 const AI_MODELS = [
-  { id: 'claude-sonnet', label: 'Claude Sonnet', description: 'Best for medical analysis' },
+  { id: 'claude-haiku-4-5-20251001', label: 'Claude Haiku', description: 'Fast responses' },
+  { id: 'claude-sonnet-4-20250514', label: 'Claude Sonnet', description: 'Best analysis' },
+  { id: 'claude-opus-4-20250514', label: 'Claude Opus', description: 'Most capable' },
 ];
 
 async function streamChat({
@@ -202,7 +204,7 @@ export default function AIDoctorChat() {
   const [messages, setMessages] = useState<Msg[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
-  const [selectedModel, setSelectedModel] = useState('claude-sonnet');
+  const [selectedModel, setSelectedModel] = useState('claude-haiku-4-5-20251001');
   const [medicalContext, setMedicalContext] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);

@@ -35,7 +35,9 @@ serve(async (req) => {
     }
     const userId = userData.user.id;
 
-    const { messages, model } = await req.json();
+    const { messages, model: requestedModel } = await req.json();
+    const ALLOWED_MODELS = ["claude-haiku-4-5-20251001", "claude-sonnet-4-20250514", "claude-opus-4-20250514"];
+    const model = ALLOWED_MODELS.includes(requestedModel) ? requestedModel : "claude-haiku-4-5-20251001";
     if (!Array.isArray(messages) || messages.length === 0) {
       return new Response(JSON.stringify({ error: "Messages required" }), {
         status: 400,
@@ -129,8 +131,8 @@ ${medicalContext || "No medical records available yet. Encourage the patient to 
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 2000,
+        model,
+        max_tokens: model.includes("haiku") ? 2000 : 4000,
         system: systemPrompt,
         messages: anthropicMessages,
         stream: true,
