@@ -27,6 +27,7 @@ import MenopauseDashboard from '@/components/dashboard/MenopauseDashboard';
 import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import PregnancyLabInsights from '@/components/dashboard/PregnancyLabInsights';
+import CycleLabInsights from '@/components/dashboard/CycleLabInsights';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { format, addDays, differenceInDays } from 'date-fns';
 import { useMemo } from 'react';
@@ -591,33 +592,9 @@ const PatientDashboard = () => {
                     />
                   </div>
                   <div className="lg:col-span-1 space-y-4">
+                    <CycleLabInsights mode={selectedMode} />
                     {periodData ? (
                       <>
-                        <Card className="p-4">
-                          <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-bold">Cycle Health</h3>
-                            <Button variant="outline" size="sm" className="h-7 gap-1.5 text-xs" onClick={() => navigate('/dashboard/settings')}>
-                              <Settings className="h-3.5 w-3.5" />
-                              Settings
-                            </Button>
-                          </div>
-                          <div className="space-y-4">
-                            {healthStats.map((stat) => {
-                              const IconComponent = stat.icon;
-                              return (
-                                <div key={stat.title} className="flex items-start gap-3 pb-3 border-b last:border-0 last:pb-0">
-                                  <IconComponent className={`h-5 w-5 ${stat.color} mt-1`} />
-                                  <div className="flex-1">
-                                    <div className="text-sm font-medium text-muted-foreground mb-1">{stat.title}</div>
-                                    <div className="text-lg font-bold mb-1">{stat.value}</div>
-                                    <div className="text-xs text-muted-foreground">{stat.subtitle}</div>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </Card>
-
                         <Card className="p-4">
                           <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
                             Cycle Phases
