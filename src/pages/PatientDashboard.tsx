@@ -28,6 +28,7 @@ import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboar
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import PregnancyLabInsights from '@/components/dashboard/PregnancyLabInsights';
 import CycleLabInsights from '@/components/dashboard/CycleLabInsights';
+import ModeLabInsights from '@/components/dashboard/ModeLabInsights';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { format, addDays, differenceInDays } from 'date-fns';
 import { useMemo } from 'react';
@@ -504,24 +505,7 @@ const PatientDashboard = () => {
                     />
                   </div>
                   <div className="lg:col-span-1 space-y-4">
-                    <Card className="p-4">
-                      <h3 className="text-lg font-bold mb-4">IVF Health</h3>
-                      <div className="space-y-4">
-                        {healthStats.map((stat) => {
-                          const IconComponent = stat.icon;
-                          return (
-                            <div key={stat.title} className="flex items-start gap-3 pb-3 border-b last:border-0 last:pb-0">
-                              <IconComponent className={`h-5 w-5 ${stat.color} mt-1`} />
-                              <div className="flex-1">
-                                <div className="text-sm font-medium text-muted-foreground mb-1">{stat.title}</div>
-                                <div className="text-lg font-bold mb-1">{stat.value}</div>
-                                <div className="text-xs text-muted-foreground">{stat.subtitle}</div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </Card>
+                    <ModeLabInsights mode="ivf" />
                   </div>
                 </div>
               ) : selectedMode === 'pregnancy' ? (
@@ -572,13 +556,34 @@ const PatientDashboard = () => {
                 </div>
               ) : selectedMode === 'pre-menstrual' ? (
                 /* ─── Pre-Menstrual Mode ─── */
-                <PreMenstrualDashboard />
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2">
+                    <PreMenstrualDashboard />
+                  </div>
+                  <div className="lg:col-span-1">
+                    <ModeLabInsights mode="pre-menstrual" />
+                  </div>
+                </div>
               ) : (selectedMode === 'menopause' || selectedMode === 'post-menopause') ? (
                 /* ─── Menopause / Post-Menopause Mode ─── */
-                <MenopauseDashboard isPostMenopause={selectedMode === 'post-menopause'} />
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2">
+                    <MenopauseDashboard isPostMenopause={selectedMode === 'post-menopause'} />
+                  </div>
+                  <div className="lg:col-span-1">
+                    <ModeLabInsights mode={selectedMode} />
+                  </div>
+                </div>
               ) : selectedMode === 'contraception' ? (
                 /* ─── Contraception Mode ─── */
-                <ContraceptionDashboard onNavigateToDoctorChat={() => navigate('/dashboard/ai-doctor')} />
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2">
+                    <ContraceptionDashboard onNavigateToDoctorChat={() => navigate('/dashboard/ai-doctor')} />
+                  </div>
+                  <div className="lg:col-span-1">
+                    <ModeLabInsights mode="contraception" />
+                  </div>
+                </div>
               ) : (
                 /* ─── Cycle Mode ─── */
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
