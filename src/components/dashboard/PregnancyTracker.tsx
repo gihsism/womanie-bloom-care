@@ -545,6 +545,98 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy }: Pregnancy
         </div>
       </Card>
 
+      {/* Week-by-week mini timeline */}
+      <Card className="p-4 space-y-3">
+        <h4 className="font-semibold flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-primary" />
+          Your Pregnancy Journey
+        </h4>
+        <div className="flex gap-0.5 overflow-x-auto pb-1">
+          {Array.from({ length: 40 }, (_, i) => i + 1).map(week => {
+            const isCurrent = week === weeksPregnant;
+            const isPast = week < weeksPregnant;
+            const isTrimesterBorder = week === 13 || week === 27;
+            return (
+              <div key={week} className="flex flex-col items-center flex-shrink-0" style={{ width: '20px' }}>
+                <div className={`w-full h-3 rounded-sm ${
+                  isCurrent ? 'bg-primary ring-2 ring-primary/30' :
+                  isPast ? (week <= 13 ? 'bg-pink-300' : week <= 27 ? 'bg-violet-300' : 'bg-indigo-300') :
+                  'bg-muted'
+                }`} />
+                {(week === 1 || week === 13 || week === 27 || week === 40 || isCurrent) && (
+                  <span className={`text-[8px] mt-0.5 ${isCurrent ? 'text-primary font-bold' : 'text-muted-foreground'}`}>{week}</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex gap-4 text-[10px] text-muted-foreground">
+          <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-pink-300" /> 1st trimester</span>
+          <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-violet-300" /> 2nd trimester</span>
+          <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-indigo-300" /> 3rd trimester</span>
+        </div>
+      </Card>
+
+      {/* Important dates */}
+      <Card className="p-4 space-y-2.5">
+        <h4 className="font-semibold flex items-center gap-2">
+          <AlertCircle className="h-4 w-4 text-primary" />
+          Key Dates & Reminders
+        </h4>
+        {weeksPregnant < 12 && (
+          <div className="flex items-center gap-3 p-2.5 rounded-lg bg-primary/5 border border-primary/10">
+            <span className="text-lg">🩺</span>
+            <div>
+              <p className="text-xs font-semibold">First prenatal visit</p>
+              <p className="text-[10px] text-muted-foreground">Schedule before week 12 — includes blood tests & first ultrasound</p>
+            </div>
+          </div>
+        )}
+        {weeksPregnant >= 11 && weeksPregnant < 14 && (
+          <div className="flex items-center gap-3 p-2.5 rounded-lg bg-violet-50 dark:bg-violet-900/10 border border-violet-200 dark:border-violet-800">
+            <span className="text-lg">🔬</span>
+            <div>
+              <p className="text-xs font-semibold">Nuchal translucency scan</p>
+              <p className="text-[10px] text-muted-foreground">Best done between weeks 11-14 — screening for chromosomal conditions</p>
+            </div>
+          </div>
+        )}
+        {weeksPregnant >= 18 && weeksPregnant < 22 && (
+          <div className="flex items-center gap-3 p-2.5 rounded-lg bg-secondary/5 border border-secondary/10">
+            <span className="text-lg">👶</span>
+            <div>
+              <p className="text-xs font-semibold">Anatomy scan</p>
+              <p className="text-[10px] text-muted-foreground">Detailed ultrasound between weeks 18-22 — checks baby's development</p>
+            </div>
+          </div>
+        )}
+        {weeksPregnant >= 24 && weeksPregnant < 28 && (
+          <div className="flex items-center gap-3 p-2.5 rounded-lg bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800">
+            <span className="text-lg">🍬</span>
+            <div>
+              <p className="text-xs font-semibold">Glucose tolerance test</p>
+              <p className="text-[10px] text-muted-foreground">Screening for gestational diabetes — usually done weeks 24-28</p>
+            </div>
+          </div>
+        )}
+        {weeksPregnant >= 35 && (
+          <div className="flex items-center gap-3 p-2.5 rounded-lg bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800">
+            <span className="text-lg">🧳</span>
+            <div>
+              <p className="text-xs font-semibold">Pack hospital bag</p>
+              <p className="text-[10px] text-muted-foreground">Baby could arrive any time now — be prepared!</p>
+            </div>
+          </div>
+        )}
+        <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50">
+          <span className="text-lg">📅</span>
+          <div>
+            <p className="text-xs font-semibold">Due date: {format(dueDate, 'MMMM d, yyyy')}</p>
+            <p className="text-[10px] text-muted-foreground">{daysUntilDue > 0 ? `${daysUntilDue} days to go` : 'Any day now!'}</p>
+          </div>
+        </div>
+      </Card>
+
       {/* Trimester symptoms */}
       <Card className="p-4 space-y-3">
         <h4 className="font-semibold flex items-center gap-2">
