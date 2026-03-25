@@ -26,6 +26,7 @@ import PreMenstrualDashboard from '@/components/dashboard/PreMenstrualDashboard'
 import MenopauseDashboard from '@/components/dashboard/MenopauseDashboard';
 import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
+import PregnancyLabInsights from '@/components/dashboard/PregnancyLabInsights';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { format, addDays, differenceInDays } from 'date-fns';
 import { useMemo } from 'react';
@@ -539,39 +540,31 @@ const PatientDashboard = () => {
                     )}
                   </div>
                   <div className="lg:col-span-1 space-y-4">
-                    {pregnancyDueDate ? (
-                      <>
-                        <Card className="p-4">
-                          <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-bold">Pregnancy Health</h3>
-                            <Button variant="outline" size="sm" className="h-7 gap-1.5 text-xs" onClick={() => navigate('/dashboard/settings')}>
-                              <Settings className="h-3.5 w-3.5" />
-                              Settings
-                            </Button>
-                          </div>
-                          <div className="space-y-4">
-                            {healthStats.map((stat) => {
-                              const IconComponent = stat.icon;
-                              return (
-                                <div key={stat.title} className="flex items-start gap-3 pb-3 border-b last:border-0 last:pb-0">
-                                  <IconComponent className={`h-5 w-5 ${stat.color} mt-1`} />
-                                  <div className="flex-1">
-                                    <div className="text-sm font-medium text-muted-foreground mb-1">{stat.title}</div>
-                                    <div className="text-lg font-bold mb-1">{stat.value}</div>
-                                    <div className="text-xs text-muted-foreground">{stat.subtitle}</div>
-                                  </div>
+                    <PregnancyLabInsights />
+                    {pregnancyDueDate && (
+                      <Card className="p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="text-sm font-bold">Pregnancy Stats</h3>
+                          <Button variant="outline" size="sm" className="h-6 text-[10px] gap-1" onClick={() => navigate('/dashboard/settings')}>
+                            <Settings className="h-3 w-3" />
+                            Settings
+                          </Button>
+                        </div>
+                        <div className="space-y-3">
+                          {healthStats.map((stat) => {
+                            const IconComponent = stat.icon;
+                            return (
+                              <div key={stat.title} className="flex items-start gap-2.5 pb-2.5 border-b last:border-0 last:pb-0">
+                                <IconComponent className={`h-4 w-4 ${stat.color} mt-0.5`} aria-hidden="true" />
+                                <div className="flex-1">
+                                  <div className="text-[10px] text-muted-foreground">{stat.title}</div>
+                                  <div className="text-sm font-bold">{stat.value}</div>
+                                  <div className="text-[10px] text-muted-foreground">{stat.subtitle}</div>
                                 </div>
-                              );
-                            })}
-                          </div>
-                        </Card>
-                      </>
-                    ) : (
-                      <Card className="p-4 text-center">
-                        <h3 className="text-lg font-bold mb-2">Pregnancy Health</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Set your due date to see pregnancy insights here.
-                        </p>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </Card>
                     )}
                   </div>
