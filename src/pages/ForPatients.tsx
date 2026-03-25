@@ -2,148 +2,112 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { Heart, Users, BookOpen, Calendar, MessageCircle, TrendingUp } from 'lucide-react';
+import { FileText, Brain, TrendingUp, MessageCircle, Shield, Heart, ArrowRight, Baby, Flame, Pill } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import { useAuth } from '@/contexts/AuthContext';
 
 const ForPatients = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   usePageTitle('For Patients');
 
-  const benefits = [
-    {
-      icon: Heart,
-      title: 'Personalized Health Tracking',
-      description: 'Track your menstrual cycle, symptoms, mood, and overall wellness with tools designed specifically for women.',
-    },
-    {
-      icon: MessageCircle,
-      title: '24/7 AI Health Assistant',
-      description: 'Get instant answers to your health questions, symptom analysis, and personalized recommendations anytime.',
-    },
-    {
-      icon: Calendar,
-      title: 'Chat with a Doctor',
-      description: 'Get support from specialized gynecologists, fertility experts, and women\'s health professionals anytime.',
-    },
-    {
-      icon: Users,
-      title: 'Supportive Community',
-      description: 'Connect with other women going through similar health journeys in our private, moderated groups.',
-    },
-    {
-      icon: BookOpen,
-      title: 'Health Education',
-      description: 'Access evidence-based articles, guides, and resources about women\'s health written by medical experts.',
-    },
-    {
-      icon: TrendingUp,
-      title: 'Progress Insights',
-      description: 'Visualize your health trends over time with beautiful charts and receive actionable insights.',
-    },
+  const features = [
+    { icon: FileText, title: 'Upload Any Medical Document', description: 'Lab results, prescriptions, imaging reports, discharge summaries — PDF, images, or DOCX. We handle it all.' },
+    { icon: Brain, title: 'AI Explains Every Result', description: 'Claude AI reads your documents, extracts every test, and explains what each result means in plain language — not medical jargon.' },
+    { icon: TrendingUp, title: 'Track Changes Over Time', description: 'Visual charts show how your values change across multiple tests. See trends and predictions for where your health is heading.' },
+    { icon: MessageCircle, title: 'AI Health Assistant', description: 'Ask any health question — the AI knows your medical history and gives personalized answers based on your actual results.' },
+    { icon: Shield, title: 'Completely Private', description: 'Your health data is encrypted and visible only to you. We never share, sell, or use your data for anything else.' },
+    { icon: Heart, title: 'Adapts to Your Journey', description: 'Pregnancy, cycles, IVF, menopause — the app shows different insights and recommendations based on your life stage.' },
   ];
 
-  const testimonials = [
-    {
-      name: 'Sarah M.',
-      condition: 'PCOS Management',
-      quote: 'Womanie helped me understand my PCOS symptoms better. The tracking features and AI insights have been life-changing.',
-    },
-    {
-      name: 'Emma K.',
-      condition: 'Pregnancy Journey',
-      quote: 'From conception to delivery, Womanie was my trusted companion. The community support was incredible.',
-    },
-    {
-      name: 'Lisa R.',
-      condition: 'Menopause Support',
-      quote: 'Finally, a platform that understands menopause. The symptom tracking and doctor consultations made this transition easier.',
-    },
+  const journeys = [
+    { icon: '📅', title: 'Cycle Tracking', description: 'Period predictions, ovulation tracking, hormone insights from your lab results' },
+    { icon: '🤰', title: 'Pregnancy', description: 'Week-by-week tracking, prenatal test analysis, key date reminders' },
+    { icon: '🥚', title: 'Fertility & IVF', description: 'AMH, FSH, hormone tracking, treatment timeline, egg reserve monitoring' },
+    { icon: '💊', title: 'Contraception', description: 'Method tracking, side effect logging, relevant blood test monitoring' },
+    { icon: '🔥', title: 'Menopause', description: 'Symptom tracking, hormone levels, bone health, cardiovascular markers' },
   ];
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      {/* Hero Section */}
+      {/* Hero */}
       <section className="py-16 lg:py-24 pt-32">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-              Your Health, Your Way
+              Finally Understand Your <span className="text-primary">Medical Results</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Whether you're tracking your cycle, planning pregnancy, managing menopause, or just want to stay healthy,
-              Womanie is here to support every stage of your journey.
+              Upload your lab results and get instant AI-powered analysis. Every test explained in plain language, with personalized insights for your health journey.
             </p>
-            <Button size="lg" onClick={() => navigate('/auth/select-type')}>
-              Start Your Journey
+            <Button size="lg" className="gap-2" onClick={() => navigate(user ? '/dashboard' : '/auth/select-type')}>
+              {user ? 'Go to Dashboard' : 'Get Started Free'}
+              <ArrowRight className="h-5 w-5" />
             </Button>
           </div>
 
-          {/* Benefits Grid */}
+          {/* Features */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {benefits.map((benefit) => (
-              <Card key={benefit.title} className="p-6">
-                <benefit.icon className="h-12 w-12 text-primary mb-4" />
-                <h3 className="text-xl font-semibold mb-3">{benefit.title}</h3>
-                <p className="text-muted-foreground">{benefit.description}</p>
+            {features.map((f) => (
+              <Card key={f.title} className="p-6 hover:shadow-md transition-shadow">
+                <f.icon className="h-10 w-10 text-primary mb-4" aria-hidden="true" />
+                <h3 className="text-lg font-semibold mb-2">{f.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{f.description}</p>
               </Card>
             ))}
           </div>
         </div>
       </section>
 
-      {/* What You Can Track */}
+      {/* Life Stages */}
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl lg:text-4xl font-bold text-center mb-12">
-            What You Can Track
+          <h2 className="text-3xl lg:text-4xl font-bold text-center mb-4">
+            For Every Stage of Your Life
           </h2>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold">Physical Health</h3>
-              <ul className="space-y-2 text-muted-foreground">
-                <li>• Menstrual cycle and period flow</li>
-                <li>• Ovulation and fertility window</li>
-                <li>• Symptoms and pain levels</li>
-                <li>• Medication and supplements</li>
-                <li>• Sleep patterns and quality</li>
-                <li>• Weight and body measurements</li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold">Mental & Emotional</h3>
-              <ul className="space-y-2 text-muted-foreground">
-                <li>• Mood and energy levels</li>
-                <li>• Stress and anxiety patterns</li>
-                <li>• Sexual wellness</li>
-                <li>• Skin and hair health</li>
-                <li>• Cravings and appetite</li>
-                <li>• Overall wellness score</li>
-              </ul>
-            </div>
+          <p className="text-lg text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
+            Womanie adapts to where you are — showing relevant tests, insights, and recommendations
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
+            {journeys.map(j => (
+              <Card key={j.title} className="p-5 text-center hover:shadow-md transition-shadow">
+                <span className="text-3xl mb-3 block">{j.icon}</span>
+                <h3 className="font-semibold mb-1">{j.title}</h3>
+                <p className="text-xs text-muted-foreground">{j.description}</p>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* How It Works */}
       <section className="py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl lg:text-4xl font-bold text-center mb-12">
-            Stories from Our Community
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((testimonial) => (
-              <Card key={testimonial.name} className="p-6">
-                <div className="mb-4">
-                  <div className="font-semibold text-lg">{testimonial.name}</div>
-                  <div className="text-sm text-primary">{testimonial.condition}</div>
-                </div>
-                <p className="text-muted-foreground italic">"{testimonial.quote}"</p>
-              </Card>
-            ))}
+        <div className="container mx-auto px-4 max-w-3xl text-center">
+          <h2 className="text-3xl font-bold mb-12">3 Steps to Better Health Understanding</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div>
+              <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center mx-auto mb-4 text-xl font-bold">1</div>
+              <h3 className="font-semibold mb-2">Upload</h3>
+              <p className="text-sm text-muted-foreground">Take a photo or upload a PDF of your lab results</p>
+            </div>
+            <div>
+              <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center mx-auto mb-4 text-xl font-bold">2</div>
+              <h3 className="font-semibold mb-2">Analyze</h3>
+              <p className="text-sm text-muted-foreground">AI reads every result and explains what it means for you</p>
+            </div>
+            <div>
+              <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center mx-auto mb-4 text-xl font-bold">3</div>
+              <h3 className="font-semibold mb-2">Understand</h3>
+              <p className="text-sm text-muted-foreground">See trends, get recommendations, ask the AI any question</p>
+            </div>
           </div>
+          <Button size="lg" className="mt-12 gap-2" onClick={() => navigate(user ? '/dashboard' : '/auth/select-type')}>
+            {user ? 'Go to Dashboard' : 'Start Free'}
+            <ArrowRight className="h-5 w-5" />
+          </Button>
         </div>
       </section>
 
