@@ -130,7 +130,7 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onU
       </div>
 
       {/* Quick Actions */}
-      <div className="flex items-center justify-center gap-3 overflow-x-auto pb-1">
+      <div className="flex items-center justify-center gap-2 sm:gap-3 overflow-x-auto pb-1 -mx-1 px-1">
         {/* Doctor Chat */}
         <button
           onClick={onDoctorChatClick}

@@ -360,22 +360,22 @@ export default function AIDoctorChat() {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="px-4 py-3 flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">
-            <ArrowLeft className="h-5 w-5" />
+        <div className="px-3 py-2.5 sm:px-4 sm:py-3 flex items-center gap-2 sm:gap-3">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">
+            <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div className="flex items-center gap-2 flex-1">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-              {chatMode === 'ai' ? <Bot className="h-4 w-4 text-primary" /> : <Stethoscope className="h-4 w-4 text-primary" />}
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+              {chatMode === 'ai' ? <Bot className="h-3.5 w-3.5 text-primary" /> : <Stethoscope className="h-3.5 w-3.5 text-primary" />}
             </div>
-            <div>
-              <h1 className="text-sm font-bold leading-tight">Doctor Chat</h1>
-              <p className="text-[10px] text-muted-foreground">
+            <div className="min-w-0">
+              <h1 className="text-xs sm:text-sm font-bold leading-tight truncate">Doctor Chat</h1>
+              <p className="text-[9px] sm:text-[10px] text-muted-foreground hidden sm:block">
                 {chatMode === 'ai' ? 'AI-powered assistant' : 'Connect with real doctors'}
               </p>
             </div>
           </div>
-          <button type="button" onClick={() => { window.location.href = '/'; }} className="text-sm font-bold text-primary hover:opacity-80 transition-opacity">
+          <button type="button" onClick={() => { window.location.href = '/'; }} className="text-xs sm:text-sm font-bold text-primary hover:opacity-80 transition-opacity hidden sm:block">
             Womanie
           </button>
 
@@ -405,7 +405,7 @@ export default function AIDoctorChat() {
         </div>
 
         {/* Mode Switcher */}
-        <div className="px-4 pb-3 flex gap-2">
+        <div className="px-3 sm:px-4 pb-2.5 sm:pb-3 flex gap-2">
           <Button
             variant={chatMode === 'ai' ? 'default' : 'outline'}
             size="sm"

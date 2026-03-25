@@ -874,18 +874,18 @@ export default function MedicalHistory() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="px-4 py-4 flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">
-            <ArrowLeft className="h-5 w-5" />
+        <div className="px-3 py-3 sm:px-4 sm:py-4 flex items-center gap-2 sm:gap-3">
+          <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
-          <div className="flex-1">
-            <h1 className="text-xl font-bold">My Health Records</h1>
-            <p className="text-sm text-muted-foreground">Your results explained in plain language</p>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-base sm:text-xl font-bold truncate">My Health Records</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Your results explained in plain language</p>
           </div>
-          <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')}>
+          <Button variant="outline" size="sm" className="hidden sm:flex" onClick={() => navigate('/dashboard')}>
             Dashboard
           </Button>
-          <button type="button" onClick={() => { window.location.href = '/'; }} className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
+          <button type="button" onClick={() => { window.location.href = '/'; }} className="text-base sm:text-lg font-bold text-primary hover:opacity-80 transition-opacity">
             Womanie
           </button>
         </div>

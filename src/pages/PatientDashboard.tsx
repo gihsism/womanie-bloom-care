@@ -384,13 +384,13 @@ const PatientDashboard = () => {
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="w-full px-4 py-4">
           <div className="flex items-center justify-between mb-4">
-             <div className="flex items-center gap-2">
+             <div className="flex items-center gap-1 sm:gap-2">
               <button
                 onClick={() => navigate('/welcome')}
-                className="flex items-center justify-center h-9 w-9 rounded-md hover:bg-muted transition-colors"
+                className="flex items-center justify-center h-8 w-8 sm:h-9 sm:w-9 rounded-md hover:bg-muted transition-colors"
                 aria-label="Go back"
               >
-                <ArrowLeft className="h-5 w-5 text-foreground" />
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 text-foreground" />
               </button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
