@@ -67,53 +67,20 @@ import {
   PieChart as RechartsPie,
   Pie,
 } from 'recharts';
+import {
+  type MedicalDataItem,
+  type DocumentInfo,
+  friendlyStatus,
+  priorityOrder,
+  getStatusInfo,
+  getFriendlyName,
+  generateFallbackNote,
+} from '@/lib/medical-utils';
 
-interface MedicalDataItem {
-  id: string;
-  data_type: string;
-  title: string;
-  value: string | null;
-  unit: string | null;
-  reference_range: string | null;
-  status: string | null;
-  date_recorded: string | null;
-  notes: string | null;
-  created_at: string;
-  document_id: string | null;
-  raw_data?: {
-    priority?: string;
-    panel?: string;
-    is_repeat_test?: boolean;
-    possible_conditions?: string[];
-  } | null;
-}
+// NOTE: friendlyStatus, priorityOrder, getStatusInfo, getFriendlyName,
+// generateFallbackNote are imported from @/lib/medical-utils
 
-interface DocumentInfo {
-  id: string;
-  file_name: string;
-  file_path: string;
-  mime_type: string;
-  ai_suggested_name: string | null;
-  ai_summary: string | null;
-  ai_suggested_category: string | null;
-  uploaded_at: string | null;
-  document_type: string;
-}
-
-// Friendly labels for statuses — no jargon
-const friendlyStatus: Record<string, { label: string; emoji: string; color: string; bgColor: string; description: string }> = {
-  normal: { label: 'All good', emoji: '✅', color: 'text-green-700 dark:text-green-400', bgColor: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800', description: 'This result is within the healthy range.' },
-  expected: { label: 'Normal for you', emoji: '💙', color: 'text-blue-700 dark:text-blue-400', bgColor: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800', description: 'This is outside the general range, but perfectly normal for your situation.' },
-  abnormal: { label: 'Worth discussing', emoji: '⚠️', color: 'text-amber-700 dark:text-amber-400', bgColor: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800', description: 'This result is outside the normal range. Talk to your doctor about it.' },
-  critical: { label: 'Needs attention', emoji: '🔴', color: 'text-red-700 dark:text-red-400', bgColor: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800', description: 'This needs urgent medical attention.' },
-  informational: { label: 'For reference', emoji: 'ℹ️', color: 'text-muted-foreground', bgColor: 'bg-muted/50 border-border', description: 'Tracked for your records.' },
-  active: { label: 'Current', emoji: '📌', color: 'text-blue-700 dark:text-blue-400', bgColor: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800', description: '' },
-  resolved: { label: 'Resolved', emoji: '✓', color: 'text-muted-foreground', bgColor: 'bg-muted/50 border-border', description: '' },
-};
-
-const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
-
-// Friendly "what does this mean" for common test names
+// Legacy — keeping friendlyTestNames inline for now (used by ValueGauge)
 const friendlyTestNames: Record<string, string> = {
   'Hemoglobin': 'Hemoglobin — carries oxygen in your blood',
   'Ferritin': 'Ferritin — your iron stores',
@@ -368,14 +335,6 @@ function generateFallbackNote(item: MedicalDataItem): string | null {
   // informational or unknown status
   if (explanation) return explanation.normal;
   return null;
-}
-
-function getFriendlyName(title: string): string {
-  return friendlyTestNames[title] || title;
-}
-
-function getStatusInfo(status: string | null) {
-  return friendlyStatus[status || ''] || friendlyStatus.informational;
 }
 
 // Render a value with a visual "gauge" showing where it falls in range
