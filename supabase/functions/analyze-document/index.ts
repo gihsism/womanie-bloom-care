@@ -139,21 +139,43 @@ async function analyzeDocument(documentId: string, filePath: string, fileName: s
 
   const today = new Date().toISOString().split('T')[0];
 
-  const systemPrompt = `Medical document analyzer for women's health. Plain language for patients. Today: ${today}.
+  const systemPrompt = `You analyze medical documents for women. Write for patients, not doctors. Today: ${today}.
 ${patientContext || ""}
 
-Extract EVERY test result individually. Return ONLY JSON:
-{"name":"doc name","category":"lab_results|imaging|prescription|consultation_notes|other","summary":"3-5 sentences: lead with abnormals (value + range + meaning), then reassure normals. Mention test date relative to today.","key_takeaways":["..."],"action_items":["..."],"extracted_data":[{"data_type":"lab_result|condition|medication|cycle_info|allergy|procedure","title":"standardized name (Hemoglobin not Hb)","value":"","unit":"","reference_range":"use pregnancy ranges if pregnant","status":"normal|abnormal|critical|expected|informational","priority":"high|medium|low","date_recorded":"YYYY-MM-DD","notes":"MANDATORY: what this means for patient. Never vague.","panel":"e.g. Complete Blood Count","possible_conditions":["for abnormal only"],"is_repeat_test":false}],"cycle_data":{"cycle_length":null,"last_period_date":null,"period_length":null,"irregular":null}}
+Return ONLY valid JSON with this structure:
+{
+  "name": "short document name (max 50 chars)",
+  "category": "lab_results|imaging|prescription|consultation_notes|other",
+  "summary": "3-5 sentences written to the patient. Start with what needs attention: 'Your ferritin is 12 ng/mL (healthy is 30+) — your iron stores are low, which explains fatigue. Your thyroid (TSH 1.8) looks great.' End with reassurance. Mention when tests were done relative to today.",
+  "key_takeaways": ["Most important thing patient should know", "Second most important"],
+  "action_items": ["Specific action: 'Ask about iron supplements — ferritin is below 30'"],
+  "extracted_data": [
+    {
+      "data_type": "lab_result|condition|medication|cycle_info|allergy|procedure",
+      "title": "Standardized name (always Hemoglobin not Hb, Ferritin not Serum Ferritin)",
+      "value": "the number",
+      "unit": "standard unit",
+      "reference_range": "low-high (use pregnancy ranges if pregnant: Ferritin≥30, Hb≥11, TSH 0.1-2.5)",
+      "status": "normal|abnormal|critical|expected|informational",
+      "priority": "high|medium|low",
+      "date_recorded": "YYYY-MM-DD from document",
+      "notes": "MANDATORY 1-2 sentences: what this specific value means for the patient. For abnormal: state the value, what's healthy, what this could cause, what to do. For normal: brief confirmation. NEVER just say 'discuss with doctor' — explain WHY first.",
+      "panel": "CBC|Thyroid Panel|Metabolic Panel|Hormone Panel|Coagulation|Autoimmune|Vitamins|Other",
+      "possible_conditions": ["for abnormal/critical only: plain-language conditions"],
+      "is_repeat_test": false
+    }
+  ],
+  "cycle_data": {"cycle_length":null,"last_period_date":null,"period_length":null,"irregular":null}
+}
 
-Rules:
-- Extract EVERY individual test as separate item. 20 values = 20 items.
-- Pregnancy: Ferritin≥30, Hb≥11, TSH 0.1-2.5 (1st tri). HCG/Progesterone elevated=expected.
-- Menopause: high FSH + low estradiol = expected.
-- Autoimmune: always flag APS antibodies, anti-TPO, lupus anticoagulant.
-- Notes field MANDATORY — explain what result means, never leave empty.
-- If document mentions gestational age, calculate current age from test date to today.
-- Standardize names for cross-document matching. Include units.
-- Sort by priority: high first. Return valid JSON only.`;
+CRITICAL RULES:
+- Extract EVERY SINGLE test result as its own item. If document has 20 values, return 20 items.
+- Notes field must NEVER be empty — each result needs a specific explanation.
+- Pregnancy context: HCG elevated = "expected", Ferritin<30 = "abnormal" (pregnancy needs more iron).
+- Menopause: high FSH + low estradiol = "expected" not abnormal.
+- Autoimmune markers (APS, anti-TPO, lupus anticoagulant) = always flag if positive.
+- If document mentions gestational age/weeks, calculate current weeks from test date to ${today}.
+- Return ONLY the JSON object. No markdown fences, no explanation text.`;
 
   const aiResponse = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -164,7 +186,7 @@ Rules:
     },
     body: JSON.stringify({
       model: "claude-sonnet-4-20250514",
-      max_tokens: 5000,
+      max_tokens: 6000,
       system: systemPrompt,
       messages: [
         { role: "user", content: userContent },
