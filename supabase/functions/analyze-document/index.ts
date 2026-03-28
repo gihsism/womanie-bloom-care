@@ -120,13 +120,12 @@ async function analyzeDocument(documentId: string, filePath: string, fileName: s
         text: `Analyze this medical document "${fileName}". Extract EVERY test result — there should be many.\n\n${patientContext}\n\nDocument text:\n${extractedPdfText}`,
       }];
     } else {
-      // Poor text extraction or scanned PDF — send as image for OCR
-      console.log("PDF text extraction insufficient, sending as image. Text length:", extractedPdfText.length, "Numbers found:", hasNumbers);
-      const dataUrl = `data:application/pdf;base64,${toBase64(fileBytes)}`;
-      userContent = [
-        { type: "text", text: `Analyze this medical PDF "${fileName}". It likely contains a table of lab results — extract EVERY SINGLE value you can see. There should be many results, not just one.\n\n${patientContext}${extractedPdfText.length > 50 ? `\n\nPartial text extracted (may be incomplete):\n${extractedPdfText.slice(0, 2000)}` : ""}` },
-        { type: "image_url", image_url: { url: dataUrl } },
-      ];
+      // Poor text extraction — send whatever text we have with extra instructions
+      console.log("PDF text extraction insufficient. Text length:", extractedPdfText.length, "Numbers found:", hasNumbers);
+      userContent = [{
+        type: "text",
+        text: `Analyze this medical document "${fileName}". The text below was extracted from a PDF and may have formatting issues — look carefully for ALL test results including values in tables.\n\n${patientContext}\n\nExtracted text (may have formatting issues — parse carefully):\n${extractedPdfText || "(No text could be extracted — document may be a scanned image. Please indicate this in the summary.)"}`,
+      }];
     }
   } else if (isImage) {
     const dataUrl = `data:${mimeType};base64,${toBase64(fileBytes)}`;
