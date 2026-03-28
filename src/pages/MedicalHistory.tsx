@@ -656,7 +656,7 @@ export default function MedicalHistory() {
 
     // Process 3 documents in parallel for speed
     let done = 0;
-    const batch = 3;
+    const batch = 5;
     for (let i = 0; i < total; i += batch) {
       const chunk = documents.slice(i, i + batch);
       await Promise.allSettled(
