@@ -105,27 +105,23 @@ async function analyzeDocument(documentId: string, filePath: string, fileName: s
     let extractedPdfText = "";
     try {
       extractedPdfText = await extractPdfText(fileBytes);
+      console.log("PDF text extracted:", extractedPdfText.length, "chars");
     } catch (pdfTextError) {
       console.error("PDF text extraction failed:", pdfTextError);
     }
 
-    // Check if text extraction captured enough data (lab results have numbers)
-    const hasNumbers = (extractedPdfText.match(/\d+\.\d+|\d{2,}/g) || []).length;
-    const textIsUseful = extractedPdfText.length > 200 && hasNumbers > 5;
-
-    if (textIsUseful) {
-      // Good text extraction — send as text
+    if (extractedPdfText.length > 50) {
       userContent = [{
         type: "text",
-        text: `Analyze this medical document "${fileName}". Extract EVERY test result — there should be many.\n\n${patientContext}\n\nDocument text:\n${extractedPdfText}`,
+        text: `Analyze this medical document "${fileName}". Extract EVERY test result as a separate item — lab reports typically contain many values in tables.\n\n${patientContext}\n\nFull document text:\n${extractedPdfText}`,
       }];
     } else {
-      // Poor text extraction — send whatever text we have with extra instructions
-      console.log("PDF text extraction insufficient. Text length:", extractedPdfText.length, "Numbers found:", hasNumbers);
-      userContent = [{
-        type: "text",
-        text: `Analyze this medical document "${fileName}". The text below was extracted from a PDF and may have formatting issues — look carefully for ALL test results including values in tables.\n\n${patientContext}\n\nExtracted text (may have formatting issues — parse carefully):\n${extractedPdfText || "(No text could be extracted — document may be a scanned image. Please indicate this in the summary.)"}`,
-      }];
+      // Scanned PDF with no text — send as image
+      const dataUrl = `data:image/png;base64,${toBase64(fileBytes)}`;
+      userContent = [
+        { type: "text", text: `Analyze this scanned medical document "${fileName}". Read all visible text and extract EVERY test result.\n\n${patientContext}` },
+        { type: "image_url", image_url: { url: dataUrl } },
+      ];
     }
   } else if (isImage) {
     const dataUrl = `data:${mimeType};base64,${toBase64(fileBytes)}`;
@@ -172,13 +168,26 @@ Return ONLY valid JSON with this structure:
 }
 
 CRITICAL RULES:
-- Extract EVERY SINGLE test result as its own item. If document has 20 values, return 20 items.
-- Notes field must NEVER be empty — each result needs a specific explanation.
-- Pregnancy context: HCG elevated = "expected", Ferritin<30 = "abnormal" (pregnancy needs more iron).
-- Menopause: high FSH + low estradiol = "expected" not abnormal.
-- Autoimmune markers (APS, anti-TPO, lupus anticoagulant) = always flag if positive.
-- If document mentions gestational age/weeks, calculate current weeks from test date to ${today}.
-- Return ONLY the JSON object. No markdown fences, no explanation text.`;
+- Extract EVERY SINGLE test result as its own item. If document has 20 values, return 20 items. Missing results = patient can't see them.
+- Notes field must NEVER be empty — each result needs 1-2 sentences explaining what it means for this patient.
+- Standardize test names for cross-document matching: always "Hemoglobin" not "Hb"/"HGB", "Ferritin" not "Serum Ferritin", "TSH" not "Thyroid Stimulating Hormone".
+- Always include units and reference ranges when visible in the document.
+
+PREGNANCY-SPECIFIC (if patient is pregnant):
+- Ferritin: must be ≥30 ng/mL. Below 30 = "abnormal", high priority.
+- Hemoglobin: <11 g/dL = anemia in pregnancy.
+- TSH: pregnancy range is 0.1-2.5 (1st tri), tighter than normal.
+- HCG elevated = "expected" status, not abnormal.
+- Progesterone elevated = "expected" in pregnancy.
+- Vitamin D <30 = needs supplementation.
+- Platelets <150k = monitor, <100k = urgent.
+- Liver enzymes (ALT, AST) elevated = flag high priority (HELLP risk).
+
+MENOPAUSE: high FSH + low estradiol = "expected" not abnormal.
+AUTOIMMUNE: always flag APS antibodies, anti-TPO, lupus anticoagulant if positive.
+
+- If document mentions gestational age, calculate current weeks from test date to ${today}.
+- Return ONLY the JSON object. No markdown, no code fences, no explanation outside JSON.`;
 
   const aiResponse = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -189,7 +198,7 @@ CRITICAL RULES:
     },
     body: JSON.stringify({
       model: "claude-sonnet-4-20250514",
-      max_tokens: 6000,
+      max_tokens: 8000,
       system: systemPrompt,
       messages: [
         { role: "user", content: userContent },
