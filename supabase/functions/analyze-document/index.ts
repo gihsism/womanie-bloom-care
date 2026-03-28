@@ -102,32 +102,36 @@ async function analyzeDocument(documentId: string, filePath: string, fileName: s
   let userContent: any[] = [];
 
   if (isPdf) {
+    let extractedPdfText = "";
     try {
-      const extractedPdfText = await extractPdfText(fileBytes);
-      if (extractedPdfText.length > 100) {
-        userContent = [{
-          type: "text",
-          text: `Analyze the following medical document extracted from "${fileName}".\n\n${patientContext}\n\nDocument content:\n${extractedPdfText}`,
-        }];
-      } else {
-        const dataUrl = `data:${mimeType};base64,${toBase64(fileBytes)}`;
-        userContent = [
-          { type: "text", text: `Analyze this medical PDF file (${fileName}).\n\n${patientContext}\n\nIf content is unreadable, return an empty extracted_data array and explain briefly in summary.` },
-          { type: "image_url", image_url: { url: dataUrl } },
-        ];
-      }
+      extractedPdfText = await extractPdfText(fileBytes);
     } catch (pdfTextError) {
       console.error("PDF text extraction failed:", pdfTextError);
-      const dataUrl = `data:${mimeType};base64,${toBase64(fileBytes)}`;
+    }
+
+    // Check if text extraction captured enough data (lab results have numbers)
+    const hasNumbers = (extractedPdfText.match(/\d+\.\d+|\d{2,}/g) || []).length;
+    const textIsUseful = extractedPdfText.length > 200 && hasNumbers > 5;
+
+    if (textIsUseful) {
+      // Good text extraction — send as text
+      userContent = [{
+        type: "text",
+        text: `Analyze this medical document "${fileName}". Extract EVERY test result — there should be many.\n\n${patientContext}\n\nDocument text:\n${extractedPdfText}`,
+      }];
+    } else {
+      // Poor text extraction or scanned PDF — send as image for OCR
+      console.log("PDF text extraction insufficient, sending as image. Text length:", extractedPdfText.length, "Numbers found:", hasNumbers);
+      const dataUrl = `data:application/pdf;base64,${toBase64(fileBytes)}`;
       userContent = [
-        { type: "text", text: `Analyze this medical PDF file (${fileName}).\n\n${patientContext}` },
+        { type: "text", text: `Analyze this medical PDF "${fileName}". It likely contains a table of lab results — extract EVERY SINGLE value you can see. There should be many results, not just one.\n\n${patientContext}${extractedPdfText.length > 50 ? `\n\nPartial text extracted (may be incomplete):\n${extractedPdfText.slice(0, 2000)}` : ""}` },
         { type: "image_url", image_url: { url: dataUrl } },
       ];
     }
   } else if (isImage) {
     const dataUrl = `data:${mimeType};base64,${toBase64(fileBytes)}`;
     userContent = [
-      { type: "text", text: `Analyze this health document image (${fileName}).\n\n${patientContext}` },
+      { type: "text", text: `Analyze this health document image "${fileName}". Extract EVERY test result visible — lab reports typically have many values in a table. Don't stop at just one or two.\n\n${patientContext}` },
       { type: "image_url", image_url: { url: dataUrl } },
     ];
   } else {
