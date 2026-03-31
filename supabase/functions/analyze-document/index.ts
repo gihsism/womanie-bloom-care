@@ -187,7 +187,16 @@ MENOPAUSE: high FSH + low estradiol = "expected" not abnormal.
 AUTOIMMUNE: always flag APS antibodies, anti-TPO, lupus anticoagulant if positive.
 
 - If document mentions gestational age, calculate current weeks from test date to ${today}.
-- Return ONLY the JSON object. No markdown, no code fences, no explanation outside JSON.`;
+- Return ONLY the JSON object. No markdown, no code fences, no explanation outside JSON.
+
+EXAMPLE of good extracted_data (your output should have THIS MANY items or more):
+[
+  {"data_type":"lab_result","title":"Hemoglobin","value":"13.2","unit":"g/dL","reference_range":"12.0-16.0","status":"normal","priority":"low","date_recorded":"2026-03-15","notes":"Your hemoglobin is healthy — your blood is carrying oxygen well.","panel":"CBC","possible_conditions":[],"is_repeat_test":false},
+  {"data_type":"lab_result","title":"Ferritin","value":"12","unit":"ng/mL","reference_range":"30-150","status":"abnormal","priority":"high","date_recorded":"2026-03-15","notes":"Your iron stores are very low at 12 ng/mL — during pregnancy this should be at least 30. Low ferritin causes fatigue and can affect your baby's growth. Ask about iron supplements.","panel":"CBC","possible_conditions":["Iron deficiency","Pregnancy anemia risk"],"is_repeat_test":false},
+  {"data_type":"lab_result","title":"TSH","value":"1.8","unit":"mIU/L","reference_range":"0.1-2.5","status":"normal","priority":"low","date_recorded":"2026-03-15","notes":"Your thyroid function is healthy and within the safe pregnancy range.","panel":"Thyroid Panel","possible_conditions":[],"is_repeat_test":false},
+  {"data_type":"lab_result","title":"Vitamin D","value":"18","unit":"ng/mL","reference_range":"30-100","status":"abnormal","priority":"medium","date_recorded":"2026-03-15","notes":"Your vitamin D is low at 18 — you need at least 30 for bone health and immunity. Consider a supplement of 2000-4000 IU daily.","panel":"Vitamins","possible_conditions":["Vitamin D deficiency"],"is_repeat_test":false}
+]
+Each test = one item. A typical blood test should produce 10-25 items.`;
 
   const aiResponse = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -197,7 +206,7 @@ AUTOIMMUNE: always flag APS antibodies, anti-TPO, lupus anticoagulant if positiv
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "claude-haiku-4-5-20251001",
+      model: "claude-sonnet-4-20250514",
       max_tokens: 8000,
       system: systemPrompt,
       messages: [
