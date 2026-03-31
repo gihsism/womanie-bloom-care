@@ -282,20 +282,38 @@ Each test = one item. A typical blood test should produce 10-25 items.`;
     throw new Error("AI did not return content");
   }
 
+  console.log(`AI response length: ${aiContent.length} chars. First 200: ${aiContent.slice(0, 200)}`);
+
   let analysis: any;
   try {
     analysis = normalizeAiJson(aiContent);
+    console.log(`Parsed OK. extracted_data count: ${analysis.extracted_data?.length || 0}`);
   } catch (parseError) {
-    console.error("AI JSON parse error:", parseError, aiContent);
-    analysis = {
-      name: fileName,
-      category: "other",
-      summary: aiContent.slice(0, 1200),
-      key_takeaways: [],
-      action_items: [],
-      extracted_data: [],
-      cycle_data: { cycle_length: null, last_period_date: null, period_length: null, irregular: null },
-    };
+    console.error("AI JSON parse error:", parseError);
+    console.error("Raw AI content (first 500):", aiContent.slice(0, 500));
+
+    // Try harder to extract JSON — look for the object anywhere in the response
+    try {
+      const jsonStart = aiContent.indexOf('{');
+      const jsonEnd = aiContent.lastIndexOf('}');
+      if (jsonStart >= 0 && jsonEnd > jsonStart) {
+        analysis = JSON.parse(aiContent.slice(jsonStart, jsonEnd + 1));
+        console.log(`Recovered JSON. extracted_data count: ${analysis.extracted_data?.length || 0}`);
+      } else {
+        throw new Error("No JSON object found");
+      }
+    } catch {
+      console.error("JSON recovery also failed. Using fallback.");
+      analysis = {
+        name: fileName,
+        category: "other",
+        summary: aiContent.slice(0, 1200),
+        key_takeaways: [],
+        action_items: [],
+        extracted_data: [],
+        cycle_data: { cycle_length: null, last_period_date: null, period_length: null, irregular: null },
+      };
+    }
   }
 
   // Build enhanced summary with takeaways and actions
