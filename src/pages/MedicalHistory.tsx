@@ -50,6 +50,8 @@ import {
   HelpCircle,
   Trash2,
   Pencil,
+  RefreshCw,
+  Loader2,
 } from 'lucide-react';
 import { format, differenceInDays, addDays } from 'date-fns';
 import {
@@ -647,6 +649,26 @@ export default function MedicalHistory() {
     }
   };
 
+  const [reanalyzingDoc, setReanalyzingDoc] = useState<string | null>(null);
+
+  const reanalyzeOne = async (doc: DocumentInfo) => {
+    if (!user) return;
+    setReanalyzingDoc(doc.id);
+    try {
+      await supabase.from('medical_extracted_data').delete().eq('document_id', doc.id);
+      await supabase.functions.invoke('analyze-document', {
+        body: { documentId: doc.id, filePath: doc.file_path, fileName: doc.file_name, mimeType: doc.mime_type },
+      });
+      toast({ title: 'Analysis complete', description: doc.ai_suggested_name || doc.file_name });
+      await fetchData();
+    } catch (err) {
+      console.error('Re-analysis failed:', err);
+      toast({ variant: 'destructive', title: 'Error', description: 'Analysis failed for this document.' });
+    } finally {
+      setReanalyzingDoc(null);
+    }
+  };
+
   const reanalyzeAll = async () => {
     if (!user || documents.length === 0) return;
     setReanalyzing(true);
@@ -888,6 +910,16 @@ export default function MedicalHistory() {
                         {abnormals > 0 && ` • ${abnormals} flagged`}
                       </p>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition-opacity"
+                      onClick={() => reanalyzeOne(doc)}
+                      disabled={reanalyzingDoc === doc.id}
+                      aria-label="Re-analyze document"
+                    >
+                      {reanalyzingDoc === doc.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
