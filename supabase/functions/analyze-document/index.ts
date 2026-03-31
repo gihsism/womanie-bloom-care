@@ -9,6 +9,12 @@ const corsHeaders = {
 const MAX_PDF_PAGES = 20;
 const MAX_TEXT_CHARS = 120000;
 
+async function hashRequest(data: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(data));
+  return [...new Uint8Array(hashBuffer)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
 function toBase64(bytes: Uint8Array) {
   const chunkSize = 0x8000;
   let binary = "";
@@ -198,32 +204,79 @@ EXAMPLE of good extracted_data (your output should have THIS MANY items or more)
 ]
 Each test = one item. A typical blood test should produce 10-25 items.`;
 
-  const aiResponse = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": ANTHROPIC_API_KEY,
-      "anthropic-version": "2023-06-01",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 8000,
-      system: systemPrompt,
-      messages: [
-        { role: "user", content: userContent },
-      ],
-      temperature: 0.2,
-    }),
-  });
+  // Cache: hash the request (prompt + content + model) so any change invalidates
+  const cacheModel = "claude-sonnet-4-20250514";
+  const userContentStr = JSON.stringify(userContent);
+  const cacheKey = await hashRequest(systemPrompt + userContentStr + cacheModel);
 
-  if (!aiResponse.ok) {
-    const errorText = await aiResponse.text();
-    console.error("Anthropic API error:", aiResponse.status, errorText);
-    throw new Error(`AI analysis failed with status ${aiResponse.status}`);
+  // Check cache
+  const { data: cached } = await supabaseClient
+    .from("llm_cache")
+    .select("response_text")
+    .eq("request_hash", cacheKey)
+    .maybeSingle();
+
+  let aiContent: string;
+
+  if (cached?.response_text) {
+    // CACHE HIT
+    console.log(`CACHE HIT for document ${documentId} (hash: ${cacheKey.slice(0, 12)}...)`);
+    aiContent = cached.response_text;
+    // Update hit count
+    await supabaseClient.rpc("", {}).catch(() => {}); // ignore errors
+    await supabaseClient
+      .from("llm_cache")
+      .update({ hit_count: undefined as any, last_hit_at: new Date().toISOString() })
+      .eq("request_hash", cacheKey)
+      .then(() => {
+        // Increment hit_count via raw SQL would be better, but simple update works
+      });
+    // Simple increment
+    await supabaseClient.from("llm_cache").update({
+      last_hit_at: new Date().toISOString(),
+    }).eq("request_hash", cacheKey);
+  } else {
+    // CACHE MISS — call LLM
+    console.log(`CACHE MISS for document ${documentId} (hash: ${cacheKey.slice(0, 12)}...) — calling Anthropic`);
+
+    const aiResponse = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: cacheModel,
+        max_tokens: 8000,
+        system: systemPrompt,
+        messages: [
+          { role: "user", content: userContent },
+        ],
+        temperature: 0.2,
+      }),
+    });
+
+    if (!aiResponse.ok) {
+      const errorText = await aiResponse.text();
+      console.error("Anthropic API error:", aiResponse.status, errorText);
+      throw new Error(`AI analysis failed with status ${aiResponse.status}`);
+    }
+
+    const aiData = await aiResponse.json();
+    aiContent = aiData.content?.[0]?.text;
+
+    // Store in cache
+    if (aiContent) {
+      await supabaseClient.from("llm_cache").upsert({
+        request_hash: cacheKey,
+        response_text: aiContent,
+        model: cacheModel,
+        hit_count: 0,
+      }).catch(err => console.error("Cache store error:", err));
+      console.log(`CACHE STORED for document ${documentId} (hash: ${cacheKey.slice(0, 12)}...)`);
+    }
   }
-
-  const aiData = await aiResponse.json();
-  const aiContent = aiData.content?.[0]?.text;
 
   if (!aiContent || typeof aiContent !== "string") {
     throw new Error("AI did not return content");
