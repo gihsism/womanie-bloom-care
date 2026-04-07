@@ -111,23 +111,25 @@ async function analyzeDocument(documentId: string, filePath: string, fileName: s
     let extractedPdfText = "";
     try {
       extractedPdfText = await extractPdfText(fileBytes);
-      console.log("PDF text extracted:", extractedPdfText.length, "chars");
+      console.log("PDF text extracted:", extractedPdfText.length, "chars. First 300:", extractedPdfText.slice(0, 300));
     } catch (pdfTextError) {
-      console.error("PDF text extraction failed:", pdfTextError);
+      console.error("PDF text extraction FAILED:", pdfTextError);
+      console.error("Error type:", typeof pdfTextError, "Message:", String(pdfTextError));
     }
 
     if (extractedPdfText.length > 50) {
+      console.log("Using extracted text for analysis");
       userContent = [{
         type: "text",
-        text: `Analyze this medical document "${fileName}". Extract EVERY test result as a separate item — lab reports typically contain many values in tables.\n\n${patientContext}\n\nFull document text:\n${extractedPdfText}`,
+        text: `Analyze this medical document "${fileName}". Extract EVERY test result as a separate item — lab reports typically contain many values in tables. A typical blood test has 10-25 results.\n\n${patientContext}\n\nFull document text:\n${extractedPdfText}`,
       }];
     } else {
-      // Scanned PDF with no text — send as image
-      const dataUrl = `data:image/png;base64,${toBase64(fileBytes)}`;
-      userContent = [
-        { type: "text", text: `Analyze this scanned medical document "${fileName}". Read all visible text and extract EVERY test result.\n\n${patientContext}` },
-        { type: "image_url", image_url: { url: dataUrl } },
-      ];
+      // PDF text extraction failed — try sending first page as image
+      console.log("PDF text extraction failed or empty. Sending raw text content if any.");
+      userContent = [{
+        type: "text",
+        text: `Analyze this medical document "${fileName}". I could not extract the text properly. Here is what I have (may be empty or garbled):\n\n${patientContext}\n\n${extractedPdfText || "(No text could be extracted from this PDF. It may be a scanned document. Please indicate this in the summary.)"}\n\nPlease extract whatever information you can find. If you cannot read the document, return an empty extracted_data array and explain in the summary.`,
+      }];
     }
   } else if (isImage) {
     const dataUrl = `data:${mimeType};base64,${toBase64(fileBytes)}`;
