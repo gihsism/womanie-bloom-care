@@ -18,8 +18,8 @@ const PatientSignUp = () => {
       </div>
       <div className="flex-1 flex items-center justify-center px-4 pb-16">
         <SignUp
-          routing="hash"
           afterSignUpUrl="/welcome"
+          signUpUrl="/auth/signup"
           appearance={{
             elements: {
               rootBox: 'w-full max-w-md',

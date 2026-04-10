@@ -60,7 +60,7 @@ function PageLoader() {
 const queryClient = new QueryClient();
 
 const App = () => (
-  <ClerkProvider publishableKey={CLERK_KEY}>
+  <ClerkProvider publishableKey={CLERK_KEY} signInUrl="/auth/login" signUpUrl="/auth/signup" afterSignInUrl="/welcome" afterSignUpUrl="/welcome">
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
