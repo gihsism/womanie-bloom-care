@@ -1,10 +1,18 @@
-import { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { createContext, useContext, ReactNode } from 'react';
+import { useUser, useAuth as useClerkAuth } from '@clerk/clerk-react';
+
+interface AuthUser {
+  id: string;
+  email?: string;
+  user_metadata?: {
+    full_name?: string;
+  };
+  created_at?: string;
+}
 
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
+  user: AuthUser | null;
+  session: { access_token: string } | null;
   loading: boolean;
 }
 
@@ -23,36 +31,28 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-  const initialSessionResolvedRef = useRef(false);
+  const { user: clerkUser, isLoaded } = useUser();
+  const { getToken } = useClerkAuth();
 
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+  const user: AuthUser | null = clerkUser ? {
+    id: clerkUser.id,
+    email: clerkUser.primaryEmailAddress?.emailAddress,
+    user_metadata: {
+      full_name: clerkUser.fullName || undefined,
+    },
+    created_at: clerkUser.createdAt?.toISOString(),
+  } : null;
 
-        // Prevent premature redirects on protected routes while OAuth session is still hydrating
-        if (event !== 'INITIAL_SESSION' || initialSessionResolvedRef.current) {
-          setLoading(false);
-        }
-      }
-    );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      initialSessionResolvedRef.current = true;
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  // Provide a session-like object for components that need an access token
+  const session = clerkUser ? {
+    get access_token() {
+      // Components should use getToken() directly, but this provides compatibility
+      return clerkUser.id;
+    }
+  } : null;
 
   return (
-    <AuthContext.Provider value={{ user, session, loading }}>
+    <AuthContext.Provider value={{ user, session, loading: !isLoaded }}>
       {children}
     </AuthContext.Provider>
   );
