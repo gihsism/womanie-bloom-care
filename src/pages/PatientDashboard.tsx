@@ -273,12 +273,13 @@ const PatientDashboard = () => {
   }, [user, loading, navigate]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    const clerk = (window as any).Clerk;
+    if (clerk) await clerk.signOut();
     toast({
       title: 'Logged out',
       description: 'You have been logged out successfully.',
     });
-    navigate('/');
+    window.location.href = '/';
   };
 
   const getGreeting = () => {

@@ -117,8 +117,8 @@ const Navigation = () => {
                     My Space
                   </Button>
                   <Button variant="outline" size="sm" onClick={async () => {
-                    const { supabase } = await import('@/integrations/supabase/client');
-                    await supabase.auth.signOut();
+                    const clerk = (window as any).Clerk;
+                    if (clerk) await clerk.signOut();
                     window.location.href = '/';
                   }}>
                     Log Out
