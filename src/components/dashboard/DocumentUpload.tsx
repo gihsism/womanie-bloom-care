@@ -89,15 +89,10 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
     setUploading(true);
 
     try {
-      // Upload to Vercel Blob via API
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('fileName', `${Date.now()}-${file.name}`);
-      formData.append('userId', user.id);
-
-      const uploadResp = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
+      // Upload via Vercel Blob client upload API
+      const uploadResp = await fetch(`/api/upload?filename=${encodeURIComponent(user.id + '/' + Date.now() + '-' + file.name)}`, {
+        method: 'PUT',
+        body: file,
       });
 
       if (!uploadResp.ok) {
