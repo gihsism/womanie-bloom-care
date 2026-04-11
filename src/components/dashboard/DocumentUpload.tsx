@@ -90,11 +90,35 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
     setUploading(true);
 
     try {
-      // Upload directly to Vercel Blob (client-side upload — bypasses 4.5MB function limit)
-      const blob = await upload(`${user.id}/${Date.now()}-${file.name}`, file, {
-        access: 'public',
-        handleUploadUrl: '/api/upload',
+      // Upload directly to Vercel Blob
+      // First get a client token, then upload directly to blob storage
+      const tokenResp = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'blob.generate-client-token',
+          payload: {
+            pathname: `${user.id}/${Date.now()}-${file.name}`,
+            callbackUrl: `${window.location.origin}/api/upload`,
+          },
+        }),
       });
+
+      if (!tokenResp.ok) throw new Error('Failed to get upload token');
+      const { clientToken } = await tokenResp.json();
+
+      // Upload directly to Vercel Blob storage (not through our server)
+      const blobResp = await fetch(`https://blob.vercel-storage.com/${user.id}/${Date.now()}-${file.name}`, {
+        method: 'PUT',
+        headers: {
+          'x-vercel-blob-client-token': clientToken,
+          'Content-Type': file.type,
+        },
+        body: file,
+      });
+
+      if (!blobResp.ok) throw new Error('Upload to blob storage failed');
+      const blob = await blobResp.json();
       const fileUrl = blob.url;
 
       // Save metadata to database
