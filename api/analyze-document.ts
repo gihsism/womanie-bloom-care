@@ -43,7 +43,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             const mediaType = isImage ? mimeType : 'image/png'; // Claude needs image type
 
             // Fetch patient context
-            const profiles = await sql('SELECT life_stage, pregnancy_due_date, ivf_phase FROM profiles WHERE id = $1', [userId]);
+            const profiles = await sql.query('SELECT life_stage, pregnancy_due_date, ivf_phase FROM profiles WHERE id = $1', [userId]);
             const profile = profiles[0];
             let patientContext = '';
             if (profile) {
@@ -67,7 +67,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             const buffer = await fileResp.arrayBuffer();
             const base64 = Buffer.from(buffer).toString('base64');
 
-            const profiles = await sql('SELECT life_stage, pregnancy_due_date, ivf_phase FROM profiles WHERE id = $1', [userId]);
+            const profiles = await sql.query('SELECT life_stage, pregnancy_due_date, ivf_phase FROM profiles WHERE id = $1', [userId]);
             const profile = profiles[0];
             let patientContext = '';
             if (profile) {
@@ -98,7 +98,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Fetch patient context
-    const profiles = await sql('SELECT life_stage, pregnancy_due_date, ivf_phase FROM profiles WHERE id = $1', [userId]);
+    const profiles = await sql.query('SELECT life_stage, pregnancy_due_date, ivf_phase FROM profiles WHERE id = $1', [userId]);
     const profile = profiles[0];
     let patientContext = '';
     if (profile) {
@@ -141,14 +141,14 @@ async function processWithAI(
   const cacheKey = await hashRequest(systemPrompt + contentStr + 'claude-sonnet-4-20250514');
 
   // Check cache
-  const cached = await sql('SELECT response_text FROM llm_cache WHERE request_hash = $1', [cacheKey]);
+  const cached = await sql.query('SELECT response_text FROM llm_cache WHERE request_hash = $1', [cacheKey]);
 
   let aiContent: string;
 
   if (cached.length > 0 && cached[0].response_text) {
     console.log(`CACHE HIT for ${documentId}`);
     aiContent = cached[0].response_text;
-    await sql('UPDATE llm_cache SET hit_count = hit_count + 1, last_hit_at = now() WHERE request_hash = $1', [cacheKey]).catch(() => {});
+    await sql.query('UPDATE llm_cache SET hit_count = hit_count + 1, last_hit_at = now() WHERE request_hash = $1', [cacheKey]).catch(() => {});
   } else {
     console.log(`CACHE MISS for ${documentId} — calling Anthropic`);
 
@@ -182,7 +182,7 @@ async function processWithAI(
     aiContent = aiData.content?.[0]?.text;
 
     if (aiContent) {
-      await sql(
+      await sql.query(
         'INSERT INTO llm_cache (request_hash, response_text, model) VALUES ($1, $2, $3) ON CONFLICT (request_hash) DO UPDATE SET response_text = $2',
         [cacheKey, aiContent, 'claude-sonnet-4-20250514']
       ).catch((e: any) => console.error('Cache store error:', e));
@@ -221,7 +221,7 @@ async function processWithAI(
   }
 
   // Update document
-  await sql(
+  await sql.query(
     'UPDATE health_documents SET ai_suggested_name = $1, ai_suggested_category = $2, ai_summary = $3 WHERE id = $4 AND user_id = $5',
     [analysis.name || fileName, analysis.category || 'other', enhancedSummary, documentId, userId]
   );
@@ -229,7 +229,7 @@ async function processWithAI(
   // Insert extracted data
   if (Array.isArray(analysis.extracted_data) && analysis.extracted_data.length > 0) {
     for (const item of analysis.extracted_data) {
-      await sql(
+      await sql.query(
         `INSERT INTO medical_extracted_data (user_id, document_id, data_type, title, value, unit, reference_range, status, date_recorded, notes, raw_data)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
         [

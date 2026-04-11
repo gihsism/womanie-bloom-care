@@ -1,6 +1,11 @@
 import { put, del } from '@vercel/blob';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
+// Allow large file uploads (up to 100MB)
+export const config = {
+  api: { bodyParser: { sizeLimit: '100mb' } },
+};
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'PUT, DELETE, OPTIONS');

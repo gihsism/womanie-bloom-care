@@ -80,7 +80,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       query += ` LIMIT ${limitCount}`;
     }
 
-    const rows = await sql(query, params);
+    const rows = await sql.query(query, params);
     return res.status(200).json({ rows, rowCount: rows.length });
   } catch (error) {
     console.error('DB error:', error);
