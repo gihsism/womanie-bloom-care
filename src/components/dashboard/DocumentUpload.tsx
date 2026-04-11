@@ -89,17 +89,21 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
     setUploading(true);
 
     try {
-      // Upload to Vercel Blob
+      // Upload to Vercel Blob via API
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('fileName', `${Date.now()}-${file.name}`);
+      formData.append('userId', user.id);
+
       const uploadResp = await fetch('/api/upload', {
         method: 'POST',
-        headers: {
-          'x-file-name': `${Date.now()}-${file.name}`,
-          'x-user-id': user.id,
-        },
-        body: file,
+        body: formData,
       });
 
-      if (!uploadResp.ok) throw new Error('Upload failed');
+      if (!uploadResp.ok) {
+        const err = await uploadResp.json().catch(() => ({}));
+        throw new Error(err.error || 'Upload failed');
+      }
       const { url: fileUrl } = await uploadResp.json();
 
       // Save metadata to database
