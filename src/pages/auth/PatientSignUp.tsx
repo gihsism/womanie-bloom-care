@@ -1,4 +1,4 @@
-import { SignUp } from '@clerk/clerk-react';
+import { SignIn } from '@clerk/clerk-react';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { ArrowLeft } from 'lucide-react';
 
@@ -17,16 +17,20 @@ const PatientSignUp = () => {
         </a>
       </div>
       <div className="flex-1 flex items-center justify-center px-4 pb-16">
-        <SignUp
-          afterSignUpUrl="/welcome"
-          signUpUrl="/auth/signup"
-          appearance={{
-            elements: {
-              rootBox: 'w-full max-w-md',
-              card: 'shadow-none border border-border',
-            },
-          }}
-        />
+        <div className="w-full max-w-md text-center space-y-4">
+          <h1 className="text-2xl font-bold">Create Your Account</h1>
+          <p className="text-muted-foreground">Sign in with Google to get started — your account is created automatically.</p>
+          <SignIn
+            afterSignInUrl="/welcome"
+            signInUrl="/auth/signup"
+            appearance={{
+              elements: {
+                rootBox: 'w-full max-w-md',
+                card: 'shadow-none border border-border',
+              },
+            }}
+          />
+        </div>
       </div>
     </div>
   );
