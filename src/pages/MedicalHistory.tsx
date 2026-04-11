@@ -657,7 +657,7 @@ export default function MedicalHistory() {
     try {
       await supabase.from('medical_extracted_data').delete().eq('document_id', doc.id);
       await supabase.functions.invoke('analyze-document', {
-        body: { documentId: doc.id, filePath: doc.file_path, fileName: doc.file_name, mimeType: doc.mime_type },
+        body: { documentId: doc.id, userId: user.id, filePath: doc.file_path, fileName: doc.file_name, mimeType: doc.mime_type },
       });
       toast({ title: 'Analysis complete', description: doc.ai_suggested_name || doc.file_name });
       await fetchData();
@@ -684,7 +684,7 @@ export default function MedicalHistory() {
       await Promise.allSettled(
         chunk.map(doc =>
           supabase.functions.invoke('analyze-document', {
-            body: { documentId: doc.id, filePath: doc.file_path, fileName: doc.file_name, mimeType: doc.mime_type },
+            body: { documentId: doc.id, userId: user.id, filePath: doc.file_path, fileName: doc.file_name, mimeType: doc.mime_type },
           })
         )
       );

@@ -89,15 +89,18 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
     setUploading(true);
 
     try {
-      // Upload to storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('health-documents')
-        .upload(fileName, file);
+      // Upload to Vercel Blob
+      const uploadResp = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'x-file-name': `${Date.now()}-${file.name}`,
+          'x-user-id': user.id,
+        },
+        body: file,
+      });
 
-      if (uploadError) throw uploadError;
+      if (!uploadResp.ok) throw new Error('Upload failed');
+      const { url: fileUrl } = await uploadResp.json();
 
       // Save metadata to database
       const { data: insertData, error: dbError } = await supabase
@@ -105,7 +108,7 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
         .insert({
           user_id: user.id,
           file_name: file.name,
-          file_path: fileName,
+          file_path: fileUrl,
           document_type: documentType,
           file_size: file.size,
           mime_type: file.type,
@@ -132,7 +135,8 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
         await supabase.functions.invoke('analyze-document', {
           body: {
             documentId: insertData.id,
-            filePath: fileName,
+            userId: user.id,
+            filePath: fileUrl,
             fileName: file.name,
             mimeType: file.type
           }
