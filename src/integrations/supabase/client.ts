@@ -37,7 +37,7 @@ function createQueryBuilder(table: string): QueryBuilder {
   let isMaybeSingle = false;
 
   const builder: QueryBuilder = {
-    select(columns = '*') { selectColumns = columns; operation = 'select'; return builder; },
+    select(columns = '*') { selectColumns = columns; if (!insertData && !updateData && !upsertData) operation = 'select'; return builder; },
     insert(data) { insertData = data; operation = 'insert'; return builder; },
     update(data) { updateData = data; operation = 'update'; return builder; },
     delete() { operation = 'delete'; return builder; },
