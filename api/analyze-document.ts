@@ -30,62 +30,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         const fileResp = await fetch(filePath);
         if (fileResp.ok) {
+          const buffer = await fileResp.arrayBuffer();
+          const base64 = Buffer.from(buffer).toString('base64');
+
+          // Fetch patient context
+          const profiles = await sql.query('SELECT life_stage, pregnancy_due_date, ivf_phase FROM profiles WHERE id = $1', [userId]);
+          const profile = profiles[0];
+          let patientContext = '';
+          if (profile) {
+            if (profile.life_stage) patientContext += `Patient life stage: ${profile.life_stage}. `;
+            if (profile.pregnancy_due_date) patientContext += `Currently pregnant, due date: ${profile.pregnancy_due_date}. `;
+          }
+
+          const today = new Date().toISOString().split('T')[0];
+          const systemPrompt = buildSystemPrompt(today, patientContext);
+
+          let userContent: any[];
+
           if (mimeType === 'application/pdf') {
-            // For PDFs, we need to extract text — use the raw bytes
-            // Since we can't use pdfjs in Vercel Functions easily,
-            // send the base64 content to Claude's vision
-            const buffer = await fileResp.arrayBuffer();
-            const base64 = Buffer.from(buffer).toString('base64');
-            documentText = `[PDF document - ${fileName} - sent as base64 for analysis]`;
-
-            // For images and PDFs, use Claude's vision capability
-            const isImage = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(mimeType);
-            const mediaType = isImage ? mimeType : 'image/png'; // Claude needs image type
-
-            // Fetch patient context
-            const profiles = await sql.query('SELECT life_stage, pregnancy_due_date, ivf_phase FROM profiles WHERE id = $1', [userId]);
-            const profile = profiles[0];
-            let patientContext = '';
-            if (profile) {
-              if (profile.life_stage) patientContext += `Patient life stage: ${profile.life_stage}. `;
-              if (profile.pregnancy_due_date) patientContext += `Currently pregnant, due date: ${profile.pregnancy_due_date}. `;
-            }
-
-            const today = new Date().toISOString().split('T')[0];
-            const systemPrompt = buildSystemPrompt(today, patientContext);
-
-            // Use vision for PDFs and images
-            const userContent = isImage ? [
-              { type: 'text', text: `Analyze this medical document "${fileName}". Extract EVERY test result.\n\n${patientContext}` },
-              { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64}` } },
-            ] : [
-              { type: 'text', text: `Analyze this medical document "${fileName}". Extract EVERY test result as a separate item. A typical blood test has 10-25 results.\n\n${patientContext}\n\n[This is a PDF document. Please analyze any visible text or data.]` },
+            // Send PDF natively to Claude — it can read PDFs directly
+            userContent = [
+              { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+              { type: 'text', text: `Analyze this medical document "${fileName}". Read every page carefully. Extract EVERY test result as a separate item — lab reports contain tables with many values. A typical blood test has 10-25 results.\n\n${patientContext}` },
             ];
-
-            return await processWithAI(sql, ANTHROPIC_API_KEY, systemPrompt, userContent, documentId, userId, fileName, res);
           } else if (['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(mimeType)) {
-            const buffer = await fileResp.arrayBuffer();
-            const base64 = Buffer.from(buffer).toString('base64');
-
-            const profiles = await sql.query('SELECT life_stage, pregnancy_due_date, ivf_phase FROM profiles WHERE id = $1', [userId]);
-            const profile = profiles[0];
-            let patientContext = '';
-            if (profile) {
-              if (profile.life_stage) patientContext += `Patient life stage: ${profile.life_stage}. `;
-              if (profile.pregnancy_due_date) patientContext += `Currently pregnant, due date: ${profile.pregnancy_due_date}. `;
-            }
-
-            const today = new Date().toISOString().split('T')[0];
-            const systemPrompt = buildSystemPrompt(today, patientContext);
-
-            const userContent = [
-              { type: 'text', text: `Analyze this medical document image "${fileName}". Extract EVERY test result you can see.\n\n${patientContext}` },
-              { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64}` } },
+            // Send image to Claude vision
+            userContent = [
+              { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64 } },
+              { type: 'text', text: `Analyze this medical document image "${fileName}". Extract EVERY test result you can see in the image.\n\n${patientContext}` },
             ];
-
-            return await processWithAI(sql, ANTHROPIC_API_KEY, systemPrompt, userContent, documentId, userId, fileName, res);
           } else {
             documentText = await fileResp.text();
+            // Fall through to text processing below
+            userContent = [];
+          }
+
+          if (userContent.length > 0) {
+            return await processWithAI(sql, ANTHROPIC_API_KEY, systemPrompt, userContent, documentId, userId, fileName, res);
           }
         }
       } catch (e) {
