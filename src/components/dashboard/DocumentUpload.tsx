@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { FileText, Upload, X, File, CheckCircle2 } from 'lucide-react';
+import { upload } from '@vercel/blob/client';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -89,17 +90,12 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
     setUploading(true);
 
     try {
-      // Upload via Vercel Blob client upload API
-      const uploadResp = await fetch(`/api/upload?filename=${encodeURIComponent(user.id + '/' + Date.now() + '-' + file.name)}`, {
-        method: 'PUT',
-        body: file,
+      // Upload directly to Vercel Blob (client-side upload — bypasses 4.5MB function limit)
+      const blob = await upload(`${user.id}/${Date.now()}-${file.name}`, file, {
+        access: 'public',
+        handleUploadUrl: '/api/upload',
       });
-
-      if (!uploadResp.ok) {
-        const err = await uploadResp.json().catch(() => ({}));
-        throw new Error(err.error || 'Upload failed');
-      }
-      const { url: fileUrl } = await uploadResp.json();
+      const fileUrl = blob.url;
 
       // Save metadata to database
       const { data: insertData, error: dbError } = await supabase
