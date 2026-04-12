@@ -1203,20 +1203,50 @@ export default function MedicalHistory() {
                               </div>
                               <ArrowRight className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                             </button>
-                            {isExpanded && (
-                              <div className="px-4 pb-4 space-y-3 border-t border-border/50 pt-3">
-                                {labs
-                                  .sort((a, b) => {
-                                    const aPri = (a.raw_data as any)?.priority || 'low';
-                                    const bPri = (b.raw_data as any)?.priority || 'low';
-                                    return (priorityOrder[aPri] ?? 2) - (priorityOrder[bPri] ?? 2);
-                                  })
-                                  .map(lab => (
+                            {isExpanded && (() => {
+                              const sorted = [...labs].sort((a, b) => {
+                                const aPri = (a.raw_data as any)?.priority || 'low';
+                                const bPri = (b.raw_data as any)?.priority || 'low';
+                                return (priorityOrder[aPri] ?? 2) - (priorityOrder[bPri] ?? 2);
+                              });
+                              const abnormals = sorted.filter(l => l.status === 'abnormal' || l.status === 'critical');
+                              const normals = sorted.filter(l => l.status !== 'abnormal' && l.status !== 'critical');
+
+                              return (
+                                <div className="px-4 pb-4 border-t border-border/50 pt-3 space-y-3">
+                                  {/* Abnormal results — full cards */}
+                                  {abnormals.map(lab => (
                                     <ResultCard key={lab.id} item={lab} />
-                                  ))
-                                }
-                              </div>
-                            )}
+                                  ))}
+
+                                  {/* Normal results — compact table */}
+                                  {normals.length > 0 && (
+                                    <div>
+                                      {abnormals.length > 0 && (
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-2">
+                                          {normals.length} healthy results
+                                        </p>
+                                      )}
+                                      <div className="space-y-1">
+                                        {normals.map(lab => {
+                                          const si = getStatusInfo(lab.status);
+                                          return (
+                                            <div key={lab.id} className="flex items-center gap-2 py-1 px-2 rounded hover:bg-muted/30">
+                                              <span className="text-xs">{si.emoji}</span>
+                                              <span className="text-xs flex-1 min-w-0 truncate">{lab.title}</span>
+                                              <span className="text-xs font-mono font-bold text-foreground">{lab.value}{lab.unit ? ` ${lab.unit}` : ''}</span>
+                                              {lab.reference_range && (
+                                                <span className="text-[9px] text-muted-foreground hidden sm:inline">({lab.reference_range})</span>
+                                              )}
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })()}
                           </Card>
                         );
                       })}
