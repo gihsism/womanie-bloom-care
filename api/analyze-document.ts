@@ -1,6 +1,11 @@
 import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
+// Allow longer execution for AI analysis
+export const config = {
+  maxDuration: 60,
+};
+
 async function hashRequest(data: string): Promise<string> {
   const encoder = new TextEncoder();
   const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(data));
@@ -224,5 +229,12 @@ async function processWithAI(
     }
   }
 
-  return res.status(200).json({ success: true, extracted: analysis.extracted_data?.length || 0 });
+  return res.status(200).json({
+    success: true,
+    extracted: analysis.extracted_data?.length || 0,
+    name: analysis.name,
+    category: analysis.category,
+    summaryLength: enhancedSummary.length,
+    cached: false,
+  });
 }
