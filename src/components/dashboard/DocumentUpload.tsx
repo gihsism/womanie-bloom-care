@@ -7,17 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { FileText, Upload, X, File, CheckCircle2 } from 'lucide-react';
-import { upload } from '@vercel/blob/client';
 import { supabase } from '@/integrations/supabase/client';
-
-async function uploadToBlob(file: globalThis.File, pathname: string): Promise<string> {
-  const blob = await upload(pathname, file, {
-    access: 'public',
-    handleUploadUrl: '/api/upload',
-    multipart: true, // Uses multipart upload — bypasses 4.5MB serverless limit
-  });
-  return blob.url;
-}
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -99,8 +89,16 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
     setUploading(true);
 
     try {
-      // Upload to Vercel Blob (multipart — no size limit)
-      const fileUrl = await uploadToBlob(file, `${user.id}/${Date.now()}-${file.name}`);
+      // Stream upload to Vercel Blob via PUT (server-side, no body size issue with streaming)
+      const uploadResp = await fetch(`/api/upload?filename=${encodeURIComponent(`${user.id}/${Date.now()}-${file.name}`)}`, {
+        method: 'PUT',
+        body: file,
+      });
+      if (!uploadResp.ok) {
+        const err = await uploadResp.json().catch(() => ({}));
+        throw new Error(err.error || 'Upload failed');
+      }
+      const { url: fileUrl } = await uploadResp.json();
 
       // Save metadata to database
       const { data: insertData, error: dbError } = await supabase
