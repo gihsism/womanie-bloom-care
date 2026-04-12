@@ -78,8 +78,7 @@ const PatientDashboard = () => {
       try {
         const { error } = await supabase
           .from('profiles')
-          .update({ life_stage: mode })
-          .eq('id', user.id);
+          .upsert({ id: user.id, life_stage: mode }, { onConflict: 'id' });
         
         if (error) throw error;
       } catch (error) {
@@ -179,15 +178,27 @@ const PatientDashboard = () => {
 
   const fetchProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('profiles')
         .select('full_name, life_stage, pregnancy_due_date, ivf_start_date, ivf_phase')
         .eq('id', userId)
         .maybeSingle();
 
       if (error) throw error;
+
+      // Auto-create profile if it doesn't exist
+      if (!data) {
+        const userName = user?.user_metadata?.full_name || null;
+        await supabase.from('profiles').insert({
+          id: userId,
+          full_name: userName,
+          life_stage: 'menstrual-cycle',
+        });
+        data = { full_name: userName, life_stage: 'menstrual-cycle', pregnancy_due_date: null, ivf_start_date: null, ivf_phase: null };
+      }
+
       setProfile(data);
-      
+
       setSelectedMode((data?.life_stage as LifeStage) || 'menstrual-cycle');
       
       if (data?.pregnancy_due_date) {

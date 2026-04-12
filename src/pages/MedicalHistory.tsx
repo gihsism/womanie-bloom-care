@@ -551,20 +551,12 @@ export default function MedicalHistory() {
           return;
       }
 
-      // Update profile
-      const { data, error } = await supabase
+      // Update or create profile
+      const { error } = await supabase
         .from('profiles')
-        .update({ life_stage: newLifeStage })
-        .eq('id', user.id)
-        .select('life_stage')
-        .single();
+        .upsert({ id: user.id, life_stage: newLifeStage }, { onConflict: 'id' });
 
       if (error) throw error;
-
-      // Verify it actually changed
-      if (data?.life_stage !== newLifeStage) {
-        throw new Error('Update did not apply');
-      }
 
       setLifeStage(newLifeStage);
       toast({
@@ -1069,7 +1061,7 @@ export default function MedicalHistory() {
                   onSwitchMode={async (mode) => {
                     if (!user) return;
                     try {
-                      await supabase.from('profiles').update({ life_stage: mode }).eq('id', user.id);
+                      await supabase.from('profiles').upsert({ id: user.id, life_stage: mode }, { onConflict: 'id' });
                       setLifeStage(mode);
                       toast({ title: 'Mode updated!', description: `Switching to ${mode.replace('-', ' ')} mode...` });
                       setTimeout(() => { window.location.href = '/dashboard'; }, 1000);
