@@ -9,6 +9,15 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { FileText, Upload, X, File, CheckCircle2 } from 'lucide-react';
 import { upload } from '@vercel/blob/client';
 import { supabase } from '@/integrations/supabase/client';
+
+async function uploadToBlob(file: globalThis.File, pathname: string): Promise<string> {
+  const blob = await upload(pathname, file, {
+    access: 'public',
+    handleUploadUrl: '/api/upload',
+    multipart: true, // Uses multipart upload — bypasses 4.5MB serverless limit
+  });
+  return blob.url;
+}
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -90,36 +99,8 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
     setUploading(true);
 
     try {
-      // Upload directly to Vercel Blob
-      // First get a client token, then upload directly to blob storage
-      const tokenResp = await fetch('/api/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'blob.generate-client-token',
-          payload: {
-            pathname: `${user.id}/${Date.now()}-${file.name}`,
-            callbackUrl: `${window.location.origin}/api/upload`,
-          },
-        }),
-      });
-
-      if (!tokenResp.ok) throw new Error('Failed to get upload token');
-      const { clientToken } = await tokenResp.json();
-
-      // Upload directly to Vercel Blob storage (not through our server)
-      const blobResp = await fetch(`https://blob.vercel-storage.com/${user.id}/${Date.now()}-${file.name}`, {
-        method: 'PUT',
-        headers: {
-          'x-vercel-blob-client-token': clientToken,
-          'Content-Type': file.type,
-        },
-        body: file,
-      });
-
-      if (!blobResp.ok) throw new Error('Upload to blob storage failed');
-      const blob = await blobResp.json();
-      const fileUrl = blob.url;
+      // Upload to Vercel Blob (multipart — no size limit)
+      const fileUrl = await uploadToBlob(file, `${user.id}/${Date.now()}-${file.name}`);
 
       // Save metadata to database
       const { data: insertData, error: dbError } = await supabase
