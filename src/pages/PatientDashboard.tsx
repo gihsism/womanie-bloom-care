@@ -284,13 +284,7 @@ const PatientDashboard = () => {
   }, [user, loading, navigate]);
 
   const handleLogout = async () => {
-    const clerk = (window as any).Clerk;
-    if (clerk) await clerk.signOut();
-    toast({
-      title: 'Logged out',
-      description: 'You have been logged out successfully.',
-    });
-    window.location.href = '/';
+    window.location.href = '/api/auth/logout';
   };
 
   const getGreeting = () => {

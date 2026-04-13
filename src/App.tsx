@@ -1,6 +1,5 @@
 // Application root
 import { lazy, Suspense } from "react";
-import { ClerkProvider, SignIn, SignUp } from "@clerk/clerk-react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,7 +10,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Loader2 } from "lucide-react";
 
-const CLERK_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+// Custom auth — no third-party dependency
 
 // Lightweight pages — load eagerly (landing / auth / onboarding)
 import Index from "./pages/Index";
@@ -60,7 +59,6 @@ function PageLoader() {
 const queryClient = new QueryClient();
 
 const App = () => (
-  <ClerkProvider publishableKey={CLERK_KEY} signInUrl="/auth/login" signUpUrl="/auth/signup" afterSignInUrl="/welcome" afterSignUpUrl="/welcome">
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
@@ -109,7 +107,6 @@ const App = () => (
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
-  </ClerkProvider>
 );
 
 export default App;

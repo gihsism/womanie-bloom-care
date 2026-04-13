@@ -1,9 +1,9 @@
-import { createContext, useContext, ReactNode } from 'react';
-import { useUser, useAuth as useClerkAuth } from '@clerk/clerk-react';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
 interface AuthUser {
   id: string;
   email?: string;
+  name?: string;
   user_metadata?: {
     full_name?: string;
   };
@@ -31,28 +31,31 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const { user: clerkUser, isLoaded } = useUser();
-  const { getToken } = useClerkAuth();
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const user: AuthUser | null = clerkUser ? {
-    id: clerkUser.id,
-    email: clerkUser.primaryEmailAddress?.emailAddress,
-    user_metadata: {
-      full_name: clerkUser.fullName || undefined,
-    },
-    created_at: clerkUser.createdAt?.toISOString(),
-  } : null;
+  useEffect(() => {
+    // Check session on mount
+    fetch('/api/auth/me', { credentials: 'include' })
+      .then(r => r.json())
+      .then(data => {
+        if (data.user) {
+          setUser({
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.name,
+            user_metadata: { full_name: data.user.name },
+          });
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
-  // Provide a session-like object for components that need an access token
-  const session = clerkUser ? {
-    get access_token() {
-      // Components should use getToken() directly, but this provides compatibility
-      return clerkUser.id;
-    }
-  } : null;
+  const session = user ? { access_token: user.id } : null;
 
   return (
-    <AuthContext.Provider value={{ user, session, loading: !isLoaded }}>
+    <AuthContext.Provider value={{ user, session, loading }}>
       {children}
     </AuthContext.Provider>
   );

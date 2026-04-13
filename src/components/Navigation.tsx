@@ -117,9 +117,7 @@ const Navigation = () => {
                     My Space
                   </Button>
                   <Button variant="outline" size="sm" onClick={async () => {
-                    const clerk = (window as any).Clerk;
-                    if (clerk) await clerk.signOut();
-                    window.location.href = '/';
+                    window.location.href = '/api/auth/logout';
                   }}>
                     Log Out
                   </Button>
