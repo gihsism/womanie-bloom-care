@@ -100,6 +100,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.redirect(302, '/welcome');
   } catch (error) {
     console.error('Auth callback error:', error);
-    res.redirect(302, '/auth/login?error=server_error');
+    // Show error details instead of redirecting to help debug
+    return res.status(500).json({ error: 'Auth failed', details: error instanceof Error ? error.message : String(error) });
   }
 }
