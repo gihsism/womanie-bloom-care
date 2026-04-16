@@ -21,6 +21,7 @@ import HealthTimeline from '@/components/dashboard/HealthTimeline';
 import ResultsRangeChart from '@/components/dashboard/ResultsRangeChart';
 import DocumentCycleAlert from '@/components/dashboard/DocumentCycleAlert';
 import { useToast } from '@/hooks/use-toast';
+import UserMenu from '@/components/UserMenu';
 import {
   ArrowLeft,
   FileText,
@@ -861,6 +862,7 @@ export default function MedicalHistory() {
           <button type="button" onClick={() => { window.location.href = '/'; }} className="text-base sm:text-lg font-bold text-primary hover:opacity-80 transition-opacity">
             Womanie
           </button>
+          <UserMenu />
         </div>
       </div>
 

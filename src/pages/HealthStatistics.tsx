@@ -108,6 +108,7 @@ export default function HealthStatistics() {
         <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
           Womanie
         </a>
+        <UserMenu />
       </div>
 
       {documents.length === 0 ? (
