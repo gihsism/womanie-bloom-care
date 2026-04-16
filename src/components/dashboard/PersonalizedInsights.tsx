@@ -303,6 +303,287 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
     });
   }
 
+  // ═══ PCOS PATTERN (expanded) ═══
+  const lh = findTest(data, ['LH', 'Luteinizing Hormone']);
+  const fsh = findTest(data, ['FSH', 'Follicle Stimulating Hormone', 'Follicle-Stimulating Hormone']);
+  const amh = findTest(data, ['AMH', 'Anti-Mullerian Hormone', 'Anti-Müllerian Hormone']);
+  const dheas = findTest(data, ['DHEA-S', 'DHEAS', 'Dehydroepiandrosterone Sulfate']);
+  const shbg = findTest(data, ['SHBG', 'Sex Hormone Binding Globulin']);
+  const insulin = findTest(data, ['Insulin', 'Fasting Insulin']);
+  const androstenedione = findTest(data, ['Androstenedione']);
+
+  if (lh && fsh && fsh.value > 0 && lh.value / fsh.value > 2) {
+    const connected = ['LH', 'FSH'];
+    if (testosterone) connected.push('Testosterone');
+    if (amh) connected.push('AMH');
+    const hasHighT = testosterone && testosterone.value > 86;
+    const hasHighAMH = amh && amh.value > 3.5;
+    insights.push({
+      title: 'LH/FSH ratio suggests possible PCOS pattern',
+      emoji: '🔬',
+      connectedTests: connected,
+      explanation: `Your LH/FSH ratio is ${(lh.value / fsh.value).toFixed(1)} (normal is ~1:1, PCOS-suggestive is >2:1).${hasHighT ? ' Combined with elevated testosterone, this strengthens a PCOS pattern.' : ''}${hasHighAMH ? ` Your AMH of ${amh.value} ng/mL is also elevated, which is common in PCOS.` : ''} PCOS affects 1 in 10 women and can cause irregular periods, acne, excess hair growth, and fertility challenges.`,
+      recommendation: 'Ask your doctor about a full PCOS evaluation (2023 International Guideline uses hyperandrogenism + ovulatory dysfunction + ovarian morphology/AMH). Lifestyle changes — regular exercise and reducing refined carbs — can significantly help manage symptoms.',
+      severity: 'attention',
+    });
+  }
+
+  // Insulin resistance pattern
+  if (insulin && glucose && insulin.value > 0 && glucose.value > 0) {
+    const homaIR = (insulin.value * glucose.value) / 405;
+    if (homaIR >= 2.0) {
+      insights.push({
+        title: `Insulin resistance detected (HOMA-IR ${homaIR.toFixed(1)})`,
+        emoji: '📊',
+        connectedTests: ['Fasting Insulin', 'Glucose'],
+        explanation: `Your HOMA-IR is ${homaIR.toFixed(1)} (normal <2.0, PCOS-specific cutoff >=2.0). This means your body needs more insulin than normal to control blood sugar. Insulin resistance is the root driver of metabolic PCOS and increases risk of type 2 diabetes.`,
+        recommendation: 'Focus on reducing refined carbohydrates, regular exercise (both cardio and strength training), and maintaining a healthy weight. Your doctor may discuss metformin or inositol supplements.',
+        severity: 'attention',
+      });
+    }
+  }
+
+  // Low SHBG amplifying androgens
+  if (shbg && shbg.value < 18) {
+    insights.push({
+      title: 'Low SHBG — may amplify androgen effects',
+      emoji: '🧬',
+      connectedTests: ['SHBG', ...(testosterone ? ['Testosterone'] : [])],
+      explanation: `Your SHBG (Sex Hormone Binding Globulin) is ${shbg.value} nmol/L, which is below normal (<18). Low SHBG means more free testosterone is active in your body, even if total testosterone appears normal. This can cause acne, hirsutism, and hair loss.`,
+      recommendation: 'Low SHBG is often linked to insulin resistance. Addressing insulin resistance (exercise, dietary changes) can help raise SHBG naturally. Your doctor may calculate your Free Androgen Index for a clearer picture.',
+      severity: 'attention',
+    });
+  }
+
+  // ═══ ENDOMETRIOSIS MARKERS ═══
+  const ca125 = findTest(data, ['CA-125', 'CA125', 'Cancer Antigen 125']);
+  const nlr = findTest(data, ['NLR', 'Neutrophil-to-Lymphocyte Ratio']);
+  if (ca125 && ca125.value > 35) {
+    const connected = ['CA-125'];
+    if (crp) connected.push('CRP');
+    if (nlr) connected.push('NLR');
+    insights.push({
+      title: 'Elevated CA-125 — may indicate endometriosis',
+      emoji: '🔍',
+      connectedTests: connected,
+      explanation: `Your CA-125 is ${ca125.value} U/mL (normal <35). Elevated CA-125 is found in endometriosis (median ~68 in endo patients vs ~12 in controls), especially stages III-IV. However, CA-125 can also be elevated by menstruation, ovarian cysts, or PID.${crp && crp.value > 3 ? ' Your elevated CRP supports an inflammatory process.' : ''}`,
+      recommendation: 'If you experience painful periods, chronic pelvic pain, or pain during intercourse, discuss endometriosis evaluation with your doctor. CA-125 supports clinical suspicion but is not diagnostic on its own.',
+      severity: 'attention',
+    });
+  }
+
+  // ═══ FERTILITY / OVARIAN RESERVE ═══
+  if (amh && amh.value < 1.1 && lifeStage !== 'menopause') {
+    const connected = ['AMH'];
+    if (fsh) connected.push('FSH');
+    insights.push({
+      title: 'Low AMH — your ovarian reserve may be declining',
+      emoji: '🥚',
+      connectedTests: connected,
+      explanation: `Your AMH is ${amh.value} ng/mL, which is below the low threshold of 1.1 ng/mL.${fsh && fsh.value > 10 ? ` Combined with your elevated FSH (${fsh.value}), this suggests diminished ovarian reserve.` : ''} AMH reflects the number of remaining eggs and declines before FSH rises, making it an early indicator.`,
+      recommendation: lifeStage === 'conception' || lifeStage === 'ivf'
+        ? 'Discuss your fertility timeline with a reproductive endocrinologist. Low AMH doesn\'t mean you can\'t conceive, but earlier intervention may be beneficial. IVF protocols can be adjusted for lower reserve.'
+        : 'If you\'re considering having children in the future, this is worth discussing with your doctor sooner rather than later. Egg freezing may be an option to preserve fertility.',
+      severity: lifeStage === 'conception' || lifeStage === 'ivf' ? 'urgent' : 'attention',
+    });
+  }
+
+  // Day 3 FSH elevated (fertility concern)
+  if (fsh && fsh.value > 10 && lifeStage !== 'menopause' && lifeStage !== 'perimenopause') {
+    if (!amh || amh.value >= 1.1) { // Don't duplicate if already covered by AMH insight
+      insights.push({
+        title: fsh.value > 15 ? 'Elevated FSH — may indicate reduced ovarian reserve' : 'FSH is borderline — worth monitoring',
+        emoji: '📈',
+        connectedTests: ['FSH', ...(estradiol ? ['Estradiol'] : [])],
+        explanation: `Your FSH is ${fsh.value} IU/L.${fsh.value > 15 ? ' Values above 15 suggest poor ovarian reserve prognosis.' : ' Values of 10-15 are in the concerning range.'}${estradiol && estradiol.value > 80 ? ` Note: your estradiol is ${estradiol.value} pg/mL which may be masking an even higher FSH — these must be interpreted together.` : ''}`,
+        recommendation: 'If you\'re planning pregnancy, discuss these results with a fertility specialist. AMH and antral follicle count provide a more complete picture of ovarian reserve.',
+        severity: fsh.value > 15 ? 'attention' : 'neutral',
+      });
+    }
+  }
+
+  // ═══ PERIMENOPAUSE / MENOPAUSE TRANSITION ═══
+  if (fsh && fsh.value > 25 && estradiol && estradiol.value < 50 && lifeStage !== 'menopause') {
+    insights.push({
+      title: 'Your hormone levels suggest perimenopause or menopause transition',
+      emoji: '🌙',
+      connectedTests: ['FSH', 'Estradiol'],
+      explanation: `Your FSH (${fsh.value} IU/L) is elevated and estradiol (${estradiol.value} pg/mL) is declining. This pattern indicates your ovaries are producing less estrogen.${fsh.value > 30 && estradiol.value < 30 ? ' If you\'ve also had 12+ months without a period, this confirms menopause.' : ' With erratic cycles, this is consistent with perimenopause.'}`,
+      recommendation: 'Discuss symptom management options with your doctor. Consider bone density screening, cardiovascular risk assessment, and whether hormone therapy might be appropriate for you.',
+      severity: 'attention',
+    });
+  }
+
+  // ═══ BONE HEALTH (menopause + general) ═══
+  const pth = findTest(data, ['PTH', 'Parathyroid Hormone', 'Intact PTH']);
+  const ctx = findTest(data, ['CTX', 'C-Telopeptide', 'Beta-CrossLaps']);
+  const p1np = findTest(data, ['P1NP', 'Procollagen Type I']);
+
+  if (vitD && vitD.value < 20 && pth && pth.value > 65) {
+    insights.push({
+      title: 'Low vitamin D is driving elevated PTH — bone loss risk',
+      emoji: '🦴',
+      connectedTests: ['Vitamin D', 'PTH', ...(calcium ? ['Calcium'] : [])],
+      explanation: `Your vitamin D is very low (${vitD.value} ng/mL) and your PTH is elevated (${pth.value} pg/mL). When vitamin D drops below ~31, PTH rises to maintain calcium levels — but it does this by pulling calcium from your bones (secondary hyperparathyroidism).`,
+      recommendation: 'Start vitamin D supplementation (2000-4000 IU daily) to bring your levels above 30 ng/mL. This should bring PTH back down and stop the calcium drain from your bones. Recheck in 3 months.',
+      severity: 'attention',
+    });
+  }
+
+  if (ctx && p1np) {
+    if (ctx.value > 0.5 && p1np.value < 30) {
+      insights.push({
+        title: 'Bone resorption exceeds formation — net bone loss',
+        emoji: '🦴',
+        connectedTests: ['CTX', 'P1NP'],
+        explanation: `Your CTX (bone breakdown marker) is ${ctx.value} ng/mL while P1NP (bone building marker) is only ${p1np.value} μg/L. This uncoupled remodeling means you're losing bone faster than you're rebuilding it.`,
+        recommendation: 'Discuss osteoporosis prevention with your doctor. This may include calcium + vitamin D supplementation, weight-bearing exercise, and possibly medication. A DEXA scan can assess your current bone density.',
+        severity: 'urgent',
+      });
+    }
+  }
+
+  // ═══ AUTOIMMUNE PATTERNS ═══
+  const ana = findTest(data, ['ANA', 'Antinuclear Antibody']);
+  const antiTPO = findTest(data, ['Anti-TPO', 'Thyroid Peroxidase Antibody', 'TPO Antibody']);
+  const antiTG = findTest(data, ['Anti-Thyroglobulin', 'Thyroglobulin Antibody', 'TgAb']);
+  const rf = findTest(data, ['RF', 'Rheumatoid Factor']);
+  const antiCCP = findTest(data, ['Anti-CCP', 'Cyclic Citrullinated Peptide']);
+
+  if (antiTPO && antiTPO.value > 35) {
+    const connected = ['Anti-TPO'];
+    if (tsh) connected.push('TSH');
+    insights.push({
+      title: 'Positive thyroid antibodies — Hashimoto\'s thyroiditis',
+      emoji: '🦋',
+      connectedTests: connected,
+      explanation: `Your anti-TPO is ${antiTPO.value} IU/mL (positive >35). This indicates your immune system is attacking your thyroid gland (Hashimoto's). Hashimoto's is 4-10x more common in women.${tsh && tsh.value > 4 ? ` Your elevated TSH (${tsh.value}) confirms the thyroid is already underperforming.` : ' Your thyroid function may still be normal now, but monitoring is important.'}`,
+      recommendation: tsh && tsh.value > 4
+        ? 'Thyroid medication (levothyroxine) is likely needed. Monitor TSH every 6-8 weeks until stable. If trying to conceive, keep TSH below 2.5.'
+        : 'Monitor TSH every 6-12 months. Many people with positive antibodies eventually develop hypothyroidism. If you notice fatigue, weight gain, or irregular periods, recheck sooner.',
+      severity: tsh && tsh.value > 4 ? 'attention' : 'neutral',
+    });
+  }
+
+  if (rf && rf.value > 14 && antiCCP && antiCCP.value > 5) {
+    insights.push({
+      title: 'Both RA markers positive — high specificity for rheumatoid arthritis',
+      emoji: '🤲',
+      connectedTests: ['Rheumatoid Factor', 'Anti-CCP'],
+      explanation: `Both your RF (${rf.value}) and anti-CCP (${antiCCP.value}) are elevated. Anti-CCP is highly specific for rheumatoid arthritis. When both are positive, the specificity is very high. RA is 2-3x more common in women.`,
+      recommendation: 'See a rheumatologist for evaluation. Early treatment with disease-modifying therapy (DMARDs) can prevent joint damage. Don\'t wait for symptoms to worsen.',
+      severity: 'attention',
+    });
+  }
+
+  // ═══ APS (ANTIPHOSPHOLIPID SYNDROME) ═══
+  const acl = findTest(data, ['Anticardiolipin', 'aCL', 'Cardiolipin Antibody']);
+  const ab2gp = findTest(data, ['Anti-Beta-2 Glycoprotein', 'Anti-B2GP1', 'Beta-2 Glycoprotein']);
+  const lupusAnticoag = data.find(d => d.title.toLowerCase().includes('lupus anticoagulant') && d.value?.toLowerCase() === 'positive');
+
+  if ((acl && acl.value > 40) || (ab2gp && ab2gp.value >= 20) || lupusAnticoag) {
+    const connected: string[] = [];
+    if (acl) connected.push('Anticardiolipin');
+    if (ab2gp) connected.push('Anti-Beta-2 Glycoprotein');
+    if (lupusAnticoag) connected.push('Lupus Anticoagulant');
+    const isPregnant = lifeStage === 'pregnancy';
+    insights.push({
+      title: isPregnant ? 'Positive APS antibodies during pregnancy — needs monitoring' : 'Antiphospholipid antibodies detected',
+      emoji: isPregnant ? '🚨' : '⚠️',
+      connectedTests: connected,
+      explanation: `Antiphospholipid antibodies are associated with increased risk of blood clots${isPregnant ? ', miscarriage, and pregnancy complications' : ' and pregnancy complications'}. ${connected.length >= 3 ? 'Triple-positive APS (all three markers) carries the highest risk.' : 'These need to be confirmed with a repeat test 12 weeks later (2023 ACR/EULAR criteria).'}`,
+      recommendation: isPregnant
+        ? 'Contact your doctor immediately. Treatment with low-dose aspirin and heparin during pregnancy significantly reduces complications.'
+        : 'Get confirmatory testing in 12 weeks. If confirmed, your doctor may recommend blood thinners, especially during pregnancy or surgery.',
+      severity: isPregnant ? 'urgent' : 'attention',
+    });
+  }
+
+  // ═══ CARDIOVASCULAR (WOMEN-SPECIFIC) ═══
+  const lpa = findTest(data, ['Lp(a)', 'Lipoprotein(a)', 'Lipoprotein a']);
+  const apoB = findTest(data, ['ApoB', 'Apolipoprotein B']);
+  const homocysteine = findTest(data, ['Homocysteine']);
+
+  if (lpa && lpa.value >= 125) {
+    insights.push({
+      title: 'High Lp(a) — an inherited cardiovascular risk factor',
+      emoji: '❤️',
+      connectedTests: ['Lp(a)', ...(crp && crp.value >= 2 ? ['hs-CRP'] : [])],
+      explanation: `Your Lp(a) is ${lpa.value} nmol/L (high risk >=125). Lp(a) is largely genetic and doesn't respond well to diet or exercise. It's 17% higher in postmenopausal women.${crp && crp.value >= 2 ? ' Combined with your elevated hs-CRP, this compounds your cardiovascular risk.' : ''}`,
+      recommendation: 'Discuss with your doctor. While Lp(a) itself is hard to lower, aggressively managing other risk factors (LDL, blood pressure, smoking) becomes even more important. New targeted therapies are in development.',
+      severity: 'attention',
+    });
+  }
+
+  if (apoB && apoB.value > 100) {
+    if (!ldl || !hdl || ldl.value / hdl.value <= 3.5) { // Don't duplicate if cholesterol ratio already flagged
+      insights.push({
+        title: 'Elevated ApoB — a more precise cardiovascular marker',
+        emoji: '❤️',
+        connectedTests: ['ApoB', ...(ldl ? ['LDL Cholesterol'] : [])],
+        explanation: `Your ApoB is ${apoB.value} mg/dL (optimal <80, elevated >100). Per 2026 ACC/AHA guidelines, ApoB is a better predictor of cardiovascular risk than LDL alone, especially when LDL appears normal.`,
+        recommendation: 'Discuss statin or other lipid-lowering therapy with your doctor. Lifestyle measures (Mediterranean diet, exercise, weight management) also help lower ApoB.',
+        severity: 'attention',
+      });
+    }
+  }
+
+  if (homocysteine && homocysteine.value > 15) {
+    insights.push({
+      title: 'Elevated homocysteine — cardiovascular and neural tube risk',
+      emoji: '🧪',
+      connectedTests: ['Homocysteine', ...(vitB12 ? ['Vitamin B12'] : []), ...(folate ? ['Folate'] : [])],
+      explanation: `Your homocysteine is ${homocysteine.value} μmol/L (normal <10, elevated >15). High homocysteine increases risk of blood clots, heart disease, and stroke.${vitB12 && vitB12.value < 300 ? ' Your low B12 is likely contributing.' : ''}${folate && folate.value < 10 ? ' Low folate is also a factor.' : ''}${lifeStage === 'conception' || lifeStage === 'pregnancy' ? ' In pregnancy, elevated homocysteine also increases neural tube defect risk.' : ''}`,
+      recommendation: 'B12 and folate supplementation usually lowers homocysteine effectively. Recheck in 3 months after starting supplements.',
+      severity: lifeStage === 'pregnancy' || lifeStage === 'conception' ? 'urgent' : 'attention',
+    });
+  }
+
+  // ═══ PROLACTIN + HAIR/FERTILITY ═══
+  const prolactin = findTest(data, ['Prolactin']);
+  if (prolactin && prolactin.value > 29) {
+    insights.push({
+      title: 'Elevated prolactin — may affect periods and hair',
+      emoji: '💇',
+      connectedTests: ['Prolactin'],
+      explanation: `Your prolactin is ${prolactin.value} ng/mL (normal 2-29). High prolactin can suppress ovulation, cause irregular or absent periods, and increase DHEA-S production leading to hair loss or hirsutism. Common causes include stress, medications, and rarely, a pituitary adenoma.`,
+      recommendation: 'Discuss with your doctor. If significantly elevated, they may order a pituitary MRI. Medications (cabergoline or bromocriptine) are very effective at normalizing prolactin.',
+      severity: prolactin.value > 100 ? 'urgent' : 'attention',
+    });
+  }
+
+  // ═══ LIVER ENZYMES + CONTRACEPTION ═══
+  const alt = findTest(data, ['ALT', 'Alanine Aminotransferase', 'SGPT']);
+  const ast = findTest(data, ['AST', 'Aspartate Aminotransferase', 'SGOT']);
+  if ((alt && alt.value > 70) || (ast && ast.value > 70)) {
+    const hasContraceptionContext = data.some(d => d.data_type === 'medication' && d.title.toLowerCase().includes('contracepti'));
+    if (hasContraceptionContext) {
+      insights.push({
+        title: 'Significantly elevated liver enzymes while on contraception',
+        emoji: '⚠️',
+        connectedTests: [...(alt ? ['ALT'] : []), ...(ast ? ['AST'] : [])],
+        explanation: `Your liver enzymes are elevated beyond 2x the upper limit of normal. Combined oral contraceptives can affect liver function. This needs evaluation.`,
+        recommendation: 'Contact your prescribing doctor. They may need to switch you to a progestin-only or non-hormonal method. Do not stop contraception abruptly without medical guidance.',
+        severity: 'urgent',
+      });
+    }
+  }
+
+  // ═══ BILE ACIDS IN PREGNANCY (CHOLESTASIS) ═══
+  const bileAcids = findTest(data, ['Bile Acids', 'Total Bile Acids', 'Serum Bile Acids']);
+  if (bileAcids && bileAcids.value >= 10 && lifeStage === 'pregnancy') {
+    insights.push({
+      title: bileAcids.value >= 40 ? 'Severe cholestasis of pregnancy — needs immediate attention' : 'Elevated bile acids — possible intrahepatic cholestasis',
+      emoji: bileAcids.value >= 40 ? '🚨' : '⚠️',
+      connectedTests: ['Bile Acids', ...(alt ? ['ALT'] : []), ...(ast ? ['AST'] : [])],
+      explanation: `Your bile acids are ${bileAcids.value} μmol/L. Values >=10 are diagnostic for intrahepatic cholestasis of pregnancy (ICP).${bileAcids.value >= 40 ? ' Values >=40 carry increased risk of adverse outcomes.' : ''}${bileAcids.value >= 100 ? ' Values >=100 are severe — delivery is typically recommended at 36 weeks.' : ''} ICP causes intense itching and can affect the baby.`,
+      recommendation: bileAcids.value >= 40
+        ? 'Contact your doctor TODAY. You may need ursodeoxycholic acid (UDCA) treatment and increased fetal monitoring. Delivery timing will be discussed.'
+        : 'Discuss with your doctor at your next appointment. UDCA medication can help. Bile acids should be monitored weekly from 32 weeks.',
+      severity: bileAcids.value >= 40 ? 'urgent' : 'attention',
+    });
+  }
+
   // Cholesterol ratio insight
   if (ldl && hdl) {
     const ratio = ldl.value / hdl.value;
@@ -330,6 +611,23 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
         : 'Lifestyle changes can reverse prediabetes: reduce refined carbs and sugar, exercise 30 min/day, maintain healthy weight. Ask about metformin if lifestyle changes aren\'t enough.',
       severity: 'attention',
     });
+  }
+
+  // ═══ THALASSEMIA SCREENING ═══
+  const mcv = findTest(data, ['MCV', 'Mean Corpuscular Volume']);
+  const mch = findTest(data, ['MCH', 'Mean Corpuscular Hemoglobin']);
+  const hba2 = findTest(data, ['HbA2', 'Hemoglobin A2']);
+  if (mcv && mcv.value < 80 && mch && mch.value < 27) {
+    if (ferritin && ferritin.value >= 30) {
+      insights.push({
+        title: 'Small red blood cells with normal iron — possible thalassemia trait',
+        emoji: '🩸',
+        connectedTests: ['MCV', 'MCH', 'Ferritin', ...(hba2 ? ['HbA2'] : [])],
+        explanation: `Your MCV (${mcv.value} fL) and MCH (${mch.value} pg) are low, but your iron stores are normal. This pattern is characteristic of thalassemia trait rather than iron deficiency.${hba2 && hba2.value > 3.5 ? ` Your HbA2 of ${hba2.value}% confirms beta-thalassemia trait.` : ' An HbA2 test can confirm this.'} Thalassemia trait is common and usually harmless, but important for family planning.`,
+        recommendation: 'If you\'re planning a pregnancy, your partner should also be tested for thalassemia. If both partners carry the trait, there\'s a 25% chance each pregnancy could result in thalassemia major.',
+        severity: 'neutral',
+      });
+    }
   }
 
   // Positive: everything looks good
