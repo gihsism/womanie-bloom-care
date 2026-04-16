@@ -105,17 +105,59 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 }
 
 function buildSystemPrompt(today: string, patientContext: string): string {
-  return `You analyze medical documents for women. Write for patients, not doctors. Today: ${today}.
+  return `You are an advanced women's health document analyzer using the latest clinical research. Write for patients in plain language. Today: ${today}.
 ${patientContext || ""}
 
-Return ONLY valid JSON:
-{"name":"doc name","category":"lab_results|imaging|prescription|consultation_notes|other","summary":"3-5 sentences. Lead with abnormals: value + range + meaning. End with reassurance.","key_takeaways":["..."],"action_items":["..."],"extracted_data":[{"data_type":"lab_result|condition|medication","title":"Standardized name","value":"number","unit":"unit","reference_range":"low-high","status":"normal|abnormal|critical|expected","priority":"high|medium|low","date_recorded":"YYYY-MM-DD","notes":"MANDATORY: what this means.","panel":"CBC|Thyroid|Metabolic|Hormone|Vitamins|Other","possible_conditions":[],"is_repeat_test":false}],"cycle_data":{"cycle_length":null,"last_period_date":null,"period_length":null,"irregular":null}}
+Return ONLY valid JSON with this structure:
+{"name":"doc name (max 50 chars)","category":"lab_results|imaging|prescription|consultation_notes|other","summary":"3-5 sentences. Lead with most critical findings with specific values. Mention cross-referencing patterns between results. End with reassurance.","key_takeaways":["..."],"action_items":["..."],"extracted_data":[...],"cross_references":[{"pattern":"name","tests":["Test1","Test2"],"finding":"what this combination means","severity":"info|attention|urgent"}],"risk_screening":{"preeclampsia_risk":null,"gestational_diabetes_risk":null,"iron_deficiency_risk":null,"thyroid_disorder_risk":null},"cycle_data":{"cycle_length":null,"last_period_date":null,"period_length":null,"irregular":null}}
 
-RULES:
-- Extract EVERY test result. 20 values = 20 items.
-- Notes MUST explain what result means. Never empty.
-- Pregnancy: Ferritin≥30, Hb≥11, TSH 0.1-2.5. HCG elevated=expected.
-- Return ONLY JSON. No markdown fences.`;
+Each item in extracted_data:
+{"data_type":"lab_result|condition|medication|allergy|procedure","title":"Standardized name (Hemoglobin not Hb)","value":"number","unit":"unit","reference_range":"low-high","status":"normal|abnormal|critical|expected|informational","priority":"high|medium|low","date_recorded":"YYYY-MM-DD","notes":"MANDATORY 1-2 sentences explaining what this means for this patient.","panel":"CBC|Thyroid Panel|Metabolic Panel|Hormone Panel|Coagulation|Autoimmune|Vitamins & Minerals|Immunology|Infection Screening|Other","possible_conditions":["for abnormal only"],"is_repeat_test":false}
+
+ADVANCED ANALYSIS RULES (based on latest 2025-2026 clinical research):
+
+1. EXTRACT EVERY test result individually. A typical blood panel has 15-40 values.
+
+2. TRIMESTER-SPECIFIC PREGNANCY RANGES (ASH Blood Advances 2024):
+   - Ferritin: 1st tri <25.8 μg/L = iron deficient, 2nd tri <18.3, 3rd tri <19.0
+   - OLD threshold of <15 μg/L UNDERESTIMATES iron deficiency by ~10%
+   - Hemoglobin: <11 g/dL = anemia (WHO). Note: Hb naturally drops in 2nd tri due to hemodilution
+   - TSH: 1st tri 0.1-2.5, 2nd tri 0.2-3.0, 3rd tri 0.3-3.5 mIU/L
+   - HCG: elevated = "expected". Doubling time matters more than absolute value
+   - Platelets: <150k = gestational thrombocytopenia (common, monitor). <100k = urgent (HELLP risk)
+   - Liver: ALT/AST elevated + low platelets = screen for HELLP syndrome
+
+3. CROSS-REFERENCE PATTERNS (populate cross_references array):
+   - Low ferritin + low Hb = iron deficiency anemia (common in pregnancy, affects 40% of women)
+   - Low ferritin + normal Hb = latent iron deficiency (will become anemia without treatment)
+   - High TSH + low FT4 = hypothyroidism (affects cycle, fertility, pregnancy outcomes)
+   - Low ferritin + high TSH = ferritin is a predictor of TSH levels (ASH 2024)
+   - High glucose + high HbA1c = diabetes/prediabetes risk
+   - High glucose alone in pregnancy = screen for gestational diabetes
+   - High LH/FSH ratio (>2) + high testosterone = PCOS pattern
+   - Elevated CRP + elevated WBC = active inflammation/infection
+   - Low vitamin D + low calcium = impaired calcium absorption
+   - Elevated liver enzymes + low platelets in pregnancy = HELLP risk (URGENT)
+   - Positive APS antibodies + pregnancy = increased miscarriage/clot risk
+
+4. RISK SCREENING (populate risk_screening):
+   - Preeclampsia: platelets <150k, elevated liver enzymes, elevated uric acid, proteinuria
+   - Gestational diabetes: fasting glucose >92 mg/dL, HbA1c >5.7%, elevated insulin
+   - Iron deficiency: ferritin below trimester-specific thresholds (see above)
+   - Thyroid disorder: TSH outside pregnancy-specific range
+
+5. CONDITION DETECTION:
+   - If results suggest PCOS, endometriosis, thyroid disorder, or autoimmune condition, add as "condition" data_type
+   - Endometriosis markers: elevated CA-125, inflammatory markers, specific symptom patterns
+   - PCOS markers: high LH/FSH ratio, high testosterone, high DHEA-S, insulin resistance
+
+6. NOTES must be specific and actionable. For each result explain:
+   - What the value means for THIS patient (considering life stage, pregnancy trimester)
+   - Whether it's trending (if repeat test indicated)
+   - What the patient should do about it
+
+7. Standardize test names for cross-document matching.
+8. Return ONLY the JSON object. No markdown fences.`;
 }
 
 async function processWithAI(
@@ -205,6 +247,12 @@ async function processWithAI(
   if (analysis.action_items?.length > 0) {
     enhancedSummary += '\n\n⚡ Action Items:\n' + analysis.action_items.map((a: string) => `• ${a}`).join('\n');
   }
+  if (Array.isArray(analysis.cross_references) && analysis.cross_references.length > 0) {
+    enhancedSummary += '\n\n🔗 Cross-Referenced Patterns:\n' + analysis.cross_references.map((cr: any) => {
+      const icon = cr.severity === 'urgent' ? '🚨' : cr.severity === 'attention' ? '⚠️' : 'ℹ️';
+      return `${icon} ${cr.pattern}: ${cr.finding} (${cr.tests?.join(' + ') || ''})`;
+    }).join('\n');
+  }
 
   // Update document
   await sql.query(
@@ -229,9 +277,37 @@ async function processWithAI(
     }
   }
 
+  // Insert risk screening as extracted data items
+  if (analysis.risk_screening) {
+    const riskMap: Record<string, string> = {
+      preeclampsia_risk: 'Preeclampsia Risk',
+      gestational_diabetes_risk: 'Gestational Diabetes Risk',
+      iron_deficiency_risk: 'Iron Deficiency Risk',
+      thyroid_disorder_risk: 'Thyroid Disorder Risk',
+    };
+    for (const [key, label] of Object.entries(riskMap)) {
+      const riskVal = analysis.risk_screening[key];
+      if (riskVal && riskVal !== 'null' && riskVal !== null) {
+        await sql.query(
+          `INSERT INTO medical_extracted_data (user_id, document_id, data_type, title, value, unit, reference_range, status, date_recorded, notes, raw_data)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+          [
+            userId, documentId,
+            'risk_screening', label,
+            riskVal, null, null,
+            riskVal === 'low' ? 'normal' : riskVal === 'moderate' ? 'abnormal' : riskVal === 'high' ? 'critical' : 'informational',
+            null, `AI-assessed ${label.toLowerCase()} based on cross-referencing multiple test results.`,
+            JSON.stringify({ risk_type: key, source: 'ai_analysis' }),
+          ]
+        );
+      }
+    }
+  }
+
   return res.status(200).json({
     success: true,
     extracted: analysis.extracted_data?.length || 0,
+    crossReferences: analysis.cross_references?.length || 0,
     name: analysis.name,
     category: analysis.category,
     summaryLength: enhancedSummary.length,

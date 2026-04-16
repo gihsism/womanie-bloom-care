@@ -53,6 +53,7 @@ import {
   Pencil,
   RefreshCw,
   Loader2,
+  Link2,
 } from 'lucide-react';
 import { format, differenceInDays, addDays } from 'date-fns';
 import {
@@ -438,6 +439,26 @@ function renderEnhancedSummary(summary: string) {
                   <li key={j} className="text-sm leading-relaxed flex items-start gap-2">
                     <span className="text-amber-600 mt-0.5 flex-shrink-0">→</span>
                     <span>{item.replace(/^[•\-]\s*/, '')}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        }
+
+        if (trimmed.startsWith('🔗 Cross-Referenced Patterns:')) {
+          const items = trimmed.replace('🔗 Cross-Referenced Patterns:', '').trim().split('\n').filter(l => l.trim());
+          return (
+            <div key={i} className="bg-violet-50 dark:bg-violet-900/10 rounded-xl p-4 border border-violet-200 dark:border-violet-900/30">
+              <div className="flex items-center gap-2 mb-2">
+                <Link2 className="h-4 w-4 text-violet-600" />
+                <span className="text-xs font-bold text-violet-700 dark:text-violet-400 uppercase tracking-wide">Cross-Referenced Patterns</span>
+              </div>
+              <ul className="space-y-2">
+                {items.map((item, j) => (
+                  <li key={j} className="text-sm leading-relaxed flex items-start gap-2">
+                    <span className="flex-shrink-0">{item.match(/^[🚨⚠️ℹ️]/u)?.[0] || '🔗'}</span>
+                    <span>{item.replace(/^[🚨⚠️ℹ️]\s*/u, '')}</span>
                   </li>
                 ))}
               </ul>
@@ -1097,6 +1118,37 @@ export default function MedicalHistory() {
                 <div id="insights" className="scroll-mt-20">
                 <PersonalizedInsights medicalData={medicalData} lifeStage={lifeStage} />
                 </div>
+
+                {/* AI Risk Screening results */}
+                {(() => {
+                  const riskItems = medicalData.filter(d => d.data_type === 'risk_screening' && d.value);
+                  if (riskItems.length === 0) return null;
+                  const riskColor = (status: string | null) => {
+                    if (status === 'critical') return 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800';
+                    if (status === 'abnormal') return 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800';
+                    return 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800';
+                  };
+                  return (
+                    <Card className="overflow-hidden">
+                      <CardContent className="p-5">
+                        <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
+                          <ShieldAlert className="h-4 w-4 text-primary" />
+                          AI Risk Screening
+                        </h3>
+                        <p className="text-xs text-muted-foreground mb-3">Based on cross-referencing your test results against clinical guidelines.</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          {riskItems.map((item, i) => (
+                            <div key={i} className={`rounded-lg border px-3 py-2 ${riskColor(item.status)}`}>
+                              <div className="text-[10px] font-bold uppercase tracking-wide opacity-70">{item.title}</div>
+                              <div className="text-sm font-bold capitalize">{item.value}</div>
+                            </div>
+                          ))}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground italic mt-2">AI-assessed risk levels. Always confirm with your healthcare provider.</p>
+                      </CardContent>
+                    </Card>
+                  );
+                })()}
 
                 {/* Smart recommendations: missing tests, stale results, retests needed */}
                 <SmartRecommendations medicalData={medicalData} lifeStage={lifeStage} />
