@@ -132,12 +132,7 @@ const DoctorDashboard = () => {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    toast({
-      title: 'Logged out',
-      description: 'You have been logged out successfully.',
-    });
-    navigate('/');
+    window.location.href = '/api/auth/logout';
   };
 
   const handleSwitchToPatient = () => {

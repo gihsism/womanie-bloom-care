@@ -196,9 +196,7 @@ const Navigation = () => {
                       className="w-full"
                       onClick={async () => {
                         const { supabase } = await import('@/integrations/supabase/client');
-                        await supabase.auth.signOut();
-                        setIsMobileMenuOpen(false);
-                        window.location.href = '/';
+                        window.location.href = '/api/auth/logout';
                       }}
                     >
                       Log Out

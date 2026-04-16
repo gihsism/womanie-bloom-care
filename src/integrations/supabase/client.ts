@@ -94,15 +94,7 @@ export const supabase = {
     getUser: async () => ({ data: { user: null }, error: null }),
     getSession: async () => ({ data: { session: null }, error: null }),
     signOut: async () => {
-      // Use Clerk's sign out
-      try {
-        const { Clerk } = await import('@clerk/clerk-react');
-        // Access clerk instance from window
-        if ((window as any).__clerk) {
-          await (window as any).__clerk.signOut();
-        }
-      } catch { /* ignore */ }
-      window.location.href = '/';
+      window.location.href = '/api/auth/logout';
     },
     onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
     signInWithOAuth: async () => ({ data: null, error: null }),

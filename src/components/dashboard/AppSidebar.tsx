@@ -45,13 +45,8 @@ export function AppSidebar() {
 
   const isActive = (path: string) => currentPath === path;
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    toast({
-      title: 'Logged out',
-      description: 'You have been logged out successfully.',
-    });
-    navigate('/');
+  const handleLogout = () => {
+    window.location.href = '/api/auth/logout';
   };
 
   return (
