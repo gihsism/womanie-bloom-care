@@ -54,6 +54,10 @@ import {
   RefreshCw,
   Loader2,
   Link2,
+  Search,
+  ChevronDown,
+  ChevronUp,
+  Printer,
 } from 'lucide-react';
 import { format, differenceInDays, addDays } from 'date-fns';
 import {
@@ -547,6 +551,8 @@ export default function MedicalHistory() {
   const [expandedPanels, setExpandedPanels] = useState<Set<string>>(new Set());
   const [reanalyzing, setReanalyzing] = useState(false);
   const [reanalyzeProgress, setReanalyzeProgress] = useState({ done: 0, total: 0 });
+  const [expandedDocId, setExpandedDocId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
 
   // Handle cycle update suggestions (e.g., switch to pregnancy mode)
@@ -851,8 +857,6 @@ export default function MedicalHistory() {
     [medicalData]
   );
 
-  const analyzedDocs = documents.filter(d => d.ai_summary);
-
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background p-4 md:p-6 space-y-4">
@@ -877,6 +881,10 @@ export default function MedicalHistory() {
             <h1 className="text-base sm:text-xl font-bold truncate">My Health Records</h1>
             <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Your results explained in plain language</p>
           </div>
+          <Button variant="outline" size="sm" className="hidden sm:flex gap-1.5" onClick={() => window.print()}>
+            <Printer className="h-3.5 w-3.5" />
+            Print
+          </Button>
           <Button variant="outline" size="sm" className="hidden sm:flex" onClick={() => navigate('/dashboard')}>
             Dashboard
           </Button>
@@ -889,8 +897,8 @@ export default function MedicalHistory() {
 
       <div className="px-4 py-6 max-w-4xl mx-auto space-y-6">
         {hasDocuments && (
-          <Card className="p-4 space-y-3">
-            <div className="flex items-center justify-between">
+          <Card className="overflow-hidden">
+            <div className="p-4 pb-3 flex items-center justify-between">
               <h3 className="text-sm font-bold">My Documents ({documents.length})</h3>
               <Button
                 variant="outline"
@@ -906,57 +914,118 @@ export default function MedicalHistory() {
               </Button>
             </div>
             {reanalyzing && (
-              <Progress value={reanalyzeProgress.total > 0 ? (reanalyzeProgress.done / reanalyzeProgress.total) * 100 : 0} className="h-1.5" />
+              <div className="px-4"><Progress value={reanalyzeProgress.total > 0 ? (reanalyzeProgress.done / reanalyzeProgress.total) * 100 : 0} className="h-1.5" /></div>
             )}
-            <div className="space-y-1.5">
+            <div className="divide-y divide-border/50">
               {documents.map(doc => {
                 const docResults = medicalData.filter(m => m.document_id === doc.id);
                 const abnormals = docResults.filter(m => m.status === 'abnormal' || m.status === 'critical').length;
+                const isExpanded = expandedDocId === doc.id;
+                const categoryIcon = doc.ai_suggested_category === 'lab_results' ? '🧪'
+                  : doc.ai_suggested_category === 'imaging' ? '📷'
+                  : doc.ai_suggested_category === 'prescription' ? '💊'
+                  : doc.ai_suggested_category === 'consultation_notes' ? '📋' : '📄';
+
                 return (
-                  <div key={doc.id} className="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-muted/50 group">
-                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                      abnormals > 0 ? 'bg-amber-500' : docResults.length > 0 ? 'bg-green-500' : 'bg-muted-foreground'
-                    }`} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium truncate">{doc.ai_suggested_name || doc.file_name}</p>
-                      <p className="text-[10px] text-muted-foreground">
-                        {doc.uploaded_at ? format(new Date(doc.uploaded_at), 'MMM d, yyyy') : ''}
-                        {docResults.length > 0 && ` • ${docResults.length} results`}
-                        {abnormals > 0 && ` • ${abnormals} flagged`}
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition-opacity"
-                      onClick={() => reanalyzeOne(doc)}
-                      disabled={reanalyzingDoc === doc.id}
-                      aria-label="Re-analyze document"
+                  <div key={doc.id}>
+                    <button
+                      onClick={() => setExpandedDocId(isExpanded ? null : doc.id)}
+                      className="w-full flex items-center gap-3 py-3 px-4 hover:bg-muted/30 transition-colors text-left"
                     >
-                      {reanalyzingDoc === doc.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition-opacity"
-                      onClick={() => renameDocument(doc.id, doc.ai_suggested_name || doc.file_name)}
-                      aria-label="Rename document"
-                    >
-                      <Pencil className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
-                      onClick={() => {
-                        if (window.confirm(`Delete "${doc.ai_suggested_name || doc.file_name}"?`)) {
-                          deleteDocument(doc.id, doc.file_path);
-                        }
-                      }}
-                      aria-label="Delete document"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
+                      <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
+                        abnormals > 0 ? 'bg-amber-500' : docResults.length > 0 ? 'bg-green-500' : 'bg-muted-foreground/40'
+                      }`} />
+                      <span className="text-base flex-shrink-0">{categoryIcon}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{doc.ai_suggested_name || doc.file_name}</p>
+                        <p className="text-[11px] text-muted-foreground">
+                          {doc.uploaded_at ? format(new Date(doc.uploaded_at), 'MMM d, yyyy') : ''}
+                          {docResults.length > 0 && ` · ${docResults.length} results`}
+                          {abnormals > 0 && ` · ${abnormals} flagged`}
+                        </p>
+                      </div>
+                      {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0" /> : <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
+                    </button>
+
+                    {isExpanded && (
+                      <div className="px-4 pb-4 bg-muted/20 border-t border-border/30">
+                        {/* Action buttons — always visible */}
+                        <div className="flex gap-2 py-3 flex-wrap">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs gap-1.5"
+                            onClick={(e) => { e.stopPropagation(); reanalyzeOne(doc); }}
+                            disabled={reanalyzingDoc === doc.id}
+                          >
+                            {reanalyzingDoc === doc.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                            Re-analyze
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs gap-1.5"
+                            onClick={(e) => { e.stopPropagation(); renameDocument(doc.id, doc.ai_suggested_name || doc.file_name); }}
+                          >
+                            <Pencil className="h-3 w-3" />
+                            Rename
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs gap-1.5 text-destructive hover:text-destructive"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm(`Delete "${doc.ai_suggested_name || doc.file_name}"?`)) {
+                                deleteDocument(doc.id, doc.file_path);
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                            Delete
+                          </Button>
+                        </div>
+
+                        {/* AI Summary inline */}
+                        {doc.ai_summary && (
+                          <div className="bg-background rounded-xl p-4 border border-border/40 mb-3">
+                            {renderEnhancedSummary(doc.ai_summary)}
+                          </div>
+                        )}
+
+                        {/* Per-document results */}
+                        {docResults.length > 0 && (
+                          <div className="space-y-2">
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">{docResults.length} extracted results</p>
+                            {docResults
+                              .filter(r => r.status === 'abnormal' || r.status === 'critical')
+                              .map(item => <ResultCard key={item.id} item={item} />)}
+                            {docResults.filter(r => r.status !== 'abnormal' && r.status !== 'critical').length > 0 && (
+                              <div className="bg-background rounded-lg border border-border/30 divide-y divide-border/20">
+                                {docResults
+                                  .filter(r => r.status !== 'abnormal' && r.status !== 'critical')
+                                  .map(lab => {
+                                    const si = getStatusInfo(lab.status);
+                                    return (
+                                      <div key={lab.id} className="flex items-center gap-2 py-1.5 px-3">
+                                        <span className="text-xs">{si.emoji}</span>
+                                        <span className="text-xs flex-1 min-w-0 truncate">{lab.title}</span>
+                                        <span className="text-xs font-mono font-bold text-foreground">{lab.value}{lab.unit ? ` ${lab.unit}` : ''}</span>
+                                        {lab.reference_range && (
+                                          <span className="text-[9px] text-muted-foreground hidden sm:inline">({lab.reference_range})</span>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        {!doc.ai_summary && docResults.length === 0 && (
+                          <p className="text-xs text-muted-foreground py-2">Not yet analyzed. Click "Re-analyze" to process this document.</p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -1216,15 +1285,31 @@ export default function MedicalHistory() {
                 {/* All results grouped by panel — collapsible, friendly */}
                 {stats.labsByPanel.length > 0 && (
                   <div id="results" className="scroll-mt-20">
-                    <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
-                      <FlaskConical className="h-4 w-4 text-primary" />
-                      All Your Test Results
-                    </h3>
+                    <div className="flex items-center gap-2 mb-3">
+                      <FlaskConical className="h-4 w-4 text-primary flex-shrink-0" />
+                      <h3 className="text-sm font-bold flex-shrink-0">All Your Test Results</h3>
+                      <div className="flex-1" />
+                      <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                        <input
+                          type="text"
+                          placeholder="Search results..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="h-8 w-40 sm:w-52 pl-8 pr-3 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        />
+                      </div>
+                    </div>
                     <div className="space-y-3">
                       {stats.labsByPanel.map(([panelName, labs]) => {
-                        const hasIssues = labs.some(l => l.status === 'critical' || l.status === 'abnormal');
-                        const allGood = labs.every(l => l.status === 'normal' || l.status === 'expected');
-                        const isExpanded = expandedPanels.has(panelName);
+                        // Filter by search query
+                        const filteredLabs = searchQuery
+                          ? labs.filter(l => l.title.toLowerCase().includes(searchQuery.toLowerCase()) || (l.notes || '').toLowerCase().includes(searchQuery.toLowerCase()))
+                          : labs;
+                        if (searchQuery && filteredLabs.length === 0) return null;
+                        const hasIssues = filteredLabs.some(l => l.status === 'critical' || l.status === 'abnormal');
+                        const allGood = filteredLabs.every(l => l.status === 'normal' || l.status === 'expected');
+                        const isExpanded = expandedPanels.has(panelName) || !!searchQuery;
 
                         return (
                           <Card key={panelName} className={`overflow-hidden ${hasIssues ? 'border-amber-200 dark:border-amber-900/30' : ''}`}>
@@ -1239,9 +1324,9 @@ export default function MedicalHistory() {
                                 <div>
                                   <span className="text-sm font-semibold">{panelName}</span>
                                   <p className="text-[11px] text-muted-foreground">
-                                    {labs.length} test{labs.length !== 1 ? 's' : ''} — {
+                                    {filteredLabs.length}{searchQuery ? `/${labs.length}` : ''} test{filteredLabs.length !== 1 ? 's' : ''} — {
                                       hasIssues
-                                        ? `${labs.filter(l => l.status === 'abnormal' || l.status === 'critical').length} need${labs.filter(l => l.status === 'abnormal' || l.status === 'critical').length === 1 ? 's' : ''} review`
+                                        ? `${filteredLabs.filter(l => l.status === 'abnormal' || l.status === 'critical').length} need${filteredLabs.filter(l => l.status === 'abnormal' || l.status === 'critical').length === 1 ? 's' : ''} review`
                                         : 'all look good'
                                     }
                                   </p>
@@ -1250,7 +1335,7 @@ export default function MedicalHistory() {
                               <ArrowRight className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                             </button>
                             {isExpanded && (() => {
-                              const sorted = [...labs].sort((a, b) => {
+                              const sorted = [...filteredLabs].sort((a, b) => {
                                 const aPri = (a.raw_data as any)?.priority || 'low';
                                 const bPri = (b.raw_data as any)?.priority || 'low';
                                 return (priorityOrder[aPri] ?? 2) - (priorityOrder[bPri] ?? 2);
@@ -1300,41 +1385,7 @@ export default function MedicalHistory() {
                   </div>
                 )}
 
-                {/* AI Summaries */}
-                {analyzedDocs.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
-                      <Lightbulb className="h-4 w-4 text-primary" />
-                      AI Summary of Your Documents
-                    </h3>
-                    <div className="space-y-3">
-                      {analyzedDocs.map((doc) => (
-                        <Card key={doc.id}>
-                          <CardContent className="p-4">
-                            <div className="flex items-start gap-3">
-                              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                <FileText className="h-4 w-4 text-primary" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap mb-2">
-                                  <h4 className="text-sm font-semibold">{doc.ai_suggested_name || doc.file_name}</h4>
-                                  {doc.uploaded_at && (
-                                    <span className="text-[10px] text-muted-foreground">
-                                      {format(new Date(doc.uploaded_at), 'MMM d, yyyy')}
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="bg-muted/30 rounded-xl p-4 border border-border/30">
-                                  {doc.ai_summary && renderEnhancedSummary(doc.ai_summary)}
-                                </div>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {/* AI Summaries are now shown inline in expanded document cards above */}
 
                 {/* ============ RESULTS BREAKDOWN PIE CHART ============ */}
                 {stats.labStatusPie.length > 0 && (
@@ -1512,78 +1563,7 @@ export default function MedicalHistory() {
                   </div>
                 )}
 
-                {/* Single readings — with visual range bars */}
-                {Object.entries(stats.labTrendData).filter(([, info]) => info.data.length === 1).length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-bold mb-1">Single Readings</h3>
-                    <p className="text-xs text-muted-foreground mb-3">Upload more documents with the same tests to see trends and predictions.</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {Object.entries(stats.labTrendData)
-                        .filter(([, info]) => info.data.length === 1)
-                        .sort(([, a], [, b]) => {
-                          const order: Record<string, number> = { critical: 0, abnormal: 1, expected: 2, normal: 3 };
-                          return (order[a.latestStatus || 'normal'] ?? 3) - (order[b.latestStatus || 'normal'] ?? 3);
-                        })
-                        .map(([title, info]) => {
-                          const d = info.data[0];
-                          const statusInfo = getStatusInfo(info.latestStatus);
-                          const refLow = d.refLow;
-                          const refHigh = d.refHigh;
-                          const hasRange = refLow !== null && refHigh !== null;
-
-                          // Calculate bar position
-                          let barPercent = 50;
-                          if (hasRange && refLow !== null && refHigh !== null) {
-                            const range = refHigh - refLow;
-                            const ext = range * 0.3;
-                            barPercent = Math.max(0, Math.min(100, ((d.value - (refLow - ext)) / (range + ext * 2)) * 100));
-                          }
-
-                          return (
-                            <Card key={title} className={`p-3.5 ${
-                              info.latestStatus === 'critical' ? 'border-red-200 dark:border-red-900/30' :
-                              info.latestStatus === 'abnormal' ? 'border-amber-200 dark:border-amber-900/30' : ''
-                            }`}>
-                              <div className="flex items-start justify-between gap-2 mb-2">
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-xs font-semibold truncate">{getFriendlyName(title)}</p>
-                                  <p className="text-[10px] text-muted-foreground">{d.date}</p>
-                                </div>
-                                <div className="text-right">
-                                  <p className={`text-base font-mono font-bold ${statusInfo.color}`}>
-                                    {d.value}{info.unit ? ` ${info.unit}` : ''}
-                                  </p>
-                                  <div className="flex items-center gap-1 justify-end">
-                                    <span className="text-[10px]">{statusInfo.emoji}</span>
-                                    <span className={`text-[10px] ${statusInfo.color}`}>{statusInfo.label}</span>
-                                  </div>
-                                </div>
-                              </div>
-                              {hasRange && (
-                                <div className="space-y-0.5">
-                                  <div className="h-3 bg-muted rounded-full overflow-hidden relative">
-                                    <div className="absolute top-0 bottom-0 bg-green-200/60 dark:bg-green-900/30 rounded-full" style={{ left: '23%', width: '54%' }} />
-                                    <div
-                                      className={`absolute top-0.5 bottom-0.5 w-2 rounded-full shadow-sm ${
-                                        info.latestStatus === 'critical' ? 'bg-red-500' :
-                                        info.latestStatus === 'abnormal' ? 'bg-amber-500' : 'bg-green-500'
-                                      }`}
-                                      style={{ left: `calc(${barPercent}% - 4px)` }}
-                                    />
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span className="text-[9px] text-muted-foreground">{refLow}</span>
-                                    <span className="text-[9px] text-green-600">Healthy range</span>
-                                    <span className="text-[9px] text-muted-foreground">{refHigh}</span>
-                                  </div>
-                                </div>
-                              )}
-                            </Card>
-                          );
-                        })}
-                    </div>
-                  </div>
-                )}
+                {/* Single readings removed — already shown in panel view and ResultsRangeChart */}
 
                 {/* Checkup timing */}
                 {documents.length >= 2 && (
