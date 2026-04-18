@@ -2,7 +2,7 @@ import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import * as jose from 'jose';
 import bcrypt from 'bcryptjs';
-import { getAuthSecret } from '../_lib/auth';
+import { getAuthSecret } from '../_lib/auth.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
