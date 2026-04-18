@@ -1,6 +1,7 @@
 import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import * as jose from 'jose';
+import { getAuthSecret } from '../_lib/auth';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -9,10 +10,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (match) {
       const token = match[1];
-      const secret = new TextEncoder().encode(process.env.AUTH_SECRET || 'womanie-secret-key-change-in-production');
 
       try {
-        const { payload } = await jose.jwtVerify(token, secret);
+        const { payload } = await jose.jwtVerify(token, getAuthSecret());
         // Delete session from database
         const sql = neon(process.env.DATABASE_URL!);
         await sql.query('DELETE FROM auth_sessions WHERE id = $1', [payload.sid]);

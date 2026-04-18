@@ -1,6 +1,7 @@
 import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import * as jose from 'jose';
+import { getAuthSecret } from '../_lib/auth';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -15,10 +16,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!match) return res.status(200).json({ user: null });
 
     const token = match[1];
-    const secret = new TextEncoder().encode(process.env.AUTH_SECRET || 'womanie-secret-key-change-in-production');
 
     // Verify JWT
-    const { payload } = await jose.jwtVerify(token, secret);
+    const { payload } = await jose.jwtVerify(token, getAuthSecret());
 
     // Check session still exists and not expired
     const sql = neon(process.env.DATABASE_URL!);

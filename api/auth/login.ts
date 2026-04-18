@@ -2,6 +2,7 @@ import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import * as jose from 'jose';
 import bcrypt from 'bcryptjs';
+import { getAuthSecret } from '../_lib/auth';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -45,11 +46,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     );
 
     // Create JWT
-    const secret = new TextEncoder().encode(process.env.AUTH_SECRET || 'womanie-secret-key');
     const token = await new jose.SignJWT({ sub: user.id, sid: sessionId, email: user.email, name: user.name })
       .setProtectedHeader({ alg: 'HS256' })
       .setExpirationTime('30d')
-      .sign(secret);
+      .sign(getAuthSecret());
 
     res.setHeader('Set-Cookie', `womanie_session=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}`);
     return res.status(200).json({ success: true, user: { id: user.id, email: user.email, name: user.name } });
