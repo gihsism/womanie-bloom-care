@@ -44,6 +44,7 @@ const HealthStatistics = lazy(() => import("./pages/HealthStatistics"));
 const MedicalHistory = lazy(() => import("./pages/MedicalHistory"));
 const AIDoctorChat = lazy(() => import("./pages/AIDoctorChat"));
 const Devices = lazy(() => import("./pages/dashboard/Devices"));
+const RecoverDocuments = lazy(() => import("./pages/RecoverDocuments"));
 
 function PageLoader() {
   return (
@@ -97,6 +98,7 @@ const App = () => (
                   <Route path="/dashboard/devices" element={<Devices />} />
                   <Route path="/welcome" element={<Welcome />} />
                   <Route path="/community" element={<Community />} />
+                  <Route path="/dashboard/recover-documents" element={<RecoverDocuments />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
