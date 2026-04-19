@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { FlaskConical, Timer, CheckCircle2, ArrowRight, Sparkles, Heart } from 'lucide-react';
@@ -45,7 +45,7 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
   // Load events
   const loadEvents = useCallback(async () => {
     if (!user) return;
-    const { data } = await supabase
+    const { data } = await db
       .from('ivf_events')
       .select('*')
       .eq('user_id', user.id)
@@ -62,7 +62,7 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
 
   const handleAddEvent = async (ev: { title: string; event_type: string; event_time: string | null; description: string | null; remind_before_minutes: number | null }) => {
     if (!user || !selectedDate) return;
-    const { error } = await supabase.from('ivf_events').insert({
+    const { error } = await db.from('ivf_events').insert({
       user_id: user.id,
       event_date: format(selectedDate, 'yyyy-MM-dd'),
       ...ev,
@@ -76,12 +76,12 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
   };
 
   const handleToggleComplete = async (eventId: string, completed: boolean) => {
-    const { error } = await supabase.from('ivf_events').update({ is_completed: completed }).eq('id', eventId);
+    const { error } = await db.from('ivf_events').update({ is_completed: completed }).eq('id', eventId);
     if (!error) loadEvents();
   };
 
   const handleDeleteEvent = async (eventId: string) => {
-    const { error } = await supabase.from('ivf_events').delete().eq('id', eventId);
+    const { error } = await db.from('ivf_events').delete().eq('id', eventId);
     if (!error) loadEvents();
   };
 

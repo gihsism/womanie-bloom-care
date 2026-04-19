@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -21,7 +21,7 @@ export const useRequireRole = (role: 'doctor' | 'patient' | 'admin', redirectTo:
 
     const checkRole = async () => {
       try {
-        const { data, error } = await supabase.rpc('has_role', {
+        const { data, error } = await db.rpc('has_role', {
           _user_id: user.id,
           _role: role,
         });

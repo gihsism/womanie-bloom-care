@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   HeartPulse,
@@ -34,8 +34,8 @@ export default function HealthSummaryWidget() {
     if (!user) return;
     const load = async () => {
       const [medRes, docRes] = await Promise.all([
-        supabase.from('medical_extracted_data').select('title, value, unit, status, data_type, date_recorded').eq('user_id', user.id),
-        supabase.from('health_documents').select('id').eq('user_id', user.id),
+        db.from('medical_extracted_data').select('title, value, unit, status, data_type, date_recorded').eq('user_id', user.id),
+        db.from('health_documents').select('id').eq('user_id', user.id),
       ]);
       if (medRes.data) setData(medRes.data);
       if (docRes.data) setDocCount(docRes.data.length);

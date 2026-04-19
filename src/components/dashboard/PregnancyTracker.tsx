@@ -31,7 +31,7 @@ import fruitWeek36 from '@/assets/fruit-week-36.png';
 import fruitWeek40 from '@/assets/fruit-week-40.png';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { differenceInDays, differenceInWeeks, addDays, format, parseISO } from 'date-fns';

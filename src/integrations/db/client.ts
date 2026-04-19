@@ -1,6 +1,6 @@
-// Compatibility layer — routes queries to Neon via API
-// This file replaces the Supabase client while keeping the same interface
-// so existing code doesn't break during migration
+// Thin client facade over /api/db (Neon). Exposes a fluent query builder
+// (.from(...).select(...).eq(...).order(...).single()) plus .functions.invoke()
+// and .auth helpers so page code can use one import.
 
 const API_BASE = '/api';
 
@@ -87,8 +87,8 @@ function createQueryBuilder(table: string): QueryBuilder {
   return builder;
 }
 
-// Mock supabase client that routes to our API
-export const supabase = {
+// DB client facade that routes queries to our /api/db endpoint (Neon)
+export const db = {
   from: (table: string) => createQueryBuilder(table),
   auth: {
     getUser: async () => ({ data: { user: null }, error: null }),

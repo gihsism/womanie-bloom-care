@@ -108,7 +108,7 @@ const RecoverDocuments = () => {
         <h2 className="font-medium">Other user_ids with documents in the DB</h2>
         {orphanGroups.length === 0 ? (
           <Card className="p-4 text-sm text-muted-foreground">
-            No other user_ids found. If you're missing documents, they were never written to this database — most likely still in the old Supabase project.
+            No other user_ids found. If you're missing documents, they were never written to this database.
           </Card>
         ) : (
           orphanGroups.map(g => (

@@ -8,7 +8,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import UserMenu from '@/components/UserMenu';
@@ -88,7 +88,7 @@ const Settings = () => {
     if (!user) return;
     
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('profiles')
         .select('life_stage')
         .eq('id', user.id)
@@ -109,7 +109,7 @@ const Settings = () => {
     setSaving(true);
     
     try {
-      const { error } = await supabase
+      const { error } = await db
         .from('profiles')
         .update({ life_stage: stage })
         .eq('id', user?.id);

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { ArrowRight, FlaskConical, AlertTriangle, CheckCircle2, Upload } from 'lucide-react';
 
@@ -55,7 +55,7 @@ export default function PregnancyLabInsights() {
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from('medical_extracted_data')
         .select('title, value, unit, reference_range, status')
         .eq('user_id', user.id)

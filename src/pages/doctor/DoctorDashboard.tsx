@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRequireRole } from '@/hooks/useRequireRole';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -70,7 +70,7 @@ const DoctorDashboard = () => {
   const [consultationPrice, setConsultationPrice] = useState<{ price: number; currency: string } | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    db.auth.getUser().then(({ data }) => setUser(data.user));
   }, []);
 
   useEffect(() => {
@@ -85,7 +85,7 @@ const DoctorDashboard = () => {
 
     try {
       // Load doctor profile
-      const { data: profile } = await supabase
+      const { data: profile } = await db
         .from('doctor_profiles')
         .select('*')
         .eq('user_id', user.id)
@@ -94,7 +94,7 @@ const DoctorDashboard = () => {
       setDoctorProfile(profile);
 
       // Load patient connections
-      const { data: connections } = await supabase
+      const { data: connections } = await db
         .from('doctor_patient_connections')
         .select('*')
         .eq('doctor_id', user.id)
@@ -103,7 +103,7 @@ const DoctorDashboard = () => {
       setPatients(connections || []);
 
       // Load appointments
-      const { data: appts } = await supabase
+      const { data: appts } = await db
         .from('appointments')
         .select('*')
         .eq('doctor_id', user.id)
@@ -112,7 +112,7 @@ const DoctorDashboard = () => {
       setAppointments(appts || []);
 
       // Load consultation price
-      const { data: consultSettings } = await supabase
+      const { data: consultSettings } = await db
         .from('consultation_settings')
         .select('consultation_price, currency')
         .eq('doctor_id', user.id)
@@ -395,7 +395,7 @@ const PatientManagement = ({ patients, onRefresh, doctorId }: { patients: Patien
 
     try {
       // Find the access code
-      const { data: codeData, error: codeError } = await supabase
+      const { data: codeData, error: codeError } = await db
         .from('patient_access_codes')
         .select('*')
         .eq('code', accessCode.trim())
@@ -413,7 +413,7 @@ const PatientManagement = ({ patients, onRefresh, doctorId }: { patients: Patien
       }
 
       // Create connection
-      const { error: connectionError } = await supabase
+      const { error: connectionError } = await db
         .from('doctor_patient_connections')
         .insert({
           doctor_id: doctorId,
@@ -436,7 +436,7 @@ const PatientManagement = ({ patients, onRefresh, doctorId }: { patients: Patien
       }
 
       // Mark code as used
-      await supabase
+      await db
         .from('patient_access_codes')
         .update({ is_used: true })
         .eq('id', codeData.id);
@@ -643,7 +643,7 @@ const ConsultationSettings = ({ doctorId }: { doctorId: string }) => {
 
   const loadSettings = async () => {
     try {
-      const { data } = await supabase
+      const { data } = await db
         .from('consultation_settings')
         .select('*')
         .eq('doctor_id', doctorId)
@@ -668,7 +668,7 @@ const ConsultationSettings = ({ doctorId }: { doctorId: string }) => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const { error } = await supabase
+      const { error } = await db
         .from('consultation_settings')
         .upsert({
           doctor_id: doctorId,
@@ -841,7 +841,7 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
   // Load existing schedule
   useEffect(() => {
     const loadSchedule = async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from('doctor_schedule')
         .select('*')
         .eq('doctor_id', doctorId);
@@ -867,7 +867,7 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
     setIsSaving(true);
     try {
       // Delete existing schedule
-      await supabase.from('doctor_schedule').delete().eq('doctor_id', doctorId);
+      await db.from('doctor_schedule').delete().eq('doctor_id', doctorId);
 
       // Insert new schedule for active days
       const rows = Object.entries(schedule)
@@ -881,7 +881,7 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
         }));
 
       if (rows.length > 0) {
-        const { error } = await supabase.from('doctor_schedule').insert(rows);
+        const { error } = await db.from('doctor_schedule').insert(rows);
         if (error) throw error;
       }
 

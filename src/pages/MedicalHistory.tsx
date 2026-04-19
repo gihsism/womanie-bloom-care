@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
 // IMPORTANT: These custom components provide AI-powered health analysis.
@@ -580,7 +580,7 @@ export default function MedicalHistory() {
       }
 
       // Update or create profile
-      const { error } = await supabase
+      const { error } = await db
         .from('profiles')
         .upsert({ id: user.id, life_stage: newLifeStage }, { onConflict: 'id' });
 
@@ -617,9 +617,9 @@ export default function MedicalHistory() {
   const fetchData = async () => {
     try {
       const [medRes, docRes, profileRes] = await Promise.all([
-        supabase.from('medical_extracted_data').select('*').eq('user_id', user!.id).order('date_recorded', { ascending: false, nullsFirst: false }),
-        supabase.from('health_documents').select('id, file_name, file_path, mime_type, ai_suggested_name, ai_summary, ai_suggested_category, uploaded_at, document_type').eq('user_id', user!.id).order('uploaded_at', { ascending: false }),
-        supabase.from('profiles').select('life_stage').eq('id', user!.id).single(),
+        db.from('medical_extracted_data').select('*').eq('user_id', user!.id).order('date_recorded', { ascending: false, nullsFirst: false }),
+        db.from('health_documents').select('id, file_name, file_path, mime_type, ai_suggested_name, ai_summary, ai_suggested_category, uploaded_at, document_type').eq('user_id', user!.id).order('uploaded_at', { ascending: false }),
+        db.from('profiles').select('life_stage').eq('id', user!.id).single(),
       ]);
       if (medRes.data) setMedicalData(medRes.data as MedicalDataItem[]);
       if (docRes.data) setDocuments(docRes.data);
@@ -644,7 +644,7 @@ export default function MedicalHistory() {
     const newName = window.prompt('Rename document:', currentName);
     if (!newName || newName === currentName) return;
     try {
-      await supabase.from('health_documents').update({ ai_suggested_name: newName }).eq('id', docId);
+      await db.from('health_documents').update({ ai_suggested_name: newName }).eq('id', docId);
       toast({ title: 'Renamed' });
       await fetchData();
     } catch {
@@ -656,11 +656,11 @@ export default function MedicalHistory() {
     if (!user) return;
     try {
       // Delete extracted data first
-      await supabase.from('medical_extracted_data').delete().eq('document_id', docId);
+      await db.from('medical_extracted_data').delete().eq('document_id', docId);
       // Delete document record
-      await supabase.from('health_documents').delete().eq('id', docId).eq('user_id', user.id);
+      await db.from('health_documents').delete().eq('id', docId).eq('user_id', user.id);
       // Delete file from storage
-      await supabase.storage.from('health-documents').remove([filePath]);
+      await db.storage.from('health-documents').remove([filePath]);
       toast({ title: 'Document deleted' });
       await fetchData();
     } catch (error) {
@@ -675,8 +675,8 @@ export default function MedicalHistory() {
     if (!user) return;
     setReanalyzingDoc(doc.id);
     try {
-      await supabase.from('medical_extracted_data').delete().eq('document_id', doc.id);
-      await supabase.functions.invoke('analyze-document', {
+      await db.from('medical_extracted_data').delete().eq('document_id', doc.id);
+      await db.functions.invoke('analyze-document', {
         body: { documentId: doc.id, userId: user.id, filePath: doc.file_path, fileName: doc.file_name, mimeType: doc.mime_type },
       });
       toast({ title: 'Analysis complete', description: doc.ai_suggested_name || doc.file_name });
@@ -694,7 +694,7 @@ export default function MedicalHistory() {
     setReanalyzing(true);
     const total = documents.length;
     setReanalyzeProgress({ done: 0, total });
-    await supabase.from('medical_extracted_data').delete().eq('user_id', user.id);
+    await db.from('medical_extracted_data').delete().eq('user_id', user.id);
 
     // Process 3 documents in parallel for speed
     let done = 0;
@@ -703,7 +703,7 @@ export default function MedicalHistory() {
       const chunk = documents.slice(i, i + batch);
       await Promise.allSettled(
         chunk.map(doc =>
-          supabase.functions.invoke('analyze-document', {
+          db.functions.invoke('analyze-document', {
             body: { documentId: doc.id, userId: user.id, filePath: doc.file_path, fileName: doc.file_name, mimeType: doc.mime_type },
           })
         )
@@ -1153,7 +1153,7 @@ export default function MedicalHistory() {
                   onSwitchMode={async (mode) => {
                     if (!user) return;
                     try {
-                      await supabase.from('profiles').upsert({ id: user.id, life_stage: mode }, { onConflict: 'id' });
+                      await db.from('profiles').upsert({ id: user.id, life_stage: mode }, { onConflict: 'id' });
                       setLifeStage(mode);
                       toast({ title: 'Mode updated!', description: `Switching to ${mode.replace('-', ' ')} mode...` });
                       setTimeout(() => { window.location.href = '/dashboard'; }, 1000);

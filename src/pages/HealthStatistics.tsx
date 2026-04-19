@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,7 +30,7 @@ export default function HealthStatistics() {
   }, []);
 
   const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await db.auth.getSession();
     if (!session) {
       navigate('/auth/login');
     }
@@ -38,8 +38,8 @@ export default function HealthStatistics() {
 
   const fetchDocuments = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const { data, error } = await supabase
+      const { data: { session } } = await db.auth.getSession();
+      const { data, error } = await db
         .from('health_documents')
         .select('id, file_name, ai_suggested_name, ai_suggested_category, ai_summary, uploaded_at, document_type')
         .eq('user_id', session?.user?.id ?? '')

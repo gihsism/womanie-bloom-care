@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Calendar } from '@/components/ui/calendar';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { useToast } from '@/hooks/use-toast';
 import UserMenu from '@/components/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
@@ -69,7 +69,7 @@ const FindDoctor = () => {
   const fetchDoctors = async () => {
     try {
       // Fetch verified doctors with their consultation settings
-      const { data: doctorProfiles, error: doctorsError } = await supabase
+      const { data: doctorProfiles, error: doctorsError } = await db
         .from('doctor_profiles')
         .select('*')
         .eq('is_verified', true);
@@ -77,7 +77,7 @@ const FindDoctor = () => {
       if (doctorsError) throw doctorsError;
 
       // Fetch consultation settings for available doctors
-      const { data: settings, error: settingsError } = await supabase
+      const { data: settings, error: settingsError } = await db
         .from('available_consultations' as any)
         .select('*')
         .eq('is_available', true) as { data: any[] | null; error: any };
@@ -85,7 +85,7 @@ const FindDoctor = () => {
       if (settingsError) throw settingsError;
 
       // Fetch schedules
-      const { data: schedules, error: schedulesError } = await supabase
+      const { data: schedules, error: schedulesError } = await db
         .from('doctor_schedule')
         .select('*')
         .eq('is_active', true);
@@ -142,7 +142,7 @@ const FindDoctor = () => {
       const [hours, minutes] = selectedTime.split(':').map(Number);
       const scheduledAt = setMinutes(setHours(selectedDate, hours), minutes);
 
-      const { error } = await supabase
+      const { error } = await db
         .from('appointments')
         .insert({
           doctor_id: selectedDoctor.user_id,

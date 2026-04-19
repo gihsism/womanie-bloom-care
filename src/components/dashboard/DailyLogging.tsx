@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { format } from 'date-fns';
 import { Loader2, Check } from 'lucide-react';
 import type { LifeStage } from './DashboardHeader';
@@ -80,10 +80,10 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
 
   const loadTodaysData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await db.auth.getUser();
       if (!user) return;
       const today = format(new Date(), 'yyyy-MM-dd');
-      const { data: existing } = await supabase
+      const { data: existing } = await db
         .from('daily_health_signals')
         .select('*')
         .eq('user_id', user.id)
@@ -127,7 +127,7 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await db.auth.getUser();
       if (!user) throw new Error('Not authenticated');
       const today = format(new Date(), 'yyyy-MM-dd');
 
@@ -142,7 +142,7 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
         data.notes,
       ].filter(Boolean).join('. ');
 
-      const { error } = await supabase
+      const { error } = await db
         .from('daily_health_signals')
         .upsert({
           user_id: user.id,

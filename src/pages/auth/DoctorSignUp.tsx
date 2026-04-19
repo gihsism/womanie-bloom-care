@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 
 const specialties = [
   'Obstetrics & Gynecology',
@@ -70,7 +70,7 @@ const DoctorSignUp = () => {
 
     try {
       // Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { data: authData, error: authError } = await db.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -84,7 +84,7 @@ const DoctorSignUp = () => {
 
       if (authData.user) {
         // Add doctor role
-        const { error: roleError } = await supabase
+        const { error: roleError } = await db
           .from('user_roles')
           .insert({
             user_id: authData.user.id,
@@ -97,7 +97,7 @@ const DoctorSignUp = () => {
         }
 
         // Create doctor profile
-        const { error: profileError } = await supabase
+        const { error: profileError } = await db
           .from('doctor_profiles')
           .insert({
             user_id: authData.user.id,

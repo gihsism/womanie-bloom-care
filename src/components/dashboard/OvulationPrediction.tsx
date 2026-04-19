@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Calendar, TrendingUp, AlertCircle } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { useToast } from '@/hooks/use-toast';
 import { format, parseISO, isValid } from 'date-fns';
 
@@ -58,7 +58,7 @@ const OvulationPrediction = ({ userId, lastPeriodStart, cycleLength = 28, onPred
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
 
-      const { data: healthData, error: healthError } = await supabase
+      const { data: healthData, error: healthError } = await db
         .from('daily_health_signals')
         .select('*')
         .eq('user_id', userId)
@@ -82,7 +82,7 @@ const OvulationPrediction = ({ userId, lastPeriodStart, cycleLength = 28, onPred
       }
 
       // Call the edge function for prediction
-      const { data, error } = await supabase.functions.invoke('predict-ovulation', {
+      const { data, error } = await db.functions.invoke('predict-ovulation', {
         body: {
           healthData,
           cycleData: {

@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardHeader, { getModeStats, type LifeStage } from '@/components/dashboard/DashboardHeader';
@@ -76,7 +76,7 @@ const PatientDashboard = () => {
     
     if (user) {
       try {
-        const { error } = await supabase
+        const { error } = await db
           .from('profiles')
           .upsert({ id: user.id, life_stage: mode }, { onConflict: 'id' });
         
@@ -103,7 +103,7 @@ const PatientDashboard = () => {
     if (!user) return;
     
     try {
-      const { data } = await supabase
+      const { data } = await db
         .from('period_tracking')
         .select('*')
         .eq('user_id', user.id)
@@ -139,7 +139,7 @@ const PatientDashboard = () => {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const { data: healthData } = await supabase
+      const { data: healthData } = await db
         .from('daily_health_signals')
         .select('*')
         .eq('user_id', user.id)
@@ -148,7 +148,7 @@ const PatientDashboard = () => {
 
       if (!healthData || healthData.length === 0) return;
 
-      const { data } = await supabase.functions.invoke('predict-ovulation', {
+      const { data } = await db.functions.invoke('predict-ovulation', {
         body: {
           healthData,
           cycleData: {
@@ -178,7 +178,7 @@ const PatientDashboard = () => {
 
   const fetchProfile = async (userId: string) => {
     try {
-      let { data, error } = await supabase
+      let { data, error } = await db
         .from('profiles')
         .select('full_name, life_stage, pregnancy_due_date, ivf_start_date, ivf_phase')
         .eq('id', userId)
@@ -189,7 +189,7 @@ const PatientDashboard = () => {
       // Auto-create profile if it doesn't exist
       if (!data) {
         const userName = user?.user_metadata?.full_name || null;
-        await supabase.from('profiles').insert({
+        await db.from('profiles').insert({
           id: userId,
           full_name: userName,
           life_stage: 'menstrual-cycle',
@@ -220,7 +220,7 @@ const PatientDashboard = () => {
     setPregnancyDueDate(date);
     if (user) {
       try {
-        await supabase
+        await db
           .from('profiles')
           .update({ pregnancy_due_date: format(date, 'yyyy-MM-dd') })
           .eq('id', user.id);
@@ -234,7 +234,7 @@ const PatientDashboard = () => {
     setPregnancyDueDate(null);
     if (user) {
       try {
-        await supabase
+        await db
           .from('profiles')
           .update({ pregnancy_due_date: null })
           .eq('id', user.id);
@@ -250,7 +250,7 @@ const PatientDashboard = () => {
     setIvfPhase(phase);
     if (user) {
       try {
-        await supabase
+        await db
           .from('profiles')
           .update({ ivf_start_date: format(date, 'yyyy-MM-dd'), ivf_phase: phase })
           .eq('id', user.id);
@@ -265,7 +265,7 @@ const PatientDashboard = () => {
     setIvfStartDate(new Date()); // reset phase start to today
     if (user) {
       try {
-        await supabase
+        await db
           .from('profiles')
           .update({ ivf_phase: phase, ivf_start_date: format(new Date(), 'yyyy-MM-dd') })
           .eq('id', user.id);

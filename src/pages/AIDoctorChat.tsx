@@ -31,7 +31,7 @@ import { Card } from '@/components/ui/card';
 type ChatMode = 'ai' | 'real';
 type Msg = { role: 'user' | 'assistant'; content: string };
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-doctor-chat`;
+const CHAT_URL = '/api/ai-doctor-chat';
 
 const AI_MODELS = [
   { id: 'claude-haiku-4-5-20251001', label: 'Claude Haiku', description: 'Fast responses' },
@@ -41,14 +41,12 @@ const AI_MODELS = [
 
 async function streamChat({
   messages,
-  token,
   model,
   onDelta,
   onDone,
   onError,
 }: {
   messages: Msg[];
-  token: string;
   model: string;
   onDelta: (text: string) => void;
   onDone: () => void;
@@ -56,11 +54,8 @@ async function streamChat({
 }) {
   const resp = await fetch(CHAT_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-    },
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ messages, model }),
   });
 
@@ -223,11 +218,11 @@ export default function AIDoctorChat() {
     if (!user) return;
     const loadContext = async () => {
       try {
-        const { supabase } = await import('@/integrations/supabase/client');
+        const { db } = await import('@/integrations/db/client');
         const [profileRes, docsRes, extractedRes] = await Promise.all([
-          supabase.from('profiles').select('life_stage').eq('id', user.id).maybeSingle(),
-          supabase.from('health_documents').select('ai_suggested_name, ai_summary, document_type').eq('user_id', user.id).order('uploaded_at', { ascending: false }).limit(5),
-          supabase.from('medical_extracted_data').select('title, value, unit, status, data_type').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
+          db.from('profiles').select('life_stage').eq('id', user.id).maybeSingle(),
+          db.from('health_documents').select('ai_suggested_name, ai_summary, document_type').eq('user_id', user.id).order('uploaded_at', { ascending: false }).limit(5),
+          db.from('medical_extracted_data').select('title, value, unit, status, data_type').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
         ]);
 
         const parts: string[] = [];
@@ -293,14 +288,6 @@ export default function AIDoctorChat() {
     setInput('');
     setIsStreaming(true);
 
-    const { data: sessionData } = await (await import('@/integrations/supabase/client')).supabase.auth.getSession();
-    const token = sessionData.session?.access_token;
-    if (!token) {
-      toast({ variant: 'destructive', title: 'Session expired', description: 'Please log in again.' });
-      setIsStreaming(false);
-      return;
-    }
-
     let assistantSoFar = '';
     const conversationForApi = newMessages.filter(m => m !== WELCOME_MESSAGE);
 
@@ -311,7 +298,6 @@ export default function AIDoctorChat() {
 
     await streamChat({
       messages: messagesWithContext,
-      token,
       model: selectedModel,
       onDelta: (chunk) => {
         assistantSoFar += chunk;

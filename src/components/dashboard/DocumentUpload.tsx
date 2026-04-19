@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { FileText, Upload, X, File, CheckCircle2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -101,7 +101,7 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
       const { url: fileUrl } = await uploadResp.json();
 
       // Save metadata to database
-      const { data: insertData, error: dbError } = await supabase
+      const { data: insertData, error: dbError } = await db
         .from('health_documents')
         .insert({
           user_id: user.id,
@@ -130,7 +130,7 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
 
       // Trigger AI analysis and notify when done
       try {
-        await supabase.functions.invoke('analyze-document', {
+        await db.functions.invoke('analyze-document', {
           body: {
             documentId: insertData.id,
             userId: user.id,

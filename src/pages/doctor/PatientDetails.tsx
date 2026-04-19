@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRequireRole } from '@/hooks/useRequireRole';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -99,7 +99,7 @@ const PatientDetails = () => {
   });
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    db.auth.getUser().then(({ data }) => setUser(data.user));
   }, []);
 
   useEffect(() => {
@@ -114,7 +114,7 @@ const PatientDetails = () => {
 
     try {
       // Check if doctor has approved access to this patient
-      const { data: connection } = await supabase
+      const { data: connection } = await db
         .from('doctor_patient_connections')
         .select('*')
         .eq('doctor_id', user.id)
@@ -135,7 +135,7 @@ const PatientDetails = () => {
       setHasAccess(true);
 
       // Load patient profile
-      const { data: profileData } = await supabase
+      const { data: profileData } = await db
         .from('profiles')
         .select('*')
         .eq('id', patientId)
@@ -147,7 +147,7 @@ const PatientDetails = () => {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const { data: signalsData } = await supabase
+      const { data: signalsData } = await db
         .from('daily_health_signals')
         .select('*')
         .eq('user_id', patientId)
@@ -157,7 +157,7 @@ const PatientDetails = () => {
       setHealthSignals(signalsData || []);
 
       // Load documents
-      const { data: docsData } = await supabase
+      const { data: docsData } = await db
         .from('health_documents')
         .select('*')
         .eq('user_id', patientId)
@@ -166,7 +166,7 @@ const PatientDetails = () => {
       setDocuments(docsData || []);
 
       // Load doctor's notes for this patient
-      const { data: notesData } = await supabase
+      const { data: notesData } = await db
         .from('doctor_notes')
         .select('*')
         .eq('doctor_id', user.id)
@@ -176,7 +176,7 @@ const PatientDetails = () => {
       setDoctorNotes(notesData || []);
 
       // Load appointments
-      const { data: appointmentsData } = await supabase
+      const { data: appointmentsData } = await db
         .from('appointments')
         .select('*')
         .eq('doctor_id', user.id)
@@ -202,7 +202,7 @@ const PatientDetails = () => {
     setIsSavingNote(true);
 
     try {
-      const { error } = await supabase
+      const { error } = await db
         .from('doctor_notes')
         .insert({
           doctor_id: user.id,
@@ -494,7 +494,7 @@ const PatientDetails = () => {
                           variant="outline"
                           size="sm"
                           onClick={async () => {
-                            const { data } = await supabase.storage
+                            const { data } = await db.storage
                               .from('health-documents')
                               .createSignedUrl(doc.file_path, 3600);
                             if (data?.signedUrl) {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -90,10 +90,10 @@ const CycleCalendar = ({
   
   const loadCalendarData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await db.auth.getUser();
       if (!user) return;
 
-      const { data: periodData } = await supabase
+      const { data: periodData } = await db
         .from('period_tracking')
         .select('*')
         .eq('user_id', user.id)
@@ -104,7 +104,7 @@ const CycleCalendar = ({
         setTempCycleLength(periodData[0]?.cycle_length || initialCycleLength);
       }
 
-      const { data: signalsData } = await supabase
+      const { data: signalsData } = await db
         .from('daily_health_signals')
         .select('*')
         .eq('user_id', user.id);
@@ -221,13 +221,13 @@ const CycleCalendar = ({
   // ─── Period Start (new flow) ───
   const handleStartPeriod = async (date: Date) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await db.auth.getUser();
       if (!user) return;
 
       const dateKey = format(date, 'yyyy-MM-dd');
 
       // Insert with null end_date (active period)
-      await supabase.from('period_tracking').insert({
+      await db.from('period_tracking').insert({
         user_id: user.id,
         period_start_date: dateKey,
         period_end_date: null,
@@ -249,13 +249,13 @@ const CycleCalendar = ({
   // ─── Period End Confirmation ───
   const handleEndPeriod = async (endDate: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await db.auth.getUser();
       if (!user) return;
 
       const activeRecord = periodRecords.find(isActivePeriod);
       if (!activeRecord) return;
 
-      await supabase
+      await db
         .from('period_tracking')
         .update({ period_end_date: endDate })
         .eq('user_id', user.id)
@@ -281,7 +281,7 @@ const CycleCalendar = ({
   // ─── Remove a period record ───
   const handleRemovePeriod = async (date: Date) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await db.auth.getUser();
       if (!user) return;
 
       const record = periodRecords.find(r => {
@@ -291,7 +291,7 @@ const CycleCalendar = ({
       });
 
       if (record) {
-        await supabase
+        await db
           .from('period_tracking')
           .delete()
           .eq('user_id', user.id)
@@ -324,9 +324,9 @@ const CycleCalendar = ({
   
   const saveHealthSignal = async (date: Date, signal: DaySignal) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await db.auth.getUser();
       if (!user) return;
-      const { error } = await supabase
+      const { error } = await db
         .from('daily_health_signals')
         .upsert({
           user_id: user.id,
@@ -374,9 +374,9 @@ const CycleCalendar = ({
     setManualPeriodLength(tempPeriodLength);
     if (periodRecords.length > 0) {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await db.auth.getUser();
         if (user) {
-          await supabase
+          await db
             .from('period_tracking')
             .update({ cycle_length: tempCycleLength })
             .eq('user_id', user.id)

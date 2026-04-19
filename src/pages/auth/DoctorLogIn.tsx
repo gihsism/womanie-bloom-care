@@ -5,7 +5,7 @@ import { ArrowLeft, Eye, EyeOff, Mail, Lock, Stethoscope, Loader2 } from 'lucide
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 
 const DoctorLogIn = () => {
   const navigate = useNavigate();
@@ -35,7 +35,7 @@ const DoctorLogIn = () => {
     setIsLoading(true);
 
     try {
-      const { data: authData, error } = await supabase.auth.signInWithPassword({
+      const { data: authData, error } = await db.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
@@ -52,7 +52,7 @@ const DoctorLogIn = () => {
       }
 
       // Check if user has doctor role
-      const { data: roleData } = await supabase
+      const { data: roleData } = await db
         .from('user_roles')
         .select('role')
         .eq('user_id', authData.user?.id)
@@ -65,7 +65,7 @@ const DoctorLogIn = () => {
           title: 'Access denied',
           description: 'This account is not registered as a doctor. Please use patient login or register as a doctor.',
         });
-        await supabase.auth.signOut();
+        await db.auth.signOut();
         return;
       }
 
