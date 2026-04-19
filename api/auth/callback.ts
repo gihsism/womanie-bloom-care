@@ -2,8 +2,9 @@ import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import * as jose from 'jose';
 import { getAuthSecret } from '../_lib/auth.js';
+import { withSentry } from '../_lib/sentry.js';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const { code } = req.query;
     if (!code || typeof code !== 'string') {
@@ -104,3 +105,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'Auth failed', details: error instanceof Error ? error.message : String(error) });
   }
 }
+
+export default withSentry(handler);

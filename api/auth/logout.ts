@@ -2,8 +2,9 @@ import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import * as jose from 'jose';
 import { getAuthSecret } from '../_lib/auth.js';
+import { withSentry } from '../_lib/sentry.js';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const cookies = req.headers.cookie || '';
     const match = cookies.match(/womanie_session=([^;]+)/);
@@ -26,3 +27,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.redirect(302, '/');
   }
 }
+
+export default withSentry(handler);

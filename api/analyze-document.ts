@@ -1,5 +1,6 @@
 import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { withSentry } from './_lib/sentry.js';
 
 // Allow longer execution for AI analysis
 export const config = {
@@ -12,7 +13,7 @@ async function hashRequest(data: string): Promise<string> {
   return [...new Uint8Array(hashBuffer)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -505,3 +506,5 @@ async function processWithAI(
     cached: false,
   });
 }
+
+export default withSentry(handler);

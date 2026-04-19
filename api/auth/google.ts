@@ -1,7 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { withSentry } from '../_lib/sentry.js';
 
 // Redirect to Google OAuth
-export default function handler(req: VercelRequest, res: VercelResponse) {
+function handler(req: VercelRequest, res: VercelResponse) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const redirectUri = `${process.env.SITE_URL || 'https://womanie.info'}/api/auth/callback`;
 
@@ -16,3 +17,5 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
   res.redirect(302, `https://accounts.google.com/o/oauth2/v2/auth?${params}`);
 }
+
+export default withSentry(handler);
