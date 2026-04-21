@@ -617,7 +617,7 @@ export default function MedicalHistory() {
   const fetchData = async () => {
     try {
       const [medRes, docRes, profileRes] = await Promise.all([
-        db.from('medical_extracted_data').select('*').eq('user_id', user!.id).order('date_recorded', { ascending: false, nullsFirst: false }),
+        db.from('current_extracted_data').select('*').eq('user_id', user!.id).order('date_recorded', { ascending: false, nullsFirst: false }),
         db.from('health_documents').select('id, file_name, file_path, mime_type, ai_suggested_name, ai_summary, ai_suggested_category, uploaded_at, document_type').eq('user_id', user!.id).order('uploaded_at', { ascending: false }),
         db.from('profiles').select('life_stage').eq('id', user!.id).single(),
       ]);
@@ -675,7 +675,9 @@ export default function MedicalHistory() {
     if (!user) return;
     setReanalyzingDoc(doc.id);
     try {
-      await db.from('medical_extracted_data').delete().eq('document_id', doc.id);
+      // Re-analysis is now non-destructive: the backend writes a new
+      // document_analyses row and only flips the current flag on success.
+      // Prior analyses stay queryable as history.
       await db.functions.invoke('analyze-document', {
         body: { documentId: doc.id, userId: user.id, filePath: doc.file_path, fileName: doc.file_name, mimeType: doc.mime_type },
       });
@@ -694,7 +696,8 @@ export default function MedicalHistory() {
     setReanalyzing(true);
     const total = documents.length;
     setReanalyzeProgress({ done: 0, total });
-    await db.from('medical_extracted_data').delete().eq('user_id', user.id);
+    // No pre-delete — the backend handles versioning. Prior analyses
+    // stay queryable until each new one replaces them atomically.
 
     // Process 3 documents in parallel for speed
     let done = 0;

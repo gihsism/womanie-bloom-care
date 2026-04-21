@@ -442,20 +442,30 @@ async function processWithAI(
     }).join('\n');
   }
 
-  // Update document
-  await sql.query(
-    'UPDATE health_documents SET ai_suggested_name = $1, ai_suggested_category = $2, ai_summary = $3 WHERE id = $4 AND user_id = $5',
-    [analysis.name || fileName, analysis.category || 'other', enhancedSummary, documentId, userId]
-  );
+  const analysisName = analysis.name || fileName;
+  const analysisCategory = analysis.category || 'other';
+  const model = 'claude-sonnet-4-20250514';
 
-  // Insert extracted data
+  // Step 1: create a new document_analyses row in a pending state
+  // (is_current = FALSE). We only flip it to TRUE once all extracted
+  // data is written — so a crash mid-write leaves the prior analysis
+  // intact.
+  const analysisRow = await sql.query(
+    `INSERT INTO document_analyses (document_id, user_id, model, name, category, summary, is_current)
+     VALUES ($1, $2, $3, $4, $5, $6, FALSE) RETURNING id`,
+    [documentId, userId, model, analysisName, analysisCategory, enhancedSummary]
+  );
+  const analysisId = analysisRow[0].id as string;
+
+  // Step 2: insert extracted data, tagged with the new analysis_id.
+  // Old rows stay untouched — they belong to the previous analysis.
   if (Array.isArray(analysis.extracted_data) && analysis.extracted_data.length > 0) {
     for (const item of analysis.extracted_data) {
       await sql.query(
-        `INSERT INTO medical_extracted_data (user_id, document_id, data_type, title, value, unit, reference_range, status, date_recorded, notes, raw_data)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+        `INSERT INTO medical_extracted_data (user_id, document_id, analysis_id, data_type, title, value, unit, reference_range, status, date_recorded, notes, raw_data)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
         [
-          userId, documentId,
+          userId, documentId, analysisId,
           item.data_type || 'other', item.title || 'Unknown',
           item.value || null, item.unit || null, item.reference_range || null,
           item.status || null, item.date_recorded || null, item.notes || null,
@@ -465,7 +475,7 @@ async function processWithAI(
     }
   }
 
-  // Insert risk screening as extracted data items
+  // Step 3: risk screening as extracted data items (same analysis_id)
   if (analysis.risk_screening) {
     const riskMap: Record<string, string> = {
       preeclampsia_risk: 'Preeclampsia Risk',
@@ -481,10 +491,10 @@ async function processWithAI(
       const riskVal = analysis.risk_screening[key];
       if (riskVal && riskVal !== 'null' && riskVal !== null) {
         await sql.query(
-          `INSERT INTO medical_extracted_data (user_id, document_id, data_type, title, value, unit, reference_range, status, date_recorded, notes, raw_data)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+          `INSERT INTO medical_extracted_data (user_id, document_id, analysis_id, data_type, title, value, unit, reference_range, status, date_recorded, notes, raw_data)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
           [
-            userId, documentId,
+            userId, documentId, analysisId,
             'risk_screening', label,
             riskVal, null, null,
             riskVal === 'low' ? 'normal' : riskVal === 'moderate' ? 'abnormal' : riskVal === 'high' ? 'critical' : 'informational',
@@ -496,8 +506,19 @@ async function processWithAI(
     }
   }
 
+  // Step 4: atomically flip the current-flag and update the denormalized
+  // summary/name/category on health_documents. Any prior analysis for
+  // this document becomes history; its extracted data remains queryable
+  // via document_analyses.
+  await sql.transaction([
+    sql`UPDATE document_analyses SET is_current = FALSE WHERE document_id = ${documentId} AND is_current = TRUE AND id != ${analysisId}`,
+    sql`UPDATE document_analyses SET is_current = TRUE WHERE id = ${analysisId}`,
+    sql`UPDATE health_documents SET ai_suggested_name = ${analysisName}, ai_suggested_category = ${analysisCategory}, ai_summary = ${enhancedSummary} WHERE id = ${documentId} AND user_id = ${userId}`,
+  ]);
+
   return res.status(200).json({
     success: true,
+    analysis_id: analysisId,
     extracted: analysis.extracted_data?.length || 0,
     crossReferences: analysis.cross_references?.length || 0,
     name: analysis.name,
