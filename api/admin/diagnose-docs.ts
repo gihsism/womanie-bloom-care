@@ -35,7 +35,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         )
       : [];
     const knownById = new Map<string, { id: string; email: string }>();
-    for (const u of knownUsers) knownById.set(u.id, u);
+    for (const u of knownUsers as Array<{ id: string; email: string }>) knownById.set(u.id, u);
 
     const groups = docGroups.map((g: any) => {
       const known = knownById.get(g.user_id);
