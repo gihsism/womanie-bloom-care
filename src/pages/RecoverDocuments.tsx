@@ -38,7 +38,7 @@ const RecoverDocuments = () => {
   const load = async () => {
     setLoading(true);
     try {
-      const r = await fetch('/api/admin/diagnose-docs', { credentials: 'include' });
+      const r = await fetch('/api/admin/docs', { credentials: 'include' });
       if (!r.ok) throw new Error((await r.json()).error || 'Failed');
       setData(await r.json());
     } catch (e) {
@@ -55,7 +55,7 @@ const RecoverDocuments = () => {
   const claim = async (oldUserId: string) => {
     setClaiming(oldUserId);
     try {
-      const r = await fetch('/api/admin/claim-docs', {
+      const r = await fetch('/api/admin/docs', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

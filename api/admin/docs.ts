@@ -3,15 +3,16 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from '../_lib/auth.js';
 import { withSentry } from '../_lib/sentry.js';
 
+// Combined admin-docs endpoint (fits the Hobby-plan function cap):
+//   GET  /api/admin/docs  → diagnose user_id groupings in health_documents
+//   POST /api/admin/docs  { oldUserId } → claim rows from an orphan id
 async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
-
   const user = await getAuthUser(req);
   if (!user) return res.status(401).json({ error: 'Not authenticated' });
 
-  try {
-    const sql = neon(process.env.DATABASE_URL!);
+  const sql = neon(process.env.DATABASE_URL!);
 
+  if (req.method === 'GET') {
     const docGroups = await sql.query(
       `SELECT user_id, COUNT(*)::int AS doc_count, MIN(uploaded_at) AS first_upload, MAX(uploaded_at) AS last_upload
        FROM health_documents
@@ -29,10 +30,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     const userIds = docGroups.map((g: any) => g.user_id);
     const knownUsers = userIds.length
-      ? await sql.query(
-          `SELECT id, email FROM auth_users WHERE id = ANY($1::text[])`,
-          [userIds]
-        )
+      ? await sql.query(`SELECT id, email FROM auth_users WHERE id = ANY($1::text[])`, [userIds])
       : [];
     const knownById = new Map<string, { id: string; email: string }>();
     for (const u of knownUsers as Array<{ id: string; email: string }>) knownById.set(u.id, u);
@@ -56,10 +54,45 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       total_groups: groups.length,
       groups,
     });
-  } catch (error) {
-    console.error('diagnose-docs error:', error);
-    return res.status(500).json({ error: error instanceof Error ? error.message : 'Internal error' });
   }
+
+  if (req.method === 'POST') {
+    const { oldUserId } = req.body || {};
+    if (!oldUserId || typeof oldUserId !== 'string') {
+      return res.status(400).json({ error: 'oldUserId required' });
+    }
+    if (oldUserId === user.id) {
+      return res.status(400).json({ error: 'Already owned by current user' });
+    }
+
+    const existing = await sql.query('SELECT id, email FROM auth_users WHERE id = $1', [oldUserId]);
+    if (existing.length > 0) {
+      const ownerEmail = ((existing[0].email as string) || '').toLowerCase();
+      const currentEmail = (user.email || '').toLowerCase();
+      if (!currentEmail || ownerEmail !== currentEmail) {
+        return res.status(403).json({ error: 'Cannot claim: oldUserId belongs to a different account' });
+      }
+    }
+
+    const docs = await sql.query(
+      'UPDATE health_documents SET user_id = $1 WHERE user_id = $2 RETURNING id',
+      [user.id, oldUserId]
+    );
+    const data = await sql.query(
+      'UPDATE medical_extracted_data SET user_id = $1 WHERE user_id = $2 RETURNING id',
+      [user.id, oldUserId]
+    );
+
+    return res.status(200).json({
+      success: true,
+      claimed_documents: docs.length,
+      claimed_extracted_data: data.length,
+      from: oldUserId,
+      to: user.id,
+    });
+  }
+
+  return res.status(405).json({ error: 'Method not allowed' });
 }
 
 export default withSentry(handler);
