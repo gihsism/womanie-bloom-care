@@ -30,6 +30,18 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const model = ALLOWED_MODELS.includes(requestedModel) ? requestedModel : 'claude-haiku-4-5-20251001';
 
   const sql = neon(process.env.DATABASE_URL!);
+
+  // Persist the latest user turn before calling the model so history
+  // survives even if the stream fails mid-response. Skip synthetic
+  // system-context messages (they embed patient data in-line).
+  const lastMsg = messages[messages.length - 1];
+  if (lastMsg?.role === 'user' && typeof lastMsg.content === 'string' && !lastMsg.content.startsWith('[SYSTEM CONTEXT')) {
+    await sql.query(
+      'INSERT INTO chat_messages (user_id, role, content) VALUES ($1, $2, $3)',
+      [user.id, 'user', lastMsg.content]
+    );
+  }
+
   const [docs, extracted, profileRow] = await Promise.all([
     sql.query(
       `SELECT file_name, ai_suggested_name, ai_summary, ai_suggested_category, document_type
@@ -135,6 +147,7 @@ ${medicalContext || 'No medical records available yet. Encourage the patient to 
   const reader = aiResponse.body!.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
+  let assistantText = '';
 
   try {
     while (true) {
@@ -150,7 +163,9 @@ ${medicalContext || 'No medical records available yet. Encourage the patient to 
         try {
           const event = JSON.parse(jsonStr);
           if (event.type === 'content_block_delta' && event.delta?.text) {
-            const openaiChunk = { choices: [{ delta: { content: event.delta.text } }] };
+            const text = event.delta.text;
+            assistantText += text;
+            const openaiChunk = { choices: [{ delta: { content: text } }] };
             res.write(`data: ${JSON.stringify(openaiChunk)}\n\n`);
           }
         } catch {
@@ -159,6 +174,12 @@ ${medicalContext || 'No medical records available yet. Encourage the patient to 
       }
     }
   } finally {
+    if (assistantText) {
+      await sql.query(
+        'INSERT INTO chat_messages (user_id, role, content, model) VALUES ($1, $2, $3, $4)',
+        [user.id, 'assistant', assistantText, model]
+      ).catch(() => {});
+    }
     res.write('data: [DONE]\n\n');
     res.end();
   }

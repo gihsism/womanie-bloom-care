@@ -196,16 +196,8 @@ export default function AIDoctorChat() {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [chatMode, setChatMode] = useState<ChatMode>('ai');
-  const [messages, setMessages] = useState<Msg[]>(() => {
-    try {
-      const saved = localStorage.getItem('womanie_chat_history');
-      if (saved) {
-        const parsed = JSON.parse(saved) as Msg[];
-        if (parsed.length > 1) return parsed;
-      }
-    } catch { /* ignore */ }
-    return [WELCOME_MESSAGE];
-  });
+  const [messages, setMessages] = useState<Msg[]>([WELCOME_MESSAGE]);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [selectedModel, setSelectedModel] = useState('claude-haiku-4-5-20251001');
@@ -272,11 +264,53 @@ export default function AIDoctorChat() {
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-    // Save chat history (skip if only welcome message)
-    if (messages.length > 1) {
-      try { localStorage.setItem('womanie_chat_history', JSON.stringify(messages)); } catch { /* ignore */ }
-    }
   }, [messages]);
+
+  // Load history from server on mount. If localStorage has a prior
+  // session and the server has nothing, migrate once then clear it.
+  useEffect(() => {
+    if (!user || historyLoaded) return;
+    (async () => {
+      try {
+        const resp = await fetch('/api/chat/messages', { credentials: 'include' });
+        if (!resp.ok) return;
+        const data = await resp.json();
+        const serverMessages: Msg[] = (data.messages || []).map((m: { role: string; content: string }) => ({
+          role: m.role as 'user' | 'assistant',
+          content: m.content,
+        }));
+
+        if (serverMessages.length > 0) {
+          setMessages([WELCOME_MESSAGE, ...serverMessages]);
+        } else {
+          // Server empty — attempt one-time migration from localStorage
+          try {
+            const saved = localStorage.getItem('womanie_chat_history');
+            if (saved) {
+              const parsed = JSON.parse(saved) as Msg[];
+              const migratable = parsed.filter(m => m.role === 'user' || m.role === 'assistant');
+              if (migratable.length > 0) {
+                const imp = await fetch('/api/chat/messages', {
+                  method: 'POST',
+                  credentials: 'include',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ messages: migratable }),
+                });
+                if (imp.ok) {
+                  localStorage.removeItem('womanie_chat_history');
+                  setMessages([WELCOME_MESSAGE, ...migratable]);
+                }
+              }
+            }
+          } catch { /* ignore migration errors */ }
+        }
+      } catch (error) {
+        console.error('Chat history load failed:', error);
+      } finally {
+        setHistoryLoaded(true);
+      }
+    })();
+  }, [user, historyLoaded]);
 
   const handleSend = async () => {
     const text = input.trim();
@@ -335,10 +369,13 @@ export default function AIDoctorChat() {
     }
   };
 
-  const clearChat = () => {
+  const clearChat = async () => {
     setMessages([WELCOME_MESSAGE]);
     setInput('');
     try { localStorage.removeItem('womanie_chat_history'); } catch { /* ignore */ }
+    try {
+      await fetch('/api/chat/messages', { method: 'DELETE', credentials: 'include' });
+    } catch { /* ignore */ }
   };
 
   // Context-aware suggested questions based on medical data
