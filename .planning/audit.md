@@ -172,6 +172,29 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 early morning (session 2)
+
+- **af3e5f2** — new `RecentFindings` card on PatientDashboard. Pulls `current_extracted_data`, filters to critical/abnormal, sorts by severity+recency, top 5 visible with value, ref range, AI note, and relative date. Hides when clean. Subscribes to `onHealthDataChange`. Directly delivers on Alena's "dashboard updates based on analysis" ask.
+- **d2996c2** — parse robustness. Helper `tryParseAnalysisJson` with lenient + brace-trim fallback. On parse failure, re-ask Claude once with the broken reply quoted back and a strict-JSON instruction; overwrite `llm_cache` on success so we don't replay the bad reply. If still broken, return `502 {error:'parse_failed'}` instead of silently saving a text blob. Closes P2 #14.
+- **9d6e3ec** — new `/api/docs/delete` endpoint. Runs `medical_extracted_data` + `document_analyses` + `health_documents` deletes in one Neon transaction, then best-effort `@vercel/blob` `del()`. Fixes orphans and the old silent blob leak. `MedicalHistory.deleteDocument` now just POSTs to it and emits a data-change. Closes P0 #4.
+- **3df2546** — deleted the unused duplicate `friendlyTestNames` in MedicalHistory. Closes P2 #15.
+- **2962c53** — "Analysis stalled · tap to retry" state on doc cards when `uploaded_at` is > 3 min old and `ai_summary` is still null. Previously the card just sat on "Analyzing…" forever if anything failed. Closes part of P2 #18.
+
+Remaining open after session 2:
+- P0 #5 transaction atomicity — subtle; schedule after observability.
+- P1 #8 cache TTL (schema change, HANDOFF).
+- P1 #12 ai-doctor-chat synthetic-message prefix sniff.
+- P2 #16 filename collision (mostly addressed by user.id prefix from the security fix).
+- P2 #17 orphaned chat messages.
+- P2 #19 timezone-aware today's date.
+
+Next session candidates, in rough order:
+1. Trend detection across docs (e.g. ferritin over 3 panels) — pure compute on existing `current_extracted_data`, big visible value.
+2. Timezone-aware date in prompt (#19) — trivial.
+3. Tests for `/api/db` ownership enforcement — defend the P0 fix.
+4. Switch synthetic chat messages to a role-based flag (#12).
+5. Observability: structured logging + Sentry spans for analysis latency + cache hit rate.
+
 ### 2026-04-22 evening (session 1)
 
 Shipped, top-down:
