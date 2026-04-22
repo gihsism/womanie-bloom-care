@@ -15,9 +15,10 @@ interface DocumentUploadProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   showTrigger?: boolean;
+  onUploaded?: () => void;
 }
 
-const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true }: DocumentUploadProps) => {
+const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true, onUploaded }: DocumentUploadProps) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setIsOpen = (v: boolean) => {
@@ -130,6 +131,10 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
         title: 'Uploaded!',
         description: 'Analyzing in the background — results will appear in Health Records shortly.',
       });
+
+      // Let the parent know so it can refetch its doc list — otherwise
+      // the just-uploaded doc won't appear until the next reload.
+      onUploaded?.();
 
       // Fire-and-forget: Vercel runs the handler to completion regardless
       // of whether the browser is still listening, so we don't block the

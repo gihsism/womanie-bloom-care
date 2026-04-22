@@ -1056,7 +1056,7 @@ export default function MedicalHistory() {
             </div>
           </Card>
         )}
-        <DocumentUpload />
+        <DocumentUpload onUploaded={fetchData} />
 
         {/* Section quick nav — only show when there's data */}
         {hasData && (
