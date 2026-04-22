@@ -89,16 +89,19 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
     setUploading(true);
 
     try {
-      // Stream upload to Vercel Blob via PUT (server-side, no body size issue with streaming)
-      const uploadResp = await fetch(`/api/upload?filename=${encodeURIComponent(`${user.id}/${Date.now()}-${file.name}`)}`, {
-        method: 'PUT',
-        body: file,
-      });
-      if (!uploadResp.ok) {
-        const err = await uploadResp.json().catch(() => ({}));
-        throw new Error(err.error || 'Upload failed');
-      }
-      const { url: fileUrl } = await uploadResp.json();
+      // Browser uploads directly to Vercel Blob via short-lived token.
+      // Bypasses the 4.5 MB serverless gateway cap so large PDFs work.
+      const { upload } = await import('@vercel/blob/client');
+      const blob = await upload(
+        `${user.id}/${Date.now()}-${file.name}`,
+        file,
+        {
+          access: 'public',
+          handleUploadUrl: '/api/upload',
+          contentType: file.type,
+        }
+      );
+      const fileUrl = blob.url;
 
       // Save metadata to database
       const { data: insertData, error: dbError } = await db

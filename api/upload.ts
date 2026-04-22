@@ -26,7 +26,14 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         body,
         request: req as any,
         onBeforeGenerateToken: async () => ({
-          allowedContentTypes: ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg', 'image/webp'],
+          allowedContentTypes: [
+            'application/pdf',
+            'image/jpeg',
+            'image/png',
+            'image/jpg',
+            'image/webp',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          ],
           maximumSizeInBytes: 200 * 1024 * 1024,
         }),
         onUploadCompleted: async ({ blob }) => {
