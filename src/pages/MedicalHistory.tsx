@@ -620,11 +620,12 @@ export default function MedicalHistory() {
   // Also tracks the previous pending id set so we can fire a data-
   // change event when a doc transitions from pending → analyzed,
   // letting dashboard widgets refresh without having to poll themselves.
+  // Uses exponential backoff (2s → 4s → 8s, cap 10s) so the refetch
+  // rate decays while we wait for a 30–90s Claude call.
   const pendingSinceRef = useRef<number | null>(null);
   const prevPendingRef = useRef<Set<string>>(new Set());
   useEffect(() => {
     const pendingIds = new Set(documents.filter(d => !d.ai_summary).map(d => d.id));
-    // Compare against previous tick to detect analyses that just landed.
     for (const id of prevPendingRef.current) {
       if (!pendingIds.has(id)) {
         emitHealthDataChange();
@@ -638,15 +639,25 @@ export default function MedicalHistory() {
       return;
     }
     if (pendingSinceRef.current === null) pendingSinceRef.current = Date.now();
-    const id = setInterval(() => {
+
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    let delay = 2000;
+    const tick = () => {
+      if (cancelled) return;
       if (pendingSinceRef.current && Date.now() - pendingSinceRef.current > 3 * 60 * 1000) {
-        clearInterval(id);
         pendingSinceRef.current = null;
         return;
       }
       fetchData();
-    }, 5000);
-    return () => clearInterval(id);
+      delay = Math.min(delay * 2, 10000);
+      timer = setTimeout(tick, delay);
+    };
+    timer = setTimeout(tick, delay);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [documents, user]);
 
   // Listen for external data changes (e.g. other pages' DocumentUpload)
@@ -984,10 +995,19 @@ export default function MedicalHistory() {
                       <span className="text-base flex-shrink-0">{categoryIcon}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{doc.ai_suggested_name || doc.file_name}</p>
-                        <p className="text-[11px] text-muted-foreground">
-                          {doc.uploaded_at ? format(new Date(doc.uploaded_at), 'MMM d, yyyy') : ''}
-                          {docResults.length > 0 && ` · ${docResults.length} results`}
-                          {abnormals > 0 && ` · ${abnormals} flagged`}
+                        <p className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+                          <span>{doc.uploaded_at ? format(new Date(doc.uploaded_at), 'MMM d, yyyy') : ''}</span>
+                          {!doc.ai_summary ? (
+                            <span className="inline-flex items-center gap-1 text-primary">
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                              Analyzing…
+                            </span>
+                          ) : (
+                            <>
+                              {docResults.length > 0 && <span>· {docResults.length} results</span>}
+                              {abnormals > 0 && <span>· {abnormals} flagged</span>}
+                            </>
+                          )}
                         </p>
                       </div>
                       {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0" /> : <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
