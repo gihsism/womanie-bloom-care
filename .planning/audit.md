@@ -172,6 +172,17 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 4)
+
+- **dc8360a** — `NewDocInsights` banner at the top of Medical History. When there's a freshly analyzed doc, compares its `medical_extracted_data` rows title-by-title against all prior docs' rows and surfaces three kinds of shift: `worsened` (was ok, now abnormal/critical or stepped up), `improved` (was abnormal/critical, now stepped down), `new` (no prior reading and came back abnormal/critical). Ranked worsened → new → improved, top 6, counts overflow. Dismissible per-doc via localStorage keyed on user+doc id. Pure client-side over data already loaded on the page.
+- **6adbcea** — structured JSON stage logs in analyze-document. `logStage(documentId, stage, startedAt, extra)` emits one line per stage (start, llm_cache_hit / llm_cache_miss, anthropic_ok with token + prompt-cache usage, parsed, parse_failed, done) with elapsed ms from handler start. Greppable `"event":"analyze_document"` in Vercel logs; gives us end-to-end latency and prompt-cache hit rate without a separate metrics service.
+
+Next-session candidates:
+1. Deep-link from RecentFindings / HealthTrends / NewDocInsights into the specific expanded doc on Medical History.
+2. Rate-limit `/api/analyze-document` per user per day (in-memory is insufficient on serverless; would prefer a lightweight DB-backed bucket — flag as HANDOFF if schema needed).
+3. "Share with doctor" flow building on `patient_access_codes`.
+4. Weekly/monthly narrative summary across all docs (Claude call on `current_extracted_data`).
+
 ### 2026-04-23 early morning (session 3)
 
 - **d1413e4** — new `HealthTrends` card on PatientDashboard. Pure client-side compute over `current_extracted_data`: groups by `title`, takes tests with ≥2 parseable numeric readings, shows latest vs previous with direction, % change, status-shift label (Improved / Worsening). Sort prioritizes status flips, then larger deltas, then recency. Top 6 shown; card hides when nothing to say. Delivers ongoing visible value as Alena uploads more documents.
