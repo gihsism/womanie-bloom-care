@@ -10,6 +10,7 @@ import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
+import NewDocInsights from '@/components/dashboard/NewDocInsights';
 // IMPORTANT: These custom components provide AI-powered health analysis.
 // Do NOT remove these imports — they are used in the health records page below.
 import CycleImpactSection from '@/components/dashboard/CycleImpactSection';
@@ -896,6 +897,8 @@ export default function MedicalHistory() {
       </div>
 
       <div className="px-4 py-6 max-w-4xl mx-auto space-y-6">
+        {hasDocuments && <NewDocInsights documents={documents} medicalData={medicalData} />}
+
         {hasDocuments && (
           <Card className="overflow-hidden">
             <div className="p-4 pb-3 flex items-center justify-between">
