@@ -172,4 +172,17 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
-(Each wake-up writes a dated entry with what was shipped and what's next.)
+### 2026-04-22 evening (session 1)
+
+Shipped, top-down:
+- **c6f0797** — P0 security. Session auth required on `/api/db`, `/api/upload`, `/api/analyze-document`. `/api/db` now enforces per-table ownership via a column map; reads force the filter to the session user, writes reject owner mismatches, updates drop owner columns from the SET clause. `/api/upload` restricts pathnames to `<user.id>/`. `analyze-document` rejects when `req.body.userId` ≠ session. Closes items 1–3 from P0.
+- **87c77da** — `callAnthropicWithRetry` with 250 ms / 1 s / 4 s backoff on 5xx and 429; batched the per-value INSERT loop into a single multi-row INSERT. Closes P1 #6 and #13.
+- **51446f5** — Anthropic prompt caching. Split `buildSystemPrompt` into `STATIC_RULES` const + `buildDynamicHeader`; sent `system` as a two-block array with `cache_control: ephemeral` on the static block. Local `llm_cache` still hashes the full prompt so rule changes invalidate naturally. Closes P1 #7.
+- **322f9f6** — Dashboard auto-refresh. `src/lib/data-events.ts` exposes a module-level emit/subscribe pair. DocumentUpload emits on insert; MedicalHistory polling emits when a doc transitions from `!ai_summary` to `ai_summary` (tracked via ref). CycleLabInsights, ModeLabInsights, PregnancyLabInsights, HealthSummaryWidget, HealthStatistics all subscribe. Also fixed two pre-existing bugs on HealthStatistics while editing: missing `usePageTitle` import and empty-session `db.auth.getSession()` usage. Closes P1 #10 and #11.
+
+Remaining P0: #4 (non-atomic delete) and #5 (transaction atomicity under timeout) — both carry some schema/backend risk, queued for next session.
+
+Remaining P1 (easy wins next up): #8 cache TTL, #9 polling backoff, #12 synthetic message flag, #14 JSON parse loudness, #15 duplicate friendlyTestNames.
+
+Potential next high-value: visible "Analyzing…" status badge on doc cards; "Recent findings" card on PatientDashboard (critical/abnormal values surfaced at-a-glance — aligned with Alena's "dashboard updates based on analysis" ask).
+
