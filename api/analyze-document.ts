@@ -16,6 +16,33 @@ async function hashRequest(data: string): Promise<string> {
   return [...new Uint8Array(hashBuffer)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// Call Anthropic with bounded exponential backoff on 5xx/429. Returns the
+// successful Response. Throws on persistent failure or any 4xx-except-429.
+async function callAnthropicWithRetry(apiKey: string, body: unknown): Promise<Response> {
+  const delays = [250, 1000, 4000];
+  let lastErr: unknown;
+  for (let attempt = 0; attempt <= delays.length; attempt++) {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+    if (resp.ok) return resp;
+    const status = resp.status;
+    const transient = status >= 500 || status === 429;
+    const errText = await resp.text().catch(() => '');
+    console.error(`Anthropic error (attempt ${attempt + 1}):`, status, errText.slice(0, 300));
+    lastErr = new Error(`AI analysis failed: ${status}`);
+    if (!transient || attempt === delays.length) throw lastErr;
+    await new Promise(r => setTimeout(r, delays[attempt]));
+  }
+  throw lastErr ?? new Error('AI analysis failed');
+}
+
 async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -381,27 +408,15 @@ async function processWithAI(
       ? [{ role: 'user', content: userContent }]
       : [{ role: 'user', content: userContent }];
 
-    const aiResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 8000,
-        system: systemPrompt,
-        messages,
-        temperature: 0.2,
-      }),
+    // Retry on transient upstream failures (5xx and 429). A single flaky
+    // response would otherwise dump the whole analysis onto the user.
+    const aiResponse = await callAnthropicWithRetry(apiKey, {
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8000,
+      system: systemPrompt,
+      messages,
+      temperature: 0.2,
     });
-
-    if (!aiResponse.ok) {
-      const errText = await aiResponse.text();
-      console.error('Anthropic error:', aiResponse.status, errText);
-      throw new Error(`AI analysis failed: ${aiResponse.status}`);
-    }
 
     const aiData = await aiResponse.json();
     aiContent = aiData.content?.[0]?.text;
@@ -466,25 +481,28 @@ async function processWithAI(
   );
   const analysisId = analysisRow[0].id as string;
 
-  // Step 2: insert extracted data, tagged with the new analysis_id.
-  // Old rows stay untouched — they belong to the previous analysis.
-  if (Array.isArray(analysis.extracted_data) && analysis.extracted_data.length > 0) {
+  // Step 2 + 3: collect every extracted_data row we want to write
+  // (lab results, conditions, medications, plus risk_screening items)
+  // and issue a single multi-row INSERT. This replaces the previous
+  // 20–40 sequential round-trips to Neon — worth several seconds per
+  // document.
+  const rows: any[][] = [];
+  if (Array.isArray(analysis.extracted_data)) {
     for (const item of analysis.extracted_data) {
-      await sql.query(
-        `INSERT INTO medical_extracted_data (user_id, document_id, analysis_id, data_type, title, value, unit, reference_range, status, date_recorded, notes, raw_data)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-        [
-          userId, documentId, analysisId,
-          item.data_type || 'other', item.title || 'Unknown',
-          item.value || null, item.unit || null, item.reference_range || null,
-          item.status || null, item.date_recorded || null, item.notes || null,
-          JSON.stringify({ priority: item.priority, panel: item.panel, possible_conditions: item.possible_conditions, is_repeat_test: item.is_repeat_test }),
-        ]
-      );
+      rows.push([
+        userId, documentId, analysisId,
+        item.data_type || 'other', item.title || 'Unknown',
+        item.value ?? null, item.unit ?? null, item.reference_range ?? null,
+        item.status ?? null, item.date_recorded ?? null, item.notes ?? null,
+        JSON.stringify({
+          priority: item.priority,
+          panel: item.panel,
+          possible_conditions: item.possible_conditions,
+          is_repeat_test: item.is_repeat_test,
+        }),
+      ]);
     }
   }
-
-  // Step 3: risk screening as extracted data items (same analysis_id)
   if (analysis.risk_screening) {
     const riskMap: Record<string, string> = {
       preeclampsia_risk: 'Preeclampsia Risk',
@@ -499,20 +517,31 @@ async function processWithAI(
     for (const [key, label] of Object.entries(riskMap)) {
       const riskVal = analysis.risk_screening[key];
       if (riskVal && riskVal !== 'null' && riskVal !== null) {
-        await sql.query(
-          `INSERT INTO medical_extracted_data (user_id, document_id, analysis_id, data_type, title, value, unit, reference_range, status, date_recorded, notes, raw_data)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-          [
-            userId, documentId, analysisId,
-            'risk_screening', label,
-            riskVal, null, null,
-            riskVal === 'low' ? 'normal' : riskVal === 'moderate' ? 'abnormal' : riskVal === 'high' ? 'critical' : 'informational',
-            null, `AI-assessed ${label.toLowerCase()} based on cross-referencing multiple test results.`,
-            JSON.stringify({ risk_type: key, source: 'ai_analysis' }),
-          ]
-        );
+        rows.push([
+          userId, documentId, analysisId,
+          'risk_screening', label,
+          riskVal, null, null,
+          riskVal === 'low' ? 'normal' : riskVal === 'moderate' ? 'abnormal' : riskVal === 'high' ? 'critical' : 'informational',
+          null, `AI-assessed ${label.toLowerCase()} based on cross-referencing multiple test results.`,
+          JSON.stringify({ risk_type: key, source: 'ai_analysis' }),
+        ]);
       }
     }
+  }
+  if (rows.length > 0) {
+    const colCount = 12;
+    const placeholders = rows
+      .map((_, rowIdx) =>
+        `(${Array.from({ length: colCount }, (_, c) => `$${rowIdx * colCount + c + 1}`).join(', ')})`
+      )
+      .join(', ');
+    const params = rows.flat();
+    await sql.query(
+      `INSERT INTO medical_extracted_data
+         (user_id, document_id, analysis_id, data_type, title, value, unit, reference_range, status, date_recorded, notes, raw_data)
+       VALUES ${placeholders}`,
+      params
+    );
   }
 
   // Step 4: atomically flip the current-flag and update the denormalized
