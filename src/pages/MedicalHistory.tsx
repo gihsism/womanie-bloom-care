@@ -925,6 +925,13 @@ export default function MedicalHistory() {
                   : doc.ai_suggested_category === 'imaging' ? '📷'
                   : doc.ai_suggested_category === 'prescription' ? '💊'
                   : doc.ai_suggested_category === 'consultation_notes' ? '📋' : '📄';
+                // A doc that's been sitting without an ai_summary for more
+                // than the polling window is almost certainly stalled —
+                // either Claude failed, the dispatched fetch was dropped,
+                // or the result didn't write back. Surface it as a
+                // retryable error instead of indefinite "Analyzing…".
+                const uploadedMsAgo = doc.uploaded_at ? Date.now() - new Date(doc.uploaded_at).getTime() : 0;
+                const analysisStalled = !doc.ai_summary && uploadedMsAgo > 3 * 60 * 1000;
 
                 return (
                   <div key={doc.id}>
@@ -940,7 +947,15 @@ export default function MedicalHistory() {
                         <p className="text-sm font-medium truncate">{doc.ai_suggested_name || doc.file_name}</p>
                         <p className="text-[11px] text-muted-foreground flex items-center gap-1.5">
                           <span>{doc.uploaded_at ? format(new Date(doc.uploaded_at), 'MMM d, yyyy') : ''}</span>
-                          {!doc.ai_summary ? (
+                          {analysisStalled ? (
+                            <span
+                              className="inline-flex items-center gap-1 text-destructive font-medium cursor-pointer hover:underline"
+                              onClick={(e) => { e.stopPropagation(); reanalyzeOne(doc); }}
+                            >
+                              <AlertTriangle className="h-3 w-3" />
+                              Analysis stalled · tap to retry
+                            </span>
+                          ) : !doc.ai_summary ? (
                             <span className="inline-flex items-center gap-1 text-primary">
                               <Loader2 className="h-3 w-3 animate-spin" />
                               Analyzing…
