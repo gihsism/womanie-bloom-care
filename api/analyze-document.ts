@@ -16,6 +16,30 @@ async function hashRequest(data: string): Promise<string> {
   return [...new Uint8Array(hashBuffer)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// Best-effort parse of a Claude reply into our expected analysis shape.
+// Returns null if the content can't be coaxed into valid JSON at all, so
+// the caller can decide whether to retry or fail loudly.
+function tryParseAnalysisJson(raw: string): any | null {
+  if (!raw) return null;
+  const cleaned = raw.replace(/^```json?\s*/i, '').replace(/```\s*$/i, '').trim();
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    // Sometimes the model wraps the object in prose. Fall back to the
+    // first { ... } we can find.
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if (start >= 0 && end > start) {
+      try {
+        return JSON.parse(cleaned.slice(start, end + 1));
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+}
+
 // Call Anthropic with bounded exponential backoff on 5xx/429. Returns the
 // successful Response. Throws on persistent failure or any 4xx-except-429.
 async function callAnthropicWithRetry(apiKey: string, body: unknown): Promise<Response> {
@@ -445,25 +469,55 @@ async function processWithAI(
 
   if (!aiContent) throw new Error('No AI response');
 
-  // Parse JSON
-  let analysis: any;
-  try {
-    const cleaned = aiContent.replace(/^```json?\s*/i, '').replace(/```\s*$/i, '').trim();
-    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-    analysis = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(cleaned);
-    console.log(`Parsed OK. extracted_data: ${analysis.extracted_data?.length || 0} items`);
-  } catch {
-    console.error('JSON parse failed. First 300:', aiContent.slice(0, 300));
-    const start = aiContent.indexOf('{');
-    const end = aiContent.lastIndexOf('}');
-    if (start >= 0 && end > start) {
-      try { analysis = JSON.parse(aiContent.slice(start, end + 1)); } catch {
-        analysis = { name: fileName, category: 'other', summary: aiContent.slice(0, 1200), extracted_data: [] };
-      }
-    } else {
-      analysis = { name: fileName, category: 'other', summary: aiContent.slice(0, 1200), extracted_data: [] };
+  // Parse JSON with graceful fallbacks. If Claude returned a wrapped
+  // code block or extra prose, tryParse() unwraps and parses. If that
+  // fails, we ask Claude once more to emit strict JSON (no fences, no
+  // prose). If that second attempt also fails we surface a clear
+  // failure to the caller and write a visible warning to ai_summary
+  // rather than silently pretending we got structured data — better to
+  // let the user re-analyze than to fake a successful run.
+  let analysis = tryParseAnalysisJson(aiContent);
+  if (!analysis) {
+    console.warn(`JSON parse failed on first attempt for ${documentId}; asking Claude for strict JSON.`);
+    const fixResp = await callAnthropicWithRetry(apiKey, {
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8000,
+      system: [
+        { type: 'text', text: STATIC_RULES, cache_control: { type: 'ephemeral' } },
+        { type: 'text', text: dynamicHeader },
+      ],
+      messages: [
+        ...(Array.isArray(userContent) ? [{ role: 'user', content: userContent }] : [{ role: 'user', content: userContent }]),
+        { role: 'assistant', content: aiContent.slice(0, 4000) },
+        { role: 'user', content: 'Your previous reply was not valid JSON. Return ONLY the JSON object described in the schema — no markdown fences, no prose before or after, no commentary. Start with { and end with }.' },
+      ],
+      temperature: 0.1,
+    });
+    const fixData = await fixResp.json();
+    const fixContent: string = fixData.content?.[0]?.text ?? '';
+    analysis = tryParseAnalysisJson(fixContent);
+    if (analysis) {
+      // Overwrite the cache with the corrected content so we don't
+      // replay the broken one on the next identical doc.
+      await sql.query(
+        'INSERT INTO llm_cache (request_hash, response_text, model) VALUES ($1, $2, $3) ON CONFLICT (request_hash) DO UPDATE SET response_text = $2',
+        [cacheKey, fixContent, 'claude-sonnet-4-20250514']
+      ).catch(() => {});
     }
   }
+  if (!analysis) {
+    console.error('JSON parse failed after retry. Sample:', aiContent.slice(0, 400));
+    const failureSummary = `⚠️ Analysis returned malformed output and could not be parsed. Please re-analyze this document. If the problem persists, the file may be corrupt or in an unsupported format.`;
+    // Leave any prior successful analysis intact (don't overwrite
+    // ai_summary on health_documents) — just tell the caller we failed
+    // so the UI can retry or show an error.
+    return res.status(502).json({
+      success: false,
+      error: 'parse_failed',
+      message: failureSummary,
+    });
+  }
+  console.log(`Parsed OK. extracted_data: ${analysis.extracted_data?.length || 0} items`);
 
   // Build summary
   let enhancedSummary = analysis.summary || 'Document analyzed.';
