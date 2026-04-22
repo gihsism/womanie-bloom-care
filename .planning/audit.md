@@ -172,6 +172,27 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 early morning (session 3)
+
+- **d1413e4** — new `HealthTrends` card on PatientDashboard. Pure client-side compute over `current_extracted_data`: groups by `title`, takes tests with ≥2 parseable numeric readings, shows latest vs previous with direction, % change, status-shift label (Improved / Worsening). Sort prioritizes status flips, then larger deltas, then recency. Top 6 shown; card hides when nothing to say. Delivers ongoing visible value as Alena uploads more documents.
+- **a8899f3** — timezone-aware "Today: …" in the analysis prompt. Client sends `Intl.DateTimeFormat().resolvedOptions().timeZone`; server's `resolveToday(tz)` formats via `Intl.DateTimeFormat('en-CA', { timeZone, … })` for YYYY-MM-DD. Closes P2 #19.
+- **eac03f8** — removed the synthetic `[SYSTEM CONTEXT …]` user message the frontend prepended to every ai-doctor-chat call. The backend already loads richer context from the DB, so the snippet was a strict subset; its only effect was forcing a fragile prefix-sniff on the backend to keep it out of the message history. Frontend still computes `medicalContext` for prompt-chip selection; it's just no longer shipped. Closes P1 #12.
+
+Remaining open after session 3:
+- P0 #5 transaction atomicity — subtle; after observability.
+- P1 #8 cache TTL (schema change, HANDOFF).
+- P2 #16 filename collision — mostly addressed by the session-1 user.id prefix; could be closed with a UUID suffix but not urgent.
+- P2 #17 orphaned chat messages.
+- HANDOFFs: schema changes (RLS, analysis_status column, pending_jobs, rate-limit table, cross-document trend table).
+
+Next-session candidates (descending by user-visible value):
+1. "What's changed" banner / diff when a new analysis lands (compare new vs prior extracted_data, surface net new abnormal findings, improved flags).
+2. Per-doc "changes since last test" inline column in the expanded doc card.
+3. Weekly/monthly health report summarizing across all docs (could be Claude-generated on demand).
+4. Rate-limit `/api/analyze-document` (simple in-memory or via lightweight schema).
+5. Structured logging + Sentry spans around analysis (latency, cache hit rate, failure mode).
+6. Share-with-doctor flow — `patient_access_codes` table exists but UI is minimal.
+
 ### 2026-04-23 early morning (session 2)
 
 - **af3e5f2** — new `RecentFindings` card on PatientDashboard. Pulls `current_extracted_data`, filters to critical/abnormal, sorts by severity+recency, top 5 visible with value, ref range, AI note, and relative date. Hides when clean. Subscribes to `onHealthDataChange`. Directly delivers on Alena's "dashboard updates based on analysis" ask.
