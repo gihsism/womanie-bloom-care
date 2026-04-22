@@ -1,5 +1,6 @@
 import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { getAuthUser } from './_lib/auth.js';
 import { withSentry } from './_lib/sentry.js';
 
 // Allow longer execution for AI analysis. Claude PDF analysis on a full
@@ -22,6 +23,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  const sessionUser = await getAuthUser(req);
+  if (!sessionUser) return res.status(401).json({ error: 'Unauthorized' });
+
   try {
     const sql = neon(process.env.DATABASE_URL!);
     const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
@@ -30,6 +34,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const { documentId, userId, filePath, fileName, mimeType } = req.body;
     if (!documentId || !userId) {
       return res.status(400).json({ error: 'Missing required fields' });
+    }
+    if (userId !== sessionUser.id) {
+      return res.status(403).json({ error: 'Cannot analyze a document owned by another user' });
     }
 
     // Download file from Vercel Blob URL

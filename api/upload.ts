@@ -1,5 +1,6 @@
 import { put } from '@vercel/blob';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { getAuthUser } from './_lib/auth.js';
 import { withSentry } from './_lib/sentry.js';
 
 export const config = {
@@ -14,7 +15,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-file-name, x-user-id');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // Handle client token generation for @vercel/blob client upload
+  const user = await getAuthUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  // Handle client token generation for @vercel/blob client upload.
+  // We also validate the requested pathname starts with the session user's
+  // id — otherwise an authenticated Bob could ask for a token to upload
+  // under Alice's prefix and later claim her storage quota or files.
   if (req.method === 'POST') {
     try {
       const { handleUpload } = await import('@vercel/blob/client');
@@ -25,17 +32,23 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       const jsonResponse = await handleUpload({
         body,
         request: req as any,
-        onBeforeGenerateToken: async () => ({
-          allowedContentTypes: [
-            'application/pdf',
-            'image/jpeg',
-            'image/png',
-            'image/jpg',
-            'image/webp',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          ],
-          maximumSizeInBytes: 200 * 1024 * 1024,
-        }),
+        onBeforeGenerateToken: async (pathname: string) => {
+          if (!pathname.startsWith(`${user.id}/`)) {
+            throw new Error('Forbidden: pathname must be scoped to session user');
+          }
+          return {
+            allowedContentTypes: [
+              'application/pdf',
+              'image/jpeg',
+              'image/png',
+              'image/jpg',
+              'image/webp',
+              'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            ],
+            maximumSizeInBytes: 200 * 1024 * 1024,
+            tokenPayload: JSON.stringify({ userId: user.id }),
+          };
+        },
         onUploadCompleted: async ({ blob }) => {
           console.log('Upload completed:', blob.url);
         },
@@ -48,10 +61,12 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  // Direct server-side upload via PUT
+  // Legacy direct server-side upload via PUT. Kept for emergencies and to
+  // avoid breaking any external caller, but also scoped to the session user.
   if (req.method === 'PUT') {
     try {
-      const filename = (req.query.filename as string) || `upload-${Date.now()}`;
+      const requested = (req.query.filename as string) || `upload-${Date.now()}`;
+      const filename = requested.startsWith(`${user.id}/`) ? requested : `${user.id}/${requested}`;
 
       const blob = await put(filename, req, {
         access: 'public',
