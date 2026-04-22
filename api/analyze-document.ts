@@ -10,6 +10,26 @@ export const config = {
   maxDuration: 300,
 };
 
+// One-line JSON log per stage so the pipeline is greppable in Vercel
+// logs. Keeps every stage on the same correlation id (documentId) and
+// records elapsed ms from the handler start — lets us see where time
+// goes without wiring Sentry spans everywhere.
+function logStage(
+  documentId: string | undefined,
+  stage: string,
+  startedAt: number,
+  extra: Record<string, unknown> = {},
+) {
+  const record = {
+    event: 'analyze_document',
+    stage,
+    documentId,
+    elapsedMs: Date.now() - startedAt,
+    ...extra,
+  };
+  console.log(JSON.stringify(record));
+}
+
 async function hashRequest(data: string): Promise<string> {
   const encoder = new TextEncoder();
   const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(data));
@@ -76,6 +96,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   const sessionUser = await getAuthUser(req);
   if (!sessionUser) return res.status(401).json({ error: 'Unauthorized' });
+
+  const startedAt = Date.now();
+  const reqDocId: string | undefined = req.body?.documentId;
+  logStage(reqDocId, 'start', startedAt, {
+    mimeType: req.body?.mimeType,
+    userId: sessionUser.id,
+  });
 
   try {
     const sql = neon(process.env.DATABASE_URL!);
@@ -147,7 +174,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           }
 
           if (userContent.length > 0) {
-            return await processWithAI(sql, ANTHROPIC_API_KEY, dynamicHeader, userContent, documentId, userId, fileName, res);
+            return await processWithAI(sql, ANTHROPIC_API_KEY, dynamicHeader, userContent, documentId, userId, fileName, res, startedAt);
           }
         }
       } catch (e) {
@@ -172,7 +199,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const dynamicHeader = buildDynamicHeader(today, patientContext);
     const userContent = `Analyze this medical document "${fileName}". Extract EVERY test result as a separate item.\n\n${patientContext}\n\nDocument text:\n${documentText}`;
 
-    return await processWithAI(sql, ANTHROPIC_API_KEY, dynamicHeader, [{ type: 'text', text: userContent }], documentId, userId, fileName, res);
+    return await processWithAI(sql, ANTHROPIC_API_KEY, dynamicHeader, [{ type: 'text', text: userContent }], documentId, userId, fileName, res, startedAt);
 
   } catch (error) {
     console.error('analyze-document error:', error);
@@ -429,7 +456,7 @@ ${patientContext || ''}`;
 async function processWithAI(
   sql: any, apiKey: string, dynamicHeader: string, userContent: any,
   documentId: string, userId: string, fileName: string,
-  res: VercelResponse
+  res: VercelResponse, startedAt: number,
 ) {
   const contentStr = JSON.stringify(userContent);
   // Hash includes STATIC_RULES so a future prompt-rules revision invalidates
@@ -441,12 +468,13 @@ async function processWithAI(
 
   let aiContent: string;
 
+  const t0 = Date.now();
   if (cached.length > 0 && cached[0].response_text) {
-    console.log(`CACHE HIT for ${documentId}`);
+    logStage(documentId, 'llm_cache_hit', t0);
     aiContent = cached[0].response_text;
     await sql.query('UPDATE llm_cache SET hit_count = hit_count + 1, last_hit_at = now() WHERE request_hash = $1', [cacheKey]).catch(() => {});
   } else {
-    console.log(`CACHE MISS for ${documentId} — calling Anthropic`);
+    logStage(documentId, 'llm_cache_miss', t0);
 
     const messages = Array.isArray(userContent) && userContent[0]?.type
       ? [{ role: 'user', content: userContent }]
@@ -460,6 +488,7 @@ async function processWithAI(
     // minutes; dynamic header (today's date + patient context) follows
     // and varies per request. The static block is well over the 1024-
     // token minimum required for caching on Sonnet.
+    const anthropicStart = Date.now();
     const aiResponse = await callAnthropicWithRetry(apiKey, {
       model: 'claude-sonnet-4-20250514',
       max_tokens: 8000,
@@ -473,6 +502,13 @@ async function processWithAI(
 
     const aiData = await aiResponse.json();
     aiContent = aiData.content?.[0]?.text;
+    const usage = aiData.usage || {};
+    logStage(documentId, 'anthropic_ok', anthropicStart, {
+      inputTokens: usage.input_tokens,
+      outputTokens: usage.output_tokens,
+      cacheReadInputTokens: usage.cache_read_input_tokens,
+      cacheCreationInputTokens: usage.cache_creation_input_tokens,
+    });
 
     if (aiContent) {
       await sql.query(
@@ -521,7 +557,7 @@ async function processWithAI(
     }
   }
   if (!analysis) {
-    console.error('JSON parse failed after retry. Sample:', aiContent.slice(0, 400));
+    logStage(documentId, 'parse_failed', startedAt, { sample: aiContent.slice(0, 200) });
     const failureSummary = `⚠️ Analysis returned malformed output and could not be parsed. Please re-analyze this document. If the problem persists, the file may be corrupt or in an unsupported format.`;
     // Leave any prior successful analysis intact (don't overwrite
     // ai_summary on health_documents) — just tell the caller we failed
@@ -532,7 +568,10 @@ async function processWithAI(
       message: failureSummary,
     });
   }
-  console.log(`Parsed OK. extracted_data: ${analysis.extracted_data?.length || 0} items`);
+  logStage(documentId, 'parsed', startedAt, {
+    extractedCount: analysis.extracted_data?.length || 0,
+    crossReferences: analysis.cross_references?.length || 0,
+  });
 
   // Build summary
   let enhancedSummary = analysis.summary || 'Document analyzed.';
@@ -636,6 +675,11 @@ async function processWithAI(
     sql`UPDATE document_analyses SET is_current = TRUE WHERE id = ${analysisId}`,
     sql`UPDATE health_documents SET ai_suggested_name = ${analysisName}, ai_suggested_category = ${analysisCategory}, ai_summary = ${enhancedSummary} WHERE id = ${documentId} AND user_id = ${userId}`,
   ]);
+
+  logStage(documentId, 'done', startedAt, {
+    extractedCount: analysis.extracted_data?.length || 0,
+    summaryChars: enhancedSummary.length,
+  });
 
   return res.status(200).json({
     success: true,
