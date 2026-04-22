@@ -85,7 +85,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           }
 
           const today = new Date().toISOString().split('T')[0];
-          const systemPrompt = buildSystemPrompt(today, patientContext);
+          const dynamicHeader = buildDynamicHeader(today, patientContext);
 
           let userContent: any[];
 
@@ -108,7 +108,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           }
 
           if (userContent.length > 0) {
-            return await processWithAI(sql, ANTHROPIC_API_KEY, systemPrompt, userContent, documentId, userId, fileName, res);
+            return await processWithAI(sql, ANTHROPIC_API_KEY, dynamicHeader, userContent, documentId, userId, fileName, res);
           }
         }
       } catch (e) {
@@ -130,10 +130,10 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const today = new Date().toISOString().split('T')[0];
-    const systemPrompt = buildSystemPrompt(today, patientContext);
+    const dynamicHeader = buildDynamicHeader(today, patientContext);
     const userContent = `Analyze this medical document "${fileName}". Extract EVERY test result as a separate item.\n\n${patientContext}\n\nDocument text:\n${documentText}`;
 
-    return await processWithAI(sql, ANTHROPIC_API_KEY, systemPrompt, [{ type: 'text', text: userContent }], documentId, userId, fileName, res);
+    return await processWithAI(sql, ANTHROPIC_API_KEY, dynamicHeader, [{ type: 'text', text: userContent }], documentId, userId, fileName, res);
 
   } catch (error) {
     console.error('analyze-document error:', error);
@@ -141,11 +141,10 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
 }
 
-function buildSystemPrompt(today: string, patientContext: string): string {
-  return `You are an advanced women's health document analyzer using the latest 2024-2026 clinical research. Write for patients in plain language. Today: ${today}.
-${patientContext || ""}
-
-Return ONLY valid JSON with this structure:
+// The static, cacheable portion of the system prompt. Kept as a module
+// constant so Anthropic prompt caching can hit on it across requests —
+// only the dynamic header (today's date + patient context) varies.
+const STATIC_RULES = `Return ONLY valid JSON with this structure:
 {"name":"doc name (max 50 chars)","category":"lab_results|imaging|prescription|consultation_notes|other","summary":"3-5 sentences. Lead with most critical findings with specific values. Mention cross-referencing patterns between results. End with reassurance.","key_takeaways":["..."],"action_items":["..."],"extracted_data":[...],"cross_references":[{"pattern":"name","tests":["Test1","Test2"],"finding":"what this combination means","severity":"info|attention|urgent"}],"risk_screening":{"preeclampsia_risk":null,"gestational_diabetes_risk":null,"iron_deficiency_risk":null,"thyroid_disorder_risk":null,"pcos_risk":null,"osteoporosis_risk":null,"cardiovascular_risk":null,"autoimmune_risk":null},"cycle_data":{"cycle_length":null,"last_period_date":null,"period_length":null,"irregular":null}}
 
 Each item in extracted_data:
@@ -382,15 +381,21 @@ COMPREHENSIVE WOMEN'S HEALTH ANALYSIS RULES (2024-2026 clinical guidelines):
 
 25. Standardize test names for cross-document matching.
 26. Return ONLY the JSON object. No markdown fences.`;
+
+function buildDynamicHeader(today: string, patientContext: string): string {
+  return `You are an advanced women's health document analyzer using the latest 2024-2026 clinical research. Write for patients in plain language. Today: ${today}.
+${patientContext || ''}`;
 }
 
 async function processWithAI(
-  sql: any, apiKey: string, systemPrompt: string, userContent: any,
+  sql: any, apiKey: string, dynamicHeader: string, userContent: any,
   documentId: string, userId: string, fileName: string,
   res: VercelResponse
 ) {
   const contentStr = JSON.stringify(userContent);
-  const cacheKey = await hashRequest(systemPrompt + contentStr + 'claude-sonnet-4-20250514');
+  // Hash includes STATIC_RULES so a future prompt-rules revision invalidates
+  // the llm_cache naturally. Model name is hashed in too.
+  const cacheKey = await hashRequest(STATIC_RULES + dynamicHeader + contentStr + 'claude-sonnet-4-20250514');
 
   // Check cache
   const cached = await sql.query('SELECT response_text FROM llm_cache WHERE request_hash = $1', [cacheKey]);
@@ -410,10 +415,19 @@ async function processWithAI(
 
     // Retry on transient upstream failures (5xx and 429). A single flaky
     // response would otherwise dump the whole analysis onto the user.
+    //
+    // System is structured: STATIC_RULES first with cache_control so
+    // Anthropic can return a cached prefix on repeat requests within 5
+    // minutes; dynamic header (today's date + patient context) follows
+    // and varies per request. The static block is well over the 1024-
+    // token minimum required for caching on Sonnet.
     const aiResponse = await callAnthropicWithRetry(apiKey, {
       model: 'claude-sonnet-4-20250514',
       max_tokens: 8000,
-      system: systemPrompt,
+      system: [
+        { type: 'text', text: STATIC_RULES, cache_control: { type: 'ephemeral' } },
+        { type: 'text', text: dynamicHeader },
+      ],
       messages,
       temperature: 0.2,
     });
