@@ -325,13 +325,16 @@ export default function AIDoctorChat() {
     let assistantSoFar = '';
     const conversationForApi = newMessages.filter(m => m !== WELCOME_MESSAGE);
 
-    // Prepend medical context as a system-style message so the AI knows the user's health background
-    const messagesWithContext: Msg[] = medicalContext
-      ? [{ role: 'user', content: `[SYSTEM CONTEXT — do not repeat this to the user, use it to personalize your answers]\n${medicalContext}` }, { role: 'assistant', content: 'I have your health records loaded. How can I help?' }, ...conversationForApi]
-      : conversationForApi;
-
+    // We used to prepend a synthetic "[SYSTEM CONTEXT ...]" user
+    // message with a brief snapshot of the patient's records. The
+    // backend already loads the full set (profile, last 20 docs,
+    // last 100 extracted values) from the DB via the session user,
+    // so the prepended snippet was both a strict subset and a source
+    // of fragility (required content-prefix sniffing to avoid being
+    // persisted as a real user message). The local `medicalContext`
+    // state is still used to pick prompt suggestions below.
     await streamChat({
-      messages: messagesWithContext,
+      messages: conversationForApi,
       model: selectedModel,
       onDelta: (chunk) => {
         assistantSoFar += chunk;

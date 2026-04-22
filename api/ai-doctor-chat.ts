@@ -32,10 +32,12 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const sql = neon(process.env.DATABASE_URL!);
 
   // Persist the latest user turn before calling the model so history
-  // survives even if the stream fails mid-response. Skip synthetic
-  // system-context messages (they embed patient data in-line).
+  // survives even if the stream fails mid-response. The frontend no
+  // longer prepends synthetic system-context messages (patient data
+  // is loaded from the DB below), so a straight role === 'user'
+  // check is sufficient.
   const lastMsg = messages[messages.length - 1];
-  if (lastMsg?.role === 'user' && typeof lastMsg.content === 'string' && !lastMsg.content.startsWith('[SYSTEM CONTEXT')) {
+  if (lastMsg?.role === 'user' && typeof lastMsg.content === 'string') {
     await sql.query(
       'INSERT INTO chat_messages (user_id, role, content) VALUES ($1, $2, $3)',
       [user.id, 'user', lastMsg.content]
