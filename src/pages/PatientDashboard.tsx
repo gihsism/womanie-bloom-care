@@ -27,6 +27,7 @@ import MenopauseDashboard from '@/components/dashboard/MenopauseDashboard';
 import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import RecentFindings from '@/components/dashboard/RecentFindings';
+import HealthTrends from '@/components/dashboard/HealthTrends';
 import PregnancyLabInsights from '@/components/dashboard/PregnancyLabInsights';
 import CycleLabInsights from '@/components/dashboard/CycleLabInsights';
 import ModeLabInsights from '@/components/dashboard/ModeLabInsights';
@@ -495,6 +496,10 @@ const PatientDashboard = () => {
                 first so critical/abnormal results are visible at a
                 glance. Hides itself when there's nothing to flag. */}
             <RecentFindings />
+
+            {/* Cross-document trends — how key tests have changed over
+                multiple uploads. Hidden when there's nothing to show. */}
+            <HealthTrends />
 
             {/* Health Summary from medical documents */}
             <HealthSummaryWidget />
