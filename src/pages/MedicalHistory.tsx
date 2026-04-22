@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -613,6 +613,27 @@ export default function MedicalHistory() {
   useEffect(() => {
     if (user) fetchData();
   }, [user]);
+
+  // Poll for analysis completion while any doc is missing ai_summary.
+  // Ref-tracked deadline so refetches don't reset the 3-minute budget.
+  const pendingSinceRef = useRef<number | null>(null);
+  useEffect(() => {
+    const pending = documents.some(d => !d.ai_summary);
+    if (!pending || !user) {
+      pendingSinceRef.current = null;
+      return;
+    }
+    if (pendingSinceRef.current === null) pendingSinceRef.current = Date.now();
+    const id = setInterval(() => {
+      if (pendingSinceRef.current && Date.now() - pendingSinceRef.current > 3 * 60 * 1000) {
+        clearInterval(id);
+        pendingSinceRef.current = null;
+        return;
+      }
+      fetchData();
+    }, 5000);
+    return () => clearInterval(id);
+  }, [documents, user]);
 
   const fetchData = async () => {
     try {

@@ -128,33 +128,25 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
 
       toast({
         title: 'Uploaded!',
-        description: 'Analyzing your document with AI...',
+        description: 'Analyzing in the background — results will appear in Health Records shortly.',
       });
 
-      // Trigger AI analysis and notify when done
-      try {
-        await db.functions.invoke('analyze-document', {
-          body: {
-            documentId: insertData.id,
-            userId: user.id,
-            filePath: fileUrl,
-            fileName: file.name,
-            mimeType: file.type
-          }
-        });
-        toast({
-          title: 'Analysis complete!',
-          description: 'View your results in Health Records.',
-          action: undefined,
-        });
-      } catch (error) {
-        console.error('AI analysis error:', error);
-        toast({
-          title: 'Upload saved',
-          description: 'Document uploaded but AI analysis had an issue. Try re-analyzing from Health Records.',
-          variant: 'destructive',
-        });
-      }
+      // Fire-and-forget: Vercel runs the handler to completion regardless
+      // of whether the browser is still listening, so we don't block the
+      // UI on a 30–120s Claude call. MedicalHistory polls for ai_summary
+      // and refreshes the card once analysis lands.
+      fetch('/api/analyze-document', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documentId: insertData.id,
+          userId: user.id,
+          filePath: fileUrl,
+          fileName: file.name,
+          mimeType: file.type,
+        }),
+        keepalive: true,
+      }).catch(e => console.error('Analysis dispatch error:', e));
     } catch (error) {
       console.error('Upload error:', error);
       toast({

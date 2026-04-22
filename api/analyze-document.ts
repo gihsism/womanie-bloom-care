@@ -2,9 +2,11 @@ import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withSentry } from './_lib/sentry.js';
 
-// Allow longer execution for AI analysis
+// Allow longer execution for AI analysis. Claude PDF analysis on a full
+// lab panel with max_tokens: 8000 plus the per-result INSERTs routinely
+// exceeds 60s; 300s is Vercel's ceiling on Pro and matches real latency.
 export const config = {
-  maxDuration: 60,
+  maxDuration: 300,
 };
 
 async function hashRequest(data: string): Promise<string> {
