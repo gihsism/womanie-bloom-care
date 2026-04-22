@@ -82,13 +82,28 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
     if (!ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured');
 
-    const { documentId, userId, filePath, fileName, mimeType } = req.body;
+    const { documentId, userId, filePath, fileName, mimeType, timezone } = req.body;
     if (!documentId || !userId) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     if (userId !== sessionUser.id) {
       return res.status(403).json({ error: 'Cannot analyze a document owned by another user' });
     }
+
+    // "Today" gets embedded in the system prompt; compute it in the
+    // user's timezone when the client sent one, so the model doesn't
+    // see UTC while the patient is a day off. Falls back to UTC.
+    const resolveToday = (tz: unknown): string => {
+      const t = new Date();
+      if (typeof tz === 'string' && tz.length > 0) {
+        try {
+          return new Intl.DateTimeFormat('en-CA', {
+            timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit',
+          }).format(t);
+        } catch { /* invalid tz — fall through */ }
+      }
+      return t.toISOString().split('T')[0];
+    };
 
     // Download file from Vercel Blob URL
     let documentText = '';
@@ -108,7 +123,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
             if (profile.pregnancy_due_date) patientContext += `Currently pregnant, due date: ${profile.pregnancy_due_date}. `;
           }
 
-          const today = new Date().toISOString().split('T')[0];
+          const today = resolveToday(timezone);
           const dynamicHeader = buildDynamicHeader(today, patientContext);
 
           let userContent: any[];
@@ -153,7 +168,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       if (profile.pregnancy_due_date) patientContext += `Currently pregnant, due date: ${profile.pregnancy_due_date}. `;
     }
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = resolveToday(timezone);
     const dynamicHeader = buildDynamicHeader(today, patientContext);
     const userContent = `Analyze this medical document "${fileName}". Extract EVERY test result as a separate item.\n\n${patientContext}\n\nDocument text:\n${documentText}`;
 

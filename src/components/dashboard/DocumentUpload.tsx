@@ -144,6 +144,9 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
       // of whether the browser is still listening, so we don't block the
       // UI on a 30–120s Claude call. MedicalHistory polls for ai_summary
       // and refreshes the card once analysis lands.
+      // Pass the user's timezone so "Today: <date>" in the prompt is in
+      // their local calendar day rather than UTC.
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       fetch('/api/analyze-document', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -153,6 +156,7 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
           filePath: fileUrl,
           fileName: file.name,
           mimeType: file.type,
+          timezone,
         }),
         keepalive: true,
       }).catch(e => console.error('Analysis dispatch error:', e));
