@@ -26,6 +26,7 @@ import PreMenstrualDashboard from '@/components/dashboard/PreMenstrualDashboard'
 import MenopauseDashboard from '@/components/dashboard/MenopauseDashboard';
 import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
+import RecentFindings from '@/components/dashboard/RecentFindings';
 import PregnancyLabInsights from '@/components/dashboard/PregnancyLabInsights';
 import CycleLabInsights from '@/components/dashboard/CycleLabInsights';
 import ModeLabInsights from '@/components/dashboard/ModeLabInsights';
@@ -489,6 +490,11 @@ const PatientDashboard = () => {
                 </div>
               </Card>
             )}
+
+            {/* Most important findings from recent analyses — shown
+                first so critical/abnormal results are visible at a
+                glance. Hides itself when there's nothing to flag. */}
+            <RecentFindings />
 
             {/* Health Summary from medical documents */}
             <HealthSummaryWidget />
