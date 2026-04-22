@@ -706,17 +706,25 @@ export default function MedicalHistory() {
     }
   };
 
-  const deleteDocument = async (docId: string, filePath: string) => {
+  const deleteDocument = async (docId: string, _filePath: string) => {
     if (!user) return;
     try {
-      // Delete extracted data first
-      await db.from('medical_extracted_data').delete().eq('document_id', docId);
-      // Delete document record
-      await db.from('health_documents').delete().eq('id', docId).eq('user_id', user.id);
-      // Delete file from storage
-      await db.storage.from('health-documents').remove([filePath]);
+      // Delegate the whole cascade to /api/docs/delete — it runs the
+      // extracted_data / document_analyses / health_documents deletes
+      // in one transaction and removes the blob afterwards, so the
+      // client doesn't need to orchestrate it.
+      const resp = await fetch('/api/docs/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId: docId }),
+      });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.error || 'Delete failed');
+      }
       toast({ title: 'Document deleted' });
       await fetchData();
+      emitHealthDataChange();
     } catch (error) {
       console.error('Delete error:', error);
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete document.' });
