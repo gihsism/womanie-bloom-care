@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
 // IMPORTANT: These custom components provide AI-powered health analysis.
 // Do NOT remove these imports — they are used in the health records page below.
@@ -616,10 +617,23 @@ export default function MedicalHistory() {
 
   // Poll for analysis completion while any doc is missing ai_summary.
   // Ref-tracked deadline so refetches don't reset the 3-minute budget.
+  // Also tracks the previous pending id set so we can fire a data-
+  // change event when a doc transitions from pending → analyzed,
+  // letting dashboard widgets refresh without having to poll themselves.
   const pendingSinceRef = useRef<number | null>(null);
+  const prevPendingRef = useRef<Set<string>>(new Set());
   useEffect(() => {
-    const pending = documents.some(d => !d.ai_summary);
-    if (!pending || !user) {
+    const pendingIds = new Set(documents.filter(d => !d.ai_summary).map(d => d.id));
+    // Compare against previous tick to detect analyses that just landed.
+    for (const id of prevPendingRef.current) {
+      if (!pendingIds.has(id)) {
+        emitHealthDataChange();
+        break;
+      }
+    }
+    prevPendingRef.current = pendingIds;
+
+    if (pendingIds.size === 0 || !user) {
       pendingSinceRef.current = null;
       return;
     }
@@ -634,6 +648,14 @@ export default function MedicalHistory() {
     }, 5000);
     return () => clearInterval(id);
   }, [documents, user]);
+
+  // Listen for external data changes (e.g. other pages' DocumentUpload)
+  // and refetch our own list.
+  useEffect(() => {
+    return onHealthDataChange(() => {
+      if (user) fetchData();
+    });
+  }, [user]);
 
   const fetchData = async () => {
     try {

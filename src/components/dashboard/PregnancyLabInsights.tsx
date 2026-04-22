@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { onHealthDataChange } from '@/lib/data-events';
 import { ArrowRight, FlaskConical, AlertTriangle, CheckCircle2, Upload } from 'lucide-react';
 
 interface LabItem {
@@ -52,19 +53,22 @@ export default function PregnancyLabInsights() {
   const [labs, setLabs] = useState<LabItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const load = useCallback(async () => {
     if (!user) return;
-    const load = async () => {
-      const { data } = await db
-        .from('medical_extracted_data')
-        .select('title, value, unit, reference_range, status')
-        .eq('user_id', user.id)
-        .eq('data_type', 'lab_result');
-      if (data) setLabs(data);
-      setLoading(false);
-    };
-    load();
+    const { data } = await db
+      .from('medical_extracted_data')
+      .select('title, value, unit, reference_range, status')
+      .eq('user_id', user.id)
+      .eq('data_type', 'lab_result');
+    if (data) setLabs(data);
+    setLoading(false);
   }, [user]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  useEffect(() => onHealthDataChange(load), [load]);
 
   if (loading) return null;
 

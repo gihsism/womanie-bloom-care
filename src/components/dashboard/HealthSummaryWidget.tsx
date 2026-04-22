@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { onHealthDataChange } from '@/lib/data-events';
 import {
   HeartPulse,
   ArrowRight,
@@ -30,19 +31,22 @@ export default function HealthSummaryWidget() {
   const [docCount, setDocCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const load = useCallback(async () => {
     if (!user) return;
-    const load = async () => {
-      const [medRes, docRes] = await Promise.all([
-        db.from('medical_extracted_data').select('title, value, unit, status, data_type, date_recorded').eq('user_id', user.id),
-        db.from('health_documents').select('id').eq('user_id', user.id),
-      ]);
-      if (medRes.data) setData(medRes.data);
-      if (docRes.data) setDocCount(docRes.data.length);
-      setLoading(false);
-    };
-    load();
+    const [medRes, docRes] = await Promise.all([
+      db.from('medical_extracted_data').select('title, value, unit, status, data_type, date_recorded').eq('user_id', user.id),
+      db.from('health_documents').select('id').eq('user_id', user.id),
+    ]);
+    if (medRes.data) setData(medRes.data);
+    if (docRes.data) setDocCount(docRes.data.length);
+    setLoading(false);
   }, [user]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  useEffect(() => onHealthDataChange(load), [load]);
 
   if (loading) return null;
 

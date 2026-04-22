@@ -10,6 +10,7 @@ import { FileText, Upload, X, File, CheckCircle2 } from 'lucide-react';
 import { db } from '@/integrations/db/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { emitHealthDataChange } from '@/lib/data-events';
 
 interface DocumentUploadProps {
   open?: boolean;
@@ -135,6 +136,9 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
       // Let the parent know so it can refetch its doc list — otherwise
       // the just-uploaded doc won't appear until the next reload.
       onUploaded?.();
+      // Broadcast a data-change so any insight widget on-screen can
+      // refetch (HealthSummary, lab insights, timeline, etc.).
+      emitHealthDataChange();
 
       // Fire-and-forget: Vercel runs the handler to completion regardless
       // of whether the browser is still listening, so we don't block the

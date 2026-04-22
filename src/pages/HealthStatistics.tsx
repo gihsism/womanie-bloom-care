@@ -1,6 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "@/integrations/db/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { onHealthDataChange } from "@/lib/data-events";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,30 +24,22 @@ interface DocumentSummary {
 export default function HealthStatistics() {
   const navigate = useNavigate();
   usePageTitle('Health Statistics');
+  const { user, loading: authLoading } = useAuth();
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkAuth();
-    fetchDocuments();
-  }, []);
+    if (!authLoading && !user) navigate('/auth/login');
+  }, [user, authLoading, navigate]);
 
-  const checkAuth = async () => {
-    const { data: { session } } = await db.auth.getSession();
-    if (!session) {
-      navigate('/auth/login');
-    }
-  };
-
-  const fetchDocuments = async () => {
+  const fetchDocuments = useCallback(async () => {
+    if (!user) return;
     try {
-      const { data: { session } } = await db.auth.getSession();
       const { data, error } = await db
         .from('health_documents')
         .select('id, file_name, ai_suggested_name, ai_suggested_category, ai_summary, uploaded_at, document_type')
-        .eq('user_id', session?.user?.id ?? '')
+        .eq('user_id', user.id)
         .order('uploaded_at', { ascending: false });
-
       if (error) throw error;
       setDocuments(data || []);
     } catch (error) {
@@ -52,7 +47,13 @@ export default function HealthStatistics() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    fetchDocuments();
+  }, [fetchDocuments]);
+
+  useEffect(() => onHealthDataChange(fetchDocuments), [fetchDocuments]);
 
   const getCategoryColor = (category: string | null) => {
     const colors: Record<string, string> = {
