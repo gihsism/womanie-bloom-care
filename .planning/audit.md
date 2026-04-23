@@ -172,6 +172,28 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 6)
+
+- Audit pass over every `.from(...)` site in `src/` to hunt the rest of the regressions from session 1's ownership enforcement. Most patient-side queries use `user.id` or a relational column and are fine; the remaining broken spots are:
+  - **DoctorLogIn** — called `db.auth.signInWithPassword`, a Supabase-shim stub that always errors. Fixed to POST `/api/auth/login` and verify the doctor role via `/api/db` (owner enforcement injects `user_id = session.id` so the role lookup is safe). Full reload to `/doctor/dashboard` after login so AuthContext picks up the new cookie. Commit **f4a2096**.
+  - **DoctorSignUp** — also uses stubs, plus inserting directly into `user_roles` with `role: 'doctor'` which is a pre-existing privilege-escalation path (any authenticated user could self-assign). NOT fixed — see HANDOFF below.
+- **8b95906** — new patient-side `ShareWithDoctor` dialog on MedicalHistory. Generates an 8-char readable code (A-Z + 2-9), expires in 24 hours, inserts into `patient_access_codes`. Lists active codes with a copy button. Pairs with last session's `/api/connections/redeem-code` for the full patient→doctor link flow. Also fixed a subtle policy bug: `patient_access_codes` is owned via `patient_id`, not `user_id` — my session-1 policy was wrong; it only hadn't bitten because there was no patient-side writer until now.
+
+Added to HANDOFFs:
+- **Doctor signup + role assignment** — needs a dedicated `/api/auth/doctor-signup` endpoint that creates the auth_users row, creates doctor_profiles, and assigns the doctor role server-side with verification (email-domain whitelist, admin approval, license check, etc.). Also needs `/api/db` to stop accepting `user_roles` INSERT from clients — role writes should only happen via trusted server paths. Without this, fixing DoctorSignUp would make an existing escalation path easier.
+
+Remaining open after session 6:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- P2 #17 orphaned chat messages.
+- HANDOFFs: schema (RLS, analysis_status, pending_jobs, rate-limit, cross-document trends, doctor signup endpoint), plus user_roles write policy tightening.
+
+Next-session candidates:
+1. Patient-side UI to approve/reject pending doctor_patient_connections (completes the end-to-end flow from ShareWithDoctor).
+2. Weekly/monthly narrative summary across all docs.
+3. Rate-limit `/api/analyze-document`.
+4. Tighten `/api/db` to reject `user_roles` INSERT/UPDATE.
+
 ### 2026-04-23 (session 5)
 
 - **be84ed0** — deep-linking from dashboard cards into the specific doc on Medical History. `RecentFindings` and `HealthTrends` now navigate with `?doc=<id>` when the finding / trend has a known document_id; `MedicalHistory` reads `useSearchParams`, auto-expands the matching doc card, and scrolls it into view (via `id=doc-card-<id>` + `scroll-mt-16` so the sticky header doesn't cover the target).
