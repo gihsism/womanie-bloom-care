@@ -172,6 +172,21 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 28)
+
+- **b297a9c** — new Help & Support page. Eight FAQ cards covering the most common questions a Womanie patient has (not-your-doctor framing; how uploads / analysis / sharing / data-control work; AI accuracy expectations; privacy). Hero card routes to the AI assistant or `mailto:support@womanie.info`. Re-surfaces the Help entry in both the sidebar and PatientDashboard dropdown (dropped in session 27 because the route didn't exist — now it does).
+
+Remaining open after session 28:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification; real rate-limit bucket; doctor-signup email verification; authed e2e smoke flow.
+
+Next-session candidates:
+1. Emergency Contacts page — requires schema for contacts; could localStorage-stub like the notification toggles.
+2. Authed e2e smoke flow.
+3. Footer / bottom nav pass for consistency with the session-28 support patterns.
+4. Mini Privacy page at /dashboard/privacy with the concrete data-model story, so the redirect to Settings is replaced by real content.
+
 ### 2026-04-23 (session 27)
 
 - **c4027ff** — persist Settings notification toggles to localStorage (keyed per user.id). Flipping a switch used to feel saved because it fired a toast, but the state lived only in React and vanished on refresh. Shape matches what a future `profiles.notification_settings` JSONB column would hold, so swapping to a server round-trip later is a drop-in.
