@@ -28,6 +28,7 @@ import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboar
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import RecentFindings from '@/components/dashboard/RecentFindings';
 import HealthTrends from '@/components/dashboard/HealthTrends';
+import WeeklySummary from '@/components/dashboard/WeeklySummary';
 import PregnancyLabInsights from '@/components/dashboard/PregnancyLabInsights';
 import CycleLabInsights from '@/components/dashboard/CycleLabInsights';
 import ModeLabInsights from '@/components/dashboard/ModeLabInsights';
@@ -491,6 +492,12 @@ const PatientDashboard = () => {
                 </div>
               </Card>
             )}
+
+            {/* Narrative weekly summary across all uploaded documents
+                — generated on demand, cached per calendar week, and
+                auto-refreshed when a new analysis lands. Hides when
+                there's nothing to summarise. */}
+            <WeeklySummary />
 
             {/* Most important findings from recent analyses — shown
                 first so critical/abnormal results are visible at a
