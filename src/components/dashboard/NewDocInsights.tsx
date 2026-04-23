@@ -1,7 +1,8 @@
 import { useMemo, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Sparkles, TrendingDown, TrendingUp, AlertCircle, X } from 'lucide-react';
+import { Sparkles, TrendingDown, TrendingUp, AlertCircle, X, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -80,7 +81,24 @@ function fmtVal(i: Item): string {
   return i.unit ? `${i.value} ${i.unit}` : String(i.value);
 }
 
+function buildAskQuery(ins: Insight): string {
+  const title = ins.item.title;
+  const latest = fmtVal(ins.item);
+  const prev = ins.prev ? fmtVal(ins.prev) : null;
+  if (ins.kind === 'new') {
+    return `My new ${title} came back at ${latest} (${ins.item.status}). What does this mean for me?`;
+  }
+  if (ins.kind === 'worsened' && prev) {
+    return `My ${title} changed from ${prev} (${ins.prev?.status ?? 'previous'}) to ${latest} (${ins.item.status}). Should I be concerned?`;
+  }
+  if (ins.kind === 'improved' && prev) {
+    return `My ${title} improved from ${prev} to ${latest}. What does that mean for me?`;
+  }
+  return `What does my ${title} result of ${latest} mean for me?`;
+}
+
 export default function NewDocInsights({ documents, medicalData }: Props) {
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   // The target doc is the most recent one that actually has an analysis
@@ -197,9 +215,9 @@ export default function NewDocInsights({ documents, medicalData }: Props) {
                 ins.kind === 'worsened' ? 'text-red-700 dark:text-red-300' :
                 'text-amber-700 dark:text-amber-300';
               return (
-                <li key={idx} className="flex items-start gap-2 text-xs">
+                <li key={idx} className="flex items-start gap-2 text-xs group">
                   <Icon className={`h-3.5 w-3.5 mt-0.5 flex-shrink-0 ${tone}`} />
-                  <span className="min-w-0">
+                  <span className="min-w-0 flex-1">
                     <span className="font-medium">{ins.item.title}</span>
                     {' '}
                     {ins.kind === 'new' && (
@@ -218,6 +236,17 @@ export default function NewDocInsights({ documents, medicalData }: Props) {
                       </>
                     )}
                   </span>
+                  <button
+                    type="button"
+                    className="flex-shrink-0 inline-flex items-center gap-1 text-[11px] text-primary hover:underline opacity-70 group-hover:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1"
+                    onClick={() => {
+                      navigate(`/dashboard/ai-doctor?q=${encodeURIComponent(buildAskQuery(ins))}`);
+                    }}
+                    aria-label={`Ask AI about ${ins.item.title}`}
+                  >
+                    <MessageCircle className="h-3 w-3" />
+                    Ask
+                  </button>
                 </li>
               );
             })}
