@@ -56,7 +56,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const sql = neon(process.env.DATABASE_URL!);
     const { table, operation, selectColumns, insertData, updateData, upsertData, upsertOptions, orderBy, limitCount } = req.body;
-    let { filters } = req.body as { filters?: [string, string, any][] };
+    let { filters } = req.body as { filters?: Array<[string, string, unknown]> };
     filters = Array.isArray(filters) ? [...filters] : [];
 
     if (!table) return res.status(400).json({ error: 'Missing table' });
@@ -118,7 +118,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Build SQL based on operation.
     let query = '';
-    let params: any[] = [];
+    let params: unknown[] = [];
     let paramIdx = 1;
 
     if (operation === 'select') {
@@ -131,7 +131,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       params = values;
     } else if (operation === 'update') {
       // Never allow a client to change an owner column.
-      const safeUpdate: Record<string, any> = { ...updateData };
+      const safeUpdate: Record<string, unknown> = { ...updateData };
       for (const c of cols) delete safeUpdate[c];
       const keys = Object.keys(safeUpdate);
       if (keys.length === 0) return res.status(400).json({ error: 'No updatable columns' });
@@ -154,10 +154,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Apply filters.
     if (filters.length > 0) {
-      const whereClauses = filters.map(([col, op, val]: [string, string, any]) => {
+      const whereClauses = filters.map(([col, op, val]) => {
         if (col === '__owner_or__' && op === 'in') {
-          const ors = (val.cols as string[]).map(c => {
-            params.push(val.value);
+          const sentinel = val as { cols: string[]; value: unknown };
+          const ors = sentinel.cols.map(c => {
+            params.push(sentinel.value);
             return `${c} = $${paramIdx++}`;
           });
           return `(${ors.join(' OR ')})`;

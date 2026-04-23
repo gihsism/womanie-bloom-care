@@ -40,7 +40,7 @@ async function hashRequest(data: string): Promise<string> {
 // Best-effort parse of a Claude reply into our expected analysis shape.
 // Returns null if the content can't be coaxed into valid JSON at all, so
 // the caller can decide whether to retry or fail loudly.
-function tryParseAnalysisJson(raw: string): any | null {
+function tryParseAnalysisJson(raw: string): Record<string, unknown> | null {
   if (!raw) return null;
   const cleaned = raw.replace(/^```json?\s*/i, '').replace(/```\s*$/i, '').trim();
   try {
@@ -162,7 +162,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           const today = resolveToday(timezone);
           const dynamicHeader = buildDynamicHeader(today, patientContext);
 
-          let userContent: any[];
+          let userContent: Array<Record<string, unknown>>;
 
           if (mimeType === 'application/pdf') {
             // Send PDF natively to Claude — it can read PDFs directly
@@ -462,8 +462,13 @@ function buildDynamicHeader(today: string, patientContext: string): string {
 ${patientContext || ''}`;
 }
 
+// neon() returns a tagged-template sql client; we type it loosely here
+// to avoid importing the internal types from @neondatabase/serverless.
+type NeonSql = ReturnType<typeof import('@neondatabase/serverless').neon>;
+
 async function processWithAI(
-  sql: any, apiKey: string, dynamicHeader: string, userContent: any,
+  sql: NeonSql, apiKey: string, dynamicHeader: string,
+  userContent: string | Array<Record<string, unknown>>,
   documentId: string, userId: string, fileName: string,
   res: VercelResponse, startedAt: number,
 ) {
@@ -523,7 +528,7 @@ async function processWithAI(
       await sql.query(
         'INSERT INTO llm_cache (request_hash, response_text, model) VALUES ($1, $2, $3) ON CONFLICT (request_hash) DO UPDATE SET response_text = $2',
         [cacheKey, aiContent, 'claude-sonnet-4-20250514']
-      ).catch((e: any) => console.error('Cache store error:', e));
+      ).catch((e: unknown) => console.error('Cache store error:', e));
     }
   }
 
@@ -591,9 +596,10 @@ async function processWithAI(
     enhancedSummary += '\n\n⚡ Action Items:\n' + analysis.action_items.map((a: string) => `• ${a}`).join('\n');
   }
   if (Array.isArray(analysis.cross_references) && analysis.cross_references.length > 0) {
-    enhancedSummary += '\n\n🔗 Cross-Referenced Patterns:\n' + analysis.cross_references.map((cr: any) => {
+    enhancedSummary += '\n\n🔗 Cross-Referenced Patterns:\n' + (analysis.cross_references as Array<Record<string, unknown>>).map(cr => {
       const icon = cr.severity === 'urgent' ? '🚨' : cr.severity === 'attention' ? '⚠️' : 'ℹ️';
-      return `${icon} ${cr.pattern}: ${cr.finding} (${cr.tests?.join(' + ') || ''})`;
+      const tests = Array.isArray(cr.tests) ? (cr.tests as string[]).join(' + ') : '';
+      return `${icon} ${cr.pattern}: ${cr.finding} (${tests})`;
     }).join('\n');
   }
 
@@ -617,9 +623,9 @@ async function processWithAI(
   // and issue a single multi-row INSERT. This replaces the previous
   // 20–40 sequential round-trips to Neon — worth several seconds per
   // document.
-  const rows: any[][] = [];
+  const rows: unknown[][] = [];
   if (Array.isArray(analysis.extracted_data)) {
-    for (const item of analysis.extracted_data) {
+    for (const item of analysis.extracted_data as Array<Record<string, unknown>>) {
       rows.push([
         userId, documentId, analysisId,
         item.data_type || 'other', item.title || 'Unknown',

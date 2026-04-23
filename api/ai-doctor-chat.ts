@@ -71,9 +71,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     medicalContext += `Patient: ${profile.full_name || 'Unknown'}, Life stage: ${profile.life_stage || 'Not specified'}\n\n`;
   }
 
+  type Row = Record<string, unknown>;
+
   if (docs.length > 0) {
     medicalContext += '## Uploaded Documents\n';
-    docs.forEach((d: any, i: number) => {
+    (docs as Row[]).forEach((d, i) => {
       medicalContext += `${i + 1}. ${d.ai_suggested_name || d.file_name} (${d.ai_suggested_category || d.document_type})\n`;
       if (d.ai_summary) medicalContext += `   Summary: ${d.ai_summary}\n`;
     });
@@ -81,8 +83,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (extracted.length > 0) {
-    const grouped: Record<string, any[]> = {};
-    for (const item of extracted as any[]) {
+    const grouped: Record<string, Row[]> = {};
+    for (const item of extracted as Row[]) {
       const t = item.data_type || 'other';
       if (!grouped[t]) grouped[t] = [];
       grouped[t].push(item);

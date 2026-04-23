@@ -28,14 +28,14 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const dataByUser = new Map<string, number>();
     for (const row of dataGroups) dataByUser.set(row.user_id, row.data_count);
 
-    const userIds = docGroups.map((g: any) => g.user_id);
+    const userIds = (docGroups as Array<{ user_id: string; doc_count: number; first_upload: string; last_upload: string }>).map(g => g.user_id);
     const knownUsers = userIds.length
       ? await sql.query(`SELECT id, email FROM auth_users WHERE id = ANY($1::text[])`, [userIds])
       : [];
     const knownById = new Map<string, { id: string; email: string }>();
     for (const u of knownUsers as Array<{ id: string; email: string }>) knownById.set(u.id, u);
 
-    const groups = docGroups.map((g: any) => {
+    const groups = (docGroups as Array<{ user_id: string; doc_count: number; first_upload: string; last_upload: string }>).map(g => {
       const known = knownById.get(g.user_id);
       return {
         user_id: g.user_id,
