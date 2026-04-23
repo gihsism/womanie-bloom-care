@@ -34,11 +34,24 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ user: null });
     }
 
+    // isAdmin is derived from the ADMIN_EMAILS env var (same rule as
+    // api/_lib/admin.ts). We expose it here so the client can decide
+    // whether to render admin-only nav entries without a second
+    // round-trip; the actual authorization still lives at each admin
+    // endpoint.
+    const adminList = (process.env.ADMIN_EMAILS || '')
+      .split(',')
+      .map(s => s.trim().toLowerCase())
+      .filter(Boolean);
+    const email = (payload.email as string | undefined)?.toLowerCase();
+    const isAdmin = Boolean(email && adminList.includes(email));
+
     return res.status(200).json({
       user: {
         id: payload.sub,
         email: payload.email,
         name: payload.name,
+        isAdmin,
       },
     });
   } catch (error) {

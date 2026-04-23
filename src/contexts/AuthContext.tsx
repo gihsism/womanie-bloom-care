@@ -4,6 +4,7 @@ interface AuthUser {
   id: string;
   email?: string;
   name?: string;
+  isAdmin?: boolean;
   user_metadata?: {
     full_name?: string;
   };
@@ -44,6 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             id: data.user.id,
             email: data.user.email,
             name: data.user.name,
+            isAdmin: Boolean(data.user.isAdmin),
             user_metadata: { full_name: data.user.name },
           });
         }
