@@ -10,11 +10,44 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const sql = neon(process.env.DATABASE_URL!);
 
   if (req.method === 'GET') {
-    const rows = await sql.query(
-      'SELECT id, role, content, model, created_at FROM chat_messages WHERE user_id = $1 ORDER BY created_at ASC',
-      [user.id]
-    );
-    return res.status(200).json({ messages: rows });
+    // Paginate from newest backwards — defaults to the most-recent
+    // 50 messages, then the client can pass `?before=<created_at>`
+    // to fetch the previous page. Chat is typically short and
+    // browsers seldom need ancient history; bounding the common
+    // case at 50 rows keeps mount latency low for heavy users.
+    const before = typeof req.query.before === 'string' ? req.query.before : null;
+    const limit = Math.min(Math.max(parseInt(req.query.limit as string, 10) || 50, 1), 200);
+
+    let rows: Array<Record<string, unknown>>;
+    if (before) {
+      rows = await sql.query(
+        `SELECT id, role, content, model, created_at
+           FROM chat_messages
+          WHERE user_id = $1 AND created_at < $2
+          ORDER BY created_at DESC
+          LIMIT $3`,
+        [user.id, before, limit]
+      ) as Array<Record<string, unknown>>;
+    } else {
+      rows = await sql.query(
+        `SELECT id, role, content, model, created_at
+           FROM chat_messages
+          WHERE user_id = $1
+          ORDER BY created_at DESC
+          LIMIT $2`,
+        [user.id, limit]
+      ) as Array<Record<string, unknown>>;
+    }
+    // Return oldest-first so the client can append to message state
+    // in natural reading order.
+    const ordered = [...rows].reverse();
+    const hasMore = rows.length === limit;
+    const earliestCursor = ordered.length > 0 ? ordered[0].created_at : null;
+    return res.status(200).json({
+      messages: ordered,
+      hasMore,
+      earliestCursor,
+    });
   }
 
   if (req.method === 'POST') {

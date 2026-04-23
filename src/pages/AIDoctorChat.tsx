@@ -199,6 +199,9 @@ export default function AIDoctorChat() {
   const [chatMode, setChatMode] = useState<ChatMode>('ai');
   const [messages, setMessages] = useState<Msg[]>([WELCOME_MESSAGE]);
   const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [hasMoreHistory, setHasMoreHistory] = useState(false);
+  const [earliestCursor, setEarliestCursor] = useState<string | null>(null);
+  const [loadingEarlier, setLoadingEarlier] = useState(false);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [selectedModel, setSelectedModel] = useState('claude-haiku-4-5-20251001');
@@ -280,6 +283,8 @@ export default function AIDoctorChat() {
           role: m.role as 'user' | 'assistant',
           content: m.content,
         }));
+        setHasMoreHistory(Boolean(data.hasMore));
+        setEarliestCursor(typeof data.earliestCursor === 'string' ? data.earliestCursor : null);
 
         if (serverMessages.length > 0) {
           setMessages([WELCOME_MESSAGE, ...serverMessages]);
@@ -531,6 +536,47 @@ export default function AIDoctorChat() {
         <>
           {/* Messages */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+            {hasMoreHistory && earliestCursor && (
+              <div className="flex justify-center">
+                <button
+                  type="button"
+                  disabled={loadingEarlier}
+                  onClick={async () => {
+                    if (!earliestCursor) return;
+                    setLoadingEarlier(true);
+                    try {
+                      const resp = await fetch(
+                        `/api/chat/messages?before=${encodeURIComponent(earliestCursor)}`,
+                        { credentials: 'include' },
+                      );
+                      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                      const data = await resp.json();
+                      const older: Msg[] = (data.messages || []).map((m: { role: string; content: string }) => ({
+                        role: m.role as 'user' | 'assistant',
+                        content: m.content,
+                      }));
+                      // Prepend older messages after the WELCOME_MESSAGE sentinel.
+                      setMessages(prev => {
+                        const welcomeIdx = prev.findIndex(m => m === WELCOME_MESSAGE);
+                        if (welcomeIdx >= 0) {
+                          return [...prev.slice(0, welcomeIdx + 1), ...older, ...prev.slice(welcomeIdx + 1)];
+                        }
+                        return [...older, ...prev];
+                      });
+                      setHasMoreHistory(Boolean(data.hasMore));
+                      setEarliestCursor(typeof data.earliestCursor === 'string' ? data.earliestCursor : null);
+                    } catch (err) {
+                      console.error('Load earlier failed:', err);
+                    } finally {
+                      setLoadingEarlier(false);
+                    }
+                  }}
+                  className="text-xs text-muted-foreground hover:text-primary px-3 py-1.5 rounded-full bg-muted/50 hover:bg-muted disabled:opacity-60"
+                >
+                  {loadingEarlier ? 'Loading…' : 'Load earlier messages'}
+                </button>
+              </div>
+            )}
             {messages.map((msg, i) => (
               <div
                 key={i}
