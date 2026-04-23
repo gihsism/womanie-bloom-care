@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, AlertCircle, ArrowRight, Activity } from 'lucide-react';
+import { AlertTriangle, AlertCircle, ArrowRight, Activity, MessageCircle } from 'lucide-react';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
@@ -127,18 +127,13 @@ export default function RecentFindings() {
           return (
             <li
               key={f.id}
-              role="button"
-              tabIndex={0}
-              className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/50 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              onClick={() => navigate(f.document_id ? `/dashboard/medical-history?doc=${f.document_id}` : '/dashboard/medical-history')}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  navigate(f.document_id ? `/dashboard/medical-history?doc=${f.document_id}` : '/dashboard/medical-history');
-                }
-              }}
+              className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/50 group"
             >
-              <div className="flex-1 min-w-0">
+              <button
+                type="button"
+                className="flex-1 min-w-0 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                onClick={() => navigate(f.document_id ? `/dashboard/medical-history?doc=${f.document_id}` : '/dashboard/medical-history')}
+              >
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-medium truncate">{f.title}</span>
                   {statusBadge(f.status)}
@@ -158,7 +153,23 @@ export default function RecentFindings() {
                 {f.notes && (
                   <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{f.notes}</p>
                 )}
-              </div>
+              </button>
+              <button
+                type="button"
+                className="flex-shrink-0 inline-flex items-center gap-1 text-[11px] text-primary hover:underline opacity-70 group-hover:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const valueBit = f.value ? `${f.value}${f.unit ? ' ' + f.unit : ''}` : '';
+                  const q = valueBit
+                    ? `What does my ${f.title} of ${valueBit} mean for me?`
+                    : `What does my ${f.title} result mean for me?`;
+                  navigate(`/dashboard/ai-doctor?q=${encodeURIComponent(q)}`);
+                }}
+                aria-label={`Ask AI about ${f.title}`}
+              >
+                <MessageCircle className="h-3 w-3" />
+                Ask
+              </button>
             </li>
           );
         })}

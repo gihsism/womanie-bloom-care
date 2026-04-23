@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -193,6 +193,7 @@ function RealDoctorPanel() {
 // ─── Main Component ───
 export default function AIDoctorChat() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [chatMode, setChatMode] = useState<ChatMode>('ai');
@@ -311,6 +312,30 @@ export default function AIDoctorChat() {
       }
     })();
   }, [user, historyLoaded]);
+
+  // Deep-link support: landing on /dashboard/ai-doctor?q=... sends that
+  // question as the first user turn automatically. Used by the "Ask
+  // about this" buttons on dashboard finding / trend cards so Alena
+  // drops into a running conversation instead of an empty input. Ref-
+  // tracked so a re-render doesn't re-fire; we also strip the query
+  // param once consumed so a refresh doesn't resend.
+  const autoSendFiredRef = useRef(false);
+  useEffect(() => {
+    if (autoSendFiredRef.current) return;
+    if (!user || !historyLoaded || isStreaming) return;
+    const q = searchParams.get('q');
+    if (!q) return;
+    autoSendFiredRef.current = true;
+    setInput(q);
+    // Defer to the next tick so the input state is committed before
+    // handleSend reads it.
+    setTimeout(() => {
+      handleSend();
+      const next = new URLSearchParams(searchParams);
+      next.delete('q');
+      setSearchParams(next, { replace: true });
+    }, 0);
+  }, [user, historyLoaded, isStreaming, searchParams, setSearchParams]);
 
   const handleSend = async () => {
     const text = input.trim();
