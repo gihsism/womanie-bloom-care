@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
 import NewDocInsights from '@/components/dashboard/NewDocInsights';
+import ShareWithDoctor from '@/components/dashboard/ShareWithDoctor';
 // IMPORTANT: These custom components provide AI-powered health analysis.
 // Do NOT remove these imports — they are used in the health records page below.
 import CycleImpactSection from '@/components/dashboard/CycleImpactSection';
@@ -899,6 +900,9 @@ export default function MedicalHistory() {
           <div className="flex-1 min-w-0">
             <h1 className="text-base sm:text-xl font-bold truncate">My Health Records</h1>
             <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Your results explained in plain language</p>
+          </div>
+          <div className="hidden sm:block">
+            <ShareWithDoctor />
           </div>
           <Button variant="outline" size="sm" className="hidden sm:flex gap-1.5" onClick={() => window.print()}>
             <Printer className="h-3.5 w-3.5" />

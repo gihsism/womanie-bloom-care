@@ -15,7 +15,7 @@ const OWNER_COLUMN: Record<string, string | string[]> = {
   daily_health_signals: 'user_id',
   period_tracking: 'user_id',
   ivf_events: 'user_id',
-  patient_access_codes: 'user_id',
+  patient_access_codes: 'patient_id',
   user_roles: 'user_id',
   document_analyses: 'user_id',
   profiles: 'id',
