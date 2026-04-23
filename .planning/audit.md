@@ -172,6 +172,22 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 16)
+
+- **a736f8c** — audit.md rotation. Sessions 1–8 moved to `.planning/SHIPPED.md`; audit.md kept at sessions 9–15 for trailing context (~300 lines, fits well in a fresh wake-up load).
+- **2c4f318** — AIDoctorChat empty-state polish. When `medicalContext` is empty (brand-new user with no uploads), swap the context-aware prompt chips for onboarding-oriented starters ("What kinds of tests should I be tracking?", "What can you help me with?", "What should I upload first?") so the first chip click doesn't return "I have no data to reference". Existing chips still trigger once there's data.
+
+Remaining open after session 16:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification; real rate-limit bucket; doctor-signup email verification; authed e2e smoke flow.
+
+Next-session candidates:
+1. Authed e2e smoke flow.
+2. Dashboard empty-state pass for brand-new users (PatientDashboard first impression — widgets mostly hide themselves; a concrete "next step" hero would help).
+3. Revoke-code / cleanup for expired `patient_access_codes`.
+4. Inline "Ask about this" on RecentFindings rows → open AI Doctor with a prefilled question.
+
 ### 2026-04-23 (session 15)
 
 - **2c2a732** — finished the ESLint `no-explicit-any` cleanup pass. analyze-document's `tryParseAnalysisJson` return type + `processWithAI` signature + cross-reference mapper + extracted_data loop all typed. ai-doctor-chat's per-row `any` replaced with `Record<string, unknown>`. db.ts filter tuple / params / safeUpdate all narrowed, and the `__owner_or__` sentinel is narrowed via a small cast instead of propagated as `any`. admin/docs groups typed. api/ is now 0 `no-explicit-any` errors.
