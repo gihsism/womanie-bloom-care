@@ -172,6 +172,23 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 23)
+
+- **f2b28ef** — reanalyzeAll in MedicalHistory now surfaces per-doc outcomes. Previously `Promise.allSettled` + ignored results meant 429s / 500s / 502s tallied as "done" silently. Now tracks succeeded / failed / rateLimited per batch, early-exits when the daily `/api/analyze-document` cap is hit (no point burning through 20 queued docs only to watch them all 429), and emits a toast that reflects the actual result: all-done with a count, rate-limit-reached with the retriable remainder, or mixed-failures with both numbers. Dropped the `db.functions.invoke` shim in favor of a direct fetch so status codes aren't swallowed into thrown errors.
+
+Quick audit note: dark-mode sweep ran cleanly — every new card already uses the `dark:` variant where a light-tone background is used, and `bg-white` / `text-black` patterns aren't present in the autonomous-session surface. Flagged item closed.
+
+Remaining open after session 23:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification; real rate-limit bucket; doctor-signup email verification; authed e2e smoke flow.
+
+Next-session candidates:
+1. Consolidate `/api/connections/*` into one handler — 23 Vercel functions is past Hobby's cap, and four separate files for approved/pending/redeem/respond is more surface area than the feature needs.
+2. Expired `patient_access_codes` cleanup.
+3. Authed e2e smoke.
+4. Revisit the Settings page — added a lot of UX elsewhere, may want to expose things like ADMIN_EMAILS check, data export, account delete.
+
 ### 2026-04-23 (session 22)
 
 - **1b8a7ee** — Badge counts on the Notifications nav entry. New `useAttentionCount` hook aggregates pending doctor connections + stalled analyses (>3 min with no ai_summary) + critical findings; subscribes to `onHealthDataChange` so the count updates as events land. PatientDashboard's dropdown shows an inline number pill; AppSidebar shows a small dot-badge in the corner of the Bell icon (9+ on overflow). Hook fails silently on errors since the badge is cosmetic.
