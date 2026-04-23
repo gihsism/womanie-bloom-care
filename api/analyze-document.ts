@@ -1,6 +1,7 @@
 import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from './_lib/auth.js';
+import { checkAndConsume } from './_lib/ratelimit.js';
 import { withSentry } from './_lib/sentry.js';
 
 // Allow longer execution for AI analysis. Claude PDF analysis on a full
@@ -96,6 +97,14 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   const sessionUser = await getAuthUser(req);
   if (!sessionUser) return res.status(401).json({ error: 'Unauthorized' });
+
+  const rate = checkAndConsume('analyze-document', sessionUser.id, 25);
+  if (!rate.ok) {
+    return res.status(429).json({
+      error: `Daily analysis limit reached (${rate.limit}). Try again in ${Math.ceil(rate.retryInSec / 60)} minutes.`,
+      retryInSec: rate.retryInSec,
+    });
+  }
 
   const startedAt = Date.now();
   const reqDocId: string | undefined = req.body?.documentId;

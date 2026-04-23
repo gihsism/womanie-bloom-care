@@ -1,6 +1,7 @@
 import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from '../_lib/auth.js';
+import { checkAndConsume } from '../_lib/ratelimit.js';
 import { withSentry } from '../_lib/sentry.js';
 
 // On-demand narrative summary across the patient's documents.
@@ -88,6 +89,18 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   if (!apiKey) return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
 
   const force = req.body?.force === true;
+
+  // Cache hits don't call Anthropic, so only charge the rate-limit
+  // budget when we're actually about to do fresh work.
+  if (force) {
+    const rate = checkAndConsume('summary-generate-force', user.id, 10);
+    if (!rate.ok) {
+      return res.status(429).json({
+        error: `Too many refreshes — try again in ${Math.ceil(rate.retryInSec / 60)} minutes.`,
+        retryInSec: rate.retryInSec,
+      });
+    }
+  }
 
   const sql = neon(process.env.DATABASE_URL!);
 

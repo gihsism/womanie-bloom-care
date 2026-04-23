@@ -1,6 +1,7 @@
 import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from './_lib/auth.js';
+import { checkAndConsume } from './_lib/ratelimit.js';
 import { withSentry } from './_lib/sentry.js';
 
 export const config = {
@@ -19,6 +20,14 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   const user = await getAuthUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  const rate = checkAndConsume('ai-doctor-chat', user.id, 150);
+  if (!rate.ok) {
+    return res.status(429).json({
+      error: `You've reached today's chat limit (${rate.limit}). Try again in ${Math.ceil(rate.retryInSec / 60)} minutes.`,
+      retryInSec: rate.retryInSec,
+    });
+  }
 
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
   if (!ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured');
