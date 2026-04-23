@@ -30,6 +30,7 @@ const menuItems = [
   { title: "My Profile", url: "/dashboard/profile", icon: User },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
   { title: "Notifications", url: "/dashboard/notifications", icon: Bell },
+  { title: "Emergency Contacts", url: "/dashboard/emergency", icon: Phone },
   { title: "Privacy & Security", url: "/dashboard/privacy", icon: Shield },
   { title: "Help & Support", url: "/dashboard/help", icon: HelpCircle },
   { title: "About Womanie", url: "/dashboard/about", icon: Info },
