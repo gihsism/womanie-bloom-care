@@ -172,6 +172,24 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 11)
+
+- **109372a** — new `.planning/smoke.sh`. Curl-based script, 23 checks, runs in ~3 seconds. Hits every auth-gated API route without a session and asserts 401/403; hits the public routes and asserts 200/302/400; compares live bundle hash against dist/. Fastest way to catch the class of silent regression that bit session 5. Gates on exit code so CI-ready.
+- **cf558e1** — closed P2 #17 (orphan chat messages). ai-doctor-chat no longer inserts the user turn before calling Claude; captures it instead and persists the pair (user + assistant) inside a single `sql.transaction` in the finally block, only if assistant text was produced. A stream that yielded nothing skips both rows — chat history stays internally consistent.
+- **0540025** — keyboard + SR access for RecentFindings / HealthTrends clickable rows. Added `role='button'`, `tabIndex={0}`, Enter/Space onKeyDown firing the same navigate() target, and a focus-visible ring. Cards were mouse-only before.
+
+Remaining open after session 11:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification on signup; real rate-limit bucket.
+- Further a11y: PendingConnections, ConnectedDoctors, NewDocInsights rows — same pattern.
+
+Next-session candidates:
+1. Apply the same a11y pattern to PendingConnections / ConnectedDoctors / NewDocInsights.
+2. Admin notification channel on doctor signup (Slack webhook? email via Resend?).
+3. Rotate audit.md sessions 1–5 into a SHIPPED.md — file is getting long for context loading.
+4. Test coverage for the share-with-doctor lifecycle (smoke.sh would need an authenticated curl flow — non-trivial but doable with a test user + bcrypt).
+
 ### 2026-04-23 (session 10)
 
 - **85d3462** — admin approval surface for doctor signups. `api/_lib/admin.ts` gates on `ADMIN_EMAILS` env var (case-insensitive, fails closed). `api/admin/doctors.ts` (GET pending list, POST `{userId, action}` for approve/reject) flips `doctor_profiles.is_verified` + `verification_status` and idempotently inserts the `user_roles` 'doctor' row under server authority. New `/admin/doctors` route renders a minimal list with Approve / Reject buttons; returns a friendly "Admin only" card on 403 with a hint to set `ADMIN_EMAILS`. Finally unblocks the doctor onboarding loop end-to-end.
