@@ -398,6 +398,13 @@ export default function AIDoctorChat() {
   };
 
   const clearChat = async () => {
+    // Only ask for confirmation when there's real history to lose —
+    // clearing an already-empty chat would just surface a pointless
+    // prompt.
+    const hasRealHistory = messages.some(m => m !== WELCOME_MESSAGE);
+    if (hasRealHistory && !window.confirm('Clear this entire chat history? This cannot be undone.')) {
+      return;
+    }
     setMessages([WELCOME_MESSAGE]);
     setInput('');
     try { localStorage.removeItem('womanie_chat_history'); } catch { /* ignore */ }
