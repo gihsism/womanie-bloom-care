@@ -41,6 +41,7 @@ const PatientDetails = lazy(() => import("./pages/doctor/PatientDetails"));
 const DoctorApprovals = lazy(() => import("./pages/admin/DoctorApprovals"));
 const Notifications = lazy(() => import("./pages/dashboard/Notifications"));
 const Help = lazy(() => import("./pages/dashboard/Help"));
+const Privacy = lazy(() => import("./pages/dashboard/Privacy"));
 const FindDoctor = lazy(() => import("./pages/FindDoctor"));
 const Settings = lazy(() => import("./pages/dashboard/Settings"));
 const HealthStatistics = lazy(() => import("./pages/HealthStatistics"));
@@ -105,13 +106,13 @@ const App = () => (
                   <Route path="/admin/doctors" element={<DoctorApprovals />} />
                   <Route path="/dashboard/notifications" element={<Notifications />} />
                   <Route path="/dashboard/help" element={<Help />} />
+                  <Route path="/dashboard/privacy" element={<Privacy />} />
                   {/* Dashboard menu entries that historically pointed to
                       dedicated pages we never shipped. Redirect them to
                       sensible existing destinations instead of bouncing
                       the user to a 404. */}
                   <Route path="/dashboard/about" element={<Navigate to="/about" replace />} />
                   <Route path="/dashboard/profile" element={<Navigate to="/onboarding/basic-info" replace />} />
-                  <Route path="/dashboard/privacy" element={<Navigate to="/dashboard/settings" replace />} />
                   <Route path="/dashboard/terms" element={<Navigate to="/about" replace />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
