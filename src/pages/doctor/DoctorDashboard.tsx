@@ -394,52 +394,29 @@ const PatientManagement = ({ patients, onRefresh, doctorId }: { patients: Patien
     setIsSubmitting(true);
 
     try {
-      // Find the access code
-      const { data: codeData, error: codeError } = await db
-        .from('patient_access_codes')
-        .select('*')
-        .eq('code', accessCode.trim())
-        .eq('is_used', false)
-        .gt('expires_at', new Date().toISOString())
-        .maybeSingle();
-
-      if (codeError || !codeData) {
-        toast({
-          variant: 'destructive',
-          title: 'Invalid code',
-          description: 'This code is invalid, expired, or already used.',
-        });
-        return;
-      }
-
-      // Create connection
-      const { error: connectionError } = await db
-        .from('doctor_patient_connections')
-        .insert({
-          doctor_id: doctorId,
-          patient_id: codeData.patient_id,
-          connection_type: 'code',
-          status: 'pending',
-        });
-
-      if (connectionError) {
-        if (connectionError.code === '23505') {
-          toast({
-            variant: 'destructive',
-            title: 'Already connected',
-            description: 'You already have a connection with this patient.',
-          });
+      // Delegate to the server. The doctor can't run this through the
+      // generic /api/db router because the patient_access_codes row is
+      // owned by the patient; redeem-code runs the whole cascade
+      // server-side under the doctor's session.
+      const resp = await fetch('/api/connections/redeem-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: accessCode.trim() }),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        const msg: string = data.error || 'Failed to process the access code.';
+        if (resp.status === 404) {
+          toast({ variant: 'destructive', title: 'Invalid code', description: msg });
+        } else if (resp.status === 409) {
+          toast({ variant: 'destructive', title: 'Already connected', description: msg });
+        } else if (resp.status === 403) {
+          toast({ variant: 'destructive', title: 'Not allowed', description: msg });
         } else {
-          throw connectionError;
+          toast({ variant: 'destructive', title: 'Error', description: msg });
         }
         return;
       }
-
-      // Mark code as used
-      await db
-        .from('patient_access_codes')
-        .update({ is_used: true })
-        .eq('id', codeData.id);
 
       toast({
         title: 'Connection request sent',
