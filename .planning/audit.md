@@ -172,6 +172,21 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 22)
+
+- **1b8a7ee** — Badge counts on the Notifications nav entry. New `useAttentionCount` hook aggregates pending doctor connections + stalled analyses (>3 min with no ai_summary) + critical findings; subscribes to `onHealthDataChange` so the count updates as events land. PatientDashboard's dropdown shows an inline number pill; AppSidebar shows a small dot-badge in the corner of the Bell icon (9+ on overflow). Hook fails silently on errors since the badge is cosmetic.
+
+Remaining open after session 22:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification; real rate-limit bucket; doctor-signup email verification; authed e2e smoke flow.
+
+Next-session candidates:
+1. Dark-mode sweep on newly-added cards (some bg-amber-100 / bg-green-100 etc. may contrast poorly in dark mode).
+2. Expired-code cleanup on `patient_access_codes`.
+3. Authed e2e smoke flow.
+4. Consolidate `/api/connections/*` behind a single handler (Vercel function count keeps climbing).
+
 ### 2026-04-23 (session 21)
 
 - **d92a98c** — re-analyze flows on MedicalHistory (reanalyzeOne + reanalyzeAll) now pass the patient's timezone to `/api/analyze-document`. Initial upload added this in session 14; re-analysis had been sneaking UTC into Claude's "Today:" prompt for re-runs.
