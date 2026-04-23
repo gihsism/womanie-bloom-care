@@ -172,6 +172,21 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 26)
+
+- **2850593** — chat history pagination. `GET /api/chat/messages` used to return every row; now defaults to most-recent 50, supports `?before=<created_at>` for back-paging, and returns `hasMore` + `earliestCursor` so the client can render a "Load earlier messages" pill at the top of the chat that fetches the next page and splices it in after WELCOME_MESSAGE. Client back-compat is preserved (old `data.messages` field still there).
+
+Remaining open after session 26:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification; real rate-limit bucket; doctor-signup email verification; authed e2e smoke flow; persisting Settings notification toggles (needs a schema change).
+
+Next-session candidates:
+1. Authed e2e smoke flow (long-standing; high value).
+2. Persist Settings notification toggles via a `profiles.notification_settings` JSONB column (schema — HANDOFF-light).
+3. Add a "Data retention" blurb + links to the export / delete buttons in a footer on dashboard for trust signaling.
+4. Consolidate `connections/*` endpoints (cosmetic; not needed for function cap).
+
 ### 2026-04-23 (session 25)
 
 - **7039d87** — GDPR data-portability export. `GET /api/me/export` returns one JSON blob with everything Womanie stores on the session user: auth_users, profiles, every health_document (with file_path blob URL so raws can be grabbed separately), document_analyses, medical_extracted_data, period_tracking, daily_health_signals, ivf_events, doctor_patient_connections (both sides), chat_messages, patient_access_codes. Content-Disposition + the Settings page's new 'Download my data' button stream it straight to disk as `womanie-export-<date>.json`.
