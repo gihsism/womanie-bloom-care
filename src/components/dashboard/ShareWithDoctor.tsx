@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Share2, Copy, Check, Loader2 } from 'lucide-react';
+import { Share2, Copy, Check, Loader2, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { errorMessage } from '@/lib/errors';
 
@@ -102,6 +102,25 @@ export default function ShareWithDoctor() {
     }
   };
 
+  const revoke = async (codeId: string) => {
+    if (!user) return;
+    try {
+      const { error } = await db
+        .from('patient_access_codes')
+        .delete()
+        .eq('id', codeId);
+      if (error) throw error;
+      toast({ title: 'Code cancelled', description: 'That code can no longer be redeemed.' });
+      await loadActiveCodes();
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Could not cancel code',
+        description: errorMessage(error, 'Please try again.'),
+      });
+    }
+  };
+
   const copy = async (code: string) => {
     try {
       await navigator.clipboard.writeText(code);
@@ -174,6 +193,15 @@ export default function ShareWithDoctor() {
                         ) : (
                           <><Copy className="h-3.5 w-3.5" />Copy</>
                         )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="gap-1 h-8 text-destructive hover:text-destructive"
+                        onClick={() => revoke(c.id)}
+                        aria-label="Cancel this code"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </li>
                   );
