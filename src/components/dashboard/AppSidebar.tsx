@@ -31,6 +31,7 @@ const menuItems = [
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
   { title: "Notifications", url: "/dashboard/notifications", icon: Bell },
   { title: "Privacy & Security", url: "/dashboard/settings", icon: Shield },
+  { title: "Help & Support", url: "/dashboard/help", icon: HelpCircle },
   { title: "About Womanie", url: "/dashboard/about", icon: Info },
 ];
 

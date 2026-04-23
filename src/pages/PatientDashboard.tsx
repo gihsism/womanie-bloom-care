@@ -428,6 +428,10 @@ const PatientDashboard = () => {
                     <Shield className="mr-2 h-4 w-4" />
                     Privacy & Security
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/dashboard/help')}>
+                    <HelpCircle className="mr-2 h-4 w-4" />
+                    Help & Support
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/dashboard/notifications')}>
                     <Bell className="mr-2 h-4 w-4" />
                     <span className="flex-1">Notifications</span>
