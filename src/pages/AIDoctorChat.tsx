@@ -381,21 +381,35 @@ export default function AIDoctorChat() {
     } catch { /* ignore */ }
   };
 
-  // Context-aware suggested questions based on medical data
-  const baseSuggestions = [
-    'Summarize my medical history',
-    'What do my latest lab results mean?',
-  ];
+  // Suggested starter prompts. When we have no medical context at all
+  // (no profile data, no docs analyzed yet) the regular prompts are
+  // pointless — the assistant would just say "I don't have anything
+  // to reference". So guide the user toward uploading instead.
+  const hasContext = Boolean(medicalContext && medicalContext.length > 0);
 
-  const contextSuggestions = medicalContext?.includes('pregnancy') || medicalContext?.includes('HCG')
-    ? ['Is my pregnancy progressing normally?', 'What supplements should I take?']
-    : medicalContext?.includes('menopause')
-    ? ['How are my hormone levels for menopause?', 'What can help with my symptoms?']
-    : medicalContext?.includes('abnormal') || medicalContext?.includes('critical')
-    ? ['Which results should I worry about?', 'What lifestyle changes could help?']
-    : ['Are there any concerning findings?', 'What tests should I do next?'];
+  let suggestedQuestions: string[];
+  if (!hasContext) {
+    suggestedQuestions = [
+      'What kinds of tests should I be tracking?',
+      'What can you help me with?',
+      'What should I upload first?',
+    ];
+  } else {
+    const baseSuggestions = [
+      'Summarize my medical history',
+      'What do my latest lab results mean?',
+    ];
 
-  const suggestedQuestions = [...baseSuggestions, ...contextSuggestions];
+    const contextSuggestions = medicalContext?.includes('pregnancy') || medicalContext?.includes('HCG')
+      ? ['Is my pregnancy progressing normally?', 'What supplements should I take?']
+      : medicalContext?.includes('menopause')
+      ? ['How are my hormone levels for menopause?', 'What can help with my symptoms?']
+      : medicalContext?.includes('abnormal') || medicalContext?.includes('critical')
+      ? ['Which results should I worry about?', 'What lifestyle changes could help?']
+      : ['Are there any concerning findings?', 'What tests should I do next?'];
+
+    suggestedQuestions = [...baseSuggestions, ...contextSuggestions];
+  }
 
   if (authLoading) {
     return (
