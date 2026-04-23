@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { OnboardingProvider } from "@/contexts/OnboardingContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -103,6 +103,14 @@ const App = () => (
                   <Route path="/dashboard/recover-documents" element={<RecoverDocuments />} />
                   <Route path="/admin/doctors" element={<DoctorApprovals />} />
                   <Route path="/dashboard/notifications" element={<Notifications />} />
+                  {/* Dashboard menu entries that historically pointed to
+                      dedicated pages we never shipped. Redirect them to
+                      sensible existing destinations instead of bouncing
+                      the user to a 404. */}
+                  <Route path="/dashboard/about" element={<Navigate to="/about" replace />} />
+                  <Route path="/dashboard/profile" element={<Navigate to="/onboarding/basic-info" replace />} />
+                  <Route path="/dashboard/privacy" element={<Navigate to="/dashboard/settings" replace />} />
+                  <Route path="/dashboard/terms" element={<Navigate to="/about" replace />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

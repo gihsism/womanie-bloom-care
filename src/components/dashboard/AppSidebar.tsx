@@ -29,11 +29,8 @@ import { useAttentionCount } from "@/hooks/useAttentionCount";
 const menuItems = [
   { title: "My Profile", url: "/dashboard/profile", icon: User },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
-  { title: "Emergency Contacts", url: "/dashboard/emergency", icon: Phone },
-  { title: "Help & Support", url: "/dashboard/help", icon: HelpCircle },
-  { title: "Privacy & Security", url: "/dashboard/privacy", icon: Shield },
   { title: "Notifications", url: "/dashboard/notifications", icon: Bell },
-  { title: "Terms & Policies", url: "/dashboard/terms", icon: FileText },
+  { title: "Privacy & Security", url: "/dashboard/settings", icon: Shield },
   { title: "About Womanie", url: "/dashboard/about", icon: Info },
 ];
 

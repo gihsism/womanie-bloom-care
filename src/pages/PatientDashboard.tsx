@@ -424,15 +424,7 @@ const PatientDashboard = () => {
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/dashboard/emergency')}>
-                    <Phone className="mr-2 h-4 w-4" />
-                    Emergency Contacts
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/dashboard/help')}>
-                    <HelpCircle className="mr-2 h-4 w-4" />
-                    Help & Support
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/dashboard/privacy')}>
+                  <DropdownMenuItem onClick={() => navigate('/dashboard/settings')}>
                     <Shield className="mr-2 h-4 w-4" />
                     Privacy & Security
                   </DropdownMenuItem>
