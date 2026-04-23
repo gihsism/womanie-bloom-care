@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, TrendingDown, Minus, ArrowRight, Sparkles } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, ArrowRight, Sparkles, MessageCircle } from 'lucide-react';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
@@ -227,27 +227,18 @@ export default function HealthTrends() {
           return (
             <li
               key={t.title}
-              role="button"
-              tabIndex={0}
-              className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/40 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              onClick={() => navigate(
-                t.latestDocumentId
-                  ? `/dashboard/medical-history?doc=${t.latestDocumentId}`
-                  : '/dashboard/medical-history'
-              )}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  navigate(
-                    t.latestDocumentId
-                      ? `/dashboard/medical-history?doc=${t.latestDocumentId}`
-                      : '/dashboard/medical-history'
-                  );
-                }
-              }}
+              className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/40 group"
             >
               <DirectionIcon direction={t.direction} shift={t.statusShift} />
-              <div className="flex-1 min-w-0">
+              <button
+                type="button"
+                className="flex-1 min-w-0 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                onClick={() => navigate(
+                  t.latestDocumentId
+                    ? `/dashboard/medical-history?doc=${t.latestDocumentId}`
+                    : '/dashboard/medical-history'
+                )}
+              >
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-medium truncate">{t.title}</span>
                   <ShiftBadge shift={t.statusShift} />
@@ -271,7 +262,25 @@ export default function HealthTrends() {
                     · {format(new Date(t.prevDate), 'MMM d')} → {format(new Date(t.latestDate), 'MMM d')}
                   </span>
                 </p>
-              </div>
+              </button>
+              <button
+                type="button"
+                className="flex-shrink-0 inline-flex items-center gap-1 text-[11px] text-primary hover:underline opacity-70 group-hover:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const direction =
+                    t.statusShift === 'improved' ? 'improved' :
+                    t.statusShift === 'worsened' ? 'got worse' :
+                    t.direction === 'up' ? 'went up' :
+                    t.direction === 'down' ? 'went down' : 'changed';
+                  const q = `My ${t.title} ${direction} from ${t.prevRawValue}${unit} to ${t.latestRawValue}${unit}. What does this mean for me?`;
+                  navigate(`/dashboard/ai-doctor?q=${encodeURIComponent(q)}`);
+                }}
+                aria-label={`Ask AI about ${t.title} trend`}
+              >
+                <MessageCircle className="h-3 w-3" />
+                Ask
+              </button>
             </li>
           );
         })}
