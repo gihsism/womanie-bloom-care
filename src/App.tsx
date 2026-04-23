@@ -39,6 +39,7 @@ const PatientDashboard = lazy(() => import("./pages/PatientDashboard"));
 const DoctorDashboard = lazy(() => import("./pages/doctor/DoctorDashboard"));
 const PatientDetails = lazy(() => import("./pages/doctor/PatientDetails"));
 const DoctorApprovals = lazy(() => import("./pages/admin/DoctorApprovals"));
+const Notifications = lazy(() => import("./pages/dashboard/Notifications"));
 const FindDoctor = lazy(() => import("./pages/FindDoctor"));
 const Settings = lazy(() => import("./pages/dashboard/Settings"));
 const HealthStatistics = lazy(() => import("./pages/HealthStatistics"));
@@ -101,6 +102,7 @@ const App = () => (
                   <Route path="/community" element={<Community />} />
                   <Route path="/dashboard/recover-documents" element={<RecoverDocuments />} />
                   <Route path="/admin/doctors" element={<DoctorApprovals />} />
+                  <Route path="/dashboard/notifications" element={<Notifications />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
