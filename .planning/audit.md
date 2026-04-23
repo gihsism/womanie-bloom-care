@@ -172,6 +172,22 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 21)
+
+- **d92a98c** — re-analyze flows on MedicalHistory (reanalyzeOne + reanalyzeAll) now pass the patient's timezone to `/api/analyze-document`. Initial upload added this in session 14; re-analysis had been sneaking UTC into Claude's "Today:" prompt for re-runs.
+- **6e3ced1** — `/dashboard/notifications` route now exists. Both PatientDashboard's dropdown and AppSidebar link to it; the route was never wired up, so those clicks 404'd. New page aggregates: pending + approved doctor connections (reuses `PendingConnections` / `ConnectedDoctors`), stalled analyses (doc >3 min old with no `ai_summary` — same threshold MedicalHistory already uses), and critical findings from `current_extracted_data`. All rows deep-link into the specific doc via the session-5 `?doc=` link.
+
+Remaining open after session 21:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification; real rate-limit bucket; doctor-signup email verification; authed e2e smoke flow.
+
+Next-session candidates:
+1. Badge counts on navigation (stalled docs count, pending connections count) so notifications are visible before clicking in.
+2. Dark-mode sweep on the new cards (some cards have hard-coded green-100 / amber-100 tones that may not contrast in dark mode).
+3. Expired-code cleanup on `patient_access_codes`.
+4. Authed e2e smoke flow.
+
 ### 2026-04-23 (session 20)
 
 - **239fcfe** — admin panel now manages verified doctors too, not just pending. `GET /api/admin/doctors` returns `{ pending, approved }`; `POST` adds `action='revoke'` that flips `is_verified=false`, sets `verification_status='revoked'` (history kept), and strips `user_roles.role='doctor'`. UI splits into Pending / Verified sections with a shared `DoctorCard` sub-component; revoke is behind a `window.confirm`.
