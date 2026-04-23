@@ -59,6 +59,8 @@ check "analyze-document (unauth)"  POST "/api/analyze-document"          401 '{}
 check "ai-doctor-chat (unauth)"    POST "/api/ai-doctor-chat"            401 '{"messages":[{"role":"user","content":"hi"}]}'
 check "summary/generate (unauth)"  POST "/api/summary/generate"          401 '{}'
 check "predict-ovulation (unauth)" POST "/api/predict-ovulation"         401 '{}'
+check "me/export (unauth)"         GET  "/api/me/export"                 401
+check "me/delete-account (unauth)" POST "/api/me/delete-account"         401 '{}'
 check "docs/delete (unauth)"       POST "/api/docs/delete"               401 '{"documentId":"x"}'
 check "connections/pending (unauth)"      GET  "/api/connections/pending"        401
 check "connections/approved (unauth)"     GET  "/api/connections/approved"       401

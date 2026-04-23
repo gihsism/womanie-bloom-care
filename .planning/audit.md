@@ -172,6 +172,22 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 25)
+
+- **7039d87** — GDPR data-portability export. `GET /api/me/export` returns one JSON blob with everything Womanie stores on the session user: auth_users, profiles, every health_document (with file_path blob URL so raws can be grabbed separately), document_analyses, medical_extracted_data, period_tracking, daily_health_signals, ivf_events, doctor_patient_connections (both sides), chat_messages, patient_access_codes. Content-Disposition + the Settings page's new 'Download my data' button stream it straight to disk as `womanie-export-<date>.json`.
+- **99872d2** — GDPR right-to-erasure. `POST /api/me/delete-account` with `{ confirm: 'DELETE MY ACCOUNT' }` wipes every row keyed on the session user across 18 tables in a single neon transaction, then best-effort-sweeps their Vercel Blob uploads via `list({prefix}) + del(urls)`, then clears the session cookie. Settings UI adds a red 'Delete my account' button gated behind a window.confirm plus a type-to-confirm window.prompt.
+
+Remaining open after session 25:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification; real rate-limit bucket; doctor-signup email verification; authed e2e smoke flow.
+
+Next-session candidates:
+1. Persist Settings notification toggles (currently local-state only).
+2. Authed e2e smoke flow.
+3. Chat history pagination — `chat_messages` loads every row every time.
+4. Add `/api/me/export` + `/api/me/delete-account` to `.planning/smoke.sh` (both should 401 on unauth).
+
 ### 2026-04-23 (session 24)
 
 - **36d14cb** — patient can cancel an active access code before it's redeemed. Each row in `ShareWithDoctor`'s active-codes list now carries a trash-icon button next to Copy; click deletes the `patient_access_codes` row (own-row delete via the `patient_id` ownership policy) and re-fetches the list. Covers the "oh no I sent it to the wrong doctor" case.
