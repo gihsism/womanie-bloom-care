@@ -172,6 +172,27 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 5)
+
+- **be84ed0** — deep-linking from dashboard cards into the specific doc on Medical History. `RecentFindings` and `HealthTrends` now navigate with `?doc=<id>` when the finding / trend has a known document_id; `MedicalHistory` reads `useSearchParams`, auto-expands the matching doc card, and scrolls it into view (via `id=doc-card-<id>` + `scroll-mt-16` so the sticky header doesn't cover the target).
+- **ddb0820** — regression fix: doctor-side access-code redemption. Session 1's `/api/db` ownership enforcement meant a doctor couldn't SELECT or UPDATE `patient_access_codes` (rows are patient-owned). New `/api/connections/redeem-code` does the whole verify-doctor-role / find-code / create-connection / mark-used cascade under server authority; `DoctorDashboard.handleSubmitCode` now POSTs to it.
+- **7e3aec7** — regression fix: `FindDoctor` was silently empty for patients because `doctor_profiles` + `doctor_schedule` + `consultation_settings` reads were pinned to the session user. New `GET /api/doctors/list` serves the verified-doctor directory server-side with public-surface columns only.
+- **3b6b339** — regression fix: `PatientDetails` on the doctor side was denying every approved connection because `profiles` / `daily_health_signals` / `health_documents` reads were pinned to the session user. New `GET /api/doctors/patient?id=<patientId>` consent-gates on an `approved` row in `doctor_patient_connections`, then returns profile + signals + documents + extracted data + notes + appointments in one payload.
+
+Noteworthy — the session-1 `/api/db` fix, while correct on the security axis, broke multiple cross-user flows. This session closed the three obvious ones (code redemption, doctor directory, approved-patient view). There may be more stragglers in places I haven't exercised — watch for them as Alena starts using doctor flows.
+
+Remaining open after session 5:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- P2 #17 orphaned chat messages.
+- HANDOFFs: schema (RLS, analysis_status, pending_jobs, rate-limit, cross-document trend table).
+
+Next-session candidates:
+1. Weekly/monthly narrative summary across all docs (on-demand Claude call, persist in DB).
+2. Rate limiting on `/api/analyze-document` (lightweight in-memory per-pod ok for now; a real bucket needs schema).
+3. Patient-side UI to generate an access code and share with a doctor (the complement to `/api/connections/redeem-code`).
+4. Audit remaining `.from(...)` call sites in `src/` for any more ownership-enforcement regressions I missed.
+
 ### 2026-04-23 (session 4)
 
 - **dc8360a** — `NewDocInsights` banner at the top of Medical History. When there's a freshly analyzed doc, compares its `medical_extracted_data` rows title-by-title against all prior docs' rows and surfaces three kinds of shift: `worsened` (was ok, now abnormal/critical or stepped up), `improved` (was abnormal/critical, now stepped down), `new` (no prior reading and came back abnormal/critical). Ranked worsened → new → improved, top 6, counts overflow. Dismissible per-doc via localStorage keyed on user+doc id. Pure client-side over data already loaded on the page.
