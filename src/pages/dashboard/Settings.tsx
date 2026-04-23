@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Pill, Shield, Bell, User } from 'lucide-react';
+import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Pill, Shield, Bell, User, Download, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -72,6 +72,36 @@ const Settings = () => {
   const { toast } = useToast();
   const [selectedStage, setSelectedStage] = useState<LifeStage>('menstrual-cycle');
   const [saving, setSaving] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  const handleDownloadData = async () => {
+    setExporting(true);
+    try {
+      const resp = await fetch('/api/me/export');
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `womanie-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast({
+        title: 'Download started',
+        description: 'Your Womanie export is saving to your device.',
+      });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Export failed',
+        description: error instanceof Error ? error.message : 'Please try again.',
+      });
+    } finally {
+      setExporting(false);
+    }
+  };
   const [notifications, setNotifications] = useState({
     cycleReminders: true,
     appointmentReminders: true,
@@ -307,10 +337,26 @@ const Settings = () => {
               Manage your data and privacy settings
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             <Button variant="outline" className="w-full" onClick={() => navigate('/dashboard/privacy')}>
               Manage Privacy Settings
             </Button>
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              onClick={handleDownloadData}
+              disabled={exporting}
+            >
+              {exporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              Download my data
+            </Button>
+            <p className="text-[11px] text-muted-foreground">
+              Exports everything Womanie has on you — profile, documents, analyses, cycle + daily logs, chat history, doctor connections — as a single JSON file.
+            </p>
           </CardContent>
         </Card>
       </div>
