@@ -9,7 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Calendar } from '@/components/ui/calendar';
-import { db } from '@/integrations/db/client';
 import { useToast } from '@/hooks/use-toast';
 import UserMenu from '@/components/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
@@ -68,38 +67,13 @@ const FindDoctor = () => {
 
   const fetchDoctors = async () => {
     try {
-      // Fetch verified doctors with their consultation settings
-      const { data: doctorProfiles, error: doctorsError } = await db
-        .from('doctor_profiles')
-        .select('*')
-        .eq('is_verified', true);
-
-      if (doctorsError) throw doctorsError;
-
-      // Fetch consultation settings for available doctors
-      const { data: settings, error: settingsError } = await db
-        .from('available_consultations' as any)
-        .select('*')
-        .eq('is_available', true) as { data: any[] | null; error: any };
-
-      if (settingsError) throw settingsError;
-
-      // Fetch schedules
-      const { data: schedules, error: schedulesError } = await db
-        .from('doctor_schedule')
-        .select('*')
-        .eq('is_active', true);
-
-      if (schedulesError) throw schedulesError;
-
-      // Combine data
-      const doctorsWithSettings = doctorProfiles?.map(doctor => ({
-        ...doctor,
-        consultation_settings: settings?.find(s => s.doctor_id === doctor.user_id) || null,
-        schedule: schedules?.filter(s => s.doctor_id === doctor.user_id) || []
-      })).filter(d => d.consultation_settings?.is_available) || [];
-
-      setDoctors(doctorsWithSettings);
+      // Delegate to /api/doctors/list — patients can't hit
+      // doctor_profiles / doctor_schedule through /api/db because of
+      // per-table ownership enforcement.
+      const resp = await fetch('/api/doctors/list');
+      if (!resp.ok) throw new Error('Failed to load doctors');
+      const payload = await resp.json();
+      setDoctors(payload.doctors ?? []);
     } catch (error) {
       console.error('Error fetching doctors:', error);
       toast({
