@@ -40,18 +40,15 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   const sql = neon(process.env.DATABASE_URL!);
 
-  // Persist the latest user turn before calling the model so history
-  // survives even if the stream fails mid-response. The frontend no
-  // longer prepends synthetic system-context messages (patient data
-  // is loaded from the DB below), so a straight role === 'user'
-  // check is sufficient.
+  // Capture the latest user turn now but don't persist until we
+  // actually have an assistant reply — a stream that fails before a
+  // single content_block_delta shouldn't leave an orphan user message
+  // sitting in chat_messages with no response next to it.
   const lastMsg = messages[messages.length - 1];
-  if (lastMsg?.role === 'user' && typeof lastMsg.content === 'string') {
-    await sql.query(
-      'INSERT INTO chat_messages (user_id, role, content) VALUES ($1, $2, $3)',
-      [user.id, 'user', lastMsg.content]
-    );
-  }
+  const userTurnContent =
+    lastMsg?.role === 'user' && typeof lastMsg.content === 'string'
+      ? lastMsg.content
+      : null;
 
   const [docs, extracted, profileRow] = await Promise.all([
     sql.query(
@@ -185,11 +182,25 @@ ${medicalContext || 'No medical records available yet. Encourage the patient to 
       }
     }
   } finally {
+    // Persist the pair together. If the stream yielded no assistant
+    // text we also skip the user message — keeps chat history
+    // internally consistent instead of half-logged conversations.
     if (assistantText) {
-      await sql.query(
-        'INSERT INTO chat_messages (user_id, role, content, model) VALUES ($1, $2, $3, $4)',
-        [user.id, 'assistant', assistantText, model]
-      ).catch(() => {});
+      try {
+        if (userTurnContent) {
+          await sql.transaction([
+            sql`INSERT INTO chat_messages (user_id, role, content) VALUES (${user.id}, 'user', ${userTurnContent})`,
+            sql`INSERT INTO chat_messages (user_id, role, content, model) VALUES (${user.id}, 'assistant', ${assistantText}, ${model})`,
+          ]);
+        } else {
+          await sql.query(
+            'INSERT INTO chat_messages (user_id, role, content, model) VALUES ($1, $2, $3, $4)',
+            [user.id, 'assistant', assistantText, model]
+          );
+        }
+      } catch (err) {
+        console.error('Chat persistence error:', err);
+      }
     }
     res.write('data: [DONE]\n\n');
     res.end();
