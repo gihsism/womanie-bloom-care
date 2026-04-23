@@ -8,7 +8,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { db } from '@/integrations/db/client';
 
 const specialties = [
   'Obstetrics & Gynecology',
@@ -63,64 +62,48 @@ const DoctorSignUp = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!isStep2Valid()) return;
 
     setIsLoading(true);
 
     try {
-      // Create auth user
-      const { data: authData, error: authError } = await db.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.fullName,
-          },
-        },
+      // Server-side: creates auth_users + unverified doctor_profiles.
+      // Intentionally does NOT grant the 'doctor' role or set a
+      // session — that's an admin step after verification. We redirect
+      // to the login page which will keep the doctor out until then.
+      const resp = await fetch('/api/auth/doctor-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          fullName: formData.fullName,
+          specialty: formData.specialty,
+          licenseNumber: formData.licenseNumber,
+          bio: formData.bio,
+        }),
       });
-
-      if (authError) throw authError;
-
-      if (authData.user) {
-        // Add doctor role
-        const { error: roleError } = await db
-          .from('user_roles')
-          .insert({
-            user_id: authData.user.id,
-            role: 'doctor',
-          });
-
-        // Note: This may fail due to RLS but we have a trigger for this
-        if (roleError) {
-          console.log('Role insert handled by system');
-        }
-
-        // Create doctor profile
-        const { error: profileError } = await db
-          .from('doctor_profiles')
-          .insert({
-            user_id: authData.user.id,
-            full_name: formData.fullName,
-            specialty: formData.specialty,
-            license_number: formData.licenseNumber,
-            bio: formData.bio,
-            verification_status: 'pending',
-          });
-
-        if (profileError) throw profileError;
-
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
         toast({
-          title: 'Registration submitted!',
-          description: 'Your account is pending verification. You will be notified once approved.',
+          variant: 'destructive',
+          title: 'Registration failed',
+          description: data.error || 'An unexpected error occurred. Please try again.',
         });
-        navigate('/auth/doctor-login');
+        return;
       }
+
+      toast({
+        title: 'Registration submitted!',
+        description: data.message || 'Your account is pending verification. You will be notified once approved.',
+      });
+      navigate('/auth/doctor-login');
     } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Registration failed',
-        description: error.message || 'An unexpected error occurred. Please try again.',
+        description: error?.message || 'An unexpected error occurred. Please try again.',
       });
     } finally {
       setIsLoading(false);
