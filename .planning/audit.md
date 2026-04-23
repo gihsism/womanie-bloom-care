@@ -172,6 +172,25 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 8)
+
+- **b5fe18a** — weekly narrative summary feature. `POST /api/summary/generate` reads the patient's profile + up to 20 recent documents' `ai_summary` + last 200 extracted values and asks Claude Sonnet 4 for a 4-section markdown narrative ("Your big picture" / "What's going well" / "What to keep an eye on" / "Good questions to bring to your doctor"). Cached in `llm_cache` keyed on user + ISO-week + content hash; `force: true` bypasses for manual refresh. New `WeeklySummary` card on PatientDashboard renders the markdown, collapses with a gradient fade + "Read more", and auto-refreshes on `onHealthDataChange` so a new analysis feeds into the narrative automatically.
+- **906e4ee** — patient can revoke access for connected doctors. `GET /api/connections/approved` mirrors the pending endpoint. `POST /api/connections/respond` now also accepts `action: 'revoke'` — parameterised expected-status guard so approve/reject stay pending-only, revoke is approved-only; revoke simply DELETEs. New `ConnectedDoctors` card on Medical History renders under `PendingConnections` with a confirm-gated Revoke button.
+
+End-to-end share-with-doctor lifecycle is now complete: generate code → redeem → pending → approve/decline → connected → revoke.
+
+Remaining open after session 8:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- P2 #17 orphaned chat messages.
+- HANDOFFs: schema migrations; `/api/auth/doctor-signup` with real role verification; rate-limit bucket.
+
+Next-session candidates:
+1. `/api/auth/doctor-signup` endpoint + DoctorSignUp rewrite (unblocks doctor onboarding — currently impossible).
+2. Rate-limit `/api/analyze-document` and `/api/summary/generate` — now that there are two Claude-call endpoints, a tenant-level budget matters more.
+3. Revoke-code / cleanup for expired `patient_access_codes` via a tiny cron-ish pass.
+4. Polish: the WeeklySummary "Read more" gradient on a shorter summary looks empty — only show fade when content is actually taller than max-h-60.
+
 ### 2026-04-23 (session 7)
 
 - **23a39f0** — patient-side pending-connection approval. New `GET /api/connections/pending` joins `doctor_patient_connections` (pending, for this patient) with `doctor_profiles` (name, specialties, verified badge, avatar) — the join lives server-side because the patient can't read doctor_profiles rows through /api/db. New `POST /api/connections/respond` validates the connection is pending + belongs to the session patient, then approves (status='approved', approved_at=now()) or rejects (deletes). New `PendingConnections` card on Medical History slots above `NewDocInsights` and hides when empty.
