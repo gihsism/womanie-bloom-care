@@ -172,6 +172,22 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 18)
+
+- **8f98f25** — "Ask" deep-link on NewDocInsights rows, completing the trio (RecentFindings / HealthTrends / NewDocInsights). Different question templates per shift kind — "new" / "worsened" / "improved" — so the prefilled chat opener reads naturally in each context.
+- **d6c1212** — new `GettingStarted` checklist on PatientDashboard. Three onboarding steps (profile name set / first doc uploaded / first daily log) with per-step CTA. Whole card hides itself once all three are complete, so it's invisible for established users. Subscribes to `onHealthDataChange` so it re-evaluates immediately after the user takes each action.
+
+Remaining open after session 18:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification; real rate-limit bucket; doctor-signup email verification; authed e2e smoke flow.
+
+Next-session candidates:
+1. Revoke / cleanup of expired `patient_access_codes` (small housekeeping job).
+2. Authed e2e smoke flow.
+3. UX: when a user completes a GettingStarted step, brief toast + celebrate (small, nice).
+4. Surface admin doctor-approvals in a navigation entry (currently only reachable by typing /admin/doctors).
+
 ### 2026-04-23 (session 17)
 
 - **c23021c** — "Ask" affordance on every RecentFindings row. Clicking navigates to `/dashboard/ai-doctor?q=<question>`; AIDoctorChat reads the `q` param on mount, auto-sends as the first user turn, and strips it from the URL so a refresh doesn't resend. Question template pulls the finding title + value + unit ("What does my Ferritin of 12 μg/L mean for me?"). Also refactored the row from an `<li role='button'>` into two proper sibling `<button>`s so row-nav + Ask both have real accessibility and focus behaviour.
