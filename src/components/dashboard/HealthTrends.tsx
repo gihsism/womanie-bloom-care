@@ -227,12 +227,24 @@ export default function HealthTrends() {
           return (
             <li
               key={t.title}
-              className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/40 cursor-pointer"
+              role="button"
+              tabIndex={0}
+              className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/40 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               onClick={() => navigate(
                 t.latestDocumentId
                   ? `/dashboard/medical-history?doc=${t.latestDocumentId}`
                   : '/dashboard/medical-history'
               )}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  navigate(
+                    t.latestDocumentId
+                      ? `/dashboard/medical-history?doc=${t.latestDocumentId}`
+                      : '/dashboard/medical-history'
+                  );
+                }
+              }}
             >
               <DirectionIcon direction={t.direction} shift={t.statusShift} />
               <div className="flex-1 min-w-0">

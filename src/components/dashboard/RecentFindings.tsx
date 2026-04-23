@@ -127,8 +127,16 @@ export default function RecentFindings() {
           return (
             <li
               key={f.id}
-              className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/50 cursor-pointer"
+              role="button"
+              tabIndex={0}
+              className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/50 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               onClick={() => navigate(f.document_id ? `/dashboard/medical-history?doc=${f.document_id}` : '/dashboard/medical-history')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  navigate(f.document_id ? `/dashboard/medical-history?doc=${f.document_id}` : '/dashboard/medical-history');
+                }
+              }}
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
