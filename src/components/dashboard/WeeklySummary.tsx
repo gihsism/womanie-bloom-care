@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,6 +32,9 @@ export default function WeeklySummary() {
   const [data, setData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [overflows, setOverflows] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const COLLAPSED_MAX_PX = 240;
 
   const load = useCallback(async (force: boolean) => {
     if (!user) return;
@@ -70,6 +73,19 @@ export default function WeeklySummary() {
   // When a new analysis lands, nudge the summary to refresh so it
   // reflects the new data instead of showing a stale weekly cache.
   useEffect(() => onHealthDataChange(() => load(true)), [load]);
+
+  // Measure the rendered summary and only show the fade + "Read more"
+  // when it's actually taller than the collapsed max-height. Prevents
+  // the gradient from appearing over a three-line response.
+  useLayoutEffect(() => {
+    if (!data?.summary) {
+      setOverflows(false);
+      return;
+    }
+    const el = contentRef.current;
+    if (!el) return;
+    setOverflows(el.scrollHeight > COLLAPSED_MAX_PX + 4);
+  }, [data?.summary]);
 
   if (!data) {
     if (loading) {
@@ -122,21 +138,24 @@ export default function WeeklySummary() {
       </div>
 
       <div
-        className={`prose prose-sm dark:prose-invert max-w-none ${expanded ? '' : 'max-h-60 overflow-hidden relative'}`}
+        ref={contentRef}
+        className={`prose prose-sm dark:prose-invert max-w-none ${overflows && !expanded ? 'max-h-60 overflow-hidden relative' : ''}`}
       >
         <ReactMarkdown>{data.summary}</ReactMarkdown>
-        {!expanded && (
+        {overflows && !expanded && (
           <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-card pointer-events-none" />
         )}
       </div>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="mt-1 h-7 text-xs"
-        onClick={() => setExpanded(e => !e)}
-      >
-        {expanded ? 'Show less' : 'Read more'}
-      </Button>
+      {overflows && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mt-1 h-7 text-xs"
+          onClick={() => setExpanded(e => !e)}
+        >
+          {expanded ? 'Show less' : 'Read more'}
+        </Button>
+      )}
     </Card>
   );
 }
