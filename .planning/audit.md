@@ -172,6 +172,22 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 27)
+
+- **c4027ff** — persist Settings notification toggles to localStorage (keyed per user.id). Flipping a switch used to feel saved because it fired a toast, but the state lived only in React and vanished on refresh. Shape matches what a future `profiles.notification_settings` JSONB column would hold, so swapping to a server round-trip later is a drop-in.
+- **828cb7d** — dead dashboard nav cleanup. Six menu entries in the dropdown + sidebar pointed at never-shipped routes (`/dashboard/profile`, `/dashboard/emergency`, `/dashboard/help`, `/dashboard/privacy`, `/dashboard/terms`, `/dashboard/about`), all 404'd. App.tsx now redirects four of them to sensible existing pages (about → /about, profile → onboarding/basic-info, privacy → /dashboard/settings, terms → /about); the dropdowns/sidebar drop the two with no good target (emergency, help).
+
+Remaining open after session 27:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification; real rate-limit bucket; doctor-signup email verification; authed e2e smoke flow.
+
+Next-session candidates:
+1. Authed e2e smoke flow.
+2. Consolidate connections/* endpoints (cosmetic).
+3. Emergency Contacts / Help pages (real content rather than deleting entries).
+4. Dashboard empty-state polish for users who have completed onboarding but haven't uploaded anything.
+
 ### 2026-04-23 (session 26)
 
 - **2850593** — chat history pagination. `GET /api/chat/messages` used to return every row; now defaults to most-recent 50, supports `?before=<created_at>` for back-paging, and returns `hasMore` + `earliestCursor` so the client can render a "Load earlier messages" pill at the top of the chat that fetches the next page and splices it in after WELCOME_MESSAGE. Client back-compat is preserved (old `data.messages` field still there).
