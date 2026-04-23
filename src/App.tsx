@@ -38,6 +38,7 @@ import Community from "./pages/Community";
 const PatientDashboard = lazy(() => import("./pages/PatientDashboard"));
 const DoctorDashboard = lazy(() => import("./pages/doctor/DoctorDashboard"));
 const PatientDetails = lazy(() => import("./pages/doctor/PatientDetails"));
+const DoctorApprovals = lazy(() => import("./pages/admin/DoctorApprovals"));
 const FindDoctor = lazy(() => import("./pages/FindDoctor"));
 const Settings = lazy(() => import("./pages/dashboard/Settings"));
 const HealthStatistics = lazy(() => import("./pages/HealthStatistics"));
@@ -99,6 +100,7 @@ const App = () => (
                   <Route path="/welcome" element={<Welcome />} />
                   <Route path="/community" element={<Community />} />
                   <Route path="/dashboard/recover-documents" element={<RecoverDocuments />} />
+                  <Route path="/admin/doctors" element={<DoctorApprovals />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
