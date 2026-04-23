@@ -172,6 +172,22 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-24 (session 30)
+
+- **c0ca0bb** — `/dashboard/emergency` Emergency Contacts page. LocalStorage-backed (keyed per user.id), capped at 5 contacts, each with name / optional relationship / phone. Phone renders as `tel:` so tapping dials on mobile. Yellow hero reminds the user Womanie doesn't place calls and they should use their local emergency number. Dashed footer calls out the on-device storage caveat. Sidebar + dropdown re-surface the entry.
+
+Remaining open after session 30:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations (would let Emergency Contacts + Settings toggles sync across devices); admin email notification; real rate-limit bucket; doctor-signup email verification; authed e2e smoke flow.
+
+All dashboard nav entries now resolve to real pages. The "broken nav" cleanup started in session 27 is complete.
+
+Next-session candidates:
+1. Authed e2e smoke flow.
+2. Consolidated schema migration for the three `localStorage` stubs (notification toggles, emergency contacts, plus any future preferences).
+3. Mobile UX pass on new pages.
+
 ### 2026-04-23 (session 29)
 
 - **defb81e** — `/dashboard/privacy` is a real page now instead of a redirect to Settings. Six sections explaining where data lives (Neon / Vercel Blob), who can see it (you + approved doctors only), Anthropic Claude API terms, doctor-connection flow, data export, and deletion rights. Hero has one-click Download / Delete buttons; footer has privacy@womanie.info. Sidebar + dropdown point straight at it.
