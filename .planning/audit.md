@@ -172,6 +172,31 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 7)
+
+- **23a39f0** — patient-side pending-connection approval. New `GET /api/connections/pending` joins `doctor_patient_connections` (pending, for this patient) with `doctor_profiles` (name, specialties, verified badge, avatar) — the join lives server-side because the patient can't read doctor_profiles rows through /api/db. New `POST /api/connections/respond` validates the connection is pending + belongs to the session patient, then approves (status='approved', approved_at=now()) or rejects (deletes). New `PendingConnections` card on Medical History slots above `NewDocInsights` and hides when empty.
+- **7051821** — close the user_roles self-elevation path. /api/db now maintains a `WRITE_BLOCKED` set of tables whose insert/update/upsert/delete operations are rejected with 403. user_roles is the first entry. Reads still work (so DoctorLogIn's role-verification query is fine). Role assignment is now only possible through trusted server paths — which means DoctorSignUp still doesn't work, pending a dedicated endpoint, but the existing privilege-escalation is closed.
+
+Share-with-doctor loop is now end-to-end complete:
+  1. Patient generates 8-char code (ShareWithDoctor, session 6).
+  2. Doctor redeems via /api/connections/redeem-code (session 5).
+  3. Connection lands as pending.
+  4. Patient sees it in PendingConnections, approves or declines.
+  5. Approved doctor reads patient data via /api/doctors/patient (session 5).
+
+Remaining open after session 7:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- P2 #17 orphaned chat messages.
+- HANDOFFs: schema migrations; `/api/auth/doctor-signup` with real role verification.
+- Polish: revoke-an-approved-doctor UX.
+
+Next-session candidates:
+1. "Revoke access" button on approved doctor connections (extend /api/connections/respond to accept 'revoke').
+2. Weekly/monthly narrative summary across all docs (on-demand Claude call).
+3. Rate limiting on /api/analyze-document.
+4. `/api/auth/doctor-signup` endpoint + DoctorSignUp rewrite.
+
 ### 2026-04-23 (session 6)
 
 - Audit pass over every `.from(...)` site in `src/` to hunt the rest of the regressions from session 1's ownership enforcement. Most patient-side queries use `user.id` or a relational column and are fine; the remaining broken spots are:
