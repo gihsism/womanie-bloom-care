@@ -172,6 +172,21 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 15)
+
+- **2c2a732** — finished the ESLint `no-explicit-any` cleanup pass. analyze-document's `tryParseAnalysisJson` return type + `processWithAI` signature + cross-reference mapper + extracted_data loop all typed. ai-doctor-chat's per-row `any` replaced with `Record<string, unknown>`. db.ts filter tuple / params / safeUpdate all narrowed, and the `__owner_or__` sentinel is narrowed via a small cast instead of propagated as `any`. admin/docs groups typed. api/ is now 0 `no-explicit-any` errors.
+
+Remaining open after session 15:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification; real rate-limit bucket; doctor-signup email verification; authed e2e smoke flow.
+
+Next-session candidates:
+1. Authed e2e smoke flow.
+2. Rotate sessions 1–6 out of audit.md into SHIPPED.md.
+3. Dashboard empty-state pass for brand-new users.
+4. ai-doctor-chat welcome-message + suggested-prompt polish.
+
 ### 2026-04-23 (session 14)
 
 - **bae6d38** — ESLint pass, phase 1. The file surface modified across autonomous sessions had 49 `no-explicit-any` errors. This commit fixes ~half: introduces `src/lib/errors.ts` with `errorMessage(err: unknown): string`, uses it in six frontend catch blocks; retypes neon query results from `as any[]` to `as unknown[]` or `as Array<{…}>` across summary/generate, doctors/list, doctors/patient, auth/doctor-signup, connections/respond, connections/redeem-code; drops the `request: req as any` in upload.ts.
