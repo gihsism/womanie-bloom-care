@@ -172,6 +172,22 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 20)
+
+- **239fcfe** — admin panel now manages verified doctors too, not just pending. `GET /api/admin/doctors` returns `{ pending, approved }`; `POST` adds `action='revoke'` that flips `is_verified=false`, sets `verification_status='revoked'` (history kept), and strips `user_roles.role='doctor'`. UI splits into Pending / Verified sections with a shared `DoctorCard` sub-component; revoke is behind a `window.confirm`.
+- **b5e974c** — GettingStarted celebration toasts. Ref-tracked set of already-completed steps; on each refresh, newly-completed keys fire a 🎉 toast (plus a final ✨ "You're all set" when the last step ticks off). Initial mount captures current state silently so established users don't get spammed.
+
+Remaining open after session 20:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification; real rate-limit bucket; doctor-signup email verification; authed e2e smoke flow.
+
+Next-session candidates:
+1. Expired-code cleanup on `patient_access_codes` (housekeeping).
+2. Authed e2e smoke flow.
+3. Settings page audit — I haven't looked at it, likely has broken Supabase stubs.
+4. Dark mode check — some of the new cards have hard-coded colors that may not read well in dark mode.
+
 ### 2026-04-23 (session 19)
 
 - **54e5cc7** — admin shortcut in the shared `UserMenu`. `/api/auth/me` now includes `isAdmin` (same `ADMIN_EMAILS` rule as `api/_lib/admin.ts`); `AuthUser` / `AuthContext` expose it; `UserMenu` renders a Shield-icon "Admin" button only when `user.isAdmin`. Client-side gating only — endpoint-level authorization stays unchanged.
