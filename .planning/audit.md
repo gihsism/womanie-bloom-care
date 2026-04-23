@@ -172,6 +172,24 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 13)
+
+- **d4801cc** — added `/api/predict-ovulation`. PatientDashboard auto-fetches a prediction on every mount for menstrual-cycle / conception users, plus the user-triggered `OvulationPrediction` button — both went through `db.functions.invoke('predict-ovulation', …)` which routes to `/api/predict-ovulation`. That endpoint never existed; prediction had been silently 404-ing since the Supabase migration. Pure algorithmic implementation (cycleLength − 14 luteal rule, ±4/+1 fertile window, indicator scan of last 30 days of signals, templated narrative) — no Claude call, so no cost/latency on every dashboard mount. Returns the exact shape the frontend already expected.
+- **3f88863** — smoke.sh now asserts 401 on the new endpoint too (24 checks passing).
+
+No more live `db.auth.*` / `db.rpc` / unreachable `db.functions.invoke(...)` targets in the codebase. The "broken after Supabase migration" class of bugs appears closed out.
+
+Remaining open after session 13:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification; real rate-limit bucket; doctor-signup email verification; authed e2e smoke flow.
+
+Next-session candidates:
+1. Authed e2e smoke flow — bcrypt a test user, exercise every page's core CRUD under its cookie. Would have caught CycleCalendar / DailyLogging bugs in session 12.
+2. Rotate sessions 1–6 into `.planning/SHIPPED.md`; audit.md is pushing 400 lines.
+3. Admin notification on doctor signup (Slack webhook or email).
+4. UX: ovulation prediction currently requires both periodData AND signal entries to surface on the dashboard — a first-time user with no period-record history sees nothing. Consider a friendlier empty state.
+
 ### 2026-04-23 (session 12)
 
 Found and closed several more post-migration stubs that had been sitting silently broken. Short-form:
