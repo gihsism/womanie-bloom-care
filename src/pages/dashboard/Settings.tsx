@@ -142,11 +142,43 @@ const Settings = () => {
       setExporting(false);
     }
   };
-  const [notifications, setNotifications] = useState({
-    cycleReminders: true,
-    appointmentReminders: true,
-    healthTips: true,
+  // Notification preferences live in localStorage (no schema change
+  // required). When we add a `profiles.notification_settings` JSONB
+  // column this can swap to a server round-trip keyed on user.id
+  // while keeping the same shape.
+  const NOTIFICATION_STORAGE_KEY = user ? `womanie_notification_prefs_${user.id}` : 'womanie_notification_prefs';
+  const [notifications, setNotifications] = useState(() => {
+    const fallback = { cycleReminders: true, appointmentReminders: true, healthTips: true };
+    try {
+      const raw = localStorage.getItem(NOTIFICATION_STORAGE_KEY);
+      if (!raw) return fallback;
+      const parsed = JSON.parse(raw);
+      return { ...fallback, ...parsed };
+    } catch {
+      return fallback;
+    }
   });
+
+  // Re-read when the user id settles (initial mount may run before user
+  // loads from AuthContext; this keeps preferences correct per-account).
+  useEffect(() => {
+    if (!user) return;
+    try {
+      const raw = localStorage.getItem(NOTIFICATION_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        setNotifications((prev: typeof notifications) => ({ ...prev, ...parsed }));
+      }
+    } catch { /* ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(NOTIFICATION_STORAGE_KEY, JSON.stringify(notifications));
+    } catch { /* ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notifications]);
 
   useEffect(() => {
     if (user) {
