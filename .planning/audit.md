@@ -172,6 +172,28 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 12)
+
+Found and closed several more post-migration stubs that had been sitting silently broken. Short-form:
+
+- **831be78** — DoctorDashboard + useRequireRole.
+  - useRequireRole called `db.rpc('has_role', …)`; rpc is not implemented in the shim, so the hook threw every render and bounced doctors to /auth/doctor-login. Switched to a `/api/db` read of `user_roles` with `.eq('role', role).maybeSingle()` — ownership enforcement injects the `user_id = session.id` filter.
+  - DoctorDashboard hydrated local user state from `db.auth.getUser()` which always returns null; `loadDoctorData()` therefore never fired. Switched to AuthContext.
+- **22ae4f5** — the other three stub sites. **CycleCalendar** (6 call sites) and **DailyLogging** (2) both read user via `db.auth.getUser()` as their auth gate — which always returned null, so period tracking, symptom logs, and daily signals were silently discarded whenever Alena tried to save. **doctor/PatientDetails** had one more occurrence that had gone unnoticed. All three now use AuthContext. After this commit no live `db.auth.*` / `db.rpc` calls remain outside the shim file itself.
+
+**High-leverage lesson**: these were all "works in dev, fails in prod because we swapped auth providers and forgot to swap the consumers". The smoke.sh script from session 11 wouldn't have caught them because they fail with an authenticated session too (stub returns null; real session in AuthContext would have worked fine). A test that exercises real CRUD flows with a logged-in test user would catch this class.
+
+Remaining open after session 12:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification; real rate-limit bucket; doctor signup email verification.
+
+Next-session candidates:
+1. Extend smoke.sh to a logged-in test-user flow (bcrypt an `e2e@womanie.test` account and exercise the big CRUD paths under its cookie — would have caught session 12's stub bugs).
+2. More a11y on PendingConnections / ConnectedDoctors action buttons (they're already `<Button>` so focus ring handled — probably fine, verify).
+3. Rotate sessions 1–5 out of audit.md into .planning/SHIPPED.md.
+4. Admin notifications on doctor signup (Slack webhook or email).
+
 ### 2026-04-23 (session 11)
 
 - **109372a** — new `.planning/smoke.sh`. Curl-based script, 23 checks, runs in ~3 seconds. Hits every auth-gated API route without a session and asserts 401/403; hits the public routes and asserts 200/302/400; compares live bundle hash against dist/. Fastest way to catch the class of silent regression that bit session 5. Gates on exit code so CI-ready.
