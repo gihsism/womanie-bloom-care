@@ -4,7 +4,21 @@ import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
-export const useRequireRole = (role: 'doctor' | 'patient' | 'admin', redirectTo: string = '/') => {
+// Gate a page on the session user having a specific role.
+//
+// Previously used `db.rpc('has_role', …)` which never shipped with
+// the Supabase→Neon migration — the shim doesn't expose rpc at all,
+// so this hook threw every render and bounced real doctors back to
+// the login page.
+//
+// Current implementation: read the user_roles row through /api/db.
+// The ownership enforcement injects `user_id = session.id`
+// automatically, so the filter is safe and minimal.
+
+export const useRequireRole = (
+  role: 'doctor' | 'patient' | 'admin',
+  redirectTo: string = '/'
+) => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -21,12 +35,13 @@ export const useRequireRole = (role: 'doctor' | 'patient' | 'admin', redirectTo:
 
     const checkRole = async () => {
       try {
-        const { data, error } = await db.rpc('has_role', {
-          _user_id: user.id,
-          _role: role,
-        });
+        const { data } = await db
+          .from('user_roles')
+          .select('role')
+          .eq('role', role)
+          .maybeSingle();
 
-        if (error || !data) {
+        if (!data) {
           setHasRole(false);
           toast({
             variant: 'destructive',

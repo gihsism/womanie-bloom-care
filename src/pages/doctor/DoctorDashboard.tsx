@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { db } from '@/integrations/db/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useRequireRole } from '@/hooks/useRequireRole';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -61,17 +62,13 @@ const DoctorDashboard = () => {
   usePageTitle('Doctor Portal');
   const { toast } = useToast();
   const { hasRole, loading } = useRequireRole('doctor', '/auth/doctor-login');
-  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const { user } = useAuth();
   const [doctorProfile, setDoctorProfile] = useState<DoctorProfile | null>(null);
   const [patients, setPatients] = useState<PatientConnection[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [consultationPrice, setConsultationPrice] = useState<{ price: number; currency: string } | null>(null);
-
-  useEffect(() => {
-    db.auth.getUser().then(({ data }) => setUser(data.user));
-  }, []);
 
   useEffect(() => {
     if (user) {
