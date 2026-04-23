@@ -27,6 +27,16 @@ const OWNER_COLUMN: Record<string, string | string[]> = {
   doctor_patient_connections: ['patient_id', 'doctor_id'],
 };
 
+// Tables whose writes must NOT be reachable through the generic /api/db
+// router. Reads are still allowed (and still scoped to the session user
+// by OWNER_COLUMN), but mutations have to go through a dedicated server
+// endpoint. user_roles is the load-bearing one — without this a client
+// could POST an insert with { user_id: session.id, role: 'doctor' } and
+// walk through every doctor-only flow in the app.
+const WRITE_BLOCKED: Set<string> = new Set([
+  'user_roles',
+]);
+
 function ownerCols(table: string): string[] | null {
   const o = OWNER_COLUMN[table];
   if (!o) return null;
@@ -53,6 +63,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     const cols = ownerCols(table);
     if (!cols) return res.status(403).json({ error: `Table not accessible: ${table}` });
+
+    if (
+      WRITE_BLOCKED.has(table) &&
+      (operation === 'insert' || operation === 'update' || operation === 'upsert' || operation === 'delete')
+    ) {
+      return res.status(403).json({ error: `Table is read-only via /api/db: ${table}` });
+    }
 
     // Ownership enforcement — reads / updates / deletes.
     // For single-owner tables, force a filter on the owner column. Reject if
