@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Pill, Shield, Bell, User, Download, Loader2 } from 'lucide-react';
+import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Pill, Shield, Bell, User, Download, Loader2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -73,6 +73,46 @@ const Settings = () => {
   const [selectedStage, setSelectedStage] = useState<LifeStage>('menstrual-cycle');
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    // Double gate: an initial warning, then a type-to-confirm step so
+    // a stray click on the destructive button doesn't eat months of
+    // health data.
+    if (!window.confirm("This will permanently erase everything Womanie has on you — documents, analyses, cycle logs, chats. This cannot be undone.\n\nContinue?")) {
+      return;
+    }
+    const typed = window.prompt('To confirm, type exactly: DELETE MY ACCOUNT');
+    if (typed !== 'DELETE MY ACCOUNT') {
+      toast({ title: 'Account delete cancelled' });
+      return;
+    }
+    setDeleting(true);
+    try {
+      const resp = await fetch('/api/me/delete-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirm: 'DELETE MY ACCOUNT' }),
+      });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${resp.status}`);
+      }
+      toast({
+        title: 'Account deleted',
+        description: 'Your data has been removed. Goodbye.',
+      });
+      // Full reload so AuthContext drops the now-invalid cookie.
+      window.location.href = '/';
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Delete failed',
+        description: error instanceof Error ? error.message : 'Please try again.',
+      });
+      setDeleting(false);
+    }
+  };
 
   const handleDownloadData = async () => {
     setExporting(true);
@@ -356,6 +396,23 @@ const Settings = () => {
             </Button>
             <p className="text-[11px] text-muted-foreground">
               Exports everything Womanie has on you — profile, documents, analyses, cycle + daily logs, chat history, doctor connections — as a single JSON file.
+            </p>
+            <Separator />
+            <Button
+              variant="outline"
+              className="w-full gap-2 text-destructive hover:text-destructive hover:bg-destructive/5 border-destructive/30"
+              onClick={handleDeleteAccount}
+              disabled={deleting}
+            >
+              {deleting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+              Delete my account
+            </Button>
+            <p className="text-[11px] text-muted-foreground">
+              Permanently erases your profile, every uploaded document, all analyses, cycle + daily logs, chat history, and doctor connections. This cannot be undone. Consider downloading your data first.
             </p>
           </CardContent>
         </Card>
