@@ -29,6 +29,7 @@ import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import RecentFindings from '@/components/dashboard/RecentFindings';
 import HealthTrends from '@/components/dashboard/HealthTrends';
 import WeeklySummary from '@/components/dashboard/WeeklySummary';
+import GettingStarted from '@/components/dashboard/GettingStarted';
 import PregnancyLabInsights from '@/components/dashboard/PregnancyLabInsights';
 import CycleLabInsights from '@/components/dashboard/CycleLabInsights';
 import ModeLabInsights from '@/components/dashboard/ModeLabInsights';
@@ -492,6 +493,12 @@ const PatientDashboard = () => {
                 </div>
               </Card>
             )}
+
+            {/* 3-step getting-started checklist — visible only while
+                at least one step is still incomplete, so it's
+                invisible once Alena (or any established user) is past
+                onboarding. */}
+            <GettingStarted />
 
             {/* Narrative weekly summary across all uploaded documents
                 — generated on demand, cached per calendar week, and
