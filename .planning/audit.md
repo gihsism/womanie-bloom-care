@@ -172,6 +172,20 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 29)
+
+- **defb81e** — `/dashboard/privacy` is a real page now instead of a redirect to Settings. Six sections explaining where data lives (Neon / Vercel Blob), who can see it (you + approved doctors only), Anthropic Claude API terms, doctor-connection flow, data export, and deletion rights. Hero has one-click Download / Delete buttons; footer has privacy@womanie.info. Sidebar + dropdown point straight at it.
+
+Remaining open after session 29:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification; real rate-limit bucket; doctor-signup email verification; authed e2e smoke flow.
+
+Next-session candidates:
+1. Emergency Contacts stub (nav entry currently missing; real feature would need schema).
+2. Authed e2e smoke flow.
+3. Footer: tiny link-strip at the bottom of authenticated pages pointing at Privacy / Help / About for consistent trust signaling.
+
 ### 2026-04-23 (session 28)
 
 - **b297a9c** — new Help & Support page. Eight FAQ cards covering the most common questions a Womanie patient has (not-your-doctor framing; how uploads / analysis / sharing / data-control work; AI accuracy expectations; privacy). Hero card routes to the AI assistant or `mailto:support@womanie.info`. Re-surfaces the Help entry in both the sidebar and PatientDashboard dropdown (dropped in session 27 because the route didn't exist — now it does).
