@@ -27,6 +27,7 @@ import MenopauseDashboard from '@/components/dashboard/MenopauseDashboard';
 import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import RecentFindings from '@/components/dashboard/RecentFindings';
+import { useAttentionCount } from '@/hooks/useAttentionCount';
 import HealthTrends from '@/components/dashboard/HealthTrends';
 import WeeklySummary from '@/components/dashboard/WeeklySummary';
 import GettingStarted from '@/components/dashboard/GettingStarted';
@@ -291,6 +292,8 @@ const PatientDashboard = () => {
     window.location.href = '/api/auth/logout';
   };
 
+  const attention = useAttentionCount();
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
@@ -435,7 +438,12 @@ const PatientDashboard = () => {
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/dashboard/notifications')}>
                     <Bell className="mr-2 h-4 w-4" />
-                    Notifications
+                    <span className="flex-1">Notifications</span>
+                    {attention.total > 0 && (
+                      <span className="ml-2 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold">
+                        {attention.total}
+                      </span>
+                    )}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/dashboard/terms')}>
                     <FileText className="mr-2 h-4 w-4" />

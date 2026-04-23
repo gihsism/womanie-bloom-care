@@ -24,6 +24,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { db } from "@/integrations/db/client";
 import { useNavigate } from "react-router-dom";
+import { useAttentionCount } from "@/hooks/useAttentionCount";
 
 const menuItems = [
   { title: "My Profile", url: "/dashboard/profile", icon: User },
@@ -49,6 +50,8 @@ export function AppSidebar() {
     window.location.href = '/api/auth/logout';
   };
 
+  const attention = useAttentionCount();
+
   return (
     <Sidebar
       className={`${isExpanded ? "w-64" : "w-16"} transition-all duration-300 ease-in-out border-r h-screen sticky top-0`}
@@ -70,7 +73,17 @@ export function AppSidebar() {
                     className={`${isActive(item.url) ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"} ${!isExpanded ? "justify-center" : ""}`}
                   >
                     <NavLink to={item.url} end className="flex items-center gap-3">
-                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      <span className="relative flex-shrink-0">
+                        <item.icon className="h-4 w-4" />
+                        {item.url === '/dashboard/notifications' && attention.total > 0 && (
+                          <span
+                            className="absolute -top-1 -right-1 inline-flex items-center justify-center min-w-[14px] h-[14px] px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold leading-none"
+                            aria-label={`${attention.total} notifications`}
+                          >
+                            {attention.total > 9 ? '9+' : attention.total}
+                          </span>
+                        )}
+                      </span>
                       <span className={`${!isExpanded ? "hidden" : "block"} transition-all`}>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
