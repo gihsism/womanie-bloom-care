@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/integrations/db/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { Loader2, Check } from 'lucide-react';
 import type { LifeStage } from './DashboardHeader';
@@ -66,6 +67,7 @@ interface QuickLogData {
 
 const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [data, setData] = useState<QuickLogData>({
     moods: [], symptoms: [], periodFlow: 'none', discharge: 'none',
     lhTest: '', intercourse: '', pillTaken: '', medicationTaken: '',
@@ -80,7 +82,6 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
 
   const loadTodaysData = async () => {
     try {
-      const { data: { user } } = await db.auth.getUser();
       if (!user) return;
       const today = format(new Date(), 'yyyy-MM-dd');
       const { data: existing } = await db
@@ -127,7 +128,6 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      const { data: { user } } = await db.auth.getUser();
       if (!user) throw new Error('Not authenticated');
       const today = format(new Date(), 'yyyy-MM-dd');
 

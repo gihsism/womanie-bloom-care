@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { db } from '@/integrations/db/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useRequireRole } from '@/hooks/useRequireRole';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -78,7 +79,7 @@ const PatientDetails = () => {
   const { patientId } = useParams();
   const { toast } = useToast();
   const { hasRole, loading } = useRequireRole('doctor', '/auth/doctor-login');
-  const [user, setUser] = useState<{ id: string } | null>(null);
+  const { user } = useAuth();
   
   const [patient, setPatient] = useState<PatientProfile | null>(null);
   const [healthSignals, setHealthSignals] = useState<HealthSignal[]>([]);
@@ -97,10 +98,6 @@ const PatientDetails = () => {
     note_type: 'observation',
     is_visible_to_patient: true,
   });
-
-  useEffect(() => {
-    db.auth.getUser().then(({ data }) => setUser(data.user));
-  }, []);
 
   useEffect(() => {
     if (user && patientId) {

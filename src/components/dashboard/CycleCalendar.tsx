@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { db } from '@/integrations/db/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,7 @@ const CycleCalendar = ({
 }: CycleCalendarProps) => {
   const { toast } = useToast();
   
+  const { user } = useAuth();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -90,7 +92,6 @@ const CycleCalendar = ({
   
   const loadCalendarData = async () => {
     try {
-      const { data: { user } } = await db.auth.getUser();
       if (!user) return;
 
       const { data: periodData } = await db
@@ -221,7 +222,6 @@ const CycleCalendar = ({
   // ─── Period Start (new flow) ───
   const handleStartPeriod = async (date: Date) => {
     try {
-      const { data: { user } } = await db.auth.getUser();
       if (!user) return;
 
       const dateKey = format(date, 'yyyy-MM-dd');
@@ -249,7 +249,6 @@ const CycleCalendar = ({
   // ─── Period End Confirmation ───
   const handleEndPeriod = async (endDate: string) => {
     try {
-      const { data: { user } } = await db.auth.getUser();
       if (!user) return;
 
       const activeRecord = periodRecords.find(isActivePeriod);
@@ -281,7 +280,6 @@ const CycleCalendar = ({
   // ─── Remove a period record ───
   const handleRemovePeriod = async (date: Date) => {
     try {
-      const { data: { user } } = await db.auth.getUser();
       if (!user) return;
 
       const record = periodRecords.find(r => {
@@ -324,7 +322,6 @@ const CycleCalendar = ({
   
   const saveHealthSignal = async (date: Date, signal: DaySignal) => {
     try {
-      const { data: { user } } = await db.auth.getUser();
       if (!user) return;
       const { error } = await db
         .from('daily_health_signals')
@@ -374,7 +371,6 @@ const CycleCalendar = ({
     setManualPeriodLength(tempPeriodLength);
     if (periodRecords.length > 0) {
       try {
-        const { data: { user } } = await db.auth.getUser();
         if (user) {
           await db
             .from('period_tracking')
