@@ -172,6 +172,24 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 24)
+
+- **36d14cb** — patient can cancel an active access code before it's redeemed. Each row in `ShareWithDoctor`'s active-codes list now carries a trash-icon button next to Copy; click deletes the `patient_access_codes` row (own-row delete via the `patient_id` ownership policy) and re-fetches the list. Covers the "oh no I sent it to the wrong doctor" case.
+- **97d131f** — confirm before clearing a non-empty AI Doctor chat. The Clear icon in the chat header used to wipe localStorage + delete server chat_messages with no safety net; now only an actually-populated chat triggers a `window.confirm`, empty-state clicks still go through silently.
+
+Quick function-count audit: 23 Vercel functions, Pro-plan ceiling is 100. No consolidation pressure.
+
+Remaining open after session 24:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification; real rate-limit bucket; doctor-signup email verification; authed e2e smoke flow.
+
+Next-session candidates:
+1. Persist Settings notification toggles (they're local-state-only; flip a switch and reload and it's forgotten).
+2. Data export endpoint (GDPR — patient downloads all their data).
+3. Account delete (GDPR).
+4. Authed e2e smoke.
+
 ### 2026-04-23 (session 23)
 
 - **f2b28ef** — reanalyzeAll in MedicalHistory now surfaces per-doc outcomes. Previously `Promise.allSettled` + ignored results meant 429s / 500s / 502s tallied as "done" silently. Now tracks succeeded / failed / rateLimited per batch, early-exits when the daily `/api/analyze-document` cap is hit (no point burning through 20 queued docs only to watch them all 429), and emits a toast that reflects the actual result: all-done with a count, rate-limit-reached with the retriable remainder, or mixed-failures with both numbers. Dropped the `db.functions.invoke` shim in favor of a direct fetch so status codes aren't swallowed into thrown errors.
