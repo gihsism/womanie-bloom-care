@@ -13,6 +13,7 @@ import DocumentUpload from '@/components/dashboard/DocumentUpload';
 import NewDocInsights from '@/components/dashboard/NewDocInsights';
 import ShareWithDoctor from '@/components/dashboard/ShareWithDoctor';
 import PendingConnections from '@/components/dashboard/PendingConnections';
+import ConnectedDoctors from '@/components/dashboard/ConnectedDoctors';
 // IMPORTANT: These custom components provide AI-powered health analysis.
 // Do NOT remove these imports — they are used in the health records page below.
 import CycleImpactSection from '@/components/dashboard/CycleImpactSection';
@@ -921,6 +922,7 @@ export default function MedicalHistory() {
 
       <div className="px-4 py-6 max-w-4xl mx-auto space-y-6">
         <PendingConnections />
+        <ConnectedDoctors />
         {hasDocuments && <NewDocInsights documents={documents} medicalData={medicalData} />}
 
         {hasDocuments && (

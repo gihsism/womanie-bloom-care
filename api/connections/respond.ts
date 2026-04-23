@@ -10,7 +10,7 @@ import { withSentry } from '../_lib/sentry.js';
 // to the session user as patient_id, is still in 'pending', and then
 // update (approve) or delete (reject) accordingly.
 
-type Action = 'approve' | 'reject';
+type Action = 'approve' | 'reject' | 'revoke';
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -26,20 +26,27 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   if (!connectionId || typeof connectionId !== 'string') {
     return res.status(400).json({ error: 'Missing connectionId' });
   }
-  if (action !== 'approve' && action !== 'reject') {
-    return res.status(400).json({ error: 'action must be approve or reject' });
+  if (action !== 'approve' && action !== 'reject' && action !== 'revoke') {
+    return res.status(400).json({ error: 'action must be approve, reject, or revoke' });
   }
 
   const sql = neon(process.env.DATABASE_URL!);
 
-  // Confirm the connection is for this patient and still pending.
+  // approve / reject operate on a pending connection; revoke operates
+  // on an already-approved one. Enforce the expected starting state
+  // and the ownership (patient_id = session user) in one query so no
+  // action can cross between intended states.
+  const expectedStatus = action === 'revoke' ? 'approved' : 'pending';
   const rows = await sql.query(
     `SELECT id FROM doctor_patient_connections
-       WHERE id = $1 AND patient_id = $2 AND status = 'pending'`,
-    [connectionId, user.id]
+       WHERE id = $1 AND patient_id = $2 AND status = $3`,
+    [connectionId, user.id, expectedStatus]
   ) as any[];
   if (rows.length === 0) {
-    return res.status(404).json({ error: 'Pending connection not found' });
+    const notFoundMsg = action === 'revoke'
+      ? 'Approved connection not found'
+      : 'Pending connection not found';
+    return res.status(404).json({ error: notFoundMsg });
   }
 
   try {
@@ -51,6 +58,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         [connectionId, user.id]
       );
     } else {
+      // reject on pending and revoke on approved both simply remove
+      // the row — the doctor can request access again later if the
+      // patient wants to reconnect.
       await sql.query(
         `DELETE FROM doctor_patient_connections WHERE id = $1 AND patient_id = $2`,
         [connectionId, user.id]
