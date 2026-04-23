@@ -718,24 +718,62 @@ export default function MedicalHistory() {
     // No pre-delete — the backend handles versioning. Prior analyses
     // stay queryable until each new one replaces them atomically.
 
-    // Process 3 documents in parallel for speed
+    // Process 5 documents in parallel for speed. Track per-doc
+    // outcomes so we can tell the user how it went rather than
+    // silently "finishing" when half the fleet actually 429'd or
+    // 5xx'd.
     let done = 0;
+    let succeeded = 0;
+    let failed = 0;
+    let rateLimited = false;
     const batch = 5;
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     for (let i = 0; i < total; i += batch) {
       const chunk = documents.slice(i, i + batch);
-      await Promise.allSettled(
+      const results = await Promise.allSettled(
         chunk.map(doc =>
-          db.functions.invoke('analyze-document', {
-            body: { documentId: doc.id, userId: user.id, filePath: doc.file_path, fileName: doc.file_name, mimeType: doc.mime_type, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone },
-          })
+          fetch('/api/analyze-document', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              documentId: doc.id, userId: user.id,
+              filePath: doc.file_path, fileName: doc.file_name,
+              mimeType: doc.mime_type, timezone: tz,
+            }),
+          }).then(r => ({ ok: r.ok, status: r.status }))
         )
       );
+      for (const r of results) {
+        if (r.status === 'fulfilled' && r.value.ok) {
+          succeeded++;
+        } else {
+          failed++;
+          if (r.status === 'fulfilled' && r.value.status === 429) rateLimited = true;
+        }
+      }
       done += chunk.length;
       setReanalyzeProgress({ done, total });
+      if (rateLimited) break; // no point continuing once the daily cap is hit
     }
 
     await fetchData();
     setReanalyzing(false);
+
+    if (failed === 0) {
+      toast({ title: 'All documents re-analyzed', description: `${succeeded} of ${total} complete.` });
+    } else if (rateLimited) {
+      toast({
+        variant: 'destructive',
+        title: 'Daily limit reached',
+        description: `${succeeded} of ${total} re-analyzed. You can retry the rest tomorrow.`,
+      });
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Some re-analyses failed',
+        description: `${succeeded} succeeded, ${failed} failed. Retry from the individual docs.`,
+      });
+    }
   };
 
   const stats = useMemo(() => {
