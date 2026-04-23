@@ -172,6 +172,22 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 19)
+
+- **54e5cc7** — admin shortcut in the shared `UserMenu`. `/api/auth/me` now includes `isAdmin` (same `ADMIN_EMAILS` rule as `api/_lib/admin.ts`); `AuthUser` / `AuthContext` expose it; `UserMenu` renders a Shield-icon "Admin" button only when `user.isAdmin`. Client-side gating only — endpoint-level authorization stays unchanged.
+- **ce1814a** — PatientDashboard's bespoke dropdown (it doesn't use UserMenu) picked up the same admin-only entry above the Logout separator.
+
+Remaining open after session 19:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification; real rate-limit bucket; doctor-signup email verification; authed e2e smoke flow.
+
+Next-session candidates:
+1. Revoke-code / cleanup of expired `patient_access_codes` (housekeeping).
+2. Authed e2e smoke flow.
+3. Little celebration (toast + icon pulse) when a GettingStarted step ticks off.
+4. Admin panel: show verified doctors too, not just pending ones (reject/re-verify actions).
+
 ### 2026-04-23 (session 18)
 
 - **8f98f25** — "Ask" deep-link on NewDocInsights rows, completing the trio (RecentFindings / HealthTrends / NewDocInsights). Different question templates per shift kind — "new" / "worsened" / "improved" — so the prefilled chat opener reads naturally in each context.
