@@ -172,6 +172,23 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 10)
+
+- **85d3462** — admin approval surface for doctor signups. `api/_lib/admin.ts` gates on `ADMIN_EMAILS` env var (case-insensitive, fails closed). `api/admin/doctors.ts` (GET pending list, POST `{userId, action}` for approve/reject) flips `doctor_profiles.is_verified` + `verification_status` and idempotently inserts the `user_roles` 'doctor' row under server authority. New `/admin/doctors` route renders a minimal list with Approve / Reject buttons; returns a friendly "Admin only" card on 403 with a hint to set `ADMIN_EMAILS`. Finally unblocks the doctor onboarding loop end-to-end.
+- **145d1f9** — WeeklySummary polish: measure rendered markdown height on mount + summary-change and only clamp / show the fade + "Read more" when it actually overflows. Short summaries now render cleanly without a broken-looking gradient and dead button.
+
+Remaining open after session 10:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- P2 #17 orphaned chat messages.
+- HANDOFFs: schema migrations; email notification on doctor signup so new applicants don't sit unnoticed; real rate-limit bucket if in-memory ever becomes insufficient.
+
+Next-session candidates:
+1. Email / in-app notification to the admin when a new doctor signup lands (currently polls /admin/doctors manually).
+2. `.planning/audit.md` is getting long; consider rotating earlier sessions out into a CHANGELOG or similar.
+3. Smoke test script hitting every auth-gated endpoint with and without a valid cookie — the fastest way to catch a future ownership-enforcement regression.
+4. P2 #17 orphaned chat messages — tiny consistency bug in ai-doctor-chat.
+
 ### 2026-04-23 (session 9)
 
 - **30afdcb** — real `/api/auth/doctor-signup` endpoint. Hashes the password, creates `auth_users` + an `is_verified=false, verification_status='pending'` `doctor_profiles` row. Deliberately does NOT grant `user_roles.role='doctor'` or set a session cookie — role assignment stays admin-only (manual DB step for now) so nobody can self-elevate via the doctor-signup URL. DoctorSignUp.tsx now just POSTs to it and drops the broken db.auth.signUp() stub path.
