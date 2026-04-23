@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check, CircleDashed, Sparkles } from 'lucide-react';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import { onHealthDataChange } from '@/lib/data-events';
 
 // Three-step getting-started checklist for brand-new patient accounts.
@@ -26,9 +27,29 @@ interface StepDef {
   ctaHref: string;
 }
 
+const CELEBRATION_LABELS: Record<string, { title: string; description: string }> = {
+  profile: {
+    title: 'Profile set up',
+    description: 'Womanie now knows who it\'s helping.',
+  },
+  upload: {
+    title: 'First document uploaded',
+    description: 'Watch for the AI analysis in Health Records.',
+  },
+  log: {
+    title: 'First daily log saved',
+    description: 'Log regularly and your trends get sharper each cycle.',
+  },
+  done: {
+    title: 'You\'re all set',
+    description: 'Your dashboard is fully lit up now.',
+  },
+};
+
 export default function GettingStarted() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [profileName, setProfileName] = useState<string | null>(null);
   const [docCount, setDocCount] = useState<number>(0);
   const [signalCount, setSignalCount] = useState<number>(0);
@@ -50,6 +71,38 @@ export default function GettingStarted() {
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => onHealthDataChange(load), [load]);
+
+  // Track which steps we've already congratulated so a re-fetch of
+  // still-completed state doesn't re-fire toasts. Initial mount
+  // captures the current state without celebrating.
+  const congratulatedRef = useRef<Set<string> | null>(null);
+
+  useEffect(() => {
+    if (!loaded) return;
+    const nowDone = new Set<string>();
+    if (profileName) nowDone.add('profile');
+    if (docCount > 0) nowDone.add('upload');
+    if (signalCount > 0) nowDone.add('log');
+
+    if (congratulatedRef.current === null) {
+      // First load — remember current state silently.
+      congratulatedRef.current = nowDone;
+      return;
+    }
+
+    const already = congratulatedRef.current;
+    const newlyDone = [...nowDone].filter(k => !already.has(k));
+    for (const key of newlyDone) {
+      const labels = CELEBRATION_LABELS[key];
+      if (labels) toast({ title: `🎉 ${labels.title}`, description: labels.description });
+    }
+    if (newlyDone.length > 0 && nowDone.size === 3 && already.size < 3) {
+      // Last box just ticked off — send a final "you're all set" toast.
+      const d = CELEBRATION_LABELS.done;
+      toast({ title: `✨ ${d.title}`, description: d.description });
+    }
+    congratulatedRef.current = nowDone;
+  }, [loaded, profileName, docCount, signalCount, toast]);
 
   if (!loaded) return null;
 
