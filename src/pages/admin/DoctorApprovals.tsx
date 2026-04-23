@@ -72,8 +72,12 @@ export default function DoctorApprovals() {
         description: action === 'approve' ? 'They can now log into the doctor portal.' : 'Their signup was marked rejected.',
       });
       await load();
-    } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Action failed', description: error?.message || 'Try again.' });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Action failed',
+        description: error instanceof Error ? error.message : 'Try again.',
+      });
     } finally {
       setBusyId(null);
     }

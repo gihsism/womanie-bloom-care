@@ -31,7 +31,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
       const jsonResponse = await handleUpload({
         body,
-        request: req as any,
+        request: req as unknown as Request,
         onBeforeGenerateToken: async (pathname: string) => {
           if (!pathname.startsWith(`${user.id}/`)) {
             throw new Error('Forbidden: pathname must be scoped to session user');
@@ -55,7 +55,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       return res.status(200).json(jsonResponse);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Upload handler error:', error);
       return res.status(400).json({ error: error instanceof Error ? error.message : 'Upload failed' });
     }

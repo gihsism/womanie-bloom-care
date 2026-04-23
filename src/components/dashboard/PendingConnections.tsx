@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Check, X, Stethoscope, ShieldCheck } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { errorMessage } from '@/lib/errors';
 
 // Pending-doctor-connection approvals.
 //
@@ -70,11 +71,11 @@ export default function PendingConnections() {
           : 'The request was declined and removed.',
       });
       await load();
-    } catch (error: any) {
+    } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Something went wrong',
-        description: error?.message || 'Please try again.',
+        description: errorMessage(error, 'Please try again.'),
       });
     } finally {
       setBusyId(null);

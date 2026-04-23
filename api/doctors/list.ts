@@ -48,27 +48,30 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     []
   );
 
+  type Row = Record<string, unknown>;
+
   try {
     const [doctors, settings, schedules] = await Promise.all([
       doctorsPromise, settingsPromise, schedulePromise,
-    ]) as [any[], any[], any[]];
+    ]) as [Row[], Row[], Row[]];
 
     // Join in memory; only include doctors who have bookable settings.
-    const settingsByDoctor = new Map<string, any>();
-    for (const s of settings) settingsByDoctor.set(s.doctor_id, s);
+    const settingsByDoctor = new Map<string, Row>();
+    for (const s of settings) settingsByDoctor.set(s.doctor_id as string, s);
 
-    const schedulesByDoctor = new Map<string, any[]>();
+    const schedulesByDoctor = new Map<string, Row[]>();
     for (const s of schedules) {
-      const arr = schedulesByDoctor.get(s.doctor_id) ?? [];
+      const key = s.doctor_id as string;
+      const arr = schedulesByDoctor.get(key) ?? [];
       arr.push(s);
-      schedulesByDoctor.set(s.doctor_id, arr);
+      schedulesByDoctor.set(key, arr);
     }
 
     const out = doctors
       .map(d => ({
         ...d,
-        consultation_settings: settingsByDoctor.get(d.user_id) ?? null,
-        schedule: schedulesByDoctor.get(d.user_id) ?? [],
+        consultation_settings: settingsByDoctor.get(d.user_id as string) ?? null,
+        schedule: schedulesByDoctor.get(d.user_id as string) ?? [],
       }))
       .filter(d => d.consultation_settings);
 

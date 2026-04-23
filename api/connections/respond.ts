@@ -41,7 +41,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     `SELECT id FROM doctor_patient_connections
        WHERE id = $1 AND patient_id = $2 AND status = $3`,
     [connectionId, user.id, expectedStatus]
-  ) as any[];
+  ) as unknown[];
   if (rows.length === 0) {
     const notFoundMsg = action === 'revoke'
       ? 'Approved connection not found'

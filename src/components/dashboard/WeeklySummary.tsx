@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { onHealthDataChange } from '@/lib/data-events';
 import { formatDistanceToNow } from 'date-fns';
 import { BookOpen, RefreshCw, Sparkles } from 'lucide-react';
+import { errorMessage } from '@/lib/errors';
 
 // Weekly narrative summary card on the patient dashboard.
 //
@@ -54,12 +55,12 @@ export default function WeeklySummary() {
       if (force && payload.summary) {
         toast({ title: 'Summary refreshed', description: 'Reflecting your latest results.' });
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Weekly summary error:', error);
       toast({
         variant: 'destructive',
         title: 'Could not load summary',
-        description: error?.message || 'Please try again.',
+        description: errorMessage(error, 'Please try again.'),
       });
     } finally {
       setLoading(false);

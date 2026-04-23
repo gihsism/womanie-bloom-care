@@ -99,11 +99,11 @@ const DoctorSignUp = () => {
         description: data.message || 'Your account is pending verification. You will be notified once approved.',
       });
       navigate('/auth/doctor-login');
-    } catch (error: any) {
+    } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Registration failed',
-        description: error?.message || 'An unexpected error occurred. Please try again.',
+        description: error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.',
       });
     } finally {
       setIsLoading(false);

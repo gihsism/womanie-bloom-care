@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Stethoscope, ShieldCheck, ShieldOff } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { errorMessage } from '@/lib/errors';
 
 // Approved doctor connections with a Revoke action. Pairs with
 // PendingConnections: that one handles "doctor wants in", this one
@@ -60,11 +61,11 @@ export default function ConnectedDoctors() {
       }
       toast({ title: 'Access revoked', description: `${label} no longer has access to your records.` });
       await load();
-    } catch (error: any) {
+    } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Could not revoke',
-        description: error?.message || 'Please try again.',
+        description: errorMessage(error, 'Please try again.'),
       });
     } finally {
       setBusyId(null);

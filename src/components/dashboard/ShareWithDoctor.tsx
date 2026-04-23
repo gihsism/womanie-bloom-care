@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Share2, Copy, Check, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { errorMessage } from '@/lib/errors';
 
 // Patient flow for sharing health records with a doctor.
 //
@@ -89,12 +90,12 @@ export default function ShareWithDoctor() {
         description: 'Share this code with your doctor to link your records.',
       });
       await loadActiveCodes();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Code generation error:', error);
       toast({
         variant: 'destructive',
         title: 'Could not generate code',
-        description: error?.message || 'Please try again.',
+        description: errorMessage(error, 'Please try again.'),
       });
     } finally {
       setGenerating(false);

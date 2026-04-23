@@ -126,7 +126,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           LIMIT 200`,
         [user.id]
       ),
-    ]) as [any[], any[], any[]];
+    ]) as [Array<Record<string, unknown>>, Array<Record<string, unknown>>, Array<Record<string, unknown>>];
 
     if (docRows.length === 0) {
       return res.status(200).json({
@@ -165,8 +165,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (extractedRows.length > 0) {
       // Prioritize flagged values but keep the count bounded.
-      const flagged = extractedRows.filter((r: any) => r.status === 'critical' || r.status === 'abnormal');
-      const normal = extractedRows.filter((r: any) => r.status === 'normal' || r.status === 'expected');
+      const flagged = extractedRows.filter(r => r.status === 'critical' || r.status === 'abnormal');
+      const normal = extractedRows.filter(r => r.status === 'normal' || r.status === 'expected');
       const sample = [...flagged, ...normal].slice(0, 120);
       parts.push('', `## Extracted values (${sample.length} of ${extractedRows.length})`);
       for (const r of sample) {
@@ -187,7 +187,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       const cached = await sql.query(
         'SELECT response_text, created_at FROM llm_cache WHERE request_hash = $1',
         [cacheKey]
-      ) as any[];
+      ) as Array<{ response_text: string | null; created_at: string | null }>;
       if (cached.length > 0 && cached[0].response_text) {
         await sql.query(
           'UPDATE llm_cache SET hit_count = hit_count + 1, last_hit_at = now() WHERE request_hash = $1',
@@ -210,7 +210,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
        ON CONFLICT (request_hash)
          DO UPDATE SET response_text = EXCLUDED.response_text, created_at = now()`,
       [cacheKey, summary, 'claude-sonnet-4-20250514']
-    ).catch((e: any) => console.error('Summary cache store error:', e));
+    ).catch((e: unknown) => console.error('Summary cache store error:', e));
 
     return res.status(200).json({
       summary,

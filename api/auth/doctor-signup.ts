@@ -39,7 +39,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const existing = await sql.query(
       'SELECT id FROM auth_users WHERE email = $1',
       [emailLower]
-    ) as any[];
+    ) as unknown[];
     if (existing.length > 0) {
       return res.status(409).json({ error: 'An account with this email already exists.' });
     }

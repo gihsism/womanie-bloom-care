@@ -35,7 +35,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
        WHERE doctor_id = $1 AND patient_id = $2 AND status = 'approved'
        LIMIT 1`,
     [doctor.id, patientId]
-  ) as any[];
+  ) as unknown[];
   if (conn.length === 0) {
     return res.status(403).json({ error: 'No approved connection to this patient' });
   }
@@ -82,7 +82,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
            ORDER BY scheduled_at DESC`,
         [doctor.id, patientId]
       ),
-    ]) as [any[], any[], any[], any[], any[], any[]];
+    ]) as [unknown[], unknown[], unknown[], unknown[], unknown[], unknown[]];
 
     return res.status(200).json({
       profile: profileRows[0] ?? null,

@@ -30,24 +30,24 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const sql = neon(process.env.DATABASE_URL!);
 
   // Only users with the doctor role can redeem codes.
-  const roles = await sql.query(
+  const roles = (await sql.query(
     'SELECT role FROM user_roles WHERE user_id = $1',
     [user.id]
-  );
-  if (!(roles as any[]).some((r: any) => r.role === 'doctor')) {
+  )) as Array<{ role: string }>;
+  if (!roles.some(r => r.role === 'doctor')) {
     return res.status(403).json({ error: 'Only doctors can redeem access codes' });
   }
 
   // Find the code.
-  const matches = await sql.query(
+  const matches = (await sql.query(
     `SELECT id, patient_id FROM patient_access_codes
        WHERE code = $1 AND is_used = false AND expires_at > now()`,
     [code.trim()]
-  );
-  if ((matches as any[]).length === 0) {
+  )) as Array<{ id: string; patient_id: string }>;
+  if (matches.length === 0) {
     return res.status(404).json({ error: 'Invalid, expired, or already-used code' });
   }
-  const entry = (matches as any[])[0];
+  const entry = matches[0];
 
   try {
     await sql.query(
@@ -55,8 +55,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
          VALUES ($1, $2, 'code', 'pending')`,
       [user.id, entry.patient_id]
     );
-  } catch (err: any) {
-    if (err?.code === '23505') {
+  } catch (err) {
+    const code = (err as { code?: string } | undefined)?.code;
+    if (code === '23505') {
       return res.status(409).json({ error: 'Already connected with this patient' });
     }
     console.error('redeem-code insert error:', err);
