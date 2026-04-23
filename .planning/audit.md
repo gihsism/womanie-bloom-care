@@ -172,6 +172,23 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 14)
+
+- **bae6d38** — ESLint pass, phase 1. The file surface modified across autonomous sessions had 49 `no-explicit-any` errors. This commit fixes ~half: introduces `src/lib/errors.ts` with `errorMessage(err: unknown): string`, uses it in six frontend catch blocks; retypes neon query results from `as any[]` to `as unknown[]` or `as Array<{…}>` across summary/generate, doctors/list, doctors/patient, auth/doctor-signup, connections/respond, connections/redeem-code; drops the `request: req as any` in upload.ts.
+
+Remaining lint errors (17 in api/) are concentrated in analyze-document / ai-doctor-chat / db.ts where the Neon surface and the Claude response shape touch more call sites. Intentionally left for a follow-up so this session doesn't turn into a marathon type-cleanup.
+
+Remaining open after session 14:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification; real rate-limit bucket; doctor-signup email verification; authed e2e smoke flow; remaining any-in-api cleanup.
+
+Next-session candidates:
+1. Finish the remaining 17 `any`s in api/analyze-document / ai-doctor-chat / db.ts.
+2. Authed e2e smoke flow — most user-valuable, catches the silent-broken-flow class of bug.
+3. Rotate sessions 1–6 out of audit.md.
+4. Dashboard empty-state pass (what does a brand-new-user dashboard look like? first-time upload experience?).
+
 ### 2026-04-23 (session 13)
 
 - **d4801cc** — added `/api/predict-ovulation`. PatientDashboard auto-fetches a prediction on every mount for menstrual-cycle / conception users, plus the user-triggered `OvulationPrediction` button — both went through `db.functions.invoke('predict-ovulation', …)` which routes to `/api/predict-ovulation`. That endpoint never existed; prediction had been silently 404-ing since the Supabase migration. Pure algorithmic implementation (cycleLength − 14 luteal rule, ±4/+1 fertile window, indicator scan of last 30 days of signals, templated narrative) — no Claude call, so no cost/latency on every dashboard mount. Returns the exact shape the frontend already expected.
