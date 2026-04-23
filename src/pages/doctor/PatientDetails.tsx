@@ -113,16 +113,12 @@ const PatientDetails = () => {
     setIsLoadingData(true);
 
     try {
-      // Check if doctor has approved access to this patient
-      const { data: connection } = await db
-        .from('doctor_patient_connections')
-        .select('*')
-        .eq('doctor_id', user.id)
-        .eq('patient_id', patientId)
-        .eq('status', 'approved')
-        .maybeSingle();
-
-      if (!connection) {
+      // One consent-gated server call fetches profile + signals +
+      // documents + extracted data + our notes + appointments.
+      // /api/db can't do this for a doctor because the rows are
+      // owned by the patient — see api/doctors/patient.ts.
+      const resp = await fetch(`/api/doctors/patient?id=${encodeURIComponent(patientId!)}`);
+      if (resp.status === 403) {
         setHasAccess(false);
         toast({
           variant: 'destructive',
@@ -131,60 +127,14 @@ const PatientDetails = () => {
         });
         return;
       }
-
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const payload = await resp.json();
       setHasAccess(true);
-
-      // Load patient profile
-      const { data: profileData } = await db
-        .from('profiles')
-        .select('*')
-        .eq('id', patientId)
-        .maybeSingle();
-
-      setPatient(profileData);
-
-      // Load health signals (last 30 days)
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-      const { data: signalsData } = await db
-        .from('daily_health_signals')
-        .select('*')
-        .eq('user_id', patientId)
-        .gte('signal_date', thirtyDaysAgo.toISOString().split('T')[0])
-        .order('signal_date', { ascending: false });
-
-      setHealthSignals(signalsData || []);
-
-      // Load documents
-      const { data: docsData } = await db
-        .from('health_documents')
-        .select('*')
-        .eq('user_id', patientId)
-        .order('uploaded_at', { ascending: false });
-
-      setDocuments(docsData || []);
-
-      // Load doctor's notes for this patient
-      const { data: notesData } = await db
-        .from('doctor_notes')
-        .select('*')
-        .eq('doctor_id', user.id)
-        .eq('patient_id', patientId)
-        .order('created_at', { ascending: false });
-
-      setDoctorNotes(notesData || []);
-
-      // Load appointments
-      const { data: appointmentsData } = await db
-        .from('appointments')
-        .select('*')
-        .eq('doctor_id', user.id)
-        .eq('patient_id', patientId)
-        .order('scheduled_at', { ascending: false });
-
-      setAppointments(appointmentsData || []);
-
+      setPatient(payload.profile);
+      setHealthSignals(payload.healthSignals || []);
+      setDocuments(payload.documents || []);
+      setDoctorNotes(payload.notes || []);
+      setAppointments(payload.appointments || []);
     } catch (error) {
       console.error('Error loading patient data:', error);
       toast({
