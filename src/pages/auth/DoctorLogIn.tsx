@@ -29,33 +29,38 @@ const DoctorLogIn = () => {
 
   const handleLogIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!isFormValid()) return;
 
     setIsLoading(true);
 
     try {
-      const { data: authData, error } = await db.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
+      // Use the real session endpoint — db.auth.signInWithPassword is
+      // a Supabase-shim stub that just returns an error.
+      const loginResp = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
       });
-
-      if (error) {
+      const loginData = await loginResp.json().catch(() => ({}));
+      if (!loginResp.ok) {
         toast({
           variant: 'destructive',
           title: 'Login failed',
-          description: error.message === 'Invalid login credentials' 
-            ? 'Invalid email or password. Please try again.' 
-            : error.message,
+          description: loginData.error || 'Invalid email or password. Please try again.',
         });
         return;
       }
 
-      // Check if user has doctor role
+      // We're logged in as a generic user; confirm they have the
+      // doctor role. /api/db's ownership enforcement injects
+      // user_id = session.id, so this reads only our own rows.
       const { data: roleData } = await db
         .from('user_roles')
         .select('role')
-        .eq('user_id', authData.user?.id)
         .eq('role', 'doctor')
         .maybeSingle();
 
@@ -65,7 +70,9 @@ const DoctorLogIn = () => {
           title: 'Access denied',
           description: 'This account is not registered as a doctor. Please use patient login or register as a doctor.',
         });
-        await db.auth.signOut();
+        // Clear the session so a non-doctor isn't left signed in via
+        // the doctor URL.
+        await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
         return;
       }
 
@@ -73,7 +80,9 @@ const DoctorLogIn = () => {
         title: 'Welcome back, Doctor!',
         description: 'You have successfully logged in.',
       });
-      navigate('/doctor/dashboard');
+      // Full reload so AuthContext picks up the new session cookie
+      // before routing into the doctor dashboard.
+      window.location.href = '/doctor/dashboard';
     } catch (error) {
       toast({
         variant: 'destructive',
