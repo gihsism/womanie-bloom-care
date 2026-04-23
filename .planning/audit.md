@@ -172,6 +172,22 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 17)
+
+- **c23021c** — "Ask" affordance on every RecentFindings row. Clicking navigates to `/dashboard/ai-doctor?q=<question>`; AIDoctorChat reads the `q` param on mount, auto-sends as the first user turn, and strips it from the URL so a refresh doesn't resend. Question template pulls the finding title + value + unit ("What does my Ferritin of 12 μg/L mean for me?"). Also refactored the row from an `<li role='button'>` into two proper sibling `<button>`s so row-nav + Ask both have real accessibility and focus behaviour.
+- **20f95d4** — same Ask pattern on HealthTrends rows, with trend-aware question phrasing ("My Ferritin improved from 42 μg/L to 78 μg/L. What does this mean for me?"). Verb degrades to "went up / down / changed" when no status shift.
+
+Remaining open after session 17:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification; real rate-limit bucket; doctor-signup email verification; authed e2e smoke flow.
+
+Next-session candidates:
+1. Dashboard empty-state pass for brand-new users (most of the dashboard is hide-when-empty; a "Welcome, here's your next step" hero would help before the widgets light up).
+2. `?q=` deep-link into AIDoctorChat also from NewDocInsights "worsened / new" rows.
+3. Expire / clean old `patient_access_codes` (low priority but easy).
+4. Authed e2e smoke.
+
 ### 2026-04-23 (session 16)
 
 - **a736f8c** — audit.md rotation. Sessions 1–8 moved to `.planning/SHIPPED.md`; audit.md kept at sessions 9–15 for trailing context (~300 lines, fits well in a fresh wake-up load).
