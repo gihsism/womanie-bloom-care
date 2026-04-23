@@ -445,6 +445,15 @@ const PatientDashboard = () => {
                     <Info className="mr-2 h-4 w-4" />
                     About Womanie
                   </DropdownMenuItem>
+                  {user?.isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => navigate('/admin/doctors')}>
+                        <Shield className="mr-2 h-4 w-4" />
+                        Admin — Doctor approvals
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                     <LogOut className="mr-2 h-4 w-4" />
