@@ -15,6 +15,7 @@ import { formatDistanceToNow } from 'date-fns';
 
 interface Finding {
   id: string;
+  document_id: string | null;
   title: string;
   value: string | null;
   unit: string | null;
@@ -65,7 +66,7 @@ export default function RecentFindings() {
     // that actually deserve attention.
     const { data } = await db
       .from('current_extracted_data')
-      .select('id, title, value, unit, reference_range, status, data_type, date_recorded, notes')
+      .select('id, document_id, title, value, unit, reference_range, status, data_type, date_recorded, notes')
       .eq('user_id', user.id);
     const rows = (data ?? []) as Finding[];
     const flagged = rows.filter(r => r.status === 'critical' || r.status === 'abnormal');
@@ -127,7 +128,7 @@ export default function RecentFindings() {
             <li
               key={f.id}
               className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/50 cursor-pointer"
-              onClick={() => navigate('/dashboard/medical-history')}
+              onClick={() => navigate(f.document_id ? `/dashboard/medical-history?doc=${f.document_id}` : '/dashboard/medical-history')}
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">

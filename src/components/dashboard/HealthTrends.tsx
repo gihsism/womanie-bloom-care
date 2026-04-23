@@ -26,6 +26,7 @@ interface ExtractedItem {
   status: string | null;
   data_type: string;
   date_recorded: string | null;
+  document_id: string | null;
 }
 
 interface TrendRow {
@@ -35,6 +36,7 @@ interface TrendRow {
   latestRawValue: string;
   latestStatus: string | null;
   latestDate: string;
+  latestDocumentId: string | null;
   prevValue: number;
   prevRawValue: string;
   prevStatus: string | null;
@@ -116,6 +118,7 @@ function computeTrends(rows: ExtractedItem[]): TrendRow[] {
       latestRawValue: String(latest.item.value),
       latestStatus: latest.item.status,
       latestDate: latest.item.date_recorded as string,
+      latestDocumentId: latest.item.document_id,
       prevValue,
       prevRawValue: String(prev.item.value),
       prevStatus: prev.item.status,
@@ -179,7 +182,7 @@ export default function HealthTrends() {
     if (!user) return;
     const { data } = await db
       .from('current_extracted_data')
-      .select('title, value, unit, status, data_type, date_recorded')
+      .select('title, value, unit, status, data_type, date_recorded, document_id')
       .eq('user_id', user.id);
     const rows = (data ?? []) as ExtractedItem[];
     setTrends(computeTrends(rows));
@@ -225,7 +228,11 @@ export default function HealthTrends() {
             <li
               key={t.title}
               className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/40 cursor-pointer"
-              onClick={() => navigate('/dashboard/medical-history')}
+              onClick={() => navigate(
+                t.latestDocumentId
+                  ? `/dashboard/medical-history?doc=${t.latestDocumentId}`
+                  : '/dashboard/medical-history'
+              )}
             >
               <DirectionIcon direction={t.direction} shift={t.statusShift} />
               <div className="flex-1 min-w-0">

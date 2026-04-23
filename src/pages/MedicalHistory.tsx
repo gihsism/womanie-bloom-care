@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -491,6 +491,24 @@ export default function MedicalHistory() {
   const [expandedDocId, setExpandedDocId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+
+  // Deep-link support: when arriving with ?doc=<id>, auto-expand that
+  // doc and scroll it into view. Fired once per distinct ?doc= value
+  // after the documents list has loaded, and keyed so a user can click
+  // the same dashboard row twice in a row and still get the scroll.
+  useEffect(() => {
+    const target = searchParams.get('doc');
+    if (!target || documents.length === 0) return;
+    if (!documents.some(d => d.id === target)) return;
+    setExpandedDocId(target);
+    // Defer to next paint so the expanded content is in the DOM before
+    // we try to scroll it into view.
+    requestAnimationFrame(() => {
+      const el = document.getElementById(`doc-card-${target}`);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [searchParams, documents]);
 
   // Handle cycle update suggestions (e.g., switch to pregnancy mode)
   const handleCycleUpdate = async (suggestion: { type: string; id: string }) => {
@@ -937,7 +955,7 @@ export default function MedicalHistory() {
                 const analysisStalled = !doc.ai_summary && uploadedMsAgo > 3 * 60 * 1000;
 
                 return (
-                  <div key={doc.id}>
+                  <div key={doc.id} id={`doc-card-${doc.id}`} className="scroll-mt-16">
                     <button
                       onClick={() => setExpandedDocId(isExpanded ? null : doc.id)}
                       className="w-full flex items-center gap-3 py-3 px-4 hover:bg-muted/30 transition-colors text-left"
