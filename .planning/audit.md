@@ -172,6 +172,24 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-23 (session 9)
+
+- **30afdcb** — real `/api/auth/doctor-signup` endpoint. Hashes the password, creates `auth_users` + an `is_verified=false, verification_status='pending'` `doctor_profiles` row. Deliberately does NOT grant `user_roles.role='doctor'` or set a session cookie — role assignment stays admin-only (manual DB step for now) so nobody can self-elevate via the doctor-signup URL. DoctorSignUp.tsx now just POSTs to it and drops the broken db.auth.signUp() stub path.
+- **4a69ddf** — `api/_lib/ratelimit.ts` + wiring. All three Claude-calling endpoints (`analyze-document`, `summary/generate`, `ai-doctor-chat`) consume from an in-memory per-user daily bucket and return 429 with a `retryInSec` field on exceed. In-memory only = soft ceiling per warm pod, not billing-grade — documented in the module; module is swappable for Vercel KV or a Neon-backed usage table later without touching callers.
+
+Remaining open after session 9:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- P2 #17 orphaned chat messages.
+- HANDOFFs: admin UI / CLI for approving doctors (manual DB step right now); schema migrations for a real rate-limit bucket if we outgrow in-memory.
+
+Next-session candidates:
+1. Admin CLI / endpoint for approving doctors — currently Alena has to run raw SQL.
+2. Weekly summary fade-gradient polish (only show when content actually overflows).
+3. P0 #5: make analyze-document's closing transaction survive a mid-commit function kill (partial-write janitor, or restructure the flip so it comes before the heavy writes).
+4. `/api/auth/doctor-signup` email notification to an admin inbox so new signups don't get lost waiting to be approved.
+5. Tests — at minimum, a smoke suite for `/api/db` ownership enforcement and for the connection lifecycle (pending → approve → revoke).
+
 ### 2026-04-23 (session 8)
 
 - **b5fe18a** — weekly narrative summary feature. `POST /api/summary/generate` reads the patient's profile + up to 20 recent documents' `ai_summary` + last 200 extracted values and asks Claude Sonnet 4 for a 4-section markdown narrative ("Your big picture" / "What's going well" / "What to keep an eye on" / "Good questions to bring to your doctor"). Cached in `llm_cache` keyed on user + ISO-week + content hash; `force: true` bypasses for manual refresh. New `WeeklySummary` card on PatientDashboard renders the markdown, collapses with a gradient fade + "Read more", and auto-refreshes on `onHealthDataChange` so a new analysis feeds into the narrative automatically.
