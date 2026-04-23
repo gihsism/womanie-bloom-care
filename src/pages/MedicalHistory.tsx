@@ -698,7 +698,7 @@ export default function MedicalHistory() {
       // document_analyses row and only flips the current flag on success.
       // Prior analyses stay queryable as history.
       await db.functions.invoke('analyze-document', {
-        body: { documentId: doc.id, userId: user.id, filePath: doc.file_path, fileName: doc.file_name, mimeType: doc.mime_type },
+        body: { documentId: doc.id, userId: user.id, filePath: doc.file_path, fileName: doc.file_name, mimeType: doc.mime_type, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone },
       });
       toast({ title: 'Analysis complete', description: doc.ai_suggested_name || doc.file_name });
       await fetchData();
@@ -726,7 +726,7 @@ export default function MedicalHistory() {
       await Promise.allSettled(
         chunk.map(doc =>
           db.functions.invoke('analyze-document', {
-            body: { documentId: doc.id, userId: user.id, filePath: doc.file_path, fileName: doc.file_name, mimeType: doc.mime_type },
+            body: { documentId: doc.id, userId: user.id, filePath: doc.file_path, fileName: doc.file_name, mimeType: doc.mime_type, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone },
           })
         )
       );
