@@ -172,6 +172,22 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-24 (session 31)
+
+- **4dafe08** — user-reported bug: the browser-tab icon was still showing Lovable's logo. Root cause: `public/favicon.ico` was a 73×74 PNG leftover from the Lovable scaffolding, and `index.html` pointed at three other favicon paths (`/favicon-32x32.png`, `/favicon-16x16.png`, `/mask-icon.svg`) that don't exist, so the browser fell back to the stale `.ico`. VitePWA's `includeAssets` also referenced the same ghost paths. Replaced with a simple pink-heart-on-gradient SVG favicon (matching the `#E8B4D8` brand), updated HTML + Vite config to point at it, removed the dead references.
+- **8b51706** — Health Statistics page picked up stat cards + a by-panel breakdown above the existing document list. Four cards (documents / lab values / healthy / flagged) and a horizontal bar chart grouping lab results by panel from the `raw_data` JSONB. Subscribes to `onHealthDataChange`.
+
+Remaining open after session 31:
+- P0 #5 transaction atomicity.
+- P1 #8 cache TTL (HANDOFF).
+- HANDOFFs: schema migrations; admin email notification; real rate-limit bucket; doctor-signup email verification; authed e2e smoke flow.
+
+Next-session candidates:
+1. Authed e2e smoke flow.
+2. Consolidated schema migration for the three `localStorage` stubs (notification toggles, emergency contacts).
+3. Replace the Lovable-leftover apple-touch-icon + pwa-192x192 icons too (not critical — only affects installed PWA, but would complete the brand pass).
+4. Mobile UX pass on new pages.
+
 ### 2026-04-24 (session 30)
 
 - **c0ca0bb** — `/dashboard/emergency` Emergency Contacts page. LocalStorage-backed (keyed per user.id), capped at 5 contacts, each with name / optional relationship / phone. Phone renders as `tel:` so tapping dials on mobile. Yellow hero reminds the user Womanie doesn't place calls and they should use their local emergency number. Dashed footer calls out the on-device storage caveat. Sidebar + dropdown re-surface the entry.
