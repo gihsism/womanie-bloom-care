@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "@/integrations/db/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,7 +7,7 @@ import { onHealthDataChange } from "@/lib/data-events";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FileText, Calendar, ArrowLeft } from "lucide-react";
+import { FileText, Calendar, ArrowLeft, Activity, AlertTriangle, CheckCircle2, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 
@@ -21,11 +21,18 @@ interface DocumentSummary {
   document_type: string;
 }
 
+interface ExtractedItem {
+  status: string | null;
+  data_type: string | null;
+  raw_data: string | Record<string, unknown> | null;
+}
+
 export default function HealthStatistics() {
   const navigate = useNavigate();
   usePageTitle('Health Statistics');
   const { user, loading: authLoading } = useAuth();
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
+  const [extracted, setExtracted] = useState<ExtractedItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,15 +42,20 @@ export default function HealthStatistics() {
   const fetchDocuments = useCallback(async () => {
     if (!user) return;
     try {
-      const { data, error } = await db
-        .from('health_documents')
-        .select('id, file_name, ai_suggested_name, ai_suggested_category, ai_summary, uploaded_at, document_type')
-        .eq('user_id', user.id)
-        .order('uploaded_at', { ascending: false });
-      if (error) throw error;
-      setDocuments(data || []);
+      const [docsRes, extractedRes] = await Promise.all([
+        db.from('health_documents')
+          .select('id, file_name, ai_suggested_name, ai_suggested_category, ai_summary, uploaded_at, document_type')
+          .eq('user_id', user.id)
+          .order('uploaded_at', { ascending: false }),
+        db.from('current_extracted_data')
+          .select('status, data_type, raw_data')
+          .eq('user_id', user.id),
+      ]);
+      if (docsRes.error) throw docsRes.error;
+      setDocuments(docsRes.data || []);
+      setExtracted((extractedRes.data ?? []) as ExtractedItem[]);
     } catch (error) {
-      console.error('Error fetching documents:', error);
+      console.error('Error fetching statistics:', error);
     } finally {
       setLoading(false);
     }
@@ -52,6 +64,35 @@ export default function HealthStatistics() {
   useEffect(() => {
     fetchDocuments();
   }, [fetchDocuments]);
+
+  useEffect(() => onHealthDataChange(fetchDocuments), [fetchDocuments]);
+
+  const stats = useMemo(() => {
+    const analyzedDocs = documents.filter(d => d.ai_summary).length;
+    const labResults = extracted.filter(e => e.data_type === 'lab_result').length;
+    const critical = extracted.filter(e => e.status === 'critical').length;
+    const abnormal = extracted.filter(e => e.status === 'abnormal').length;
+    const normal = extracted.filter(e => e.status === 'normal' || e.status === 'expected').length;
+
+    // Count by panel from the raw_data JSON column.
+    const panels = new Map<string, number>();
+    for (const item of extracted) {
+      if (item.data_type !== 'lab_result') continue;
+      let raw: Record<string, unknown> | null = null;
+      if (typeof item.raw_data === 'string') {
+        try { raw = JSON.parse(item.raw_data); } catch { /* ignore */ }
+      } else if (item.raw_data && typeof item.raw_data === 'object') {
+        raw = item.raw_data as Record<string, unknown>;
+      }
+      const panel = typeof raw?.panel === 'string' ? raw.panel : 'Other';
+      panels.set(panel, (panels.get(panel) ?? 0) + 1);
+    }
+    const topPanels = [...panels.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6);
+
+    return { analyzedDocs, labResults, critical, abnormal, normal, topPanels };
+  }, [documents, extracted]);
 
   useEffect(() => onHealthDataChange(fetchDocuments), [fetchDocuments]);
 
@@ -125,7 +166,75 @@ export default function HealthStatistics() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
+        <div className="space-y-6">
+          {/* Stat cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <Card className="p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <FileText className="h-4 w-4 text-primary" />
+                <p className="text-xs text-muted-foreground">Documents</p>
+              </div>
+              <p className="text-2xl font-bold">{stats.analyzedDocs}</p>
+              <p className="text-[11px] text-muted-foreground">analyzed</p>
+            </Card>
+            <Card className="p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <FlaskConical className="h-4 w-4 text-primary" />
+                <p className="text-xs text-muted-foreground">Lab results</p>
+              </div>
+              <p className="text-2xl font-bold">{stats.labResults}</p>
+              <p className="text-[11px] text-muted-foreground">tracked values</p>
+            </Card>
+            <Card className="p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <p className="text-xs text-muted-foreground">Healthy</p>
+              </div>
+              <p className="text-2xl font-bold">{stats.normal}</p>
+              <p className="text-[11px] text-muted-foreground">in range</p>
+            </Card>
+            <Card className="p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <AlertTriangle className={`h-4 w-4 ${stats.critical > 0 ? 'text-destructive' : 'text-amber-600'}`} />
+                <p className="text-xs text-muted-foreground">Flagged</p>
+              </div>
+              <p className="text-2xl font-bold">{stats.critical + stats.abnormal}</p>
+              <p className="text-[11px] text-muted-foreground">
+                {stats.critical > 0 ? `${stats.critical} critical` : 'needs review'}
+              </p>
+            </Card>
+          </div>
+
+          {/* Breakdown by panel */}
+          {stats.topPanels.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-primary" />
+                  By panel
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {stats.topPanels.map(([panel, count]) => (
+                    <div key={panel} className="flex items-center gap-3">
+                      <span className="text-sm flex-shrink-0 w-40 truncate">{panel}</span>
+                      <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
+                        <div
+                          className="bg-primary h-2 rounded-full"
+                          style={{ width: `${(count / stats.labResults) * 100}%` }}
+                        />
+                      </div>
+                      <span className="text-xs text-muted-foreground flex-shrink-0 w-8 text-right">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Document list */}
+          <div className="grid gap-4">
           {documents.map((doc) => (
             <Card key={doc.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
@@ -157,6 +266,7 @@ export default function HealthStatistics() {
               )}
             </Card>
           ))}
+        </div>
         </div>
       )}
     </div>
