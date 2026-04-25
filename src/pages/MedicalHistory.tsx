@@ -581,6 +581,7 @@ export default function MedicalHistory() {
   const [searchQuery, setSearchQuery] = useState('');
   type DocFilter = 'all' | 'flagged' | 'lab_results' | 'imaging' | 'prescription' | 'consultation_notes';
   const [docFilter, setDocFilter] = useState<DocFilter>('all');
+  const [docSearch, setDocSearch] = useState('');
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
 
@@ -1110,13 +1111,41 @@ export default function MedicalHistory() {
                 </div>
               );
             })()}
+            {documents.length > 5 && (
+              <div className="px-4 pb-3">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                  <input
+                    type="search"
+                    placeholder="Search by name, category, or what's inside the analysis…"
+                    value={docSearch}
+                    onChange={(e) => setDocSearch(e.target.value)}
+                    className="w-full pl-8 pr-3 py-1.5 text-xs rounded-md border border-border bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+              </div>
+            )}
             <div className="divide-y divide-border/50">
               {documents.filter(doc => {
-                if (docFilter === 'all') return true;
-                if (docFilter === 'flagged') {
-                  return medicalData.some(m => m.document_id === doc.id && (m.status === 'abnormal' || m.status === 'critical'));
+                if (docFilter !== 'all') {
+                  if (docFilter === 'flagged') {
+                    if (!medicalData.some(m => m.document_id === doc.id && (m.status === 'abnormal' || m.status === 'critical'))) return false;
+                  } else if (doc.ai_suggested_category !== docFilter) {
+                    return false;
+                  }
                 }
-                return doc.ai_suggested_category === docFilter;
+                if (docSearch.trim()) {
+                  const q = docSearch.trim().toLowerCase();
+                  const haystack = [
+                    doc.ai_suggested_name,
+                    doc.file_name,
+                    doc.ai_suggested_category,
+                    doc.document_type,
+                    doc.ai_summary,
+                  ].filter(Boolean).join(' ').toLowerCase();
+                  if (!haystack.includes(q)) return false;
+                }
+                return true;
               }).map(doc => {
                 const docResults = medicalData.filter(m => m.document_id === doc.id);
                 const abnormals = docResults.filter(m => m.status === 'abnormal' || m.status === 'critical').length;
