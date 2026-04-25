@@ -10,6 +10,7 @@ import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
+import ResultSparkline from '@/components/dashboard/ResultSparkline';
 import NewDocInsights from '@/components/dashboard/NewDocInsights';
 import ShareWithDoctor from '@/components/dashboard/ShareWithDoctor';
 import PendingConnections from '@/components/dashboard/PendingConnections';
@@ -63,6 +64,7 @@ import {
   ChevronDown,
   ChevronUp,
   Printer,
+  MessageCircle,
 } from 'lucide-react';
 import { format, differenceInDays, addDays } from 'date-fns';
 import {
@@ -419,10 +421,29 @@ function renderEnhancedSummary(summary: string) {
 }
 
 // A single result card — friendly, visual, no jargon
-function ResultCard({ item }: { item: MedicalDataItem }) {
+function ResultCard({ item, history = [] }: { item: MedicalDataItem; history?: MedicalDataItem[] }) {
   const statusInfo = getStatusInfo(item.status);
   const fallbackNote = generateFallbackNote(item);
   const displayNote = item.notes || fallbackNote;
+
+  // Build sparkline data from this + prior readings of the same test.
+  // We parse numeric values from the stored string and drop entries
+  // that don't resolve cleanly.
+  const sparklinePoints = (() => {
+    const all = [item, ...history];
+    const out: Array<{ value: number; date: string; status: string | null }> = [];
+    for (const entry of all) {
+      if (!entry.value || !entry.date_recorded) continue;
+      const match = String(entry.value).match(/-?\d+(?:\.\d+)?/);
+      if (!match) continue;
+      const n = parseFloat(match[0]);
+      if (!Number.isFinite(n)) continue;
+      out.push({ value: n, date: entry.date_recorded, status: entry.status ?? null });
+    }
+    return out;
+  })();
+  const showSparkline = sparklinePoints.length >= 2;
+  const sparklineCount = sparklinePoints.length;
 
   return (
     <div className={`rounded-xl p-4 border ${statusInfo.bgColor} transition-all`}>
@@ -435,6 +456,14 @@ function ResultCard({ item }: { item: MedicalDataItem }) {
           <Badge variant="outline" className={`text-[10px] px-2 py-0.5 ${statusInfo.color} border-current/20`}>
             {statusInfo.label}
           </Badge>
+          {showSparkline && (
+            <div className="flex items-center gap-2 mt-2">
+              <ResultSparkline points={sparklinePoints} />
+              <span className="text-[10px] text-muted-foreground">
+                {sparklineCount} reading{sparklineCount > 1 ? 's' : ''}
+              </span>
+            </div>
+          )}
         </div>
         <div className="text-right flex-shrink-0">
           <ValueGauge value={item.value} unit={item.unit} refRange={item.reference_range} status={item.status} />
@@ -1046,6 +1075,20 @@ export default function MedicalHistory() {
                             variant="outline"
                             size="sm"
                             className="h-7 text-xs gap-1.5"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const docName = doc.ai_suggested_name || doc.file_name;
+                              const q = `Can you walk me through what my "${docName}" results mean?`;
+                              navigate(`/dashboard/ai-doctor?q=${encodeURIComponent(q)}`);
+                            }}
+                          >
+                            <MessageCircle className="h-3 w-3" />
+                            Ask about this
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs gap-1.5"
                             onClick={(e) => { e.stopPropagation(); reanalyzeOne(doc); }}
                             disabled={reanalyzingDoc === doc.id}
                           >
@@ -1090,7 +1133,12 @@ export default function MedicalHistory() {
                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">{docResults.length} extracted results</p>
                             {docResults
                               .filter(r => r.status === 'abnormal' || r.status === 'critical')
-                              .map(item => <ResultCard key={item.id} item={item} />)}
+                              .map(item => {
+                                const history = medicalData.filter(
+                                  m => m.id !== item.id && m.title === item.title
+                                );
+                                return <ResultCard key={item.id} item={item} history={history} />;
+                              })}
                             {docResults.filter(r => r.status !== 'abnormal' && r.status !== 'critical').length > 0 && (
                               <div className="bg-background rounded-lg border border-border/30 divide-y divide-border/20">
                                 {docResults
