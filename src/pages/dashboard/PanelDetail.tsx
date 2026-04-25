@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, FlaskConical, Loader2, MessageCircle } from 'lucide-react';
+import { ArrowLeft, FlaskConical, Loader2, MessageCircle, Sparkles, RefreshCw } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -95,6 +96,9 @@ export default function PanelDetail() {
   const [rows, setRows] = useState<ExtractedRow[]>([]);
   const [docs, setDocs] = useState<DocLite[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [aiSummary, setAiSummary] = useState<{ summary: string; cached: boolean; generatedAt: string | null } | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -190,6 +194,34 @@ export default function PanelDetail() {
     navigate(`/dashboard/ai-doctor?q=${encodeURIComponent(q)}`);
   };
 
+  const generateAiSummary = useCallback(async (force: boolean) => {
+    if (!panelDisplayName) return;
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const resp = await fetch('/api/summary/panel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ panel: panelDisplayName, force }),
+      });
+      const payload = await resp.json();
+      if (!resp.ok) {
+        throw new Error(payload?.error || `HTTP ${resp.status}`);
+      }
+      if (payload.summary) {
+        setAiSummary({
+          summary: payload.summary,
+          cached: Boolean(payload.cached),
+          generatedAt: typeof payload.generatedAt === 'string' ? payload.generatedAt : null,
+        });
+      }
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : 'Failed to generate summary');
+    } finally {
+      setAiLoading(false);
+    }
+  }, [panelDisplayName]);
+
   return (
     <div className="min-h-screen bg-background">
       <div className="border-b border-border bg-card sticky top-0 z-10">
@@ -225,6 +257,58 @@ export default function PanelDetail() {
                   <span className="text-amber-600 dark:text-amber-400 font-medium"> · {totalFlagged} flagged</span>
                 )}
               </p>
+            </Card>
+
+            {/* AI panel narrative — three-section markdown read of
+                this panel's history. Manual generate so we don't burn
+                Anthropic on every panel page view; cached server-side
+                in llm_cache so repeated clicks within the cache
+                window come back instantly. */}
+            <Card className="p-4 border-l-4 border-l-primary">
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <p className="text-sm font-semibold">AI panel insight</p>
+                </div>
+                {!aiSummary && !aiLoading && (
+                  <Button size="sm" variant="outline" onClick={() => generateAiSummary(false)}>
+                    Generate
+                  </Button>
+                )}
+                {aiSummary && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 gap-1"
+                    onClick={() => generateAiSummary(true)}
+                    disabled={aiLoading}
+                    aria-label="Regenerate AI insight"
+                  >
+                    <RefreshCw className={`h-3 w-3 ${aiLoading ? 'animate-spin' : ''}`} />
+                    <span className="text-xs">Refresh</span>
+                  </Button>
+                )}
+              </div>
+              {aiLoading && !aiSummary && (
+                <p className="text-xs text-muted-foreground">
+                  Reading your {panelDisplayName} history…
+                </p>
+              )}
+              {aiError && (
+                <p className="text-xs text-destructive">
+                  Could not generate summary: {aiError}
+                </p>
+              )}
+              {!aiSummary && !aiLoading && !aiError && (
+                <p className="text-xs text-muted-foreground">
+                  Click <span className="font-medium">Generate</span> for a 3-section narrative across your {panelDisplayName} readings: what the panel is for, what your readings show (with trends), and what to bring to your next appointment.
+                </p>
+              )}
+              {aiSummary && (
+                <div className="prose prose-sm dark:prose-invert max-w-none">
+                  <ReactMarkdown>{aiSummary.summary}</ReactMarkdown>
+                </div>
+              )}
             </Card>
 
             <div className="space-y-3">
