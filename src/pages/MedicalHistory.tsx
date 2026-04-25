@@ -1032,7 +1032,7 @@ export default function MedicalHistory() {
           <div className="hidden sm:block">
             <ShareWithDoctor />
           </div>
-          <Button variant="outline" size="sm" className="hidden sm:flex gap-1.5" onClick={() => window.print()}>
+          <Button variant="outline" size="sm" className="hidden sm:flex gap-1.5" onClick={() => window.open('/dashboard/health-record/print', '_blank', 'noopener,noreferrer')}>
             <Printer className="h-3.5 w-3.5" />
             Print
           </Button>
