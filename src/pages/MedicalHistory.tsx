@@ -287,24 +287,51 @@ function generateFallbackNote(item: MedicalDataItem): string | null {
   return null;
 }
 
-// Render a value with a visual "gauge" showing where it falls in range
+// Render a value with a visual "gauge" showing where it falls in range.
+//
+// Layout: a 3-zone horizontal bar — 20% under-range red gradient, 60%
+// in-range green band, 20% over-range red gradient. The actual value
+// is plotted as a marker at its true position, including outside the
+// in-range band when applicable. A small relative-deviation label
+// ("12% below" / "32% above") makes overshoots concrete instead of
+// just clamping the marker to the edge.
 function ValueGauge({ value, unit, refRange, status }: { value: string | null; unit: string | null; refRange: string | null; status: string | null }) {
   if (!value) return <span className="text-sm text-muted-foreground">—</span>;
 
   const numVal = parseFloat(value);
   const hasNumeric = !isNaN(numVal);
-  let percentage: number | null = null;
 
-  if (hasNumeric && refRange) {
+  let low: number | null = null;
+  let high: number | null = null;
+  if (refRange) {
     const match = refRange.match(/([\d.]+)\s*[-–]\s*([\d.]+)/);
     if (match) {
-      const low = parseFloat(match[1]);
-      const high = parseFloat(match[2]);
-      const range = high - low;
-      if (range > 0) {
-        // Show position: 0% = at low end, 100% = at high end
-        percentage = Math.max(0, Math.min(100, ((numVal - low) / range) * 100));
-      }
+      low = parseFloat(match[1]);
+      high = parseFloat(match[2]);
+    }
+  }
+
+  // Map the value onto the bar:
+  //   0..20%   → under-range zone (anything below low)
+  //   20..80%  → in-range zone (low..high)
+  //   80..100% → over-range zone (anything above high)
+  // Marker position uses 1.5× the in-range span as the visual extent
+  // for under/over zones, then clamps to [0..100] so an extreme
+  // outlier still pins to the edge with a label.
+  let markerPct: number | null = null;
+  let deviationLabel: string | null = null;
+  if (hasNumeric && low !== null && high !== null && high > low) {
+    const range = high - low;
+    if (numVal >= low && numVal <= high) {
+      markerPct = 20 + ((numVal - low) / range) * 60;
+    } else if (numVal < low) {
+      const under = (low - numVal) / range;
+      markerPct = Math.max(0, 20 - under * 20 / Math.max(0.5, under));
+      deviationLabel = `${Math.round(under * 100)}% below`;
+    } else {
+      const over = (numVal - high) / range;
+      markerPct = Math.min(100, 80 + over * 20 / Math.max(0.5, over));
+      deviationLabel = `${Math.round(over * 100)}% above`;
     }
   }
 
@@ -318,24 +345,52 @@ function ValueGauge({ value, unit, refRange, status }: { value: string | null; u
         </span>
         {unit && <span className="text-xs text-muted-foreground">{unit}</span>}
       </div>
-      {percentage !== null && (
-        <div className="space-y-0.5">
-          <div className="h-2 bg-muted rounded-full overflow-hidden relative">
-            <div className="absolute inset-0 bg-green-200 dark:bg-green-900/40 rounded-full" />
+      {markerPct !== null && (
+        <div className="space-y-0.5 min-w-[140px]">
+          <div className="h-2 rounded-full overflow-hidden relative bg-muted">
+            <div
+              className="absolute inset-y-0 left-0 bg-red-200 dark:bg-red-900/30"
+              style={{ width: '20%' }}
+            />
+            <div
+              className="absolute inset-y-0 bg-green-200 dark:bg-green-900/40"
+              style={{ left: '20%', width: '60%' }}
+            />
+            <div
+              className="absolute inset-y-0 right-0 bg-red-200 dark:bg-red-900/30"
+              style={{ width: '20%' }}
+            />
             <div
               className={`absolute top-0 h-full w-1.5 rounded-full ${
-                status === 'critical' ? 'bg-red-500' : status === 'abnormal' ? 'bg-amber-500' : 'bg-green-500'
+                status === 'critical' ? 'bg-red-600' :
+                status === 'abnormal' ? 'bg-amber-500' :
+                'bg-green-600'
               }`}
-              style={{ left: `calc(${percentage}% - 3px)` }}
+              style={{ left: `calc(${markerPct}% - 3px)` }}
             />
           </div>
-          <div className="flex justify-between">
-            <span className="text-[9px] text-muted-foreground">Low</span>
-            <span className="text-[9px] text-muted-foreground">High</span>
+          <div className="flex justify-between text-[9px] text-muted-foreground">
+            {deviationLabel ? (
+              <>
+                <span className={
+                  status === 'critical' ? 'text-red-600 font-semibold' :
+                  status === 'abnormal' ? 'text-amber-600 font-semibold' :
+                  ''
+                }>
+                  {deviationLabel}
+                </span>
+                <span>healthy {refRange}</span>
+              </>
+            ) : (
+              <>
+                <span>{low}</span>
+                <span>{high}</span>
+              </>
+            )}
           </div>
         </div>
       )}
-      {refRange && (
+      {markerPct === null && refRange && (
         <p className="text-[10px] text-muted-foreground">
           Healthy range: {refRange} {unit || ''}
         </p>
