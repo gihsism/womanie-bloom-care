@@ -172,6 +172,26 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-25 (session 33)
+
+Continuing the document-analysis "all three buckets" arc.
+
+- **fe382fc** — Per-doc "Read this first" hero card on the expanded view. Top 3 flagged findings sorted by severity → AI-priority → recency, each with friendly name + value + ref range + AI note + an inline Ask button. Hides for benign docs.
+- **2718951** — `/dashboard/compare?a=<id>&b=<id>` paired-diff view. Pairs every lab value by canonical title (the f89fb8d normalizer makes this safe), classifies each as both / a_only / b_only, computes a status shift, sorts worsened-first, tints rows by direction, header counts ("2 worsened · 5 improved · 1 new in B"), Ask AI button at the top hands the comparison to Claude. Entry from Medical History via a new "Compare to…" dropdown on each expanded doc.
+- **763e092** — Unit-notation normalizer pairs with the title one. Collapses μ vs µ vs mc vs u, recases mL / dL / L / mIU / IU / mEq segments, strips spaces around `/`. Applied on write to `medical_extracted_data`; the existing `/api/me/normalize-titles` backfill endpoint now does both passes in one call with separate counts. Settings button relabelled "Clean up test names + units". Raw unit preserved in `raw_data.raw_unit`.
+
+The "all three buckets" pass has now landed at least one substantive piece in each bucket: extraction (titles + units), per-doc presentation (Top 3 hero, ValueGauge zones, sparklines, Ask), cross-doc (compare-two-docs). Plus the surrounding polish from earlier sessions (deep-link Ask, RecentFindings, HealthTrends, NewDocInsights, WeeklySummary all already in place).
+
+Remaining open after session 33:
+- Panel deep-dives: click a panel name (CBC / Thyroid Panel / etc.) → see every reading across all docs, grouped + sparklined. Cross-doc bucket continuation.
+- Strengthen the system prompt to never summarize tables. Extraction quality bucket continuation.
+- All ongoing HANDOFFs.
+
+Next-session candidates:
+1. Panel deep-dive page `/dashboard/panel/:slug`.
+2. System prompt tightening + add `confidence` field to extracted_data.
+3. Per-doc panel-grouped layout (CBC / Thyroid / etc. visually grouped instead of flat list).
+
 ### 2026-04-25 (session 32)
 
 Alena asked for "all three buckets" of document-analysis improvements (extraction quality, per-doc presentation, cross-doc views). Working through them in dependency order.
