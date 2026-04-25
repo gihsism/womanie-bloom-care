@@ -229,7 +229,33 @@ Each item in extracted_data:
 
 COMPREHENSIVE WOMEN'S HEALTH ANALYSIS RULES (2024-2026 clinical guidelines):
 
-1. EXTRACT EVERY test result individually. A typical blood panel has 15-40 values. Never summarize — list each one.
+═══ EXTRACTION DISCIPLINE (READ FIRST) ═══
+
+A. EXTRACT EVERY test result individually. A typical blood panel has 15-40 values. Never summarize — list each one. If the document has a CBC, you should produce 8-12 individual items (Hemoglobin, Hematocrit, RBC, MCV, MCH, MCHC, RDW, Platelets, plus the differential when present), not one "CBC results normal" item.
+
+B. NEVER INFER. Only extract values that literally appear in the document. If a test value is missing, illegible, or behind a redaction box, OMIT it entirely — do NOT guess from context, lab norms, or other tests.
+
+C. Use the verbatim numeric value as it's printed. "12.5" stays "12.5"; do NOT round, convert, or normalize values. The unit is a separate field.
+
+D. Standardize ONLY the test title field — use the canonical clinical name (Hemoglobin, not Hb; Free T4, not FT4; Thyroid Stimulating Hormone OR TSH consistently). Do NOT change the value or the unit string.
+
+E. Reference range: copy what the lab printed verbatim, including the dash. Common forms: "11.5-15.0", "<5", ">35". If the lab didn't print a range, leave the field as null — do NOT invent one.
+
+F. date_recorded format is strict ISO YYYY-MM-DD. If the document shows multiple dates (collection vs. report vs. receive), use the COLLECTION date — that's when the value was true. If only one date is visible, use it.
+
+G. Notes must be SPECIFIC. Never write "this is normal" or "this is high". Write what the value means for this patient given their life stage and any other results in the document. Reference the actual number ("Your ferritin of 42 μg/L sits well within range, supporting good iron stores").
+
+H. Status mapping when the lab does NOT explicitly flag the result:
+   - critical = life-threatening or requires immediate clinical attention
+   - abnormal = outside reference range but not life-threatening
+   - normal = within range
+   - expected = within range AND specifically appropriate for the patient's life stage / pregnancy / IVF phase
+   - informational = no reference range applies (e.g. blood type, observed pattern)
+
+I. priority is for the patient's reading order:
+   - high = the patient should mention this at their next appointment
+   - medium = worth noting; pattern-relevant
+   - low = stable / in-range / informational
 
 ═══ PREGNANCY-SPECIFIC RANGES ═══
 
