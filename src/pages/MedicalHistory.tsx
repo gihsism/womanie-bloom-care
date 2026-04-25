@@ -1175,6 +1175,95 @@ export default function MedicalHistory() {
                           </Button>
                         </div>
 
+                        {/* Top findings hero — what to read first if you
+                            read nothing else. Critical before abnormal,
+                            tie-broken by AI-assigned priority then by
+                            most-recent date_recorded. Each row deep-
+                            links into AI Doctor Chat with a finding-
+                            specific Ask. Hidden when nothing is
+                            flagged on this doc. */}
+                        {(() => {
+                          const flagged = docResults
+                            .filter(r => r.status === 'critical' || r.status === 'abnormal')
+                            .map(r => {
+                              const raw = (r.raw_data as Record<string, unknown> | null) ?? null;
+                              const priorityVal = raw && typeof raw === 'object' ? (raw as { priority?: string }).priority : undefined;
+                              const priorityRank = priorityVal === 'high' ? 0 : priorityVal === 'medium' ? 1 : 2;
+                              return { ...r, priorityRank };
+                            })
+                            .sort((a, b) => {
+                              const sev = (a.status === 'critical' ? 0 : 1) - (b.status === 'critical' ? 0 : 1);
+                              if (sev !== 0) return sev;
+                              if (a.priorityRank !== b.priorityRank) return a.priorityRank - b.priorityRank;
+                              const ta = a.date_recorded ? Date.parse(a.date_recorded) : 0;
+                              const tb = b.date_recorded ? Date.parse(b.date_recorded) : 0;
+                              return tb - ta;
+                            })
+                            .slice(0, 3);
+                          if (flagged.length === 0) return null;
+                          return (
+                            <div className="bg-gradient-to-br from-destructive/5 via-amber-50/50 to-amber-50/0 dark:from-destructive/10 dark:via-amber-900/10 dark:to-transparent rounded-xl p-4 border border-amber-200/60 dark:border-amber-900/30 mb-3">
+                              <div className="flex items-center gap-2 mb-2">
+                                <AlertTriangle className="h-4 w-4 text-amber-600" />
+                                <p className="text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide">
+                                  Read this first — top {flagged.length} {flagged.length === 1 ? 'finding' : 'findings'}
+                                </p>
+                              </div>
+                              <ul className="space-y-1.5">
+                                {flagged.map(f => {
+                                  const valueBit = f.value
+                                    ? `${f.value}${f.unit ? ' ' + f.unit : ''}`
+                                    : '';
+                                  return (
+                                    <li key={f.id} className="flex items-start gap-2 text-sm">
+                                      <span className="flex-shrink-0 mt-0.5">
+                                        {f.status === 'critical' ? '🚨' : '⚠️'}
+                                      </span>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-baseline gap-2 flex-wrap">
+                                          <span className="font-semibold">{getFriendlyName(f.title)}</span>
+                                          {valueBit && (
+                                            <span className={`text-xs font-mono ${
+                                              f.status === 'critical' ? 'text-red-700 dark:text-red-300' :
+                                              'text-amber-700 dark:text-amber-300'
+                                            }`}>
+                                              {valueBit}
+                                            </span>
+                                          )}
+                                          {f.reference_range && (
+                                            <span className="text-[10px] text-muted-foreground">
+                                              ref {f.reference_range}
+                                            </span>
+                                          )}
+                                        </div>
+                                        {f.notes && (
+                                          <p className="text-[12px] text-muted-foreground line-clamp-2 mt-0.5">
+                                            {f.notes}
+                                          </p>
+                                        )}
+                                      </div>
+                                      <button
+                                        type="button"
+                                        className="flex-shrink-0 inline-flex items-center gap-1 text-[11px] text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const q = valueBit
+                                            ? `What does my ${getFriendlyName(f.title)} of ${valueBit} mean for me?`
+                                            : `What does my ${getFriendlyName(f.title)} result mean for me?`;
+                                          navigate(`/dashboard/ai-doctor?q=${encodeURIComponent(q)}`);
+                                        }}
+                                      >
+                                        <MessageCircle className="h-3 w-3" />
+                                        Ask
+                                      </button>
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            </div>
+                          );
+                        })()}
+
                         {/* AI Summary inline */}
                         {doc.ai_summary && (
                           <div className="bg-background rounded-xl p-4 border border-border/40 mb-3">
