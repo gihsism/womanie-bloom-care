@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Pill, Shield, Bell, User, Download, Loader2, Trash2 } from 'lucide-react';
+import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Pill, Shield, Bell, User, Download, Loader2, Trash2, Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -74,6 +74,38 @@ const Settings = () => {
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [normalizing, setNormalizing] = useState(false);
+
+  const handleNormalizeTitles = async () => {
+    setNormalizing(true);
+    try {
+      const resp = await fetch('/api/me/normalize-titles', { method: 'POST' });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${resp.status}`);
+      }
+      const { scanned, updated } = await resp.json();
+      if (updated === 0) {
+        toast({
+          title: 'Already clean',
+          description: `Scanned ${scanned} test names, all already canonical.`,
+        });
+      } else {
+        toast({
+          title: 'Test names cleaned up',
+          description: `Renamed ${updated} of ${scanned} entries to canonical forms (e.g. Hb → Hemoglobin).`,
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Cleanup failed',
+        description: error instanceof Error ? error.message : 'Try again.',
+      });
+    } finally {
+      setNormalizing(false);
+    }
+  };
 
   const handleDeleteAccount = async () => {
     // Double gate: an initial warning, then a type-to-confirm step so
@@ -428,6 +460,23 @@ const Settings = () => {
             </Button>
             <p className="text-[11px] text-muted-foreground">
               Exports everything Womanie has on you — profile, documents, analyses, cycle + daily logs, chat history, doctor connections — as a single JSON file.
+            </p>
+            <Separator />
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              onClick={handleNormalizeTitles}
+              disabled={normalizing}
+            >
+              {normalizing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Wand2 className="h-4 w-4" />
+              )}
+              Clean up test names
+            </Button>
+            <p className="text-[11px] text-muted-foreground">
+              Renames any inconsistently-extracted test titles in your existing data (e.g. "Hb" → "Hemoglobin", "FT4" → "Free T4") so trends and history connect properly. New uploads are normalized automatically.
             </p>
             <Separator />
             <Button
