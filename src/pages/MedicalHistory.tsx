@@ -1325,25 +1325,85 @@ export default function MedicalHistory() {
                                 );
                                 return <ResultCard key={item.id} item={item} history={history} />;
                               })}
-                            {docResults.filter(r => r.status !== 'abnormal' && r.status !== 'critical').length > 0 && (
-                              <div className="bg-background rounded-lg border border-border/30 divide-y divide-border/20">
-                                {docResults
-                                  .filter(r => r.status !== 'abnormal' && r.status !== 'critical')
-                                  .map(lab => {
-                                    const si = getStatusInfo(lab.status);
+                            {(() => {
+                              // Group the in-range results by panel for
+                              // navigability. A doc with 30+ values in
+                              // one flat list is hard to scan; grouping
+                              // by panel (CBC / Thyroid / Lipid / …)
+                              // halves the cognitive load. Panel name
+                              // comes from raw_data.panel populated by
+                              // the analyzer; rows without a panel land
+                              // in "Other".
+                              const normalRows = docResults.filter(
+                                r => r.status !== 'abnormal' && r.status !== 'critical'
+                              );
+                              if (normalRows.length === 0) return null;
+                              const byPanel = new Map<string, typeof normalRows>();
+                              for (const lab of normalRows) {
+                                const raw = lab.raw_data as Record<string, unknown> | null;
+                                const panel = raw && typeof raw === 'object' && typeof raw.panel === 'string'
+                                  ? raw.panel
+                                  : 'Other';
+                                const list = byPanel.get(panel) ?? [];
+                                list.push(lab);
+                                byPanel.set(panel, list);
+                              }
+                              // Render panels in a stable, useful order:
+                              // any panel with >1 row first, by row count
+                              // descending, then "Other" last.
+                              const panels = [...byPanel.entries()].sort((a, b) => {
+                                if (a[0] === 'Other') return 1;
+                                if (b[0] === 'Other') return -1;
+                                return b[1].length - a[1].length;
+                              });
+                              return (
+                                <div className="space-y-2">
+                                  {panels.map(([panel, labs]) => {
+                                    const slug = panel
+                                      .toLowerCase()
+                                      .replace(/&/g, 'and')
+                                      .replace(/[^a-z0-9]+/g, '-')
+                                      .replace(/^-+|-+$/g, '');
                                     return (
-                                      <div key={lab.id} className="flex items-center gap-2 py-1.5 px-3">
-                                        <span className="text-xs">{si.emoji}</span>
-                                        <span className="text-xs flex-1 min-w-0 truncate">{lab.title}</span>
-                                        <span className="text-xs font-mono font-bold text-foreground">{lab.value}{lab.unit ? ` ${lab.unit}` : ''}</span>
-                                        {lab.reference_range && (
-                                          <span className="text-[9px] text-muted-foreground hidden sm:inline">({lab.reference_range})</span>
-                                        )}
+                                      <div key={panel} className="bg-background rounded-lg border border-border/30 overflow-hidden">
+                                        <div className="flex items-center justify-between px-3 py-1.5 bg-muted/40">
+                                          <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                                            {panel} · {labs.length}
+                                          </p>
+                                          {panel !== 'Other' && (
+                                            <button
+                                              type="button"
+                                              className="text-[10px] text-primary hover:underline"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                navigate(`/dashboard/panel/${slug}`);
+                                              }}
+                                            >
+                                              View panel →
+                                            </button>
+                                          )}
+                                        </div>
+                                        <div className="divide-y divide-border/20">
+                                          {labs.map(lab => {
+                                            const si = getStatusInfo(lab.status);
+                                            return (
+                                              <div key={lab.id} className="flex items-center gap-2 py-1.5 px-3">
+                                                <span className="text-xs">{si.emoji}</span>
+                                                <span className="text-xs flex-1 min-w-0 truncate">{lab.title}</span>
+                                                <span className="text-xs font-mono font-bold text-foreground">{lab.value}{lab.unit ? ` ${lab.unit}` : ''}</span>
+                                                {lab.reference_range && (
+                                                  <span className="text-[9px] text-muted-foreground hidden sm:inline">({lab.reference_range})</span>
+                                                )}
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
                                       </div>
                                     );
                                   })}
-                              </div>
-                            )}
+                                </div>
+                              );
+                            })()}
                           </div>
                         )}
                         {!doc.ai_summary && docResults.length === 0 && (
