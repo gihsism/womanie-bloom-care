@@ -172,6 +172,27 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-25 (session 34)
+
+Alena said "do all and don't stop" so this session ran through the queued items + kept going.
+
+- **be99a67** — Panel deep-dive page at `/dashboard/panel/:slug`. Click a panel name on HealthStatistics's by-panel chart → see every reading in that panel across every uploaded doc, grouped by canonical title with per-test ResultSparkline + a 6-row history list (date · value · status · doc deep-link). Header has count summary + "Ask AI" with a panel-specific prefilled question. Title + unit normalization is what makes this work cleanly across docs.
+- **5e8bb14** — Per-doc panel grouping. The flat in-range list inside an expanded doc now groups by `raw_data.panel` with a "CBC · 12" header per group + a "View panel →" link to the deep-dive. Panels with most rows sort first; "Other" lands at the bottom.
+- **f1a2fec** — System prompt tightening: new "EXTRACTION DISCIPLINE (READ FIRST)" section at the top of `STATIC_RULES` with 9 directives (extract every value, never infer, verbatim numbers, standardize titles only, ISO dates, specific notes, status mapping). Caches with the rest of `STATIC_RULES`; local `llm_cache` invalidates naturally on rules change.
+- **ed4e4b7** — `OverdueTests` card on PatientDashboard. For tests the patient has tracked at least twice but where the latest reading is 12+ months old, surface them so a real gap doesn't go invisible. Each row deep-links to the panel deep-dive when the test has a panel; footer button hands "which to recheck" to the AI doctor with a prefilled question.
+- **949a1a2** — Filter chips on the My Documents list (All / Flagged / Lab results / Imaging / Prescription / Notes). Inline counts; chips that resolve to 0 hide; whole row hides when ≤3 docs.
+
+Remaining open after session 34:
+- Personal range / personal baselines on panel deep-dive (median + p5/p95 of user's history vs. the lab's healthy range).
+- Per-doc print/share-friendly view.
+- Per-panel Claude narrative on the panel deep-dive page.
+- All ongoing HANDOFFs.
+
+Next-session candidates:
+1. Personal-range mini-block per test on PanelDetail.
+2. AI panel summary on PanelDetail (Claude call hashed by user+panel).
+3. "Print this analysis" view (single doc, clean layout).
+
 ### 2026-04-25 (session 33)
 
 Continuing the document-analysis "all three buckets" arc.
