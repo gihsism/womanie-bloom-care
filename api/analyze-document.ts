@@ -2,6 +2,7 @@ import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from './_lib/auth.js';
 import { normalizeTestTitle } from './_lib/normalize-test-title.js';
+import { normalizeUnit } from './_lib/normalize-unit.js';
 import { checkAndConsume } from './_lib/ratelimit.js';
 import { withSentry } from './_lib/sentry.js';
 
@@ -630,16 +631,17 @@ async function processWithAI(
       rows.push([
         userId, documentId, analysisId,
         item.data_type || 'other', normalizeTestTitle(item.title) || 'Unknown',
-        item.value ?? null, item.unit ?? null, item.reference_range ?? null,
+        item.value ?? null, normalizeUnit(item.unit), item.reference_range ?? null,
         item.status ?? null, item.date_recorded ?? null, item.notes ?? null,
         JSON.stringify({
           priority: item.priority,
           panel: item.panel,
           possible_conditions: item.possible_conditions,
           is_repeat_test: item.is_repeat_test,
-          // Keep the raw title Claude returned for debugging /
+          // Keep the raw title + unit Claude returned for debugging /
           // backfilling if our alias map ever needs auditing.
           raw_title: item.title,
+          raw_unit: item.unit,
         }),
       ]);
     }

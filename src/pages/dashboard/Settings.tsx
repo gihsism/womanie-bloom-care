@@ -84,16 +84,25 @@ const Settings = () => {
         const err = await resp.json().catch(() => ({}));
         throw new Error(err.error || `HTTP ${resp.status}`);
       }
-      const { scanned, updated } = await resp.json();
-      if (updated === 0) {
+      const { scanned, titlesUpdated, unitsUpdated } = await resp.json() as {
+        scanned: number;
+        titlesUpdated?: number;
+        unitsUpdated?: number;
+      };
+      const tu = titlesUpdated ?? 0;
+      const uu = unitsUpdated ?? 0;
+      if (tu === 0 && uu === 0) {
         toast({
           title: 'Already clean',
-          description: `Scanned ${scanned} test names, all already canonical.`,
+          description: `Scanned ${scanned} entries — names + units are all canonical.`,
         });
       } else {
+        const parts: string[] = [];
+        if (tu > 0) parts.push(`${tu} test name${tu > 1 ? 's' : ''}`);
+        if (uu > 0) parts.push(`${uu} unit${uu > 1 ? 's' : ''}`);
         toast({
-          title: 'Test names cleaned up',
-          description: `Renamed ${updated} of ${scanned} entries to canonical forms (e.g. Hb → Hemoglobin).`,
+          title: 'Cleanup complete',
+          description: `Normalized ${parts.join(' + ')} across ${scanned} entries (e.g. Hb → Hemoglobin, μg/L casing).`,
         });
       }
     } catch (error) {
@@ -473,10 +482,10 @@ const Settings = () => {
               ) : (
                 <Wand2 className="h-4 w-4" />
               )}
-              Clean up test names
+              Clean up test names + units
             </Button>
             <p className="text-[11px] text-muted-foreground">
-              Renames any inconsistently-extracted test titles in your existing data (e.g. "Hb" → "Hemoglobin", "FT4" → "Free T4") so trends and history connect properly. New uploads are normalized automatically.
+              Renames any inconsistently-extracted test titles and unit notations in your existing data (e.g. "Hb" → "Hemoglobin", "mcg/L" → "μg/L") so trends and history connect properly. New uploads are normalized automatically.
             </p>
             <Separator />
             <Button
