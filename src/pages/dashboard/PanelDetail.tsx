@@ -244,6 +244,27 @@ export default function PanelDetail() {
                   ? `${s.latest.value}${s.latest.unit ? ' ' + s.latest.unit : ''}`
                   : '—';
                 const latestTone = STATUS_TONE[s.latest.status ?? ''] ?? '';
+
+                // Personal range: with 3+ numeric readings, compute the
+                // user's own min/median/max so they can tell whether a
+                // technically-in-range value is unusual *for them*.
+                let personalRange: { min: number; median: number; max: number } | null = null;
+                if (sparklinePoints.length >= 3) {
+                  const sortedVals = [...sparklinePoints].map(p => p.value).sort((a, b) => a - b);
+                  const min = sortedVals[0];
+                  const max = sortedVals[sortedVals.length - 1];
+                  const median = sortedVals.length % 2 === 0
+                    ? (sortedVals[sortedVals.length / 2 - 1] + sortedVals[sortedVals.length / 2]) / 2
+                    : sortedVals[Math.floor(sortedVals.length / 2)];
+                  personalRange = { min, median, max };
+                }
+                const fmt = (n: number): string => {
+                  // Match the precision the latest reading uses so we
+                  // don't print 12.300000000001.
+                  const sample = String(s.latest.value ?? '');
+                  const decimals = sample.includes('.') ? sample.split('.')[1].length : 0;
+                  return n.toFixed(Math.min(decimals, 3));
+                };
                 return (
                   <Card key={s.title} className="p-4">
                     <div className="flex items-start gap-3 flex-wrap mb-3">
@@ -252,6 +273,13 @@ export default function PanelDetail() {
                         {s.refRange && (
                           <p className="text-[11px] text-muted-foreground">
                             healthy range {s.refRange}{s.unit ? ` ${s.unit}` : ''}
+                          </p>
+                        )}
+                        {personalRange && (
+                          <p className="text-[11px] text-muted-foreground">
+                            <span className="font-medium text-foreground/80">your readings:</span>{' '}
+                            {fmt(personalRange.min)}–{fmt(personalRange.max)}
+                            {' '}<span className="text-muted-foreground">(median {fmt(personalRange.median)})</span>
                           </p>
                         )}
                       </div>
