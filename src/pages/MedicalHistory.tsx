@@ -579,6 +579,8 @@ export default function MedicalHistory() {
   const [reanalyzeProgress, setReanalyzeProgress] = useState({ done: 0, total: 0 });
   const [expandedDocId, setExpandedDocId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  type DocFilter = 'all' | 'flagged' | 'lab_results' | 'imaging' | 'prescription' | 'consultation_notes';
+  const [docFilter, setDocFilter] = useState<DocFilter>('all');
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
 
@@ -1069,8 +1071,53 @@ export default function MedicalHistory() {
             {reanalyzing && (
               <div className="px-4"><Progress value={reanalyzeProgress.total > 0 ? (reanalyzeProgress.done / reanalyzeProgress.total) * 100 : 0} className="h-1.5" /></div>
             )}
+            {/* Filter chips — quick scoping when the doc list grows
+                past a screenful. Counts show inline so the user
+                knows what's behind each chip before clicking. */}
+            {documents.length > 3 && (() => {
+              const allCount = documents.length;
+              const flaggedCount = documents.filter(d =>
+                medicalData.some(m => m.document_id === d.id && (m.status === 'abnormal' || m.status === 'critical'))
+              ).length;
+              const labCount = documents.filter(d => d.ai_suggested_category === 'lab_results').length;
+              const imagingCount = documents.filter(d => d.ai_suggested_category === 'imaging').length;
+              const rxCount = documents.filter(d => d.ai_suggested_category === 'prescription').length;
+              const noteCount = documents.filter(d => d.ai_suggested_category === 'consultation_notes').length;
+              const chips: Array<{ key: DocFilter; label: string; count: number }> = [
+                { key: 'all', label: 'All', count: allCount },
+                ...(flaggedCount > 0 ? [{ key: 'flagged' as DocFilter, label: 'Flagged', count: flaggedCount }] : []),
+                ...(labCount > 0 ? [{ key: 'lab_results' as DocFilter, label: 'Lab results', count: labCount }] : []),
+                ...(imagingCount > 0 ? [{ key: 'imaging' as DocFilter, label: 'Imaging', count: imagingCount }] : []),
+                ...(rxCount > 0 ? [{ key: 'prescription' as DocFilter, label: 'Prescription', count: rxCount }] : []),
+                ...(noteCount > 0 ? [{ key: 'consultation_notes' as DocFilter, label: 'Notes', count: noteCount }] : []),
+              ];
+              return (
+                <div className="px-4 pb-3 flex gap-1.5 overflow-x-auto -mx-1 px-5">
+                  {chips.map(c => (
+                    <button
+                      key={c.key}
+                      type="button"
+                      onClick={() => setDocFilter(c.key)}
+                      className={`flex-shrink-0 text-xs px-3 py-1 rounded-full whitespace-nowrap transition-colors ${
+                        docFilter === c.key
+                          ? 'bg-primary text-primary-foreground font-semibold'
+                          : 'bg-muted hover:bg-muted/70 text-muted-foreground'
+                      }`}
+                    >
+                      {c.label} <span className="opacity-70">· {c.count}</span>
+                    </button>
+                  ))}
+                </div>
+              );
+            })()}
             <div className="divide-y divide-border/50">
-              {documents.map(doc => {
+              {documents.filter(doc => {
+                if (docFilter === 'all') return true;
+                if (docFilter === 'flagged') {
+                  return medicalData.some(m => m.document_id === doc.id && (m.status === 'abnormal' || m.status === 'critical'));
+                }
+                return doc.ai_suggested_category === docFilter;
+              }).map(doc => {
                 const docResults = medicalData.filter(m => m.document_id === doc.id);
                 const abnormals = docResults.filter(m => m.status === 'abnormal' || m.status === 'critical').length;
                 const isExpanded = expandedDocId === doc.id;
