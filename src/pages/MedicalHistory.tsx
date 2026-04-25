@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
@@ -65,6 +66,7 @@ import {
   ChevronUp,
   Printer,
   MessageCircle,
+  ArrowUpDown,
 } from 'lucide-react';
 import { format, differenceInDays, addDays } from 'date-fns';
 import {
@@ -1159,6 +1161,46 @@ export default function MedicalHistory() {
                             <Pencil className="h-3 w-3" />
                             Rename
                           </Button>
+                          {documents.length > 1 && (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7 text-xs gap-1.5"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <ArrowUpDown className="h-3 w-3" />
+                                  Compare to…
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="start" className="max-w-xs max-h-72 overflow-y-auto">
+                                {documents
+                                  .filter(other => other.id !== doc.id)
+                                  .slice(0, 30)
+                                  .map(other => (
+                                    <DropdownMenuItem
+                                      key={other.id}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate(`/dashboard/compare?a=${doc.id}&b=${other.id}`);
+                                      }}
+                                    >
+                                      <div className="flex flex-col gap-0.5 min-w-0">
+                                        <span className="text-xs font-medium truncate">
+                                          {other.ai_suggested_name || other.file_name}
+                                        </span>
+                                        {other.uploaded_at && (
+                                          <span className="text-[10px] text-muted-foreground">
+                                            {format(new Date(other.uploaded_at), 'MMM d, yyyy')}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </DropdownMenuItem>
+                                  ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )}
                           <Button
                             variant="outline"
                             size="sm"

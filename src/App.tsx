@@ -43,6 +43,7 @@ const Notifications = lazy(() => import("./pages/dashboard/Notifications"));
 const Help = lazy(() => import("./pages/dashboard/Help"));
 const Privacy = lazy(() => import("./pages/dashboard/Privacy"));
 const Emergency = lazy(() => import("./pages/dashboard/Emergency"));
+const CompareDocs = lazy(() => import("./pages/dashboard/CompareDocs"));
 const FindDoctor = lazy(() => import("./pages/FindDoctor"));
 const Settings = lazy(() => import("./pages/dashboard/Settings"));
 const HealthStatistics = lazy(() => import("./pages/HealthStatistics"));
@@ -109,6 +110,7 @@ const App = () => (
                   <Route path="/dashboard/help" element={<Help />} />
                   <Route path="/dashboard/privacy" element={<Privacy />} />
                   <Route path="/dashboard/emergency" element={<Emergency />} />
+                  <Route path="/dashboard/compare" element={<CompareDocs />} />
                   {/* Dashboard menu entries that historically pointed to
                       dedicated pages we never shipped. Redirect them to
                       sensible existing destinations instead of bouncing
