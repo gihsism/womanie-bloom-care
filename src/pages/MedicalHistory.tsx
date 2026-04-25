@@ -1208,6 +1208,18 @@ export default function MedicalHistory() {
                             <Pencil className="h-3 w-3" />
                             Rename
                           </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs gap-1.5"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(`/dashboard/doc/${doc.id}/print`, '_blank', 'noopener,noreferrer');
+                            }}
+                          >
+                            <Printer className="h-3 w-3" />
+                            Print / PDF
+                          </Button>
                           {documents.length > 1 && (
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>

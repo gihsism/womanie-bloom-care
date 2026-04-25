@@ -58,6 +58,7 @@ check "upload (unauth)"            POST "/api/upload"                    401 '{}
 check "analyze-document (unauth)"  POST "/api/analyze-document"          401 '{}'
 check "ai-doctor-chat (unauth)"    POST "/api/ai-doctor-chat"            401 '{"messages":[{"role":"user","content":"hi"}]}'
 check "summary/generate (unauth)"  POST "/api/summary/generate"          401 '{}'
+check "summary/panel (unauth)"     POST "/api/summary/panel"             401 '{}'
 check "predict-ovulation (unauth)" POST "/api/predict-ovulation"         401 '{}'
 check "me/export (unauth)"         GET  "/api/me/export"                 401
 check "me/delete-account (unauth)" POST "/api/me/delete-account"         401 '{}'
