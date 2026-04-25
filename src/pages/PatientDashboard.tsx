@@ -31,6 +31,7 @@ import { useAttentionCount } from '@/hooks/useAttentionCount';
 import HealthTrends from '@/components/dashboard/HealthTrends';
 import WeeklySummary from '@/components/dashboard/WeeklySummary';
 import GettingStarted from '@/components/dashboard/GettingStarted';
+import OverdueTests from '@/components/dashboard/OverdueTests';
 import PregnancyLabInsights from '@/components/dashboard/PregnancyLabInsights';
 import CycleLabInsights from '@/components/dashboard/CycleLabInsights';
 import ModeLabInsights from '@/components/dashboard/ModeLabInsights';
@@ -527,6 +528,10 @@ const PatientDashboard = () => {
                 first so critical/abnormal results are visible at a
                 glance. Hides itself when there's nothing to flag. */}
             <RecentFindings />
+
+            {/* Tests the patient has tracked at least twice but hasn't
+                seen in 12+ months. Hides when nothing is overdue. */}
+            <OverdueTests />
 
             {/* Cross-document trends — how key tests have changed over
                 multiple uploads. Hidden when there's nothing to show. */}
