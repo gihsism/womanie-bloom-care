@@ -216,18 +216,30 @@ export default function HealthStatistics() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {stats.topPanels.map(([panel, count]) => (
-                    <div key={panel} className="flex items-center gap-3">
-                      <span className="text-sm flex-shrink-0 w-40 truncate">{panel}</span>
-                      <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
-                        <div
-                          className="bg-primary h-2 rounded-full"
-                          style={{ width: `${(count / stats.labResults) * 100}%` }}
-                        />
-                      </div>
-                      <span className="text-xs text-muted-foreground flex-shrink-0 w-8 text-right">{count}</span>
-                    </div>
-                  ))}
+                  {stats.topPanels.map(([panel, count]) => {
+                    const slug = panel
+                      .toLowerCase()
+                      .replace(/&/g, 'and')
+                      .replace(/[^a-z0-9]+/g, '-')
+                      .replace(/^-+|-+$/g, '');
+                    return (
+                      <button
+                        key={panel}
+                        type="button"
+                        onClick={() => navigate(`/dashboard/panel/${slug}`)}
+                        className="w-full flex items-center gap-3 hover:bg-muted/50 rounded px-1 py-0.5 -mx-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      >
+                        <span className="text-sm flex-shrink-0 w-40 truncate text-left">{panel}</span>
+                        <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
+                          <div
+                            className="bg-primary h-2 rounded-full"
+                            style={{ width: `${(count / stats.labResults) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-muted-foreground flex-shrink-0 w-8 text-right">{count}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
