@@ -172,6 +172,26 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-25 (session 32)
+
+Alena asked for "all three buckets" of document-analysis improvements (extraction quality, per-doc presentation, cross-doc views). Working through them in dependency order.
+
+- **8e03dc5** — sparklines on per-doc result cards. Tiny SVG trendline next to each abnormal/critical ResultCard when ≥2 readings of the same test exist; latest point bigger and stroke-coloured by current status. Plus an "Ask about this" button that deep-links into AI Doctor Chat with a pre-filled "Can you walk me through what my <doc name> results mean?" question. Closes a presentation-bucket item.
+- **f89fb8d** — extraction-quality bucket: canonical title normalization. New `api/_lib/normalize-test-title.ts` aliases ~250 surface forms (Hb / Hgb / Haemoglobin → Hemoglobin, FT4 → Free T4, etc.) into ~100 canonical names. Applied at the `medical_extracted_data` INSERT site. Without this every cross-document feature was quietly missing connections any time Claude phrased a test differently between two uploads. Raw title preserved in `raw_data.raw_title` for audit / future backfill.
+- **b548725** — backfill: `POST /api/me/normalize-titles` runs the same map over the user's existing rows. Idempotent. Triggered manually from a "Clean up test names" button under Settings → Download my data. Toast reports renamed-of-scanned counts. Without this, the alias map only helped *new* uploads.
+- **064a1cb** — presentation-bucket polish: ValueGauge picked up a 3-zone bar (under-range red / in-range green / over-range red) plus a "12% below" / "32% above" deviation label for out-of-range readings. The marker is plotted at its real position now, so abnormal-high vs critical-high are visibly different rather than both clamping to the right edge.
+
+Remaining open after session 32:
+- Extraction quality #2: strengthen the system prompt to never summarize tables (always extract every value). Could also add unit normalization (μg/L vs mcg/L).
+- Presentation #2: per-doc "Top findings" hero card; panel-grouped layout in expanded view.
+- Cross-doc: dedicated compare-two-docs view; panel deep-dives.
+- All ongoing HANDOFFs.
+
+Next-session candidates:
+1. Unit normalization (paired with title normalization — μg/L vs mcg/L vs ng/mL grouping).
+2. Per-doc "Top 3 findings" hero at the top of the expanded view.
+3. Compare-two-docs view (pick A and B, show paired diffs).
+
 ### 2026-04-24 (session 31)
 
 - **4dafe08** — user-reported bug: the browser-tab icon was still showing Lovable's logo. Root cause: `public/favicon.ico` was a 73×74 PNG leftover from the Lovable scaffolding, and `index.html` pointed at three other favicon paths (`/favicon-32x32.png`, `/favicon-16x16.png`, `/mask-icon.svg`) that don't exist, so the browser fell back to the stale `.ico`. VitePWA's `includeAssets` also referenced the same ghost paths. Replaced with a simple pink-heart-on-gradient SVG favicon (matching the `#E8B4D8` brand), updated HTML + Vite config to point at it, removed the dead references.
