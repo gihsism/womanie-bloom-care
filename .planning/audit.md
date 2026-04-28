@@ -172,6 +172,22 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-04-25 to 2026-04-28 (rolling autonomous arc)
+
+Document analysis + presentation (post session-34): personal ranges on PanelDetail (`4dac5fa`), AI panel insight endpoint + card (`8bec07e`), single-doc print view (`dec2f65`), audit of pregnancy week-by-week measurements + ranges (`785da70`), favicon + Lovable-leftover icon cleanup (`4dafe08`, `fb92049`), HealthStatistics stat cards (`8b51706`), full-record print view (`db5a143`), doc-list search (`2f74221`).
+
+Menstrual cycle (Alena flagged "period of bleeding is too long"):
+- **425c6b4** — calendar caps active-period bleeding at predicted_end + 2 days. Forgotten un-ended periods no longer balloon visually through every day to today.
+- **c38e38a** — banner now alerts the moment rendering stops (predicted_end + 2 instead of +5), no silent gap.
+- **011085a** — TodayStatusCard's `isOnPeriod` reads the actual period record's confirmed end, not just `cycleDay <= avgPeriodLength`.
+- **c432d73** — cycle-phase label card on TodayStatusCard (Menstrual / Follicular / Fertile window / Ovulation / Late luteal · PMS likely / Luteal). Plus an ordinal-day-of-cycle fix that was writing "21th" / "22th" / "23th".
+- **78c3723** — calm "your period is late by N days" alert above the phase card when today is past the predicted period start by more than the confidence window. Hidden when a period is active.
+
+Remaining open after this arc:
+- Easier period-end confirmation from the day action sheet (currently routes you to the banner above the calendar).
+- Symptom-cycle correlation card on PatientDashboard.
+- All ongoing HANDOFFs.
+
 ### 2026-04-25 (session 34)
 
 Alena said "do all and don't stop" so this session ran through the queued items + kept going.
