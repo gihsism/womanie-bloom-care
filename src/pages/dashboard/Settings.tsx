@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Pill, Shield, Bell, User, Download, Loader2, Trash2, Wand2 } from 'lucide-react';
+import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Pill, Shield, Bell, User, Download, Loader2, Trash2, Wand2, KeyRound, Eye, EyeOff } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -75,6 +76,57 @@ const Settings = () => {
   const [exporting, setExporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [normalizing, setNormalizing] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPasswords, setShowPasswords] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+
+  const resetPasswordForm = () => {
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setShowPasswords(false);
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword.length < 8) {
+      toast({ variant: 'destructive', title: 'Password too short', description: 'Use at least 8 characters.' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ variant: 'destructive', title: 'Passwords do not match', description: 'Re-type the new password.' });
+      return;
+    }
+    setChangingPassword(true);
+    try {
+      const resp = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        throw new Error(data.error || `HTTP ${resp.status}`);
+      }
+      toast({
+        title: 'Password updated',
+        description: 'Other devices have been signed out.',
+      });
+      resetPasswordForm();
+      setShowPasswordForm(false);
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Could not change password',
+        description: error instanceof Error ? error.message : 'Try again.',
+      });
+    } finally {
+      setChangingPassword(false);
+    }
+  };
 
   const handleNormalizeTitles = async () => {
     setNormalizing(true);
@@ -436,6 +488,96 @@ const Settings = () => {
                 }}
               />
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Password */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <KeyRound className="h-5 w-5" />
+              Password
+            </CardTitle>
+            <CardDescription>
+              Change the password you use to sign in.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {!showPasswordForm ? (
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => setShowPasswordForm(true)}
+              >
+                Change password
+              </Button>
+            ) : (
+              <form onSubmit={handleChangePassword} className="space-y-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="current-password">Current password</Label>
+                  <Input
+                    id="current-password"
+                    type={showPasswords ? 'text' : 'password'}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    autoComplete="current-password"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="new-password">New password</Label>
+                  <Input
+                    id="new-password"
+                    type={showPasswords ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    autoComplete="new-password"
+                    minLength={8}
+                    required
+                  />
+                  <p className="text-[11px] text-muted-foreground">At least 8 characters.</p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="confirm-password">Confirm new password</Label>
+                  <Input
+                    id="confirm-password"
+                    type={showPasswords ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    autoComplete="new-password"
+                    required
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowPasswords(!showPasswords)}
+                  className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+                >
+                  {showPasswords ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  {showPasswords ? 'Hide passwords' : 'Show passwords'}
+                </button>
+                <p className="text-[11px] text-muted-foreground">
+                  Changing your password signs out every other device.
+                </p>
+                <div className="flex gap-2">
+                  <Button type="submit" disabled={changingPassword} className="flex-1">
+                    {changingPassword ? (
+                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Updating…</>
+                    ) : (
+                      'Update password'
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => { resetPasswordForm(); setShowPasswordForm(false); }}
+                    disabled={changingPassword}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            )}
           </CardContent>
         </Card>
 
