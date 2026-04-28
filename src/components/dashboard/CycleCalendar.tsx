@@ -164,25 +164,35 @@ const CycleCalendar = ({
     return days;
   }, [periodRecords, periodLength]);
 
-  // Active (unconfirmed) period days: start is confirmed, end is predicted
+  // Active (unconfirmed) period days: start is confirmed, end is predicted.
+  //
+  // Cap how far we visually extend bleeding past the predicted end —
+  // otherwise a period the user forgot to end balloons through every
+  // day since (so a forgotten log from January reads as "still
+  // bleeding" in March). Two extra days past predicted end is enough
+  // grace for someone who's "running long" without making the
+  // calendar look like a medical mystery.
+  const ACTIVE_PERIOD_GRACE_DAYS = 2;
   const { activePeriodConfirmedDays, activePeriodPredictedDays } = useMemo(() => {
     const confirmed = new Set<string>();
     const predicted = new Set<string>();
-    
+
     const activeRecord = periodRecords.find(r => getEffectiveEnd(r) === null);
     if (!activeRecord) return { activePeriodConfirmedDays: confirmed, activePeriodPredictedDays: predicted };
 
     const start = parseISO(activeRecord.period_start_date);
     const today = startOfDay(new Date());
     const predictedEnd = addDays(start, periodLength - 1);
+    const renderEnd = addDays(predictedEnd, ACTIVE_PERIOD_GRACE_DAYS);
+    const effectiveEnd = today < renderEnd ? today : renderEnd;
 
-    // Days from start up to min(today, predictedEnd) → solid
+    // Solid days from start through min(today, predictedEnd, renderEnd).
     let d = start;
-    while (d <= today && d <= predictedEnd) {
+    while (d <= effectiveEnd && d <= predictedEnd) {
       confirmed.add(format(d, 'yyyy-MM-dd'));
       d = addDays(d, 1);
     }
-    // If today is before predicted end, remaining days → dashed
+    // If today is before predicted end, remaining days up to predicted end → dashed.
     if (today < predictedEnd) {
       d = addDays(today, 1);
       while (d <= predictedEnd) {
@@ -190,8 +200,13 @@ const CycleCalendar = ({
         d = addDays(d, 1);
       }
     }
-    // If today is past predicted end but no confirmation yet, extend solid
-    if (today > predictedEnd) {
+    // If today is past predicted end but within the grace window,
+    // mark grace days as solid so a slightly-long period reads
+    // accurately. Anything beyond the grace window stops marking
+    // days entirely — the period is treated as visually ended even
+    // though the DB row is still active. The user can confirm or
+    // adjust from the period-end banner / log sheet.
+    if (today > predictedEnd && today <= renderEnd) {
       d = addDays(predictedEnd, 1);
       while (d <= today) {
         confirmed.add(format(d, 'yyyy-MM-dd'));
