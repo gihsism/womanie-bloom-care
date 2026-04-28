@@ -34,6 +34,7 @@ import GettingStarted from '@/components/dashboard/GettingStarted';
 import OverdueTests from '@/components/dashboard/OverdueTests';
 import SymptomPatternsCard from '@/components/dashboard/SymptomPatternsCard';
 import FertileWindowTimingCard from '@/components/dashboard/FertileWindowTimingCard';
+import { useNotificationPrefs } from '@/hooks/useNotificationPrefs';
 import PregnancyLabInsights from '@/components/dashboard/PregnancyLabInsights';
 import CycleLabInsights from '@/components/dashboard/CycleLabInsights';
 import ModeLabInsights from '@/components/dashboard/ModeLabInsights';
@@ -64,6 +65,7 @@ const PatientDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, session, loading } = useAuth();
+  const notificationPrefs = useNotificationPrefs();
   usePageTitle('Dashboard');
   const [profile, setProfile] = useState<{ full_name?: string; life_stage?: string; pregnancy_due_date?: string | null; ivf_start_date?: string | null; ivf_phase?: string | null } | null>(null);
   const [selectedMode, setSelectedMode] = useState<LifeStage | null>(null);
@@ -745,8 +747,8 @@ const PatientDashboard = () => {
 
             {/* Two-column layout: Tips + Quick Links */}
             <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Daily Tips */}
-              {stageTips[selectedMode] && (
+              {/* Daily Tips — gated by the Health Tips notification toggle */}
+              {stageTips[selectedMode] && notificationPrefs.healthTips && (
                 <Card className="p-4">
                   <h3 className="text-sm font-bold mb-3">Daily Reminders</h3>
                   <div className="space-y-2">

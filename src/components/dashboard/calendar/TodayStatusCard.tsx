@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import { addDays, differenceInDays, format, parseISO, startOfDay } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { CyclePrediction, SymptomPattern, PeriodRecord } from '@/hooks/useCyclePrediction';
+import { useNotificationPrefs } from '@/hooks/useNotificationPrefs';
 
 interface TodayStatusCardProps {
   cycleDay: number;
@@ -26,6 +27,7 @@ const TodayStatusCard = ({
   periodRecords = []
 }: TodayStatusCardProps) => {
   const today = new Date();
+  const notificationPrefs = useNotificationPrefs();
 
   const ovulationCycleDay = differenceInDays(prediction.predictedOvulationDate, lastPeriodStart) + 1;
   const rawDaysToNextPeriod = Math.ceil((prediction.predictedPeriodStart.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
@@ -229,7 +231,7 @@ const TodayStatusCard = ({
           cycle is past the prediction's confidence window so a
           slightly-variable cycle doesn't fire false alarms.
           Hidden when a period is currently active. */}
-      {!isOnPeriod && periodLateBy > prediction.confidenceWindow && (
+      {!isOnPeriod && periodLateBy > prediction.confidenceWindow && notificationPrefs.cycleReminders && (
         <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-4">
           <div className="flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
