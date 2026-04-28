@@ -183,9 +183,12 @@ Menstrual cycle (Alena flagged "period of bleeding is too long"):
 - **c432d73** — cycle-phase label card on TodayStatusCard (Menstrual / Follicular / Fertile window / Ovulation / Late luteal · PMS likely / Luteal). Plus an ordinal-day-of-cycle fix that was writing "21th" / "22th" / "23th".
 - **78c3723** — calm "your period is late by N days" alert above the phase card when today is past the predicted period start by more than the confidence window. Hidden when a period is active.
 
-Remaining open after this arc:
-- Easier period-end confirmation from the day action sheet (currently routes you to the banner above the calendar).
-- Symptom-cycle correlation card on PatientDashboard.
+Closed both follow-ups this session:
+- **6bbc44b** — DayActionSheet now offers an inline "Ended <day>" button when you tap a day inside the active period range. Today/yesterday get the natural labels; older days say "Ended Apr 22". Days before the period started or in the future show an explanation instead of an action.
+- **1eba692** — `SymptomPatternsCard` on PatientDashboard for menstrual / pre-menstrual / conception modes. Walks every logged signal in the last 6 months, classifies each by cycle phase relative to the owning period record, shows top 4 symptoms + top 3 moods per phase as "logged on N of M tracked days." Hidden until at least 3 logged days exist.
+
+Remaining open:
+- "Other types of cycles" — Alena's broader directive after menstrual. Likely candidates: conception (BBT charting / LH peak detection / fertile-window confidence), contraception (pill streak / missed-pill recovery), pre-menstrual (PMS severity tracker). Needs steering on which mode is highest-value.
 - All ongoing HANDOFFs.
 
 ### 2026-04-25 (session 34)
