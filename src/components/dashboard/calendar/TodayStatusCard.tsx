@@ -115,6 +115,66 @@ const TodayStatusCard = ({
   const status = getStatusText();
   const predictedSymptoms = getTodaySymptomPredictions();
 
+  // Current cycle phase. Order matters: menstrual takes precedence
+  // over the fallback follicular/luteal split because day 1-N can
+  // overlap with the start of the follicular phase. Then ovulation
+  // /fertile window, then luteal (past fertile window), else
+  // follicular (post-period, pre-fertile).
+  const cyclePhase: { label: string; description: string; tone: string } = (() => {
+    if (isOnPeriod) {
+      return {
+        label: 'Menstrual phase',
+        description: 'Your body is shedding the uterine lining. Lower energy and cramps are normal — rest is welcome.',
+        tone: 'text-red-700 dark:text-red-300',
+      };
+    }
+    const daysToOvulation = differenceInDays(prediction.predictedOvulationDate, today);
+    if (isInFertileWindow) {
+      if (Math.abs(daysToOvulation) <= 1) {
+        return {
+          label: 'Ovulation phase',
+          description: 'Egg is being released. Highest fertility window of your cycle.',
+          tone: 'text-secondary',
+        };
+      }
+      return {
+        label: 'Fertile window',
+        description: 'Approaching ovulation. Higher chance of conception this week.',
+        tone: 'text-secondary',
+      };
+    }
+    if (daysToOvulation > 0) {
+      return {
+        label: 'Follicular phase',
+        description: 'Estrogen is rising as your body prepares for ovulation. Often a higher-energy stretch.',
+        tone: 'text-blue-600 dark:text-blue-400',
+      };
+    }
+    // Past ovulation
+    const daysToPeriod = daysToNextPeriod;
+    if (daysToPeriod <= 5 && daysToPeriod > 0) {
+      return {
+        label: 'Late luteal · PMS likely',
+        description: `${daysToPeriod} ${daysToPeriod === 1 ? 'day' : 'days'} until your next period. PMS symptoms (mood shifts, cramps, bloating) are most common in this window.`,
+        tone: 'text-amber-700 dark:text-amber-300',
+      };
+    }
+    return {
+      label: 'Luteal phase',
+      description: 'Progesterone has risen after ovulation. Body is preparing for either implantation or the next cycle.',
+      tone: 'text-violet-600 dark:text-violet-400',
+    };
+  })();
+
+  // Robust ordinal — the previous one only handled 1/2/3 and silently
+  // wrote "21th" / "22th" / "23th".
+  const ordinal = (n: number): string => {
+    const tens = n % 100;
+    if (tens >= 11 && tens <= 13) return `${n}th`;
+    const ones = n % 10;
+    return `${n}${ones === 1 ? 'st' : ones === 2 ? 'nd' : ones === 3 ? 'rd' : 'th'}`;
+  };
+
   return (
     <div className="space-y-3">
       {/* Main status card */}
@@ -159,6 +219,22 @@ const TodayStatusCard = ({
         </div>
       </div>
 
+      {/* Cycle phase card — clear, plain-language label of the
+          phase the user is in right now plus a one-line
+          explanation. Replaces the previous mental-math reader had
+          to do from cycleDay alone. */}
+      <div className="bg-card rounded-2xl border p-4">
+        <div className="flex items-start gap-3">
+          <div className={cn("w-1 h-12 rounded-full mt-0.5 bg-current opacity-60", cyclePhase.tone)} />
+          <div className="flex-1 min-w-0">
+            <div className={cn("font-semibold", cyclePhase.tone)}>{cyclePhase.label}</div>
+            <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+              {cyclePhase.description}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Fertility info card */}
       <div className="bg-card rounded-2xl border p-4">
         <div className="flex items-start gap-2">
@@ -181,7 +257,7 @@ const TodayStatusCard = ({
               {daysToNextPeriod} days until next period
             </div>
             <div className="text-sm text-muted-foreground">
-              {cycleDay}{cycleDay === 1 ? 'st' : cycleDay === 2 ? 'nd' : cycleDay === 3 ? 'rd' : 'th'} day of cycle
+              {ordinal(cycleDay)} day of cycle
             </div>
           </div>
         </div>
