@@ -1,7 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { db } from '@/integrations/db/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { format, subDays, parseISO, differenceInDays } from 'date-fns';
+import { onHealthDataChange } from '@/lib/data-events';
 import {
   Heart,
   Moon,
@@ -19,14 +23,47 @@ import {
   Sparkles,
   AlertTriangle,
   Shield,
-  Activity,
   Flower2,
   HeartPulse,
-  Sun,
+  TrendingUp,
 } from 'lucide-react';
 
 interface MenopauseDashboardProps {
   isPostMenopause?: boolean;
+  onNavigateToDoctorChat?: () => void;
+}
+
+interface SignalRow {
+  signal_date: string;
+  notes: string | null;
+}
+
+function parseHotFlashCount(notes: string | null): number | null {
+  if (!notes) return null;
+  const match = notes.match(/Hot flashes:\s*(\d+)/i);
+  if (!match) return null;
+  const n = parseInt(match[1], 10);
+  return Number.isFinite(n) ? n : null;
+}
+
+const lsKey = (userId: string, scope: string, key: string) => `menopause:${userId}:${scope}:${key}`;
+
+function readLS<T>(userId: string, scope: string, key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(lsKey(userId, scope, key));
+    if (!raw) return fallback;
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeLS(userId: string, scope: string, key: string, value: unknown) {
+  try {
+    localStorage.setItem(lsKey(userId, scope, key), JSON.stringify(value));
+  } catch {
+    // Quota / private mode — silently ignore.
+  }
 }
 
 // ─── Menopause symptoms ───
@@ -93,10 +130,79 @@ const stages = [
   { name: 'Post-Menopause', duration: 'The rest of life', description: 'Symptoms often ease. Focus shifts to long-term health prevention.' },
 ];
 
-export default function MenopauseDashboard({ isPostMenopause = false }: MenopauseDashboardProps) {
+export default function MenopauseDashboard({ isPostMenopause = false, onNavigateToDoctorChat }: MenopauseDashboardProps) {
+  const { user } = useAuth();
+  const scope = isPostMenopause ? 'post' : 'meno';
   const [trackedSymptoms, setTrackedSymptoms] = useState<Set<string>>(new Set());
   const [activeSection, setActiveSection] = useState<string | null>('symptoms');
   const [currentMythIndex, setCurrentMythIndex] = useState(0);
+  const [signals, setSignals] = useState<SignalRow[]>([]);
+
+  // ─── Persist tracked symptoms + myth index per user, per scope ───
+  useEffect(() => {
+    if (!user) return;
+    setTrackedSymptoms(new Set(readLS<string[]>(user.id, scope, 'trackedSymptoms', [])));
+    setCurrentMythIndex(readLS<number>(user.id, scope, 'mythIndex', 0));
+  }, [user?.id, scope]);
+
+  useEffect(() => {
+    if (!user) return;
+    writeLS(user.id, scope, 'trackedSymptoms', Array.from(trackedSymptoms));
+  }, [user?.id, scope, trackedSymptoms]);
+
+  useEffect(() => {
+    if (!user) return;
+    writeLS(user.id, scope, 'mythIndex', currentMythIndex);
+  }, [user?.id, scope, currentMythIndex]);
+
+  // ─── Hot-flash history from daily_health_signals notes ───
+  const loadSignals = async () => {
+    if (!user) return;
+    try {
+      const { data } = await db
+        .from('daily_health_signals')
+        .select('signal_date, notes')
+        .eq('user_id', user.id)
+        .gte('signal_date', format(subDays(new Date(), 30), 'yyyy-MM-dd'))
+        .order('signal_date', { ascending: false });
+      setSignals(((data as SignalRow[]) || []));
+    } catch (e) {
+      console.error('MenopauseDashboard load error', e);
+      setSignals([]);
+    }
+  };
+
+  useEffect(() => {
+    loadSignals();
+    return onHealthDataChange(() => loadSignals());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  const hotFlashStats = useMemo(() => {
+    const last7: { date: string; count: number }[] = [];
+    const last30: { date: string; count: number }[] = [];
+    const today = new Date();
+    signals.forEach((s) => {
+      const count = parseHotFlashCount(s.notes);
+      if (count === null) return;
+      const days = differenceInDays(today, parseISO(s.signal_date));
+      if (days >= 0 && days < 7) last7.push({ date: s.signal_date, count });
+      if (days >= 0 && days < 30) last30.push({ date: s.signal_date, count });
+    });
+    const total7 = last7.reduce((sum, d) => sum + d.count, 0);
+    const total30 = last30.reduce((sum, d) => sum + d.count, 0);
+    const avg7 = last7.length > 0 ? total7 / last7.length : 0;
+    const avg30Prior = last30.length > 0 ? total30 / last30.length : 0;
+    return {
+      daysLogged7: last7.length,
+      daysLogged30: last30.length,
+      total7,
+      avg7,
+      avg30Prior,
+      trend: avg30Prior > 0 ? avg7 - avg30Prior : 0,
+      hasData: last30.length > 0,
+    };
+  }, [signals]);
 
   const currentSymptoms = isPostMenopause ? postSymptoms : menoSymptoms;
   const currentWellness = isPostMenopause ? postWellness : menoWellness;
@@ -177,6 +283,40 @@ export default function MenopauseDashboard({ isPostMenopause = false }: Menopaus
               <p className="text-sm text-foreground">Schedule annual check-ups: mammogram, bone density scan, blood pressure, cholesterol, and blood sugar.</p>
             </div>
           </div>
+        </Card>
+      )}
+
+      {/* Hot-flash trend (menopause only — post-menopause focus shifts away from this) */}
+      {!isPostMenopause && hotFlashStats.hasData && (
+        <Card className="p-4">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-sm font-semibold flex items-center gap-2">
+              <ThermometerSun className="h-4 w-4 text-amber-500" />
+              Hot flashes — recent trend
+            </h4>
+            {hotFlashStats.trend !== 0 && (
+              <Badge variant={hotFlashStats.trend < 0 ? 'default' : 'outline'} className="text-[10px]">
+                {hotFlashStats.trend < 0 ? 'Easing' : 'Up'} <TrendingUp className={`h-3 w-3 ml-1 ${hotFlashStats.trend < 0 ? 'rotate-180' : ''}`} />
+              </Badge>
+            )}
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="p-2 rounded-lg bg-muted/50">
+              <p className="text-lg font-bold text-amber-600">{hotFlashStats.total7}</p>
+              <p className="text-[10px] text-muted-foreground">last 7 days</p>
+            </div>
+            <div className="p-2 rounded-lg bg-muted/50">
+              <p className="text-lg font-bold">{hotFlashStats.avg7.toFixed(1)}</p>
+              <p className="text-[10px] text-muted-foreground">per logged day</p>
+            </div>
+            <div className="p-2 rounded-lg bg-muted/50">
+              <p className="text-lg font-bold">{hotFlashStats.daysLogged7}/7</p>
+              <p className="text-[10px] text-muted-foreground">days logged</p>
+            </div>
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">
+            Log your daily count from the daily-log form. More logging sharpens the trend.
+          </p>
         </Card>
       )}
 
@@ -333,7 +473,10 @@ export default function MenopauseDashboard({ isPostMenopause = false }: Menopaus
       )}
 
       {/* CTA */}
-      <Card className="p-5 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
+      <Card
+        className="p-5 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20 cursor-pointer"
+        onClick={onNavigateToDoctorChat}
+      >
         <div className="flex items-center gap-4">
           <div className="w-11 h-11 rounded-2xl bg-primary/20 flex items-center justify-center flex-shrink-0">
             <Pill className="h-5 w-5 text-primary" />

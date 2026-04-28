@@ -623,7 +623,10 @@ const PatientDashboard = () => {
                 /* ─── Menopause / Post-Menopause Mode ─── */
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="lg:col-span-2">
-                    <MenopauseDashboard isPostMenopause={selectedMode === 'post-menopause'} />
+                    <MenopauseDashboard
+                      isPostMenopause={selectedMode === 'post-menopause'}
+                      onNavigateToDoctorChat={() => navigate('/dashboard/ai-doctor')}
+                    />
                   </div>
                   <div className="lg:col-span-1">
                     <ModeLabInsights mode={selectedMode} />
