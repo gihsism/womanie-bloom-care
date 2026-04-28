@@ -32,6 +32,7 @@ import HealthTrends from '@/components/dashboard/HealthTrends';
 import WeeklySummary from '@/components/dashboard/WeeklySummary';
 import GettingStarted from '@/components/dashboard/GettingStarted';
 import OverdueTests from '@/components/dashboard/OverdueTests';
+import SymptomPatternsCard from '@/components/dashboard/SymptomPatternsCard';
 import PregnancyLabInsights from '@/components/dashboard/PregnancyLabInsights';
 import CycleLabInsights from '@/components/dashboard/CycleLabInsights';
 import ModeLabInsights from '@/components/dashboard/ModeLabInsights';
@@ -707,11 +708,22 @@ const PatientDashboard = () => {
             {/* Ovulation Prediction - Show for conception and menstrual cycle modes */}
             {(selectedMode === 'conception' || selectedMode === 'menstrual-cycle') && user && periodData && (
               <div className="mb-6">
-                <OvulationPrediction 
+                <OvulationPrediction
                   userId={user.id}
                   lastPeriodStart={periodData.lastPeriodStart}
                   cycleLength={periodData.cycleLength}
                   onPredictionUpdate={setOvulationPrediction}
+                />
+              </div>
+            )}
+
+            {/* Symptom patterns by cycle phase — menstrual + pre-menstrual modes */}
+            {(selectedMode === 'menstrual-cycle' || selectedMode === 'pre-menstrual' || selectedMode === 'conception') && user && periodData && (
+              <div className="mb-6">
+                <SymptomPatternsCard
+                  userId={user.id}
+                  cycleLength={periodData.cycleLength}
+                  periodLength={5}
                 />
               </div>
             )}
