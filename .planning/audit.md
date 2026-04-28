@@ -187,13 +187,16 @@ Closed both follow-ups this session:
 - **6bbc44b** — DayActionSheet now offers an inline "Ended <day>" button when you tap a day inside the active period range. Today/yesterday get the natural labels; older days say "Ended Apr 22". Days before the period started or in the future show an explanation instead of an action.
 - **1eba692** — `SymptomPatternsCard` on PatientDashboard for menstrual / pre-menstrual / conception modes. Walks every logged signal in the last 6 months, classifies each by cycle phase relative to the owning period record, shows top 4 symptoms + top 3 moods per phase as "logged on N of M tracked days." Hidden until at least 3 logged days exist.
 
-"Other types of cycles" arc — extended into conception + contraception modes:
+"Other types of cycles" arc — covered all 8 modes by the end:
 - **0e12c2f** — `FertileWindowTimingCard` for conception mode. Walks the last 3 completed cycles, draws each as a horizontal timeline (period band, fertile window, ovulation marker, intercourse dots color-coded protected/unprotected). Top stat counts unprotected intercourse logged inside the fertile window. Doesn't penalize active cycles.
 - **02ea46a** — `ContraceptionDashboard` was a UI mock — selected method, pill streak, pack day, side-effects all reset on refresh. Now persists prefs to localStorage scoped by user.id, computes pill streak from real `daily_health_signals` rows (parsing the same "Pill: on-time / late / missed" segment `DailyLogging` already writes into notes — so the two surfaces never disagree). Three logging buttons (took on time / took late / missed) plus "Start a new pack" stamp.
+- **c9c78ff** — `MenopauseDashboard`: same mock-state problem, plus an unwired doctor-chat CTA. Tracked symptoms + myth carousel position now persist to localStorage scoped by user.id × `isPostMenopause` flag (so the two scopes don't collide). New hot-flash trend card on the menopause view reads the user's last 30 days of signals and parses the existing `Hot flashes: N` segment from `DailyLogging`. Doctor-chat CTA actually navigates now.
+- **bd62278** — `PreMenstrualDashboard`: readiness checklist + "did you know?" carousel position now persist to localStorage. Was losing both on every refresh.
+- **a02019f** — `IVFTracker`: header showed "Day 47 • Duration: 8-14 days" while the user was past day 14 because the day count was actually journey day, not phase day. Re-labeled "Tracking day N • Typical: …" so the relationship is unambiguous.
 
 Remaining open:
-- IVF, menopause, post-menopause modes still untouched.
-- The notes-segment trick for structured pill state is OK for now but the right long-term shape is dedicated columns (`pill_status`, `basal_temp_f`, `lh_test`) — that needs a migration. Same constraint applied to BBT/LH being trapped in notes from `DailyLogging`.
+- The notes-segment trick for structured pill / hot-flash state works but the right long-term shape is dedicated columns (`pill_status`, `basal_temp_f`, `lh_test`, `hot_flash_count`) — that needs a migration. Without one, BBT and LH stay trapped in notes text, unreadable by the app.
+- IVF could store per-phase start dates so "tracking day" can become "phase day" — also wants schema work.
 - All ongoing HANDOFFs.
 
 ### 2026-04-25 (session 34)
