@@ -1,5 +1,5 @@
-import { format, isSameDay, startOfDay } from 'date-fns';
-import { Droplet, Sparkles, Heart, Smile, AlertCircle } from 'lucide-react';
+import { format, isSameDay, startOfDay, parseISO, addDays } from 'date-fns';
+import { Droplet, Sparkles, Heart, Smile, AlertCircle, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
@@ -11,9 +11,11 @@ interface DayActionSheetProps {
   isPeriodDay: boolean;
   isOvulationDay: boolean;
   hasActivePeriod: boolean;
+  activePeriodStartDate?: string | null;
   onStartPeriod: () => void;
   onRemovePeriodDay: () => void;
   onMarkOvulation: () => void;
+  onEndPeriod?: (endDate: string) => void;
   onLogSymptoms: () => void;
   onLogMood: () => void;
   onLogIntimacy: () => void;
@@ -27,9 +29,11 @@ const DayActionSheet = ({
   isPeriodDay,
   isOvulationDay,
   hasActivePeriod,
+  activePeriodStartDate,
   onStartPeriod,
   onRemovePeriodDay,
   onMarkOvulation,
+  onEndPeriod,
   onLogSymptoms,
   onLogMood,
   onLogIntimacy,
@@ -37,8 +41,22 @@ const DayActionSheet = ({
 }: DayActionSheetProps) => {
   if (!date) return null;
 
-  const isToday = isSameDay(date, startOfDay(new Date()));
-  const isFutureDate = date > startOfDay(new Date());
+  const todayStart = startOfDay(new Date());
+  const isToday = isSameDay(date, todayStart);
+  const isFutureDate = date > todayStart;
+  const dateStart = startOfDay(date);
+
+  // True when the tapped day falls on/after the active period start and not in the future,
+  // so it's a valid candidate for "ended on this day".
+  const canEndOnThisDay =
+    hasActivePeriod &&
+    !!activePeriodStartDate &&
+    !!onEndPeriod &&
+    !isFutureDate &&
+    dateStart >= startOfDay(parseISO(activePeriodStartDate));
+
+  const yesterdayStart = startOfDay(addDays(todayStart, -1));
+  const isYesterday = isSameDay(dateStart, yesterdayStart);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -104,20 +122,43 @@ const DayActionSheet = ({
               </button>
             )}
 
-            {/* Active period indicator */}
+            {/* Active period — inline end confirmation */}
             {hasActivePeriod && !isPeriodDay && (
-              <div className="w-full flex items-center p-4 rounded-xl border border-primary/20 bg-primary/5">
+              <div className="w-full p-4 rounded-xl border border-primary/20 bg-primary/5 space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                     <Droplet className="h-5 w-5 text-primary animate-pulse" />
                   </div>
-                  <div className="text-left">
+                  <div className="text-left flex-1">
                     <div className="font-medium text-sm">Period is active</div>
                     <div className="text-xs text-muted-foreground">
-                      Use the banner above the calendar to confirm when it ends
+                      {canEndOnThisDay
+                        ? 'Confirm when it actually ended'
+                        : 'Tap a day on or after your period start to mark when it ended'}
                     </div>
                   </div>
                 </div>
+
+                {canEndOnThisDay && (
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      variant="default"
+                      className="text-xs gap-1.5"
+                      onClick={() => {
+                        onEndPeriod!(format(date, 'yyyy-MM-dd'));
+                        onOpenChange(false);
+                      }}
+                    >
+                      <Check className="h-3.5 w-3.5" />
+                      {isToday
+                        ? 'Ended today'
+                        : isYesterday
+                        ? 'Ended yesterday'
+                        : `Ended ${format(date, 'MMM d')}`}
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
 

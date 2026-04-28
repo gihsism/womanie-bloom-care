@@ -224,7 +224,8 @@ const CycleCalendar = ({
     return merged;
   }, [confirmedPeriodDays, activePeriodConfirmedDays]);
 
-  const hasActivePeriod = periodRecords.some(r => getEffectiveEnd(r) === null);
+  const activePeriodRecord = periodRecords.find(r => getEffectiveEnd(r) === null) ?? null;
+  const hasActivePeriod = activePeriodRecord !== null;
   
   const isPeriodDay = (date: Date): boolean => {
     return allConfirmedPeriodDays.has(format(date, 'yyyy-MM-dd'));
@@ -566,9 +567,11 @@ const CycleCalendar = ({
         isPeriodDay={selectedDate ? isPeriodDay(selectedDate) : false}
         isOvulationDay={selectedDate ? isOvulationMarked(selectedDate) : false}
         hasActivePeriod={hasActivePeriod}
+        activePeriodStartDate={activePeriodRecord?.period_start_date ?? null}
         onStartPeriod={() => selectedDate && handleStartPeriod(selectedDate)}
         onRemovePeriodDay={() => selectedDate && handleRemovePeriod(selectedDate)}
         onMarkOvulation={() => selectedDate && handleToggleOvulationDay(selectedDate)}
+        onEndPeriod={handleEndPeriod}
         onLogSymptoms={() => { setIsDayActionOpen(false); setDailyLogTab('symptoms'); setIsDailyLogSheetOpen(true); }}
         onLogMood={() => { setIsDayActionOpen(false); setDailyLogTab('mood'); setIsDailyLogSheetOpen(true); }}
         onLogIntimacy={() => { setIsDayActionOpen(false); setDailyLogTab('intimacy'); setIsDailyLogSheetOpen(true); }}
