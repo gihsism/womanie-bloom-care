@@ -33,6 +33,7 @@ import WeeklySummary from '@/components/dashboard/WeeklySummary';
 import GettingStarted from '@/components/dashboard/GettingStarted';
 import OverdueTests from '@/components/dashboard/OverdueTests';
 import SymptomPatternsCard from '@/components/dashboard/SymptomPatternsCard';
+import FertileWindowTimingCard from '@/components/dashboard/FertileWindowTimingCard';
 import PregnancyLabInsights from '@/components/dashboard/PregnancyLabInsights';
 import CycleLabInsights from '@/components/dashboard/CycleLabInsights';
 import ModeLabInsights from '@/components/dashboard/ModeLabInsights';
@@ -721,6 +722,17 @@ const PatientDashboard = () => {
             {(selectedMode === 'menstrual-cycle' || selectedMode === 'pre-menstrual' || selectedMode === 'conception') && user && periodData && (
               <div className="mb-6">
                 <SymptomPatternsCard
+                  userId={user.id}
+                  cycleLength={periodData.cycleLength}
+                  periodLength={5}
+                />
+              </div>
+            )}
+
+            {/* Fertile-window timing — conception mode only */}
+            {selectedMode === 'conception' && user && periodData && (
+              <div className="mb-6">
+                <FertileWindowTimingCard
                   userId={user.id}
                   cycleLength={periodData.cycleLength}
                   periodLength={5}
