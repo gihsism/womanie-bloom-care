@@ -24,20 +24,22 @@ const PeriodEndBanner = ({ periodRecords, avgPeriodLength, onEndPeriod, onStillG
   const showFrom = predictedEndDay - 1;
   const showUntil = predictedEndDay + 3;
 
-  if (daysSinceStart < showFrom || daysSinceStart > showUntil + 5) {
-    // Outside prompt window entirely
-    // But if period is way longer than predicted + 5, show a different message
-    if (daysSinceStart > predictedEndDay + 5) {
+  if (daysSinceStart < showFrom || daysSinceStart > showUntil + 2) {
+    // Outside the gentle-prompt window. Past predicted_end + 2 we
+    // pivot to a firmer "seems longer than usual" panel so there's
+    // no silent stretch between when the calendar stops rendering
+    // bleeding (also at predicted+2) and when the user gets nudged.
+    if (daysSinceStart > predictedEndDay + 2) {
       return (
         <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-4">
           <div className="flex items-start gap-3">
             <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
             <div className="flex-1">
               <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                Your period seems longer than usual ({daysSinceStart} days)
+                Your period seems longer than usual ({daysSinceStart} days since it started)
               </p>
               <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                Tap below to let us know when it ended
+                Womanie has stopped marking days as bleeding on the calendar — tap below to confirm when it actually ended.
               </p>
               <div className="flex gap-2 mt-3">
                 <Button
