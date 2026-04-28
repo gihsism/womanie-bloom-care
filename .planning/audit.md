@@ -187,8 +187,13 @@ Closed both follow-ups this session:
 - **6bbc44b** — DayActionSheet now offers an inline "Ended <day>" button when you tap a day inside the active period range. Today/yesterday get the natural labels; older days say "Ended Apr 22". Days before the period started or in the future show an explanation instead of an action.
 - **1eba692** — `SymptomPatternsCard` on PatientDashboard for menstrual / pre-menstrual / conception modes. Walks every logged signal in the last 6 months, classifies each by cycle phase relative to the owning period record, shows top 4 symptoms + top 3 moods per phase as "logged on N of M tracked days." Hidden until at least 3 logged days exist.
 
+"Other types of cycles" arc — extended into conception + contraception modes:
+- **0e12c2f** — `FertileWindowTimingCard` for conception mode. Walks the last 3 completed cycles, draws each as a horizontal timeline (period band, fertile window, ovulation marker, intercourse dots color-coded protected/unprotected). Top stat counts unprotected intercourse logged inside the fertile window. Doesn't penalize active cycles.
+- **02ea46a** — `ContraceptionDashboard` was a UI mock — selected method, pill streak, pack day, side-effects all reset on refresh. Now persists prefs to localStorage scoped by user.id, computes pill streak from real `daily_health_signals` rows (parsing the same "Pill: on-time / late / missed" segment `DailyLogging` already writes into notes — so the two surfaces never disagree). Three logging buttons (took on time / took late / missed) plus "Start a new pack" stamp.
+
 Remaining open:
-- "Other types of cycles" — Alena's broader directive after menstrual. Likely candidates: conception (BBT charting / LH peak detection / fertile-window confidence), contraception (pill streak / missed-pill recovery), pre-menstrual (PMS severity tracker). Needs steering on which mode is highest-value.
+- IVF, menopause, post-menopause modes still untouched.
+- The notes-segment trick for structured pill state is OK for now but the right long-term shape is dedicated columns (`pill_status`, `basal_temp_f`, `lh_test`) — that needs a migration. Same constraint applied to BBT/LH being trapped in notes from `DailyLogging`.
 - All ongoing HANDOFFs.
 
 ### 2026-04-25 (session 34)
