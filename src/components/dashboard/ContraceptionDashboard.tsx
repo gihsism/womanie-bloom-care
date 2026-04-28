@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -6,14 +6,13 @@ import { Progress } from '@/components/ui/progress';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { format, differenceInDays, addDays, isToday, parseISO } from 'date-fns';
+import { format, differenceInDays, parseISO, subDays } from 'date-fns';
+import { onHealthDataChange, emitHealthDataChange } from '@/lib/data-events';
 import {
   Pill,
   Clock,
   CheckCircle2,
-  Circle,
   Bell,
-  Calendar,
   Shield,
   AlertTriangle,
   ChevronRight,
@@ -49,38 +48,214 @@ interface ContraceptionDashboardProps {
   onNavigateToDoctorChat?: () => void;
 }
 
+interface SignalRow {
+  signal_date: string;
+  notes: string | null;
+}
+
+// Pill state encoded inside the existing daily_health_signals.notes column.
+// Same surface DailyLogging.tsx already writes ("Pill: on-time" / "Pill: late" / "Pill: missed"),
+// kept consistent so the two surfaces never disagree.
+type PillStatus = 'on-time' | 'late' | 'missed';
+
+function parsePillStatus(notes: string | null): PillStatus | null {
+  if (!notes) return null;
+  const match = notes.match(/Pill:\s*(on-time|late|missed)/i);
+  if (!match) return null;
+  return match[1].toLowerCase() as PillStatus;
+}
+
+function setPillInNotes(notes: string | null, status: PillStatus | null): string | null {
+  // Strip any existing "Pill: ..." segment, then append the new one if non-null.
+  const stripped = (notes || '')
+    .split('.')
+    .map((s) => s.trim())
+    .filter((s) => s && !/^Pill:\s*(on-time|late|missed)$/i.test(s))
+    .join('. ');
+  if (!status) return stripped || null;
+  return stripped ? `${stripped}. Pill: ${status}` : `Pill: ${status}`;
+}
+
+const lsKey = (userId: string, key: string) => `contraception:${userId}:${key}`;
+
+function readLS<T>(userId: string, key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(lsKey(userId, key));
+    if (!raw) return fallback;
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeLS(userId: string, key: string, value: unknown) {
+  try {
+    localStorage.setItem(lsKey(userId, key), JSON.stringify(value));
+  } catch {
+    // Quota / private mode — silently ignore.
+  }
+}
+
 export default function ContraceptionDashboard({ onNavigateToDoctorChat }: ContraceptionDashboardProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
-  const [pillsTakenToday, setPillsTakenToday] = useState(false);
-  const [pillStreak, setPillStreak] = useState(0);
-  const [packDay, setPackDay] = useState(1);
   const [trackedSideEffects, setTrackedSideEffects] = useState<Set<string>>(new Set());
   const [showMethodPicker, setShowMethodPicker] = useState(false);
   const [reminderTime, setReminderTime] = useState('21:00');
+  const [packStartDate, setPackStartDate] = useState<string | null>(null);
 
-  // For demo purposes, set a default method
+  const [signals, setSignals] = useState<SignalRow[]>([]);
+  const [isLoadingSignals, setIsLoadingSignals] = useState(true);
+
+  // ─── Persisted preferences via localStorage ───
   useEffect(() => {
-    if (!selectedMethod) setSelectedMethod('pill');
-  }, []);
+    if (!user) return;
+    setSelectedMethod(readLS<string | null>(user.id, 'method', 'pill'));
+    setTrackedSideEffects(new Set(readLS<string[]>(user.id, 'sideEffects', [])));
+    setReminderTime(readLS<string>(user.id, 'reminderTime', '21:00'));
+    setPackStartDate(readLS<string | null>(user.id, 'packStartDate', null));
+  }, [user?.id]);
 
-  const currentMethod = CONTRACEPTION_METHODS.find(m => m.id === selectedMethod);
+  useEffect(() => {
+    if (!user || selectedMethod === null) return;
+    writeLS(user.id, 'method', selectedMethod);
+  }, [user?.id, selectedMethod]);
+
+  useEffect(() => {
+    if (!user) return;
+    writeLS(user.id, 'sideEffects', Array.from(trackedSideEffects));
+  }, [user?.id, trackedSideEffects]);
+
+  useEffect(() => {
+    if (!user) return;
+    writeLS(user.id, 'reminderTime', reminderTime);
+  }, [user?.id, reminderTime]);
+
+  useEffect(() => {
+    if (!user) return;
+    writeLS(user.id, 'packStartDate', packStartDate);
+  }, [user?.id, packStartDate]);
+
+  // ─── Recent pill-take history from the database ───
+  const loadSignals = async () => {
+    if (!user) return;
+    setIsLoadingSignals(true);
+    try {
+      const { data } = await db
+        .from('daily_health_signals')
+        .select('signal_date, notes')
+        .eq('user_id', user.id)
+        .gte('signal_date', format(subDays(new Date(), 60), 'yyyy-MM-dd'))
+        .order('signal_date', { ascending: false });
+      setSignals(((data as SignalRow[]) || []));
+    } catch (e) {
+      console.error('ContraceptionDashboard load error', e);
+      setSignals([]);
+    } finally {
+      setIsLoadingSignals(false);
+    }
+  };
+
+  useEffect(() => {
+    loadSignals();
+    return onHealthDataChange(() => loadSignals());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  const currentMethod = CONTRACEPTION_METHODS.find((m) => m.id === selectedMethod);
   const isPillBased = ['pill', 'patch', 'ring'].includes(selectedMethod || '');
 
-  const handleTakePill = () => {
-    setPillsTakenToday(true);
-    setPillStreak(s => s + 1);
-    setPackDay(d => d >= 28 ? 1 : d + 1);
-    toast({ title: '✅ Logged!', description: `${currentMethod?.label || 'Contraception'} taken for today.` });
+  // Compute "today logged" + streak from real DB rows.
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const todayStatus = useMemo(() => {
+    const row = signals.find((s) => s.signal_date === today);
+    return parsePillStatus(row?.notes ?? null);
+  }, [signals, today]);
+  const pillsTakenToday = todayStatus !== null && todayStatus !== 'missed';
+
+  const pillStreak = useMemo(() => {
+    // Walk back from today, count consecutive days with on-time or late (missed breaks streak).
+    const map = new Map<string, PillStatus>();
+    signals.forEach((s) => {
+      const status = parsePillStatus(s.notes);
+      if (status) map.set(s.signal_date, status);
+    });
+    let streak = 0;
+    let cursor = new Date();
+    while (true) {
+      const key = format(cursor, 'yyyy-MM-dd');
+      const status = map.get(key);
+      if (!status || status === 'missed') break;
+      streak++;
+      cursor = subDays(cursor, 1);
+      if (streak > 365) break; // sanity cap
+    }
+    return streak;
+  }, [signals]);
+
+  // Pack day from packStartDate; default to "not started" until user marks it.
+  const packDay = useMemo(() => {
+    if (!packStartDate) return null;
+    try {
+      const days = differenceInDays(new Date(), parseISO(packStartDate)) + 1;
+      // Cycle through 28-day packs.
+      return ((days - 1) % 28) + 1;
+    } catch {
+      return null;
+    }
+  }, [packStartDate]);
+
+  const handleTakePill = async (status: PillStatus = 'on-time') => {
+    if (!user) return;
+    try {
+      // Read existing today row to preserve other note segments + structured fields.
+      const { data: existing } = await db
+        .from('daily_health_signals')
+        .select('notes')
+        .eq('user_id', user.id)
+        .eq('signal_date', today)
+        .maybeSingle();
+
+      const newNotes = setPillInNotes((existing?.notes ?? null) as string | null, status);
+      await db
+        .from('daily_health_signals')
+        .upsert(
+          {
+            user_id: user.id,
+            signal_date: today,
+            notes: newNotes,
+          },
+          { onConflict: 'user_id,signal_date' }
+        );
+
+      // First pill of a pack? Stamp the pack start.
+      if (!packStartDate) setPackStartDate(today);
+
+      emitHealthDataChange();
+      toast({
+        title: status === 'missed' ? 'Logged as missed' : '✅ Logged!',
+        description: `${currentMethod?.label || 'Contraception'} marked ${status} for today.`,
+      });
+    } catch (e) {
+      console.error('handleTakePill error', e);
+      toast({ title: 'Error', description: 'Failed to log. Please try again.', variant: 'destructive' });
+    }
   };
 
   const toggleSideEffect = (id: string) => {
-    setTrackedSideEffects(prev => {
+    setTrackedSideEffects((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
+  };
+
+  const handleStartNewPack = () => {
+    setPackStartDate(today);
+    toast({ title: 'New pack started', description: 'Pack day reset to 1.' });
   };
 
   return (
@@ -109,13 +284,13 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
         <Card className="p-4">
           <h4 className="text-sm font-semibold mb-3">Select Your Method</h4>
           <div className="grid grid-cols-2 gap-2">
-            {CONTRACEPTION_METHODS.map(method => (
+            {CONTRACEPTION_METHODS.map((method) => (
               <button
                 key={method.id}
                 onClick={() => { setSelectedMethod(method.id); setShowMethodPicker(false); }}
                 className={cn(
-                  "flex items-center gap-2 p-3 rounded-xl border text-left transition-all",
-                  selectedMethod === method.id ? "border-primary bg-primary/10" : "border-border hover:bg-muted/50"
+                  'flex items-center gap-2 p-3 rounded-xl border text-left transition-all',
+                  selectedMethod === method.id ? 'border-primary bg-primary/10' : 'border-border hover:bg-muted/50'
                 )}
               >
                 <span className="text-xl">{method.emoji}</span>
@@ -138,38 +313,85 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
               Daily Tracking
             </h3>
             <Badge variant={pillsTakenToday ? 'default' : 'outline'} className="text-xs">
-              {pillsTakenToday ? '✓ Taken' : 'Not taken'}
+              {todayStatus === 'on-time' && '✓ Taken on time'}
+              {todayStatus === 'late' && '⏰ Taken late'}
+              {todayStatus === 'missed' && '⚠ Missed'}
+              {!todayStatus && 'Not logged'}
             </Badge>
           </div>
 
           {!pillsTakenToday ? (
-            <Button onClick={handleTakePill} className="w-full gap-2 h-12 text-base">
-              <Pill className="h-5 w-5" />
-              Mark as Taken
-            </Button>
+            <div className="space-y-2">
+              <Button onClick={() => handleTakePill('on-time')} className="w-full gap-2 h-12 text-base">
+                <Pill className="h-5 w-5" />
+                Mark as Taken
+              </Button>
+              <div className="flex gap-2">
+                <Button onClick={() => handleTakePill('late')} variant="outline" size="sm" className="flex-1 text-xs">
+                  Took it late
+                </Button>
+                <Button onClick={() => handleTakePill('missed')} variant="outline" size="sm" className="flex-1 text-xs">
+                  Missed today
+                </Button>
+              </div>
+            </div>
           ) : (
             <div className="text-center py-3 bg-secondary/10 rounded-xl">
               <CheckCircle2 className="h-8 w-8 text-secondary mx-auto mb-1" />
               <p className="text-sm font-medium">All done for today!</p>
               <p className="text-xs text-muted-foreground">Great job staying consistent 💪</p>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-[11px] h-6 mt-1"
+                onClick={() => handleTakePill('missed')}
+              >
+                Actually, mark as missed
+              </Button>
             </div>
           )}
 
           {/* Streak & Pack Progress */}
           <div className="grid grid-cols-2 gap-3 mt-4">
             <div className="p-3 rounded-xl bg-muted/50 text-center">
-              <p className="text-2xl font-bold text-primary">{pillStreak}</p>
+              {isLoadingSignals ? (
+                <p className="text-2xl font-bold text-muted-foreground">—</p>
+              ) : (
+                <p className="text-2xl font-bold text-primary">{pillStreak}</p>
+              )}
               <p className="text-xs text-muted-foreground">Day streak 🔥</p>
             </div>
             <div className="p-3 rounded-xl bg-muted/50">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-xs font-medium">Pack Day</p>
-                <p className="text-xs font-bold">{packDay}/28</p>
-              </div>
-              <Progress value={(packDay / 28) * 100} className="h-2" />
-              <p className="text-[10px] text-muted-foreground mt-1">
-                {packDay <= 21 ? `${21 - packDay} active pills left` : `${28 - packDay} placebo days left`}
-              </p>
+              {packDay !== null ? (
+                <>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-xs font-medium">Pack Day</p>
+                    <p className="text-xs font-bold">{packDay}/28</p>
+                  </div>
+                  <Progress value={(packDay / 28) * 100} className="h-2" />
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="text-[10px] text-muted-foreground">
+                      {packDay <= 21 ? `${21 - packDay + 1} active left` : `${28 - packDay + 1} placebo left`}
+                    </p>
+                    {packDay === 1 || packDay === 28 ? (
+                      <button
+                        onClick={handleStartNewPack}
+                        className="text-[10px] text-primary underline"
+                      >
+                        New pack
+                      </button>
+                    ) : null}
+                  </div>
+                </>
+              ) : (
+                <button
+                  onClick={handleStartNewPack}
+                  className="w-full h-full flex flex-col items-center justify-center text-xs text-muted-foreground hover:text-foreground"
+                >
+                  <span className="font-medium">Start a pack</span>
+                  <span className="text-[10px]">Mark today as day 1</span>
+                </button>
+              )}
             </div>
           </div>
         </Card>
@@ -196,7 +418,7 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
       )}
 
       {/* Refill Reminder */}
-      {isPillBased && (
+      {isPillBased && packDay !== null && (
         <Card className="p-4 border-primary/20 bg-primary/5">
           <div className="flex items-center gap-3">
             <RefreshCcw className="h-5 w-5 text-primary" />
@@ -206,7 +428,10 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
                 {packDay <= 21 ? `${21 - packDay + 7} days until refill needed` : 'Time to get your refill!'}
               </p>
             </div>
-            <Button variant="outline" size="sm" className="text-xs h-7">Set Reminder</Button>
+            <Button variant="outline" size="sm" className="text-xs h-7">
+              <Bell className="h-3 w-3 mr-1" />
+              {reminderTime}
+            </Button>
           </div>
         </Card>
       )}
@@ -219,15 +444,15 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
         </h4>
         <p className="text-xs text-muted-foreground mb-3">Tap any side effects you're experiencing to track them.</p>
         <div className="flex flex-wrap gap-2">
-          {SIDE_EFFECTS.map(effect => {
+          {SIDE_EFFECTS.map((effect) => {
             const isActive = trackedSideEffects.has(effect.id);
             return (
               <button
                 key={effect.id}
                 onClick={() => toggleSideEffect(effect.id)}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
-                  isActive ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-muted/50"
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border',
+                  isActive ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:bg-muted/50'
                 )}
               >
                 <span>{effect.emoji}</span>
@@ -239,7 +464,7 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
         {trackedSideEffects.size > 0 && (
           <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
             <Info className="h-3 w-3" />
-            Tracking {trackedSideEffects.size} side effect(s). If severe, talk to your doctor.
+            Tracking {trackedSideEffects.size} side effect{trackedSideEffects.size === 1 ? '' : 's'}. If severe, talk to your doctor.
           </p>
         )}
       </Card>
@@ -271,7 +496,10 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
       </Card>
 
       {/* Doctor Chat CTA */}
-      <Card className="p-4 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
+      <Card
+        className="p-4 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20 cursor-pointer"
+        onClick={onNavigateToDoctorChat}
+      >
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-2xl bg-primary/20 flex items-center justify-center flex-shrink-0">
             <Sparkles className="h-5 w-5 text-primary" />
