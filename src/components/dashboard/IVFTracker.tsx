@@ -181,7 +181,7 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
         <div className="text-center mb-4">
           <div className="text-5xl mb-2">{currentPhaseData.icon}</div>
           <div className="text-2xl font-semibold text-foreground mb-1">{currentPhaseData.label}</div>
-          <div className="text-sm text-muted-foreground">Day {daysInPhase + 1} • Duration: {currentPhaseData.duration}</div>
+          <div className="text-sm text-muted-foreground">Tracking day {daysInPhase + 1} • Typical: {currentPhaseData.duration}</div>
           <Badge variant="secondary" className="mt-2">Phase {currentPhaseIndex + 1} of {IVF_PHASES.length}</Badge>
         </div>
         <p className="text-sm text-center text-muted-foreground max-w-sm mx-auto">{currentPhaseData.description}</p>
