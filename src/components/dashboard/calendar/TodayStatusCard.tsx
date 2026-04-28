@@ -28,7 +28,12 @@ const TodayStatusCard = ({
   const today = new Date();
 
   const ovulationCycleDay = differenceInDays(prediction.predictedOvulationDate, lastPeriodStart) + 1;
-  const daysToNextPeriod = Math.max(0, Math.ceil((prediction.predictedPeriodStart.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
+  const rawDaysToNextPeriod = Math.ceil((prediction.predictedPeriodStart.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const daysToNextPeriod = Math.max(0, rawDaysToNextPeriod);
+  // Negative ⇒ past predicted start ⇒ period is "late". We allow a
+  // small grace window before declaring "late" because cycle-length
+  // variance routinely shifts the predicted day by 1-2 days.
+  const periodLateBy = rawDaysToNextPeriod < 0 ? Math.abs(rawDaysToNextPeriod) : 0;
   const isInFertileWindow = today >= prediction.fertileWindowStart && today <= prediction.fertileWindowEnd;
 
   // Whether the user is "on her period" right now should reflect the
@@ -218,6 +223,28 @@ const TodayStatusCard = ({
           }
         </div>
       </div>
+
+      {/* Period-late alert — surfaced before the phase card so the
+          user sees it first when applicable. Only flagged once the
+          cycle is past the prediction's confidence window so a
+          slightly-variable cycle doesn't fire false alarms.
+          Hidden when a period is currently active. */}
+      {!isOnPeriod && periodLateBy > prediction.confidenceWindow && (
+        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                Your period is {periodLateBy} {periodLateBy === 1 ? 'day' : 'days'} later than expected
+              </p>
+              <p className="text-xs text-amber-700/80 dark:text-amber-300/80 mt-1 leading-relaxed">
+                Some variation between cycles is normal. If your period started, tap any day on the calendar to log it.
+                {periodLateBy >= 7 && ' If it has been late by more than a week and pregnancy is possible, consider taking a test.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Cycle phase card — clear, plain-language label of the
           phase the user is in right now plus a one-line
