@@ -1,8 +1,8 @@
 import { Sparkles, TrendingUp, TrendingDown, AlertCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { addDays, differenceInDays, format } from 'date-fns';
+import { addDays, differenceInDays, format, parseISO, startOfDay } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
-import { CyclePrediction, SymptomPattern } from '@/hooks/useCyclePrediction';
+import { CyclePrediction, SymptomPattern, PeriodRecord } from '@/hooks/useCyclePrediction';
 
 interface TodayStatusCardProps {
   cycleDay: number;
@@ -12,6 +12,7 @@ interface TodayStatusCardProps {
   selectedMode: string;
   prediction: CyclePrediction;
   symptomPatterns?: SymptomPattern[];
+  periodRecords?: PeriodRecord[];
 }
 
 const TodayStatusCard = ({
@@ -21,14 +22,41 @@ const TodayStatusCard = ({
   lastPeriodStart,
   selectedMode,
   prediction,
-  symptomPatterns = []
+  symptomPatterns = [],
+  periodRecords = []
 }: TodayStatusCardProps) => {
   const today = new Date();
 
   const ovulationCycleDay = differenceInDays(prediction.predictedOvulationDate, lastPeriodStart) + 1;
   const daysToNextPeriod = Math.max(0, Math.ceil((prediction.predictedPeriodStart.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
   const isInFertileWindow = today >= prediction.fertileWindowStart && today <= prediction.fertileWindowEnd;
-  const isOnPeriod = cycleDay <= periodLength;
+
+  // Whether the user is "on her period" right now should reflect the
+  // most recent period record's actual end date — not just whether
+  // today's cycle-day index is ≤ avgPeriodLength. If the period was
+  // confirmed to end early (e.g. on day 3 of a 5-day average), this
+  // card was still saying "day 5 of period" through day 5. Same gap
+  // the calendar's bleeding-rendering cap closed: source-of-truth is
+  // the period record, not the average.
+  const todayStart = startOfDay(today);
+  const ACTIVE_PERIOD_GRACE_DAYS = 2;
+  const isOnPeriod = (() => {
+    const sorted = [...periodRecords].sort(
+      (a, b) => parseISO(b.period_start_date).getTime() - parseISO(a.period_start_date).getTime()
+    );
+    const latest = sorted[0];
+    if (!latest) return false;
+    const start = parseISO(latest.period_start_date);
+    if (todayStart < startOfDay(start)) return false;
+    if (latest.period_end_date) {
+      const end = parseISO(latest.period_end_date);
+      return todayStart <= startOfDay(end);
+    }
+    // Active (un-ended) — match the calendar's cap so the two stay
+    // visually consistent.
+    const renderEnd = addDays(start, periodLength - 1 + ACTIVE_PERIOD_GRACE_DAYS);
+    return todayStart <= startOfDay(renderEnd);
+  })();
 
   if (['pregnancy', 'menopause', 'post-menopause'].includes(selectedMode)) {
     return null;

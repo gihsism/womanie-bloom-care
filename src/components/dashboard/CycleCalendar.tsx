@@ -454,6 +454,7 @@ const CycleCalendar = ({
           selectedMode={selectedMode}
           prediction={prediction}
           symptomPatterns={symptomPatterns}
+          periodRecords={periodRecords}
         />
       )}
 
