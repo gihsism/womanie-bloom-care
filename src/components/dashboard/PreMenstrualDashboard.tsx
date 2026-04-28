@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Flower2,
   BookOpen,
@@ -56,10 +57,48 @@ const funFacts = [
   "Everyone's cycle is different - there is no wrong way.",
 ];
 
+const lsKey = (userId: string, key: string) => `pre-menstrual:${userId}:${key}`;
+
+function readLS<T>(userId: string, key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(lsKey(userId, key));
+    if (!raw) return fallback;
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeLS(userId: string, key: string, value: unknown) {
+  try {
+    localStorage.setItem(lsKey(userId, key), JSON.stringify(value));
+  } catch {
+    // Quota / private mode — silently ignore.
+  }
+}
+
 export default function PreMenstrualDashboard() {
+  const { user } = useAuth();
   const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
   const [activeSection, setActiveSection] = useState<string | null>('changes');
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
+
+  // Persist readiness checklist + fact carousel position so they survive a refresh.
+  useEffect(() => {
+    if (!user) return;
+    setCheckedItems(new Set(readLS<number[]>(user.id, 'checkedItems', [])));
+    setCurrentFactIndex(readLS<number>(user.id, 'factIndex', 0));
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user) return;
+    writeLS(user.id, 'checkedItems', Array.from(checkedItems));
+  }, [user?.id, checkedItems]);
+
+  useEffect(() => {
+    if (!user) return;
+    writeLS(user.id, 'factIndex', currentFactIndex);
+  }, [user?.id, currentFactIndex]);
 
   const toggleCheck = (id: number) => {
     setCheckedItems(prev => {
