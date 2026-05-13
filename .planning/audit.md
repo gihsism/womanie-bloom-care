@@ -253,8 +253,30 @@ Open follow-ups from this group:
 - Forgot-password / email reset (needs email provider).
 - Server-side rate limit + audit logging on /api/appointments/book if
   it ever becomes a load target.
-- Wire `appointmentReminders` to the appointment-day reminder banner
-  once that ships.
+
+Appointments-pass continued (closes the previous session's candidates 1
+and 3, plus an unplanned calendar-export):
+- **ccfe890** — `/dashboard/appointments` page lists upcoming + past in
+  one round-trip (the /api/me/appointments endpoint already returns
+  everything when called without ?upcoming=true). Upcoming ascending,
+  past descending up to 50; cancelled rows stay in Past with a
+  "Cancelled" badge and dimmed opacity; cancel button only on
+  non-cancelled upcoming rows. UpcomingAppointments card's overflow
+  and the new "See all appointments" link both land here.
+- **674e02c** — `AppointmentTodayBanner` is the surface
+  `appointmentReminders` was missing. Prominent card at the top of the
+  dashboard when an appointment is scheduled for today; gated by the
+  notification toggle. Imminent (±15 min) boosts to "Starting soon" with
+  a Join call button on video consults; past-start-still-in-progress
+  reads "in progress" instead of a stale negative duration. Re-ticks
+  once a minute so the countdown stays accurate without a refresh, and
+  resubscribes to onHealthDataChange so a cancel elsewhere makes it
+  disappear.
+- **f251c2d** — Add-to-calendar .ics export on each upcoming row.
+  RFC 5545 one-event VCALENDAR with doctor name, time, duration, type,
+  and a 15-min DISPLAY alarm; UTC-stamped so the consuming calendar
+  applies local timezone instead of us baking it in. Apple Calendar /
+  Google Calendar / Outlook all consume the same file.
 
 ### 2026-04-25 to 2026-04-28 (rolling autonomous arc)
 
