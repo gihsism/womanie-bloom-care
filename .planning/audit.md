@@ -210,6 +210,52 @@ Next-session candidates:
    refresh).
 3. Reminder banner the day of a scheduled appointment.
 
+Late session 35 additions (auth + doctor flow polish):
+- **b393e5d** — Change password from Settings without an email round-trip.
+  New `/api/auth/change-password` verifies current password against
+  bcrypt hash, requires ≥8 chars and different from current, updates
+  `auth_users`, and revokes every OTHER session so a stolen old-password
+  device gets booted. Rate-limited 10/24h per user. Google-only accounts
+  rejected up front. Forgot-password (email reset) still missing — needs
+  email provider + tokens table chosen.
+- **f57122a** — Notification toggles in Settings now actually do
+  something. New `useNotificationPrefs` hook reads the same per-user
+  localStorage key the Settings page writes, re-reads on focus +
+  storage event so a flip in another tab takes effect immediately.
+  Wired `healthTips` to hide the "Daily Reminders" tip card on
+  PatientDashboard and `cycleReminders` to gate the late-period alert
+  in TodayStatusCard. `appointmentReminders` is preserved with no
+  surface yet.
+- **f803726, ac579ed, 352ef2e** — Doctor side saw every patient as
+  "Patient #abc12345" because `/api/db` can't join across tables and
+  doctors aren't owners of `profiles` rows. New `/api/doctors/connections`
+  endpoint LEFT JOINs profiles and returns name + life_stage; the
+  PatientConnection lookup is reused via `patientNameFor()` across all
+  three appointment lists so the overview / upcoming / past tables show
+  real names. Falls through to the old query if the endpoint fails so
+  the list still renders.
+- **44b6a85** — FindDoctor was offering already-booked slots. New
+  `/api/doctors/availability?doctor_id&date` returns the times +
+  durations of non-cancelled appointments for that day (no patient
+  identity leaked). Booking dialog refetches on (doctor, date) change
+  and filters slots via interval-overlap math; past slots that have
+  already started are also hidden. Footer reports how many slots are
+  suppressed.
+- **91f0c2d** — Closed the residual booking race. New
+  `/api/appointments/book` does `INSERT … WHERE NOT EXISTS (overlapping)`
+  in one round-trip so a same-slot collision returns 409 instead of
+  writing a duplicate row. Validates doctor existence + is_verified +
+  is_available + non-past. FindDoctor surfaces the server's exact
+  message ("This slot was just taken by another patient") rather than
+  the old generic toast.
+
+Open follow-ups from this group:
+- Forgot-password / email reset (needs email provider).
+- Server-side rate limit + audit logging on /api/appointments/book if
+  it ever becomes a load target.
+- Wire `appointmentReminders` to the appointment-day reminder banner
+  once that ships.
+
 ### 2026-04-25 to 2026-04-28 (rolling autonomous arc)
 
 Document analysis + presentation (post session-34): personal ranges on PanelDetail (`4dac5fa`), AI panel insight endpoint + card (`8bec07e`), single-doc print view (`dec2f65`), audit of pregnancy week-by-week measurements + ranges (`785da70`), favicon + Lovable-leftover icon cleanup (`4dafe08`, `fb92049`), HealthStatistics stat cards (`8b51706`), full-record print view (`db5a143`), doc-list search (`2f74221`).
