@@ -168,6 +168,13 @@ const DoctorDashboard = () => {
 
   const approvedPatients = patients.filter(p => p.status === 'approved');
 
+  // patient_id → friendly name (or UUID short-id fallback). Used by every
+  // appointment list so we don't have to repeat the lookup.
+  const patientNameFor = (patientId: string): string => {
+    const p = patients.find(c => c.patient_id === patientId);
+    return p?.patient_full_name?.trim() || `Patient #${patientId.slice(0, 8)}`;
+  };
+
   if (loading || isLoadingData) {
     return (
       <div className="min-h-screen bg-background">
@@ -348,7 +355,7 @@ const DoctorDashboard = () => {
                             <Calendar className="h-4 w-4 text-primary" />
                           </div>
                           <div>
-                            <p className="font-medium">Appointment</p>
+                            <p className="font-medium">{patientNameFor(apt.patient_id)}</p>
                             <p className="text-sm text-muted-foreground">
                               {new Date(apt.scheduled_at).toLocaleDateString()} at{' '}
                               {new Date(apt.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -379,7 +386,7 @@ const DoctorDashboard = () => {
 
           {/* Appointments Tab */}
           <TabsContent value="appointments">
-            <AppointmentsView appointments={appointments} />
+            <AppointmentsView appointments={appointments} patients={patients} />
           </TabsContent>
 
           {/* Settings Tab */}
@@ -530,7 +537,11 @@ const PatientManagement = ({ patients, onRefresh, doctorId }: { patients: Patien
   );
 };
 
-const AppointmentsView = ({ appointments }: { appointments: Appointment[] }) => {
+const AppointmentsView = ({ appointments, patients }: { appointments: Appointment[]; patients: PatientConnection[] }) => {
+  const patientNameFor = (patientId: string): string => {
+    const p = patients.find(c => c.patient_id === patientId);
+    return p?.patient_full_name?.trim() || `Patient #${patientId.slice(0, 8)}`;
+  };
   const upcomingAppointments = appointments.filter(
     apt => new Date(apt.scheduled_at) > new Date() && apt.status !== 'cancelled'
   );
@@ -559,15 +570,14 @@ const AppointmentsView = ({ appointments }: { appointments: Appointment[] }) => 
                       )}
                     </div>
                     <div>
-                      <p className="font-medium">
+                      <p className="font-medium">{patientNameFor(apt.patient_id)}</p>
+                      <p className="text-sm text-muted-foreground">
                         {new Date(apt.scheduled_at).toLocaleDateString('en-US', {
                           weekday: 'long',
                           month: 'short',
-                          day: 'numeric'
-                        })}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(apt.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} •{' '}
+                          day: 'numeric',
+                        })}{' '}
+                        at {new Date(apt.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} •{' '}
                         {apt.duration} min
                       </p>
                     </div>
