@@ -43,9 +43,8 @@ interface PatientConnection {
   status: string | null;
   created_at: string;
   connection_type: string | null;
-  profiles?: {
-    full_name: string | null;
-  };
+  patient_full_name?: string | null;
+  patient_life_stage?: string | null;
 }
 
 interface Appointment {
@@ -90,14 +89,28 @@ const DoctorDashboard = () => {
 
       setDoctorProfile(profile);
 
-      // Load patient connections
-      const { data: connections } = await db
-        .from('doctor_patient_connections')
-        .select('*')
-        .eq('doctor_id', user.id)
-        .order('created_at', { ascending: false });
-
-      setPatients(connections || []);
+      // Load patient connections via the consent-gated endpoint so we get
+      // the joined patient_full_name + life_stage (the generic /api/db
+      // router can't join across tables, and the doctor is not the owner
+      // of `profiles` rows so it can't read them directly).
+      try {
+        const resp = await fetch('/api/doctors/connections', { credentials: 'include' });
+        if (resp.ok) {
+          const { connections } = (await resp.json()) as { connections: PatientConnection[] };
+          setPatients(connections || []);
+        } else {
+          // Fall back to the unjoined view so the list still renders if the
+          // endpoint is unavailable — names will degrade to "Patient #..."
+          const { data: connections } = await db
+            .from('doctor_patient_connections')
+            .select('*')
+            .eq('doctor_id', user.id)
+            .order('created_at', { ascending: false });
+          setPatients(connections || []);
+        }
+      } catch {
+        setPatients([]);
+      }
 
       // Load appointments
       const { data: appts } = await db
@@ -482,8 +495,11 @@ const PatientManagement = ({ patients, onRefresh, doctorId }: { patients: Patien
                       <Users className="h-4 w-4" />
                     </div>
                     <div>
-                      <p className="font-medium">Patient #{patient.patient_id.slice(0, 8)}</p>
+                      <p className="font-medium">
+                        {patient.patient_full_name?.trim() || `Patient #${patient.patient_id.slice(0, 8)}`}
+                      </p>
                       <p className="text-sm text-muted-foreground">
+                        {patient.patient_life_stage ? `${patient.patient_life_stage.replace(/-/g, ' ')} · ` : ''}
                         Connected via {patient.connection_type || 'request'}
                       </p>
                     </div>
