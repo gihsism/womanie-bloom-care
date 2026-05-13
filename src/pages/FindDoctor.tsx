@@ -52,6 +52,12 @@ const FindDoctor = () => {
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
+  // Busy slots for the currently selected (doctor, date) pair. Each entry is
+  // {scheduled_at, duration} for non-cancelled appointments. We use these to
+  // strike out slots that overlap with already-booked time, so two patients
+  // can't both be offered the same slot.
+  const [busySlots, setBusySlots] = useState<{ scheduled_at: string; duration: number | null }[]>([]);
+  const [busySlotsLoading, setBusySlotsLoading] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -89,24 +95,68 @@ const FindDoctor = () => {
   const getAvailableTimeSlots = (doctor: Doctor, date: Date) => {
     const dayOfWeek = date.getDay();
     const daySchedule = doctor.schedule?.find(s => s.day_of_week === dayOfWeek);
-    
+
     if (!daySchedule) return [];
 
     const slots: string[] = [];
     const duration = doctor.consultation_settings?.consultation_duration || 30;
     const [startHour, startMin] = daySchedule.start_time.split(':').map(Number);
     const [endHour, endMin] = daySchedule.end_time.split(':').map(Number);
-    
+
     let currentTime = setMinutes(setHours(date, startHour), startMin);
     const endTime = setMinutes(setHours(date, endHour), endMin);
 
+    // Precompute busy intervals as [startMs, endMs) so overlap is a tight check.
+    const busyIntervals = busySlots.map(b => {
+      const startMs = new Date(b.scheduled_at).getTime();
+      const dur = typeof b.duration === 'number' && b.duration > 0 ? b.duration : duration;
+      return [startMs, startMs + dur * 60000] as const;
+    });
+
+    const nowMs = Date.now();
+
     while (currentTime < endTime) {
-      slots.push(format(currentTime, 'HH:mm'));
+      const slotStart = currentTime.getTime();
+      const slotEnd = slotStart + duration * 60000;
+      const overlapsBusy = busyIntervals.some(([bs, be]) => slotStart < be && slotEnd > bs);
+      // Also hide slots that have already started — picking 10:00 at 10:15
+      // would just produce a server-side error.
+      const inPast = slotEnd <= nowMs;
+      if (!overlapsBusy && !inPast) {
+        slots.push(format(currentTime, 'HH:mm'));
+      }
       currentTime = new Date(currentTime.getTime() + duration * 60000);
     }
 
     return slots;
   };
+
+  // Reload busy slots whenever the doctor or date changes inside the booking dialog.
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      if (!selectedDoctor || !selectedDate) {
+        setBusySlots([]);
+        return;
+      }
+      setBusySlotsLoading(true);
+      try {
+        const dateStr = format(selectedDate, 'yyyy-MM-dd');
+        const params = new URLSearchParams({ doctor_id: selectedDoctor.user_id, date: dateStr });
+        const resp = await fetch(`/api/doctors/availability?${params.toString()}`);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const payload = await resp.json();
+        if (!cancelled) setBusySlots((payload.busy ?? []) as { scheduled_at: string; duration: number | null }[]);
+      } catch (e) {
+        console.error('Failed to load availability:', e);
+        if (!cancelled) setBusySlots([]);
+      } finally {
+        if (!cancelled) setBusySlotsLoading(false);
+      }
+    };
+    run();
+    return () => { cancelled = true; };
+  }, [selectedDoctor?.user_id, selectedDate]);
 
   const handleBookAppointment = async () => {
     if (!selectedDoctor || !selectedDate || !selectedTime || !user) return;
@@ -358,25 +408,41 @@ const FindDoctor = () => {
                           return (
                             <div>
                               <label className="text-sm font-medium mb-2 block">Select Time</label>
-                              {slots.length === 0 ? (
+                              {busySlotsLoading ? (
+                                <div className="flex items-center justify-center py-4 bg-muted/50 rounded-lg gap-2 text-sm text-muted-foreground">
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                  Checking availability…
+                                </div>
+                              ) : slots.length === 0 ? (
                                 <div className="text-center py-4 bg-muted/50 rounded-lg">
                                   <Clock className="h-5 w-5 mx-auto text-muted-foreground mb-1.5" aria-hidden="true" />
-                                  <p className="text-sm text-muted-foreground">No time slots available on this day.</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {busySlots.length > 0
+                                      ? 'All time slots are booked on this day.'
+                                      : 'No time slots available on this day.'}
+                                  </p>
                                   <p className="text-xs text-muted-foreground mt-1">Try selecting a different date.</p>
                                 </div>
                               ) : (
-                                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-40 overflow-y-auto">
-                                  {slots.map(time => (
-                                    <Button
-                                      key={time}
-                                      variant={selectedTime === time ? 'default' : 'outline'}
-                                      className="h-10 text-sm"
-                                      onClick={() => setSelectedTime(time)}
-                                    >
-                                      {time}
-                                    </Button>
-                                  ))}
-                                </div>
+                                <>
+                                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-40 overflow-y-auto">
+                                    {slots.map(time => (
+                                      <Button
+                                        key={time}
+                                        variant={selectedTime === time ? 'default' : 'outline'}
+                                        className="h-10 text-sm"
+                                        onClick={() => setSelectedTime(time)}
+                                      >
+                                        {time}
+                                      </Button>
+                                    ))}
+                                  </div>
+                                  {busySlots.length > 0 && (
+                                    <p className="text-[11px] text-muted-foreground mt-1.5">
+                                      {busySlots.length} slot{busySlots.length === 1 ? '' : 's'} already booked are hidden.
+                                    </p>
+                                  )}
+                                </>
                               )}
                             </div>
                           );
