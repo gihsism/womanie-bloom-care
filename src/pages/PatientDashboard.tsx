@@ -31,6 +31,7 @@ import { useAttentionCount } from '@/hooks/useAttentionCount';
 import HealthTrends from '@/components/dashboard/HealthTrends';
 import WeeklySummary from '@/components/dashboard/WeeklySummary';
 import GettingStarted from '@/components/dashboard/GettingStarted';
+import UpcomingAppointments from '@/components/dashboard/UpcomingAppointments';
 import OverdueTests from '@/components/dashboard/OverdueTests';
 import SymptomPatternsCard from '@/components/dashboard/SymptomPatternsCard';
 import FertileWindowTimingCard from '@/components/dashboard/FertileWindowTimingCard';
@@ -521,6 +522,12 @@ const PatientDashboard = () => {
                 invisible once Alena (or any established user) is past
                 onboarding. */}
             <GettingStarted />
+
+            {/* Upcoming consultations the patient has booked through
+                FindDoctor. Hides itself when there are none, so it
+                stays out of the way for users who haven't scheduled
+                anything yet. */}
+            <UpcomingAppointments />
 
             {/* Narrative weekly summary across all uploaded documents
                 — generated on demand, cached per calendar week, and

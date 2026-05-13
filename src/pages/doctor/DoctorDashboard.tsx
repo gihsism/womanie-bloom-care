@@ -607,10 +607,10 @@ const AppointmentsView = ({ appointments, patients }: { appointments: Appointmen
               {pastAppointments.slice(0, 10).map((apt) => (
                 <div key={apt.id} className="flex items-center justify-between border-b pb-4 last:border-0 opacity-60">
                   <div>
-                    <p className="font-medium">
-                      {new Date(apt.scheduled_at).toLocaleDateString()}
+                    <p className="font-medium">{patientNameFor(apt.patient_id)}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(apt.scheduled_at).toLocaleDateString()} • {apt.duration} min • {apt.status}
                     </p>
-                    <p className="text-sm text-muted-foreground">{apt.duration} min • {apt.status}</p>
                   </div>
                   <Badge variant="outline">{apt.status}</Badge>
                 </div>
