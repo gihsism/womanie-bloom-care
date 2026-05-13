@@ -172,6 +172,44 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-14 (session 35)
+
+- **352ef2e** — `UpcomingAppointments` card on PatientDashboard. Patients
+  could already book through FindDoctor but had nowhere to see the
+  appointment after — it landed in the DB and disappeared from their
+  view. New card lists the next three upcoming consultations with
+  doctor name + avatar, time, type chip (video / in person), and an X
+  to cancel. Hides itself when there's nothing upcoming. New
+  `/api/me/appointments` endpoint joins appointments with
+  `doctor_profiles` server-side (patients can't read other doctors'
+  profile rows via /api/db). Smoke flow asserts 401 unauth.
+- **ac579ed** — DoctorDashboard fix-up: missed bit of the prior
+  `patientNameFor` patch — applied it to the inline appointment list
+  on the Overview tab and to the AppointmentsView upcoming/past lists
+  so every appointment row reads "Alice Smith" instead of the literal
+  "Appointment" label.
+
+Note: the `352ef2e` commit message describes only the
+DoctorDashboard polish, but its diff actually contains the whole
+UpcomingAppointments feature. A parallel session collided on the
+commit at 00:48; the content is sound, only the message is misleading.
+
+Remaining open after session 35:
+- All ongoing HANDOFFs (schema for emergency contacts / notification
+  settings / pending-jobs table / cross-doc trend table; admin email
+  on doctor signup; real rate-limit bucket).
+- IVF phase day vs tracking day (schema work).
+- BBT / LH trapped in `notes` text (schema work).
+
+Next-session candidates:
+1. Past-appointments page so users can see their consultation history
+   (the endpoint already returns historical rows when `upcoming` is
+   omitted; just needs UI).
+2. Email confirmation when a doctor confirms / cancels an
+   appointment (currently the patient only sees status flip on
+   refresh).
+3. Reminder banner the day of a scheduled appointment.
+
 ### 2026-04-25 to 2026-04-28 (rolling autonomous arc)
 
 Document analysis + presentation (post session-34): personal ranges on PanelDetail (`4dac5fa`), AI panel insight endpoint + card (`8bec07e`), single-doc print view (`dec2f65`), audit of pregnancy week-by-week measurements + ranges (`785da70`), favicon + Lovable-leftover icon cleanup (`4dafe08`, `fb92049`), HealthStatistics stat cards (`8b51706`), full-record print view (`db5a143`), doc-list search (`2f74221`).
