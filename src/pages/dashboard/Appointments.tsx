@@ -21,7 +21,9 @@ import {
   X,
   Search,
   History,
+  CalendarPlus,
 } from 'lucide-react';
+import { downloadIcs } from '@/lib/ics';
 
 // Patient-side full appointments view: upcoming + past in one page.
 // Backed by the same /api/me/appointments endpoint the dashboard widget
@@ -181,16 +183,41 @@ const Appointments = () => {
           </p>
         </div>
         {kind === 'upcoming' && !isCancelled && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-xs gap-1 text-muted-foreground hover:text-destructive"
-            onClick={() => cancel(apt)}
-            disabled={busyId === apt.id}
-          >
-            <X className="h-3.5 w-3.5" />
-            Cancel
-          </Button>
+          <div className="flex flex-col gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs gap-1 text-muted-foreground hover:text-foreground"
+              onClick={() => {
+                downloadIcs({
+                  uid: apt.id,
+                  start: when,
+                  durationMinutes: apt.duration ?? 30,
+                  title: `Consultation with ${name}`,
+                  description:
+                    `${isVideo ? 'Video consultation' : 'In-person consultation'} on Womanie.` +
+                    (specialty ? ` Specialty: ${specialty}.` : ''),
+                  location: isVideo ? 'Video call (Womanie)' : 'In-person',
+                  url: `${window.location.origin}/dashboard/appointments`,
+                });
+                toast({ title: 'Calendar event saved', description: 'Open the .ics file to add it.' });
+              }}
+              title="Add to calendar"
+            >
+              <CalendarPlus className="h-3.5 w-3.5" />
+              Add to calendar
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs gap-1 text-muted-foreground hover:text-destructive"
+              onClick={() => cancel(apt)}
+              disabled={busyId === apt.id}
+            >
+              <X className="h-3.5 w-3.5" />
+              Cancel
+            </Button>
+          </div>
         )}
       </li>
     );
