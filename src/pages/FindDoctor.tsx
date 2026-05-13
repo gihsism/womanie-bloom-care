@@ -166,19 +166,26 @@ const FindDoctor = () => {
       const [hours, minutes] = selectedTime.split(':').map(Number);
       const scheduledAt = setMinutes(setHours(selectedDate, hours), minutes);
 
-      const { error } = await db
-        .from('appointments')
-        .insert({
+      // Routed through /api/appointments/book so the server can run a
+      // conflict-guarded INSERT — without it, two patients hitting the
+      // same slot inside the round-trip both succeed.
+      const resp = await fetch('/api/appointments/book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           doctor_id: selectedDoctor.user_id,
-          patient_id: user.id,
           scheduled_at: scheduledAt.toISOString(),
           duration: selectedDoctor.consultation_settings?.consultation_duration || 30,
           consultation_type: selectedDoctor.consultation_settings?.video_enabled ? 'video' : 'in_person',
-          status: 'scheduled',
-          payment_status: 'pending',
-        });
-
-      if (error) throw error;
+        }),
+      });
+      const payload = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        // 409 is the recognized "slot just taken" case — surface the
+        // server's message verbatim so the user sees the specific
+        // reason without us re-wording it.
+        throw new Error(payload.error || `HTTP ${resp.status}`);
+      }
 
       toast({
         title: 'Appointment Booked',
@@ -192,8 +199,8 @@ const FindDoctor = () => {
     } catch (error) {
       console.error('Error booking appointment:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to book appointment. Please try again.',
+        title: 'Could not book',
+        description: error instanceof Error ? error.message : 'Please try again.',
         variant: 'destructive',
       });
     } finally {
