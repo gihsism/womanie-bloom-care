@@ -183,18 +183,26 @@ export default function UpcomingAppointments() {
         })}
       </ul>
 
-      {hidden > 0 && (
-        <div className="mt-2 text-center">
+      <div className="mt-2 flex items-center justify-center gap-3">
+        {hidden > 0 && (
           <Button
             variant="ghost"
             size="sm"
             className="h-7 text-xs"
-            onClick={() => navigate('/find-doctor')}
+            onClick={() => navigate('/dashboard/appointments')}
           >
-            +{hidden} more · manage
+            +{hidden} more
           </Button>
-        </div>
-      )}
+        )}
+        <Button
+          variant="link"
+          size="sm"
+          className="h-7 text-xs"
+          onClick={() => navigate('/dashboard/appointments')}
+        >
+          See all appointments
+        </Button>
+      </div>
     </Card>
   );
 }

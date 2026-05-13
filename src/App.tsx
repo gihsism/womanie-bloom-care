@@ -47,6 +47,7 @@ const CompareDocs = lazy(() => import("./pages/dashboard/CompareDocs"));
 const PanelDetail = lazy(() => import("./pages/dashboard/PanelDetail"));
 const PrintDoc = lazy(() => import("./pages/dashboard/PrintDoc"));
 const PrintHealthRecord = lazy(() => import("./pages/dashboard/PrintHealthRecord"));
+const Appointments = lazy(() => import("./pages/dashboard/Appointments"));
 const FindDoctor = lazy(() => import("./pages/FindDoctor"));
 const Settings = lazy(() => import("./pages/dashboard/Settings"));
 const HealthStatistics = lazy(() => import("./pages/HealthStatistics"));
@@ -117,6 +118,7 @@ const App = () => (
                   <Route path="/dashboard/panel/:slug" element={<PanelDetail />} />
                   <Route path="/dashboard/doc/:id/print" element={<PrintDoc />} />
                   <Route path="/dashboard/health-record/print" element={<PrintHealthRecord />} />
+                  <Route path="/dashboard/appointments" element={<Appointments />} />
                   {/* Dashboard menu entries that historically pointed to
                       dedicated pages we never shipped. Redirect them to
                       sensible existing destinations instead of bouncing
