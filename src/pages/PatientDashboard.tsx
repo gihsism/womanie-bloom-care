@@ -32,6 +32,7 @@ import HealthTrends from '@/components/dashboard/HealthTrends';
 import WeeklySummary from '@/components/dashboard/WeeklySummary';
 import GettingStarted from '@/components/dashboard/GettingStarted';
 import UpcomingAppointments from '@/components/dashboard/UpcomingAppointments';
+import AppointmentTodayBanner from '@/components/dashboard/AppointmentTodayBanner';
 import OverdueTests from '@/components/dashboard/OverdueTests';
 import SymptomPatternsCard from '@/components/dashboard/SymptomPatternsCard';
 import FertileWindowTimingCard from '@/components/dashboard/FertileWindowTimingCard';
@@ -522,6 +523,11 @@ const PatientDashboard = () => {
                 invisible once Alena (or any established user) is past
                 onboarding. */}
             <GettingStarted />
+
+            {/* Day-of reminder banner — appears above the upcoming card
+                only when there's an appointment scheduled for today.
+                Gated by the appointmentReminders notification toggle. */}
+            <AppointmentTodayBanner />
 
             {/* Upcoming consultations the patient has booked through
                 FindDoctor. Hides itself when there are none, so it
