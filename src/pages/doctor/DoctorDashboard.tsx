@@ -12,6 +12,7 @@ import { useRequireRole } from '@/hooks/useRequireRole';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Loader2 } from 'lucide-react';
+import DoctorTodayBanner from '@/components/doctor/DoctorTodayBanner';
 import {
   Users,
   Calendar,
@@ -247,6 +248,10 @@ const DoctorDashboard = () => {
 
       {/* Main Content */}
       <div className="p-4 md:p-6 max-w-7xl mx-auto">
+        {/* Day-of consultations — symmetric to the patient-side
+            AppointmentTodayBanner. Hides itself when there's nothing
+            scheduled today. */}
+        <DoctorTodayBanner appointments={appointments} patients={patients} />
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid grid-cols-4 lg:w-[500px]">
             <TabsTrigger value="overview">Overview</TabsTrigger>
