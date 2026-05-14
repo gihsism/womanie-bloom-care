@@ -1,11 +1,31 @@
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, Sparkles, ArrowRight } from 'lucide-react';
+import { CheckCircle2, Sparkles, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { commitOnboarding } from '@/lib/onboarding-commit';
 
 const OnboardingSuccess = () => {
   const navigate = useNavigate();
-  const { resetOnboarding } = useOnboarding();
+  const { data, resetOnboarding } = useOnboarding();
+  const { user } = useAuth();
+  const [committing, setCommitting] = useState(false);
+
+  // Persist on mount: everything the user just entered is in the
+  // onboarding context. Without this, resetOnboarding() in
+  // handleStartExploring would wipe the localStorage cache without
+  // ever writing to the database, so the user would land on a blank
+  // dashboard that ignored their answers.
+  const didCommit = useRef(false);
+  useEffect(() => {
+    if (!user?.id || didCommit.current) return;
+    didCommit.current = true;
+    setCommitting(true);
+    commitOnboarding(user, data)
+      .catch((e) => console.error('Onboarding commit failed', e))
+      .finally(() => setCommitting(false));
+  }, [user?.id, data]);
 
   const handleStartExploring = () => {
     resetOnboarding();
@@ -48,9 +68,19 @@ const OnboardingSuccess = () => {
           <Button
             className="w-full text-base py-5"
             onClick={handleStartExploring}
+            disabled={committing}
           >
-            Go to my dashboard
-            <ArrowRight className="h-4 w-4 ml-2" />
+            {committing ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Saving your answers…
+              </>
+            ) : (
+              <>
+                Go to my dashboard
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </>
+            )}
           </Button>
           <Button
             variant="outline"

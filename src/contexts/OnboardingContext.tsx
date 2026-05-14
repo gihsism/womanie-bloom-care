@@ -50,7 +50,7 @@ interface MenopauseData {
   mainConcerns: string[];
 }
 
-interface OnboardingData {
+export interface OnboardingData {
   basicInfo: BasicInfo;
   lifeStage: LifeStage;
   regularCycle?: RegularCycleData;
