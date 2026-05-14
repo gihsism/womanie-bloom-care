@@ -278,6 +278,39 @@ and 3, plus an unplanned calendar-export):
   applies local timezone instead of us baking it in. Apple Calendar /
   Google Calendar / Outlook all consume the same file.
 
+Doctor flow + onboarding fixes (next-tick candidates from the previous
+list — all three closed):
+- **c125a52** — `DoctorTodayBanner` is the symmetric of
+  AppointmentTodayBanner on the doctor side. Lists every non-cancelled
+  appointment scheduled for today at the top of /doctor/dashboard with
+  patient name (via the existing patientNameFor helper), time,
+  countdown, and consultation type. Imminent slots boost to "Starting
+  soon" with a "Start call" button on video consults; in-progress
+  reads correctly. Reuses the in-memory appointments + patients arrays
+  the dashboard already loads — no extra round-trip.
+- **cd476a4** — Verification banner used to claim every non-approved
+  doctor was "pending verification, some features may be limited"
+  even when the status was `rejected` or `revoked`. Now branches on
+  the actual status with distinct copy and a destructive palette for
+  the bad cases — both point users at support@womanie.info with a
+  specific next step.
+- **100fb1d** — **Onboarding answers were being dropped on the floor.**
+  The three-screen flow (basic info → life stage → mode setup) stored
+  everything in OnboardingContext + localStorage, then OnboardingSuccess
+  called resetOnboarding() and navigated to the dashboard. The DB write
+  step was simply missing. Users landed on a blank dashboard with no
+  period data and the wrong life stage. New `commitOnboarding()` helper
+  runs on success-page mount: writes profiles.life_stage (mapped from
+  the broad onboarding stage + regular-cycle main-focus combo onto the
+  eight dashboard modes), profiles.pregnancy_due_date (derived from
+  due-date / last-period + 280d / current-week + remaining), and seeds
+  a period_tracking row from the reported last-period start and cycle
+  length. DOB / height (cm) / weight (kg) / blood type park in per-user
+  localStorage since profiles doesn't have those columns yet — when
+  schema lands, swap the localStorage path for an /api/db upsert
+  without touching callers. Button shows a "Saving your answers…"
+  loading state during the commit.
+
 ### 2026-04-25 to 2026-04-28 (rolling autonomous arc)
 
 Document analysis + presentation (post session-34): personal ranges on PanelDetail (`4dac5fa`), AI panel insight endpoint + card (`8bec07e`), single-doc print view (`dec2f65`), audit of pregnancy week-by-week measurements + ranges (`785da70`), favicon + Lovable-leftover icon cleanup (`4dafe08`, `fb92049`), HealthStatistics stat cards (`8b51706`), full-record print view (`db5a143`), doc-list search (`2f74221`).
