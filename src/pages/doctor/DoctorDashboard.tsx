@@ -234,17 +234,42 @@ const DoctorDashboard = () => {
         </div>
       </div>
 
-      {/* Verification Warning */}
-      {doctorProfile?.verification_status !== 'approved' && (
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-b border-yellow-200 dark:border-yellow-800 px-4 py-3">
-          <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-200">
-            <AlertCircle className="h-5 w-5" />
-            <p className="text-sm">
-              Your account is pending verification. Some features may be limited until your license is verified.
-            </p>
+      {/* Verification banner — branches on the actual status instead of
+          claiming everyone is "pending". 'rejected' and 'revoked'
+          surface their own copy with a route to support. */}
+      {doctorProfile?.verification_status !== 'approved' && (() => {
+        const status = doctorProfile?.verification_status;
+        const isRejected = status === 'rejected';
+        const isRevoked = status === 'revoked';
+        const palette = isRejected || isRevoked
+          ? 'bg-destructive/10 border-destructive/30 text-destructive'
+          : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200';
+
+        let heading = 'Your account is pending verification';
+        let body =
+          'Verification typically takes 1–3 business days. You can keep editing your profile and schedule, but patients won\'t see you in the directory until we approve your license.';
+        if (isRejected) {
+          heading = 'Verification was not approved';
+          body =
+            'We weren\'t able to verify the credentials on file. Email support@womanie.info with your updated license details and we\'ll re-review.';
+        } else if (isRevoked) {
+          heading = 'Verification has been revoked';
+          body =
+            'Your verification was revoked, so you\'re no longer listed in the directory. Email support@womanie.info to reinstate.';
+        }
+
+        return (
+          <div className={`border-b px-4 py-3 ${palette}`}>
+            <div className="flex items-start gap-2">
+              <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold">{heading}</p>
+                <p className="text-xs mt-0.5 opacity-90 leading-relaxed">{body}</p>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Main Content */}
       <div className="p-4 md:p-6 max-w-7xl mx-auto">
