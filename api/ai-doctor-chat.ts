@@ -166,27 +166,43 @@ ${medicalContext || 'No medical records available yet. Encourage the patient to 
     content: m.content,
   }));
 
-  const aiResponse = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model,
-      max_tokens: model.includes('haiku') ? 2000 : 4000,
-      system: systemPrompt,
-      messages: anthropicMessages,
-      stream: true,
-    }),
-  });
+  // Retry the initial connection on transient 5xx — the stream itself
+  // can't be safely resumed once it's started, but a single failed
+  // handshake shouldn't dump the user back to a generic error.
+  // 429 / 402 short-circuit so the client surfaces the right code.
+  const requestBody = {
+    model,
+    max_tokens: model.includes('haiku') ? 2000 : 4000,
+    system: systemPrompt,
+    messages: anthropicMessages,
+    stream: true,
+  };
+  const initialDelays = [250, 1000];
+  let aiResponse: Response | null = null;
+  for (let attempt = 0; attempt <= initialDelays.length; attempt++) {
+    aiResponse = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+    if (aiResponse.ok) break;
+    if (aiResponse.status >= 500 && attempt < initialDelays.length) {
+      console.warn(`Anthropic ${aiResponse.status} on chat handshake (attempt ${attempt + 1}); retrying`);
+      await new Promise(r => setTimeout(r, initialDelays[attempt]));
+      continue;
+    }
+    break;
+  }
 
-  if (!aiResponse.ok) {
-    if (aiResponse.status === 429) return res.status(429).json({ error: 'Rate limit exceeded. Please try again shortly.' });
-    if (aiResponse.status === 402) return res.status(402).json({ error: 'AI usage limit reached.' });
-    const errText = await aiResponse.text();
-    console.error('Anthropic error:', aiResponse.status, errText);
+  if (!aiResponse || !aiResponse.ok) {
+    if (aiResponse?.status === 429) return res.status(429).json({ error: 'Rate limit exceeded. Please try again shortly.' });
+    if (aiResponse?.status === 402) return res.status(402).json({ error: 'AI usage limit reached.' });
+    const errText = aiResponse ? await aiResponse.text() : '';
+    console.error('Anthropic error:', aiResponse?.status, errText);
     return res.status(500).json({ error: 'AI service unavailable' });
   }
 
