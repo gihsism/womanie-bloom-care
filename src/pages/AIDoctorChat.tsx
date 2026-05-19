@@ -484,7 +484,18 @@ export default function AIDoctorChat() {
       ? ['Which results should I worry about?', 'What lifestyle changes could help?']
       : ['Are there any concerning findings?', 'What tests should I do next?'];
 
-    suggestedQuestions = [...baseSuggestions, ...contextSuggestions];
+    // If the patient has an upcoming visit or recent doctor notes,
+    // surface a chip that helps them get value from the assistant
+    // about those — both are now in the server-side prompt context.
+    const proximitySuggestions: string[] = [];
+    if (medicalContext?.includes('Upcoming appointments:')) {
+      proximitySuggestions.push('What should I prepare for my next appointment?');
+    }
+    if (medicalContext?.includes('Recent doctor notes:')) {
+      proximitySuggestions.push('Explain my doctor\'s latest note in plain language');
+    }
+
+    suggestedQuestions = [...baseSuggestions, ...contextSuggestions, ...proximitySuggestions];
   }
 
   if (authLoading) {
