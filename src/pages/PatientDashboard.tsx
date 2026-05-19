@@ -32,6 +32,7 @@ import HealthTrends from '@/components/dashboard/HealthTrends';
 import WeeklySummary from '@/components/dashboard/WeeklySummary';
 import GettingStarted from '@/components/dashboard/GettingStarted';
 import UpcomingAppointments from '@/components/dashboard/UpcomingAppointments';
+import DoctorNotesCard from '@/components/dashboard/DoctorNotesCard';
 import AppointmentTodayBanner from '@/components/dashboard/AppointmentTodayBanner';
 import OverdueTests from '@/components/dashboard/OverdueTests';
 import SymptomPatternsCard from '@/components/dashboard/SymptomPatternsCard';
@@ -534,6 +535,11 @@ const PatientDashboard = () => {
                 stays out of the way for users who haven't scheduled
                 anything yet. */}
             <UpcomingAppointments />
+
+            {/* Doctor-authored notes flagged is_visible_to_patient in
+                PatientDetails. Without this card the patient never
+                sees them. Hides itself when there are none. */}
+            <DoctorNotesCard />
 
             {/* Narrative weekly summary across all uploaded documents
                 — generated on demand, cached per calendar week, and
