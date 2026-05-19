@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Loader2 } from 'lucide-react';
 import DoctorTodayBanner from '@/components/doctor/DoctorTodayBanner';
+import DoctorCancellationsBanner from '@/components/doctor/DoctorCancellationsBanner';
 import {
   Users,
   Calendar,
@@ -290,6 +291,11 @@ const DoctorDashboard = () => {
             AppointmentTodayBanner. Hides itself when there's nothing
             scheduled today. */}
         <DoctorTodayBanner appointments={appointments} patients={patients} />
+
+        {/* Patient-initiated cancellations from the last 7 days. Doctor-
+            initiated cancellations are filtered out (the doctor already
+            knows). Hides itself when there are none, dismissible per-row. */}
+        <DoctorCancellationsBanner appointments={appointments} patients={patients} />
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid grid-cols-4 lg:w-[500px]">
             <TabsTrigger value="overview">Overview</TabsTrigger>
