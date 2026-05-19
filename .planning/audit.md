@@ -186,6 +186,25 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
   title or notes; All Results caps at 200 with a hint to narrow with
   search.
 
+Doctor + auth flow polish (closes the "signup polish + doctor note
+edit/delete" candidates from last tick):
+- **85d0593** — `PatientDetails` clinical notes were insert-only. Each
+  note row now has Edit and Delete buttons. Edit replaces the
+  read-only display with an inline form reusing the same
+  title/type/visibility/content fields as the new-note form (only one
+  note is editable at a time). Delete is confirm-gated. Both routed
+  through /api/db — `doctor_notes` is owned by `doctor_id`, so the
+  generic router pins updates and deletes to the calling doctor.
+- **ca85396 / efec0d0 / b9d224d** — Password strength meter. PatientSignUp
+  rejected <8-char passwords but gave no mid-typing feedback between
+  "password" and "X9q!Lv#tw&8Aer". Added a 5-tick bar with five tiers
+  (Too short / Weak / Fair / Good / Strong) under the field. Extracted
+  the heuristic into `src/lib/password-strength.ts` (`scorePassword`)
+  so the same meter shows up on Settings → change password and on
+  DoctorSignUp. The doctor surface also had a `password.length >= 6`
+  client check while the server enforces 8 — bumped both to 8 so the
+  step-2 button doesn't let users through to a guaranteed 400.
+
 ### 2026-05-14 (session 35)
 
 - **352ef2e** — `UpcomingAppointments` card on PatientDashboard. Patients
