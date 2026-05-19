@@ -147,7 +147,7 @@ const Appointments = () => {
   const cancel = async (apt: AppointmentRow) => {
     const doctorLabel = [apt.doctor_title, apt.doctor_name].filter(Boolean).join(' ') || 'this doctor';
     const when = format(new Date(apt.scheduled_at), 'PPP, p');
-    if (!window.confirm(`Cancel your appointment with ${doctorLabel} on ${when}? This can't be undone.`)) return;
+    if (!window.confirm(`Cancel your appointment with ${doctorLabel} on ${when}?`)) return;
     setBusyId(apt.id);
     try {
       const { error } = await db
@@ -155,7 +155,32 @@ const Appointments = () => {
         .update({ status: 'cancelled' })
         .eq('id', apt.id);
       if (error) throw error;
-      toast({ title: 'Appointment cancelled', description: `Your appointment with ${doctorLabel} has been cancelled.` });
+      toast({
+        title: 'Appointment cancelled',
+        description: `Your appointment with ${doctorLabel} on ${when} has been cancelled.`,
+        action: (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={async () => {
+              try {
+                const { error: undoErr } = await db
+                  .from('appointments')
+                  .update({ status: 'scheduled' })
+                  .eq('id', apt.id);
+                if (undoErr) throw undoErr;
+                toast({ title: 'Cancellation undone', description: 'Your appointment is back on the schedule.' });
+                emitHealthDataChange();
+                await load();
+              } catch (e) {
+                toast({ variant: 'destructive', title: 'Could not undo', description: errorMessage(e, 'Please try again.') });
+              }
+            }}
+          >
+            Undo
+          </Button>
+        ),
+      });
       emitHealthDataChange();
       await load();
     } catch (error) {

@@ -69,18 +69,43 @@ export default function UpcomingAppointments() {
   useEffect(() => { load(); }, [load]);
   useEffect(() => onHealthDataChange(load), [load]);
 
+  const setApptStatus = async (apt: AppointmentRow, next: string) => {
+    const { error } = await db
+      .from('appointments')
+      .update({ status: next })
+      .eq('id', apt.id);
+    if (error) throw error;
+  };
+
   const cancel = async (apt: AppointmentRow) => {
     const doctorLabel = [apt.doctor_title, apt.doctor_name].filter(Boolean).join(' ') || 'this doctor';
     const when = format(new Date(apt.scheduled_at), 'PPP, p');
-    if (!window.confirm(`Cancel your appointment with ${doctorLabel} on ${when}? This can't be undone.`)) return;
+    if (!window.confirm(`Cancel your appointment with ${doctorLabel} on ${when}?`)) return;
     setBusyId(apt.id);
     try {
-      const { error } = await db
-        .from('appointments')
-        .update({ status: 'cancelled' })
-        .eq('id', apt.id);
-      if (error) throw error;
-      toast({ title: 'Appointment cancelled', description: `Your appointment with ${doctorLabel} has been cancelled.` });
+      await setApptStatus(apt, 'cancelled');
+      toast({
+        title: 'Appointment cancelled',
+        description: `Your appointment with ${doctorLabel} on ${when} has been cancelled.`,
+        action: (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={async () => {
+              try {
+                await setApptStatus(apt, 'scheduled');
+                toast({ title: 'Cancellation undone', description: 'Your appointment is back on the schedule.' });
+                emitHealthDataChange();
+                await load();
+              } catch (e) {
+                toast({ variant: 'destructive', title: 'Could not undo', description: errorMessage(e, 'Please try again.') });
+              }
+            }}
+          >
+            Undo
+          </Button>
+        ),
+      });
       emitHealthDataChange();
       await load();
     } catch (error) {
