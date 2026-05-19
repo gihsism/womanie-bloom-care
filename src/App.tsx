@@ -124,7 +124,7 @@ const App = () => (
                       sensible existing destinations instead of bouncing
                       the user to a 404. */}
                   <Route path="/dashboard/about" element={<Navigate to="/about" replace />} />
-                  <Route path="/dashboard/profile" element={<Navigate to="/onboarding/basic-info" replace />} />
+                  <Route path="/dashboard/profile" element={<Navigate to="/dashboard/settings" replace />} />
                   <Route path="/dashboard/terms" element={<Navigate to="/about" replace />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
