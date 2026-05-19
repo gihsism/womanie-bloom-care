@@ -177,6 +177,23 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-19 (session 51 — continuing 24h arc, +5 more)
+
+- **058e7b7** — GDPR /api/me/export now includes appointments and the
+  doctor notes flagged is_visible_to_patient. Internal-only doctor
+  notes stay with the doctor.
+- **7fa4481** — FindDoctor: Sort Select (Name / Highest rated / Most
+  experienced / Price low→high). Data already on every row from
+  /api/doctors/list (4590abe); just needed the sort path.
+- **d1e44a2** — /dashboard/profile redirects to /dashboard/settings
+  instead of /onboarding/basic-info. The wizard was wrong as a
+  "where do I edit my profile" destination once Settings absorbed
+  those fields.
+- **0f099a4** — Doctor overview stat tiles (Total Patients, Upcoming,
+  This Month, Pending Requests, Consultation) are clickable now and
+  route into the appropriate tabs. Quick-Actions row was already
+  navigable; the stats below it were not.
+
 ### 2026-05-19 (session 50 — 24h autonomous arc, +7 more)
 
 Alena re-extended to 24h after session 49. Seven more commits:
