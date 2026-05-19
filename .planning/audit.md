@@ -172,6 +172,20 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-19 (session 41)
+
+- **5697d11** — Doctor's patient view: finished the half-built Lab
+  Results tab. A previous session had added the tab trigger +
+  threaded `medicalData` through from `/api/doctors/patient`, but the
+  TabsContent block was never written — clicking the tab landed on
+  empty space. New `LabResultsView` subcomponent renders a Flagged
+  section sorted by status severity (critical → high / low / abnormal
+  → borderline) and recency, then an All Results card with everything
+  newest first. Each row shows status pill, value+unit, reference
+  range, date, and source document name. Search input filters by
+  title or notes; All Results caps at 200 with a hint to narrow with
+  search.
+
 ### 2026-05-14 (session 35)
 
 - **352ef2e** — `UpcomingAppointments` card on PatientDashboard. Patients
