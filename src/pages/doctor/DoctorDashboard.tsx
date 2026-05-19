@@ -634,7 +634,30 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
       const label = next === 'completed' ? 'Marked completed'
         : next === 'no_show' ? 'Marked no-show'
         : 'Reopened';
-      toast({ title: label, description: `${patientNameFor(apt.patient_id)} · ${new Date(apt.scheduled_at).toLocaleDateString()}` });
+      // After marking a visit completed, offer a one-click jump into the
+      // patient's chart with the notes form pre-opened and the title
+      // pre-filled with "Visit on <date>". Keeps the doctor's after-visit
+      // documentation flow tight: complete the row, write a quick note,
+      // done.
+      if (next === 'completed') {
+        const isoDate = apt.scheduled_at.split('T')[0];
+        const visitUrl = `/doctor/patient/${apt.patient_id}?addNote=visit&date=${isoDate}`;
+        toast({
+          title: label,
+          description: `${patientNameFor(apt.patient_id)} · ${new Date(apt.scheduled_at).toLocaleDateString()}`,
+          action: (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => navigate(visitUrl)}
+            >
+              Add visit note
+            </Button>
+          ),
+        });
+      } else {
+        toast({ title: label, description: `${patientNameFor(apt.patient_id)} · ${new Date(apt.scheduled_at).toLocaleDateString()}` });
+      }
       onChange();
     } catch (e) {
       console.error('Failed to update appointment status:', e);

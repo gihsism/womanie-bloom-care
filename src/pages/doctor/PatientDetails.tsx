@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -92,6 +92,7 @@ const PatientDetails = () => {
   const navigate = useNavigate();
   usePageTitle('Patient Details');
   const { patientId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const { hasRole, loading } = useRequireRole('doctor', '/auth/doctor-login');
   const { user } = useAuth();
@@ -114,6 +115,32 @@ const PatientDetails = () => {
     note_type: 'observation',
     is_visible_to_patient: true,
   });
+  const [activeTab, setActiveTab] = useState<string>('overview');
+
+  // Deep-link support: arriving at /doctor/patient/:id?addNote=visit&date=2026-05-19
+  // opens the Notes tab with the note form already expanded and the
+  // title pre-filled. Doctors hit this from the "Add visit note" action
+  // after marking an appointment completed on the DoctorDashboard.
+  useEffect(() => {
+    const intent = searchParams.get('addNote');
+    if (!intent) return;
+    const dateParam = searchParams.get('date');
+    const visitDate = dateParam ? new Date(dateParam) : new Date();
+    const prettyDate = isNaN(visitDate.getTime())
+      ? new Date().toLocaleDateString()
+      : visitDate.toLocaleDateString();
+    setActiveTab('notes');
+    setShowNoteForm(true);
+    setNewNote(n => ({
+      ...n,
+      title: intent === 'visit' ? `Visit on ${prettyDate}` : n.title,
+      note_type: intent === 'visit' ? 'observation' : n.note_type,
+    }));
+    // Strip the query so a refresh doesn't re-trigger.
+    searchParams.delete('addNote');
+    searchParams.delete('date');
+    setSearchParams(searchParams, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   // Inline edit state for an existing note. Only one note is editable at
   // a time; the form replaces the read-only display for that row.
@@ -337,7 +364,7 @@ const PatientDetails = () => {
 
       {/* Main Content */}
       <div className="p-4 md:p-6 max-w-7xl mx-auto">
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid grid-cols-5 lg:w-[600px]">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="health">Health Data</TabsTrigger>
