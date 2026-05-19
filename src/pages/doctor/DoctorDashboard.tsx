@@ -893,7 +893,23 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
     loadSchedule();
   }, [doctorId]);
 
+  // Identify any active day whose end_time isn't strictly after start_time.
+  // A 0- or negative-length window would otherwise sit in the schedule
+  // table and silently produce zero bookable slots for that day.
+  const invalidDays = Object.entries(schedule)
+    .filter(([, s]) => s.active && s.start >= s.end)
+    .map(([day]) => Number(day));
+
   const handleSaveSchedule = async () => {
+    if (invalidDays.length > 0) {
+      const dayList = invalidDays.map((d) => days[d]).join(', ');
+      toast({
+        variant: 'destructive',
+        title: 'Fix the highlighted days',
+        description: `End time must be after start time on ${dayList}.`,
+      });
+      return;
+    }
     setIsSaving(true);
     try {
       // Delete existing schedule
@@ -940,44 +956,55 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
 
   return (
     <div className="space-y-3">
-      {days.map((dayName, index) => (
-        <div key={index} className="flex items-center gap-4 p-3 border rounded-lg">
-          <button
-            onClick={() => toggleDay(index)}
-            className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
-              schedule[index].active 
-                ? 'bg-secondary border-secondary text-secondary-foreground' 
-                : 'border-muted-foreground'
+      {days.map((dayName, index) => {
+        const invalid = invalidDays.includes(index);
+        return (
+          <div
+            key={index}
+            className={`flex items-center gap-4 p-3 border rounded-lg ${
+              invalid ? 'border-destructive bg-destructive/5' : ''
             }`}
           >
-            {schedule[index].active && <CheckCircle className="h-4 w-4" />}
-          </button>
-          <span className="w-24 font-medium">{dayName}</span>
-          {schedule[index].active ? (
-            <div className="flex items-center gap-2">
-              <input
-                type="time"
-                value={schedule[index].start}
-                onChange={(e) => updateTime(index, 'start', e.target.value)}
-                className="px-3 py-1 border rounded bg-background"
-              />
-              <span className="text-muted-foreground">to</span>
-              <input
-                type="time"
-                value={schedule[index].end}
-                onChange={(e) => updateTime(index, 'end', e.target.value)}
-                className="px-3 py-1 border rounded bg-background"
-              />
-            </div>
-          ) : (
-            <span className="text-muted-foreground">Unavailable</span>
-          )}
-        </div>
-      ))}
+            <button
+              onClick={() => toggleDay(index)}
+              className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
+                schedule[index].active
+                  ? 'bg-secondary border-secondary text-secondary-foreground'
+                  : 'border-muted-foreground'
+              }`}
+            >
+              {schedule[index].active && <CheckCircle className="h-4 w-4" />}
+            </button>
+            <span className="w-24 font-medium">{dayName}</span>
+            {schedule[index].active ? (
+              <div className="flex items-center gap-2 flex-1">
+                <input
+                  type="time"
+                  value={schedule[index].start}
+                  onChange={(e) => updateTime(index, 'start', e.target.value)}
+                  className={`px-3 py-1 border rounded bg-background ${invalid ? 'border-destructive' : ''}`}
+                />
+                <span className="text-muted-foreground">to</span>
+                <input
+                  type="time"
+                  value={schedule[index].end}
+                  onChange={(e) => updateTime(index, 'end', e.target.value)}
+                  className={`px-3 py-1 border rounded bg-background ${invalid ? 'border-destructive' : ''}`}
+                />
+                {invalid && (
+                  <span className="text-xs text-destructive ml-2">End must be after start</span>
+                )}
+              </div>
+            ) : (
+              <span className="text-muted-foreground">Unavailable</span>
+            )}
+          </div>
+        );
+      })}
       <Button
         className="w-full mt-4 bg-secondary hover:bg-secondary/90"
         onClick={handleSaveSchedule}
-        disabled={isSaving}
+        disabled={isSaving || invalidDays.length > 0}
       >
         {isSaving ? (
           <>
