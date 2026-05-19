@@ -52,7 +52,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           WHERE user_id = c.patient_id
        ) u ON TRUE
        WHERE c.doctor_id = $1
-       ORDER BY c.created_at DESC`,
+       ORDER BY c.created_at DESC
+       LIMIT 500`,
       [doctor.id]
     );
 

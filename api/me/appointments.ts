@@ -61,7 +61,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
              FROM appointments a
              LEFT JOIN doctor_profiles p ON p.user_id = a.doctor_id
             WHERE a.patient_id = $1
-            ORDER BY a.scheduled_at DESC`,
+            ORDER BY a.scheduled_at DESC
+            LIMIT 200`,
           [user.id]
         );
 

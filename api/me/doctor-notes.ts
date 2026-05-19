@@ -38,7 +38,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
          LEFT JOIN doctor_profiles p ON p.user_id = n.doctor_id
         WHERE n.patient_id = $1
           AND n.is_visible_to_patient = TRUE
-        ORDER BY n.created_at DESC`,
+        ORDER BY n.created_at DESC
+        LIMIT 200`,
       [user.id]
     );
     return res.status(200).json({ notes: rows });
