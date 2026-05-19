@@ -177,6 +177,33 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-19 (session 50 — 24h autonomous arc, +7 more)
+
+Alena re-extended to 24h after session 49. Seven more commits:
+
+- **43752ef** — Extracted callAnthropicWithRetry into
+  api/_lib/anthropic.ts. summary/generate + summary/panel now use the
+  same 250ms → 1s → 4s backoff that analyze-document had since
+  session 13.
+- **7d4a8c2** — ai-doctor-chat: retry the initial Anthropic
+  connection on 5xx before opening the stream. 429 / 402 still
+  short-circuit. Once the stream opens it runs untouched.
+- **0de7681** — db client shim: replaced "Use Clerk for
+  authentication" error strings (leftover from the Clerk → JWT
+  migration) with pointers to the actual /api/auth/* endpoints.
+- **d8a51e5** — Health Statistics page now has a Download CSV button
+  that exports current_extracted_data with title / value / unit /
+  range / status / type / date / source document / notes as an
+  RFC-4180 CSV. Button hides itself when there are no lab results.
+- **fd1c027** — FindDoctor booking-success toast picked up a View
+  button that routes to /dashboard/appointments. Matches the
+  doctor-side "Add visit note" toast-action pattern.
+- **70caa5f** — Patient appointment cancel: removed the misleading
+  "this can't be undone" copy from the confirm dialog and added a
+  real Undo button on the toast that flips status back to
+  'scheduled'. Wired in both UpcomingAppointments (dashboard card)
+  and the full /dashboard/appointments page.
+
 ### 2026-05-19 (session 49 — continuing autonomous arc, +6 commits)
 
 Alena re-extended the autonomous mandate to 24h after session 47.
