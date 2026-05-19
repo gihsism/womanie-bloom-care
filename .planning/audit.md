@@ -177,6 +177,43 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-20 (session 52 — continuous, no scheduled breaks)
+
+Alena asked to drop the scheduled-wakeup pacing and work straight
+through. Four commits:
+
+- **c5ef9d6** — AI Doctor Chat export as markdown. Patients often want
+  to share a chat thread with their actual clinician; until now the
+  only way was a screenshot, losing the structure Claude usually
+  returns (headings, lists, bold). Download button next to Clear chat
+  writes a `text/markdown` blob with title + timestamp + model + a
+  medical-advice disclaimer up top, then each turn as `## You` / `##
+  Assistant` separated by horizontal rules. No new endpoint —
+  client-side from in-memory state.
+- **019f1be** — Doctor sees patient-initiated cancellations at the
+  top of /doctor/dashboard. Symmetric to the patient surface on
+  Notifications. `DoctorCancellationsBanner` filters appointments for
+  status='cancelled' within 7 days, excludes doctor-initiated rows
+  (the "Cancelled by doctor:" prefix), and sorts desc. Each row has
+  an × that localStorage-dismisses (per-user). Hides itself when
+  there's nothing recent.
+- **6087bf5** — Doctor profile editor on the Settings tab. Until now
+  bio / specialty / years_experience / languages were settable only
+  at signup — after that the profile was frozen even though those
+  fields are exactly what patients see on FindDoctor. New form
+  reads + writes doctor_profiles directly (user_id ownership lets
+  /api/db handle it; no new endpoint). Validates years 0–80 before
+  the round-trip; empty inputs land as null so card "if (value)"
+  guards still hide unset fields.
+- **6045f44** — Avatar upload extends the profile editor. PUTs to
+  /api/upload with a `<userId>/avatar-<uuid>.<ext>` pathname (passes
+  the existing session-scoped check), validates JPG/PNG/WebP + 5 MB
+  cap client-side, persists avatar_url to doctor_profiles
+  immediately on success (independent of the Save button below) so a
+  mid-edit refresh keeps the new photo. Remove button confirm-
+  prompts and nulls the column. FindDoctor picks up the new image
+  via the existing avatar_url render — no client change there.
+
 ### 2026-05-19 (session 51 — continuing 24h arc, +5 more)
 
 - **058e7b7** — GDPR /api/me/export now includes appointments and the
