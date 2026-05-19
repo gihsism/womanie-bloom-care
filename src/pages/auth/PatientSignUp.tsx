@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { scorePassword } from '@/lib/password-strength';
 
 const PatientSignUp = () => {
   usePageTitle('Sign Up');
@@ -20,41 +21,7 @@ const PatientSignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Heuristic strength meter — counts character classes + length.
-  // Not a security control: the server still enforces ≥8 chars. The
-  // signal is for the user, so they pick a password they won't curse
-  // us for later.
-  const strength = (() => {
-    if (!password) return { score: 0, label: '', color: '', hint: '' };
-    if (password.length < 8) {
-      return {
-        score: 1,
-        label: 'Too short',
-        color: 'bg-destructive',
-        hint: `${8 - password.length} more character${8 - password.length === 1 ? '' : 's'} needed.`,
-      };
-    }
-    const classes =
-      (/[a-z]/.test(password) ? 1 : 0) +
-      (/[A-Z]/.test(password) ? 1 : 0) +
-      (/\d/.test(password) ? 1 : 0) +
-      (/[^A-Za-z0-9]/.test(password) ? 1 : 0);
-    if (password.length >= 14 && classes >= 4) {
-      return { score: 5, label: 'Strong', color: 'bg-emerald-500', hint: 'Great password.' };
-    }
-    if (password.length >= 12 && classes >= 3) {
-      return { score: 4, label: 'Good', color: 'bg-green-500', hint: 'Solid — a symbol would push it to strong.' };
-    }
-    if (classes >= 2) {
-      return { score: 3, label: 'Fair', color: 'bg-yellow-500', hint: 'Add more length or a symbol to strengthen it.' };
-    }
-    return {
-      score: 2,
-      label: 'Weak',
-      color: 'bg-orange-500',
-      hint: 'Mix uppercase, digits, or a symbol to strengthen.',
-    };
-  })();
+  const strength = scorePassword(password);
 
   useEffect(() => {
     if (!loading && user) navigate('/welcome', { replace: true });

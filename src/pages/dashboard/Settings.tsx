@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Pill, Shield, Bell, User, Download, Loader2, Trash2, Wand2, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { scorePassword } from '@/lib/password-strength';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -535,7 +536,31 @@ const Settings = () => {
                     minLength={8}
                     required
                   />
-                  <p className="text-[11px] text-muted-foreground">At least 8 characters.</p>
+                  {newPassword ? (
+                    (() => {
+                      const s = scorePassword(newPassword);
+                      return (
+                        <div className="space-y-1">
+                          <div className="flex gap-1" aria-hidden="true">
+                            {[1, 2, 3, 4, 5].map((tick) => (
+                              <div
+                                key={tick}
+                                className={`h-1 flex-1 rounded-full ${
+                                  tick <= s.score ? s.color : 'bg-muted'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <p className="text-[11px] flex items-center justify-between" role="status">
+                            <span className="font-medium">{s.label}</span>
+                            <span className="text-muted-foreground">{s.hint}</span>
+                          </p>
+                        </div>
+                      );
+                    })()
+                  ) : (
+                    <p className="text-[11px] text-muted-foreground">At least 8 characters.</p>
+                  )}
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="confirm-password">Confirm new password</Label>
