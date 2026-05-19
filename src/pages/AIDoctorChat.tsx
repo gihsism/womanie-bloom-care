@@ -458,6 +458,47 @@ export default function AIDoctorChat() {
     } catch { /* ignore */ }
   };
 
+  // Export the current conversation as a markdown file. Patients often
+  // want to share what the AI said with their actual doctor — until now
+  // the only way was a screenshot. Markdown survives copy-paste into
+  // Notes / Gmail / a clinic portal without losing the structure of
+  // headings + lists Claude usually returns.
+  const exportChat = () => {
+    const real = messages.filter(m => m !== WELCOME_MESSAGE && m.content?.trim());
+    if (real.length === 0) {
+      toast({ title: 'Nothing to export', description: 'Send a message first.' });
+      return;
+    }
+    const stamp = new Date();
+    const header = [
+      `# Womanie AI Doctor Chat`,
+      ``,
+      `Exported: ${stamp.toLocaleString()}`,
+      `Model: ${selectedModel}`,
+      ``,
+      `> This conversation is for reference only. The AI assistant on Womanie is not a substitute for medical advice from a licensed clinician.`,
+      ``,
+      `---`,
+      ``,
+    ].join('\n');
+    const body = real
+      .map(m => {
+        const role = m.role === 'user' ? '## You' : '## Assistant';
+        return `${role}\n\n${m.content.trim()}\n`;
+      })
+      .join('\n---\n\n');
+    const blob = new Blob([header + body], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `womanie-chat-${stamp.toISOString().split('T')[0]}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast({ title: 'Chat exported', description: 'Saved a markdown file — open it anywhere or share with your doctor.' });
+  };
+
   // Suggested starter prompts. When we have no medical context at all
   // (no profile data, no docs analyzed yet) the regular prompts are
   // pointless — the assistant would just say "I don't have anything
@@ -550,6 +591,9 @@ export default function AIDoctorChat() {
                   ))}
                 </SelectContent>
               </Select>
+              <Button variant="ghost" size="icon" onClick={exportChat} title="Export chat as markdown">
+                <Download className="h-4 w-4" />
+              </Button>
               <Button variant="ghost" size="icon" onClick={clearChat} title="Clear chat">
                 <Trash2 className="h-4 w-4" />
               </Button>
