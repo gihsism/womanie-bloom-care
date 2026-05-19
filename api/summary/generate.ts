@@ -3,6 +3,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from '../_lib/auth.js';
 import { checkAndConsume } from '../_lib/ratelimit.js';
 import { withSentry } from '../_lib/sentry.js';
+import { callAnthropicWithRetry } from '../_lib/anthropic.js';
 
 // On-demand narrative summary across the patient's documents.
 //
@@ -49,27 +50,15 @@ End with a one-line sign-off reminding her Womanie is not a replacement for a cl
 Do not invent numbers. If something isn't in the data, don't mention it.`;
 
 async function callClaude(apiKey: string, userContent: string): Promise<string> {
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 2000,
-      system: [
-        { type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } },
-      ],
-      messages: [{ role: 'user', content: userContent }],
-      temperature: 0.4,
-    }),
+  const resp = await callAnthropicWithRetry(apiKey, {
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 2000,
+    system: [
+      { type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } },
+    ],
+    messages: [{ role: 'user', content: userContent }],
+    temperature: 0.4,
   });
-  if (!resp.ok) {
-    const body = await resp.text().catch(() => '');
-    throw new Error(`Anthropic ${resp.status}: ${body.slice(0, 200)}`);
-  }
   const data = await resp.json();
   const text: string | undefined = data.content?.[0]?.text;
   if (!text) throw new Error('Empty Claude response');

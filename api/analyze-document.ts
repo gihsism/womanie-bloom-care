@@ -5,6 +5,7 @@ import { normalizeTestTitle } from './_lib/normalize-test-title.js';
 import { normalizeUnit } from './_lib/normalize-unit.js';
 import { checkAndConsume } from './_lib/ratelimit.js';
 import { withSentry } from './_lib/sentry.js';
+import { callAnthropicWithRetry } from './_lib/anthropic.js';
 
 // Allow longer execution for AI analysis. Claude PDF analysis on a full
 // lab panel with max_tokens: 8000 plus the per-result INSERTs routinely
@@ -63,32 +64,8 @@ function tryParseAnalysisJson(raw: string): Record<string, unknown> | null {
   }
 }
 
-// Call Anthropic with bounded exponential backoff on 5xx/429. Returns the
-// successful Response. Throws on persistent failure or any 4xx-except-429.
-async function callAnthropicWithRetry(apiKey: string, body: unknown): Promise<Response> {
-  const delays = [250, 1000, 4000];
-  let lastErr: unknown;
-  for (let attempt = 0; attempt <= delays.length; attempt++) {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-    if (resp.ok) return resp;
-    const status = resp.status;
-    const transient = status >= 500 || status === 429;
-    const errText = await resp.text().catch(() => '');
-    console.error(`Anthropic error (attempt ${attempt + 1}):`, status, errText.slice(0, 300));
-    lastErr = new Error(`AI analysis failed: ${status}`);
-    if (!transient || attempt === delays.length) throw lastErr;
-    await new Promise(r => setTimeout(r, delays[attempt]));
-  }
-  throw lastErr ?? new Error('AI analysis failed');
-}
+// callAnthropicWithRetry now lives in api/_lib/anthropic.ts so the
+// summary/* endpoints can reuse the same retry semantics.
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
