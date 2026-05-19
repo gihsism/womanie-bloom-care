@@ -34,6 +34,7 @@ import GettingStarted from '@/components/dashboard/GettingStarted';
 import UpcomingAppointments from '@/components/dashboard/UpcomingAppointments';
 import DoctorNotesCard from '@/components/dashboard/DoctorNotesCard';
 import AppointmentTodayBanner from '@/components/dashboard/AppointmentTodayBanner';
+import ModeHeroStat from '@/components/dashboard/ModeHeroStat';
 import OverdueTests from '@/components/dashboard/OverdueTests';
 import SymptomPatternsCard from '@/components/dashboard/SymptomPatternsCard';
 import FertileWindowTimingCard from '@/components/dashboard/FertileWindowTimingCard';
@@ -524,6 +525,20 @@ const PatientDashboard = () => {
                 invisible once Alena (or any established user) is past
                 onboarding. */}
             <GettingStarted />
+
+            {/* Mode-specific "today at a glance" hero — surfaces the one
+                most important fact for your current life stage right at
+                the top, instead of scattering it across cards below
+                (cycle day, pill streak, week of pregnancy, etc.). */}
+            {selectedMode && (
+              <ModeHeroStat
+                selectedMode={selectedMode}
+                periodData={periodData}
+                pregnancyDueDate={pregnancyDueDate}
+                ivfStartDate={ivfStartDate}
+                ivfPhase={ivfPhase}
+              />
+            )}
 
             {/* Day-of reminder banner — appears above the upcoming card
                 only when there's an appointment scheduled for today.
