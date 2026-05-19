@@ -184,7 +184,7 @@ No-show but had no way to say "I can't make this one." If something
 came up the doctor would either cancel via a backend call or just
 ghost — both leave the patient guessing.
 
-Code landed across two commits whose titles don't fully describe it
+Code landed across three commits whose titles don't fully describe it
 (cross-session interleave), but the working flow is:
 
 - **800e596** (in addition to its stated patient-side chip filter)
@@ -202,6 +202,16 @@ Code landed across two commits whose titles don't fully describe it
   the consultation type with the doctor's exact reason. Patient-
   initiated cancellations (no prefix) render nothing extra, so the
   hint only appears when there's something to say.
+- **6e0dc69** (in addition to its stated cycle/IVF emit work) added
+  the Notifications-page surface + bell-badge count. `useAttentionCount`
+  switched to the full appointments fetch and derives both upcoming +
+  `recentDoctorCancellations` (14-day window, prefix-filtered) from
+  one round-trip; the new count rolls into the bell-icon total.
+  Notifications page picks up a destructive-tinted card listing each
+  cancellation with doctor name, time, reason in italics, and a
+  one-click "Rebook" button that jumps to FindDoctor. Patient-
+  initiated cancellations are silent (no badge increment, no card)
+  because the patient already knows about their own cancellations.
 
 ### 2026-05-19 (session 47 — closing wave)
 
