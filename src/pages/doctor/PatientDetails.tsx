@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import ReactMarkdown from 'react-markdown';
 import { useRequireRole } from '@/hooks/useRequireRole';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
@@ -53,6 +54,7 @@ interface HealthDocument {
   file_path: string;
   document_type: string;
   ai_summary: string | null;
+  ai_suggested_name: string | null;
   uploaded_at: string | null;
 }
 
@@ -514,39 +516,43 @@ const PatientDetails = () => {
                 {documents.length > 0 ? (
                   <div className="space-y-4">
                     {documents.map((doc) => (
-                      <div key={doc.id} className="flex items-start justify-between border rounded-lg p-4">
-                        <div className="flex items-start gap-3">
-                          <div className="bg-muted p-2 rounded">
-                            <FileText className="h-5 w-5" />
+                      <div key={doc.id} className="border rounded-lg p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start gap-3 flex-1 min-w-0">
+                            <div className="bg-muted p-2 rounded">
+                              <FileText className="h-5 w-5" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate">{doc.ai_suggested_name || doc.file_name}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {doc.document_type} • {doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString() : 'Unknown date'}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-medium">{doc.file_name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {doc.document_type} • {doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString() : 'Unknown date'}
-                            </p>
-                            {doc.ai_summary && (
-                              <p className="text-sm mt-2 text-muted-foreground">{doc.ai_summary}</p>
-                            )}
-                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              // health_documents.file_path is a Vercel Blob URL
+                              // (see /api/me/export.ts notes). Opens directly —
+                              // the old Supabase createSignedUrl path was dead
+                              // code post-migration and silently failed.
+                              if (!doc.file_path) {
+                                toast({ variant: 'destructive', title: 'Error', description: 'No file URL on this document.' });
+                                return;
+                              }
+                              window.open(doc.file_path, '_blank', 'noopener,noreferrer');
+                            }}
+                          >
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            View
+                          </Button>
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            // health_documents.file_path is a Vercel Blob URL
-                            // (see /api/me/export.ts notes). Opens directly —
-                            // the old Supabase createSignedUrl path was dead
-                            // code post-migration and silently failed.
-                            if (!doc.file_path) {
-                              toast({ variant: 'destructive', title: 'Error', description: 'No file URL on this document.' });
-                              return;
-                            }
-                            window.open(doc.file_path, '_blank', 'noopener,noreferrer');
-                          }}
-                        >
-                          <ExternalLink className="h-4 w-4 mr-2" />
-                          View
-                        </Button>
+                        {doc.ai_summary && (
+                          <div className="mt-3 pt-3 border-t prose prose-sm max-w-none dark:prose-invert text-sm">
+                            <ReactMarkdown>{doc.ai_summary}</ReactMarkdown>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
