@@ -177,6 +177,44 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-19 (session 45 — continuing autonomous arc, +8 commits)
+
+Continuation of session 43. Eight more commits, all pushed:
+
+- **a1744c9** — Doctor's overview added a "This Month" stat tile —
+  completed-visit count for the calendar month, with a quiet no-show
+  number appended when > 0. Computed from the already-loaded
+  appointments[]; no extra query.
+- **cd8990e** — Doctor's Lab Results: All Results section swapped flat
+  list for a By Panel grouping. api/doctors/patient now returns
+  raw_data so the panel field surfaces; groups sorted by row count,
+  "Other" last, 30-row cap per group with a "+ N more" hint.
+- **baf3a68** — Client-side AI doctor chat context picked up upcoming
+  appointments + visible doctor notes (intent was right but doesn't
+  reach Claude — see b9fb27f follow-up).
+- **b9fb27f** — Server-side fix-up: api/ai-doctor-chat now joins
+  appointments + doctor_profiles for upcoming visits and doctor_notes
+  for visible notes, surfacing them in the system prompt under
+  "## Upcoming Appointments" and "## Doctor Notes (visible to
+  patient)". Claude can finally answer "what should I bring on
+  Tuesday?" with grounded context.
+- **062db3e** — Print Health Record now includes the visible doctor
+  notes (up to 10) between Flagged Findings and Documents. A patient
+  walking a printout into a second-opinion visit no longer hides
+  everything their first doctor told them.
+- **4590abe** — FindDoctor cards surface title (Dr / Prof / MD), years
+  of experience, rating + review count, languages, and additional
+  specialties. /api/doctors/list already returned all of this; the UI
+  just wasn't using it.
+- **4823b70** — FindDoctor search now also matches languages and
+  secondary specialties so "german" / "PCOS" / "thyroid" return
+  doctors who fit. Empty query short-circuits.
+- **d44c510** — Sidebar leads with My Profile / Appointments /
+  Notifications / Settings. Appointments entry carries a primary-
+  tinted pill showing the count of upcoming consultations. Added
+  upcomingAppointments to useAttentionCount but kept it out of the
+  bell total — upcoming visits are informational, not attention.
+
 ### 2026-05-19 (session 44 — dashboard per-mode polish)
 
 Alena asked "can you improve dashboard? for different types" — four
