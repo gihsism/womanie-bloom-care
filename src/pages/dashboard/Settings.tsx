@@ -84,6 +84,58 @@ const Settings = () => {
   const [showPasswords, setShowPasswords] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
 
+  // Personal info parked in localStorage by onboarding (commitOnboarding
+  // in src/lib/onboarding-commit.ts) because profiles doesn't yet have
+  // columns for DOB / height / weight / blood type. Editing it here
+  // keeps callers on the same key so the data is visible end-to-end
+  // until the schema lands.
+  const basicInfoKey = user ? `womanie_basic_info_${user.id}` : null;
+  const [basicInfo, setBasicInfo] = useState<{
+    dateOfBirth: string | null;
+    heightCm: number | null;
+    weightKg: number | null;
+    bloodType: string | null;
+  }>({ dateOfBirth: null, heightCm: null, weightKg: null, bloodType: null });
+
+  useEffect(() => {
+    if (!basicInfoKey) return;
+    try {
+      const raw = localStorage.getItem(basicInfoKey);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        setBasicInfo({
+          dateOfBirth: parsed.dateOfBirth ?? null,
+          heightCm: typeof parsed.heightCm === 'number' ? parsed.heightCm : null,
+          weightKg: typeof parsed.weightKg === 'number' ? parsed.weightKg : null,
+          bloodType: parsed.bloodType ?? null,
+        });
+      }
+    } catch {
+      // Corrupt JSON — leave fields empty.
+    }
+  }, [basicInfoKey]);
+
+  const saveBasicInfo = (next: typeof basicInfo) => {
+    setBasicInfo(next);
+    if (!basicInfoKey) return;
+    try {
+      localStorage.setItem(basicInfoKey, JSON.stringify(next));
+    } catch {
+      // Quota / private mode — silently ignore.
+    }
+  };
+
+  const ageFromDob = (dob: string | null): number | null => {
+    if (!dob) return null;
+    const d = new Date(dob);
+    if (Number.isNaN(d.getTime())) return null;
+    const now = new Date();
+    let age = now.getFullYear() - d.getFullYear();
+    const m = now.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+    return age >= 0 && age <= 130 ? age : null;
+  };
+
   const resetPasswordForm = () => {
     setCurrentPassword('');
     setNewPassword('');
@@ -433,6 +485,111 @@ const Settings = () => {
                   : '—'}
               </span>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Personal info — DOB / height / weight / blood type. Lives in
+            localStorage scoped by user.id until the profiles schema gets
+            dedicated columns. Onboarding writes the same key, so this is
+            the place to view + edit what you entered then. */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Personal info
+            </CardTitle>
+            <CardDescription>
+              These show up in your health summary and help personalize insights. Stored on this device for now.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="dob">Date of birth</Label>
+                <Input
+                  id="dob"
+                  type="date"
+                  value={basicInfo.dateOfBirth ?? ''}
+                  onChange={(e) =>
+                    saveBasicInfo({ ...basicInfo, dateOfBirth: e.target.value || null })
+                  }
+                />
+                {ageFromDob(basicInfo.dateOfBirth) !== null && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Age {ageFromDob(basicInfo.dateOfBirth)}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="blood-type">Blood type</Label>
+                <Select
+                  value={basicInfo.bloodType ?? ''}
+                  onValueChange={(v) =>
+                    saveBasicInfo({ ...basicInfo, bloodType: v === 'unknown' ? null : v })
+                  }
+                >
+                  <SelectTrigger id="blood-type">
+                    <SelectValue placeholder="Not specified" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="A+">A+</SelectItem>
+                    <SelectItem value="A-">A−</SelectItem>
+                    <SelectItem value="B+">B+</SelectItem>
+                    <SelectItem value="B-">B−</SelectItem>
+                    <SelectItem value="AB+">AB+</SelectItem>
+                    <SelectItem value="AB-">AB−</SelectItem>
+                    <SelectItem value="O+">O+</SelectItem>
+                    <SelectItem value="O-">O−</SelectItem>
+                    <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                    <SelectItem value="unknown">Clear</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="height">Height (cm)</Label>
+                <Input
+                  id="height"
+                  type="number"
+                  inputMode="decimal"
+                  min={50}
+                  max={250}
+                  value={basicInfo.heightCm ?? ''}
+                  onChange={(e) => {
+                    const n = parseFloat(e.target.value);
+                    saveBasicInfo({
+                      ...basicInfo,
+                      heightCm: Number.isFinite(n) ? n : null,
+                    });
+                  }}
+                  placeholder="e.g. 165"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="weight">Weight (kg)</Label>
+                <Input
+                  id="weight"
+                  type="number"
+                  inputMode="decimal"
+                  min={20}
+                  max={300}
+                  step={0.1}
+                  value={basicInfo.weightKg ?? ''}
+                  onChange={(e) => {
+                    const n = parseFloat(e.target.value);
+                    saveBasicInfo({
+                      ...basicInfo,
+                      weightKg: Number.isFinite(n) ? n : null,
+                    });
+                  }}
+                  placeholder="e.g. 62"
+                />
+              </div>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              These fields autosave as you change them.
+            </p>
           </CardContent>
         </Card>
 
