@@ -172,6 +172,16 @@ const DoctorDashboard = () => {
 
   const approvedPatients = patients.filter(p => p.status === 'approved');
 
+  // Calendar-month visit counts for the overview stat cards. Computed
+  // from the already-loaded appointments[] so no extra query.
+  const monthStart = (() => {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+  })();
+  const thisMonthApts = appointments.filter(a => Date.parse(a.scheduled_at) >= monthStart);
+  const completedThisMonth = thisMonthApts.filter(a => a.status === 'completed').length;
+  const noShowThisMonth = thisMonthApts.filter(a => a.status === 'no_show').length;
+
   // patient_id → friendly name (or UUID short-id fallback). Used by every
   // appointment list so we don't have to repeat the lookup.
   const patientNameFor = (patientId: string): string => {
@@ -290,7 +300,7 @@ const DoctorDashboard = () => {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
@@ -310,6 +320,20 @@ const DoctorDashboard = () => {
                 <CardContent>
                   <div className="text-2xl font-bold">{upcomingAppointments.length}</div>
                   <p className="text-xs text-muted-foreground">Scheduled appointments</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">This Month</CardTitle>
+                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{completedThisMonth}</div>
+                  <p className="text-xs text-muted-foreground">
+                    completed
+                    {noShowThisMonth > 0 && ` · ${noShowThisMonth} no-show${noShowThisMonth === 1 ? '' : 's'}`}
+                  </p>
                 </CardContent>
               </Card>
 
