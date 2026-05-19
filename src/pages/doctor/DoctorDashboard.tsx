@@ -406,7 +406,12 @@ const DoctorDashboard = () => {
                 {upcomingAppointments.length > 0 ? (
                   <div className="space-y-4">
                     {upcomingAppointments.slice(0, 5).map((apt) => (
-                      <div key={apt.id} className="flex items-center justify-between border-b pb-4 last:border-0">
+                      <button
+                        key={apt.id}
+                        type="button"
+                        onClick={() => navigate(`/doctor/patient/${apt.patient_id}`)}
+                        className="flex w-full items-center justify-between border-b pb-4 last:border-0 text-left hover:bg-muted/40 -mx-2 px-2 py-1 rounded transition-colors"
+                      >
                         <div className="flex items-center gap-3">
                           <div className="bg-primary/10 p-2 rounded-full">
                             <Calendar className="h-4 w-4 text-primary" />
@@ -422,7 +427,7 @@ const DoctorDashboard = () => {
                         <Badge variant={apt.consultation_type === 'video' ? 'default' : 'outline'}>
                           {apt.consultation_type || 'consultation'}
                         </Badge>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 ) : (

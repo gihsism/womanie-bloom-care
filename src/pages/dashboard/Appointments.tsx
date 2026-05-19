@@ -38,11 +38,22 @@ interface AppointmentRow {
   consultation_type: string | null;
   duration: number | null;
   payment_status: string | null;
+  notes: string | null;
   doctor_name: string | null;
   doctor_title: string | null;
   doctor_specialties: string[] | null;
   doctor_avatar_url: string | null;
   doctor_verified: boolean | null;
+}
+
+// Extracts the doctor's reason out of the notes field on doctor-
+// cancelled appointments. The doctor cancel flow stamps notes with
+// "Cancelled by doctor: <reason>" — anything else (or a missing prefix)
+// returns null so we don't render an empty hint.
+function doctorCancelReason(notes: string | null): string | null {
+  if (!notes) return null;
+  const m = notes.match(/^Cancelled by doctor:\s*(.+)$/i);
+  return m ? m[1].trim() : null;
 }
 
 function relativeDay(d: Date): string {
@@ -223,6 +234,15 @@ const Appointments = () => {
             {isVideo ? <Video className="h-3 w-3" /> : <MapPin className="h-3 w-3" />}
             {isVideo ? 'Video consultation' : 'In-person'}
           </p>
+          {isCancelled && (() => {
+            const reason = doctorCancelReason(apt.notes);
+            if (!reason) return null;
+            return (
+              <p className="text-[11px] mt-1.5 px-2 py-1 rounded bg-destructive/5 border border-destructive/20 text-destructive">
+                <span className="font-medium">Cancelled by doctor:</span> {reason}
+              </p>
+            );
+          })()}
         </div>
         {kind === 'upcoming' && !isCancelled && (
           <div className="flex flex-col gap-1">
