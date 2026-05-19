@@ -50,7 +50,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       ? lastMsg.content
       : null;
 
-  const [docs, extracted, profileRow] = await Promise.all([
+  const [docs, extracted, profileRow, upcomingApts, visibleNotes] = await Promise.all([
     sql.query(
       `SELECT file_name, ai_suggested_name, ai_summary, ai_suggested_category, document_type
        FROM health_documents WHERE user_id = $1 ORDER BY uploaded_at DESC LIMIT 20`,
@@ -62,6 +62,28 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       [user.id]
     ),
     sql.query('SELECT full_name, life_stage FROM profiles WHERE id = $1', [user.id]),
+    sql.query(
+      `SELECT a.scheduled_at, a.consultation_type, a.duration,
+              p.full_name AS doctor_name, p.title AS doctor_title, p.specialties AS doctor_specialties
+         FROM appointments a
+         LEFT JOIN doctor_profiles p ON p.user_id = a.doctor_id
+        WHERE a.patient_id = $1
+          AND a.scheduled_at >= NOW()
+          AND COALESCE(a.status, 'scheduled') <> 'cancelled'
+        ORDER BY a.scheduled_at ASC
+        LIMIT 5`,
+      [user.id]
+    ),
+    sql.query(
+      `SELECT n.title, n.content, n.note_type, n.created_at,
+              p.full_name AS doctor_name, p.title AS doctor_title
+         FROM doctor_notes n
+         LEFT JOIN doctor_profiles p ON p.user_id = n.doctor_id
+        WHERE n.patient_id = $1 AND n.is_visible_to_patient = TRUE
+        ORDER BY n.created_at DESC
+        LIMIT 5`,
+      [user.id]
+    ),
   ]);
 
   const profile = profileRow[0];
@@ -102,6 +124,25 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         medicalContext += line + '\n';
       }
     }
+  }
+
+  if (upcomingApts.length > 0) {
+    medicalContext += '\n## Upcoming Appointments\n';
+    (upcomingApts as Row[]).forEach((a) => {
+      const doctorLabel = [a.doctor_title, a.doctor_name].filter(Boolean).join(' ') || 'a doctor';
+      const specialties = Array.isArray(a.doctor_specialties) ? a.doctor_specialties as string[] : [];
+      const spec = specialties.length > 0 ? `, ${specialties[0]}` : '';
+      medicalContext += `- ${new Date(String(a.scheduled_at)).toISOString()} with ${doctorLabel}${spec} — ${a.consultation_type || 'consultation'}${a.duration ? `, ${a.duration} min` : ''}\n`;
+    });
+  }
+
+  if (visibleNotes.length > 0) {
+    medicalContext += '\n## Doctor Notes (visible to patient)\n';
+    (visibleNotes as Row[]).forEach((n) => {
+      const doctorLabel = [n.doctor_title, n.doctor_name].filter(Boolean).join(' ') || 'A doctor';
+      const created = new Date(String(n.created_at)).toLocaleDateString();
+      medicalContext += `- ${created} — ${doctorLabel} (${n.note_type || 'note'}): ${n.title}\n  ${String(n.content || '').replace(/\n/g, '\n  ')}\n`;
+    });
   }
 
   const systemPrompt = `You are an AI medical assistant for a women's health platform called Womanie. You have access to the patient's uploaded health documents and extracted medical data shown below. Use this information to provide personalized, empathetic health guidance.
