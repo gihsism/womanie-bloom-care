@@ -7,7 +7,8 @@ import { onHealthDataChange } from "@/lib/data-events";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FileText, Calendar, ArrowLeft, Activity, AlertTriangle, CheckCircle2, FlaskConical } from "lucide-react";
+import { FileText, Calendar, ArrowLeft, Activity, AlertTriangle, CheckCircle2, FlaskConical, Download } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 
@@ -27,13 +28,31 @@ interface ExtractedItem {
   raw_data: string | Record<string, unknown> | null;
 }
 
+// CSV cell encoding — wraps the value in quotes whenever it contains
+// a comma, quote, newline, or leading whitespace, and doubles internal
+// quotes. RFC 4180-shaped output that Excel and Sheets both accept.
+function csvCell(v: unknown): string {
+  if (v === null || v === undefined) return '';
+  const s = String(v);
+  if (/[",\n\r]|^\s/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+function buildCsv(rows: Array<Record<string, unknown>>, columns: Array<{ key: string; label: string }>): string {
+  const header = columns.map(c => csvCell(c.label)).join(',');
+  const body = rows.map(r => columns.map(c => csvCell(r[c.key])).join(',')).join('\n');
+  return `${header}\n${body}`;
+}
+
 export default function HealthStatistics() {
   const navigate = useNavigate();
   usePageTitle('Health Statistics');
   const { user, loading: authLoading } = useAuth();
+  const { toast } = useToast();
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
   const [extracted, setExtracted] = useState<ExtractedItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [downloadingCsv, setDownloadingCsv] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/auth/login');
@@ -94,7 +113,50 @@ export default function HealthStatistics() {
     return { analyzedDocs, labResults, critical, abnormal, normal, topPanels };
   }, [documents, extracted]);
 
-  useEffect(() => onHealthDataChange(fetchDocuments), [fetchDocuments]);
+  const downloadCsv = async () => {
+    if (!user) return;
+    setDownloadingCsv(true);
+    try {
+      const { data, error } = await db
+        .from('current_extracted_data')
+        .select('title, value, unit, reference_range, status, data_type, date_recorded, notes, document_id')
+        .eq('user_id', user.id)
+        .order('date_recorded', { ascending: false });
+      if (error) throw error;
+      const rows = (data ?? []) as Array<Record<string, unknown>>;
+      const docName = new Map(documents.map(d => [d.id, d.ai_suggested_name || d.file_name]));
+      const enriched = rows.map(r => ({
+        ...r,
+        document_name: docName.get(String(r.document_id ?? '')) ?? '',
+      }));
+      const csv = buildCsv(enriched, [
+        { key: 'title', label: 'Test' },
+        { key: 'value', label: 'Value' },
+        { key: 'unit', label: 'Unit' },
+        { key: 'reference_range', label: 'Reference range' },
+        { key: 'status', label: 'Status' },
+        { key: 'data_type', label: 'Type' },
+        { key: 'date_recorded', label: 'Date recorded' },
+        { key: 'document_name', label: 'Source document' },
+        { key: 'notes', label: 'Notes' },
+      ]);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `womanie-health-data-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast({ title: 'CSV downloaded', description: `${enriched.length} row${enriched.length === 1 ? '' : 's'} exported.` });
+    } catch (e) {
+      console.error('CSV download failed:', e);
+      toast({ variant: 'destructive', title: 'Download failed', description: 'Please try again.' });
+    } finally {
+      setDownloadingCsv(false);
+    }
+  };
 
   const getCategoryColor = (category: string | null) => {
     const colors: Record<string, string> = {
@@ -147,6 +209,19 @@ export default function HealthStatistics() {
           <h1 className="text-3xl font-bold mb-1">Health Statistics</h1>
           <p className="text-muted-foreground">AI-analyzed summaries of your health documents</p>
         </div>
+        {stats.labResults > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={downloadCsv}
+            disabled={downloadingCsv}
+            className="gap-2"
+            title="Download all your extracted lab values as a CSV"
+          >
+            <Download className="h-4 w-4" />
+            {downloadingCsv ? 'Preparing…' : 'Download CSV'}
+          </Button>
+        )}
         <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
           Womanie
         </a>
