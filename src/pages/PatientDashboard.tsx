@@ -340,11 +340,29 @@ const PatientDashboard = () => {
     };
   }, [periodData]);
 
-  // Context-aware quick links based on life stage
+  // Quick links — the doctor-search slot's label nudges users toward
+  // the right specialty for their life stage. The destination is the
+  // same FindDoctor page regardless; the label adjusts so a pregnant
+  // user sees "Find OB-GYN" instead of the generic "Find Doctor".
+  const doctorLink = (() => {
+    if (selectedMode === 'pregnancy') {
+      return { label: 'Find OB-GYN', description: 'Pregnancy specialists' };
+    }
+    if (selectedMode === 'conception' || selectedMode === 'ivf') {
+      return { label: 'Find fertility specialist', description: 'Conception & IVF' };
+    }
+    if (selectedMode === 'menopause' || selectedMode === 'post-menopause') {
+      return { label: 'Find menopause specialist', description: 'HRT, bone, heart' };
+    }
+    if (selectedMode === 'contraception') {
+      return { label: 'Find gynecologist', description: 'Birth control review' };
+    }
+    return { label: 'Find Doctor', description: 'Book consultation' };
+  })();
   const quickLinks = [
     { icon: MessageSquare, label: 'AI Doctor', description: 'Ask health questions', action: () => navigate('/dashboard/ai-doctor'), color: 'bg-primary/10 text-primary' },
     { icon: FileText, label: 'Health Records', description: 'Analysis & trends', action: () => navigate('/dashboard/medical-history'), color: 'bg-secondary/10 text-secondary' },
-    { icon: Activity, label: 'Find Doctor', description: 'Book consultation', action: () => navigate('/find-doctor'), color: 'bg-accent/10 text-accent' },
+    { icon: Activity, label: doctorLink.label, description: doctorLink.description, action: () => navigate('/find-doctor'), color: 'bg-accent/10 text-accent' },
     { icon: Settings, label: 'Settings', description: 'Preferences', action: () => navigate('/dashboard/settings'), color: 'bg-muted text-muted-foreground' },
   ];
 
