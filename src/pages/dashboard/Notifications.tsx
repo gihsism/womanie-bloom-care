@@ -9,6 +9,7 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import { onHealthDataChange } from '@/lib/data-events';
 import PendingConnections from '@/components/dashboard/PendingConnections';
 import ConnectedDoctors from '@/components/dashboard/ConnectedDoctors';
+import DoctorNotesCard from '@/components/dashboard/DoctorNotesCard';
 import { formatDistanceToNow } from 'date-fns';
 
 // Notifications / "needs your attention" page.
@@ -95,6 +96,8 @@ export default function Notifications() {
 
       <div className="px-4 py-6 max-w-3xl mx-auto space-y-6">
         <PendingConnections />
+
+        <DoctorNotesCard />
 
         {stalled.length > 0 && (
           <Card className="p-4 border-l-4 border-l-destructive">

@@ -4,21 +4,24 @@ import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
 
 // Count of "needs your attention" items across the app — matches the
-// three sections on /dashboard/notifications: pending doctor
-// connections, stalled analyses (upload > 3 min old + no ai_summary),
-// critical findings. Returns the raw numbers and the total so the
-// caller can decide how to render a badge.
+// sections on /dashboard/notifications: pending doctor connections,
+// stalled analyses (upload > 3 min old + no ai_summary), critical
+// findings, and recent doctor notes (written in the last 14 days).
+// Returns the raw numbers and the total so the caller can decide how
+// to render a badge.
 //
 // Subscribes to onHealthDataChange, so the number re-evaluates the
 // moment a new analysis lands, a doctor is approved, etc.
 
 const STALLED_THRESHOLD_MS = 3 * 60 * 1000;
+const RECENT_NOTE_WINDOW_MS = 14 * 24 * 60 * 60 * 1000;
 
 export interface AttentionCounts {
   total: number;
   pendingConnections: number;
   stalledDocuments: number;
   criticalFindings: number;
+  recentDoctorNotes: number;
 }
 
 const ZERO: AttentionCounts = {
@@ -26,6 +29,7 @@ const ZERO: AttentionCounts = {
   pendingConnections: 0,
   stalledDocuments: 0,
   criticalFindings: 0,
+  recentDoctorNotes: 0,
 };
 
 export function useAttentionCount(): AttentionCounts {
@@ -38,7 +42,7 @@ export function useAttentionCount(): AttentionCounts {
       return;
     }
     try {
-      const [pendingResp, docsRes, findingsRes] = await Promise.all([
+      const [pendingResp, docsRes, findingsRes, notesResp] = await Promise.all([
         fetch('/api/connections/pending').then(r => (r.ok ? r.json() : { pending: [] })),
         db.from('health_documents')
           .select('id, ai_summary, uploaded_at')
@@ -47,6 +51,7 @@ export function useAttentionCount(): AttentionCounts {
           .select('id')
           .eq('user_id', user.id)
           .eq('status', 'critical'),
+        fetch('/api/me/doctor-notes').then(r => (r.ok ? r.json() : { notes: [] })),
       ]);
 
       const pendingConnections = Array.isArray(pendingResp?.pending) ? pendingResp.pending.length : 0;
@@ -56,12 +61,20 @@ export function useAttentionCount(): AttentionCounts {
         d => !d.ai_summary && d.uploaded_at && Date.parse(d.uploaded_at) < threshold,
       ).length;
       const criticalFindings = Array.isArray(findingsRes.data) ? findingsRes.data.length : 0;
+      const noteCutoff = Date.now() - RECENT_NOTE_WINDOW_MS;
+      const notes = Array.isArray(notesResp?.notes)
+        ? notesResp.notes as Array<{ created_at: string | null }>
+        : [];
+      const recentDoctorNotes = notes.filter(
+        n => n.created_at && Date.parse(n.created_at) >= noteCutoff,
+      ).length;
 
       setCounts({
-        total: pendingConnections + stalledDocuments + criticalFindings,
+        total: pendingConnections + stalledDocuments + criticalFindings + recentDoctorNotes,
         pendingConnections,
         stalledDocuments,
         criticalFindings,
+        recentDoctorNotes,
       });
     } catch {
       // Silently keep last known counts — a badge is cosmetic.
