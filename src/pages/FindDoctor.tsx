@@ -20,10 +20,16 @@ interface Doctor {
   id: string;
   user_id: string;
   full_name: string;
+  title: string | null;
   specialty: string | null;
+  specialties: string[] | null;
   bio: string | null;
   avatar_url: string | null;
   is_verified: boolean;
+  years_experience: number | null;
+  languages: string[] | null;
+  rating: number | null;
+  review_count: number | null;
   consultation_settings?: {
     consultation_price: number | null;
     currency: string;
@@ -330,16 +336,37 @@ const FindDoctor = () => {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <CardTitle className="text-lg truncate">Dr. {doctor.full_name}</CardTitle>
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <CardTitle className="text-lg truncate">
+                          {doctor.title ? `${doctor.title} ` : 'Dr. '}{doctor.full_name}
+                        </CardTitle>
                         {doctor.is_verified && (
-                          <CheckCircle className="h-4 w-4 text-primary flex-shrink-0" />
+                          <CheckCircle className="h-4 w-4 text-primary flex-shrink-0" aria-label="Verified" />
                         )}
                       </div>
-                      {doctor.specialty && (
-                        <Badge variant="secondary" className="mb-2">
-                          {doctor.specialty}
-                        </Badge>
+                      <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                        {doctor.specialty && (
+                          <Badge variant="secondary">{doctor.specialty}</Badge>
+                        )}
+                        {Array.isArray(doctor.specialties) && doctor.specialties
+                          .filter(s => s && s !== doctor.specialty)
+                          .slice(0, 2)
+                          .map(s => (
+                            <Badge key={s} variant="outline" className="text-[10px]">{s}</Badge>
+                          ))}
+                      </div>
+                      {(doctor.years_experience || (doctor.rating && doctor.review_count)) && (
+                        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                          {doctor.years_experience && (
+                            <span>{doctor.years_experience}y experience</span>
+                          )}
+                          {doctor.rating && doctor.review_count ? (
+                            <span className="inline-flex items-center gap-0.5">
+                              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                              {doctor.rating.toFixed(1)} ({doctor.review_count})
+                            </span>
+                          ) : null}
+                        </div>
                       )}
                     </div>
                   </div>
@@ -348,7 +375,16 @@ const FindDoctor = () => {
                   {doctor.bio && (
                     <p className="text-sm text-muted-foreground line-clamp-2">{doctor.bio}</p>
                   )}
-                  
+
+                  {Array.isArray(doctor.languages) && doctor.languages.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-1">
+                      <span className="text-[11px] text-muted-foreground">Languages:</span>
+                      {doctor.languages.slice(0, 4).map(l => (
+                        <Badge key={l} variant="outline" className="text-[10px]">{l}</Badge>
+                      ))}
+                    </div>
+                  )}
+
                   <div className="flex flex-wrap gap-2 text-sm">
                     {doctor.consultation_settings?.video_enabled && (
                       <div className="flex items-center gap-1 text-muted-foreground">
