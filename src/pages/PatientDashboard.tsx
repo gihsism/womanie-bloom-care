@@ -367,27 +367,56 @@ const PatientDashboard = () => {
   ];
 
   // Life-stage specific tips
+  // Per-mode tips for the Daily Reminders card. Half the modes
+  // (pre-menstrual, contraception, ivf, post-menopause) had no entry
+  // here previously, which silently hid the card on those dashboards.
   const stageTips: Record<string, { emoji: string; tip: string }[]> = {
-    'pregnancy': [
-      { emoji: '💊', tip: 'Take your prenatal vitamins daily' },
-      { emoji: '💧', tip: 'Drink at least 8 glasses of water' },
-      { emoji: '🚶', tip: '30 minutes of gentle exercise helps' },
-      { emoji: '📋', tip: 'Upload your latest scan results for analysis' },
-    ],
-    'conception': [
-      { emoji: '🥚', tip: 'Track your ovulation signs daily' },
-      { emoji: '🌡️', tip: 'Log basal temperature for better predictions' },
-      { emoji: '🥬', tip: 'Start folic acid at least 3 months before' },
+    'pre-menstrual': [
+      { emoji: '🌸', tip: 'Your first period usually arrives between 10 and 15' },
+      { emoji: '🎒', tip: 'Keep a small kit of pads or liners in your bag' },
+      { emoji: '💬', tip: 'Talking to a trusted adult helps when you have questions' },
+      { emoji: '💪', tip: 'Cramps are normal — moving and warmth often ease them' },
     ],
     'menstrual-cycle': [
       { emoji: '📅', tip: 'Log your period start day for better predictions' },
       { emoji: '💤', tip: 'Sleep quality affects your cycle' },
       { emoji: '🩸', tip: 'Upload blood test results for personalized insights' },
     ],
+    'contraception': [
+      { emoji: '⏰', tip: 'Take your pill at the same time each day for full protection' },
+      { emoji: '🛡️', tip: 'Contraception doesn\'t protect against STIs — condoms do' },
+      { emoji: '💊', tip: 'Missed a pill? Take it as soon as you remember' },
+      { emoji: '🩺', tip: 'Review your method with a doctor every 6–12 months' },
+    ],
+    'conception': [
+      { emoji: '🥚', tip: 'Track your ovulation signs daily' },
+      { emoji: '🌡️', tip: 'Log basal temperature for better predictions' },
+      { emoji: '🥬', tip: 'Start folic acid at least 3 months before' },
+      { emoji: '🚭', tip: 'Cut back on alcohol and caffeine while trying' },
+    ],
+    'ivf': [
+      { emoji: '💉', tip: 'Take injections at the same time each day' },
+      { emoji: '💧', tip: 'Aim for 2L of water daily during stimulation' },
+      { emoji: '🧘', tip: 'Gentle movement is fine — avoid intense workouts' },
+      { emoji: '📞', tip: 'Call your clinic about any sharp pain or heavy bleeding' },
+    ],
+    'pregnancy': [
+      { emoji: '💊', tip: 'Take your prenatal vitamins daily' },
+      { emoji: '💧', tip: 'Drink at least 8 glasses of water' },
+      { emoji: '🚶', tip: '30 minutes of gentle exercise helps' },
+      { emoji: '📋', tip: 'Upload your latest scan results for analysis' },
+    ],
     'menopause': [
       { emoji: '🌡️', tip: 'Log hot flashes to track patterns' },
       { emoji: '🦴', tip: 'Check vitamin D and calcium levels' },
       { emoji: '🏃', tip: 'Weight-bearing exercise supports bone health' },
+      { emoji: '😴', tip: 'A cool bedroom (65–68°F) reduces night sweats' },
+    ],
+    'post-menopause': [
+      { emoji: '🦴', tip: 'A DEXA bone-density scan every 2 years is the gold standard' },
+      { emoji: '❤️', tip: 'Annual blood pressure + cholesterol checks matter more now' },
+      { emoji: '🧠', tip: 'Stay socially active — strong ties lower dementia risk' },
+      { emoji: '💪', tip: 'Resistance training 3×/week protects muscle and balance' },
     ],
   };
 
