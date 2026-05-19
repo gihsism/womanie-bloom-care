@@ -15,6 +15,7 @@ import { onHealthDataChange } from '@/lib/data-events';
 
 const STALLED_THRESHOLD_MS = 3 * 60 * 1000;
 const RECENT_NOTE_WINDOW_MS = 14 * 24 * 60 * 60 * 1000;
+const RECENT_CANCEL_WINDOW_MS = 14 * 24 * 60 * 60 * 1000;
 
 export interface AttentionCounts {
   total: number;
@@ -23,6 +24,7 @@ export interface AttentionCounts {
   criticalFindings: number;
   recentDoctorNotes: number;
   upcomingAppointments: number;
+  recentDoctorCancellations: number;
 }
 
 const ZERO: AttentionCounts = {
@@ -32,6 +34,7 @@ const ZERO: AttentionCounts = {
   criticalFindings: 0,
   recentDoctorNotes: 0,
   upcomingAppointments: 0,
+  recentDoctorCancellations: 0,
 };
 
 export function useAttentionCount(): AttentionCounts {
@@ -54,7 +57,10 @@ export function useAttentionCount(): AttentionCounts {
           .eq('user_id', user.id)
           .eq('status', 'critical'),
         fetch('/api/me/doctor-notes').then(r => (r.ok ? r.json() : { notes: [] })),
-        fetch('/api/me/appointments?upcoming=true').then(r => (r.ok ? r.json() : { appointments: [] })),
+        // Fetch the full history (capped server-side at 200) so we can
+        // derive both upcoming + recent doctor-initiated cancellations
+        // from one round-trip.
+        fetch('/api/me/appointments').then(r => (r.ok ? r.json() : { appointments: [] })),
       ]);
 
       const pendingConnections = Array.isArray(pendingResp?.pending) ? pendingResp.pending.length : 0;
@@ -71,20 +77,48 @@ export function useAttentionCount(): AttentionCounts {
       const recentDoctorNotes = notes.filter(
         n => n.created_at && Date.parse(n.created_at) >= noteCutoff,
       ).length;
-      const upcomingAppointments = Array.isArray(aptsResp?.appointments)
-        ? aptsResp.appointments.length
-        : 0;
+      const allAppts = Array.isArray(aptsResp?.appointments)
+        ? (aptsResp.appointments as Array<{
+            scheduled_at: string;
+            status: string | null;
+            notes: string | null;
+          }>)
+        : [];
+      const now = Date.now();
+      const cancelCutoff = now - RECENT_CANCEL_WINDOW_MS;
+      const upcomingAppointments = allAppts.filter(a => {
+        const s = (a.status ?? '').toLowerCase();
+        if (s === 'cancelled') return false;
+        return Date.parse(a.scheduled_at) >= now;
+      }).length;
+      const recentDoctorCancellations = allAppts.filter(a => {
+        const s = (a.status ?? '').toLowerCase();
+        if (s !== 'cancelled') return false;
+        // Only doctor-initiated cancellations carry the prefix; patient-
+        // initiated ones leave notes null. We only flag the ones the
+        // patient didn't initiate themselves.
+        if (!a.notes || !/^Cancelled by doctor:/i.test(a.notes)) return false;
+        return Date.parse(a.scheduled_at) >= cancelCutoff;
+      }).length;
 
       // upcomingAppointments is informational on its own nav entry — it
       // doesn't roll into the bell-icon total (those are unread/needs-
       // attention items; an upcoming visit is just a heads-up).
+      // recentDoctorCancellations *does* roll in — the patient needs to
+      // know and (usually) rebook.
       setCounts({
-        total: pendingConnections + stalledDocuments + criticalFindings + recentDoctorNotes,
+        total:
+          pendingConnections +
+          stalledDocuments +
+          criticalFindings +
+          recentDoctorNotes +
+          recentDoctorCancellations,
         pendingConnections,
         stalledDocuments,
         criticalFindings,
         recentDoctorNotes,
         upcomingAppointments,
+        recentDoctorCancellations,
       });
     } catch {
       // Silently keep last known counts — a badge is cosmetic.

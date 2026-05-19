@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { onHealthDataChange } from '@/lib/data-events';
+import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Settings2, Sparkles } from 'lucide-react';
@@ -261,6 +261,7 @@ const CycleCalendar = ({
         description: `Predicted to last ~${periodLength} days. We'll check in with you.`,
       });
 
+      emitHealthDataChange();
       loadCalendarData();
     } catch (error) {
       console.error('Error starting period:', error);
@@ -288,6 +289,7 @@ const CycleCalendar = ({
         description: `Logged ${duration} day period. Predictions updated.`,
       });
 
+      emitHealthDataChange();
       loadCalendarData();
     } catch (error) {
       console.error('Error ending period:', error);
@@ -318,6 +320,7 @@ const CycleCalendar = ({
           .eq('period_start_date', record.period_start_date);
         
         toast({ title: 'Period removed' });
+        emitHealthDataChange();
         loadCalendarData();
       }
     } catch (error) {
@@ -357,6 +360,7 @@ const CycleCalendar = ({
           notes: signal.notes,
         }, { onConflict: 'user_id,signal_date' });
       if (error) throw error;
+      emitHealthDataChange();
     } catch (error) {
       console.error('Error saving health signal:', error);
       toast({ title: 'Error', description: 'Failed to save health signal', variant: 'destructive' });

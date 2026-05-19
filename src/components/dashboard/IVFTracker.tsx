@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
+import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,6 +55,7 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
   }, [user]);
 
   useEffect(() => { loadEvents(); }, [loadEvents]);
+  useEffect(() => onHealthDataChange(loadEvents), [loadEvents]);
 
   const handleSelectDate = (date: Date) => {
     setSelectedDate(date);
@@ -71,18 +73,25 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
       toast({ title: 'Error', description: 'Failed to add event', variant: 'destructive' });
     } else {
       toast({ title: 'Treatment added', description: ev.title });
+      emitHealthDataChange();
       loadEvents();
     }
   };
 
   const handleToggleComplete = async (eventId: string, completed: boolean) => {
     const { error } = await db.from('ivf_events').update({ is_completed: completed }).eq('id', eventId);
-    if (!error) loadEvents();
+    if (!error) {
+      emitHealthDataChange();
+      loadEvents();
+    }
   };
 
   const handleDeleteEvent = async (eventId: string) => {
     const { error } = await db.from('ivf_events').delete().eq('id', eventId);
-    if (!error) loadEvents();
+    if (!error) {
+      emitHealthDataChange();
+      loadEvents();
+    }
   };
 
   const handleMarkCompleteFromReminder = async (eventId: string) => {
