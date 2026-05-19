@@ -136,7 +136,10 @@ const Appointments = () => {
       ? apt.doctor_specialties[0]
       : null;
     const isVideo = apt.consultation_type === 'video';
-    const isCancelled = (apt.status ?? '').toLowerCase() === 'cancelled';
+    const statusLower = (apt.status ?? '').toLowerCase();
+    const isCancelled = statusLower === 'cancelled';
+    const isCompleted = statusLower === 'completed';
+    const isNoShow = statusLower === 'no_show' || statusLower === 'no-show';
 
     return (
       <li
@@ -164,6 +167,16 @@ const Appointments = () => {
             {isCancelled && (
               <Badge variant="outline" className="h-4 px-1.5 text-[9px] border-destructive/40 text-destructive">
                 Cancelled
+              </Badge>
+            )}
+            {isCompleted && (
+              <Badge variant="outline" className="h-4 px-1.5 text-[9px] bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200 border-transparent">
+                Completed
+              </Badge>
+            )}
+            {isNoShow && (
+              <Badge variant="outline" className="h-4 px-1.5 text-[9px] bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200 border-transparent">
+                No-show
               </Badge>
             )}
             {apt.payment_status === 'pending' && !isCancelled && kind === 'upcoming' && (

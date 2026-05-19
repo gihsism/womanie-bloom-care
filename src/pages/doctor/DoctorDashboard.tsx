@@ -416,7 +416,7 @@ const DoctorDashboard = () => {
 
           {/* Appointments Tab */}
           <TabsContent value="appointments">
-            <AppointmentsView appointments={appointments} patients={patients} />
+            <AppointmentsView appointments={appointments} patients={patients} onChange={loadDoctorData} />
           </TabsContent>
 
           {/* Settings Tab */}
@@ -567,7 +567,9 @@ const PatientManagement = ({ patients, onRefresh, doctorId }: { patients: Patien
   );
 };
 
-const AppointmentsView = ({ appointments, patients }: { appointments: Appointment[]; patients: PatientConnection[] }) => {
+const AppointmentsView = ({ appointments, patients, onChange }: { appointments: Appointment[]; patients: PatientConnection[]; onChange: () => void }) => {
+  const { toast } = useToast();
+  const [busyId, setBusyId] = useState<string | null>(null);
   const patientNameFor = (patientId: string): string => {
     const p = patients.find(c => c.patient_id === patientId);
     return p?.patient_full_name?.trim() || `Patient #${patientId.slice(0, 8)}`;
@@ -579,6 +581,31 @@ const AppointmentsView = ({ appointments, patients }: { appointments: Appointmen
   const pastAppointments = appointments.filter(
     apt => new Date(apt.scheduled_at) <= new Date() || apt.status === 'cancelled'
   );
+
+  // Visit closeout. After a scheduled appointment is in the past, the
+  // doctor is the only one who knows whether the patient turned up —
+  // these actions stamp the row so it stops looking ambiguous on both
+  // dashboards (and the patient's past-appointments view).
+  const setStatus = async (apt: Appointment, next: 'completed' | 'no_show' | 'scheduled') => {
+    setBusyId(apt.id);
+    try {
+      const { error } = await db
+        .from('appointments')
+        .update({ status: next })
+        .eq('id', apt.id);
+      if (error) throw error;
+      const label = next === 'completed' ? 'Marked completed'
+        : next === 'no_show' ? 'Marked no-show'
+        : 'Reopened';
+      toast({ title: label, description: `${patientNameFor(apt.patient_id)} · ${new Date(apt.scheduled_at).toLocaleDateString()}` });
+      onChange();
+    } catch (e) {
+      console.error('Failed to update appointment status:', e);
+      toast({ variant: 'destructive', title: 'Could not update', description: 'Please try again.' });
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -634,17 +661,81 @@ const AppointmentsView = ({ appointments, patients }: { appointments: Appointmen
         <CardContent>
           {pastAppointments.length > 0 ? (
             <div className="space-y-4">
-              {pastAppointments.slice(0, 10).map((apt) => (
-                <div key={apt.id} className="flex items-center justify-between border-b pb-4 last:border-0 opacity-60">
-                  <div>
-                    <p className="font-medium">{patientNameFor(apt.patient_id)}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(apt.scheduled_at).toLocaleDateString()} • {apt.duration} min • {apt.status}
-                    </p>
+              {pastAppointments.slice(0, 10).map((apt) => {
+                const needsCloseout =
+                  apt.status !== 'completed' &&
+                  apt.status !== 'no_show' &&
+                  apt.status !== 'cancelled' &&
+                  new Date(apt.scheduled_at) <= new Date();
+                const wasResolved = apt.status === 'completed' || apt.status === 'no_show';
+                return (
+                  <div
+                    key={apt.id}
+                    className={`flex flex-wrap items-center justify-between gap-2 border-b pb-4 last:border-0 ${
+                      apt.status === 'cancelled' ? 'opacity-60' : ''
+                    }`}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium">{patientNameFor(apt.patient_id)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(apt.scheduled_at).toLocaleDateString()} • {apt.duration} min • {apt.status || 'scheduled'}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {needsCloseout && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs"
+                            disabled={busyId === apt.id}
+                            onClick={() => setStatus(apt, 'completed')}
+                          >
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Mark completed
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 text-xs text-muted-foreground"
+                            disabled={busyId === apt.id}
+                            onClick={() => setStatus(apt, 'no_show')}
+                          >
+                            <XCircle className="h-3 w-3 mr-1" />
+                            No-show
+                          </Button>
+                        </>
+                      )}
+                      {wasResolved && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 text-xs text-muted-foreground"
+                          disabled={busyId === apt.id}
+                          onClick={() => setStatus(apt, 'scheduled')}
+                          title="Reopen this appointment"
+                        >
+                          Undo
+                        </Button>
+                      )}
+                      <Badge
+                        variant="outline"
+                        className={
+                          apt.status === 'completed'
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200'
+                            : apt.status === 'no_show'
+                            ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200'
+                            : apt.status === 'cancelled'
+                            ? 'bg-muted text-muted-foreground'
+                            : ''
+                        }
+                      >
+                        {apt.status || 'scheduled'}
+                      </Badge>
+                    </div>
                   </div>
-                  <Badge variant="outline">{apt.status}</Badge>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <p className="text-muted-foreground text-center py-8">No past appointments</p>
