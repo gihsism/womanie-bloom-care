@@ -177,6 +177,29 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-19 (session 46 — continuing autonomous arc, +5 more)
+
+- **6d17f05** — Capped unbounded result sets on three history endpoints
+  (/api/me/appointments history mode, /api/me/doctor-notes,
+  /api/doctors/connections). Defensive — payloads can't run away on
+  power users.
+- **03f4af5** — AI chat suggestion chips now include "What should I
+  prepare for my next appointment?" and "Explain my doctor's latest
+  note in plain language" when the context block has them (see
+  b9fb27f).
+- **102807d** — Doctor's Connected Patients list picked up a search
+  box that appears only when patient count > 5. Matches name, life
+  stage, and patient_id short-prefix; respects the recent-activity
+  sort.
+- **fa5a9f6** — Doctor-connection cards (PendingConnections /
+  ConnectedDoctors / DoctorNotesCard) emit + subscribe on
+  onHealthDataChange, so approve/revoke updates the other lists
+  without a reload.
+- **e042fdc** — Three product-judgment items deferred to
+  .planning/HANDOFF.md: the no-op newsletter form in Footer,
+  marketing claims on TrustSecurity, and the missing single-step
+  patient reschedule flow.
+
 ### 2026-05-19 (session 45 — continuing autonomous arc, +8 commits)
 
 Continuation of session 43. Eight more commits, all pushed:
