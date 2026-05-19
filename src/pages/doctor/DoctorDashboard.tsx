@@ -15,6 +15,7 @@ import { Switch } from '@/components/ui/switch';
 import { Loader2 } from 'lucide-react';
 import DoctorTodayBanner from '@/components/doctor/DoctorTodayBanner';
 import DoctorCancellationsBanner from '@/components/doctor/DoctorCancellationsBanner';
+import DoctorProfileEditor from '@/components/doctor/DoctorProfileEditor';
 import {
   Users,
   Calendar,
@@ -458,7 +459,8 @@ const DoctorDashboard = () => {
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings">
+          <TabsContent value="settings" className="space-y-6">
+            <DoctorProfileEditor doctorId={user.id} />
             <ConsultationSettings doctorId={user.id} />
           </TabsContent>
         </Tabs>
