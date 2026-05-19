@@ -154,6 +154,8 @@ const PatientDetails = () => {
   });
   const [isUpdatingNote, setIsUpdatingNote] = useState(false);
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
+  const [notesQuery, setNotesQuery] = useState('');
+  const [notesTypeFilter, setNotesTypeFilter] = useState<string>('all');
 
   const startEditingNote = (note: DoctorNote) => {
     setEditingNoteId(note.id);
@@ -681,9 +683,55 @@ const PatientDetails = () => {
                 <CardDescription>Your notes for this patient</CardDescription>
               </CardHeader>
               <CardContent>
-                {doctorNotes.length > 0 ? (
+                {doctorNotes.length > 5 && (
+                  <div className="mb-4 flex flex-col sm:flex-row gap-2">
+                    <Input
+                      placeholder="Search note title or content…"
+                      value={notesQuery}
+                      onChange={e => setNotesQuery(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Select value={notesTypeFilter} onValueChange={setNotesTypeFilter}>
+                      <SelectTrigger className="sm:w-44"><SelectValue placeholder="All types" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All types</SelectItem>
+                        <SelectItem value="observation">Observation</SelectItem>
+                        <SelectItem value="diagnosis">Diagnosis</SelectItem>
+                        <SelectItem value="recommendation">Recommendation</SelectItem>
+                        <SelectItem value="follow_up">Follow-up</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                {(() => {
+                  const q = notesQuery.trim().toLowerCase();
+                  const visibleNotes = doctorNotes.filter(n => {
+                    if (notesTypeFilter !== 'all' && (n.note_type ?? '') !== notesTypeFilter) return false;
+                    if (!q) return true;
+                    return (n.title || '').toLowerCase().includes(q)
+                      || (n.content || '').toLowerCase().includes(q);
+                  });
+                  if (doctorNotes.length === 0) {
+                    return (
+                      <div className="text-center py-8">
+                        <p className="text-muted-foreground mb-4">No notes added yet</p>
+                        <Button onClick={() => setShowNoteForm(true)}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add First Note
+                        </Button>
+                      </div>
+                    );
+                  }
+                  if (visibleNotes.length === 0) {
+                    return (
+                      <p className="text-muted-foreground text-center py-8 text-sm">
+                        No notes match this filter.
+                      </p>
+                    );
+                  }
+                  return (
                   <div className="space-y-4">
-                    {doctorNotes.map((note) => editingNoteId === note.id ? (
+                    {visibleNotes.map((note) => editingNoteId === note.id ? (
                       <div key={note.id} className="border rounded-lg p-4 bg-muted/30 space-y-3">
                         <div className="space-y-1.5">
                           <label className="text-xs font-medium">Title</label>
@@ -784,15 +832,8 @@ const PatientDetails = () => {
                       </div>
                     ))}
                   </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground mb-4">No notes added yet</p>
-                    <Button onClick={() => setShowNoteForm(true)}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add First Note
-                    </Button>
-                  </div>
-                )}
+                  );
+                })()}
               </CardContent>
             </Card>
           </TabsContent>
