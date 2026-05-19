@@ -20,6 +20,42 @@ const PatientSignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Heuristic strength meter — counts character classes + length.
+  // Not a security control: the server still enforces ≥8 chars. The
+  // signal is for the user, so they pick a password they won't curse
+  // us for later.
+  const strength = (() => {
+    if (!password) return { score: 0, label: '', color: '', hint: '' };
+    if (password.length < 8) {
+      return {
+        score: 1,
+        label: 'Too short',
+        color: 'bg-destructive',
+        hint: `${8 - password.length} more character${8 - password.length === 1 ? '' : 's'} needed.`,
+      };
+    }
+    const classes =
+      (/[a-z]/.test(password) ? 1 : 0) +
+      (/[A-Z]/.test(password) ? 1 : 0) +
+      (/\d/.test(password) ? 1 : 0) +
+      (/[^A-Za-z0-9]/.test(password) ? 1 : 0);
+    if (password.length >= 14 && classes >= 4) {
+      return { score: 5, label: 'Strong', color: 'bg-emerald-500', hint: 'Great password.' };
+    }
+    if (password.length >= 12 && classes >= 3) {
+      return { score: 4, label: 'Good', color: 'bg-green-500', hint: 'Solid — a symbol would push it to strong.' };
+    }
+    if (classes >= 2) {
+      return { score: 3, label: 'Fair', color: 'bg-yellow-500', hint: 'Add more length or a symbol to strengthen it.' };
+    }
+    return {
+      score: 2,
+      label: 'Weak',
+      color: 'bg-orange-500',
+      hint: 'Mix uppercase, digits, or a symbol to strengthen.',
+    };
+  })();
+
   useEffect(() => {
     if (!loading && user) navigate('/welcome', { replace: true });
   }, [user, loading, navigate]);
@@ -105,6 +141,24 @@ const PatientSignUp = () => {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {password && (
+                <div className="space-y-1">
+                  <div className="flex gap-1" aria-hidden="true">
+                    {[1, 2, 3, 4, 5].map((tick) => (
+                      <div
+                        key={tick}
+                        className={`h-1 flex-1 rounded-full ${
+                          tick <= strength.score ? strength.color : 'bg-muted'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-xs flex items-center justify-between" role="status">
+                    <span className="font-medium">{strength.label}</span>
+                    <span className="text-muted-foreground">{strength.hint}</span>
+                  </p>
+                </div>
+              )}
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Creating account...</> : 'Create Account'}
