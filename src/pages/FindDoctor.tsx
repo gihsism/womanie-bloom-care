@@ -196,6 +196,11 @@ const FindDoctor = () => {
       toast({
         title: 'Appointment Booked',
         description: `Your consultation with Dr. ${selectedDoctor.full_name} is scheduled for ${format(scheduledAt, 'PPP')} at ${selectedTime}`,
+        action: (
+          <Button size="sm" variant="outline" onClick={() => navigate('/dashboard/appointments')}>
+            View
+          </Button>
+        ),
       });
 
       setBookingDialogOpen(false);
