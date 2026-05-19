@@ -147,6 +147,7 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 - Status: shipped — `upload-${crypto.randomUUID()}` (upload.ts:68). Comment explains why concurrent uploads would otherwise overwrite each other.
 
 **17. Orphaned chat messages** — `ai-doctor-chat.ts:39-43` inserts user message before streaming reply; if stream fails, orphaned message remains.
+- Status: shipped — user turn is captured into `userTurnContent` but only inserted in the handler's `finally` block, paired with the assistant reply inside `sql.transaction([...])` (api/ai-doctor-chat.ts:186-206). If `assistantText` is empty (stream failed before any delta) nothing is written at all.
 
 **18. Fire-and-forget analysis dispatch not observable** — if the /api/analyze-document request is lost in flight before Vercel receives it, nothing retries. Should store a `pending_jobs` row and have a retry worker.
 
