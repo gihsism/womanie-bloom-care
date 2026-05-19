@@ -30,7 +30,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const [
       profile, authUser, documents, analyses, extracted,
       periods, signals, ivfEvents, connections, chatMessages,
-      accessCodes,
+      accessCodes, appointments, visibleDoctorNotes,
     ] = await Promise.all([
       sql.query('SELECT * FROM profiles WHERE id = $1', [user.id]),
       sql.query('SELECT id, email, name, created_at FROM auth_users WHERE id = $1', [user.id]),
@@ -82,6 +82,24 @@ async function handler(req: VercelRequest, res: VercelResponse) {
            WHERE patient_id = $1 ORDER BY created_at DESC`,
         [user.id]
       ),
+      sql.query(
+        `SELECT id, doctor_id, scheduled_at, duration, consultation_type,
+                status, payment_status, notes, created_at
+           FROM appointments
+           WHERE patient_id = $1
+           ORDER BY scheduled_at DESC`,
+        [user.id]
+      ),
+      // Only the doctor-authored notes the patient was meant to see.
+      // Internal-only notes (is_visible_to_patient = FALSE) are
+      // explicitly excluded — they belong to the doctor.
+      sql.query(
+        `SELECT id, doctor_id, title, content, note_type, created_at
+           FROM doctor_notes
+           WHERE patient_id = $1 AND is_visible_to_patient = TRUE
+           ORDER BY created_at DESC`,
+        [user.id]
+      ),
     ]) as Row[][];
 
     const payload = {
@@ -100,6 +118,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       doctor_patient_connections: connections,
       chat_messages: chatMessages,
       patient_access_codes: accessCodes,
+      appointments,
+      visible_doctor_notes: visibleDoctorNotes,
       notes: {
         documents_note:
           'The file_path field on each document is a Vercel Blob URL — fetch those separately to download the original upload.',
