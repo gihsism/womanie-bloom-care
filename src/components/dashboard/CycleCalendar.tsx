@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { onHealthDataChange } from '@/lib/data-events';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Settings2, Sparkles } from 'lucide-react';
@@ -89,7 +90,12 @@ const CycleCalendar = ({
   useEffect(() => {
     loadCalendarData();
   }, []);
-  
+
+  // Refresh when other surfaces emit a health-data change — e.g. the
+  // patient logs a period from DailyLogging in another tab/page and
+  // the calendar should reflect it without a manual reload.
+  useEffect(() => onHealthDataChange(loadCalendarData), []);
+
   const loadCalendarData = async () => {
     try {
       if (!user) return;

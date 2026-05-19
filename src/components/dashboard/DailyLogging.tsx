@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { emitHealthDataChange } from '@/lib/data-events';
 import { format } from 'date-fns';
 import { Loader2, Check } from 'lucide-react';
 import type { LifeStage } from './DashboardHeader';
@@ -156,6 +157,7 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
       if (error) throw error;
       setSaved(true);
       toast({ title: 'Saved!', description: 'Your daily log has been recorded.' });
+      emitHealthDataChange();
     } catch (error) {
       console.error('Error saving:', error);
       toast({ title: 'Error', description: 'Failed to save', variant: 'destructive' });
