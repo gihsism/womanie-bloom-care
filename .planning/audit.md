@@ -251,6 +251,15 @@ commits making the dashboard read like it knows who's looking at it:
   input, one Save button, upserts profile.full_name through /api/db,
   banner self-dismisses, dashboard greeting at the top updates without
   a refresh.
+- **863d88b** — `GettingStarted` checklist's "Add your name" step
+  still pointed at the same broken /onboarding/basic-info route, so
+  even with the new inline banner above it, the step's CTA dragged
+  users back into the dead loop. Changed the step's ctaHref to a hash
+  anchor `#name-banner`; click handler treats hash hrefs as
+  scrollIntoView calls instead of routes. Name banner picks up
+  `id="name-banner"` + `scroll-mt-24` so the sticky header doesn't
+  cover it. Description copy now reads "Use the 'What should we call
+  you?' box above to fill this in" so the action is unambiguous.
 
 ### 2026-05-19 (session 43 — autonomous arc)
 
