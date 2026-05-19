@@ -172,6 +172,22 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-19 (session 42)
+
+- **2781efb** — Patient dashboard now surfaces doctor notes that have
+  been marked visible. When a doctor writes a note on PatientDetails,
+  the "Visible to patient" toggle defaults on, but the patient had no
+  consumer for it — note sat in the DB, patient never saw it. New
+  `DoctorNotesCard` on PatientDashboard shows visible notes with
+  doctor name + avatar + specialty, the note title + type chip
+  (diagnosis / treatment / recommendation / observation), relative
+  time, and the content (line-clamped at 3 with Show more when
+  longer). Hides itself when there are none. Supporting
+  `/api/me/doctor-notes` endpoint joins `doctor_profiles` server-side
+  because `doctor_notes` is owned-by-doctor in `/api/db`'s ownership
+  map — patients can't reach the row through the generic router.
+  Smoke flow asserts 401 unauth.
+
 ### 2026-05-19 (session 41)
 
 - **5697d11** — Doctor's patient view: finished the half-built Lab
