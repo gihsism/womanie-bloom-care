@@ -53,6 +53,7 @@ const FindDoctor = () => {
   const [loadingDoctors, setLoadingDoctors] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [specialtyFilter, setSpecialtyFilter] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'name' | 'rating' | 'experience' | 'price_low'>('name');
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string>('');
@@ -235,6 +236,30 @@ const FindDoctor = () => {
     return matchesSearch && matchesSpecialty;
   });
 
+  const sortedDoctors = [...filteredDoctors].sort((a, b) => {
+    switch (sortBy) {
+      case 'rating': {
+        const ar = a.rating ?? 0;
+        const br = b.rating ?? 0;
+        if (br !== ar) return br - ar;
+        return (b.review_count ?? 0) - (a.review_count ?? 0);
+      }
+      case 'experience': {
+        const ax = a.years_experience ?? 0;
+        const bx = b.years_experience ?? 0;
+        return bx - ax;
+      }
+      case 'price_low': {
+        const ap = a.consultation_settings?.consultation_price ?? Number.POSITIVE_INFINITY;
+        const bp = b.consultation_settings?.consultation_price ?? Number.POSITIVE_INFINITY;
+        return ap - bp;
+      }
+      case 'name':
+      default:
+        return a.full_name.localeCompare(b.full_name);
+    }
+  });
+
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
@@ -298,6 +323,17 @@ const FindDoctor = () => {
               ))}
             </SelectContent>
           </Select>
+          <Select value={sortBy} onValueChange={v => setSortBy(v as typeof sortBy)}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="name">Sort: Name (A–Z)</SelectItem>
+              <SelectItem value="rating">Sort: Highest rated</SelectItem>
+              <SelectItem value="experience">Sort: Most experienced</SelectItem>
+              <SelectItem value="price_low">Sort: Price (low to high)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Doctors List */}
@@ -334,7 +370,7 @@ const FindDoctor = () => {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredDoctors.map(doctor => (
+            {sortedDoctors.map(doctor => (
               <Card key={doctor.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-4">
                   <div className="flex items-start gap-4">

@@ -18,6 +18,7 @@ import {
   Sparkles,
   Loader2,
   Trash2,
+  Download,
   Cpu,
   Stethoscope,
   MessageCircle,
