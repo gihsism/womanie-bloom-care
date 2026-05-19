@@ -460,6 +460,7 @@ const DoctorDashboard = () => {
 const PatientManagement = ({ patients, onRefresh, doctorId }: { patients: PatientConnection[], onRefresh: () => void, doctorId: string }) => {
   const [accessCode, setAccessCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -482,6 +483,19 @@ const PatientManagement = ({ patients, onRefresh, doctorId }: { patients: Patien
       return cb - ca;
     });
   }, [patients]);
+
+  // Search filter — name, life stage, and the patient_id short-prefix
+  // so a doctor can paste a recent reference like "Patient #a1b2c3d4".
+  const visiblePatients = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return sortedPatients;
+    return sortedPatients.filter(p => {
+      const name = (p.patient_full_name ?? '').toLowerCase();
+      const stage = (p.patient_life_stage ?? '').toLowerCase();
+      const shortId = p.patient_id.slice(0, 8).toLowerCase();
+      return name.includes(q) || stage.includes(q) || shortId.includes(q);
+    });
+  }, [sortedPatients, searchQuery]);
 
   const handleSubmitCode = async () => {
     if (!accessCode.trim()) return;
@@ -570,9 +584,23 @@ const PatientManagement = ({ patients, onRefresh, doctorId }: { patients: Patien
           <CardDescription>{patients.filter(p => p.status === 'approved').length} approved connections</CardDescription>
         </CardHeader>
         <CardContent>
+          {patients.length > 5 && (
+            <div className="mb-3">
+              <input
+                type="text"
+                placeholder="Search by name, life stage, or patient #..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-secondary bg-background"
+              />
+            </div>
+          )}
           {patients.length > 0 ? (
+            visiblePatients.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8 text-sm">No patients match "{searchQuery}".</p>
+            ) : (
             <div className="space-y-4">
-              {sortedPatients.map((patient) => {
+              {visiblePatients.map((patient) => {
                 const recentCount = Number(patient.recent_doc_count ?? 0);
                 const lastUpload = patient.last_upload_at ? new Date(patient.last_upload_at) : null;
                 return (
@@ -618,6 +646,7 @@ const PatientManagement = ({ patients, onRefresh, doctorId }: { patients: Patien
                 );
               })}
             </div>
+            )
           ) : (
             <p className="text-muted-foreground text-center py-8">No patient connections yet</p>
           )}
