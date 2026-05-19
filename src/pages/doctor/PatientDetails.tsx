@@ -73,6 +73,19 @@ interface Appointment {
   notes: string | null;
 }
 
+interface MedicalDataRow {
+  id: string;
+  document_id: string;
+  title: string;
+  value: string | number | null;
+  unit: string | null;
+  reference_range: string | null;
+  status: string | null; // 'normal' | 'high' | 'low' | 'critical' etc
+  data_type: string | null;
+  date_recorded: string | null;
+  notes: string | null;
+}
+
 const PatientDetails = () => {
   const navigate = useNavigate();
   usePageTitle('Patient Details');
@@ -86,6 +99,7 @@ const PatientDetails = () => {
   const [documents, setDocuments] = useState<HealthDocument[]>([]);
   const [doctorNotes, setDoctorNotes] = useState<DoctorNote[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [medicalData, setMedicalData] = useState<MedicalDataRow[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
   
@@ -132,6 +146,7 @@ const PatientDetails = () => {
       setDocuments(payload.documents || []);
       setDoctorNotes(payload.notes || []);
       setAppointments(payload.appointments || []);
+      setMedicalData(payload.medicalData || []);
     } catch (error) {
       console.error('Error loading patient data:', error);
       toast({
@@ -235,7 +250,9 @@ const PatientDetails = () => {
             <div className="flex-1">
               <h1 className="text-xl font-bold">{patient?.full_name || 'Patient'}</h1>
               <p className="text-sm text-muted-foreground">
-                Life stage: {patient?.life_stage || 'Not specified'}
+                Life stage: {patient?.life_stage
+                  ? patient.life_stage.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+                  : 'Not specified'}
               </p>
             </div>
             <Button onClick={() => setShowNoteForm(true)} size="sm">
@@ -252,9 +269,10 @@ const PatientDetails = () => {
       {/* Main Content */}
       <div className="p-4 md:p-6 max-w-7xl mx-auto">
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid grid-cols-4 lg:w-[500px]">
+          <TabsList className="grid grid-cols-5 lg:w-[600px]">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="health">Health Data</TabsTrigger>
+            <TabsTrigger value="labs">Lab Results</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="notes">Notes</TabsTrigger>
           </TabsList>
@@ -280,7 +298,9 @@ const PatientDetails = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{documents.length}</div>
-                  <p className="text-xs text-muted-foreground">Uploaded files</p>
+                  <p className="text-xs text-muted-foreground">
+                    {medicalData.length > 0 ? `${medicalData.length} extracted values` : 'Uploaded files'}
+                  </p>
                 </CardContent>
               </Card>
 
@@ -411,6 +431,11 @@ const PatientDetails = () => {
             </Card>
           </TabsContent>
 
+          {/* Lab Results Tab */}
+          <TabsContent value="labs" className="space-y-6">
+            <LabResultsView medicalData={medicalData} documents={documents} />
+          </TabsContent>
+
           {/* Documents Tab */}
           <TabsContent value="documents" className="space-y-6">
             <Card>
@@ -440,15 +465,16 @@ const PatientDetails = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={async () => {
-                            const { data } = await db.storage
-                              .from('health-documents')
-                              .createSignedUrl(doc.file_path, 3600);
-                            if (data?.signedUrl) {
-                              window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
-                            } else {
-                              toast({ variant: 'destructive', title: 'Error', description: 'Could not open document.' });
+                          onClick={() => {
+                            // health_documents.file_path is a Vercel Blob URL
+                            // (see /api/me/export.ts notes). Opens directly —
+                            // the old Supabase createSignedUrl path was dead
+                            // code post-migration and silently failed.
+                            if (!doc.file_path) {
+                              toast({ variant: 'destructive', title: 'Error', description: 'No file URL on this document.' });
+                              return;
                             }
+                            window.open(doc.file_path, '_blank', 'noopener,noreferrer');
                           }}
                         >
                           <ExternalLink className="h-4 w-4 mr-2" />
@@ -592,3 +618,146 @@ const PatientDetails = () => {
 };
 
 export default PatientDetails;
+
+// Severity ranking for sorting. Lower number = more urgent, surface
+// first. "abnormal" and "high" / "low" share a tier because not every
+// LLM extraction normalizes to a single set of strings.
+function statusRank(status: string | null): number {
+  const s = (status || '').toLowerCase();
+  if (s === 'critical') return 0;
+  if (s === 'high' || s === 'low' || s === 'abnormal') return 1;
+  if (s === 'borderline' || s === 'informational') return 2;
+  return 3; // normal / unknown
+}
+
+function statusBadgeClass(status: string | null): string {
+  const s = (status || '').toLowerCase();
+  if (s === 'critical') return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200';
+  if (s === 'high' || s === 'low' || s === 'abnormal') return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200';
+  if (s === 'borderline') return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200';
+  if (s === 'normal') return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200';
+  return 'bg-muted text-muted-foreground';
+}
+
+function formatValue(v: string | number | null, unit: string | null): string {
+  if (v === null || v === undefined || v === '') return '—';
+  const base = typeof v === 'number' ? String(v) : v;
+  return unit ? `${base} ${unit}` : base;
+}
+
+const LabResultsView = ({ medicalData, documents }: { medicalData: MedicalDataRow[]; documents: HealthDocument[] }) => {
+  const [query, setQuery] = useState('');
+  const docNameById = new Map(documents.map(d => [d.id, d.ai_suggested_name || d.file_name]));
+
+  const filtered = medicalData.filter(r => {
+    if (!query.trim()) return true;
+    const q = query.toLowerCase();
+    return (r.title || '').toLowerCase().includes(q) || (r.notes || '').toLowerCase().includes(q);
+  });
+
+  const flagged = filtered
+    .filter(r => statusRank(r.status) <= 1)
+    .sort((a, b) => {
+      const r = statusRank(a.status) - statusRank(b.status);
+      if (r !== 0) return r;
+      const ad = a.date_recorded ? new Date(a.date_recorded).getTime() : 0;
+      const bd = b.date_recorded ? new Date(b.date_recorded).getTime() : 0;
+      return bd - ad;
+    });
+
+  const allRecent = [...filtered].sort((a, b) => {
+    const ad = a.date_recorded ? new Date(a.date_recorded).getTime() : 0;
+    const bd = b.date_recorded ? new Date(b.date_recorded).getTime() : 0;
+    return bd - ad;
+  });
+
+  if (medicalData.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Lab Results</CardTitle>
+          <CardDescription>Values extracted from the patient's uploaded documents</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground text-center py-8">
+            No lab values extracted yet. They'll appear here once the patient's documents have been analyzed.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const Row = ({ r }: { r: MedicalDataRow }) => (
+    <div className="flex items-start gap-3 border rounded-lg p-3 bg-card">
+      <Badge className={`text-[10px] capitalize shrink-0 ${statusBadgeClass(r.status)}`} variant="outline">
+        {r.status || 'unknown'}
+      </Badge>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium truncate">{r.title}</p>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5 text-xs">
+          <span className="font-mono">{formatValue(r.value, r.unit)}</span>
+          {r.reference_range && (
+            <span className="text-muted-foreground">ref {r.reference_range}</span>
+          )}
+          {r.date_recorded && (
+            <span className="text-muted-foreground">{new Date(r.date_recorded).toLocaleDateString()}</span>
+          )}
+          {docNameById.has(r.document_id) && (
+            <span className="text-muted-foreground truncate">· {docNameById.get(r.document_id)}</span>
+          )}
+        </div>
+        {r.notes && (
+          <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{r.notes}</p>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      <Input
+        placeholder="Search by test name or notes…"
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        className="max-w-md"
+      />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Flagged Values</CardTitle>
+          <CardDescription>
+            {flagged.length === 0
+              ? 'No abnormal results in the extracted data.'
+              : `${flagged.length} result${flagged.length === 1 ? '' : 's'} outside the reference range, most urgent first.`}
+          </CardDescription>
+        </CardHeader>
+        {flagged.length > 0 && (
+          <CardContent className="space-y-2">
+            {flagged.map(r => <Row key={r.id} r={r} />)}
+          </CardContent>
+        )}
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>All Results</CardTitle>
+          <CardDescription>
+            {allRecent.length} extracted value{allRecent.length === 1 ? '' : 's'}, newest first.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {allRecent.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">No results match the filter.</p>
+          ) : (
+            allRecent.slice(0, 200).map(r => <Row key={r.id} r={r} />)
+          )}
+          {allRecent.length > 200 && (
+            <p className="text-[11px] text-muted-foreground text-center pt-2">
+              Showing 200 most recent of {allRecent.length}. Narrow with search to see specific tests.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
