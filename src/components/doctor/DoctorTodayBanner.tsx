@@ -107,19 +107,14 @@ const DoctorTodayBanner = ({ appointments, patients }: DoctorTodayBannerProps) =
                 </p>
               </div>
               <div className="flex flex-col gap-2 items-end">
-                {isVideo && imminent && (
-                  <Button size="sm" className="gap-1.5 h-8">
-                    <Video className="h-3.5 w-3.5" />
-                    Start call
-                  </Button>
-                )}
                 <Button
                   size="sm"
-                  variant="ghost"
-                  className="text-[11px] h-7"
+                  variant={isVideo && imminent ? 'default' : 'ghost'}
+                  className={isVideo && imminent ? 'gap-1.5 h-8' : 'text-[11px] h-7'}
                   onClick={() => navigate(`/doctor/patient/${apt.patient_id}`)}
                 >
-                  View patient
+                  {isVideo && imminent && <Video className="h-3.5 w-3.5" />}
+                  {isVideo && imminent ? 'Open chart' : 'View patient'}
                 </Button>
               </div>
             </div>

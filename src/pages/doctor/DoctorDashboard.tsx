@@ -568,6 +568,7 @@ const PatientManagement = ({ patients, onRefresh, doctorId }: { patients: Patien
 };
 
 const AppointmentsView = ({ appointments, patients, onChange }: { appointments: Appointment[]; patients: PatientConnection[]; onChange: () => void }) => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [busyId, setBusyId] = useState<string | null>(null);
   const patientNameFor = (patientId: string): string => {
@@ -641,8 +642,12 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge>{apt.consultation_type || 'consultation'}</Badge>
-                    <Button size="sm" variant="outline">
-                      {apt.consultation_type === 'video' ? 'Join Call' : 'Details'}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => navigate(`/doctor/patient/${apt.patient_id}`)}
+                    >
+                      Open chart
                     </Button>
                   </div>
                 </div>
