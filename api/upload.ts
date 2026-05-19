@@ -65,7 +65,10 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   // avoid breaking any external caller, but also scoped to the session user.
   if (req.method === 'PUT') {
     try {
-      const requested = (req.query.filename as string) || `upload-${Date.now()}`;
+      // Per-call UUID avoids collisions when two uploads land in the
+      // same millisecond — `Date.now()` produced identical paths under
+      // concurrency, which Vercel Blob would silently overwrite.
+      const requested = (req.query.filename as string) || `upload-${crypto.randomUUID()}`;
       const filename = requested.startsWith(`${user.id}/`) ? requested : `${user.id}/${requested}`;
 
       const blob = await put(filename, req, {

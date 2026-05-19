@@ -138,16 +138,20 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 ## P2 — polish
 
 **14. JSON parse fallback silently degrades** — api/analyze-document.ts:417–428. On malformed JSON returns a generic summary with no structured data. Should retry Claude with "return valid JSON only" or fail loudly.
+- Status: shipped — `tryParseAnalysisJson` runs first; on miss, a second Claude call with an explicit "strict JSON only" message replays; if that also fails the handler returns 502 with `error: 'parse_failed'` and leaves any prior successful `ai_summary` intact (analyze-document.ts ~572-610).
 
 **15. Duplicated `friendlyTestNames`** — in both `medical-utils.ts` and `MedicalHistory.tsx`; already drifting. Delete the duplicate.
+- Status: shipped — single source of truth at `src/lib/medical-utils.ts:53`; consumer at `friendlyTitle()` line 116. The MedicalHistory copy was removed.
 
 **16. Filename collision risk** — `upload-${Date.now()}` fallback path in upload.ts; use UUIDs.
+- Status: shipped — `upload-${crypto.randomUUID()}` (upload.ts:68). Comment explains why concurrent uploads would otherwise overwrite each other.
 
 **17. Orphaned chat messages** — `ai-doctor-chat.ts:39-43` inserts user message before streaming reply; if stream fails, orphaned message remains.
 
 **18. Fire-and-forget analysis dispatch not observable** — if the /api/analyze-document request is lost in flight before Vercel receives it, nothing retries. Should store a `pending_jobs` row and have a retry worker.
 
 **19. "Today's date" is UTC** — analyze-document.ts:98. Patient timezone not considered.
+- Status: shipped — `req.body.timezone` accepted, `resolveToday(timezone)` resolves to the patient's local date with UTC fallback (analyze-document.ts:123, 132-170). Client sends `Intl.DateTimeFormat().resolvedOptions().timeZone` on every reanalysis call (MedicalHistory.tsx:790).
 
 ---
 
