@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
 import { db } from '@/integrations/db/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -80,6 +81,8 @@ const PatientDashboard = () => {
     confidence?: string;
   } | null>(null);
   const [periodData, setPeriodData] = useState<{ lastPeriodStart: Date; cycleLength: number } | null>(null);
+  const [nameInput, setNameInput] = useState('');
+  const [savingName, setSavingName] = useState(false);
   const [pregnancyDueDate, setPregnancyDueDate] = useState<Date | null>(null);
   const [ivfStartDate, setIvfStartDate] = useState<Date | null>(null);
   const [ivfPhase, setIvfPhase] = useState<string | null>(null);
@@ -545,24 +548,58 @@ const PatientDashboard = () => {
           </div>
 
           <div className="w-full px-4 py-6">
-            {/* Profile Completion Banner — only show if name isn't set */}
-            {!profile?.full_name && (
+            {/* Name prompt — inline rather than routing to /onboarding/basic-info,
+                which doesn't actually collect a name. Used to send users
+                in a loop where they'd fill the basic-info form, come
+                back, and the banner would still be sitting here. */}
+            {!profile?.full_name && user && (
               <Card className="p-4 mb-6 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold mb-2">
-                      Complete your profile for better personalized services
-                    </h3>
+                    <h3 className="text-lg font-bold mb-2">What should we call you?</h3>
                     <p className="text-sm text-muted-foreground">
-                      Tell us about your health journey to get customized insights, tracking, and recommendations tailored to your needs.
+                      Just a first name is fine — we use it in your dashboard greeting and the AI Doctor chat.
                     </p>
                   </div>
-                  <Button
-                    size="lg"
-                    onClick={() => navigate('/onboarding/basic-info')}
+                  <form
+                    className="flex gap-2 w-full md:w-auto"
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      const trimmed = nameInput.trim();
+                      if (!trimmed) return;
+                      setSavingName(true);
+                      try {
+                        const { error } = await db
+                          .from('profiles')
+                          .upsert({ id: user.id, full_name: trimmed }, { onConflict: 'id' });
+                        if (error) throw error;
+                        setProfile((p) => ({ ...(p ?? {}), full_name: trimmed }));
+                        setNameInput('');
+                        toast({ title: 'Saved', description: `Nice to meet you, ${trimmed.split(' ')[0]}.` });
+                      } catch (err) {
+                        console.error('Save name failed:', err);
+                        toast({
+                          variant: 'destructive',
+                          title: 'Could not save',
+                          description: 'Please try again.',
+                        });
+                      } finally {
+                        setSavingName(false);
+                      }
+                    }}
                   >
-                    Complete Profile
-                  </Button>
+                    <Input
+                      value={nameInput}
+                      onChange={(e) => setNameInput(e.target.value)}
+                      placeholder="Your name"
+                      maxLength={80}
+                      autoComplete="given-name"
+                      className="md:w-56"
+                    />
+                    <Button type="submit" disabled={savingName || !nameInput.trim()}>
+                      {savingName ? 'Saving…' : 'Save'}
+                    </Button>
+                  </form>
                 </div>
               </Card>
             )}
