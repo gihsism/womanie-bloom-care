@@ -113,6 +113,73 @@ const PatientDetails = () => {
     is_visible_to_patient: true,
   });
 
+  // Inline edit state for an existing note. Only one note is editable at
+  // a time; the form replaces the read-only display for that row.
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [editingNote, setEditingNote] = useState({
+    title: '',
+    content: '',
+    note_type: 'observation',
+    is_visible_to_patient: true,
+  });
+  const [isUpdatingNote, setIsUpdatingNote] = useState(false);
+  const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
+
+  const startEditingNote = (note: DoctorNote) => {
+    setEditingNoteId(note.id);
+    setEditingNote({
+      title: note.title,
+      content: note.content,
+      note_type: note.note_type || 'observation',
+      is_visible_to_patient: note.is_visible_to_patient ?? true,
+    });
+  };
+
+  const cancelEditingNote = () => {
+    setEditingNoteId(null);
+  };
+
+  const handleUpdateNote = async () => {
+    if (!user || !editingNoteId || !editingNote.title || !editingNote.content) return;
+    setIsUpdatingNote(true);
+    try {
+      const { error } = await db
+        .from('doctor_notes')
+        .update({
+          title: editingNote.title,
+          content: editingNote.content,
+          note_type: editingNote.note_type,
+          is_visible_to_patient: editingNote.is_visible_to_patient,
+        })
+        .eq('id', editingNoteId);
+      if (error) throw error;
+      toast({ title: 'Note updated' });
+      setEditingNoteId(null);
+      checkAccessAndLoadData();
+    } catch (error) {
+      console.error('Error updating note:', error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to update note.' });
+    } finally {
+      setIsUpdatingNote(false);
+    }
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    if (!window.confirm('Delete this clinical note? This cannot be undone.')) return;
+    setDeletingNoteId(noteId);
+    try {
+      const { error } = await db.from('doctor_notes').delete().eq('id', noteId);
+      if (error) throw error;
+      toast({ title: 'Note deleted' });
+      checkAccessAndLoadData();
+    } catch (error) {
+      console.error('Error deleting note:', error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete note.' });
+    } finally {
+      setDeletingNoteId(null);
+    }
+  };
+
   useEffect(() => {
     if (user && patientId) {
       checkAccessAndLoadData();
@@ -582,18 +649,102 @@ const PatientDetails = () => {
               <CardContent>
                 {doctorNotes.length > 0 ? (
                   <div className="space-y-4">
-                    {doctorNotes.map((note) => (
+                    {doctorNotes.map((note) => editingNoteId === note.id ? (
+                      <div key={note.id} className="border rounded-lg p-4 bg-muted/30 space-y-3">
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-medium">Title</label>
+                          <Input
+                            value={editingNote.title}
+                            onChange={(e) => setEditingNote(n => ({ ...n, title: e.target.value }))}
+                          />
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-3">
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-medium">Type</label>
+                            <Select
+                              value={editingNote.note_type}
+                              onValueChange={(value) => setEditingNote(n => ({ ...n, note_type: value }))}
+                            >
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="observation">Observation</SelectItem>
+                                <SelectItem value="diagnosis">Diagnosis</SelectItem>
+                                <SelectItem value="recommendation">Recommendation</SelectItem>
+                                <SelectItem value="follow_up">Follow-up</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-medium">Visibility</label>
+                            <Select
+                              value={editingNote.is_visible_to_patient ? 'visible' : 'hidden'}
+                              onValueChange={(value) => setEditingNote(n => ({ ...n, is_visible_to_patient: value === 'visible' }))}
+                            >
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="visible">Visible to patient</SelectItem>
+                                <SelectItem value="hidden">Doctor only</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-medium">Content</label>
+                          <Textarea
+                            value={editingNote.content}
+                            onChange={(e) => setEditingNote(n => ({ ...n, content: e.target.value }))}
+                            rows={5}
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={handleUpdateNote}
+                            size="sm"
+                            disabled={!editingNote.title || !editingNote.content || isUpdatingNote}
+                          >
+                            {isUpdatingNote ? (
+                              <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving…</>
+                            ) : 'Save changes'}
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={cancelEditingNote} disabled={isUpdatingNote}>
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
                       <div key={note.id} className="border rounded-lg p-4">
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
+                        <div className="flex items-start justify-between mb-2 gap-3">
+                          <div className="min-w-0 flex-1">
                             <h4 className="font-medium">{note.title}</h4>
                             <p className="text-sm text-muted-foreground">
                               {new Date(note.created_at).toLocaleDateString()} • {note.note_type}
                             </p>
                           </div>
-                          <Badge variant={note.is_visible_to_patient ? 'default' : 'outline'}>
-                            {note.is_visible_to_patient ? 'Visible' : 'Private'}
-                          </Badge>
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            <Badge variant={note.is_visible_to_patient ? 'default' : 'outline'}>
+                              {note.is_visible_to_patient ? 'Visible' : 'Private'}
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 px-2 text-xs"
+                              onClick={() => startEditingNote(note)}
+                              disabled={deletingNoteId === note.id}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive"
+                              onClick={() => handleDeleteNote(note.id)}
+                              disabled={deletingNoteId === note.id}
+                            >
+                              {deletingNoteId === note.id ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : 'Delete'}
+                            </Button>
+                          </div>
                         </div>
                         <p className="text-sm whitespace-pre-wrap">{note.content}</p>
                       </div>
