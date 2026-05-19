@@ -215,10 +215,12 @@ export default function AIDoctorChat() {
     const loadContext = async () => {
       try {
         const { db } = await import('@/integrations/db/client');
-        const [profileRes, docsRes, extractedRes] = await Promise.all([
+        const [profileRes, docsRes, extractedRes, appointmentsResp, notesResp] = await Promise.all([
           db.from('profiles').select('life_stage').eq('id', user.id).maybeSingle(),
           db.from('health_documents').select('ai_suggested_name, ai_summary, document_type').eq('user_id', user.id).order('uploaded_at', { ascending: false }).limit(5),
           db.from('medical_extracted_data').select('title, value, unit, status, data_type').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
+          fetch('/api/me/appointments?upcoming=true').then(r => (r.ok ? r.json() : { appointments: [] })),
+          fetch('/api/me/doctor-notes').then(r => (r.ok ? r.json() : { notes: [] })),
         ]);
 
         const parts: string[] = [];
@@ -250,6 +252,43 @@ export default function AIDoctorChat() {
             .map(d => `${d.ai_suggested_name || d.document_type}: ${d.ai_summary!.slice(0, 200)}`)
             .join('\n');
           if (summaries) parts.push(`Document summaries:\n${summaries}`);
+        }
+
+        // Upcoming appointments — three rows max so questions like "what
+        // should I prepare for Tuesday's visit?" can be grounded.
+        const apts = Array.isArray(appointmentsResp?.appointments) ? appointmentsResp.appointments : [];
+        if (apts.length > 0) {
+          const lines = apts.slice(0, 3).map((a: {
+            scheduled_at: string;
+            doctor_title: string | null;
+            doctor_name: string | null;
+            doctor_specialties: string[] | null;
+            consultation_type: string | null;
+          }) => {
+            const doc = [a.doctor_title, a.doctor_name].filter(Boolean).join(' ') || 'a doctor';
+            const spec = Array.isArray(a.doctor_specialties) && a.doctor_specialties.length > 0 ? `, ${a.doctor_specialties[0]}` : '';
+            return `${new Date(a.scheduled_at).toLocaleString()} with ${doc}${spec} (${a.consultation_type || 'consultation'})`;
+          }).join('; ');
+          parts.push(`Upcoming appointments: ${lines}`);
+        }
+
+        // Doctor notes visible to the patient — last three. Lets the
+        // assistant reference "as Dr. Smith noted on May 14, …" instead
+        // of re-deriving advice from labs alone.
+        const notes = Array.isArray(notesResp?.notes) ? notesResp.notes : [];
+        if (notes.length > 0) {
+          const noteLines = notes.slice(0, 3).map((n: {
+            created_at: string;
+            doctor_title: string | null;
+            doctor_name: string | null;
+            title: string;
+            content: string;
+            note_type: string | null;
+          }) => {
+            const doc = [n.doctor_title, n.doctor_name].filter(Boolean).join(' ') || 'doctor';
+            return `${new Date(n.created_at).toLocaleDateString()} — ${doc} (${n.note_type || 'note'}): ${n.title} — ${n.content.slice(0, 200)}`;
+          }).join('\n');
+          parts.push(`Recent doctor notes:\n${noteLines}`);
         }
 
         if (parts.length > 0) {
