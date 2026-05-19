@@ -217,12 +217,16 @@ const FindDoctor = () => {
   const specialties = [...new Set(doctors.map(d => d.specialty).filter(Boolean))];
 
   const filteredDoctors = doctors.filter(doctor => {
-    const matchesSearch = doctor.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      doctor.specialty?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      doctor.bio?.toLowerCase().includes(searchQuery.toLowerCase());
-    
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !q
+      || doctor.full_name.toLowerCase().includes(q)
+      || (doctor.specialty?.toLowerCase().includes(q) ?? false)
+      || (doctor.bio?.toLowerCase().includes(q) ?? false)
+      || (Array.isArray(doctor.specialties) && doctor.specialties.some(s => s?.toLowerCase().includes(q)))
+      || (Array.isArray(doctor.languages) && doctor.languages.some(l => l?.toLowerCase().includes(q)));
+
     const matchesSpecialty = specialtyFilter === 'all' || doctor.specialty === specialtyFilter;
-    
+
     return matchesSearch && matchesSpecialty;
   });
 
@@ -272,7 +276,7 @@ const FindDoctor = () => {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by name, specialty, or keywords..."
+              placeholder="Search by name, specialty, language, or keywords..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
