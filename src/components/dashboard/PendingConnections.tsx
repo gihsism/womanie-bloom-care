@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Check, X, Stethoscope, ShieldCheck } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { errorMessage } from '@/lib/errors';
+import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
 
 // Pending-doctor-connection approvals.
 //
@@ -51,6 +52,7 @@ export default function PendingConnections() {
   }, [user]);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => onHealthDataChange(load), [load]);
 
   const respond = async (connectionId: string, action: 'approve' | 'reject') => {
     setBusyId(connectionId);
@@ -70,6 +72,7 @@ export default function PendingConnections() {
           ? 'They can now view the records you uploaded.'
           : 'The request was declined and removed.',
       });
+      emitHealthDataChange();
       await load();
     } catch (error) {
       toast({

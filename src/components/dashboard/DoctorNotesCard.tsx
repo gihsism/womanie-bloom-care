@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { Stethoscope, NotebookPen, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { onHealthDataChange } from '@/lib/data-events';
 
 // Notes the doctor has written and explicitly marked as visible to
 // the patient. Surfaces them next to the rest of the dashboard so the
@@ -71,6 +72,7 @@ export default function DoctorNotesCard() {
   }, [user]);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => onHealthDataChange(load), [load]);
 
   if (!loaded || rows.length === 0) return null;
 

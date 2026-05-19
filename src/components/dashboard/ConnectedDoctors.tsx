@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Stethoscope, ShieldCheck, ShieldOff } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { errorMessage } from '@/lib/errors';
+import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
 
 // Approved doctor connections with a Revoke action. Pairs with
 // PendingConnections: that one handles "doctor wants in", this one
@@ -45,6 +46,7 @@ export default function ConnectedDoctors() {
   }, [user]);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => onHealthDataChange(load), [load]);
 
   const revoke = async (connectionId: string, label: string) => {
     if (!window.confirm(`Revoke access for ${label}? They'll no longer be able to view your records.`)) return;
@@ -60,6 +62,7 @@ export default function ConnectedDoctors() {
         throw new Error(err.error || 'Failed');
       }
       toast({ title: 'Access revoked', description: `${label} no longer has access to your records.` });
+      emitHealthDataChange();
       await load();
     } catch (error) {
       toast({
