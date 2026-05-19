@@ -86,6 +86,7 @@ interface MedicalDataRow {
   data_type: string | null;
   date_recorded: string | null;
   notes: string | null;
+  raw_data: { panel?: string | null } | null;
 }
 
 const PatientDetails = () => {
@@ -924,22 +925,44 @@ const LabResultsView = ({ medicalData, documents }: { medicalData: MedicalDataRo
 
       <Card>
         <CardHeader>
-          <CardTitle>All Results</CardTitle>
+          <CardTitle>By Panel</CardTitle>
           <CardDescription>
-            {allRecent.length} extracted value{allRecent.length === 1 ? '' : 's'}, newest first.
+            Results grouped by panel (CBC, Thyroid, etc) — most-populated first.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2">
-          {allRecent.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">No results match the filter.</p>
-          ) : (
-            allRecent.slice(0, 200).map(r => <Row key={r.id} r={r} />)
-          )}
-          {allRecent.length > 200 && (
-            <p className="text-[11px] text-muted-foreground text-center pt-2">
-              Showing 200 most recent of {allRecent.length}. Narrow with search to see specific tests.
-            </p>
-          )}
+        <CardContent className="space-y-4">
+          {(() => {
+            const groups = new Map<string, MedicalDataRow[]>();
+            for (const r of allRecent) {
+              const panel = r.raw_data?.panel?.trim() || 'Other';
+              const arr = groups.get(panel) ?? [];
+              arr.push(r);
+              groups.set(panel, arr);
+            }
+            const sortedGroups = [...groups.entries()].sort((a, b) => {
+              if (a[0] === 'Other') return 1;
+              if (b[0] === 'Other') return -1;
+              return b[1].length - a[1].length;
+            });
+            if (sortedGroups.length === 0) {
+              return <p className="text-muted-foreground text-center py-8">No results match the filter.</p>;
+            }
+            return sortedGroups.map(([panel, items]) => (
+              <div key={panel}>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
+                  {panel} · {items.length}
+                </p>
+                <div className="space-y-2">
+                  {items.slice(0, 30).map(r => <Row key={r.id} r={r} />)}
+                  {items.length > 30 && (
+                    <p className="text-[11px] text-muted-foreground text-center">
+                      +{items.length - 30} more in {panel}. Use search to narrow.
+                    </p>
+                  )}
+                </div>
+              </div>
+            ));
+          })()}
         </CardContent>
       </Card>
     </div>

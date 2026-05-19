@@ -63,7 +63,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       ),
       sql.query(
         `SELECT id, document_id, title, value, unit, reference_range, status,
-                data_type, date_recorded, notes
+                data_type, date_recorded, notes, raw_data
            FROM current_extracted_data
           WHERE user_id = $1
           ORDER BY date_recorded DESC NULLS LAST
