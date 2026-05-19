@@ -177,6 +177,33 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-19 (session 49 — continuing autonomous arc, +6 commits)
+
+Alena re-extended the autonomous mandate to 24h after session 47.
+Six more atomic improvements, all pushed:
+
+- **800e596** — Patient appointments page: filter past list by status
+  (All / Completed / No-show / Cancelled / Unresolved). Chips with
+  zero count hide; appears only when > 3 past rows.
+- **4c10cbb** — Doctor overview Recent Activity rows are clickable
+  buttons that navigate straight to /doctor/patient/:id. Saves two
+  taps per "open this chart."
+- **3db79ab** — Same-window data loop: DailyLogging emits
+  health-data-change after a save; CycleCalendar subscribes. So
+  logging a daily signal lights up SymptomPatternsCard, attention
+  badge, GettingStarted, etc. without a refresh.
+- **6e0dc69** — Extended the loop to CycleCalendar's four mutation
+  paths (start/end/remove period, save signal) and IVFTracker's
+  three (add/toggle/delete event). Both also subscribe so changes
+  from elsewhere refresh the local view.
+- **c610617** — Doctor's notes list: search + type filter when notes
+  count exceeds five. Search hits title + content; type narrows to
+  Observation / Diagnosis / Recommendation / Follow-up.
+- **acf6200** — Doctor's documents tab: search + category filter
+  with the same > 5 threshold. Search matches filename,
+  ai_suggested_name, and ai_summary. Category Select is derived from
+  the patient's actual document_type values.
+
 ### 2026-05-19 (session 48 — doctor-initiated cancellation)
 
 The doctor-side appointment flow could mark visits Completed or
