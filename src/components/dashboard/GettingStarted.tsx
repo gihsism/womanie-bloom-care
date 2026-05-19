@@ -111,9 +111,15 @@ export default function GettingStarted() {
       key: 'profile',
       done: Boolean(profileName),
       title: 'Add your name',
-      description: 'A one-minute profile tells Womanie who it\'s helping.',
+      // The inline name banner directly above this card is the action,
+      // so we point users to it rather than the old /onboarding/basic-info
+      // route — that form never collected a name and would just route
+      // them back here with the step still incomplete.
+      description: profileName
+        ? 'A one-minute profile tells Womanie who it\'s helping.'
+        : 'Use the "What should we call you?" box above to fill this in.',
       ctaLabel: 'Complete profile',
-      ctaHref: '/onboarding/basic-info',
+      ctaHref: '#name-banner',
     },
     {
       key: 'upload',
@@ -176,7 +182,20 @@ export default function GettingStarted() {
                 size="sm"
                 variant="outline"
                 className="h-7 text-xs"
-                onClick={() => navigate(step.ctaHref)}
+                onClick={() => {
+                  // Hash hrefs scroll to an anchor on the same page;
+                  // path hrefs navigate. Keeps the in-page "use the
+                  // name banner above" pointer working without a route.
+                  if (step.ctaHref.startsWith('#')) {
+                    const id = step.ctaHref.slice(1);
+                    document.getElementById(id)?.scrollIntoView({
+                      behavior: 'smooth',
+                      block: 'center',
+                    });
+                  } else {
+                    navigate(step.ctaHref);
+                  }
+                }}
               >
                 {step.ctaLabel}
               </Button>

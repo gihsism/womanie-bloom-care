@@ -551,9 +551,12 @@ const PatientDashboard = () => {
             {/* Name prompt — inline rather than routing to /onboarding/basic-info,
                 which doesn't actually collect a name. Used to send users
                 in a loop where they'd fill the basic-info form, come
-                back, and the banner would still be sitting here. */}
+                back, and the banner would still be sitting here.
+                #name-banner anchor lets GettingStarted's "Complete
+                profile" button scroll to this banner instead of routing
+                to a dead destination. */}
             {!profile?.full_name && user && (
-              <Card className="p-4 mb-6 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
+              <Card id="name-banner" className="p-4 mb-6 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 scroll-mt-24">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                   <div className="flex-1">
                     <h3 className="text-lg font-bold mb-2">What should we call you?</h3>
