@@ -23,6 +23,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const sql = neon(process.env.DATABASE_URL!);
+    // Adds patient activity signal so the doctor's connected-patients list
+    // can sort by recency and flag patients with new uploads:
+    //   - last_upload_at: most recent health_documents row for the patient
+    //   - recent_doc_count: count of docs uploaded in the last 14 days
+    // These are LATERAL subqueries scoped to c.patient_id so they don't
+    // leak data — a connection row only surfaces patient activity if the
+    // doctor already has the connection.
     const rows = await sql.query(
       `SELECT
          c.id,
@@ -32,9 +39,18 @@ async function handler(req: VercelRequest, res: VercelResponse) {
          c.connection_type,
          c.created_at,
          p.full_name AS patient_full_name,
-         p.life_stage AS patient_life_stage
+         p.life_stage AS patient_life_stage,
+         u.last_upload_at,
+         u.recent_doc_count
        FROM doctor_patient_connections c
        LEFT JOIN profiles p ON p.id = c.patient_id
+       LEFT JOIN LATERAL (
+         SELECT
+           MAX(uploaded_at) AS last_upload_at,
+           COUNT(*) FILTER (WHERE uploaded_at >= NOW() - INTERVAL '14 days') AS recent_doc_count
+           FROM health_documents
+          WHERE user_id = c.patient_id
+       ) u ON TRUE
        WHERE c.doctor_id = $1
        ORDER BY c.created_at DESC`,
       [doctor.id]

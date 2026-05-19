@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { formatDistanceToNow } from 'date-fns';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -46,6 +47,8 @@ interface PatientConnection {
   connection_type: string | null;
   patient_full_name?: string | null;
   patient_life_stage?: string | null;
+  last_upload_at?: string | null;
+  recent_doc_count?: number | string | null;
 }
 
 interface Appointment {
@@ -436,6 +439,26 @@ const PatientManagement = ({ patients, onRefresh, doctorId }: { patients: Patien
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Sort: approved patients with new uploads first (by recent_doc_count
+  // desc), then approved by last_upload_at desc, then everyone else by
+  // created_at desc. Pending/rejected stay at the bottom.
+  const sortedPatients = useMemo(() => {
+    const score = (p: PatientConnection): [number, number] => {
+      const approved = p.status === 'approved' ? 1 : 0;
+      const recent = Number(p.recent_doc_count ?? 0);
+      const lastUpload = p.last_upload_at ? Date.parse(p.last_upload_at) : 0;
+      const created = Date.parse(p.created_at) || 0;
+      const primary = approved * 10_000_000_000 + recent * 1_000_000_000 + lastUpload / 1000;
+      return [primary, created];
+    };
+    return [...patients].sort((a, b) => {
+      const [pa, ca] = score(a);
+      const [pb, cb] = score(b);
+      if (pb !== pa) return pb - pa;
+      return cb - ca;
+    });
+  }, [patients]);
+
   const handleSubmitCode = async () => {
     if (!accessCode.trim()) return;
     setIsSubmitting(true);
@@ -525,19 +548,31 @@ const PatientManagement = ({ patients, onRefresh, doctorId }: { patients: Patien
         <CardContent>
           {patients.length > 0 ? (
             <div className="space-y-4">
-              {patients.map((patient) => (
+              {sortedPatients.map((patient) => {
+                const recentCount = Number(patient.recent_doc_count ?? 0);
+                const lastUpload = patient.last_upload_at ? new Date(patient.last_upload_at) : null;
+                return (
                 <div key={patient.id} className="flex items-center justify-between border-b pb-4 last:border-0">
                   <div className="flex items-center gap-3">
                     <div className="bg-muted p-2 rounded-full">
                       <Users className="h-4 w-4" />
                     </div>
                     <div>
-                      <p className="font-medium">
-                        {patient.patient_full_name?.trim() || `Patient #${patient.patient_id.slice(0, 8)}`}
-                      </p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-medium">
+                          {patient.patient_full_name?.trim() || `Patient #${patient.patient_id.slice(0, 8)}`}
+                        </p>
+                        {recentCount > 0 && patient.status === 'approved' && (
+                          <Badge variant="outline" className="h-4 px-1.5 text-[9px] bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200 border-transparent">
+                            {recentCount} new
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground">
                         {patient.patient_life_stage ? `${patient.patient_life_stage.replace(/-/g, ' ')} · ` : ''}
-                        Connected via {patient.connection_type || 'request'}
+                        {lastUpload && patient.status === 'approved'
+                          ? `Last upload ${formatDistanceToNow(lastUpload, { addSuffix: true })}`
+                          : `Connected via ${patient.connection_type || 'request'}`}
                       </p>
                     </div>
                   </div>
@@ -546,8 +581,8 @@ const PatientManagement = ({ patients, onRefresh, doctorId }: { patients: Patien
                       {patient.status}
                     </Badge>
                     {patient.status === 'approved' && (
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => navigate(`/doctor/patient/${patient.patient_id}`)}
                       >
@@ -556,7 +591,8 @@ const PatientManagement = ({ patients, onRefresh, doctorId }: { patients: Patien
                     )}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <p className="text-muted-foreground text-center py-8">No patient connections yet</p>
