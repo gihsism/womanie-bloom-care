@@ -35,7 +35,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       ? await sql.query(
           `SELECT
               a.id, a.doctor_id, a.scheduled_at, a.status,
-              a.consultation_type, a.duration, a.payment_status,
+              a.consultation_type, a.duration, a.payment_status, a.notes,
               p.full_name AS doctor_name,
               p.title AS doctor_title,
               p.specialties AS doctor_specialties,
@@ -52,7 +52,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       : await sql.query(
           `SELECT
               a.id, a.doctor_id, a.scheduled_at, a.status,
-              a.consultation_type, a.duration, a.payment_status,
+              a.consultation_type, a.duration, a.payment_status, a.notes,
               p.full_name AS doctor_name,
               p.title AS doctor_title,
               p.specialties AS doctor_specialties,

@@ -672,6 +672,49 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
     apt => new Date(apt.scheduled_at) <= new Date() || apt.status === 'cancelled'
   );
 
+  // Doctor-initiated cancellation. The patient-side flow already
+  // handles cancelling their own appointment; this lets the doctor
+  // call off a visit they can't make and tell the patient why.
+  // Reason is stamped into appointments.notes (no other surface writes
+  // there) with a "Cancelled by doctor: <reason>" prefix so the patient
+  // Appointments page can render the reason cleanly.
+  const cancelByDoctor = async (apt: Appointment) => {
+    const patientLabel = patientNameFor(apt.patient_id);
+    const when = new Date(apt.scheduled_at).toLocaleString();
+    const reason = window.prompt(
+      `Cancel the appointment with ${patientLabel} on ${when}?\n\nReason (the patient will see this):`,
+      ''
+    );
+    if (reason === null) return; // user cancelled the dialog
+    const trimmed = reason.trim();
+    if (!trimmed) {
+      toast({
+        variant: 'destructive',
+        title: 'Reason required',
+        description: 'Add a short reason so the patient understands why.',
+      });
+      return;
+    }
+    setBusyId(apt.id);
+    try {
+      const { error } = await db
+        .from('appointments')
+        .update({ status: 'cancelled', notes: `Cancelled by doctor: ${trimmed}` })
+        .eq('id', apt.id);
+      if (error) throw error;
+      toast({
+        title: 'Appointment cancelled',
+        description: `${patientLabel} will see the cancellation and reason in their Appointments view.`,
+      });
+      onChange();
+    } catch (e) {
+      console.error('Doctor cancel failed:', e);
+      toast({ variant: 'destructive', title: 'Could not cancel', description: 'Please try again.' });
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   // Visit closeout. After a scheduled appointment is in the past, the
   // doctor is the only one who knows whether the patient turned up —
   // these actions stamp the row so it stops looking ambiguous on both
@@ -760,6 +803,15 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
                       onClick={() => navigate(`/doctor/patient/${apt.patient_id}`)}
                     >
                       Open chart
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-muted-foreground hover:text-destructive"
+                      onClick={() => cancelByDoctor(apt)}
+                      disabled={busyId === apt.id}
+                    >
+                      Cancel
                     </Button>
                   </div>
                 </div>

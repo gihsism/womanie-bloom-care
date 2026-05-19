@@ -58,6 +58,8 @@ function isUpcoming(apt: AppointmentRow): boolean {
   return !isPast(new Date(apt.scheduled_at));
 }
 
+type PastFilter = 'all' | 'completed' | 'no_show' | 'cancelled' | 'unresolved';
+
 const Appointments = () => {
   const navigate = useNavigate();
   usePageTitle('My Appointments');
@@ -66,6 +68,7 @@ const Appointments = () => {
   const [rows, setRows] = useState<AppointmentRow[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [pastFilter, setPastFilter] = useState<PastFilter>('all');
 
   const load = async () => {
     if (!user) return;
@@ -103,6 +106,32 @@ const Appointments = () => {
     () => rows.filter(r => !isUpcoming(r)),
     [rows]
   );
+
+  const pastCounts = useMemo(() => {
+    const counts = { all: past.length, completed: 0, no_show: 0, cancelled: 0, unresolved: 0 };
+    for (const a of past) {
+      const s = (a.status ?? '').toLowerCase();
+      if (s === 'completed') counts.completed++;
+      else if (s === 'no_show' || s === 'no-show') counts.no_show++;
+      else if (s === 'cancelled') counts.cancelled++;
+      else counts.unresolved++;
+    }
+    return counts;
+  }, [past]);
+
+  const filteredPast = useMemo(() => {
+    if (pastFilter === 'all') return past;
+    return past.filter(a => {
+      const s = (a.status ?? '').toLowerCase();
+      if (pastFilter === 'completed') return s === 'completed';
+      if (pastFilter === 'no_show') return s === 'no_show' || s === 'no-show';
+      if (pastFilter === 'cancelled') return s === 'cancelled';
+      if (pastFilter === 'unresolved') {
+        return s !== 'completed' && s !== 'no_show' && s !== 'no-show' && s !== 'cancelled';
+      }
+      return true;
+    });
+  }, [past, pastFilter]);
 
   const cancel = async (apt: AppointmentRow) => {
     const doctorLabel = [apt.doctor_title, apt.doctor_name].filter(Boolean).join(' ') || 'this doctor';
@@ -304,15 +333,48 @@ const Appointments = () => {
             </h2>
             {loaded && <span className="text-xs text-muted-foreground">({past.length})</span>}
           </div>
+          {loaded && past.length > 3 && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {([
+                ['all', 'All', pastCounts.all],
+                ['completed', 'Completed', pastCounts.completed],
+                ['no_show', 'No-show', pastCounts.no_show],
+                ['cancelled', 'Cancelled', pastCounts.cancelled],
+                ['unresolved', 'Unresolved', pastCounts.unresolved],
+              ] as const).map(([key, label, count]) => {
+                if (count === 0 && key !== 'all') return null;
+                const active = pastFilter === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setPastFilter(key)}
+                    className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
+                      active
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : 'bg-muted/40 hover:bg-muted text-foreground border-transparent'
+                    }`}
+                    aria-pressed={active}
+                  >
+                    {label} <span className="opacity-70">· {count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
           {!loaded ? (
             <Skeleton className="h-20 w-full" />
           ) : past.length === 0 ? (
             <p className="text-xs text-muted-foreground py-4 text-center">
               Past appointments will appear here.
             </p>
+          ) : filteredPast.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-4 text-center">
+              No past appointments match this filter.
+            </p>
           ) : (
             <ul className="space-y-2">
-              {past.slice(0, 50).map(apt => renderAppointment(apt, 'past'))}
+              {filteredPast.slice(0, 50).map(apt => renderAppointment(apt, 'past'))}
             </ul>
           )}
         </section>
