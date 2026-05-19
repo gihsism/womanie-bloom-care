@@ -22,6 +22,7 @@ export interface AttentionCounts {
   stalledDocuments: number;
   criticalFindings: number;
   recentDoctorNotes: number;
+  upcomingAppointments: number;
 }
 
 const ZERO: AttentionCounts = {
@@ -30,6 +31,7 @@ const ZERO: AttentionCounts = {
   stalledDocuments: 0,
   criticalFindings: 0,
   recentDoctorNotes: 0,
+  upcomingAppointments: 0,
 };
 
 export function useAttentionCount(): AttentionCounts {
@@ -42,7 +44,7 @@ export function useAttentionCount(): AttentionCounts {
       return;
     }
     try {
-      const [pendingResp, docsRes, findingsRes, notesResp] = await Promise.all([
+      const [pendingResp, docsRes, findingsRes, notesResp, aptsResp] = await Promise.all([
         fetch('/api/connections/pending').then(r => (r.ok ? r.json() : { pending: [] })),
         db.from('health_documents')
           .select('id, ai_summary, uploaded_at')
@@ -52,6 +54,7 @@ export function useAttentionCount(): AttentionCounts {
           .eq('user_id', user.id)
           .eq('status', 'critical'),
         fetch('/api/me/doctor-notes').then(r => (r.ok ? r.json() : { notes: [] })),
+        fetch('/api/me/appointments?upcoming=true').then(r => (r.ok ? r.json() : { appointments: [] })),
       ]);
 
       const pendingConnections = Array.isArray(pendingResp?.pending) ? pendingResp.pending.length : 0;
@@ -68,13 +71,20 @@ export function useAttentionCount(): AttentionCounts {
       const recentDoctorNotes = notes.filter(
         n => n.created_at && Date.parse(n.created_at) >= noteCutoff,
       ).length;
+      const upcomingAppointments = Array.isArray(aptsResp?.appointments)
+        ? aptsResp.appointments.length
+        : 0;
 
+      // upcomingAppointments is informational on its own nav entry — it
+      // doesn't roll into the bell-icon total (those are unread/needs-
+      // attention items; an upcoming visit is just a heads-up).
       setCounts({
         total: pendingConnections + stalledDocuments + criticalFindings + recentDoctorNotes,
         pendingConnections,
         stalledDocuments,
         criticalFindings,
         recentDoctorNotes,
+        upcomingAppointments,
       });
     } catch {
       // Silently keep last known counts — a badge is cosmetic.
