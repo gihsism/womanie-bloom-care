@@ -177,6 +177,32 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-19 (session 48 — doctor-initiated cancellation)
+
+The doctor-side appointment flow could mark visits Completed or
+No-show but had no way to say "I can't make this one." If something
+came up the doctor would either cancel via a backend call or just
+ghost — both leave the patient guessing.
+
+Code landed across two commits whose titles don't fully describe it
+(cross-session interleave), but the working flow is:
+
+- **800e596** (in addition to its stated patient-side chip filter)
+  introduced the doctor-side `cancelByDoctor(apt)` in DoctorDashboard
+  upcoming-appointments list. Confirm-with-reason prompt; required
+  reason ("Add a short reason so the patient understands why"); updates
+  status='cancelled' and notes=`Cancelled by doctor: <reason>`. New
+  Cancel button next to Open chart on each upcoming row, disabled
+  during the round-trip. Same commit expanded /api/me/appointments to
+  return the `notes` column so the patient side can read it.
+- **4c10cbb** (in addition to its stated Recent Activity click target)
+  renders the parsed reason on the patient's `/dashboard/appointments`
+  page. New `doctorCancelReason()` extracts the prefix; cancelled rows
+  with a matching prefix show a small destructive-tinted pill under
+  the consultation type with the doctor's exact reason. Patient-
+  initiated cancellations (no prefix) render nothing extra, so the
+  hint only appears when there's something to say.
+
 ### 2026-05-19 (session 47 — closing wave)
 
 - **c835fbc** — `/api/auth/me` falls back to `profiles.full_name`
