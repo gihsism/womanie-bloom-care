@@ -27,7 +27,7 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 - Fix sketch: Resolve the session inside `onBeforeGenerateToken`; 401 on missing session; stamp pathname with `user.id` server-side.
 - Risk class: RISKY — auth (but we're the sole caller, changing won't break user flows)
 - Priority: P0
-- Status: open
+- Status: shipped — `getAuthUser` resolved inside the handler; 401 on no session.
 
 **2. api/analyze-document.ts — No session validation before reanalysis**
 - Where: Lines 30–33
@@ -36,7 +36,7 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 - Fix sketch: Add `const user = await requireAuthUser(req); if (user.id !== userId) return 401`. Same pattern applies to all `/api/*` handlers that touch user data.
 - Risk class: RISKY — auth bypass fix, touches handler logic but not session code
 - Priority: P0
-- Status: open
+- Status: shipped — `getAuthUser` checked + session id reconciled against body `userId`.
 
 **3. api/db.ts — Query router trusts client-supplied filters**
 - Where: Lines 23–85
@@ -45,7 +45,7 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 - Fix sketch: Extract the session user inside the handler; for tables owned by users (health_documents, medical_extracted_data, profiles, document_analyses, ai_chat_messages…), force a `user_id = <session.id>` filter even if the client doesn't include it.
 - Risk class: RISKY — central query router; must be tested carefully
 - Priority: P0
-- Status: open
+- Status: shipped — `OWNER_COLUMN` map enforces the right column per table, owner-or filter injected for relational tables, `WRITE_BLOCKED` set covers `user_roles`.
 
 **4. src/pages/MedicalHistory.tsx:655–669 — Delete is non-atomic**
 - Where: `deleteDocument()`
@@ -54,7 +54,7 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 - Fix sketch: Add ON DELETE CASCADE (schema change — HANDOFF) OR do both deletes in a transaction on the server side via a new `/api/docs/delete` endpoint.
 - Risk class: SAFE if via new endpoint; RISKY if schema change
 - Priority: P0
-- Status: open
+- Status: shipped — new `/api/docs/delete` runs extracted-data, analyses, and the doc row inside one Neon transaction; blob is removed after commit on a best-effort basis.
 
 **5. api/analyze-document.ts:513–517 — Transaction atomicity not guaranteed mid-timeout**
 - Where: `sql.transaction([...])` at end of handler
@@ -63,7 +63,7 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 - Fix sketch: (a) Add a background janitor that promotes the most recent `document_analyses` row when a document's `ai_summary` is stale; OR (b) restructure so the flip happens before the per-item INSERTs finish.
 - Risk class: SAFE — internal logic
 - Priority: P0
-- Status: open
+- Status: shipped — extracted-value INSERT now runs *before* the flip-current transaction (analyze-document.ts ~700), and the flip is wrapped in `sql.transaction([…])`, so a mid-flight kill leaves the partial analysis recoverable rather than orphaned.
 
 ---
 
@@ -75,7 +75,7 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 - Fix sketch: Single multi-row INSERT.
 - Risk class: SAFE
 - Priority: P1
-- Status: open
+- Status: shipped — single `INSERT INTO medical_extracted_data … VALUES (…), (…), …` built from a flat parameter array (analyze-document.ts ~700).
 
 **7. api/analyze-document.ts:108–350 — System prompt is 350 lines, not cached**
 - Where: `buildSystemPrompt()`
@@ -83,7 +83,7 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 - Fix sketch: Split prompt into static (cacheable) + dynamic (date, patient context) sections; send with `cache_control: { type: "ephemeral" }` on the static block.
 - Risk class: SAFE
 - Priority: P1
-- Status: open
+- Status: shipped — `STATIC_RULES` block sent with `cache_control: { type: 'ephemeral' }` on both first-pass and follow-up Claude calls.
 
 **8. api/analyze-document.ts:357 — Cache key is pinned to model version**
 - Where: cacheKey includes model name
@@ -99,7 +99,7 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 - Fix sketch: 2s → 4s → 8s → 10s cap; stop after 3 min.
 - Risk class: SAFE
 - Priority: P1
-- Status: open
+- Status: shipped — `delay = Math.min(delay * 2, 10000)` with `pendingSinceRef` cutoff at 3 minutes (MedicalHistory.tsx ~690).
 
 **10. src/components/dashboard/{Cycle,Mode,Pregnancy}LabInsights — Independent fetches**
 - Where: Each component fetches `medical_extracted_data` independently
@@ -115,7 +115,7 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 - Fix sketch: Same hook as #10; when MedicalHistory completes polling, hook invalidates and re-fetches.
 - Risk class: SAFE (moderate effort)
 - Priority: P1
-- Status: open
+- Status: shipped — `src/lib/data-events.ts` module-level emitter; consumers subscribe via `onHealthDataChange()` and refetch when MedicalHistory / DocumentUpload emit on completion.
 
 **12. api/ai-doctor-chat.ts:113–116 — Fragile system-message prefix filter**
 - Where: Skips messages starting with `[SYSTEM CONTEXT`
