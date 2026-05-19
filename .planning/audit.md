@@ -107,7 +107,7 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 - Fix sketch: `useExtractedData()` hook with React-Query-style caching (or lift state to PatientDashboard / MedicalHistory and pass down).
 - Risk class: SAFE
 - Priority: P1
-- Status: open
+- Status: shipped — `src/hooks/useLabResults.ts` keeps a per-user module-level cache + subscriber set; one fetch on first mount, in-flight promise dedupe across racing mounts, onHealthDataChange invalidates+refetches and fans out to all three consumers.
 
 **11. Insights don't auto-refresh after analysis lands**
 - Where: HealthSummaryWidget, HealthTimeline, all lab insights
@@ -123,7 +123,7 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 - Fix sketch: Add `synthetic: boolean` column or role discrimination.
 - Risk class: SAFE
 - Priority: P1
-- Status: open
+- Status: shipped — the prepended synthetic user message was removed entirely (AIDoctorChat.tsx:358-365 explains the deletion). The backend loads profile + last 20 docs + last 100 extracted values server-side under the session user, so no client-side context injection (and no prefix sniff) is needed. Role mapping at api/ai-doctor-chat.ts:124 handles any legacy `role === 'system'` rows.
 
 **13. api/analyze-document.ts:391–395 — No retry on Anthropic 5xx / 429**
 - Where: After `fetch(https://api.anthropic.com/...)`
@@ -131,7 +131,7 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 - Fix sketch: 3 retries with exponential backoff (250ms, 1s, 4s), short-circuit on 4xx-non-429.
 - Risk class: SAFE
 - Priority: P1
-- Status: open
+- Status: shipped — bounded exponential backoff helper at analyze-document.ts ~66-95 retries on `status >= 500 || status === 429`, surfaces persistent failures to the UI as documented at line 605.
 
 ---
 
