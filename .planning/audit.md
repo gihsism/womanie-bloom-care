@@ -177,6 +177,15 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-19 (session 47 — closing wave)
+
+- **c835fbc** — `/api/auth/me` falls back to `profiles.full_name`
+  when the JWT-cached `name` is blank. A user who signed up without a
+  name and added it via the inline form (f37709f) had a stale JWT;
+  Welcome / header dropdowns still said "Welcome, there." Fixed
+  with a one-row lookup on cache miss; best-effort, doesn't fail the
+  request on error.
+
 ### 2026-05-19 (session 46 — continuing autonomous arc, +5 more)
 
 - **6d17f05** — Capped unbounded result sets on three history endpoints
