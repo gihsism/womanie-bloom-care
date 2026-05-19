@@ -177,6 +177,44 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-19 (session 43 — autonomous arc)
+
+Alena re-authorized 8 hours of autonomous work after session 42. Six
+commits this stretch:
+
+- **e5bd214** — Doctor-note badge on the Notifications bell.
+  useAttentionCount picked up a new field, recentDoctorNotes, counting
+  visible notes written in the last 14 days. Total feeds AppSidebar
+  bell dot + PatientDashboard dropdown pill. Notifications page now
+  includes DoctorNotesCard so the badge lands on a real consumer.
+- **63cb84d** — Appointments could only go scheduled → cancelled.
+  Doctor's Appointments tab now offers Mark completed / No-show on
+  past appointments still in scheduled state, with quiet Undo on
+  resolved rows. Status pills tint green / amber. Patient-side
+  Appointments page picks up matching pills.
+- **caef89d** — Dead "Join Call" / "Start call" buttons on
+  DoctorDashboard + DoctorTodayBanner had no onClick (Womanie doesn't
+  run video infrastructure). Relabeled to "Open chart" and wired to
+  /doctor/patient/:id so the click does the thing a doctor actually
+  needs at appointment time.
+- **44a5fcb** — Doctor's connected-patients list now surfaces patient
+  activity: /api/doctors/connections LATERAL-joins health_documents to
+  return last_upload_at + recent_doc_count (14-day window). Dashboard
+  sorts by approved → recent count → last upload → created. Each row
+  shows "Last upload <relative>" and patients with new uploads get a
+  small amber "N new" pill.
+- **5b0f430** — Doctor's documents tab renders ai_summary through
+  react-markdown so the existing structure (📋 Key Takeaways,
+  ⚡ Action Items, 🔗 Cross-Referenced Patterns) is finally readable.
+  Document title prefers ai_suggested_name where Claude proposed
+  something clearer than the original filename.
+- **12a2ab6** — One-click follow-up after a visit. "Mark completed"
+  toast now carries an "Add visit note" action button that navigates
+  to /doctor/patient/:id?addNote=visit&date=<iso>; PatientDetails
+  consumes those params, jumps to the Notes tab, opens the new-note
+  form, and pre-fills the title with "Visit on <date>". Query is
+  stripped on consume so a refresh doesn't re-trigger.
+
 ### 2026-05-19 (session 42)
 
 - **2781efb** — Patient dashboard now surfaces doctor notes that have
