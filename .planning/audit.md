@@ -177,6 +177,43 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-19 (session 44 — dashboard per-mode polish)
+
+Alena asked "can you improve dashboard? for different types" — four
+commits making the dashboard read like it knows who's looking at it:
+
+- **85ac504** — `ModeHeroStat` is a slim "today at a glance" card at
+  the very top of /dashboard. Each life stage gets distinct content
+  and tinting: cycle day + phase + days-to-next for menstrual/conception;
+  pill streak (parsed from daily_health_signals notes) for contraception;
+  phase label + tracking day for IVF; week + trimester + due date math
+  for pregnancy; days-since-last-period + hot-flash count for menopause;
+  readiness % from local checklist for pre-menstrual; static wellness
+  framing for post-menopause. Empty states are seed prompts, not stale
+  placeholders.
+- **1ce6284** — The comment on quickLinks claimed "Context-aware quick
+  links based on life stage" but every mode showed the same four tiles.
+  Doctor-search slot's label now nudges toward the right specialty —
+  "Find OB-GYN" / "Find fertility specialist" / "Find menopause
+  specialist" / "Find gynecologist" — while the destination stays the
+  shared FindDoctor page.
+- **79cbde9** — Daily Reminders card was gated on `stageTips[selectedMode]`
+  but the dictionary only had four modes filled in. Users on
+  pre-menstrual / contraception / IVF / post-menopause silently saw no
+  reminders card at all. Filled in the missing four with mode-appropriate
+  content (pill timing + STI reminder for contraception; injection
+  cadence + hydration for IVF; DEXA + cardio screening for post-
+  menopause; first-period age + prep-kit advice for pre-menstrual) and
+  bumped the existing four to four tips each for symmetry.
+- **f37709f** — Profile-completion banner used to route users to
+  /onboarding/basic-info — but that form only collects DOB / height /
+  weight / blood type, no name field. Users would walk through it, come
+  back, and the banner would still be sitting there because
+  profile.full_name still wasn't set. Replaced with an inline form: one
+  input, one Save button, upserts profile.full_name through /api/db,
+  banner self-dismisses, dashboard greeting at the top updates without
+  a refresh.
+
 ### 2026-05-19 (session 43 — autonomous arc)
 
 Alena re-authorized 8 hours of autonomous work after session 42. Six
