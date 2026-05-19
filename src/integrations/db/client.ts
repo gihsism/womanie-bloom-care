@@ -98,9 +98,9 @@ export const db = {
     },
     onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
     signInWithOAuth: async () => ({ data: null, error: null }),
-    signInWithPassword: async () => ({ data: null, error: { message: 'Use Clerk for authentication' } }),
-    signUp: async () => ({ data: null, error: { message: 'Use Clerk for authentication' } }),
-    resetPasswordForEmail: async () => ({ data: null, error: { message: 'Use Clerk for authentication' } }),
+    signInWithPassword: async () => ({ data: null, error: { message: 'Use /api/auth/login (JWT auth)' } }),
+    signUp: async () => ({ data: null, error: { message: 'Use /api/auth/signup (JWT auth)' } }),
+    resetPasswordForEmail: async () => ({ data: null, error: { message: 'Use /api/auth/change-password' } }),
   },
   storage: {
     from: () => ({
