@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { scorePassword } from '@/lib/password-strength';
 
 const specialties = [
   'Obstetrics & Gynecology',
@@ -47,7 +48,7 @@ const DoctorSignUp = () => {
   const isStep1Valid = () => {
     return (
       formData.email.length > 0 &&
-      formData.password.length >= 6 &&
+      formData.password.length >= 8 &&
       formData.password === formData.confirmPassword
     );
   };
@@ -200,12 +201,12 @@ const DoctorSignUp = () => {
                     <Input
                       id="password"
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="Create a password (min 6 characters)"
+                      placeholder="At least 8 characters"
                       className="pl-10 pr-10"
                       value={formData.password}
                       onChange={(e) => handleInputChange('password', e.target.value)}
                       required
-                      minLength={6}
+                      minLength={8}
                     />
                     <button
                       type="button"
@@ -215,6 +216,27 @@ const DoctorSignUp = () => {
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
+                  {formData.password && (() => {
+                    const s = scorePassword(formData.password);
+                    return (
+                      <div className="space-y-1">
+                        <div className="flex gap-1" aria-hidden="true">
+                          {[1, 2, 3, 4, 5].map((tick) => (
+                            <div
+                              key={tick}
+                              className={`h-1 flex-1 rounded-full ${
+                                tick <= s.score ? s.color : 'bg-muted'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <p className="text-xs flex items-center justify-between" role="status">
+                          <span className="font-medium">{s.label}</span>
+                          <span className="text-muted-foreground">{s.hint}</span>
+                        </p>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Confirm Password */}
