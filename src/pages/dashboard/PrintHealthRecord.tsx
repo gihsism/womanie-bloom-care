@@ -51,6 +51,17 @@ interface Item {
   raw_data: Record<string, unknown> | string | null;
 }
 
+interface DoctorNote {
+  id: string;
+  title: string;
+  content: string;
+  note_type: string | null;
+  created_at: string;
+  doctor_name: string | null;
+  doctor_title: string | null;
+  doctor_specialties: string[] | null;
+}
+
 const STATUS_LABEL: Record<string, string> = {
   critical: 'Critical',
   abnormal: 'Abnormal',
@@ -78,11 +89,12 @@ export default function PrintHealthRecord() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [docs, setDocs] = useState<Doc[]>([]);
   const [items, setItems] = useState<Item[]>([]);
+  const [doctorNotes, setDoctorNotes] = useState<DoctorNote[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   const load = useCallback(async () => {
     if (!user) return;
-    const [profileRes, docsRes, itemsRes] = await Promise.all([
+    const [profileRes, docsRes, itemsRes, notesResp] = await Promise.all([
       db.from('profiles')
         .select('full_name, life_stage, pregnancy_due_date, ivf_phase')
         .eq('id', user.id)
@@ -94,10 +106,12 @@ export default function PrintHealthRecord() {
       db.from('current_extracted_data')
         .select('id, document_id, title, value, unit, reference_range, status, data_type, date_recorded, notes, raw_data')
         .eq('user_id', user.id),
+      fetch('/api/me/doctor-notes').then(r => (r.ok ? r.json() : { notes: [] })),
     ]);
     setProfile((profileRes.data ?? null) as Profile | null);
     setDocs((docsRes.data ?? []) as Doc[]);
     setItems((itemsRes.data ?? []) as Item[]);
+    setDoctorNotes((notesResp?.notes ?? []) as DoctorNote[]);
     setLoaded(true);
   }, [user]);
 
@@ -219,6 +233,40 @@ export default function PrintHealthRecord() {
                 )}
               </tbody>
             </table>
+          </section>
+        )}
+
+        {doctorNotes.length > 0 && (
+          <section className="mb-6 break-inside-avoid">
+            <h2 className="text-sm font-bold uppercase tracking-wide text-gray-500 mb-2">
+              Notes from your doctors
+            </h2>
+            <div className="space-y-3">
+              {doctorNotes.slice(0, 10).map(n => {
+                const docLabel = [n.doctor_title, n.doctor_name].filter(Boolean).join(' ') || 'Doctor';
+                const spec = Array.isArray(n.doctor_specialties) && n.doctor_specialties.length > 0
+                  ? `, ${n.doctor_specialties[0]}`
+                  : '';
+                const prettyType = (n.note_type ?? '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                return (
+                  <div key={n.id} className="border-l-2 border-gray-300 pl-3 text-sm">
+                    <p className="font-medium">
+                      {n.title}
+                      {prettyType && <span className="text-[10px] text-gray-500 ml-2 uppercase tracking-wide">{prettyType}</span>}
+                    </p>
+                    <p className="text-[11px] text-gray-600 mb-1">
+                      {docLabel}{spec} · {format(new Date(n.created_at), 'MMM d, yyyy')}
+                    </p>
+                    <p className="text-[12px] text-gray-700 whitespace-pre-line leading-relaxed">{n.content}</p>
+                  </div>
+                );
+              })}
+              {doctorNotes.length > 10 && (
+                <p className="text-[10px] text-gray-500 italic">
+                  + {doctorNotes.length - 10} earlier note{doctorNotes.length - 10 > 1 ? 's' : ''} in your Womanie account.
+                </p>
+              )}
+            </div>
           </section>
         )}
 
