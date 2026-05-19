@@ -156,6 +156,8 @@ const PatientDetails = () => {
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
   const [notesQuery, setNotesQuery] = useState('');
   const [notesTypeFilter, setNotesTypeFilter] = useState<string>('all');
+  const [docsQuery, setDocsQuery] = useState('');
+  const [docsCategoryFilter, setDocsCategoryFilter] = useState<string>('all');
 
   const startEditingNote = (note: DoctorNote) => {
     setEditingNoteId(note.id);
@@ -543,9 +545,52 @@ const PatientDetails = () => {
                 <CardDescription>Medical documents uploaded by the patient</CardDescription>
               </CardHeader>
               <CardContent>
-                {documents.length > 0 ? (
+                {documents.length > 5 && (() => {
+                  const categories = Array.from(
+                    new Set(
+                      documents
+                        .map(d => d.document_type)
+                        .filter((s): s is string => Boolean(s))
+                    )
+                  ).sort();
+                  return (
+                    <div className="mb-4 flex flex-col sm:flex-row gap-2">
+                      <Input
+                        placeholder="Search file or summary…"
+                        value={docsQuery}
+                        onChange={e => setDocsQuery(e.target.value)}
+                        className="flex-1"
+                      />
+                      <Select value={docsCategoryFilter} onValueChange={setDocsCategoryFilter}>
+                        <SelectTrigger className="sm:w-48"><SelectValue placeholder="All categories" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All categories</SelectItem>
+                          {categories.map(c => (
+                            <SelectItem key={c} value={c}>{c.replace(/_/g, ' ')}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  );
+                })()}
+                {(() => {
+                  const q = docsQuery.trim().toLowerCase();
+                  const visibleDocs = documents.filter(d => {
+                    if (docsCategoryFilter !== 'all' && d.document_type !== docsCategoryFilter) return false;
+                    if (!q) return true;
+                    return (d.file_name || '').toLowerCase().includes(q)
+                      || (d.ai_suggested_name || '').toLowerCase().includes(q)
+                      || (d.ai_summary || '').toLowerCase().includes(q);
+                  });
+                  if (documents.length === 0) {
+                    return <p className="text-muted-foreground text-center py-8">No documents uploaded</p>;
+                  }
+                  if (visibleDocs.length === 0) {
+                    return <p className="text-muted-foreground text-center py-8 text-sm">No documents match this filter.</p>;
+                  }
+                  return (
                   <div className="space-y-4">
-                    {documents.map((doc) => (
+                    {visibleDocs.map((doc) => (
                       <div key={doc.id} className="border rounded-lg p-4">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -586,9 +631,8 @@ const PatientDetails = () => {
                       </div>
                     ))}
                   </div>
-                ) : (
-                  <p className="text-muted-foreground text-center py-8">No documents uploaded</p>
-                )}
+                  );
+                })()}
               </CardContent>
             </Card>
           </TabsContent>
