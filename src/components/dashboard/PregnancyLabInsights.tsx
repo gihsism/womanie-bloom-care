@@ -1,20 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { db } from '@/integrations/db/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { onHealthDataChange } from '@/lib/data-events';
+import { useLabResults } from '@/hooks/useLabResults';
 import { ArrowRight, FlaskConical, AlertTriangle, CheckCircle2, Upload } from 'lucide-react';
-
-interface LabItem {
-  title: string;
-  value: string | null;
-  unit: string | null;
-  reference_range: string | null;
-  status: string | null;
-}
 
 // Key tests to highlight during pregnancy
 const PREGNANCY_TESTS = [
@@ -49,26 +38,7 @@ const statusBg = (status: string | null) => {
 
 export default function PregnancyLabInsights() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [labs, setLabs] = useState<LabItem[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const load = useCallback(async () => {
-    if (!user) return;
-    const { data } = await db
-      .from('medical_extracted_data')
-      .select('title, value, unit, reference_range, status')
-      .eq('user_id', user.id)
-      .eq('data_type', 'lab_result');
-    if (data) setLabs(data);
-    setLoading(false);
-  }, [user]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  useEffect(() => onHealthDataChange(load), [load]);
+  const { labs, loading } = useLabResults();
 
   if (loading) return null;
 
