@@ -628,9 +628,14 @@ const PatientManagement = ({ patients, onRefresh, doctorId }: { patients: Patien
                           {patient.patient_full_name?.trim() || `Patient #${patient.patient_id.slice(0, 8)}`}
                         </p>
                         {recentCount > 0 && patient.status === 'approved' && (
-                          <Badge variant="outline" className="h-4 px-1.5 text-[9px] bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200 border-transparent">
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/doctor/patient/${patient.patient_id}?tab=documents`)}
+                            className="h-4 px-1.5 text-[9px] inline-flex items-center rounded-md bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors"
+                            title="Open the patient's documents tab"
+                          >
                             {recentCount} new
-                          </Badge>
+                          </button>
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">

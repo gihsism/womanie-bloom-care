@@ -143,6 +143,20 @@ const PatientDetails = () => {
     setSearchParams(searchParams, { replace: true });
   }, [searchParams, setSearchParams]);
 
+  // Deep-link support: ?tab=documents / labs / notes / health / overview
+  // jumps straight to the named tab. Used from the doctor dashboard
+  // "N new" upload pill so the doctor lands on the documents view
+  // without an extra click. Validated against the tab list to keep
+  // unknown values from breaking the Tabs component.
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (!tab) return;
+    const valid = ['overview', 'health', 'labs', 'documents', 'notes'];
+    if (valid.includes(tab)) setActiveTab(tab);
+    searchParams.delete('tab');
+    setSearchParams(searchParams, { replace: true });
+  }, [searchParams, setSearchParams]);
+
   // Inline edit state for an existing note. Only one note is editable at
   // a time; the form replaces the read-only display for that row.
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
