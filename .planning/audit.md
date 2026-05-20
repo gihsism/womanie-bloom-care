@@ -213,6 +213,22 @@ through. Four commits:
   mid-edit refresh keeps the new photo. Remove button confirm-
   prompts and nulls the column. FindDoctor picks up the new image
   via the existing avatar_url render — no client change there.
+- **540e994** — App: lazy-load all marketing + auth + onboarding
+  pages. The initial bundle eagerly imported Product / ForPatients /
+  ForDoctors / About / Pricing / Blog / Welcome / Community plus the
+  auth and onboarding flows — pages a returning logged-in user
+  landing on /dashboard never sees but still paid for. Converted to
+  `lazy(() => import(...))`. Build impact: index chunk 731.84 kB →
+  506.82 kB (-30%, -58 kB gzipped on the wire). MedicalHistory's
+  577 kB chunk is the next target — its recharts deps want their own
+  boundary, but that's a heavier refactor.
+- **dad533e** — Doctor's "N new" upload pill on the connected-
+  patients list now opens that patient's Documents tab directly.
+  Previously it was a non-interactive div — to actually see those
+  docs the doctor had to click View Details, then click Documents.
+  PatientDetails picks up a new `?tab=` deep-link param (validated
+  against the known tab list, stripped on consume) so the badge
+  routes the doctor exactly where they wanted to go in one click.
 
 ### 2026-05-19 (session 51 — continuing 24h arc, +5 more)
 
