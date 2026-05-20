@@ -12,27 +12,33 @@ import { Loader2 } from "lucide-react";
 
 // Custom auth — no third-party dependency
 
-// Lightweight pages — load eagerly (landing / auth / onboarding)
+// Eager imports only for what the very first paint needs — the
+// landing page and the catch-all 404. Everything else is lazy: a
+// returning logged-in user landing on /dashboard shouldn't pay the
+// download cost of the marketing pages they aren't going to visit.
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import SelectUserType from "./pages/auth/SelectUserType";
-import PatientSignUp from "./pages/auth/PatientSignUp";
-import PatientLogIn from "./pages/auth/PatientLogIn";
-import DoctorLogIn from "./pages/auth/DoctorLogIn";
-import DoctorSignUp from "./pages/auth/DoctorSignUp";
-import BasicInformation from "./pages/onboarding/BasicInformation";
-import LifeStageSelection from "./pages/onboarding/LifeStageSelection";
-import ModeSetup from "./pages/onboarding/ModeSetup";
-import OnboardingSuccess from "./pages/onboarding/OnboardingSuccess";
-import Product from "./pages/Product";
-import ForPatients from "./pages/ForPatients";
-import ForDoctors from "./pages/ForDoctors";
-import About from "./pages/About";
-import Pricing from "./pages/Pricing";
-import Blog from "./pages/Blog";
-import Install from "./pages/Install";
-import Welcome from "./pages/Welcome";
-import Community from "./pages/Community";
+
+// Marketing / static pages — visited rarely by authenticated users, so
+// they don't belong in the initial bundle.
+const SelectUserType = lazy(() => import("./pages/auth/SelectUserType"));
+const PatientSignUp = lazy(() => import("./pages/auth/PatientSignUp"));
+const PatientLogIn = lazy(() => import("./pages/auth/PatientLogIn"));
+const DoctorLogIn = lazy(() => import("./pages/auth/DoctorLogIn"));
+const DoctorSignUp = lazy(() => import("./pages/auth/DoctorSignUp"));
+const BasicInformation = lazy(() => import("./pages/onboarding/BasicInformation"));
+const LifeStageSelection = lazy(() => import("./pages/onboarding/LifeStageSelection"));
+const ModeSetup = lazy(() => import("./pages/onboarding/ModeSetup"));
+const OnboardingSuccess = lazy(() => import("./pages/onboarding/OnboardingSuccess"));
+const Product = lazy(() => import("./pages/Product"));
+const ForPatients = lazy(() => import("./pages/ForPatients"));
+const ForDoctors = lazy(() => import("./pages/ForDoctors"));
+const About = lazy(() => import("./pages/About"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const Blog = lazy(() => import("./pages/Blog"));
+const Install = lazy(() => import("./pages/Install"));
+const Welcome = lazy(() => import("./pages/Welcome"));
+const Community = lazy(() => import("./pages/Community"));
 
 // Heavy pages — lazy loaded (dashboard / doctor / features)
 const PatientDashboard = lazy(() => import("./pages/PatientDashboard"));
