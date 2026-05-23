@@ -328,6 +328,22 @@ After this batch, every per-day field DailyLogging writes
 symptoms, mood, discharge) appears visualized in a dashboard
 surface somewhere. No more "you log it but never see it back."
 
+Sleep + reload-fix tail (2026-05-24):
+- **6ddf97d** — Sleep tracking. New hours + 1-5 quality fields on
+  every mode of the daily log; SleepTrendCard on cycle / conception
+  / pregnancy / menopause / post-menopause modes reads them back.
+  30-day average, last-7-day average, recharts line with the 7-9h
+  recommended range shaded; amber callout when last-7-day average
+  drops below 7h ("chronic short sleep is linked to mood, cycle,
+  cardiovascular changes — worth flagging at your next visit").
+- **2baaf02** — DailyLogging reload-data-loss fix. Every field
+  written into notes (Flow / LH / Intercourse / Pill / Medication
+  / Hot flashes / BBT / Sleep / Sleep quality / freeform) is now
+  parsed back when the form re-opens mid-day. Without this, saving
+  a second time would rebuild notes from a blank form — silently
+  dropping every other field the user had logged. Caught the bug
+  before users hit it.
+
 ### 2026-05-23 (session 53 — 24h authorization)
 
 Alena re-authorized a third 24h autonomous arc. Began with a
