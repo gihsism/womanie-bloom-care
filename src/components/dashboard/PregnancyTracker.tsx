@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import BabyImage3DOverlay from './BabyImage3DOverlay';
+import KickCounter from './KickCounter';
 
 // Baby development illustrations
 import babyWeek04 from '@/assets/baby-week-04.png';
@@ -838,6 +839,10 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy }: Pregnancy
           ))}
         </div>
       </Card>
+
+      {/* Daily kick counter — only relevant from ~week 28 onward, when
+          fetal movement-counting becomes part of standard self-monitoring. */}
+      {weeksPregnant >= 28 && <KickCounter />}
 
       {/* Recommended prenatal milestones — what's due now, what's
           coming up, what may have been missed. Sourced from ACOG/NICE
