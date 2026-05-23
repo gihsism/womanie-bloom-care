@@ -60,10 +60,7 @@ const SelectUserType = () => {
 
             {/* Healthcare Provider Card */}
             <Card
-              onClick={() => {
-                // Placeholder for future implementation
-                console.log('Healthcare Provider signup - Coming soon');
-              }}
+              onClick={() => navigate('/auth/doctor-signup')}
               className="p-8 cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-secondary/50 group"
             >
               <div className="flex flex-col items-center text-center space-y-4">
@@ -78,6 +75,27 @@ const SelectUserType = () => {
                 </div>
               </div>
             </Card>
+          </div>
+
+          {/* Already-have-an-account row — both audiences land on the
+              same screen, so we have to surface both login paths. */}
+          <div className="text-center mt-8 text-sm text-muted-foreground">
+            Already have an account?{' '}
+            <button
+              type="button"
+              onClick={() => navigate('/auth/login')}
+              className="text-primary hover:underline font-medium"
+            >
+              Patient login
+            </button>
+            {' · '}
+            <button
+              type="button"
+              onClick={() => navigate('/auth/doctor-login')}
+              className="text-primary hover:underline font-medium"
+            >
+              Doctor login
+            </button>
           </div>
         </div>
       </div>

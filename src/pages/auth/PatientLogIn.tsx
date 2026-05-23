@@ -112,6 +112,9 @@ const PatientLogIn = () => {
           <p className="text-center text-sm text-muted-foreground">
             Don't have an account? <a href="/auth/signup" className="text-primary hover:underline font-medium">Sign Up</a>
           </p>
+          <p className="text-center text-xs text-muted-foreground mt-2">
+            Are you a doctor? <a href="/auth/doctor-login" className="text-primary hover:underline">Doctor login</a>
+          </p>
         </Card>
       </div>
     </div>
