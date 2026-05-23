@@ -386,10 +386,10 @@ const DoctorDashboard = () => {
               <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('appointments')}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Video className="h-5 w-5 text-primary" />
-                    Video Consultations
+                    <Calendar className="h-5 w-5 text-primary" />
+                    Appointments
                   </CardTitle>
-                  <CardDescription>Manage your video consultation schedule</CardDescription>
+                  <CardDescription>Review upcoming and past consultations</CardDescription>
                 </CardHeader>
               </Card>
 
