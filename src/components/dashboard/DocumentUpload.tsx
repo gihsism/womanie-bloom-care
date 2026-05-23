@@ -56,19 +56,23 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
         return;
       }
 
-      // Validate file type
-      const allowedTypes = [
+      // Validate file type. Accept PDF, DOCX, and any image type the
+      // browser can identify — iPhone photos arrive as image/heic /
+      // image/heif and were rejected by an explicit jpg/png allowlist.
+      // Some browsers report an empty selectedFile.type for camera
+      // captures or HEIC; accept those by extension as a fallback.
+      const allowedMimes = [
         'application/pdf',
-        'image/jpeg',
-        'image/png',
-        'image/jpg',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       ];
+      const isAllowedImage = selectedFile.type.startsWith('image/');
+      const ext = (selectedFile.name.split('.').pop() || '').toLowerCase();
+      const isAllowedByExt = ['pdf', 'docx', 'jpg', 'jpeg', 'png', 'heic', 'heif', 'webp'].includes(ext);
 
-      if (!allowedTypes.includes(selectedFile.type)) {
+      if (!allowedMimes.includes(selectedFile.type) && !isAllowedImage && !isAllowedByExt) {
         toast({
           title: 'Invalid file type',
-          description: 'Please upload a PDF, JPEG, PNG, or DOCX file',
+          description: 'Please upload a PDF, DOCX, or image file (JPG, PNG, HEIC, WebP)',
           variant: 'destructive',
         });
         return;
