@@ -18,17 +18,13 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import {
   ArrowLeft,
-  User,
   FileText,
   Calendar,
   Activity,
   Plus,
-  Clock,
   Heart,
   Droplet,
   MessageSquare,
-  Download,
-  Eye,
   Loader2,
   ExternalLink,
 } from 'lucide-react';
