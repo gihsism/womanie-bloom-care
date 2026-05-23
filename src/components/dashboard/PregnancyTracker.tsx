@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import BabyImage3DOverlay from './BabyImage3DOverlay';
 import KickCounter from './KickCounter';
 import MaternalWeightTracker from './MaternalWeightTracker';
+import ContractionTimer from './ContractionTimer';
 
 // Baby development illustrations
 import babyWeek04 from '@/assets/baby-week-04.png';
@@ -848,6 +849,11 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy }: Pregnancy
       {/* Daily kick counter — only relevant from ~week 28 onward, when
           fetal movement-counting becomes part of standard self-monitoring. */}
       {weeksPregnant >= 28 && <KickCounter />}
+
+      {/* Contraction timer — only relevant from ~week 36 onward when
+          labor could realistically start. Earlier contractions are
+          almost certainly Braxton-Hicks and don't need timing. */}
+      {weeksPregnant >= 36 && <ContractionTimer />}
 
       {/* Recommended prenatal milestones — what's due now, what's
           coming up, what may have been missed. Sourced from ACOG/NICE
