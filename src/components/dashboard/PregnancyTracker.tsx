@@ -48,6 +48,9 @@ import {
   Apple,
   Pencil,
   RotateCcw,
+  ClipboardList,
+  CheckCircle2,
+  CircleDashed,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -251,6 +254,59 @@ const getFruitImage = (week: number): string => {
   if (week <= 3) return fruitWeek04;
   if (week >= 40) return fruitWeek40;
   return FRUIT_IMAGES[week] || fruitWeek36;
+};
+
+// ─── Recommended prenatal milestones ───
+//
+// Sourced from ACOG / NICE typical prenatal care timelines. These are
+// recommendations, not prescriptions — every pregnancy is different and
+// the user's OB-GYN may schedule differently. Window is the
+// {start, end} week range during which the milestone is typically done;
+// label is short, description explains why.
+interface PregnancyMilestone {
+  start: number;
+  end: number;
+  label: string;
+  description: string;
+  category: 'visit' | 'scan' | 'lab' | 'class' | 'decision';
+}
+
+const PREGNANCY_MILESTONES: PregnancyMilestone[] = [
+  { start: 4, end: 8, label: 'First prenatal visit', description: 'Confirm pregnancy, due-date calc, initial bloodwork (CBC, blood type + Rh, rubella, HIV, hep B, syphilis).', category: 'visit' },
+  { start: 8, end: 12, label: 'Dating ultrasound', description: 'Confirms gestational age and heartbeat. Most accurate due-date estimate.', category: 'scan' },
+  { start: 10, end: 13, label: 'First-trimester screening', description: 'Nuchal translucency scan + bloodwork (PAPP-A, β-hCG) to assess Down/Edwards/Patau risk.', category: 'scan' },
+  { start: 10, end: 14, label: 'NIPT (optional)', description: 'Cell-free DNA blood test. More sensitive than the first-trimester combined screen; covered by some insurance for high-risk pregnancies.', category: 'lab' },
+  { start: 15, end: 20, label: 'Quad screen (if no NIPT)', description: 'AFP, hCG, estriol, inhibin-A. Backup screen if first-trimester or NIPT not done.', category: 'lab' },
+  { start: 18, end: 22, label: 'Anatomy scan', description: 'Detailed mid-pregnancy ultrasound — checks organs, placenta, growth. Sex often visible if you want to know.', category: 'scan' },
+  { start: 24, end: 28, label: 'Glucose challenge test', description: 'Screens for gestational diabetes. 1-hour fasting test; if abnormal, follow up with the 3-hour tolerance test.', category: 'lab' },
+  { start: 27, end: 29, label: 'Rhogam (if Rh-negative)', description: 'Anti-D immunoglobulin if your blood type is Rh-negative. Prevents complications in this and future pregnancies.', category: 'lab' },
+  { start: 28, end: 36, label: 'Visits every 2 weeks', description: 'Standard cadence shifts from monthly to biweekly through week 36.', category: 'visit' },
+  { start: 28, end: 40, label: 'Daily kick counts', description: 'Track fetal movement once a day from now on — 10 movements in 2 hours is the typical reassurance threshold.', category: 'decision' },
+  { start: 30, end: 36, label: 'Childbirth class', description: 'Hospital tour, birth-prep classes, breastfeeding class. Book early — popular classes fill up.', category: 'class' },
+  { start: 35, end: 37, label: 'Group B Strep swab', description: 'Vaginal/rectal swab to test for GBS colonization. If positive, you\'ll get IV antibiotics in labor.', category: 'lab' },
+  { start: 36, end: 40, label: 'Weekly visits', description: 'Cervical checks, position monitoring, induction discussion if appropriate.', category: 'visit' },
+  { start: 36, end: 38, label: 'Hospital bag packed', description: 'Have it ready by week 36. Pack for mom, baby, partner. Include ID, insurance card, birth plan if you have one.', category: 'class' },
+  { start: 37, end: 40, label: 'Full term reached', description: '37 weeks is "early term", 39+ is "full term". Most healthy babies arrive between 39 and 41 weeks.', category: 'decision' },
+  { start: 41, end: 42, label: 'Induction discussion', description: 'Past your due date by 7+ days — your provider will discuss monitoring frequency and induction timing.', category: 'decision' },
+];
+
+// Returns the milestones that bracket the current week: a small set
+// of "due now" plus "coming up next" plus "you may have missed if
+// not done". UI uses these three buckets so the user sees what's
+// active without scrolling 16 rows.
+function getRelevantMilestones(week: number) {
+  const active = PREGNANCY_MILESTONES.filter(m => week >= m.start && week <= m.end);
+  const upcoming = PREGNANCY_MILESTONES.filter(m => m.start > week && m.start <= week + 6);
+  const recent = PREGNANCY_MILESTONES.filter(m => m.end < week && m.end >= week - 4);
+  return { active, upcoming, recent };
+}
+
+const MILESTONE_CATEGORY_TONE: Record<PregnancyMilestone['category'], { dot: string; label: string }> = {
+  visit: { dot: 'bg-primary', label: 'Visit' },
+  scan: { dot: 'bg-secondary', label: 'Scan' },
+  lab: { dot: 'bg-amber-500', label: 'Lab' },
+  class: { dot: 'bg-emerald-500', label: 'Class' },
+  decision: { dot: 'bg-violet-500', label: 'Decision' },
 };
 
 // ─── Pregnancy symptoms by trimester ───
@@ -782,6 +838,84 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy }: Pregnancy
           ))}
         </div>
       </Card>
+
+      {/* Recommended prenatal milestones — what's due now, what's
+          coming up, what may have been missed. Sourced from ACOG/NICE
+          typical prenatal care timelines; user's actual schedule may
+          vary by clinic. */}
+      {(() => {
+        const { active, upcoming, recent } = getRelevantMilestones(weeksPregnant);
+        if (active.length === 0 && upcoming.length === 0 && recent.length === 0) return null;
+        const renderMilestone = (
+          m: PregnancyMilestone,
+          variant: 'active' | 'upcoming' | 'recent'
+        ) => {
+          const tone = MILESTONE_CATEGORY_TONE[m.category];
+          const Icon = variant === 'recent' ? CheckCircle2 : CircleDashed;
+          return (
+            <div
+              key={`${m.start}-${m.label}`}
+              className={`flex items-start gap-3 p-3 rounded-lg border ${
+                variant === 'active' ? 'border-primary/30 bg-primary/5' : 'border-border bg-card'
+              } ${variant === 'recent' ? 'opacity-70' : ''}`}
+            >
+              <Icon
+                className={`h-4 w-4 mt-0.5 flex-shrink-0 ${
+                  variant === 'recent' ? 'text-muted-foreground' : 'text-primary'
+                }`}
+              />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-medium">{m.label}</span>
+                  <span className={`inline-flex items-center gap-1 text-[10px] text-muted-foreground`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${tone.dot}`} />
+                    {tone.label} · weeks {m.start}{m.start !== m.end ? `–${m.end}` : ''}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                  {m.description}
+                </p>
+              </div>
+            </div>
+          );
+        };
+        return (
+          <Card className="p-4 space-y-3">
+            <h4 className="font-semibold flex items-center gap-2">
+              <ClipboardList className="h-4 w-4 text-primary" />
+              Prenatal milestones
+            </h4>
+            <p className="text-[11px] text-muted-foreground -mt-1">
+              Typical ACOG/NICE schedule — your clinic may differ. Use this as a checklist for
+              what to ask about at your next visit.
+            </p>
+            {active.length > 0 && (
+              <div className="space-y-2">
+                <h5 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Due now
+                </h5>
+                {active.map(m => renderMilestone(m, 'active'))}
+              </div>
+            )}
+            {upcoming.length > 0 && (
+              <div className="space-y-2">
+                <h5 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Coming up
+                </h5>
+                {upcoming.slice(0, 4).map(m => renderMilestone(m, 'upcoming'))}
+              </div>
+            )}
+            {recent.length > 0 && (
+              <div className="space-y-2">
+                <h5 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Recently expected
+                </h5>
+                {recent.slice(0, 3).map(m => renderMilestone(m, 'recent'))}
+              </div>
+            )}
+          </Card>
+        );
+      })()}
 
       {/* Week-by-week mini timeline */}
       <Card className="p-4 space-y-3">
