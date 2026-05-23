@@ -177,6 +177,78 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-23 (session 54 — deepening each life-stage mode)
+
+Alena asked to keep improving pregnancy mode then move to other
+modes, working continuously for 24h. Nine commits adding clinically
+meaningful tools per mode:
+
+Pregnancy:
+- **77d944b** — Prenatal milestones checklist. 16 entries from typical
+  ACOG/NICE timelines (first visit, dating ultrasound, NT scan,
+  NIPT, anatomy scan, glucose challenge, Rhogam, GBS swab, hospital
+  bag, full-term, induction discussion). Bucketed into "Due now /
+  Coming up / Recently expected" against the current week. Category
+  dots (visit / scan / lab / class / decision) + one-line "why this
+  matters" per row.
+- **6ecaacd** — Kick counter from week 28. ACOG 10-movements-in-2-hours
+  methodology. Big tap target, runs locally (per-user localStorage),
+  auto-completes at 10 with a reassuring or amber toast based on
+  duration. Past-2h-without-10-movements inline warning. 14-entry
+  session history with ✓/! markers.
+- **104d1f6** — Maternal weight gain card. IOM guidelines: classifies
+  pre-pregnancy BMI into the four categories, computes recommended
+  total + expected-by-current-week gain (2-phase curve: ~1.5 kg in
+  T1, then linear). Pre-fills height from the existing
+  womanie_basic_info_ localStorage stash. Weight log: date + kg,
+  one entry per date, recent-log strip with delta + per-row delete.
+
+Conception (also surfaces on menstrual-cycle):
+- **926a800** — BBT chart. Parses BBT entries from
+  daily_health_signals.notes (DailyLogging already writes
+  "BBT: 97.8°F" there but nothing ever read it back). Recharts line
+  with cycle-start + ovulation reference lines. Biphasic-shift
+  detection: first day of a sustained 3-day rise above the prior
+  6-day rolling average + 0.2°F; reports doubling jump in plain
+  language. °F / °C toggle in header.
+
+Menopause:
+- **75f40b6** — Stage tracker. Pulls the most recent period_tracking
+  row, classifies (Cycling <60d / Perimenopause / Late perimenopause
+  / Menopause reached) with progress bar against the 365-day clinical
+  threshold. Card tone shifts amber → green as the line approaches.
+  Empty-state nudge if no period logged.
+- **6388f21** — Preventive screening tracker for menopause +
+  post-menopause. Eight USPSTF/ACS-standard screenings with their
+  cadences; per-row mark-as-done + status (overdue / due-soon /
+  up-to-date / not logged), sorted by urgency. Replaces the old
+  static "Schedule annual check-ups" callout.
+
+IVF:
+- **3d0c095** — Beta hCG tracker. Date + optional time + value per
+  draw; computes inter-draw doubling time via t·ln(2)/ln(ratio);
+  interpretation branches on latest + trend (negative / borderline
+  / doubling normally / slower than typical / falling / plateau).
+  Card highlighted when phase is `tww` or `beta`.
+
+Contraception:
+- **f7c823f** — 30-day pill adherence calendar. Built from the in-
+  memory signals[] the dashboard already had. 30 squares, oldest
+  left, today ringed in primary. Colors: green on-time, amber late,
+  destructive missed, muted-grey not logged. Header reads
+  "12 on-time · 2 late · 1 missed".
+
+Cross-mode:
+- **bfa868e** — CycleHistoryCard for menstrual / conception /
+  contraception. Pulls last 12 months of period_tracking, derives
+  cycle length from consecutive period starts (not the stored
+  cycle_length, which can be stale), plots a Recharts bar chart with
+  bars colored by deviation from the mean (primary ≤2d, secondary
+  ≤5d, destructive outlier). Stats strip + ACOG-anchored regularity
+  badge (Very regular / Mostly / Somewhat / Irregular by σ
+  thresholds 2 / 5 / 8). Irregular triggers a callout pointing at
+  PCOS / thyroid / stress as worth-discussing-with-doctor causes.
+
 ### 2026-05-23 (session 53 — 24h authorization)
 
 Alena re-authorized a third 24h autonomous arc. Began with a
