@@ -61,7 +61,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
        FROM medical_extracted_data WHERE user_id = $1 ORDER BY date_recorded DESC NULLS LAST LIMIT 100`,
       [user.id]
     ),
-    sql.query('SELECT full_name, life_stage FROM profiles WHERE id = $1', [user.id]),
+    sql.query(
+      `SELECT full_name, life_stage, pregnancy_due_date, ivf_start_date, ivf_phase
+         FROM profiles WHERE id = $1`,
+      [user.id]
+    ),
     sql.query(
       `SELECT a.scheduled_at, a.consultation_type, a.duration,
               p.full_name AS doctor_name, p.title AS doctor_title, p.specialties AS doctor_specialties
@@ -90,7 +94,34 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   let medicalContext = '';
   if (profile) {
-    medicalContext += `Patient: ${profile.full_name || 'Unknown'}, Life stage: ${profile.life_stage || 'Not specified'}\n\n`;
+    medicalContext += `Patient: ${profile.full_name || 'Unknown'}, Life stage: ${profile.life_stage || 'Not specified'}`;
+
+    // Enrich with mode-specific anchor data so the assistant can
+    // answer "what week am I?" / "where am I in my IVF cycle?"
+    // without having to ask the user. profiles already stores these
+    // — they were just not being passed into the prompt.
+    if (profile.pregnancy_due_date) {
+      const due = new Date(profile.pregnancy_due_date as string);
+      if (!Number.isNaN(due.getTime())) {
+        const today = new Date();
+        const daysUntilDue = Math.round((due.getTime() - today.getTime()) / 86_400_000);
+        const totalDays = 280 - daysUntilDue;
+        const weeksPregnant = Math.max(0, Math.min(42, Math.floor(totalDays / 7)));
+        const daysExtra = Math.max(0, totalDays % 7);
+        medicalContext += `\nPregnancy: due ${due.toISOString().split('T')[0]} (week ${weeksPregnant}${daysExtra ? ` + ${daysExtra}d` : ''}, ${daysUntilDue} days to go)`;
+      }
+    }
+    if (profile.ivf_phase) {
+      medicalContext += `\nIVF phase: ${profile.ivf_phase}`;
+      if (profile.ivf_start_date) {
+        const startDate = new Date(profile.ivf_start_date as string);
+        if (!Number.isNaN(startDate.getTime())) {
+          const days = Math.max(0, Math.floor((Date.now() - startDate.getTime()) / 86_400_000));
+          medicalContext += ` (day ${days + 1} of journey)`;
+        }
+      }
+    }
+    medicalContext += '\n\n';
   }
 
   type Row = Record<string, unknown>;
