@@ -266,6 +266,26 @@ Continued session 54:
   context builder emits and picks from per-mode prompt sets — eight
   distinct sets, one per mode, each grounded in what the assistant
   actually knows from the server-side context.
+- **5f80e1f** — Conception: LH surge tracker. The DailyLogging form
+  has had a positive/negative/not-tested LH input forever, written
+  into daily_health_signals.notes as "LH test: positive". Nothing
+  read it back. New card parses the last 30 days, marks the most
+  recent valid surge (first positive preceded by a negative within
+  7 days), predicts ovulation 24h later. 30-day strip in amber
+  positive / grey negative / faint not-tested; today ringed.
+- **a6e99d2** — Cycle modes: 3-month fertility + period forecast.
+  Forward-looking complement to the existing past-cycle history
+  card. Predicts the next 3 cycles using the median cycle length
+  from the last 6 logged cycles (more robust than mean against
+  anovulatory outliers). Each row shows period dates + countdown,
+  fertile window, ovulation tick — same visual language as the past-
+  cycle card so the two views read consistently.
+- **ec4a132** — Pregnancy: hospital bag checklist from week 32. 28
+  items across four sections (for you / for baby / for partner /
+  documents + admin) with per-item "why this matters" hints. Per-
+  section progress badges, expandable details, overall progress bar.
+  "Pack by week 36" amber nudge after that milestone if incomplete;
+  "All packed ✓" emerald when done. Per-user localStorage.
 
 ### 2026-05-23 (session 53 — 24h authorization)
 
