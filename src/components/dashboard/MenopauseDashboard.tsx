@@ -24,6 +24,7 @@ import {
   AlertTriangle,
   Shield,
   Flower2,
+  Compass,
   HeartPulse,
   TrendingUp,
 } from 'lucide-react';
@@ -137,6 +138,8 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
   const [activeSection, setActiveSection] = useState<string | null>('symptoms');
   const [currentMythIndex, setCurrentMythIndex] = useState(0);
   const [signals, setSignals] = useState<SignalRow[]>([]);
+  const [lastPeriodStart, setLastPeriodStart] = useState<Date | null>(null);
+  const [periodLoaded, setPeriodLoaded] = useState(false);
 
   // ─── Persist tracked symptoms + myth index per user, per scope ───
   useEffect(() => {
@@ -176,6 +179,34 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
     loadSignals();
     return onHealthDataChange(() => loadSignals());
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  // Pull the most recent period start so we can compute the
+  // days-since-last-period count for the stage tracker.
+  useEffect(() => {
+    if (!user) return;
+    const load = async () => {
+      try {
+        const { data } = await db
+          .from('period_tracking')
+          .select('period_start_date')
+          .eq('user_id', user.id)
+          .order('period_start_date', { ascending: false })
+          .limit(1);
+        const row = Array.isArray(data) ? data[0] : null;
+        if (row?.period_start_date) {
+          setLastPeriodStart(new Date(row.period_start_date as string));
+        } else {
+          setLastPeriodStart(null);
+        }
+      } catch (e) {
+        console.error('Stage tracker period load error', e);
+      } finally {
+        setPeriodLoaded(true);
+      }
+    };
+    load();
+    return onHealthDataChange(load);
   }, [user?.id]);
 
   const hotFlashStats = useMemo(() => {
@@ -271,6 +302,94 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Where you are in your journey — computed from the most recent
+          period_tracking entry. The 12-consecutive-months-no-period
+          threshold is the clinical line between perimenopause and
+          menopause, so we surface progress toward it explicitly. */}
+      {!isPostMenopause && periodLoaded && lastPeriodStart && (() => {
+        const daysSince = Math.max(
+          0,
+          Math.floor((Date.now() - lastPeriodStart.getTime()) / 86_400_000)
+        );
+        const monthsSince = daysSince / 30.44;
+        let stageName: string;
+        let stageDescription: string;
+        let stageTone: string;
+        if (daysSince >= 365) {
+          stageName = 'Menopause reached';
+          stageDescription =
+            'Twelve consecutive months without a period — the clinical definition of menopause. You may want to update your life-stage mode to Post-Menopause.';
+          stageTone = 'border-green-300/60 bg-green-50/60 dark:bg-green-900/20 dark:border-green-700/40';
+        } else if (daysSince >= 180) {
+          stageName = 'Late perimenopause';
+          stageDescription =
+            'Six months or more since your last period — within sight of the 12-month menopause threshold. Hormonal symptoms often peak in this window.';
+          stageTone = 'border-amber-300/60 bg-amber-50/60 dark:bg-amber-900/20 dark:border-amber-700/40';
+        } else if (daysSince >= 60) {
+          stageName = 'Perimenopause';
+          stageDescription =
+            'Irregular cycles with longer gaps between periods. Symptoms (hot flashes, sleep changes, mood shifts) often start here.';
+          stageTone = 'border-amber-200/60 bg-amber-50/40 dark:bg-amber-900/10 dark:border-amber-800/30';
+        } else {
+          stageName = 'Cycling';
+          stageDescription =
+            'Last period was within the last 60 days — still actively cycling, even if irregular. Track variability to see the trend.';
+          stageTone = 'border-border bg-card';
+        }
+        const progressPct = Math.min((daysSince / 365) * 100, 100);
+        return (
+          <Card className={`p-4 border ${stageTone}`}>
+            <div className="flex items-center gap-2 mb-2">
+              <Compass className="h-4 w-4 text-primary" />
+              <p className="text-sm font-semibold">{stageName}</p>
+            </div>
+            <p className="text-xs text-muted-foreground mb-3">{stageDescription}</p>
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-xs">
+                <span className="text-muted-foreground">
+                  Last period {daysSince === 0
+                    ? 'today'
+                    : daysSince === 1
+                    ? 'yesterday'
+                    : daysSince < 30
+                    ? `${daysSince} days ago`
+                    : `${monthsSince.toFixed(1)} months ago`}
+                </span>
+                <span className="font-medium">{Math.min(daysSince, 365)} / 365 days</span>
+              </div>
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+              <p className="text-[10px] text-muted-foreground">
+                12 consecutive months without a period is the clinical line.
+              </p>
+            </div>
+          </Card>
+        );
+      })()}
+
+      {/* Empty-state nudge when menopause mode is on but no period
+          history has been logged — the stage tracker can't classify
+          without an anchor, so point the user at the calendar. */}
+      {!isPostMenopause && periodLoaded && !lastPeriodStart && (
+        <Card className="p-4 bg-muted/30">
+          <div className="flex items-start gap-3">
+            <Compass className="h-4 w-4 text-primary mt-0.5" />
+            <div className="text-sm">
+              <p className="font-medium mb-0.5">Mark your last period to see your stage</p>
+              <p className="text-xs text-muted-foreground">
+                Tap the calendar in your dashboard to log the date your most recent period
+                started. We'll use it to estimate where you are between perimenopause and
+                menopause.
+              </p>
+            </div>
+          </div>
+        </Card>
       )}
 
       {/* Screening reminder for post-menopause */}
