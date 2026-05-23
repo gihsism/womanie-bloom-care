@@ -99,11 +99,57 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
         .maybeSingle();
 
       if (existing) {
+        // Parse the encoded segments out of `notes` so reopening the
+        // form mid-day repopulates BBT / LH / Pill / Medication / Hot
+        // flashes / Flow / Sleep. Without this, saving a second time
+        // (e.g. just to log mood) would clobber notes with whatever's
+        // in the form — silently dropping the rest of the day's
+        // structured logs.
+        const notes: string = existing.notes ?? '';
+        const flow = notes.match(/Flow:\s*(spotting|light|medium|heavy)/i)?.[1] ?? '';
+        const lhTest = notes.match(/LH test:\s*(not-tested|positive|negative)/i)?.[1] ?? '';
+        const intercourse = notes.match(/Intercourse:\s*(no|yes-protected|yes-unprotected)/i)?.[1] ?? '';
+        const pillTaken = notes.match(/Pill:\s*(on-time|late|missed)/i)?.[1] ?? '';
+        const medication = notes.match(/Medication:\s*(all-on-time|late|missed)/i)?.[1] ?? '';
+        const hotFlashCount = notes.match(/Hot flashes:\s*(\d+)/i)?.[1] ?? '';
+        const bbt = notes.match(/BBT:\s*(\d+(?:\.\d+)?)/i)?.[1] ?? '';
+        const sleepHours = notes.match(/Sleep:\s*(\d+(?:\.\d+)?)\s*h/i)?.[1] ?? '';
+        const sleepQuality = notes.match(/Sleep quality:\s*([1-5])\/5/i)?.[1] ?? '';
+        // What remains after stripping the encoded segments is the
+        // user's freeform note. Each segment is separated by `. ` per
+        // handleSave's join, so split on that, drop matches, rejoin.
+        const freeform = notes
+          .split('.')
+          .map(s => s.trim())
+          .filter(s =>
+            s &&
+            !/^Flow:\s*(spotting|light|medium|heavy)$/i.test(s) &&
+            !/^LH test:\s*(not-tested|positive|negative)$/i.test(s) &&
+            !/^Intercourse:\s*(no|yes-protected|yes-unprotected)$/i.test(s) &&
+            !/^Pill:\s*(on-time|late|missed)$/i.test(s) &&
+            !/^Medication:\s*(all-on-time|late|missed)$/i.test(s) &&
+            !/^Hot flashes:\s*\d+$/i.test(s) &&
+            !/^BBT:\s*\d+(?:\.\d+)?°?F?$/i.test(s) &&
+            !/^Sleep:\s*\d+(?:\.\d+)?h$/i.test(s) &&
+            !/^Sleep quality:\s*[1-5]\/5$/i.test(s)
+          )
+          .join('. ');
+
         setData(prev => ({
           ...prev,
           moods: existing.mood || [],
           symptoms: existing.symptoms || [],
           discharge: existing.discharge || 'none',
+          periodFlow: flow || 'none',
+          lhTest,
+          intercourse,
+          pillTaken,
+          medicationTaken: medication,
+          hotFlashCount,
+          basalTemp: bbt,
+          sleepHours,
+          sleepQuality,
+          notes: freeform,
         }));
       }
     } catch (error) {
