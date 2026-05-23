@@ -40,6 +40,7 @@ import OverdueTests from '@/components/dashboard/OverdueTests';
 import SymptomPatternsCard from '@/components/dashboard/SymptomPatternsCard';
 import FertileWindowTimingCard from '@/components/dashboard/FertileWindowTimingCard';
 import BBTChart from '@/components/dashboard/BBTChart';
+import CycleHistoryCard from '@/components/dashboard/CycleHistoryCard';
 import { useNotificationPrefs } from '@/hooks/useNotificationPrefs';
 import PregnancyLabInsights from '@/components/dashboard/PregnancyLabInsights';
 import CycleLabInsights from '@/components/dashboard/CycleLabInsights';
@@ -874,6 +875,15 @@ const PatientDashboard = () => {
             {(selectedMode === 'conception' || selectedMode === 'menstrual-cycle') && user && (
               <div className="mb-6">
                 <BBTChart lastPeriodStart={periodData?.lastPeriodStart ?? null} />
+              </div>
+            )}
+
+            {/* Cycle-length history — variability + regularity classification
+                across the last 12 months. Hides itself when there's only
+                one period logged (no cycle to measure yet). */}
+            {(selectedMode === 'menstrual-cycle' || selectedMode === 'conception' || selectedMode === 'contraception') && user && (
+              <div className="mb-6">
+                <CycleHistoryCard />
               </div>
             )}
 
