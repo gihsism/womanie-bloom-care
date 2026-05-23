@@ -26,6 +26,8 @@ import {
   Calendar,
   Star,
   Shield,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
@@ -205,6 +207,19 @@ export default function AIDoctorChat() {
   const [loadingEarlier, setLoadingEarlier] = useState(false);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
+  // Tracks which assistant message was just copied so the Copy button
+  // can flip to a checkmark for 1.5s. Indexed by message position.
+  const [justCopiedIdx, setJustCopiedIdx] = useState<number | null>(null);
+  const copyAssistantMessage = async (idx: number, text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setJustCopiedIdx(idx);
+      setTimeout(() => setJustCopiedIdx(c => (c === idx ? null : c)), 1500);
+    } catch {
+      toast({ variant: 'destructive', title: 'Copy failed', description: 'Your browser blocked clipboard access.' });
+    }
+  };
+
   // Model preference persists across sessions so a user who set up
   // Sonnet doesn't drop back to Haiku on every page load.
   const [selectedModel, setSelectedModel] = useState(() => {
@@ -694,16 +709,33 @@ export default function AIDoctorChat() {
                   </div>
                 )}
                 <div
-                  className={`max-w-[85%] md:max-w-[70%] rounded-2xl px-4 py-3 ${
+                  className={`group max-w-[85%] md:max-w-[70%] rounded-2xl px-4 py-3 relative ${
                     msg.role === 'user'
                       ? 'bg-primary text-primary-foreground rounded-br-md'
                       : 'bg-muted rounded-bl-md'
                   }`}
                 >
                   {msg.role === 'assistant' ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none text-sm [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&>h1]:text-base [&>h2]:text-sm [&>h3]:text-sm">
-                      <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{msg.content}</ReactMarkdown>
-                    </div>
+                    <>
+                      <div className="prose prose-sm dark:prose-invert max-w-none text-sm [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&>h1]:text-base [&>h2]:text-sm [&>h3]:text-sm">
+                        <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{msg.content}</ReactMarkdown>
+                      </div>
+                      {msg !== WELCOME_MESSAGE && msg.content.trim() && (
+                        <button
+                          type="button"
+                          onClick={() => copyAssistantMessage(i, msg.content)}
+                          className="absolute -bottom-3 right-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-background border border-border text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity hover:text-foreground"
+                          aria-label="Copy this reply"
+                          title="Copy this reply"
+                        >
+                          {justCopiedIdx === i ? (
+                            <><Check className="h-3 w-3" />Copied</>
+                          ) : (
+                            <><Copy className="h-3 w-3" />Copy</>
+                          )}
+                        </button>
+                      )}
+                    </>
                   ) : (
                     <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                   )}
