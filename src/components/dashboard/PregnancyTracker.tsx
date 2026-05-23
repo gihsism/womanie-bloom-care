@@ -260,6 +260,101 @@ const getFruitImage = (week: number): string => {
   return FRUIT_IMAGES[week] || fruitWeek36;
 };
 
+// ─── Per-week perspectives ───
+//
+// Plain-language framing of what the current pregnancy week means
+// from four angles: baby (development), mother (what she may notice
+// or do), partner (how a supporting partner can help — "partner"
+// rather than "father" so the copy reads for any household shape),
+// and employer (when to disclose, leave planning, workplace prep).
+//
+// Defined at 10 anchor weeks across the 4-40 range. The renderer
+// resolves to the closest preceding anchor so users at week 17 see
+// the week-16 perspectives, etc. — same fallback shape getWeekData()
+// already uses.
+interface WeekPerspectives {
+  baby: string;
+  mother: string;
+  partner: string;
+  employer: string;
+}
+
+const WEEK_PERSPECTIVES: Record<number, WeekPerspectives> = {
+  4: {
+    baby: 'The embryo has just implanted in the uterine wall and the placenta is starting to form. About the size of a poppy seed; not yet a recognizable shape.',
+    mother: 'You may not feel different yet. Early signals — tender breasts, fatigue, food aversions — can mimic a normal premenstrual week. If you haven\'t started prenatal vitamins (folic acid in particular), do it now.',
+    partner: 'Your partner just found out, or just confirmed it — likely a mix of joy and fear. Be present. Don\'t share the news with anyone until they\'re ready.',
+    employer: 'No need to disclose anything yet. Most people wait until 13+ weeks. Your employer is not entitled to know until you tell them; until then, focus on the work as usual.',
+  },
+  8: {
+    baby: 'Fingers and toes are forming, the heart beats around 150 times per minute, and tiny muscles are starting to move (you can\'t feel it yet). Major organs are visible on an early ultrasound.',
+    mother: 'Morning sickness often peaks. Trust your body\'s food preferences — eat what stays down. Constant low-level nausea is common too. Aversions to specific smells (coffee, cooking, perfumes) are normal.',
+    partner: 'Help with shopping, cooking, and any food smells that trigger nausea. Drive when possible — fatigue can make her too tired to focus. Resist the urge to fix things; sometimes just being there is enough.',
+    employer: 'Still too early to disclose for most people. If symptoms are interfering with work, you can request flexibility without specifying why — "I\'m dealing with a health issue" is enough.',
+  },
+  12: {
+    baby: 'End of the first trimester. The baby has all major organs in place and is starting to look proportional. Risk of miscarriage drops significantly past this point.',
+    mother: 'Energy often returns. Many people start sharing the news now. The first-trimester combined screen (NT scan + bloodwork) typically happens between weeks 10 and 13.',
+    partner: 'First-trimester ending — many couples share the news now. Help draft the announcement timing and the people involved. The anatomy scan is coming around week 20; mark your calendar.',
+    employer: 'This is the typical disclosure window. Once told, your employer cannot legally discriminate against you for pregnancy in most jurisdictions. Consider talking to HR about leave options, work-from-home, and accommodations.',
+  },
+  16: {
+    baby: 'Skeleton is hardening; facial expressions are forming; baby can hear muffled sound. Sex is sometimes visible on ultrasound from this point on if you want to know.',
+    mother: 'Welcome to second trimester. You may start showing. First kicks (quickening) are often felt around now in a second pregnancy, slightly later in a first. Schedule your anomaly scan around week 20.',
+    partner: 'Belly may start to show. Sing or talk to the bump — baby can hear you now. Don\'t take it personally if she still feels nauseous or exhausted; the second trimester is supposed to be easier but it isn\'t for everyone.',
+    employer: 'Good time to formalize leave plans. Most US workers get 12 weeks unpaid via FMLA at employers with 50+ staff; the EU varies widely (Germany 14 paid, UK up to 39 paid). Confirm dates in writing and find out exactly what you\'re entitled to.',
+  },
+  20: {
+    baby: 'Halfway. Anatomy scan typically this week or next — a 20-minute ultrasound that checks organs, placenta, growth, and amniotic fluid. Most parents-to-be remember this scan for the rest of their lives.',
+    mother: 'Belly is now obviously pregnant to observers. Round-ligament pain (sharp twinges on the sides of the belly) is normal. Start sleeping on your left side from now on — better circulation to the placenta.',
+    partner: 'Clear your calendar for the anatomy scan. Many couples find out the sex now if they want to. Start nursery conversations — what you\'re reusing, what you need, who\'s doing what. Research childbirth classes.',
+    employer: 'Mid-pregnancy: time to talk leave dates with your manager and HR. Get exact return-to-work expectations in writing. If your work has any physical risk (chemicals, heavy lifting), request the accommodations now.',
+  },
+  24: {
+    baby: 'Viability milestone — at this point babies born preterm have a meaningful chance of surviving with NICU care. Hearing is well-developed; the baby reacts to loud sounds.',
+    mother: 'Glucose challenge test (screens for gestational diabetes) usually happens between weeks 24 and 28. Round-ligament pain continues. Some people start to feel Braxton-Hicks contractions — mild, irregular tightening, not labor.',
+    partner: 'Long flights and demanding travel get harder. Help with errands; she\'s carrying real extra weight now. Start practicing breathing or massage techniques you\'ll use in labor.',
+    employer: 'If you haven\'t finalized leave dates, do it now. Begin documenting your projects and responsibilities — your future leave-coverage colleague will thank you. Decide who you trust as the contact point during your leave.',
+  },
+  28: {
+    baby: 'Third trimester begins. Eyes can open and close. Baby may show a sleep-wake cycle. Brain is developing rapidly through the rest of pregnancy — much of the weight gain from here is brain growth.',
+    mother: 'Standard prenatal visits shift from monthly to every 2 weeks. Start daily kick counts. Sleep gets harder — heartburn, back pain, more bathroom trips, harder to find a comfortable position. Rhogam at 28 weeks if you\'re Rh-negative.',
+    partner: 'Help with anything that involves bending over (shoes, laundry, picking things up). Ask to feel the kicks — at this point they\'re usually visible from outside. Start the conversation about night feedings and parental-leave overlap.',
+    employer: 'Begin a detailed handover document — what\'s in flight, where to find docs, who covers what for each project. Have it 80% done by week 32 so you\'re not scrambling if labor starts early.',
+  },
+  32: {
+    baby: 'Most major development is done; remaining weeks are mostly growth and brain maturation. Baby is usually head-down by now (if not, your provider may discuss external cephalic version).',
+    mother: 'Pre-labor weeks. Pelvic pressure, more frequent Braxton-Hicks, swelling in feet/ankles are common. Pack your hospital bag this week — most providers want it ready by week 36.',
+    partner: 'Install the car seat — hospital staff will check it before discharge. Confirm the route to the hospital, parking, the entrance to use after hours. Pack your own overnight bag too.',
+    employer: 'Out-of-office and email forwarding rules set up. Confirm your manager knows the contact-chain when labor starts (and who to NOT contact). Final handover document done; walk through it with your team.',
+  },
+  36: {
+    baby: 'Considered "early term" from 37 weeks; "full term" from 39. The baby is gaining weight and dropping into the pelvis — what\'s called "lightening" or "engagement".',
+    mother: 'Weekly prenatal visits. Cervical checks may begin. Group B strep swab around weeks 35-37. Hospital bag should be packed and accessible. Practice your labor breathing if you\'re going to use it.',
+    partner: 'Stay reachable. Have your bag ready too. Know the hospital paperwork — ID, insurance, birth plan. Have a backup person on call in case you can\'t get there fast enough.',
+    employer: 'Labor can start any time now. Make sure your team knows you may disappear without warning. Set up the actual out-of-office. Set boundaries about being contacted during leave.',
+  },
+  40: {
+    baby: 'Full term. Average newborn is 50 cm and 3.4 kg, but the typical range is wide (47-54 cm, 2.5-4.3 kg). Most healthy babies arrive between week 39 and week 41.',
+    mother: 'Today\'s your due date — only about 5% of babies actually arrive on it. Stay close to home, stay rested. Past 41 weeks your provider will discuss induction timing and increased monitoring.',
+    partner: 'Be patient. Most babies come within 2 weeks either side of the due date. Stay close, stay calm. The "is it happening yet?" texts from family will be relentless — set expectations now.',
+    employer: 'You should already be on leave or on the verge of it. Resist the urge to "just finish one thing" — your job has waited for you to get here, it can wait the rest of the way.',
+  },
+};
+
+function getNearestPerspectives(week: number): WeekPerspectives | null {
+  const anchorWeeks = Object.keys(WEEK_PERSPECTIVES).map(Number).sort((a, b) => a - b);
+  let best: number | null = null;
+  for (const w of anchorWeeks) {
+    if (w <= week) best = w;
+    else break;
+  }
+  // If user is before week 4 (very early or test data), still show
+  // the earliest perspective set rather than nothing.
+  if (best === null && anchorWeeks.length > 0) best = anchorWeeks[0];
+  return best !== null ? WEEK_PERSPECTIVES[best] : null;
+}
+
 // ─── Recommended prenatal milestones ───
 //
 // Sourced from ACOG / NICE typical prenatal care timelines. These are
@@ -842,6 +937,44 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy }: Pregnancy
           ))}
         </div>
       </Card>
+
+      {/* Multi-perspective framing of the current week — what it means
+          for the baby, the mother, a supporting partner, and the
+          workplace. Resolves to the nearest preceding anchor week
+          (defined for weeks 4 / 8 / 12 / 16 / 20 / 24 / 28 / 32 / 36 / 40)
+          so users at week 17 see the week-16 perspectives, etc. */}
+      {(() => {
+        const persp = getNearestPerspectives(weeksPregnant);
+        if (!persp) return null;
+        const sections = [
+          { key: 'baby', label: 'For the baby', tone: 'bg-pink-50/60 dark:bg-pink-950/20 border-pink-200/60 dark:border-pink-800/40', emoji: '👶', text: persp.baby },
+          { key: 'mother', label: 'For you', tone: 'bg-primary/5 border-primary/20', emoji: '💗', text: persp.mother },
+          { key: 'partner', label: 'For your partner', tone: 'bg-secondary/10 border-secondary/30', emoji: '🤝', text: persp.partner },
+          { key: 'employer', label: 'At work', tone: 'bg-muted/60 border-border', emoji: '💼', text: persp.employer },
+        ];
+        return (
+          <Card className="p-4 space-y-3">
+            <h4 className="font-semibold flex items-center gap-2">
+              <Baby className="h-4 w-4 text-primary" />
+              What week {weeksPregnant} means
+            </h4>
+            <p className="text-[11px] text-muted-foreground -mt-1">
+              The same milestone, four perspectives.
+            </p>
+            <div className="space-y-2">
+              {sections.map(s => (
+                <div key={s.key} className={`p-3 rounded-lg border ${s.tone}`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm" aria-hidden="true">{s.emoji}</span>
+                    <span className="text-xs font-semibold uppercase tracking-wide">{s.label}</span>
+                  </div>
+                  <p className="text-sm leading-relaxed">{s.text}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+        );
+      })()}
 
       {/* Maternal weight gain — tracker for mom's side of the pregnancy.
           Uses IOM guidelines to recommend total + expected-by-now gain. */}
