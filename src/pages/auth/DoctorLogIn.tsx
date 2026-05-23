@@ -157,10 +157,7 @@ const DoctorLogIn = () => {
                 <a
                   href="#"
                   className="text-sm text-primary hover:underline"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    toast({ title: 'Coming soon', description: 'Password reset will be available soon' });
-                  }}
+                  href="mailto:support@womanie.info?subject=Password%20reset%20%E2%80%94%20doctor%20account&body=Hi%20Womanie%20team%2C%0A%0AI%20can%27t%20log%20in%20to%20my%20doctor%20account%20and%20need%20a%20password%20reset.%20My%20email%20is%3A%20"
                 >
                   Forgot password?
                 </a>

@@ -85,7 +85,15 @@ const PatientLogIn = () => {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                <a
+                  href="mailto:support@womanie.info?subject=Password%20reset&body=Hi%20Womanie%20team%2C%0A%0AI%20can%27t%20log%20in%20and%20need%20a%20password%20reset.%20My%20email%20is%3A%20"
+                  className="text-xs text-primary hover:underline"
+                >
+                  Forgot password?
+                </a>
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="Enter password" className="pl-10 pr-10" value={password} onChange={e => setPassword(e.target.value)} required />
