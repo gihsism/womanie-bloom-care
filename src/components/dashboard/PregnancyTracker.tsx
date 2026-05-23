@@ -159,6 +159,50 @@ function fmtWeight(range: { low: number; median: number; high: number } | null):
   };
 }
 
+// Imperial conversions for the length / weight stat tiles. Many users
+// outside the metric belt want to see inches + ounces alongside the
+// clinical metric numbers. Returns null when the source range is null
+// so callers can fall through cleanly.
+function fmtLengthImperial(week: number, range: { low: number; median: number; high: number } | null): string | null {
+  if (!range) return null;
+  const mmToIn = (mm: number) => mm / 25.4;
+  if (week <= 13) {
+    return `${mmToIn(range.median).toFixed(2)} in`;
+  }
+  return `${mmToIn(range.median).toFixed(1)} in`;
+}
+
+function fmtWeightImperial(range: { low: number; median: number; high: number } | null): string | null {
+  if (!range) return null;
+  const oz = range.median / 28.3495;
+  if (oz < 1) return null;
+  if (oz < 16) return `${oz.toFixed(1)} oz`;
+  const lb = oz / 16;
+  return `${lb.toFixed(2)} lb`;
+}
+
+// "About the weight of <familiar thing>" — gives a tangible sense in
+// addition to the gram number. Picked so the comparison reads
+// naturally to a US/EU audience.
+function weightEquivalent(g: number | null | undefined): string | null {
+  if (typeof g !== 'number' || g <= 0) return null;
+  if (g < 5) return 'a paperclip';
+  if (g < 15) return 'a strawberry';
+  if (g < 30) return 'a small egg';
+  if (g < 60) return 'a chicken egg';
+  if (g < 120) return 'a small lemon';
+  if (g < 200) return 'an apple';
+  if (g < 350) return 'a banana';
+  if (g < 500) return 'a stick of butter (½ lb)';
+  if (g < 750) return 'a pomegranate';
+  if (g < 1100) return 'a pineapple (~1 kg)';
+  if (g < 1600) return 'a melon (~1.5 kg)';
+  if (g < 2200) return 'a small cabbage (~2 kg)';
+  if (g < 2900) return 'a butternut squash';
+  if (g < 3500) return 'a small watermelon';
+  return 'a large watermelon';
+}
+
 const getWeekData = (week: number) => {
   const keys = Object.keys(WEEK_DATA).map(Number).sort((a, b) => a - b);
   let bestKey = keys[0];
@@ -413,13 +457,34 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy }: Pregnancy
       {/* Main pregnancy status */}
       <div className="bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 rounded-2xl p-5">
         <div className="text-center mb-4">
-          <img src={getFruitImage(weeksPregnant)} alt={`Size of a ${weekData.size}`} className="w-24 h-24 mx-auto mb-2 object-contain" />
+          {/* Hero image: the baby illustration is the headline, with the
+              fruit comparison overlaid in the corner so users get both
+              "what does this stage look like" and "size of a lemon" in
+              one glance. Click to open the 3D overlay. */}
+          <div
+            className="relative w-32 h-32 sm:w-36 sm:h-36 mx-auto mb-2 cursor-pointer hover:scale-105 transition-transform"
+            onClick={() => setShowFullImage(true)}
+            title="Tap to see this week in 3D"
+          >
+            <img
+              src={getWeekImage(weeksPregnant)}
+              alt={`Baby at week ${weeksPregnant}`}
+              className="w-full h-full object-contain"
+            />
+            <div className="absolute -bottom-1 -right-1 bg-background/95 backdrop-blur rounded-full p-1.5 border shadow-sm">
+              <img
+                src={getFruitImage(weeksPregnant)}
+                alt={`Size of a ${weekData.size}`}
+                className="w-9 h-9 object-contain"
+              />
+            </div>
+          </div>
           <div className="text-4xl font-light text-foreground mb-1">
             Week {weeksPregnant}
             <span className="text-lg text-muted-foreground ml-1">+{daysExtra}d</span>
           </div>
           <div className="text-sm text-muted-foreground">
-            {trimesterLabel} Trimester
+            {trimesterLabel} Trimester · size of a {weekData.size}
           </div>
           <Badge variant="secondary" className="mt-2">
             {daysUntilDue > 0 ? `${daysUntilDue} days until due date` : daysUntilDue === 0 ? 'Due today! 🎉' : `${Math.abs(daysUntilDue)} days past due date`}
@@ -570,13 +635,14 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy }: Pregnancy
           <img
             src={getWeekImage(weeksPregnant)}
             alt="Baby development"
-            className="w-20 h-20 object-contain flex-shrink-0 cursor-pointer hover:scale-105 transition-transform rounded-lg"
+            className="w-32 h-32 sm:w-36 sm:h-36 object-contain flex-shrink-0 cursor-pointer hover:scale-105 transition-transform rounded-lg"
             onClick={() => setShowFullImage(true)}
+            title="Tap to see this week in 3D"
           />
-          <div>
+          <div className="min-w-0">
             <div className="text-lg font-semibold">Your baby at week {weeksPregnant}</div>
             <div className="flex items-center gap-2 mt-1">
-              <img src={getFruitImage(weeksPregnant)} alt={weekData.size} className="w-6 h-6 object-contain" />
+              <img src={getFruitImage(weeksPregnant)} alt={weekData.size} className="w-7 h-7 object-contain" />
               <span className="text-sm text-muted-foreground">Size of a {weekData.size}</span>
             </div>
             {(() => {
@@ -588,8 +654,58 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy }: Pregnancy
               if (parts.length === 0) return null;
               return <div className="text-sm text-muted-foreground">{parts.join(' · ')} typical</div>;
             })()}
+            {(() => {
+              const eq = weightEquivalent(weekData.weightG?.median ?? null);
+              if (!eq) return null;
+              return (
+                <div className="text-xs text-muted-foreground mt-1">
+                  About the weight of {eq}
+                </div>
+              );
+            })()}
           </div>
         </div>
+
+        {/* Length scale — horizontal ruler that grows with the baby. Only
+            renders once we have a length range (the very earliest weeks
+            don't), and we cap the visible scale at 30 cm so the bar
+            doesn't overflow a phone screen in late pregnancy where the
+            crown-heel length is ~50 cm. */}
+        {weekData.lengthMm && (() => {
+          const lengthMm = weekData.lengthMm.median;
+          const maxScaleMm = 300; // 30 cm
+          const visibleFraction = Math.min(lengthMm, maxScaleMm) / maxScaleMm;
+          const overflowed = lengthMm > maxScaleMm;
+          // Tick spacing: every 5 cm up to 30 cm, with labels at 10/20/30.
+          const ticks = [50, 100, 150, 200, 250, 300];
+          return (
+            <div className="px-1">
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
+                <span>Length to scale (CRL/CHL)</span>
+                {overflowed && <span>capped at 30 cm</span>}
+              </div>
+              <div className="relative h-6 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-500"
+                  style={{ width: `${Math.max(visibleFraction * 100, 2)}%` }}
+                />
+                {ticks.map((mm) => (
+                  <div
+                    key={mm}
+                    className="absolute top-0 bottom-0 w-px bg-background/60"
+                    style={{ left: `${(mm / maxScaleMm) * 100}%` }}
+                  />
+                ))}
+              </div>
+              <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                <span>0</span>
+                <span>10 cm</span>
+                <span>20 cm</span>
+                <span>30 cm</span>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Full-size 3D image overlay */}
         {showFullImage && (
@@ -608,12 +724,16 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy }: Pregnancy
           </div>
           {(() => {
             const lf = fmtLength(weeksPregnant, weekData.lengthMm);
+            const li = fmtLengthImperial(weeksPregnant, weekData.lengthMm);
             const lengthLabel = weekData.measurementType === 'crl' ? 'Length (CRL)' : 'Length';
             return (
               <div className="bg-muted/50 rounded-xl p-3">
                 <Ruler className="h-4 w-4 text-secondary mx-auto mb-1" />
                 <div className="text-xs text-muted-foreground">{lengthLabel}</div>
                 <div className="text-sm font-semibold">{lf ? lf.typical : '—'}</div>
+                {li && (
+                  <div className="text-[10px] text-muted-foreground mt-0.5">({li})</div>
+                )}
                 {lf && (
                   <div className="text-[10px] text-muted-foreground mt-0.5">typical {lf.range}</div>
                 )}
@@ -622,11 +742,15 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy }: Pregnancy
           })()}
           {(() => {
             const wf = fmtWeight(weekData.weightG);
+            const wi = fmtWeightImperial(weekData.weightG);
             return (
               <div className="bg-muted/50 rounded-xl p-3">
                 <Scale className="h-4 w-4 text-accent mx-auto mb-1" />
                 <div className="text-xs text-muted-foreground">Weight</div>
                 <div className="text-sm font-semibold">{wf ? wf.typical : '—'}</div>
+                {wi && (
+                  <div className="text-[10px] text-muted-foreground mt-0.5">({wi})</div>
+                )}
                 {wf && (
                   <div className="text-[10px] text-muted-foreground mt-0.5">typical {wf.range}</div>
                 )}
