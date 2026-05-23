@@ -39,6 +39,7 @@ import ModeHeroStat from '@/components/dashboard/ModeHeroStat';
 import OverdueTests from '@/components/dashboard/OverdueTests';
 import SymptomPatternsCard from '@/components/dashboard/SymptomPatternsCard';
 import FertileWindowTimingCard from '@/components/dashboard/FertileWindowTimingCard';
+import BBTChart from '@/components/dashboard/BBTChart';
 import { useNotificationPrefs } from '@/hooks/useNotificationPrefs';
 import PregnancyLabInsights from '@/components/dashboard/PregnancyLabInsights';
 import CycleLabInsights from '@/components/dashboard/CycleLabInsights';
@@ -863,6 +864,16 @@ const PatientDashboard = () => {
                   cycleLength={periodData.cycleLength}
                   periodLength={5}
                 />
+              </div>
+            )}
+
+            {/* BBT chart — conception + menstrual-cycle modes, since
+                BBT is logged in both via the DailyLogging form. Hides
+                itself gracefully (with a setup prompt) when there are
+                no BBT entries yet. */}
+            {(selectedMode === 'conception' || selectedMode === 'menstrual-cycle') && user && (
+              <div className="mb-6">
+                <BBTChart lastPeriodStart={periodData?.lastPeriodStart ?? null} />
               </div>
             )}
 
