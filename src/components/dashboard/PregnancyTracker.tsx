@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import BabyImage3DOverlay from './BabyImage3DOverlay';
 import KickCounter from './KickCounter';
+import MaternalWeightTracker from './MaternalWeightTracker';
 
 // Baby development illustrations
 import babyWeek04 from '@/assets/baby-week-04.png';
@@ -839,6 +840,10 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy }: Pregnancy
           ))}
         </div>
       </Card>
+
+      {/* Maternal weight gain — tracker for mom's side of the pregnancy.
+          Uses IOM guidelines to recommend total + expected-by-now gain. */}
+      <MaternalWeightTracker weeksPregnant={weeksPregnant} />
 
       {/* Daily kick counter — only relevant from ~week 28 onward, when
           fetal movement-counting becomes part of standard self-monitoring. */}
