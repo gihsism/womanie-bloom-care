@@ -43,6 +43,7 @@ import BBTChart from '@/components/dashboard/BBTChart';
 import CycleHistoryCard from '@/components/dashboard/CycleHistoryCard';
 import LHSurgeCard from '@/components/dashboard/LHSurgeCard';
 import FertilityForecast from '@/components/dashboard/FertilityForecast';
+import PeriodFlowCard from '@/components/dashboard/PeriodFlowCard';
 import { useNotificationPrefs } from '@/hooks/useNotificationPrefs';
 import PregnancyLabInsights from '@/components/dashboard/PregnancyLabInsights';
 import CycleLabInsights from '@/components/dashboard/CycleLabInsights';
@@ -898,6 +899,14 @@ const PatientDashboard = () => {
                   lastPeriodStart={periodData.lastPeriodStart}
                   cycleLengthFallback={periodData.cycleLength}
                 />
+              </div>
+            )}
+
+            {/* Per-day flow visualization for the last 3 cycles. Self-
+                hides when no flow has ever been logged. */}
+            {(selectedMode === 'menstrual-cycle' || selectedMode === 'conception') && user && periodData && (
+              <div className="mb-6">
+                <PeriodFlowCard lastPeriodStart={periodData.lastPeriodStart} />
               </div>
             )}
 
