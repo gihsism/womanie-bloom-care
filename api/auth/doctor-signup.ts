@@ -75,7 +75,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({
       success: true,
       pending: true,
-      message: 'Your doctor account has been submitted for verification. You will be notified once approved.',
+      message: 'Your doctor account has been submitted for verification. License review typically takes 1–3 business days; try logging in again once approved.',
     });
   } catch (error) {
     console.error('Doctor signup error:', error);

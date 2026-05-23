@@ -97,7 +97,7 @@ const DoctorLogIn = () => {
       let description = 'This account is not registered as a doctor. Use patient login, or register as a doctor.';
       if (profileData && (status === 'pending' || !status)) {
         title = 'Verification pending';
-        description = 'Your doctor signup is in the queue for admin review. We typically verify licenses within 1–3 business days — you\'ll get an email when approved.';
+        description = 'Your doctor signup is in the queue for admin review. License verification typically takes 1–3 business days. Try logging in again once you\'ve been approved.';
       } else if (profileData && status === 'rejected') {
         title = 'Verification not approved';
         description = 'We weren\'t able to verify the credentials on file. Email support@womanie.info with updated license details and we\'ll re-review.';
