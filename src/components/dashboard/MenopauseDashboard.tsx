@@ -6,6 +6,7 @@ import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { format, subDays, parseISO, differenceInDays } from 'date-fns';
 import { onHealthDataChange } from '@/lib/data-events';
+import ScreeningTracker from './ScreeningTracker';
 import {
   Heart,
   Moon,
@@ -392,18 +393,9 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
         </Card>
       )}
 
-      {/* Screening reminder for post-menopause */}
-      {isPostMenopause && (
-        <Card className="p-4 border-blue-200/60 dark:border-blue-800/30 bg-blue-50/50 dark:bg-blue-950/20">
-          <div className="flex items-start gap-3">
-            <Shield className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wide mb-1">Screening Reminder</p>
-              <p className="text-sm text-foreground">Schedule annual check-ups: mammogram, bone density scan, blood pressure, cholesterol, and blood sugar.</p>
-            </div>
-          </div>
-        </Card>
-      )}
+      {/* Screening tracker — replaces the old static "annual check-ups"
+          callout with a list the user can actually mark done. */}
+      <ScreeningTracker scope={isPostMenopause ? 'post-menopause' : 'menopause'} />
 
       {/* Hot-flash trend (menopause only — post-menopause focus shifts away from this) */}
       {!isPostMenopause && hotFlashStats.hasData && (
