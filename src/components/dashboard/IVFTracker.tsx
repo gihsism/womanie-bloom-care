@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import IVFCalendar from './ivf/IVFCalendar';
 import IVFEventSheet from './ivf/IVFEventSheet';
 import IVFReminders from './ivf/IVFReminders';
+import BetaHcgTracker from './BetaHcgTracker';
 import type { IVFEvent } from './ivf/IVFCalendar';
 
 // ─── IVF phases ───
@@ -270,6 +271,12 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
           ))}
         </div>
       </Card>
+
+      {/* Beta hCG tracker — surfaces during the two-week wait and beta
+          phases when post-transfer hCG monitoring is the main thing
+          on the patient's mind. Stays visible outside those phases too
+          so users can log retrospectively. */}
+      <BetaHcgTracker ivfPhase={ivfPhase} />
 
       {/* Quick advance */}
       {currentPhaseIndex < IVF_PHASES.length - 1 && (
