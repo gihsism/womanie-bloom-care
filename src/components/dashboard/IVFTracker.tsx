@@ -14,6 +14,7 @@ import IVFCalendar from './ivf/IVFCalendar';
 import IVFEventSheet from './ivf/IVFEventSheet';
 import IVFReminders from './ivf/IVFReminders';
 import BetaHcgTracker from './BetaHcgTracker';
+import IVFMedicationAdherence from './IVFMedicationAdherence';
 import type { IVFEvent } from './ivf/IVFCalendar';
 
 // ─── IVF phases ───
@@ -271,6 +272,12 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
           ))}
         </div>
       </Card>
+
+      {/* Medication adherence — reads back the per-day "Medication"
+          entries from the daily-log form. Self-hides when nothing has
+          been logged yet, so users in the prep phase don't see an
+          empty tile for medications they haven't started. */}
+      <IVFMedicationAdherence />
 
       {/* Beta hCG tracker — surfaces during the two-week wait and beta
           phases when post-transfer hCG monitoring is the main thing
