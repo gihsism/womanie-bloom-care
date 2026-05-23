@@ -71,6 +71,7 @@ export default function Notifications() {
   const [stalled, setStalled] = useState<StalledDoc[]>([]);
   const [critical, setCritical] = useState<CriticalFinding[]>([]);
   const [cancellations, setCancellations] = useState<CancelledAppt[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -112,6 +113,7 @@ export default function Notifications() {
           )
           .slice(0, 10)
       );
+      setLoaded(true);
     };
     load();
     return onHealthDataChange(load);
@@ -247,10 +249,14 @@ export default function Notifications() {
 
         <ConnectedDoctors />
 
-        {/* Empty-state when there's genuinely nothing. */}
-        <div className="text-center text-sm text-muted-foreground py-8">
-          Nothing else to flag right now.
-        </div>
+        {/* Empty-state — only after the fetch has resolved, so we don't
+            momentarily claim "nothing to flag" while the data is still
+            in flight. */}
+        {loaded && stalled.length === 0 && critical.length === 0 && cancellations.length === 0 && (
+          <div className="text-center text-sm text-muted-foreground py-8">
+            Nothing else to flag right now.
+          </div>
+        )}
       </div>
     </div>
   );
