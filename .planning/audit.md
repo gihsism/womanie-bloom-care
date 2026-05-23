@@ -177,6 +177,55 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-23 (session 53 — 24h authorization)
+
+Alena re-authorized a third 24h autonomous arc. Began with a
+direct user question — "why log in as a doctor is not available
+yet?" — which uncovered a placeholder console.log on the Get
+Started page's Healthcare Provider card. Eleven commits this turn:
+
+- **44e1ade** — Healthcare Provider card on `/auth/select-type` had
+  `console.log('Healthcare Provider signup - Coming soon')` as its
+  onClick (placeholder), so clicking it did nothing visible even
+  though `/auth/doctor-signup` has been live for months. Wired the
+  card to navigate; added an "Already have an account?" row with
+  Patient/Doctor login links; added "Are you a doctor?" cross-links
+  on PatientLogIn + PatientSignUp.
+- **698844f** — Forgot-password links: doctor login fired a "Coming
+  soon" toast; patient login had no path. Both now mailto:
+  support@womanie.info with subject + body pre-filled. Real path
+  until email reset infra exists (HANDOFF).
+- **ca57607** — AI chat: model selection persists to
+  localStorage(`womanie_chat_model`). Doesn't reset to Haiku on
+  every page load anymore.
+- **4695942** — ErrorBoundary forwards caught errors to Sentry with
+  the React componentStack. Render crashes now reach the dashboard
+  instead of just console.error.
+- **43c36bc** — Copy button on each assistant chat message. Sits
+  bottom-right of the bubble, fades in on hover, flips to "Copied"
+  with a checkmark for 1.5s. Skips the welcome boilerplate and
+  empty streams.
+- **48c76ea** — PatientDetails: dropped four unused lucide-react
+  imports (User, Eye, Download, Clock). Cosmetic — Lucide is
+  tree-shakable so no bundle impact.
+- **edbf80e** — AppointmentTodayBanner kept disappearing the moment
+  a visit started because it queried `?upcoming=true` (server filter
+  is scheduled_at >= NOW()). Now fetches full history + filters
+  client-side to today AND scheduled_at + duration > now, so the
+  banner stays through the entire visit window.
+- **611beb6** — Doctor-side counterpart: DoctorTodayBanner used to
+  show 9am visits at 5pm because it only filtered on isToday.
+  Added the same duration-elapsed check.
+- **fb2ea99 → 755f81e** — DocumentUpload: first commit accepted any
+  image type (HEIC, etc) at upload, second commit walked it back
+  because Claude vision can't read HEIC — silent-fail-at-analysis
+  is worse than a clear early reject. Accepts JPEG/PNG/WebP/PDF/
+  DOCX; HEIC gets a friendly "change iPhone Settings → Camera →
+  Formats" hint.
+- **c9a3cb9** — HANDOFF.md picks up three deferred items:
+  server-side HEIC decoding, auto-create pending connection on
+  booking, access audit log table.
+
 ### 2026-05-20 (session 52 — continuous, no scheduled breaks)
 
 Alena asked to drop the scheduled-wakeup pacing and work straight
