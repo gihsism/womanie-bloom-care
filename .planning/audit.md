@@ -286,6 +286,47 @@ Continued session 54:
   section progress badges, expandable details, overall progress bar.
   "Pack by week 36" amber nudge after that milestone if incomplete;
   "All packed ✓" emerald when done. Per-user localStorage.
+- **8a197ec** — Pre-menstrual: "If your period starts today" walk-
+  through card. Five concrete plain-language steps (breathe, find a
+  bathroom, use pad/liner/TP backup, tell a trusted adult when ready,
+  track the day) plus a footer with the "when to ask for help right
+  away" flags (heavy bleeding, severe pain, off-range age). Always-
+  rendered so a young user in a stressful moment finds it without
+  clicking around. Pink/purple gradient — warm not clinical.
+- **8572599** — Pregnancy: "What week N means" multi-perspective
+  card. Same milestone, four lenses: for the baby (development), for
+  you (mom-focused), for your partner ("partner" not "father" so the
+  copy reads for any household shape), at work (when to disclose,
+  leave planning, accommodations). Content defined at 10 anchor weeks
+  (4/8/12/16/20/24/28/32/36/40); getNearestPerspectives() resolves
+  the user's current week to the closest preceding anchor.
+- **e024aa3 + bf33069** — Doctor login error states. The old code
+  showed "not registered as a doctor" to anyone who lacked a
+  user_roles row, which included every pending/rejected doctor who
+  had successfully signed up. Now parallel-reads user_roles +
+  doctor_profiles after login and branches on verification_status:
+  pending → "License review takes 1-3 business days; try again once
+  approved." rejected → "Email support with updated license details."
+  revoked → "Email support to reinstate." Stale-cookie-by-default fix
+  (credentials: 'include' on login + logout). Also dropped the "you
+  will be notified" copy from doctor-signup since we don't actually
+  send approval emails today.
+- **55b57b5** — Menstrual + conception: period flow visualization.
+  Renders the last 3 cycles as horizontal strips with day-by-day
+  flow color (spotting → heavy gradient). Headline stats + amber
+  callout when a recent period has >3 heavy-flow days (one of the
+  standard menorrhagia screening signals; can drive iron deficiency).
+- **a5337ad** — IVF: medication adherence calendar. The last field
+  DailyLogging writes that wasn't surfaced anywhere. 30-day square
+  grid, color-coded on-time/late/missed, with a destructive callout
+  when any dose has been missed in the last 7 days — IVF medication
+  timing is critical, more so than birth-control pills. Self-hides
+  for users in the prep phase who haven't started injections.
+
+After this batch, every per-day field DailyLogging writes
+(BBT, LH, intercourse, pill, medication, hot flashes, period flow,
+symptoms, mood, discharge) appears visualized in a dashboard
+surface somewhere. No more "you log it but never see it back."
 
 ### 2026-05-23 (session 53 — 24h authorization)
 
