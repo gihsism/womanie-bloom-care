@@ -394,6 +394,60 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
               )}
             </div>
           </div>
+
+          {/* 30-day adherence calendar — gives a glanceable history that
+              the streak number alone hides. Built from the same
+              signals[] we already loaded; today's column is highlighted. */}
+          {(() => {
+            const days: { date: string; status: PillStatus | null; isToday: boolean }[] = [];
+            const todayKey = today;
+            for (let i = 29; i >= 0; i--) {
+              const d = format(subDays(new Date(), i), 'yyyy-MM-dd');
+              const row = signals.find(s => s.signal_date === d);
+              const status = parsePillStatus(row?.notes ?? null);
+              days.push({ date: d, status, isToday: d === todayKey });
+            }
+            const onTime = days.filter(d => d.status === 'on-time').length;
+            const late = days.filter(d => d.status === 'late').length;
+            const missed = days.filter(d => d.status === 'missed').length;
+            const unlogged = 30 - onTime - late - missed;
+            const dotFor = (status: PillStatus | null): string => {
+              if (status === 'on-time') return 'bg-green-500';
+              if (status === 'late') return 'bg-amber-500';
+              if (status === 'missed') return 'bg-destructive';
+              return 'bg-muted-foreground/20';
+            };
+            return (
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-medium">Last 30 days</span>
+                  <span className="text-muted-foreground">
+                    <span className="text-green-600 font-medium">{onTime}</span>
+                    {' on-time · '}
+                    <span className="text-amber-600 font-medium">{late}</span>
+                    {' late · '}
+                    <span className="text-destructive font-medium">{missed}</span>
+                    {' missed'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-10 sm:grid-cols-15 gap-1">
+                  {days.map((d) => (
+                    <div
+                      key={d.date}
+                      className={`aspect-square rounded-sm ${dotFor(d.status)} ${d.isToday ? 'ring-2 ring-primary ring-offset-1 ring-offset-background' : ''}`}
+                      title={`${d.date}${d.status ? ` · ${d.status}` : ' · not logged'}`}
+                    />
+                  ))}
+                </div>
+                {unlogged > 0 && (
+                  <p className="text-[10px] text-muted-foreground">
+                    {unlogged} {unlogged === 1 ? 'day' : 'days'} not logged. Tap "Mark as Taken"
+                    each day to keep the streak meaningful.
+                  </p>
+                )}
+              </div>
+            );
+          })()}
         </Card>
       )}
 
