@@ -41,6 +41,7 @@ import SymptomPatternsCard from '@/components/dashboard/SymptomPatternsCard';
 import FertileWindowTimingCard from '@/components/dashboard/FertileWindowTimingCard';
 import BBTChart from '@/components/dashboard/BBTChart';
 import CycleHistoryCard from '@/components/dashboard/CycleHistoryCard';
+import LHSurgeCard from '@/components/dashboard/LHSurgeCard';
 import { useNotificationPrefs } from '@/hooks/useNotificationPrefs';
 import PregnancyLabInsights from '@/components/dashboard/PregnancyLabInsights';
 import CycleLabInsights from '@/components/dashboard/CycleLabInsights';
@@ -875,6 +876,15 @@ const PatientDashboard = () => {
             {(selectedMode === 'conception' || selectedMode === 'menstrual-cycle') && user && (
               <div className="mb-6">
                 <BBTChart lastPeriodStart={periodData?.lastPeriodStart ?? null} />
+              </div>
+            )}
+
+            {/* LH surge tracker — conception mode only, since OPK tests
+                are predominantly used by users actively trying to
+                conceive. Self-hides when no LH tests have been logged. */}
+            {selectedMode === 'conception' && user && (
+              <div className="mb-6">
+                <LHSurgeCard />
               </div>
             )}
 
