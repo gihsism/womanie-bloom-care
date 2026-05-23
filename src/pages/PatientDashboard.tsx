@@ -44,6 +44,7 @@ import CycleHistoryCard from '@/components/dashboard/CycleHistoryCard';
 import LHSurgeCard from '@/components/dashboard/LHSurgeCard';
 import FertilityForecast from '@/components/dashboard/FertilityForecast';
 import PeriodFlowCard from '@/components/dashboard/PeriodFlowCard';
+import SleepTrendCard from '@/components/dashboard/SleepTrendCard';
 import { useNotificationPrefs } from '@/hooks/useNotificationPrefs';
 import PregnancyLabInsights from '@/components/dashboard/PregnancyLabInsights';
 import CycleLabInsights from '@/components/dashboard/CycleLabInsights';
@@ -907,6 +908,15 @@ const PatientDashboard = () => {
             {(selectedMode === 'menstrual-cycle' || selectedMode === 'conception') && user && periodData && (
               <div className="mb-6">
                 <PeriodFlowCard lastPeriodStart={periodData.lastPeriodStart} />
+              </div>
+            )}
+
+            {/* Sleep trend — shown on the modes where sleep is most
+                clinically relevant. Self-hides when no sleep entries
+                exist (a brand-new user shouldn't see an empty card). */}
+            {user && ['menstrual-cycle', 'conception', 'pregnancy', 'menopause', 'post-menopause'].includes(selectedMode) && (
+              <div className="mb-6">
+                <SleepTrendCard />
               </div>
             )}
 

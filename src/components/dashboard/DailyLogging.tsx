@@ -63,6 +63,12 @@ interface QuickLogData {
   medicationTaken: string;
   hotFlashCount: string;
   basalTemp: string;
+  // Cross-mode: hours slept (numeric) + perceived quality (1-5).
+  // Sleep disruption is the #1 menopause complaint, insomnia is
+  // common in pregnancy, and poor sleep affects fertility — so it
+  // shows on every mode that uses this form.
+  sleepHours: string;
+  sleepQuality: string;
   notes: string;
 }
 
@@ -72,7 +78,7 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
   const [data, setData] = useState<QuickLogData>({
     moods: [], symptoms: [], periodFlow: 'none', discharge: 'none',
     lhTest: '', intercourse: '', pillTaken: '', medicationTaken: '',
-    hotFlashCount: '', basalTemp: '', notes: '',
+    hotFlashCount: '', basalTemp: '', sleepHours: '', sleepQuality: '', notes: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -140,6 +146,8 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
         data.medicationTaken && `Medication: ${data.medicationTaken}`,
         data.hotFlashCount && `Hot flashes: ${data.hotFlashCount}`,
         data.basalTemp && `BBT: ${data.basalTemp}°F`,
+        data.sleepHours && `Sleep: ${data.sleepHours}h`,
+        data.sleepQuality && `Sleep quality: ${data.sleepQuality}/5`,
         data.notes,
       ].filter(Boolean).join('. ');
 
@@ -347,6 +355,37 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
             )}
           </div>
         )}
+
+        {/* Sleep — shown for every mode. Hours + a 1-5 quality rating,
+            both optional so users can log just one. */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs">Sleep (hours)</Label>
+            <Input
+              type="number"
+              step="0.5"
+              min="0"
+              max="24"
+              placeholder="7.5"
+              className="h-9"
+              value={data.sleepHours}
+              onChange={(e) => update('sleepHours', e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Sleep quality</Label>
+            <Select value={data.sleepQuality} onValueChange={(v) => update('sleepQuality', v)}>
+              <SelectTrigger className="h-9"><SelectValue placeholder="Rate 1–5" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">😩 1 — Terrible</SelectItem>
+                <SelectItem value="2">😪 2 — Poor</SelectItem>
+                <SelectItem value="3">😐 3 — OK</SelectItem>
+                <SelectItem value="4">🙂 4 — Good</SelectItem>
+                <SelectItem value="5">😴 5 — Great</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
         {/* Optional note */}
         <div>
