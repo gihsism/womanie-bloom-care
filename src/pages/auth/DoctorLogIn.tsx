@@ -39,6 +39,7 @@ const DoctorLogIn = () => {
       // a Supabase-shim stub that just returns an error.
       const loginResp = await fetch('/api/auth/login', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: formData.email,
@@ -55,35 +56,66 @@ const DoctorLogIn = () => {
         return;
       }
 
-      // We're logged in as a generic user; confirm they have the
-      // doctor role. /api/db's ownership enforcement injects
-      // user_id = session.id, so this reads only our own rows.
-      const { data: roleData } = await db
-        .from('user_roles')
-        .select('role')
-        .eq('role', 'doctor')
-        .maybeSingle();
+      // We're logged in as a generic user. Now figure out which of
+      // four states this account is in so we can give an accurate
+      // error rather than the old "not registered as a doctor"
+      // catch-all, which was misleading for anyone whose doctor
+      // signup is still awaiting admin verification.
+      //
+      // /api/db's ownership enforcement injects user_id = session.id
+      // on both queries, so we only read this user's own rows.
+      const [{ data: roleData }, { data: profileData }] = await Promise.all([
+        db
+          .from('user_roles')
+          .select('role')
+          .eq('role', 'doctor')
+          .maybeSingle(),
+        db
+          .from('doctor_profiles')
+          .select('verification_status, is_verified')
+          .maybeSingle(),
+      ]);
 
-      if (!roleData) {
+      // Happy path: an approved doctor with the role row in place.
+      if (roleData && profileData?.is_verified) {
         toast({
-          variant: 'destructive',
-          title: 'Access denied',
-          description: 'This account is not registered as a doctor. Please use patient login or register as a doctor.',
+          title: 'Welcome back, Doctor!',
+          description: 'You have successfully logged in.',
         });
-        // Clear the session so a non-doctor isn't left signed in via
-        // the doctor URL.
-        await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+        // Full reload so AuthContext picks up the new session cookie
+        // before routing into the doctor dashboard.
+        window.location.href = '/doctor/dashboard';
         return;
       }
 
-      toast({
-        title: 'Welcome back, Doctor!',
-        description: 'You have successfully logged in.',
-      });
-      // Full reload so AuthContext picks up the new session cookie
-      // before routing into the doctor dashboard.
-      window.location.href = '/doctor/dashboard';
+      // Diagnose the four failure modes a doctor can actually be in
+      // and surface the right next step. Always clear the session so
+      // the user isn't left half-authenticated in the doctor URL.
+      const status = profileData?.verification_status as string | undefined;
+
+      let title = 'Access denied';
+      let description = 'This account is not registered as a doctor. Use patient login, or register as a doctor.';
+      if (profileData && (status === 'pending' || !status)) {
+        title = 'Verification pending';
+        description = 'Your doctor signup is in the queue for admin review. We typically verify licenses within 1–3 business days — you\'ll get an email when approved.';
+      } else if (profileData && status === 'rejected') {
+        title = 'Verification not approved';
+        description = 'We weren\'t able to verify the credentials on file. Email support@womanie.info with updated license details and we\'ll re-review.';
+      } else if (profileData && status === 'revoked') {
+        title = 'Verification revoked';
+        description = 'Your doctor verification has been revoked. Email support@womanie.info to discuss reinstating.';
+      } else if (profileData && profileData.is_verified && !roleData) {
+        // Defensive: should be unreachable in normal flows (admin
+        // approve always inserts the user_roles row), but if it ever
+        // is, the doctor needs a human to fix it.
+        title = 'Account out of sync';
+        description = 'Your profile shows as verified but the doctor role is missing. Email support@womanie.info — we\'ll fix it manually.';
+      }
+
+      toast({ variant: 'destructive', title, description });
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
     } catch (error) {
+      console.error('Doctor login error:', error);
       toast({
         variant: 'destructive',
         title: 'Error',
@@ -155,7 +187,6 @@ const DoctorLogIn = () => {
                   Password
                 </label>
                 <a
-                  href="#"
                   className="text-sm text-primary hover:underline"
                   href="mailto:support@womanie.info?subject=Password%20reset%20%E2%80%94%20doctor%20account&body=Hi%20Womanie%20team%2C%0A%0AI%20can%27t%20log%20in%20to%20my%20doctor%20account%20and%20need%20a%20password%20reset.%20My%20email%20is%3A%20"
                 >
