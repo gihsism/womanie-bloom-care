@@ -148,6 +148,70 @@ export default function PreMenstrualDashboard() {
         </div>
       </Card>
 
+      {/* "What if it happens today?" walk-through. Designed for the
+          moment a young user actually needs it — discreet, calm,
+          step-by-step. Always rendered (not behind a section toggle)
+          so it's the first thing they find. */}
+      <Card className="p-4 border-pink-200/60 dark:border-pink-800/30 bg-gradient-to-br from-pink-50/60 to-purple-50/30 dark:from-pink-950/20 dark:to-purple-950/10">
+        <div className="flex items-start gap-3 mb-3">
+          <div className="w-9 h-9 rounded-xl bg-pink-100 dark:bg-pink-900/40 flex items-center justify-center flex-shrink-0">
+            <Flower2 className="h-4 w-4 text-pink-500" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-bold">If your period starts today — here's what to do</h3>
+            <p className="text-[11px] text-muted-foreground">
+              You've got this. Take it one step at a time.
+            </p>
+          </div>
+        </div>
+        <ol className="space-y-2.5">
+          {[
+            {
+              num: 1,
+              title: 'Breathe — this is normal',
+              detail: 'Periods happen to about half of all people. Nothing is wrong with you. The brown or red color is just your body doing what it\'s built to do.',
+            },
+            {
+              num: 2,
+              title: 'Get to a bathroom when you can',
+              detail: 'No rush — periods don\'t flood. You have time to walk calmly. If you\'re at school, the nurse or any female teacher can help.',
+            },
+            {
+              num: 3,
+              title: 'Use a pad, liner, or toilet paper backup',
+              detail: 'Pads stick to the inside of your underwear. If you don\'t have one, fold toilet paper into a thick layer and replace it through the day until you can get a real pad.',
+            },
+            {
+              num: 4,
+              title: 'Tell a trusted adult when you\'re ready',
+              detail: 'A parent, school nurse, older sibling, or family friend. You don\'t need to make it a big deal — "I got my period" is enough.',
+            },
+            {
+              num: 5,
+              title: 'Track the day in this app',
+              detail: 'Log today as your first period day so you can start to see your own pattern. Most cycles take a year or two to settle into a regular rhythm.',
+            },
+          ].map(step => (
+            <li key={step.num} className="flex items-start gap-2.5">
+              <div className="w-6 h-6 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-xs font-bold text-primary">{step.num}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium">{step.title}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">{step.detail}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <div className="mt-4 pt-3 border-t border-pink-200/40 dark:border-pink-800/20">
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            <span className="font-medium">When to ask for help right away:</span> very heavy bleeding (soaking
+            a pad in under an hour), severe cramps you can’t stand, or bleeding before age 8 or after a
+            year of regular periods. Tell a parent or call your doctor.
+          </p>
+        </div>
+      </Card>
+
       {/* Section Navigation */}
       <div className="flex gap-2 overflow-x-auto pb-1">
         {[
