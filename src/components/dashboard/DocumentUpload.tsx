@@ -56,23 +56,36 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
         return;
       }
 
-      // Validate file type. Accept PDF, DOCX, and any image type the
-      // browser can identify — iPhone photos arrive as image/heic /
-      // image/heif and were rejected by an explicit jpg/png allowlist.
-      // Some browsers report an empty selectedFile.type for camera
-      // captures or HEIC; accept those by extension as a fallback.
+      // Validate file type. We accept formats Claude vision can read
+      // (JPEG, PNG, WebP) plus PDF and DOCX, which we handle separately.
+      // HEIC / HEIF (iPhone default) is *not* supported by Claude vision,
+      // so we reject it at the door with a useful hint rather than
+      // accepting an upload that will silently fail at analysis time.
       const allowedMimes = [
         'application/pdf',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/webp',
       ];
-      const isAllowedImage = selectedFile.type.startsWith('image/');
       const ext = (selectedFile.name.split('.').pop() || '').toLowerCase();
-      const isAllowedByExt = ['pdf', 'docx', 'jpg', 'jpeg', 'png', 'heic', 'heif', 'webp'].includes(ext);
-
-      if (!allowedMimes.includes(selectedFile.type) && !isAllowedImage && !isAllowedByExt) {
+      const allowedExts = ['pdf', 'docx', 'jpg', 'jpeg', 'png', 'webp'];
+      const blockedHeic = ext === 'heic' || ext === 'heif'
+        || selectedFile.type === 'image/heic'
+        || selectedFile.type === 'image/heif';
+      if (blockedHeic) {
+        toast({
+          title: 'HEIC photos not yet supported',
+          description: 'iPhone defaults to HEIC. Change Settings → Camera → Formats to "Most Compatible" (JPEG), or convert this photo first.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      if (!allowedMimes.includes(selectedFile.type) && !allowedExts.includes(ext)) {
         toast({
           title: 'Invalid file type',
-          description: 'Please upload a PDF, DOCX, or image file (JPG, PNG, HEIC, WebP)',
+          description: 'Please upload a PDF, DOCX, or image (JPG, PNG, WebP).',
           variant: 'destructive',
         });
         return;
