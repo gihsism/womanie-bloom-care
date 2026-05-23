@@ -33,6 +33,8 @@ interface PatientProfile {
   id: string;
   full_name: string | null;
   life_stage: string | null;
+  pregnancy_due_date: string | null;
+  ivf_phase: string | null;
 }
 
 interface HealthSignal {
@@ -364,6 +366,27 @@ const PatientDetails = () => {
                 Life stage: {patient?.life_stage
                   ? patient.life_stage.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
                   : 'Not specified'}
+                {/* Mode-specific anchor data, surfaced inline so the
+                    doctor sees "where she is" without opening another
+                    tab. Pregnancy week + days-to-due / IVF phase are
+                    both already on the patient's profile. */}
+                {patient?.pregnancy_due_date && (() => {
+                  const due = new Date(patient.pregnancy_due_date);
+                  if (Number.isNaN(due.getTime())) return null;
+                  const daysToDue = Math.round((due.getTime() - Date.now()) / 86_400_000);
+                  const totalDays = 280 - daysToDue;
+                  const weeks = Math.max(0, Math.min(42, Math.floor(totalDays / 7)));
+                  return (
+                    <span className="ml-2 text-primary font-medium">
+                      · Week {weeks}{daysToDue > 0 ? ` (${daysToDue}d to due)` : daysToDue === 0 ? ' (due today)' : ` (${Math.abs(daysToDue)}d past due)`}
+                    </span>
+                  );
+                })()}
+                {patient?.ivf_phase && (
+                  <span className="ml-2 text-primary font-medium">
+                    · IVF: {patient.ivf_phase}
+                  </span>
+                )}
               </p>
             </div>
             <Button onClick={() => setShowNoteForm(true)} size="sm">
