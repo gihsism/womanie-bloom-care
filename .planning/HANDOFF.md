@@ -45,3 +45,40 @@ Worth a `/api/appointments/reschedule` endpoint that validates the new
 slot against the doctor's schedule + busy-slots before updating
 `scheduled_at`. About an hour to ship. Deferred so this arc could stay
 in small, atomic commits.
+
+## 2026-05-23
+
+### HEIC / HEIF photo upload
+
+iPhone defaults to HEIC. Claude vision only reads JPEG / PNG / GIF /
+WebP, so we reject HEIC at upload (DocumentUpload, 755f81e) with a
+"change Settings → Camera → Formats" hint. That works but it's a
+weird thing to make the patient do.
+
+Real fix: HEIC decoder inside api/analyze-document.ts. Options:
+1. `heic-convert` (pure JS, ~1.5 MB pulled into the bundle, slow).
+2. `sharp` with the HEIF system library — fast but Vercel functions
+   don't include libheif by default; needs a custom runtime image.
+3. Vercel Image Optimization API (paid, transforms on the fly).
+
+For now, the user-facing message is honest. Worth doing once HEIC
+share is non-trivial in upload telemetry.
+
+### Auto-create pending doctor-patient connection on booking
+
+When a patient books with a doctor through FindDoctor, no connection
+row is created. The doctor sees the appointment but can't open
+PatientDetails (consent-gated). Currently the patient has to
+separately send an access code.
+
+Right call is to auto-insert a pending connection on booking so the
+patient sees an approval request in PendingConnections. Approving
+unlocks the chart in time for the visit. Skipped — needs Alena's
+read on whether booking implies consent to share full history.
+
+### Access audit log
+
+There's no record of when a doctor opens a patient's chart. For
+GDPR-friendly transparency, a small `access_log(id, doctor_id,
+patient_id, viewed_at, surface)` table that the patient can review
+from Settings would be a good addition. Schema change, so HANDOFF.
