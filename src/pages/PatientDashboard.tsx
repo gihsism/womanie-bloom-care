@@ -42,6 +42,7 @@ import FertileWindowTimingCard from '@/components/dashboard/FertileWindowTimingC
 import BBTChart from '@/components/dashboard/BBTChart';
 import CycleHistoryCard from '@/components/dashboard/CycleHistoryCard';
 import LHSurgeCard from '@/components/dashboard/LHSurgeCard';
+import FertilityForecast from '@/components/dashboard/FertilityForecast';
 import { useNotificationPrefs } from '@/hooks/useNotificationPrefs';
 import PregnancyLabInsights from '@/components/dashboard/PregnancyLabInsights';
 import CycleLabInsights from '@/components/dashboard/CycleLabInsights';
@@ -885,6 +886,18 @@ const PatientDashboard = () => {
             {selectedMode === 'conception' && user && (
               <div className="mb-6">
                 <LHSurgeCard />
+              </div>
+            )}
+
+            {/* 3-cycle fertility / period forecast for cycle-tracking
+                and conception modes. Hides itself when no period has
+                been logged. */}
+            {(selectedMode === 'menstrual-cycle' || selectedMode === 'conception') && user && periodData && (
+              <div className="mb-6">
+                <FertilityForecast
+                  lastPeriodStart={periodData.lastPeriodStart}
+                  cycleLengthFallback={periodData.cycleLength}
+                />
               </div>
             )}
 
