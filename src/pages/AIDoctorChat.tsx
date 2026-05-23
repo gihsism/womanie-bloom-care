@@ -205,7 +205,18 @@ export default function AIDoctorChat() {
   const [loadingEarlier, setLoadingEarlier] = useState(false);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
-  const [selectedModel, setSelectedModel] = useState('claude-haiku-4-5-20251001');
+  // Model preference persists across sessions so a user who set up
+  // Sonnet doesn't drop back to Haiku on every page load.
+  const [selectedModel, setSelectedModel] = useState(() => {
+    try {
+      const saved = typeof window !== 'undefined' ? window.localStorage.getItem('womanie_chat_model') : null;
+      if (saved && AI_MODELS.some(m => m.id === saved)) return saved;
+    } catch { /* ignore */ }
+    return 'claude-haiku-4-5-20251001';
+  });
+  useEffect(() => {
+    try { window.localStorage.setItem('womanie_chat_model', selectedModel); } catch { /* ignore */ }
+  }, [selectedModel]);
   const [medicalContext, setMedicalContext] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
