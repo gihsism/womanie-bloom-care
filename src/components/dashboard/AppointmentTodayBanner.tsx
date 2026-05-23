@@ -35,14 +35,24 @@ const AppointmentTodayBanner = () => {
   const load = async () => {
     if (!user) return;
     try {
-      const resp = await fetch('/api/me/appointments?upcoming=true');
+      // Use the full history endpoint (not ?upcoming=true) so in-progress
+      // visits — scheduled_at already past, but not yet ended — still
+      // appear in the banner. ?upcoming=true filters to scheduled_at >=
+      // NOW() server-side; a 10:00 appointment vanishes from the banner
+      // at 10:01, which is precisely when the patient still needs it.
+      const resp = await fetch('/api/me/appointments');
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const payload = await resp.json();
       const all = (payload.appointments ?? []) as AppointmentRow[];
+      const now = Date.now();
       setTodays(
         all.filter((a) => {
           if ((a.status ?? '').toLowerCase() === 'cancelled') return false;
-          return isToday(new Date(a.scheduled_at));
+          const start = new Date(a.scheduled_at);
+          if (!isToday(start)) return false;
+          // Drop ones whose duration has already elapsed.
+          const end = start.getTime() + ((a.duration ?? 30) * 60_000);
+          return end > now;
         })
       );
     } catch (e) {
