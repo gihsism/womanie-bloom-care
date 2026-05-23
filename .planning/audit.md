@@ -249,6 +249,24 @@ Cross-mode:
   thresholds 2 / 5 / 8). Irregular triggers a callout pointing at
   PCOS / thyroid / stress as worth-discussing-with-doctor causes.
 
+Continued session 54:
+- **ed6433c** — Contraction timer for pregnancy ≥ week 36. Big Start
+  / Stop surface with tabular-nums duration; idle state shows
+  gap-since-last; last-hour stats (count, avg frequency, avg
+  duration); 5-1-1 detection callout when the standard "go to
+  hospital" threshold is met (≤5 min avg freq, ≥1 min avg duration,
+  ≥6 contractions in window). Recent list with per-row delete, max
+  50 entries. Per-user localStorage — real-time tool, no benefit to
+  server sync.
+- **3a6e705** — AI chat prompt suggestions are now mode-aware. The
+  old code did substring sniffs on medicalContext ("pregnancy" /
+  "menopause" / "abnormal") which misclassified anyone in trying-
+  to-conceive / IVF / contraception / pre-menstrual / post-menopause
+  modes. Now anchors on the exact `Life stage: <key>` line the
+  context builder emits and picks from per-mode prompt sets — eight
+  distinct sets, one per mode, each grounded in what the assistant
+  actually knows from the server-side context.
+
 ### 2026-05-23 (session 53 — 24h authorization)
 
 Alena re-authorized a third 24h autonomous arc. Began with a
