@@ -6,6 +6,7 @@ import BabyImage3DOverlay from './BabyImage3DOverlay';
 import KickCounter from './KickCounter';
 import MaternalWeightTracker from './MaternalWeightTracker';
 import ContractionTimer from './ContractionTimer';
+import HospitalBagChecklist from './HospitalBagChecklist';
 
 // Baby development illustrations
 import babyWeek04 from '@/assets/baby-week-04.png';
@@ -849,6 +850,13 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy }: Pregnancy
       {/* Daily kick counter — only relevant from ~week 28 onward, when
           fetal movement-counting becomes part of standard self-monitoring. */}
       {weeksPregnant >= 28 && <KickCounter />}
+
+      {/* Hospital bag checklist — packing reminders surface from week
+          32 onward (most providers recommend having it ready by week
+          36). 27 items grouped into for-you / for-baby / for-partner /
+          documents, with per-item hints that turn into "what to bring
+          and why" guidance. */}
+      {weeksPregnant >= 32 && <HospitalBagChecklist weeksPregnant={weeksPregnant} />}
 
       {/* Contraction timer — only relevant from ~week 36 onward when
           labor could realistically start. Earlier contractions are
