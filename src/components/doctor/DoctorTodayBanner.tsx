@@ -45,10 +45,16 @@ const DoctorTodayBanner = ({ appointments, patients }: DoctorTodayBannerProps) =
     return () => clearInterval(t);
   }, []);
 
+  const now = Date.now();
   const todays = appointments
     .filter((a) => {
       if ((a.status ?? '').toLowerCase() === 'cancelled') return false;
-      return isToday(new Date(a.scheduled_at));
+      const start = new Date(a.scheduled_at);
+      if (!isToday(start)) return false;
+      // Drop ones whose duration has elapsed — the doctor banner is for
+      // "right now / coming up," not for visits that already wrapped.
+      const end = start.getTime() + ((a.duration ?? 30) * 60_000);
+      return end > now;
     })
     .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime());
 
