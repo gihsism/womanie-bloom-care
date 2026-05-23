@@ -531,6 +531,62 @@ export default function AIDoctorChat() {
   // to reference". So guide the user toward uploading instead.
   const hasContext = Boolean(medicalContext && medicalContext.length > 0);
 
+  // Match the exact `Life stage: <key>` string that the medicalContext
+  // builder emits (lines 254-256 above), keyed against the eight
+  // dashboard modes. Anchoring on the colon-prefixed key avoids the
+  // false positives the old substring match was prone to — "pregnancy"
+  // also appears in "trying to conceive" copy elsewhere in the
+  // context, for example.
+  const lifeStageMatch = medicalContext?.match(/Life stage: ([\w-]+)/);
+  const lifeStage = lifeStageMatch?.[1] ?? null;
+
+  // Per-mode prompt sets. Each mode's questions are chosen so the
+  // assistant actually has something useful to say grounded in what
+  // it knows from the server-side context (profile + last 20 docs +
+  // last 100 extracted values + upcoming visits + recent notes).
+  const MODE_SUGGESTIONS: Record<string, string[]> = {
+    'pre-menstrual': [
+      'What changes should I expect before my first period?',
+      'How do I prepare a period kit for school?',
+      'When should I tell a trusted adult?',
+    ],
+    'menstrual-cycle': [
+      'Are my cycles regular based on my history?',
+      'Which lab results are most relevant for my cycle?',
+      'What symptoms should I track this month?',
+    ],
+    'contraception': [
+      'Is my contraception still the right fit?',
+      'What should I know about missed-pill recovery?',
+      'How would switching methods affect me?',
+    ],
+    'conception': [
+      'What does my BBT pattern suggest about ovulation?',
+      'When is my fertile window this cycle?',
+      'Which supplements help fertility?',
+    ],
+    'ivf': [
+      'Explain my beta hCG trend in plain language',
+      'What does my current IVF phase mean?',
+      'How should I support recovery after retrieval?',
+    ],
+    'pregnancy': [
+      'Is my pregnancy progressing normally?',
+      'What prenatal milestones are coming up?',
+      'Which supplements should I keep taking?',
+    ],
+    'menopause': [
+      'Where am I in the menopause transition?',
+      'What can help with my symptoms?',
+      'Which screenings should I be doing this year?',
+    ],
+    'post-menopause': [
+      'What should I prioritize for long-term health?',
+      'Are any of my labs concerning for someone my age?',
+      'Which screenings are overdue?',
+    ],
+  };
+
   let suggestedQuestions: string[];
   if (!hasContext) {
     suggestedQuestions = [
@@ -544,10 +600,11 @@ export default function AIDoctorChat() {
       'What do my latest lab results mean?',
     ];
 
-    const contextSuggestions = medicalContext?.includes('pregnancy') || medicalContext?.includes('HCG')
-      ? ['Is my pregnancy progressing normally?', 'What supplements should I take?']
-      : medicalContext?.includes('menopause')
-      ? ['How are my hormone levels for menopause?', 'What can help with my symptoms?']
+    // Pick the mode-specific set when we have a known life stage;
+    // otherwise fall back to the old abnormal/concerning heuristic
+    // so users without a mode still get something useful.
+    const contextSuggestions = lifeStage && MODE_SUGGESTIONS[lifeStage]
+      ? MODE_SUGGESTIONS[lifeStage]
       : medicalContext?.includes('abnormal') || medicalContext?.includes('critical')
       ? ['Which results should I worry about?', 'What lifestyle changes could help?']
       : ['Are there any concerning findings?', 'What tests should I do next?'];
