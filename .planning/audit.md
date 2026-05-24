@@ -177,6 +177,58 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-24 (session 56 — lab- and age-aware cycle prediction)
+
+Alena asked for "better cycle prediction based on input data and lab
+results and age, also better predictions of hormones such as
+anti-müllerian hormone, plus improve calendar for all types." Six
+commits building a coherent layer on top of the existing prediction
+pipeline:
+
+- **0255063** — Foundation: `src/lib/hormone-reference.ts` (AMH by
+  age from Seifer 2011, FSH day-3 thresholds, PCOS LH/FSH > 2.0
+  pattern, TSH 0.4–4.0, cycle-phase ranges for FSH / LH / estradiol
+  / progesterone, hormoneKeyForTitle / parseLabValue helpers) plus
+  `useUserHealthContext` hook that reads age (localStorage DOB) and
+  pulls the newest reading per hormone from current_extracted_data,
+  precomputes flags (tshOutOfRange, highFsh, menopausalFsh,
+  pcosLhFshPattern, highProlactin, highTestosterone, amhAssessment).
+- **bdb523c** — `useCyclePrediction` accepts an optional
+  `healthContext` and returns two new fields:
+  - `riskFactors[]`: human-readable lines citing actual lab values
+    (e.g. "TSH 5.2 mIU/L is outside 0.4–4.0").
+  - `ageAdjusted: boolean`: true when regularity threshold widened
+    from 3-day SD to 5-day SD for perimenopausal age (≥40).
+  Confidence window widens by 1d on TSH out-of-range, 1d on high FSH,
+  2d on PCOS pattern. New `CyclePredictionInsights` card on
+  PatientDashboard surfaces the riskFactors (hides when empty).
+- **2eb59b1** — `AmhAgeContext` widget for conception / IVF /
+  menstrual modes. Shows user's AMH value vs age-bracket p5/median/p95
+  with a coloured percentile pill, a horizontal range bar with a pin
+  at the user's value, and a reserve label (diminished / low_average
+  / average / good / high) plus the matching interpretation note.
+- **866b0ab** — PanelDetail picks up a per-test age-anchored line for
+  AMH: "for ages 35–37: median 1.8 ng/mL (p5 0.4 – p95 4.5)".
+- **62c351f** — Same surface adds phase-aware reference lines for
+  FSH / LH / estradiol / progesterone: "by cycle phase (IU/L):
+  follicular 3–10 · midcycle 4–25 · luteal 1.5–9 · postmenopausal
+  26–135". Honest single-line replacement until per-draw cycle-day
+  mapping ships.
+- **d3b3c0e** — CalendarGrid generates a `lowConfidencePeriodSet`
+  padding `confidenceWindow` days on either side of each predicted
+  period range, painted in `bg-primary/5` (lighter than the
+  predicted-period band). So when labs widen the window (TSH / FSH
+  / PCOS / age), the calendar visibly widens too. Legend gains a
+  "Window" chip.
+
+Result: a patient with elevated FSH and TSH out of range now sees
+the prediction window naturally widen on the calendar, the
+PatientDashboard card explains why citing her actual numbers, the
+AmhAgeContext card tells her where her ovarian reserve sits for her
+age, and PanelDetail surfaces the cycle-phase reference alongside
+each cycle-hormone test. All gated to hide cleanly when the relevant
+data isn't there.
+
 ### 2026-05-23 (session 54 — deepening each life-stage mode)
 
 Alena asked to keep improving pregnancy mode then move to other
