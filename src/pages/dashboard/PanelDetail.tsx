@@ -11,6 +11,8 @@ import { format } from 'date-fns';
 import { getFriendlyName } from '@/lib/medical-utils';
 import ResultSparkline from '@/components/dashboard/ResultSparkline';
 import UserMenu from '@/components/UserMenu';
+import { useUserHealthContext } from '@/hooks/useUserHealthContext';
+import { hormoneKeyForTitle, assessAmh } from '@/lib/hormone-reference';
 
 // Panel deep-dive — every reading in one panel (CBC, Thyroid Panel,
 // Lipid Panel, …) across every document the user has uploaded,
@@ -93,6 +95,7 @@ export default function PanelDetail() {
   const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
+  const healthContext = useUserHealthContext();
   const [rows, setRows] = useState<ExtractedRow[]>([]);
   const [docs, setDocs] = useState<DocLite[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -366,6 +369,27 @@ export default function PanelDetail() {
                             {' '}<span className="text-muted-foreground">(median {fmt(personalRange.median)})</span>
                           </p>
                         )}
+                        {/* Age-anchored expectation for hormones (AMH only
+                            so far — FSH / estradiol etc. need cycle-phase
+                            knowledge to be honest). Shown when we know
+                            the user's age and the latest numeric value. */}
+                        {(() => {
+                          const key = hormoneKeyForTitle(s.title);
+                          if (key !== 'amh' || !healthContext.age) return null;
+                          const numericLatest = (() => {
+                            const m = String(s.latest.value ?? '').match(/-?\d+(?:\.\d+)?/);
+                            return m ? parseFloat(m[0]) : null;
+                          })();
+                          if (numericLatest === null) return null;
+                          const a = assessAmh(numericLatest, healthContext.age);
+                          if (!a) return null;
+                          return (
+                            <p className="text-[11px] text-muted-foreground">
+                              <span className="font-medium text-foreground/80">for ages {a.ageBracket}:</span>{' '}
+                              median {a.median} ng/mL (p5 {a.p5} – p95 {a.p95})
+                            </p>
+                          );
+                        })()}
                       </div>
                       <div className="text-right">
                         <p className={`text-sm font-mono font-bold ${latestTone}`}>{latestValue}</p>
