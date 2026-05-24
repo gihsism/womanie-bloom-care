@@ -27,6 +27,7 @@ import PreMenstrualDashboard from '@/components/dashboard/PreMenstrualDashboard'
 import MenopauseDashboard from '@/components/dashboard/MenopauseDashboard';
 import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
+import CyclePredictionInsights from '@/components/dashboard/CyclePredictionInsights';
 import RecentFindings from '@/components/dashboard/RecentFindings';
 import { useAttentionCount } from '@/hooks/useAttentionCount';
 import HealthTrends from '@/components/dashboard/HealthTrends';
@@ -670,6 +671,12 @@ const PatientDashboard = () => {
 
             {/* Health Summary from medical documents */}
             <HealthSummaryWidget />
+
+            {/* Lab + age signals that change how reliable the cycle
+                prediction is — TSH out of range, elevated FSH, PCOS
+                LH/FSH pattern, perimenopausal age. Hides itself when
+                there's nothing to flag. */}
+            {selectedMode && <CyclePredictionInsights mode={selectedMode} />}
 
             {/* Health Tracking Section */}
             <div className="mb-6">

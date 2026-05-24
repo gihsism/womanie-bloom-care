@@ -18,6 +18,7 @@ import DayActionSheet from './calendar/DayActionSheet';
 import PeriodEndBanner from './calendar/PeriodEndBanner';
 
 import { useCyclePrediction, useSymptomPatterns, getCurrentCycleDay, isActivePeriod, getEffectiveEndDate, type PeriodRecord, type DaySignal } from '@/hooks/useCyclePrediction';
+import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 
 interface CycleCalendarProps {
   lastPeriodStart?: Date;
@@ -71,11 +72,13 @@ const CycleCalendar = ({
     periodLength: manualPeriodLength || undefined,
   }), [manualCycleLength, manualPeriodLength]);
 
+  const healthContext = useUserHealthContext();
   const prediction = useCyclePrediction({
     periodRecords,
     daySignals,
     onboardingEstimates,
     manualOverrides,
+    healthContext,
   });
   
   const symptomPatterns = useSymptomPatterns(

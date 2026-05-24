@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { parseISO, differenceInDays, addDays, format, isSameDay } from 'date-fns';
+import type { UserHealthContext } from './useUserHealthContext';
 
 // Types
 export interface PeriodRecord {
@@ -41,6 +42,15 @@ export interface CyclePrediction {
   currentCycleAnomaly: boolean;
   anomalyMessage?: string;
   excludedCycles: number;
+  // Lab- and age-aware caveats. Empty array when no risk factors were
+  // detected. Each entry is a one-line explanation safe to render
+  // alongside the prediction (e.g. "TSH 5.2 mIU/L — thyroid out of
+  // range can lengthen cycles; the prediction window may be off").
+  riskFactors: string[];
+  // True when an age-bracket adjustment widened the confidence window
+  // (perimenopausal variability is normal, shouldn't be flagged as
+  // "irregular" the same way it would be at 25).
+  ageAdjusted: boolean;
 }
 
 export interface SymptomPattern {
@@ -60,6 +70,7 @@ interface CyclePredictionInput {
   daySignals: Record<string, DaySignal>;
   onboardingEstimates?: OnboardingEstimates;
   manualOverrides?: { cycleLength?: number; periodLength?: number };
+  healthContext?: UserHealthContext;
 }
 
 // Constants
@@ -110,6 +121,7 @@ export function useCyclePrediction({
   daySignals,
   onboardingEstimates,
   manualOverrides,
+  healthContext,
 }: CyclePredictionInput): CyclePrediction {
   return useMemo(() => {
     const sortedRecords = [...periodRecords].sort(
@@ -207,8 +219,26 @@ export function useCyclePrediction({
     // ─── Statistics ───
     const standardDeviation = validCycleLengths.length >= 2
       ? calculateStandardDeviation(validCycleLengths) : 0;
-    const isRegular = standardDeviation < 3;
-    const confidenceWindow = isRegular ? 1 : Math.min(Math.ceil(standardDeviation), 7);
+
+    // Age- and lab-aware regularity threshold. Default is 3-day SD =
+    // "regular." Perimenopausal women (age ≥ 40) routinely vary more
+    // than that without anything being wrong — bump to 5 days before
+    // flagging irregularity. Conversely, if a PCOS / thyroid pattern
+    // is in the labs, even a small variance deserves a caveat.
+    let regularityThreshold = 3;
+    let ageAdjusted = false;
+    if (healthContext?.age !== null && healthContext?.age !== undefined && healthContext.age >= 40) {
+      regularityThreshold = 5;
+      ageAdjusted = true;
+    }
+    const isRegular = standardDeviation < regularityThreshold;
+    const baseWindow = isRegular ? 1 : Math.min(Math.ceil(standardDeviation), 7);
+    // Widen the window when we have signal that the prediction is less
+    // reliable than the variance alone implies.
+    let confidenceWindow = baseWindow;
+    if (healthContext?.tshOutOfRange) confidenceWindow = Math.min(confidenceWindow + 1, 7);
+    if (healthContext?.highFsh) confidenceWindow = Math.min(confidenceWindow + 1, 7);
+    if (healthContext?.pcosLhFshPattern) confidenceWindow = Math.min(confidenceWindow + 2, 10);
 
     let confidenceLevel: 'low' | 'medium' | 'high' = 'low';
     let dataQualityMessage = '';
@@ -268,6 +298,47 @@ export function useCyclePrediction({
       currentCycleAnomaly = true;
     }
 
+    // ─── Lab-derived risk factors ───
+    // Lines for each lab signal that affects cycle reliability. UI
+    // surfaces these next to the prediction so the patient knows why
+    // the window widened, or why "irregular" is showing up.
+    const riskFactors: string[] = [];
+    if (healthContext?.tshOutOfRange && healthContext.labs.tsh) {
+      const v = healthContext.labs.tsh.value;
+      riskFactors.push(
+        `TSH ${v} mIU/L is outside 0.4–4.0; thyroid issues can lengthen or disrupt cycles.`
+      );
+    }
+    if (healthContext?.menopausalFsh && healthContext.labs.fsh) {
+      riskFactors.push(
+        `FSH ${healthContext.labs.fsh.value} IU/L is in the menopausal range — cycle predictions become unreliable as ovulation stops.`
+      );
+    } else if (healthContext?.highFsh && healthContext.labs.fsh) {
+      riskFactors.push(
+        `FSH ${healthContext.labs.fsh.value} IU/L is above 10 — diminished ovarian reserve makes ovulation timing more variable.`
+      );
+    }
+    if (healthContext?.pcosLhFshPattern) {
+      riskFactors.push(
+        'LH/FSH ratio > 2 with elevated LH — a PCOS pattern that often produces longer, less predictable cycles.'
+      );
+    }
+    if (healthContext?.highProlactin && healthContext.labs.prolactin) {
+      riskFactors.push(
+        `Prolactin ${healthContext.labs.prolactin.value} ng/mL is elevated — can suppress ovulation and skip cycles entirely.`
+      );
+    }
+    if (healthContext?.highTestosterone && healthContext.labs.testosterone_total) {
+      riskFactors.push(
+        `Total testosterone ${healthContext.labs.testosterone_total.value} ng/dL is above normal — often co-occurs with cycle irregularity.`
+      );
+    }
+    if (ageAdjusted && cyclesLogged >= 3) {
+      riskFactors.push(
+        `Perimenopausal range (age ${healthContext?.age}): more cycle variance is normal — the prediction allows a wider window than for younger users.`
+      );
+    }
+
     return {
       predictedPeriodStart, predictedPeriodEnd, confidenceWindow,
       averageCycleLength: avgCycleLength, averagePeriodLength: avgPeriodLength,
@@ -276,8 +347,9 @@ export function useCyclePrediction({
       confidenceLevel, cyclesLogged, dataQualityMessage,
       tier, tierLabel, cycleTrend,
       currentCycleAnomaly, anomalyMessage, excludedCycles,
+      riskFactors, ageAdjusted,
     };
-  }, [periodRecords, daySignals, onboardingEstimates, manualOverrides]);
+  }, [periodRecords, daySignals, onboardingEstimates, manualOverrides, healthContext]);
 }
 
 // Symptom pattern recognition
