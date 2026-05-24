@@ -28,6 +28,7 @@ import MenopauseDashboard from '@/components/dashboard/MenopauseDashboard';
 import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import CyclePredictionInsights from '@/components/dashboard/CyclePredictionInsights';
+import AmhAgeContext from '@/components/dashboard/AmhAgeContext';
 import RecentFindings from '@/components/dashboard/RecentFindings';
 import { useAttentionCount } from '@/hooks/useAttentionCount';
 import HealthTrends from '@/components/dashboard/HealthTrends';
@@ -677,6 +678,11 @@ const PatientDashboard = () => {
                 LH/FSH pattern, perimenopausal age. Hides itself when
                 there's nothing to flag. */}
             {selectedMode && <CyclePredictionInsights mode={selectedMode} />}
+
+            {/* AMH-vs-age ovarian reserve context. Only renders for
+                conception / IVF / menstrual modes AND when an AMH lab
+                exists + age is known. */}
+            {selectedMode && <AmhAgeContext mode={selectedMode} />}
 
             {/* Health Tracking Section */}
             <div className="mb-6">
