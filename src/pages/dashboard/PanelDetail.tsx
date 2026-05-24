@@ -12,7 +12,7 @@ import { getFriendlyName } from '@/lib/medical-utils';
 import ResultSparkline from '@/components/dashboard/ResultSparkline';
 import UserMenu from '@/components/UserMenu';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
-import { hormoneKeyForTitle, assessAmh } from '@/lib/hormone-reference';
+import { hormoneKeyForTitle, assessAmh, getPhaseRange } from '@/lib/hormone-reference';
 
 // Panel deep-dive — every reading in one panel (CBC, Thyroid Panel,
 // Lipid Panel, …) across every document the user has uploaded,
@@ -369,24 +369,45 @@ export default function PanelDetail() {
                             {' '}<span className="text-muted-foreground">(median {fmt(personalRange.median)})</span>
                           </p>
                         )}
-                        {/* Age-anchored expectation for hormones (AMH only
-                            so far — FSH / estradiol etc. need cycle-phase
-                            knowledge to be honest). Shown when we know
-                            the user's age and the latest numeric value. */}
+                        {/* Age-anchored expectation for AMH + cycle-phase
+                            ranges for the four cycle hormones (FSH, LH,
+                            estradiol, progesterone). Shown when we know
+                            enough to make the comparison meaningful. */}
                         {(() => {
                           const key = hormoneKeyForTitle(s.title);
-                          if (key !== 'amh' || !healthContext.age) return null;
-                          const numericLatest = (() => {
+                          if (!key) return null;
+                          // AMH: age-anchored expectation.
+                          if (key === 'amh' && healthContext.age) {
                             const m = String(s.latest.value ?? '').match(/-?\d+(?:\.\d+)?/);
-                            return m ? parseFloat(m[0]) : null;
-                          })();
-                          if (numericLatest === null) return null;
-                          const a = assessAmh(numericLatest, healthContext.age);
-                          if (!a) return null;
+                            const numericLatest = m ? parseFloat(m[0]) : null;
+                            if (numericLatest === null) return null;
+                            const a = assessAmh(numericLatest, healthContext.age);
+                            if (!a) return null;
+                            return (
+                              <p className="text-[11px] text-muted-foreground">
+                                <span className="font-medium text-foreground/80">for ages {a.ageBracket}:</span>{' '}
+                                median {a.median} ng/mL (p5 {a.p5} – p95 {a.p95})
+                              </p>
+                            );
+                          }
+                          // FSH / LH / Estradiol / Progesterone: ranges
+                          // differ by cycle phase, so a single static range
+                          // is misleading. Show all four phases so the
+                          // patient can match the right one to her draw.
+                          const phaseAware: Array<typeof key> = ['fsh', 'lh', 'estradiol', 'progesterone'];
+                          if (!phaseAware.includes(key)) return null;
+                          const f = getPhaseRange(key, 'follicular');
+                          const m2 = getPhaseRange(key, 'midcycle');
+                          const l = getPhaseRange(key, 'luteal');
+                          const pm = getPhaseRange(key, 'postmenopausal');
+                          if (!f || !m2 || !l) return null;
                           return (
                             <p className="text-[11px] text-muted-foreground">
-                              <span className="font-medium text-foreground/80">for ages {a.ageBracket}:</span>{' '}
-                              median {a.median} ng/mL (p5 {a.p5} – p95 {a.p95})
+                              <span className="font-medium text-foreground/80">by cycle phase ({f.unit}):</span>{' '}
+                              follicular {f.low}–{f.high} ·
+                              {' '}midcycle {m2.low}–{m2.high} ·
+                              {' '}luteal {l.low}–{l.high}
+                              {pm && ` · postmenopausal ${pm.low}–${pm.high}`}
                             </p>
                           );
                         })()}
