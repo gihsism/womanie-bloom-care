@@ -50,20 +50,25 @@ const CalendarGrid = ({
   }, [currentMonth]);
 
   // Build prediction sets for multi-cycle display
-  const { futurePeriodSet, predictedOvulationSet, fertileSet, pmsSet } = useMemo(() => {
+  const { futurePeriodSet, predictedOvulationSet, fertileSet, pmsSet, lowConfidencePeriodSet } = useMemo(() => {
     const fPeriod = new Set<string>();
     const pOvulation = new Set<string>();
     const pFertile = new Set<string>();
     const pPms = new Set<string>();
+    // "Low-confidence" pre/post pad around the predicted period start
+    // — visible as a lighter shade so the user can see the
+    // confidenceWindow visually instead of only as a "±N days" text.
+    const lcPeriod = new Set<string>();
 
     // Don't generate any predictions if there are no period records
     if (periodRecords.length === 0) {
-      return { futurePeriodSet: fPeriod, predictedOvulationSet: pOvulation, fertileSet: pFertile, pmsSet: pPms };
+      return { futurePeriodSet: fPeriod, predictedOvulationSet: pOvulation, fertileSet: pFertile, pmsSet: pPms, lowConfidencePeriodSet: lcPeriod };
     }
 
     const avgCycle = prediction.averageCycleLength;
     const avgPeriod = prediction.averagePeriodLength;
     const lutealPhase = 14;
+    const window = prediction.confidenceWindow;
 
     const sorted = [...periodRecords].sort(
       (a, b) => new Date(a.period_start_date).getTime() - new Date(b.period_start_date).getTime()
@@ -96,6 +101,18 @@ const CalendarGrid = ({
       let d = futureStart;
       while (d <= futureEnd) { fPeriod.add(format(d, 'yyyy-MM-dd')); d = addDays(d, 1); }
 
+      // Confidence band: window days before predicted start + window
+      // days after predicted end. Only paint days *not* already in the
+      // solid prediction set so the bullseye stays distinct.
+      if (window > 0) {
+        for (let off = 1; off <= window; off++) {
+          const before = format(addDays(futureStart, -off), 'yyyy-MM-dd');
+          const after = format(addDays(futureEnd, off), 'yyyy-MM-dd');
+          if (!fPeriod.has(before)) lcPeriod.add(before);
+          if (!fPeriod.has(after)) lcPeriod.add(after);
+        }
+      }
+
       const nextCycleStart = addDays(lastStart, avgCycle * (cycle + 1));
       const ovDate = addDays(nextCycleStart, -lutealPhase);
       pOvulation.add(format(ovDate, 'yyyy-MM-dd'));
@@ -108,7 +125,7 @@ const CalendarGrid = ({
       while (d < nextCycleStart) { pPms.add(format(d, 'yyyy-MM-dd')); d = addDays(d, 1); }
     }
 
-    return { futurePeriodSet: fPeriod, predictedOvulationSet: pOvulation, fertileSet: pFertile, pmsSet: pPms };
+    return { futurePeriodSet: fPeriod, predictedOvulationSet: pOvulation, fertileSet: pFertile, pmsSet: pPms, lowConfidencePeriodSet: lcPeriod };
   }, [prediction, periodRecords]);
 
   const isPregnancyMode = selectedMode === 'pregnancy' && pregnancyDueDate;
@@ -171,6 +188,13 @@ const CalendarGrid = ({
     // 6) Future predicted period
     if (futurePeriodSet.has(dateKey)) {
       return { type: 'predicted-period' as const, bgClass: 'bg-primary/15', textClass: 'text-foreground', dashed: true, active: false };
+    }
+
+    // 6b) Confidence band around the predicted period — lighter shade
+    // so the user sees the ±N day uncertainty as a tinted halo rather
+    // than only a number.
+    if (lowConfidencePeriodSet.has(dateKey)) {
+      return { type: 'predicted-period-band' as const, bgClass: 'bg-primary/5', textClass: 'text-muted-foreground', dashed: true, active: false };
     }
 
     // 7) Fertile window
