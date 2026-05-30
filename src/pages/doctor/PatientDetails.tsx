@@ -28,6 +28,7 @@ import {
   Loader2,
   ExternalLink,
 } from 'lucide-react';
+import DoctorPatientTrackingSummary from '@/components/dashboard/DoctorPatientTrackingSummary';
 
 interface PatientProfile {
   id: string;
@@ -495,6 +496,16 @@ const PatientDetails = () => {
                 );
               })()}
             </div>
+
+            {/* Tracking summary — last period, cycle stats, top
+                symptoms (last 30d), hot-flash count for menopause.
+                Same aggregations the patient sees on her dashboard /
+                print view. Self-hides each block when data is empty. */}
+            <DoctorPatientTrackingSummary
+              periodRecords={periodRecords}
+              signals={healthSignals}
+              lifeStage={patient?.life_stage ?? null}
+            />
 
             {/* Recent Appointments */}
             <Card>
