@@ -19,6 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import DashboardHeader, { getModeStats, type LifeStage } from '@/components/dashboard/DashboardHeader';
 import CycleCalendar from '@/components/dashboard/CycleCalendar';
 import PregnancyTracker from '@/components/dashboard/PregnancyTracker';
+import PregnancyNutrition from '@/components/dashboard/PregnancyNutrition';
 import IVFTracker from '@/components/dashboard/IVFTracker';
 import DailyLogging from '@/components/dashboard/DailyLogging';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
@@ -776,6 +777,12 @@ const PatientDashboard = () => {
                         pregnancyDueDate={pregnancyDueDate}
                       />
                     )}
+                    {pregnancyDueDate && (() => {
+                      const gestationStart = new Date(pregnancyDueDate.getTime() - 280 * 24 * 60 * 60 * 1000);
+                      const totalDays = Math.floor((Date.now() - gestationStart.getTime()) / (24 * 60 * 60 * 1000));
+                      const weeks = Math.max(0, Math.min(42, Math.floor(totalDays / 7)));
+                      return <PregnancyNutrition weeksPregnant={weeks} />;
+                    })()}
                   </div>
                   <div className="lg:col-span-1 space-y-4">
                     <PregnancyLabInsights />
