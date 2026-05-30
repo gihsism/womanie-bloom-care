@@ -6,7 +6,7 @@ import { ArrowLeft, Printer, Loader2 } from 'lucide-react';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { format } from 'date-fns';
+import { differenceInDays, differenceInMonths, format, parseISO, subDays } from 'date-fns';
 import { getFriendlyName } from '@/lib/medical-utils';
 
 // Bring-to-the-doctor printout — everything Womanie has on the patient
@@ -62,6 +62,33 @@ interface DoctorNote {
   doctor_specialties: string[] | null;
 }
 
+interface PeriodRow {
+  period_start_date: string;
+  period_end_date: string | null;
+  cycle_length: number | null;
+}
+
+interface SignalRow {
+  signal_date: string;
+  symptoms: string[] | null;
+  mood: string[] | null;
+  notes: string | null;
+}
+
+const SYMPTOM_LABEL: Record<string, string> = {
+  cramps: 'Cramps',
+  headache: 'Headache',
+  bloating: 'Bloating',
+  tender_breasts: 'Tender breasts',
+  back_pain: 'Back pain',
+  nausea: 'Nausea',
+  fatigue: 'Fatigue',
+  acne: 'Acne',
+  hot_flashes: 'Hot flashes',
+  night_sweats: 'Night sweats',
+  insomnia: 'Insomnia',
+};
+
 const STATUS_LABEL: Record<string, string> = {
   critical: 'Critical',
   abnormal: 'Abnormal',
@@ -90,11 +117,13 @@ export default function PrintHealthRecord() {
   const [docs, setDocs] = useState<Doc[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [doctorNotes, setDoctorNotes] = useState<DoctorNote[]>([]);
+  const [periodRows, setPeriodRows] = useState<PeriodRow[]>([]);
+  const [signalRows, setSignalRows] = useState<SignalRow[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   const load = useCallback(async () => {
     if (!user) return;
-    const [profileRes, docsRes, itemsRes, notesResp] = await Promise.all([
+    const [profileRes, docsRes, itemsRes, notesResp, periodRes, signalRes] = await Promise.all([
       db.from('profiles')
         .select('full_name, life_stage, pregnancy_due_date, ivf_phase')
         .eq('id', user.id)
@@ -107,15 +136,102 @@ export default function PrintHealthRecord() {
         .select('id, document_id, title, value, unit, reference_range, status, data_type, date_recorded, notes, raw_data')
         .eq('user_id', user.id),
       fetch('/api/me/doctor-notes').then(r => (r.ok ? r.json() : { notes: [] })),
+      db.from('period_tracking')
+        .select('period_start_date, period_end_date, cycle_length')
+        .eq('user_id', user.id)
+        .order('period_start_date', { ascending: false }),
+      db.from('daily_health_signals')
+        .select('signal_date, symptoms, mood, notes')
+        .eq('user_id', user.id)
+        .gte('signal_date', format(subDays(new Date(), 90), 'yyyy-MM-dd')),
     ]);
     setProfile((profileRes.data ?? null) as Profile | null);
     setDocs((docsRes.data ?? []) as Doc[]);
     setItems((itemsRes.data ?? []) as Item[]);
     setDoctorNotes((notesResp?.notes ?? []) as DoctorNote[]);
+    setPeriodRows((periodRes.data ?? []) as PeriodRow[]);
+    setSignalRows((signalRes.data ?? []) as SignalRow[]);
     setLoaded(true);
   }, [user]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Cycle context: derive cycle-length stats from consecutive period
+  // starts (the stored cycle_length can be stale). Take the most
+  // recent 6 cycles.
+  const cycleStats = useMemo(() => {
+    if (periodRows.length === 0) return null;
+    const sorted = [...periodRows].sort(
+      (a, b) => Date.parse(b.period_start_date) - Date.parse(a.period_start_date)
+    );
+    const recent = sorted.slice(0, 7); // 7 starts → 6 cycle gaps
+    const gaps: number[] = [];
+    for (let i = 0; i < recent.length - 1; i++) {
+      const g = differenceInDays(parseISO(recent[i].period_start_date), parseISO(recent[i + 1].period_start_date));
+      if (g >= 18 && g <= 90) gaps.push(g);
+    }
+    const lastPeriod = sorted[0];
+    const lastPeriodDate = parseISO(lastPeriod.period_start_date);
+    const monthsSinceLast = differenceInMonths(new Date(), lastPeriodDate);
+    const daysSinceLast = differenceInDays(new Date(), lastPeriodDate);
+    if (gaps.length === 0) {
+      return {
+        recent: sorted.slice(0, 6),
+        mean: null,
+        sd: null,
+        lastPeriodDate,
+        monthsSinceLast,
+        daysSinceLast,
+      };
+    }
+    const mean = gaps.reduce((s, v) => s + v, 0) / gaps.length;
+    const sd = Math.sqrt(gaps.map(v => (v - mean) ** 2).reduce((s, v) => s + v, 0) / gaps.length);
+    return {
+      recent: sorted.slice(0, 6),
+      mean,
+      sd,
+      lastPeriodDate,
+      monthsSinceLast,
+      daysSinceLast,
+    };
+  }, [periodRows]);
+
+  // Symptom counts across the last 90 days of signals — gives the
+  // clinician a sense of what the patient is actually noticing.
+  const symptomSummary = useMemo(() => {
+    const counts: Record<string, number> = {};
+    let daysLogged = 0;
+    for (const s of signalRows) {
+      const hasAny = (s.symptoms && s.symptoms.length > 0) || (s.mood && s.mood.length > 0) || (s.notes && s.notes.trim().length > 0);
+      if (hasAny) daysLogged++;
+      for (const sym of s.symptoms ?? []) {
+        counts[sym] = (counts[sym] ?? 0) + 1;
+      }
+    }
+    const ranked = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([k, n]) => ({ key: k, label: SYMPTOM_LABEL[k] ?? k.replace(/_/g, ' '), count: n }));
+    return { daysLogged, ranked };
+  }, [signalRows]);
+
+  // Hot-flash count from notes (parsed from "Hot flashes: N" segments)
+  // — useful for menopause-mode visits.
+  const hotFlashCount = useMemo(() => {
+    let total = 0;
+    let daysWith = 0;
+    for (const s of signalRows) {
+      const m = (s.notes ?? '').match(/Hot flashes:\s*(\d+)/i);
+      if (m) {
+        const n = parseInt(m[1], 10);
+        if (n > 0) {
+          total += n;
+          daysWith++;
+        }
+      }
+    }
+    return { total, daysWith };
+  }, [signalRows]);
 
   const flagged = useMemo<Item[]>(() => {
     const flaggedRows = items.filter(
@@ -187,6 +303,89 @@ export default function PrintHealthRecord() {
             {flagged.length > 0 && ` · ${flagged.length} flagged for attention`}.
           </p>
         </section>
+
+        {(cycleStats || symptomSummary.daysLogged > 0 || hotFlashCount.daysWith > 0) && (
+          <section className="mb-6 break-inside-avoid">
+            <h2 className="text-sm font-bold uppercase tracking-wide text-gray-500 mb-2">
+              Patient-tracked context
+            </h2>
+
+            {cycleStats && (
+              <div className="mb-3">
+                <p className="text-sm leading-relaxed">
+                  <span className="font-medium">Last period:</span>{' '}
+                  {format(cycleStats.lastPeriodDate, 'MMM d, yyyy')}{' '}
+                  ({cycleStats.daysSinceLast === 0
+                    ? 'today'
+                    : cycleStats.daysSinceLast === 1
+                      ? '1 day ago'
+                      : cycleStats.monthsSinceLast >= 2
+                        ? `${cycleStats.monthsSinceLast} months ago`
+                        : `${cycleStats.daysSinceLast} days ago`}).
+                  {cycleStats.mean !== null && cycleStats.sd !== null && (
+                    <>
+                      {' '}
+                      <span className="font-medium">Cycle length:</span>{' '}
+                      mean {cycleStats.mean.toFixed(1)} d, SD ±{cycleStats.sd.toFixed(1)} d (last {cycleStats.recent.length - 1} cycles).
+                    </>
+                  )}
+                </p>
+                {cycleStats.recent.length > 1 && (
+                  <table className="w-full text-xs border-collapse mt-2">
+                    <thead>
+                      <tr className="border-b border-gray-300 text-[10px] text-gray-500">
+                        <th className="text-left py-1 font-medium">Period start</th>
+                        <th className="text-left py-1 font-medium">Period end</th>
+                        <th className="text-right py-1 font-medium">Cycle length</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cycleStats.recent.map((p, i) => {
+                        const prev = cycleStats.recent[i + 1];
+                        const len = prev
+                          ? differenceInDays(parseISO(p.period_start_date), parseISO(prev.period_start_date))
+                          : null;
+                        return (
+                          <tr key={p.period_start_date} className="border-b border-gray-100">
+                            <td className="py-1 pr-2 font-mono">{format(parseISO(p.period_start_date), 'yyyy-MM-dd')}</td>
+                            <td className="py-1 pr-2 font-mono text-gray-600">
+                              {p.period_end_date ? format(parseISO(p.period_end_date), 'yyyy-MM-dd') : '—'}
+                            </td>
+                            <td className="py-1 text-right font-mono">{len !== null ? `${len} d` : '—'}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            )}
+
+            {symptomSummary.daysLogged > 0 && symptomSummary.ranked.length > 0 && (
+              <div className="mb-3">
+                <p className="text-sm leading-relaxed">
+                  <span className="font-medium">Symptoms logged in the last 90 days</span>{' '}
+                  ({symptomSummary.daysLogged} {symptomSummary.daysLogged === 1 ? 'day' : 'days'} logged):
+                </p>
+                <ul className="text-sm text-gray-700 mt-1">
+                  {symptomSummary.ranked.map(s => (
+                    <li key={s.key}>
+                      · {s.label} on {s.count} {s.count === 1 ? 'day' : 'days'}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {hotFlashCount.daysWith > 0 && (
+              <p className="text-sm leading-relaxed">
+                <span className="font-medium">Hot flashes:</span>{' '}
+                {hotFlashCount.total} total over {hotFlashCount.daysWith} {hotFlashCount.daysWith === 1 ? 'day' : 'days'} in the last 90 days
+                ({(hotFlashCount.total / hotFlashCount.daysWith).toFixed(1)} per logged day).
+              </p>
+            )}
+          </section>
+        )}
 
         {flagged.length > 0 && (
           <section className="mb-6 break-inside-avoid">
