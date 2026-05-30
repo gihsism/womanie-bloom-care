@@ -1,9 +1,12 @@
 import { Card } from '@/components/ui/card';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
-import { AMH_BY_AGE } from '@/lib/hormone-reference';
-import { Egg, Info } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
-import { useMemo } from 'react';
+import { hormoneKeyForTitle, parseLabValue } from '@/lib/hormone-reference';
+import { db } from '@/integrations/db/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { onHealthDataChange } from '@/lib/data-events';
+import { Egg, Info, TrendingDown, TrendingUp, Minus } from 'lucide-react';
+import { format, parseISO, differenceInDays } from 'date-fns';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 // "Your AMH vs typical for your age" card. Anti-Müllerian Hormone is
 // the cleanest single signal of ovarian reserve and it declines with
@@ -43,8 +46,56 @@ const BUCKET_LABEL: Record<string, string> = {
   very_high: 'Above 95th percentile',
 };
 
+interface AmhHistoryPoint {
+  value: number;
+  date: string;
+}
+
 export default function AmhAgeContext({ mode }: AmhAgeContextProps) {
   const ctx = useUserHealthContext();
+  const { user } = useAuth();
+  const [history, setHistory] = useState<AmhHistoryPoint[]>([]);
+
+  // Pull every AMH reading over time so we can compute a trend
+  // (annualized rate of change) alongside the current value. AMH
+  // typically declines ~10–20%/yr — a steeper decline is worth
+  // discussing with a fertility specialist.
+  const loadHistory = useCallback(async () => {
+    if (!user) return;
+    const { data } = await db
+      .from('medical_extracted_data')
+      .select('title, value, date_recorded')
+      .eq('user_id', user.id)
+      .eq('data_type', 'lab_result');
+    const points: AmhHistoryPoint[] = [];
+    for (const r of (data ?? []) as Array<{ title: string; value: string | null; date_recorded: string | null }>) {
+      if (hormoneKeyForTitle(r.title) !== 'amh') continue;
+      if (!r.date_recorded) continue;
+      const v = parseLabValue(r.value);
+      if (v === null) continue;
+      points.push({ value: v, date: r.date_recorded });
+    }
+    points.sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+    setHistory(points);
+  }, [user]);
+
+  useEffect(() => { loadHistory(); }, [loadHistory]);
+  useEffect(() => onHealthDataChange(loadHistory), [loadHistory]);
+
+  // Annualized change between the oldest and newest reading. Needs ≥2
+  // readings spanning ≥90 days; otherwise the rate is too noisy to
+  // report.
+  const trend = useMemo(() => {
+    if (history.length < 2) return null;
+    const oldest = history[0];
+    const newest = history[history.length - 1];
+    const days = differenceInDays(new Date(newest.date), new Date(oldest.date));
+    if (days < 90) return null;
+    if (oldest.value <= 0) return null;
+    const pctChange = ((newest.value - oldest.value) / oldest.value) * 100;
+    const annualizedPct = pctChange * (365 / days);
+    return { oldest, newest, days, pctChange, annualizedPct };
+  }, [history]);
 
   // Pin position on the visual bar (0–100% of the p5..p95 range).
   // Clamped so out-of-band values still show at one of the edges.
@@ -119,6 +170,40 @@ export default function AmhAgeContext({ mode }: AmhAgeContextProps) {
           {dateLine && <span className="block mt-0.5 text-[10px] opacity-75">Your value {dateLine}.</span>}
         </span>
       </p>
+
+      {/* Personal trend across logged AMH readings. AMH typically
+          declines 10–20%/year; faster decline is worth raising with a
+          fertility specialist. Only shown when there are ≥2 readings
+          spanning ≥90 days. */}
+      {trend && (
+        <div className="mt-3 pt-3 border-t border-border/40 flex items-start gap-2">
+          {trend.annualizedPct < -25 ? (
+            <TrendingDown className="h-3.5 w-3.5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+          ) : trend.annualizedPct < -5 ? (
+            <TrendingDown className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+          ) : trend.annualizedPct > 25 ? (
+            <TrendingUp className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+          ) : (
+            <Minus className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+          )}
+          <div className="text-[11px] text-muted-foreground flex-1">
+            <p className="font-medium text-foreground/80">
+              Your trend: {fmt(trend.oldest.value)} → {fmt(trend.newest.value)} ng/mL over {Math.round(trend.days / 30)} mo
+            </p>
+            <p>
+              Annualized change: {trend.annualizedPct > 0 ? '+' : ''}{trend.annualizedPct.toFixed(0)}%/yr.
+              {' '}
+              {trend.annualizedPct < -25
+                ? 'Faster decline than typical (10–20%/yr) — worth raising with a fertility specialist.'
+                : trend.annualizedPct < -5
+                  ? 'Within the typical 10–20%/yr decline range.'
+                  : trend.annualizedPct > 25
+                    ? 'AMH rose — unusual; could reflect new PCOS workup, supplementation, or lab variability.'
+                    : 'Stable across your readings.'}
+            </p>
+          </div>
+        </div>
+      )}
 
       <p className="text-[10px] text-muted-foreground mt-2 leading-relaxed">
         Reference: Seifer 2011 US cohort. AMH is one input among many — full reserve
