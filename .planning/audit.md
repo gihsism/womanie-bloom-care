@@ -177,6 +177,57 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-30 (session 59 — 50h arc, +17 commits so far)
+
+Additional ten commits after the audit update:
+
+- **3c69b8b** — `PostpartumFeedingTracker`: two-tap feed log (pick
+  left / right / bottle) with today's count, average gap over last
+  8 feeds, time-since-last. Per-device localStorage, no schema.
+  Mounted in PostpartumDashboard for the first 6 months.
+- **23c2958** — Settings: postpartum option in the Life Stage Mode
+  picker (parity with onboarding selection).
+- **647b5f7** — Daily log gains a Lochia field for postpartum users
+  in the first 8 weeks. Six buckets (none / spotting / light red /
+  heavy red / pink-brown / yellow-clear) encoded into
+  daily_health_signals.notes; load + save round-trip; freeform
+  notes extraction strips the segment cleanly.
+- **725f19d** — `PostpartumLochiaCard`: cell-per-day visualization
+  of the lochia trajectory, today ringed, legend below. Detection
+  layer flags persistent bright red past day 14 and re-bleeding
+  (heavy red after several yellow/pink/spotting days), each with
+  the matching provider-call copy.
+- **a30f9f3** — `PostpartumPelvicFloor`: one-tap "Log set" habit
+  tracker with today's count vs the 3-per-day target, 7-day strip,
+  consecutive-day streak badge. Local-only. Mounted weeks 2-26.
+- **f95d350** — Pregnancy → postpartum transition prompt. When the
+  due date has passed by ≥14 days, PregnancyTracker surfaces a
+  "Has your baby arrived?" card. "Yes" → flips life_stage in
+  profiles + clears due_date + sets mode; "Not yet, hide this" →
+  per-user dismissal. Footer mentions pregnancy-loss support
+  resources because the same threshold catches that scenario too.
+- **646271c** — `PostpartumNutrition`: bucket-adapted reference
+  card (0-6 weeks early recovery, 6-26 weeks sustained, 26+ weeks
+  maintenance). Iron, protein, fluids in the early window; vitamin
+  D, omega-3 DHA, B12, calcium in sustained; ferritin recheck +
+  prenatal continuation + fibre in later. Non-prescriptive,
+  flagging cases (vegan, heavy bleed, thyroid) that need tailored
+  guidance.
+- **8595190** — PWA manifest: four shortcuts (AI Doctor, Records,
+  Appointments, Settings) for long-press / right-click on the
+  install icon. Built + verified the manifest carries them.
+- **e0c1a29** — `CyclePhaseNutrition`: phase-aware nutrition focus
+  for cycle modes. Classifies current cycle day into menstrual /
+  follicular / ovulation / luteal; surfaces focus list + rationale
+  + caution per phase. Magnesium-for-PMS in luteal; iron + B + Mg
+  in menstrual; cruciferous/DIM in follicular; antioxidants +
+  omega-3 in ovulation.
+
+Net effect: postpartum is now an end-to-end first-class mode
+(dashboard hero, lochia tracking, feeding log, pelvic floor habit,
+nutrition, transition prompt from pregnancy). Cycle modes get a
+phase-nutrition layer. PWA install gets shortcut affordances.
+
 ### 2026-05-30 (session 59 — 50h arc opening, +7 commits so far)
 
 User authorized "continue making improvements and push them to the
