@@ -177,6 +177,66 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-30 (session 59 — 50h arc opening, +7 commits so far)
+
+User authorized "continue making improvements and push them to the
+website and to github during the next 50 hours" after the prior 48h
+arc had wrapped. Seven commits so far this arc, spanning
+patient-side depth, doctor-side parity, and a new life-stage mode:
+
+- **21be50e** — Ask-Claude deep links on FertilityOutlookCard,
+  AmhAgeContext, PerimenopauseStageCard, CyclePredictionInsights.
+  Each one's button pre-fills the chat with the relevant numbers
+  (age + AMH bucket + trend, STRAW+10 stage code, risk factor list)
+  so the user lands in chat at the question they're already
+  asking themselves.
+- **d60d323** — Print health record (the bring-to-the-doctor PDF)
+  picks up a "Patient-tracked context" section: last period
+  date + ago, cycle mean ± SD over last 6 cycles, top symptoms
+  over last 90 days, hot-flash totals for menopause modes. Each
+  sub-block self-hides when its data is empty.
+- **8a568b3** — `CyclePredictionAccuracyCard` — retrospective
+  scoring of the predictor. For each of the last 4 logged periods,
+  replays the prediction the predictor would have made using only
+  cycles before that one, compares to actual, shows the signed
+  delta. Headline stats: average absolute error + within-±2-day
+  rate. Bottom line copy adapts to the error magnitude.
+- **1a9590b** — Doctor PatientDetails picks up
+  `DoctorPatientTrackingSummary` on the Overview tab: same cycle
+  stats + top symptoms + hot-flash count the patient sees, but
+  inside the doctor's view, no extra fetch needed.
+- **3de2b40** — Postpartum mode end-to-end. New LifeStage value
+  through the type system + DashboardHeader modeOptions; new
+  `PostpartumDashboard` with weeks-postpartum hero, lochia
+  callout (6-week window), mood self-check with EPDS-style PPD
+  flag list (cadence: every 2 weeks for 3 months, then monthly to
+  6 months) and a "doing OK" dismiss; 9-item recovery checklist
+  with time-bucketing; wellness tips. New `POSTPARTUM_TESTS`
+  panel in ModeLabInsights (iron, hb, postpartum TSH for
+  thyroiditis, vit D, B12, glucose). New `PostpartumForm`
+  onboarding step capturing birth date + focus areas;
+  onboarding-commit persists birth date to localStorage
+  `womanie_postpartum_birth_<id>`. AIDoctorChat MODE_SUGGESTIONS
+  for postpartum. FindDoctor stageKeywords picks up OB-GYN,
+  lactation, pelvic floor, mental health, perinatal.
+- **02f0267** — AI chat: derive weeks-postpartum from the
+  localStorage birth date and ship it as `personalContext.postpartumWeeks`.
+  Server adds "Postpartum week N (M days since birth)" to the
+  `## Personal context` block in the system prompt — so the
+  assistant grounds "is this bleeding/mood normal?" questions in
+  the actual postpartum window without asking back.
+- **f342485** — `SleepCycleCorrelation` — joins sleep entries
+  (parsed from daily_health_signals.notes) against cycle phases
+  for the last 6 months. Renders mean hours per phase as a
+  horizontal-bar comparison; calls out the worst-deviating phase
+  with phase-specific copy (late_luteal → progesterone drop +
+  thermoregulation; menstrual → cramps; other → general nudge).
+  Hides when fewer than 2 phases have ≥3 entries, total < 8, or
+  the worst-phase delta < 0.5h.
+
+Parallel session also shipped FindDoctor "Recommended for you"
+badge (12fbdda) earlier on the same date.
+
 ### 2026-05-30 (session 58 — 48h arc continued, +5 commits)
 
 Same arc, second half:
