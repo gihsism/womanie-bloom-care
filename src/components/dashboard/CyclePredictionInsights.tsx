@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { Card } from '@/components/ui/card';
-import { Info, FlaskConical } from 'lucide-react';
+import { Info, FlaskConical, MessageCircle } from 'lucide-react';
 import { db } from '@/integrations/db/client';
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
 import { useCyclePrediction, type PeriodRecord, type DaySignal } from '@/hooks/useCyclePrediction';
@@ -24,6 +25,7 @@ const RELEVANT_MODES: LifeStage[] = [
 
 export default function CyclePredictionInsights({ mode }: CyclePredictionInsightsProps) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [periodRecords, setPeriodRecords] = useState<PeriodRecord[]>([]);
   const [daySignals] = useState<Record<string, DaySignal>>({});
   const [loaded, setLoaded] = useState(false);
@@ -75,6 +77,22 @@ export default function CyclePredictionInsights({ mode }: CyclePredictionInsight
       <p className="text-[10px] text-muted-foreground mt-2">
         These are population-level signals, not a diagnosis. Discuss with your clinician.
       </p>
+
+      <div className="flex justify-end mt-2">
+        <button
+          type="button"
+          className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5"
+          onClick={() => {
+            const factorList = items.slice(0, 3).join('; ');
+            const q = `My cycle prediction has some uncertainty because of: ${factorList}. What does each of these mean for my cycle, and what would be worth doing about them?`;
+            navigate(`/dashboard/ai-doctor?q=${encodeURIComponent(q)}`);
+          }}
+          aria-label="Ask AI about these cycle factors"
+        >
+          <MessageCircle className="h-3 w-3" />
+          Ask Claude about this
+        </button>
+      </div>
     </Card>
   );
 }

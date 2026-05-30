@@ -4,8 +4,9 @@ import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { differenceInDays, parseISO } from 'date-fns';
-import { Heart, Info } from 'lucide-react';
+import { Heart, Info, MessageCircle } from 'lucide-react';
 
 // Fertility-outlook synthesis for conception mode.
 //
@@ -48,6 +49,7 @@ const COLOR_BG: Record<SignalColor, string> = {
 export default function FertilityOutlookCard({ mode }: FertilityOutlookCardProps) {
   const ctx = useUserHealthContext();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [periodRecords, setPeriodRecords] = useState<Array<{
     period_start_date: string;
     cycle_length: number;
@@ -200,6 +202,31 @@ export default function FertilityOutlookCard({ mode }: FertilityOutlookCardProps
           </span>
         </p>
       )}
+
+      <div className="flex justify-end mt-2">
+        <button
+          type="button"
+          className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5"
+          onClick={() => {
+            const parts: string[] = [];
+            if (ctx.age !== null) parts.push(`I'm ${ctx.age}`);
+            if (ctx.amhAssessment) {
+              parts.push(`my AMH reads ${ctx.amhAssessment.reserveLabel.replace(/_/g, ' ')} for my age`);
+            }
+            const cycleSignal = signals.find(s => s.label === 'Cycle regularity');
+            if (cycleSignal && cycleSignal.color !== 'muted') {
+              parts.push(`my cycle regularity is ${cycleSignal.value}`);
+            }
+            const desc = parts.length > 0 ? parts.join(', ') : 'my current data';
+            const q = `Given ${desc}, what would you suggest I think about as I try to conceive?`;
+            navigate(`/dashboard/ai-doctor?q=${encodeURIComponent(q)}`);
+          }}
+          aria-label="Ask AI about my fertility outlook"
+        >
+          <MessageCircle className="h-3 w-3" />
+          Ask Claude about this
+        </button>
+      </div>
 
       <p className="text-[10px] text-muted-foreground mt-2 leading-relaxed">
         Not a probability estimate. Real fertility evaluation also weighs intercourse timing, antral follicle count,

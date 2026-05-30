@@ -4,8 +4,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { differenceInDays, differenceInMonths, format, parseISO } from 'date-fns';
-import { Flower2, Info } from 'lucide-react';
+import { Flower2, Info, MessageCircle } from 'lucide-react';
 
 // STRAW+10 staging estimator for menopausal-mode users.
 //
@@ -64,6 +65,7 @@ interface PerimenopauseStageCardProps {
 export default function PerimenopauseStageCard({ mode }: PerimenopauseStageCardProps) {
   const { user } = useAuth();
   const ctx = useUserHealthContext();
+  const navigate = useNavigate();
   const [periodRecords, setPeriodRecords] = useState<Array<{
     period_start_date: string;
     cycle_length: number;
@@ -218,6 +220,23 @@ export default function PerimenopauseStageCard({ mode }: PerimenopauseStageCardP
         Reference: STRAW+10 (2012 Workshop on the Stages of Reproductive Aging). Approximation
         from tracked data — not a clinical diagnosis. Discuss with your clinician.
       </p>
+
+      {result.stage !== 'unknown' && (
+        <div className="flex justify-end mt-2">
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5"
+            onClick={() => {
+              const q = `My tracking suggests I'm at STRAW+10 stage ${result.stage} (${def.label}). ${result.rationale} What should I expect next and what's worth discussing with my doctor?`;
+              navigate(`/dashboard/ai-doctor?q=${encodeURIComponent(q)}`);
+            }}
+            aria-label="Ask AI about my menopause stage"
+          >
+            <MessageCircle className="h-3 w-3" />
+            Ask Claude about this
+          </button>
+        </div>
+      )}
     </Card>
   );
 }

@@ -4,9 +4,10 @@ import { hormoneKeyForTitle, parseLabValue } from '@/lib/hormone-reference';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
-import { Egg, Info, TrendingDown, TrendingUp, Minus } from 'lucide-react';
+import { Egg, Info, TrendingDown, TrendingUp, Minus, MessageCircle } from 'lucide-react';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // "Your AMH vs typical for your age" card. Anti-Müllerian Hormone is
 // the cleanest single signal of ovarian reserve and it declines with
@@ -54,6 +55,7 @@ interface AmhHistoryPoint {
 export default function AmhAgeContext({ mode }: AmhAgeContextProps) {
   const ctx = useUserHealthContext();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [history, setHistory] = useState<AmhHistoryPoint[]>([]);
 
   // Pull every AMH reading over time so we can compute a trend
@@ -209,6 +211,24 @@ export default function AmhAgeContext({ mode }: AmhAgeContextProps) {
         Reference: Seifer 2011 US cohort. AMH is one input among many — full reserve
         assessment also weighs FSH, antral follicle count, and age.
       </p>
+
+      <div className="flex justify-end mt-2">
+        <button
+          type="button"
+          className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5"
+          onClick={() => {
+            const trendBit = trend
+              ? ` (${trend.annualizedPct > 0 ? '+' : ''}${trend.annualizedPct.toFixed(0)}%/yr trend over ${Math.round(trend.days / 30)} months)`
+              : '';
+            const q = `My AMH is ${fmt(lab.value)} ${lab.unit || 'ng/mL'} at age ${ctx.age ?? '?'} — ${BUCKET_LABEL[a.percentileBucket].toLowerCase()} for the ${a.ageBracket} bracket${trendBit}. What does this mean for me and what would be worth discussing with my doctor?`;
+            navigate(`/dashboard/ai-doctor?q=${encodeURIComponent(q)}`);
+          }}
+          aria-label="Ask AI about my AMH"
+        >
+          <MessageCircle className="h-3 w-3" />
+          Ask Claude about this
+        </button>
+      </div>
     </Card>
   );
 }
