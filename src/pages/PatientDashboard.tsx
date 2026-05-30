@@ -25,6 +25,7 @@ import DocumentUpload from '@/components/dashboard/DocumentUpload';
 import OvulationPrediction from '@/components/dashboard/OvulationPrediction';
 import PreMenstrualDashboard from '@/components/dashboard/PreMenstrualDashboard';
 import MenopauseDashboard from '@/components/dashboard/MenopauseDashboard';
+import MenopauseSymptomCalendar from '@/components/dashboard/MenopauseSymptomCalendar';
 import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import CyclePredictionInsights from '@/components/dashboard/CyclePredictionInsights';
@@ -764,7 +765,8 @@ const PatientDashboard = () => {
               ) : (selectedMode === 'menopause' || selectedMode === 'post-menopause') ? (
                 /* ─── Menopause / Post-Menopause Mode ─── */
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2">
+                  <div className="lg:col-span-2 space-y-6">
+                    <MenopauseSymptomCalendar mode={selectedMode} />
                     <MenopauseDashboard
                       isPostMenopause={selectedMode === 'post-menopause'}
                       onNavigateToDoctorChat={() => navigate('/dashboard/ai-doctor')}
