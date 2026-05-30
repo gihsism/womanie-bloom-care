@@ -42,6 +42,20 @@ const FLOW_OPTIONS = [
   { label: 'Heavy', value: 'heavy', color: 'bg-pink-500' },
 ];
 
+// Postpartum bleeding (lochia) progresses bright-red → pink/brown →
+// yellow/clear over 4-6 weeks. Tracking it day-to-day lets the user
+// see the expected colour shift and catches re-bleeding (sudden
+// bright red after a few days of fading) which can flag retained
+// placenta or activity overdone.
+const LOCHIA_OPTIONS = [
+  { label: 'None', value: 'none' },
+  { label: 'Spotting', value: 'spotting' },
+  { label: 'Light red', value: 'light-red' },
+  { label: 'Heavy red', value: 'heavy-red' },
+  { label: 'Pink/brown', value: 'pink-brown' },
+  { label: 'Yellow/clear', value: 'yellow-clear' },
+];
+
 const DISCHARGE_OPTIONS = [
   { label: 'None', value: 'none' },
   { label: 'Dry', value: 'dry' },
@@ -69,6 +83,8 @@ interface QuickLogData {
   // shows on every mode that uses this form.
   sleepHours: string;
   sleepQuality: string;
+  // Postpartum-only: lochia colour/intensity bucket.
+  lochia: string;
   notes: string;
 }
 
@@ -78,7 +94,7 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
   const [data, setData] = useState<QuickLogData>({
     moods: [], symptoms: [], periodFlow: 'none', discharge: 'none',
     lhTest: '', intercourse: '', pillTaken: '', medicationTaken: '',
-    hotFlashCount: '', basalTemp: '', sleepHours: '', sleepQuality: '', notes: '',
+    hotFlashCount: '', basalTemp: '', sleepHours: '', sleepQuality: '', lochia: '', notes: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -115,6 +131,7 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
         const bbt = notes.match(/BBT:\s*(\d+(?:\.\d+)?)/i)?.[1] ?? '';
         const sleepHours = notes.match(/Sleep:\s*(\d+(?:\.\d+)?)\s*h/i)?.[1] ?? '';
         const sleepQuality = notes.match(/Sleep quality:\s*([1-5])\/5/i)?.[1] ?? '';
+        const lochia = notes.match(/Lochia:\s*(none|spotting|light-red|heavy-red|pink-brown|yellow-clear)/i)?.[1] ?? '';
         // What remains after stripping the encoded segments is the
         // user's freeform note. Each segment is separated by `. ` per
         // handleSave's join, so split on that, drop matches, rejoin.
@@ -131,7 +148,8 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
             !/^Hot flashes:\s*\d+$/i.test(s) &&
             !/^BBT:\s*\d+(?:\.\d+)?°?F?$/i.test(s) &&
             !/^Sleep:\s*\d+(?:\.\d+)?h$/i.test(s) &&
-            !/^Sleep quality:\s*[1-5]\/5$/i.test(s)
+            !/^Sleep quality:\s*[1-5]\/5$/i.test(s) &&
+            !/^Lochia:\s*(none|spotting|light-red|heavy-red|pink-brown|yellow-clear)$/i.test(s)
           )
           .join('. ');
 
@@ -149,6 +167,7 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
           basalTemp: bbt,
           sleepHours,
           sleepQuality,
+          lochia,
           notes: freeform,
         }));
       }
@@ -194,6 +213,7 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
         data.basalTemp && `BBT: ${data.basalTemp}°F`,
         data.sleepHours && `Sleep: ${data.sleepHours}h`,
         data.sleepQuality && `Sleep quality: ${data.sleepQuality}/5`,
+        data.lochia && `Lochia: ${data.lochia}`,
         data.notes,
       ].filter(Boolean).join('. ');
 
@@ -229,6 +249,24 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
   const showMedication = selectedMode === 'ivf';
   const showHotFlashes = selectedMode === 'menopause' || selectedMode === 'post-menopause';
   const showBBT = selectedMode === 'conception' || selectedMode === 'menstrual-cycle';
+  // Postpartum bleeding (lochia) only matters in the active recovery
+  // window. Birth date lives in localStorage — read it to decide
+  // whether to show this field. If we can't find it or the user is
+  // > 6 weeks postpartum, the field hides itself.
+  const showLochia = (() => {
+    if (selectedMode !== 'postpartum') return false;
+    if (!user?.id) return false;
+    try {
+      const raw = window.localStorage.getItem(`womanie_postpartum_birth_${user.id}`);
+      if (!raw) return true; // show it anyway — better than burying it
+      const d = new Date(raw);
+      if (Number.isNaN(d.getTime())) return true;
+      const days = Math.floor((Date.now() - d.getTime()) / (24 * 60 * 60 * 1000));
+      return days >= 0 && days <= 56; // 8 weeks gives a buffer past the 6-week clinical window
+    } catch {
+      return true;
+    }
+  })();
 
   return (
     <Card className="p-5">
@@ -286,6 +324,33 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
                 </button>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Lochia (postpartum bleeding) — first 6-8 weeks only */}
+        {showLochia && (
+          <div>
+            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 block">
+              Lochia (postpartum bleeding)
+            </Label>
+            <div className="flex flex-wrap gap-1.5">
+              {LOCHIA_OPTIONS.map(l => (
+                <button
+                  key={l.value}
+                  onClick={() => update('lochia', data.lochia === l.value ? '' : l.value)}
+                  className={`px-3 py-1.5 rounded-full text-xs border transition-all ${
+                    data.lochia === l.value
+                      ? 'border-primary bg-primary/10 font-semibold'
+                      : 'border-border hover:border-primary/30'
+                  }`}
+                >
+                  {l.label}
+                </button>
+              ))}
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1.5">
+              Heavy red lasting past week 2, or new bright red after fading, is worth a call to your provider.
+            </p>
           </div>
         )}
 
