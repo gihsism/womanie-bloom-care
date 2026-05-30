@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 import UserMenu from '@/components/UserMenu';
 import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
@@ -42,15 +43,23 @@ const AI_MODELS = [
   { id: 'claude-opus-4-20250514', label: 'Claude Opus', description: 'Most capable' },
 ];
 
+interface PersonalContext {
+  age?: number | null;
+  amhSummary?: string | null;
+  flags?: string | null;
+}
+
 async function streamChat({
   messages,
   model,
+  personalContext,
   onDelta,
   onDone,
   onError,
 }: {
   messages: Msg[];
   model: string;
+  personalContext?: PersonalContext;
   onDelta: (text: string) => void;
   onDone: () => void;
   onError: (err: string) => void;
@@ -59,7 +68,7 @@ async function streamChat({
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages, model }),
+    body: JSON.stringify({ messages, model, personalContext }),
   });
 
   if (!resp.ok) {
@@ -198,6 +207,7 @@ export default function AIDoctorChat() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
+  const healthContext = useUserHealthContext();
   const { toast } = useToast();
   const [chatMode, setChatMode] = useState<ChatMode>('ai');
   const [messages, setMessages] = useState<Msg[]>([WELCOME_MESSAGE]);
@@ -429,9 +439,33 @@ export default function AIDoctorChat() {
     // of fragility (required content-prefix sniffing to avoid being
     // persisted as a real user message). The local `medicalContext`
     // state is still used to pick prompt suggestions below.
+    // Build personalContext payload — age + AMH age-bracket assessment
+    // + a flat lab-flag line — so Claude can ground answers like "is
+    // my AMH normal?" in the age-aware reference, not just the lab's
+    // static range. Server validates the shape and ignores anything
+    // outside what it expects.
+    const flagsBits: string[] = [];
+    if (healthContext.tshOutOfRange && healthContext.labs.tsh) flagsBits.push(`TSH ${healthContext.labs.tsh.value} mIU/L (out of 0.4–4.0)`);
+    if (healthContext.menopausalFsh && healthContext.labs.fsh) flagsBits.push(`FSH ${healthContext.labs.fsh.value} IU/L (menopausal range)`);
+    else if (healthContext.highFsh && healthContext.labs.fsh) flagsBits.push(`FSH ${healthContext.labs.fsh.value} IU/L (above 10 — diminished reserve threshold)`);
+    if (healthContext.pcosLhFshPattern) flagsBits.push('LH/FSH > 2 with elevated LH (PCOS pattern)');
+    if (healthContext.highProlactin && healthContext.labs.prolactin) flagsBits.push(`prolactin ${healthContext.labs.prolactin.value} ng/mL (elevated)`);
+    if (healthContext.highTestosterone && healthContext.labs.testosterone_total) flagsBits.push(`testosterone ${healthContext.labs.testosterone_total.value} ng/dL (above range)`);
+    const amhSummary = healthContext.amhAssessment && healthContext.labs.amh
+      ? `${healthContext.labs.amh.value} ng/mL for ages ${healthContext.amhAssessment.ageBracket} — ${healthContext.amhAssessment.reserveLabel.replace(/_/g, ' ')} reserve (median ${healthContext.amhAssessment.median}, p5 ${healthContext.amhAssessment.p5} – p95 ${healthContext.amhAssessment.p95})`
+      : null;
+    const personalContext = healthContext.loaded
+      ? {
+          age: healthContext.age,
+          amhSummary,
+          flags: flagsBits.length > 0 ? flagsBits.join('; ') : null,
+        }
+      : undefined;
+
     await streamChat({
       messages: conversationForApi,
       model: selectedModel,
+      personalContext,
       onDelta: (chunk) => {
         assistantSoFar += chunk;
         setMessages((prev) => {

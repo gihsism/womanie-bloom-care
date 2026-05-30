@@ -32,11 +32,35 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
   if (!ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured');
 
-  const { messages, model: requestedModel } = req.body || {};
+  const { messages, model: requestedModel, personalContext } = req.body || {};
   if (!Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'Messages required' });
   }
   const model = ALLOWED_MODELS.includes(requestedModel) ? requestedModel : 'claude-haiku-4-5-20251001';
+
+  // Client-supplied context: things the server can't see (age lives in
+  // localStorage), or things we precomputed there and don't want to
+  // re-derive here (AMH age-bracket assessment). Validated shape only;
+  // anything else is dropped. Free-form `summary` lets the client send
+  // a pre-built block without us reaching into its internals.
+  const personalContextBlock: string = (() => {
+    if (!personalContext || typeof personalContext !== 'object') return '';
+    const lines: string[] = [];
+    const age = typeof personalContext.age === 'number' && personalContext.age > 0 && personalContext.age < 130
+      ? Math.floor(personalContext.age)
+      : null;
+    if (age !== null) lines.push(`Age: ${age}`);
+    const amhSummary = typeof personalContext.amhSummary === 'string'
+      ? personalContext.amhSummary.slice(0, 400)
+      : null;
+    if (amhSummary) lines.push(`AMH context: ${amhSummary}`);
+    const flags = typeof personalContext.flags === 'string'
+      ? personalContext.flags.slice(0, 400)
+      : null;
+    if (flags) lines.push(`Lab signals: ${flags}`);
+    if (lines.length === 0) return '';
+    return `\n## Personal context\n${lines.join('\n')}\n`;
+  })();
 
   const sql = neon(process.env.DATABASE_URL!);
 
@@ -174,6 +198,10 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       const created = new Date(String(n.created_at)).toLocaleDateString();
       medicalContext += `- ${created} — ${doctorLabel} (${n.note_type || 'note'}): ${n.title}\n  ${String(n.content || '').replace(/\n/g, '\n  ')}\n`;
     });
+  }
+
+  if (personalContextBlock) {
+    medicalContext += personalContextBlock;
   }
 
   const systemPrompt = `You are an AI medical assistant for a women's health platform called Womanie. You have access to the patient's uploaded health documents and extracted medical data shown below. Use this information to provide personalized, empathetic health guidance.
