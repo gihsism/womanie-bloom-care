@@ -459,6 +459,39 @@ const PatientDetails = () => {
                   <p className="text-xs text-muted-foreground">Clinical notes</p>
                 </CardContent>
               </Card>
+
+              {(() => {
+                // Quick-scan severity tile. Counts whatever's in
+                // medicalData with status critical / abnormal /
+                // borderline (case-insensitive). Click → Labs tab so
+                // the doctor can drill straight in.
+                const critical = medicalData.filter(d => (d.status ?? '').toLowerCase() === 'critical').length;
+                const abnormal = medicalData.filter(d => {
+                  const s = (d.status ?? '').toLowerCase();
+                  return s === 'abnormal' || s === 'high' || s === 'low';
+                }).length;
+                const borderline = medicalData.filter(d => (d.status ?? '').toLowerCase() === 'borderline').length;
+                const flagged = critical + abnormal;
+                return (
+                  <Card
+                    className={`cursor-pointer hover:shadow-md transition-shadow ${critical > 0 ? 'border-red-500/40 bg-red-50/40 dark:bg-red-900/10' : abnormal > 0 ? 'border-amber-500/40 bg-amber-50/40 dark:bg-amber-900/10' : ''}`}
+                    onClick={() => setActiveTab('labs')}
+                  >
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Flagged values</CardTitle>
+                      <FileText className={`h-4 w-4 ${critical > 0 ? 'text-red-600' : abnormal > 0 ? 'text-amber-600' : 'text-muted-foreground'}`} />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{flagged}</div>
+                      <p className="text-xs text-muted-foreground">
+                        {flagged === 0
+                          ? medicalData.length > 0 ? 'All in range' : 'No labs yet'
+                          : `${critical} critical · ${abnormal} abnormal${borderline > 0 ? ` · ${borderline} borderline` : ''}`}
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })()}
             </div>
 
             {/* Recent Appointments */}
