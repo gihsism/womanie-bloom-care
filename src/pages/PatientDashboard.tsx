@@ -32,6 +32,7 @@ import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import CyclePredictionInsights from '@/components/dashboard/CyclePredictionInsights';
 import AmhAgeContext from '@/components/dashboard/AmhAgeContext';
 import FertilityOutlookCard from '@/components/dashboard/FertilityOutlookCard';
+import LabFreshnessCard from '@/components/dashboard/LabFreshnessCard';
 import RecentFindings from '@/components/dashboard/RecentFindings';
 import { useAttentionCount } from '@/hooks/useAttentionCount';
 import HealthTrends from '@/components/dashboard/HealthTrends';
@@ -691,6 +692,11 @@ const PatientDashboard = () => {
                 regularity) for conception mode only. Hidden when no
                 signal is meaningful. */}
             {selectedMode && <FertilityOutlookCard mode={selectedMode} />}
+
+            {/* Mode-specific "labs worth rechecking" nudge — only
+                shows entries that are overdue against the suggested
+                interval or never uploaded. */}
+            {selectedMode && <LabFreshnessCard mode={selectedMode} />}
 
             {/* Health Tracking Section */}
             <div className="mb-6">
