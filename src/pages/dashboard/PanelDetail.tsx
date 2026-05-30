@@ -98,6 +98,7 @@ export default function PanelDetail() {
   const healthContext = useUserHealthContext();
   const [rows, setRows] = useState<ExtractedRow[]>([]);
   const [docs, setDocs] = useState<DocLite[]>([]);
+  const [periodRecords, setPeriodRecords] = useState<Array<{ period_start_date: string; cycle_length: number }>>([]);
   const [loaded, setLoaded] = useState(false);
   const [aiSummary, setAiSummary] = useState<{ summary: string; cached: boolean; generatedAt: string | null } | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
@@ -105,16 +106,25 @@ export default function PanelDetail() {
 
   const load = useCallback(async () => {
     if (!user) return;
-    const [extractedRes, docsRes] = await Promise.all([
+    const [extractedRes, docsRes, periodRes] = await Promise.all([
       db.from('current_extracted_data')
         .select('id, document_id, title, value, unit, reference_range, status, data_type, date_recorded, raw_data')
         .eq('user_id', user.id),
       db.from('health_documents')
         .select('id, ai_suggested_name, file_name')
         .eq('user_id', user.id),
+      // Period records let us tag each historical hormone reading
+      // with the cycle phase it was drawn in — so a follicular FSH 4
+      // gets shown next to the follicular-phase range, not the generic
+      // one.
+      db.from('period_tracking')
+        .select('period_start_date, cycle_length')
+        .eq('user_id', user.id)
+        .order('period_start_date', { ascending: true }),
     ]);
     setRows((extractedRes.data ?? []) as ExtractedRow[]);
     setDocs((docsRes.data ?? []) as DocLite[]);
+    setPeriodRecords((periodRes.data ?? []) as Array<{ period_start_date: string; cycle_length: number }>);
     setLoaded(true);
   }, [user]);
 
@@ -129,6 +139,47 @@ export default function PanelDetail() {
     }
     return unsglug(slug);
   }, [rows, slug]);
+
+  // Map a date_recorded → { cycleDay, phase } using the user's logged
+  // periods. Returns null when the date doesn't fall inside any
+  // recorded cycle (no records before that date, or the cycle was
+  // never closed). Cheap enough to compute per render; the period
+  // list is small.
+  const cyclePhaseForDate = useCallback((dateRecorded: string): { cycleDay: number; phase: 'follicular' | 'midcycle' | 'luteal' } | null => {
+    if (!dateRecorded || periodRecords.length === 0) return null;
+    const draw = new Date(dateRecorded);
+    if (Number.isNaN(draw.getTime())) return null;
+    // Find the most recent period_start on or before the draw date.
+    let cycleStart: Date | null = null;
+    let cycleLen = 28;
+    for (let i = periodRecords.length - 1; i >= 0; i--) {
+      const ps = new Date(periodRecords[i].period_start_date);
+      if (Number.isNaN(ps.getTime())) continue;
+      if (ps.getTime() <= draw.getTime()) {
+        cycleStart = ps;
+        cycleLen = periodRecords[i].cycle_length || 28;
+        // Walk forward to confirm there isn't a next period start <= draw.
+        if (i + 1 < periodRecords.length) {
+          const next = new Date(periodRecords[i + 1].period_start_date);
+          if (!Number.isNaN(next.getTime()) && next.getTime() <= draw.getTime()) continue;
+        }
+        break;
+      }
+    }
+    if (!cycleStart) return null;
+    const days = Math.floor((draw.getTime() - cycleStart.getTime()) / (1000 * 60 * 60 * 24));
+    const cycleDay = days + 1;
+    // Reject draws too far past the cycle start (the next period was
+    // never recorded; this would otherwise label a draw from months
+    // later as "luteal day 90" which is nonsense).
+    if (cycleDay < 1 || cycleDay > cycleLen + 7) return null;
+    const ovulation = cycleLen - 14;
+    let phase: 'follicular' | 'midcycle' | 'luteal';
+    if (Math.abs(cycleDay - ovulation) <= 2) phase = 'midcycle';
+    else if (cycleDay < ovulation) phase = 'follicular';
+    else phase = 'luteal';
+    return { cycleDay, phase };
+  }, [periodRecords]);
 
   const series = useMemo<TestSeries[]>(() => {
     if (!slug) return [];
@@ -432,12 +483,36 @@ export default function PanelDetail() {
                         const dateLabel = r.date_recorded
                           ? format(new Date(r.date_recorded), 'MMM d, yyyy')
                           : '—';
+                        // Phase chip — only meaningful for cycle hormones.
+                        // hormoneKeyForTitle returns null for non-hormones
+                        // (CBC, lipids, etc), so the chip naturally hides
+                        // outside reproductive panels.
+                        const key = hormoneKeyForTitle(s.title);
+                        const cyclePhaseKeys: Array<typeof key> = ['fsh', 'lh', 'estradiol', 'progesterone'];
+                        const phaseInfo = (key && cyclePhaseKeys.includes(key) && r.date_recorded)
+                          ? cyclePhaseForDate(r.date_recorded)
+                          : null;
+                        const phaseRange = phaseInfo && key
+                          ? getPhaseRange(key, phaseInfo.phase)
+                          : null;
                         return (
                           <li key={r.id} className="flex items-baseline gap-2">
                             <span className="text-muted-foreground w-24 flex-shrink-0">{dateLabel}</span>
                             <span className={`font-mono ${tone}`}>
                               {r.value}{r.unit ? ` ${r.unit}` : ''}
                             </span>
+                            {phaseInfo && (
+                              <span
+                                className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary"
+                                title={
+                                  phaseRange
+                                    ? `Cycle day ${phaseInfo.cycleDay} · ${phaseInfo.phase} phase range ${phaseRange.low}–${phaseRange.high} ${phaseRange.unit}`
+                                    : `Cycle day ${phaseInfo.cycleDay} · ${phaseInfo.phase} phase`
+                                }
+                              >
+                                day {phaseInfo.cycleDay} · {phaseInfo.phase}
+                              </span>
+                            )}
                             {r.status && r.status !== 'normal' && r.status !== 'expected' && (
                               <span className="text-[10px] text-muted-foreground">({r.status})</span>
                             )}
