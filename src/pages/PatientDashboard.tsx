@@ -31,6 +31,7 @@ import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboar
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import CyclePredictionInsights from '@/components/dashboard/CyclePredictionInsights';
 import AmhAgeContext from '@/components/dashboard/AmhAgeContext';
+import FertilityOutlookCard from '@/components/dashboard/FertilityOutlookCard';
 import RecentFindings from '@/components/dashboard/RecentFindings';
 import { useAttentionCount } from '@/hooks/useAttentionCount';
 import HealthTrends from '@/components/dashboard/HealthTrends';
@@ -685,6 +686,11 @@ const PatientDashboard = () => {
                 conception / IVF / menstrual modes AND when an AMH lab
                 exists + age is known. */}
             {selectedMode && <AmhAgeContext mode={selectedMode} />}
+
+            {/* Three-signal fertility outlook (age + reserve +
+                regularity) for conception mode only. Hidden when no
+                signal is meaningful. */}
+            {selectedMode && <FertilityOutlookCard mode={selectedMode} />}
 
             {/* Health Tracking Section */}
             <div className="mb-6">
