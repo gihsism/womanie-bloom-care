@@ -177,6 +177,22 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-30 (session 58 — 48h arc continued, +5 commits)
+
+Same arc, second half:
+- **10a1719** — Doctor labs mirror the patient view: cycle-phase chip
+  on each FSH / LH / estradiol / progesterone row. New
+  period_tracking field on /api/doctors/patient (last 2 years).
+- **817e399** — `LabFreshnessCard` — "worth rechecking" nudges per
+  mode. Conservative intervals (AMH 12mo for conception, 6mo for
+  IVF; TSH 24mo for routine, 12mo for menopause). Flags overdue +
+  never-uploaded labs; hides when everything is fresh.
+- **12fbdda** — FindDoctor: "Recommended for you" badge on doctors
+  whose specialty matches the patient's life_stage. Pregnancy →
+  OB-GYN, conception/IVF → fertility, menopause → menopause
+  specialist, etc. Recommended doctors float to top of the default
+  Name sort; explicit sorts win.
+
 ### 2026-05-30 (session 57 — 48h arc, hormone + menopause depth)
 
 User asked "push all changes" (already on origin) and then
