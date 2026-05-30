@@ -20,6 +20,7 @@ import { differenceInDays, differenceInWeeks, format, parseISO, addDays } from '
 import PostpartumFeedingTracker from './PostpartumFeedingTracker';
 import PostpartumLochiaCard from './PostpartumLochiaCard';
 import PostpartumPelvicFloor from './PostpartumPelvicFloor';
+import PostpartumNutrition from './PostpartumNutrition';
 
 // Postpartum-mode dashboard.
 //
@@ -366,6 +367,10 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
       {/* Pelvic floor habit — surfaces from week 2 (vaginal) /
           week 6 (C-section), most useful through ~6 months. */}
       {weeksPp >= 2 && weeksPp <= 26 && <PostpartumPelvicFloor />}
+
+      {/* Nutrition reference — bucket-adapted to early / sustained /
+          later postpartum windows. */}
+      <PostpartumNutrition weeksPostpartum={weeksPp} />
 
       {/* Wellness tips */}
       <Card className="p-4">
