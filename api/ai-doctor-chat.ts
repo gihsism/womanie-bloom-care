@@ -58,6 +58,14 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       ? personalContext.flags.slice(0, 400)
       : null;
     if (flags) lines.push(`Lab signals: ${flags}`);
+    const postpartumWeeks = typeof personalContext.postpartumWeeks === 'number'
+      && personalContext.postpartumWeeks >= 0
+      && personalContext.postpartumWeeks <= 104
+      ? Math.floor(personalContext.postpartumWeeks)
+      : null;
+    if (postpartumWeeks !== null) {
+      lines.push(`Postpartum week ${postpartumWeeks} (${postpartumWeeks * 7} days since birth)`);
+    }
     if (lines.length === 0) return '';
     return `\n## Personal context\n${lines.join('\n')}\n`;
   })();

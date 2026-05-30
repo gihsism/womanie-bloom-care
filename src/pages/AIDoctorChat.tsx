@@ -47,6 +47,7 @@ interface PersonalContext {
   age?: number | null;
   amhSummary?: string | null;
   flags?: string | null;
+  postpartumWeeks?: number | null;
 }
 
 async function streamChat({
@@ -454,11 +455,31 @@ export default function AIDoctorChat() {
     const amhSummary = healthContext.amhAssessment && healthContext.labs.amh
       ? `${healthContext.labs.amh.value} ng/mL for ages ${healthContext.amhAssessment.ageBracket} — ${healthContext.amhAssessment.reserveLabel.replace(/_/g, ' ')} reserve (median ${healthContext.amhAssessment.median}, p5 ${healthContext.amhAssessment.p5} – p95 ${healthContext.amhAssessment.p95})`
       : null;
+    // Postpartum weeks lives in localStorage (PostpartumDashboard
+     // owns it; no schema column yet). Surface it to the chat
+     // backend so Claude can ground time-bound questions ("is this
+     // bleeding normal at 5 weeks?") in the actual postpartum
+     // window rather than asking the user to repeat herself.
+    let postpartumWeeks: number | null = null;
+    if (user) {
+      try {
+        const raw = window.localStorage.getItem(`womanie_postpartum_birth_${user.id}`);
+        if (raw) {
+          const d = new Date(raw);
+          if (!Number.isNaN(d.getTime())) {
+            const weeks = Math.floor((Date.now() - d.getTime()) / (7 * 24 * 60 * 60 * 1000));
+            if (weeks >= 0 && weeks <= 104) postpartumWeeks = weeks;
+          }
+        }
+      } catch { /* ignore */ }
+    }
+
     const personalContext = healthContext.loaded
       ? {
           age: healthContext.age,
           amhSummary,
           flags: flagsBits.length > 0 ? flagsBits.join('; ') : null,
+          postpartumWeeks,
         }
       : undefined;
 
