@@ -37,6 +37,7 @@ import CyclePredictionInsights from '@/components/dashboard/CyclePredictionInsig
 import CyclePredictionAccuracyCard from '@/components/dashboard/CyclePredictionAccuracyCard';
 import SleepCycleCorrelation from '@/components/dashboard/SleepCycleCorrelation';
 import CyclePhaseNutrition from '@/components/dashboard/CyclePhaseNutrition';
+import VisitPrepCard from '@/components/dashboard/VisitPrepCard';
 import AmhAgeContext from '@/components/dashboard/AmhAgeContext';
 import FertilityOutlookCard from '@/components/dashboard/FertilityOutlookCard';
 import LabFreshnessCard from '@/components/dashboard/LabFreshnessCard';
@@ -726,6 +727,13 @@ const PatientDashboard = () => {
             {/* Nutrition focus for the current cycle phase. Hides
                 when no period data exists. */}
             {selectedMode && <CyclePhaseNutrition mode={selectedMode} />}
+
+            {/* Personalised "questions for your next visit" — pulls
+                flagged labs + hormone flags + symptom patterns +
+                mode-default questions into a single checklist with
+                copy + Ask-AI affordances. Hides when there's
+                nothing actionable. */}
+            {selectedMode && <VisitPrepCard mode={selectedMode} />}
 
             {/* AMH-vs-age ovarian reserve context. Only renders for
                 conception / IVF / menstrual modes AND when an AMH lab
