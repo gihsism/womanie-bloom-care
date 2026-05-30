@@ -32,6 +32,7 @@ import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboar
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import CyclePredictionInsights from '@/components/dashboard/CyclePredictionInsights';
 import CyclePredictionAccuracyCard from '@/components/dashboard/CyclePredictionAccuracyCard';
+import SleepCycleCorrelation from '@/components/dashboard/SleepCycleCorrelation';
 import AmhAgeContext from '@/components/dashboard/AmhAgeContext';
 import FertilityOutlookCard from '@/components/dashboard/FertilityOutlookCard';
 import LabFreshnessCard from '@/components/dashboard/LabFreshnessCard';
@@ -688,6 +689,10 @@ const PatientDashboard = () => {
             {/* Retrospective: how close did past predictions land?
                 Hides until there are ≥4 logged periods. */}
             {selectedMode && <CyclePredictionAccuracyCard mode={selectedMode} />}
+
+            {/* Sleep-by-cycle-phase correlation. Hides when there
+                isn't enough overlap or no phase deviates meaningfully. */}
+            {selectedMode && <SleepCycleCorrelation mode={selectedMode} />}
 
             {/* AMH-vs-age ovarian reserve context. Only renders for
                 conception / IVF / menstrual modes AND when an AMH lab
