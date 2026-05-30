@@ -30,6 +30,7 @@ import PerimenopauseStageCard from '@/components/dashboard/PerimenopauseStageCar
 import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import CyclePredictionInsights from '@/components/dashboard/CyclePredictionInsights';
+import CyclePredictionAccuracyCard from '@/components/dashboard/CyclePredictionAccuracyCard';
 import AmhAgeContext from '@/components/dashboard/AmhAgeContext';
 import FertilityOutlookCard from '@/components/dashboard/FertilityOutlookCard';
 import LabFreshnessCard from '@/components/dashboard/LabFreshnessCard';
@@ -682,6 +683,10 @@ const PatientDashboard = () => {
                 LH/FSH pattern, perimenopausal age. Hides itself when
                 there's nothing to flag. */}
             {selectedMode && <CyclePredictionInsights mode={selectedMode} />}
+
+            {/* Retrospective: how close did past predictions land?
+                Hides until there are ≥4 logged periods. */}
+            {selectedMode && <CyclePredictionAccuracyCard mode={selectedMode} />}
 
             {/* AMH-vs-age ovarian reserve context. Only renders for
                 conception / IVF / menstrual modes AND when an AMH lab
