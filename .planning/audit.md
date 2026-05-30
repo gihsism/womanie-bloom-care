@@ -177,6 +177,34 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-30 (session 59 — 50h arc, +21 commits so far)
+
+Wave 3, four more commits:
+
+- **ffc7f15** — `PregnancyNutrition`: trimester-aware reference card.
+  T1 focuses on folate / B6 for nausea / fluids / small meals;
+  T2 on iron / calcium / DHA / choline; T3 on iron continued /
+  vit D / fibre + complex carbs. Plus a collapsible foods-to-
+  avoid reference (raw fish, deli meats, unpasteurised dairy,
+  high-mercury fish, alcohol, caffeine cap).
+- **a6da143** — `IVFNutrition` + `MenopauseNutrition`. IVF version
+  branches on `ivf_phase`: prep (caffeine taper, no alcohol),
+  stim (hydration + protein, no twisted-ovary core work),
+  trigger / retrieval (light low-residue, electrolytes),
+  fertilization / transfer / TWW (pregnancy-grade), beta
+  (branches on positive vs negative outcome). Menopause version
+  anchors on Mediterranean/DASH with calcium 1200 + vit D 800-
+  2000 + protein 1.0-1.2 g/kg + phytoestrogens + cardiovascular
+  focus, with a collapsible per-symptom reference.
+- **2c3221b** — `VisitPrepCard`: personalised "questions for your
+  next visit" checklist. Pulls flagged labs (severity-then-
+  recency, top 4), hormone-flag derivations (TSH out of range,
+  PCOS pattern, diminished AMH for age), top symptom over last
+  60 days, plus mode-default fillers if fewer than 4 personal
+  questions surfaced. Checkbox state persists; per-row Ask-AI
+  deep links; Copy-all to clipboard; cross-link to print record.
+  Header shows next upcoming appointment.
+
 ### 2026-05-30 (session 59 — 50h arc, +17 commits so far)
 
 Additional ten commits after the audit update:
