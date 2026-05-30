@@ -26,6 +26,7 @@ import OvulationPrediction from '@/components/dashboard/OvulationPrediction';
 import PreMenstrualDashboard from '@/components/dashboard/PreMenstrualDashboard';
 import MenopauseDashboard from '@/components/dashboard/MenopauseDashboard';
 import MenopauseSymptomCalendar from '@/components/dashboard/MenopauseSymptomCalendar';
+import PerimenopauseStageCard from '@/components/dashboard/PerimenopauseStageCard';
 import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import CyclePredictionInsights from '@/components/dashboard/CyclePredictionInsights';
@@ -766,6 +767,7 @@ const PatientDashboard = () => {
                 /* ─── Menopause / Post-Menopause Mode ─── */
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="lg:col-span-2 space-y-6">
+                    <PerimenopauseStageCard mode={selectedMode} />
                     <MenopauseSymptomCalendar mode={selectedMode} />
                     <MenopauseDashboard
                       isPostMenopause={selectedMode === 'post-menopause'}
