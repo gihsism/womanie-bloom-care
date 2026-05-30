@@ -17,6 +17,7 @@ import {
   Droplet,
 } from 'lucide-react';
 import { differenceInDays, differenceInWeeks, format, parseISO, addDays } from 'date-fns';
+import PostpartumFeedingTracker from './PostpartumFeedingTracker';
 
 // Postpartum-mode dashboard.
 //
@@ -349,6 +350,11 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
           </details>
         )}
       </Card>
+
+      {/* Feeding tracker — shows for the first 6 months postpartum
+          when feed timing is the most active question. After that
+          the cadence stabilises and the tool isn't really needed. */}
+      {weeksPp <= 26 && <PostpartumFeedingTracker />}
 
       {/* Wellness tips */}
       <Card className="p-4">
