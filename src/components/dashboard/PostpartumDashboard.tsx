@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { differenceInDays, differenceInWeeks, format, parseISO, addDays } from 'date-fns';
 import PostpartumFeedingTracker from './PostpartumFeedingTracker';
+import PostpartumLochiaCard from './PostpartumLochiaCard';
 
 // Postpartum-mode dashboard.
 //
@@ -248,6 +249,11 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
           </div>
         )}
       </Card>
+
+      {/* Lochia visualization — reads back the lochia field
+          DailyLogging encodes into daily_health_signals.notes.
+          Hides itself when no entries exist or past week 8. */}
+      {inLochiaWindow && <PostpartumLochiaCard birthDate={birthDate} />}
 
       {/* Lochia callout (only in the relevant window) */}
       {inLochiaWindow && (
