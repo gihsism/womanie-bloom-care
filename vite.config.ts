@@ -36,6 +36,36 @@ export default defineConfig(() => ({
             purpose: "any maskable",
           },
         ],
+        // PWA shortcuts — long-press the home-screen icon (Android)
+        // or right-click the desktop install (Chromium) and these
+        // surface. Picks the four destinations a mobile user most
+        // often opens the app to reach.
+        shortcuts: [
+          {
+            name: "AI Doctor",
+            short_name: "Ask",
+            description: "Open the AI health assistant",
+            url: "/dashboard/ai-doctor",
+          },
+          {
+            name: "Medical records",
+            short_name: "Records",
+            description: "Open your uploaded medical documents",
+            url: "/dashboard/medical-history",
+          },
+          {
+            name: "Appointments",
+            short_name: "Visits",
+            description: "Manage upcoming and past appointments",
+            url: "/dashboard/appointments",
+          },
+          {
+            name: "Settings",
+            short_name: "Settings",
+            description: "Mode, profile, and personal info",
+            url: "/dashboard/settings",
+          },
+        ],
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
