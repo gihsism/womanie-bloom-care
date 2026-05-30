@@ -177,6 +177,43 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-05-30 (session 57 — 48h arc, hormone + menopause depth)
+
+User asked "push all changes" (already on origin) and then
+re-authorized for 48h. Seven commits extending the
+hormone-reference + useUserHealthContext foundation from session 56:
+
+- **ee3cf28** — `MenopauseSymptomCalendar` — 60-cell heat grid
+  colored by hot-flash count per day, with corner dots for any
+  other logged signal. Fills the calendar gap that CycleCalendar
+  left for menopause / post-menopause modes. Header shows
+  days-logged + total flashes + 30-day trend label.
+- **1d8cd86** — `PanelDetail` per-reading cycle-phase tag. For
+  FSH / LH / estradiol / progesterone, each historical reading row
+  carries a chip ("day 8 · follicular") with the matching phase
+  range in the tooltip — replaces "show all four phases, you pick"
+  with automatic matching when period_tracking spans the draw date.
+- **e3ce601** — Doctor's PatientDetails Overview picks up a 4th
+  stat tile: "Flagged values" with red/amber tint + critical /
+  abnormal / borderline breakdown, clickable into the Labs tab.
+- **837232d** — AI chat now ships age + AMH-by-age + lab-flag
+  summary as a `personalContext` field on each send; server appends
+  to the system prompt under "## Personal context." Claude can now
+  ground "is my AMH normal?" in the age-bracket reference.
+- **6b6c377** — `AmhAgeContext` picks up a personal trend section:
+  oldest → newest reading, annualized rate of change, branded by
+  rate (faster than typical 10–20%/yr decline → red, within range
+  → amber, rising → blue, stable → muted).
+- **bfaf063** — `PerimenopauseStageCard` — STRAW+10 stage estimator
+  for menopause modes. Reads period_tracking + FSH, picks one of
+  -3b / -2 / -1 / +1a / +1b, shows the standard description plus
+  the specific rationale (cycle gap of 67 days, FSH 32 IU/L, etc).
+
+Result: menopause modes have a real calendar surface and a
+clinical staging card; conception/IVF users see AMH trend over
+time; doctors see flagged-count at a glance on patient open; and
+Claude in chat is age-aware by default.
+
 ### 2026-05-24 (session 56 — lab- and age-aware cycle prediction)
 
 Alena asked for "better cycle prediction based on input data and lab
