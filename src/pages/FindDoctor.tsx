@@ -246,6 +246,8 @@ const FindDoctor = () => {
     switch (lifeStage) {
       case 'pregnancy':
         return ['ob', 'obgyn', 'ob-gyn', 'obstetric', 'obstetrician', 'maternal', 'perinatal', 'midwif'];
+      case 'postpartum':
+        return ['ob', 'obgyn', 'ob-gyn', 'obstetric', 'maternal', 'lactation', 'pelvic floor', 'mental health', 'postpartum', 'perinatal'];
       case 'conception':
       case 'ivf':
         return ['fertility', 'reproductive endo', 'rei', 'infertility', 'ivf'];

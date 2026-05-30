@@ -609,6 +609,11 @@ export default function AIDoctorChat() {
       'What prenatal milestones are coming up?',
       'Which supplements should I keep taking?',
     ],
+    'postpartum': [
+      'What recovery milestones should I expect this week?',
+      'Is what I\'m experiencing normal postpartum bleeding?',
+      'How can I tell if it might be postpartum depression?',
+    ],
     'menopause': [
       'Where am I in the menopause transition?',
       'What can help with my symptoms?',

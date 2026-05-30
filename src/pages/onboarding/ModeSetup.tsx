@@ -7,6 +7,7 @@ import TryingToConceiveForm from '@/components/onboarding/TryingToConceiveForm';
 import PregnancyForm from '@/components/onboarding/PregnancyForm';
 import PreMenstrualForm from '@/components/onboarding/PreMenstrualForm';
 import MenopauseForm from '@/components/onboarding/MenopauseForm';
+import PostpartumForm from '@/components/onboarding/PostpartumForm';
 
 const ModeSetup = () => {
   const navigate = useNavigate();
@@ -25,6 +26,8 @@ const ModeSetup = () => {
         return <TryingToConceiveForm />;
       case 'pregnant':
         return <PregnancyForm />;
+      case 'postpartum':
+        return <PostpartumForm />;
       case 'pre-menstrual':
         return <PreMenstrualForm />;
       case 'menopause':

@@ -55,12 +55,22 @@ const PRE_MENSTRUAL_TESTS: TestDef[] = [
   { names: ['hemoglobin', 'hb'], label: 'Hemoglobin', emoji: '🔴', note: 'Blood health' },
 ];
 
+const POSTPARTUM_TESTS: TestDef[] = [
+  { names: ['ferritin'], label: 'Iron Stores', emoji: '🩸', note: 'Often low after birth blood loss' },
+  { names: ['hemoglobin', 'hb'], label: 'Hemoglobin', emoji: '🔴', note: 'Anemia screen' },
+  { names: ['tsh'], label: 'Thyroid (TSH)', emoji: '🦋', note: 'Postpartum thyroiditis peaks 3–6 mo' },
+  { names: ['vitamin d', '25-oh'], label: 'Vitamin D', emoji: '☀️', note: 'Needed for you + (if breastfeeding) baby' },
+  { names: ['b12', 'vitamin b12', 'cobalamin'], label: 'Vitamin B12', emoji: '🌱', note: 'Energy + nerve recovery' },
+  { names: ['glucose', 'fasting glucose'], label: 'Blood Sugar', emoji: '🍬', note: 'Especially after gestational diabetes' },
+];
+
 const TEST_MAP: Record<string, TestDef[]> = {
   'ivf': IVF_TESTS,
   'menopause': MENOPAUSE_TESTS,
   'post-menopause': MENOPAUSE_TESTS,
   'contraception': CONTRACEPTION_TESTS,
   'pre-menstrual': PRE_MENSTRUAL_TESTS,
+  'postpartum': POSTPARTUM_TESTS,
 };
 
 const MODE_LABELS: Record<string, string> = {
@@ -69,6 +79,7 @@ const MODE_LABELS: Record<string, string> = {
   'post-menopause': 'post-menopause',
   'contraception': 'contraception',
   'pre-menstrual': 'your health',
+  'postpartum': 'postpartum recovery',
 };
 
 const statusColor = (s: string | null) =>

@@ -29,6 +29,7 @@ function deriveLifeStage(data: OnboardingData): string | null {
   if (!stage) return null;
   if (stage === 'pre-menstrual') return 'pre-menstrual';
   if (stage === 'pregnant') return 'pregnancy';
+  if (stage === 'postpartum') return 'postpartum';
   if (stage === 'menopause') return 'menopause';
   if (stage === 'trying-to-conceive') return 'conception';
   if (stage === 'regular-cycle') {
@@ -109,6 +110,19 @@ export async function commitOnboarding(user: UserShape, data: OnboardingData): P
     } catch (e) {
       console.error('onboarding: period_tracking upsert failed', e);
     }
+  }
+
+  // --- postpartum birth date (no schema column yet) ---
+  // PostpartumDashboard reads `womanie_postpartum_birth_<userId>` to
+  // anchor recovery milestones. When the user picks the postpartum
+  // life stage and provides a birth date here, persist it so the
+  // dashboard doesn't ask again.
+  const ppBirth = data.postpartum?.birthDate;
+  if (ppBirth) {
+    try {
+      const iso = new Date(ppBirth).toISOString().split('T')[0];
+      localStorage.setItem(`womanie_postpartum_birth_${user.id}`, iso);
+    } catch { /* ignore */ }
   }
 
   // --- localStorage fallback for unschematized basic info ---

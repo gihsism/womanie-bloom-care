@@ -43,13 +43,14 @@ import {
   Sparkles
 } from 'lucide-react';
 
-export type LifeStage = 
+export type LifeStage =
   | 'pre-menstrual'
   | 'menstrual-cycle'
   | 'contraception'
   | 'conception'
   | 'ivf'
   | 'pregnancy'
+  | 'postpartum'
   | 'menopause'
   | 'post-menopause';
 
@@ -87,6 +88,7 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onU
     { value: 'conception', label: 'Conception Mode' },
     { value: 'ivf', label: 'IVF Mode' },
     { value: 'pregnancy', label: 'Pregnancy Mode' },
+    { value: 'postpartum', label: 'Postpartum Mode' },
     { value: 'menopause', label: 'Menopause Mode' },
     { value: 'post-menopause', label: 'Post-Menopause Mode' },
   ];
@@ -286,6 +288,11 @@ export const getModeStats = (mode: LifeStage, cycleDay: number = 14, pregnancyDu
       ];
     }
     
+    case 'postpartum':
+      return [
+        { title: 'Recovery', value: 'Active', subtitle: 'See dashboard for milestones', icon: Baby, color: 'text-primary' },
+      ];
+
     case 'menopause':
     case 'post-menopause':
       return [

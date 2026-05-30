@@ -34,6 +34,12 @@ const lifeStages = [
     description: 'Expecting a baby',
   },
   {
+    value: 'postpartum',
+    icon: Baby,
+    title: 'Recently gave birth',
+    description: 'Postpartum recovery & care',
+  },
+  {
     value: 'menopause',
     icon: Sunset,
     title: 'Menopause/Post-menopause',

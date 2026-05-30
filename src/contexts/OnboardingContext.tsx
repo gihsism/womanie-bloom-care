@@ -12,7 +12,7 @@ interface BasicInfo {
 }
 
 interface LifeStage {
-  stage: 'pre-menstrual' | 'regular-cycle' | 'trying-to-conceive' | 'pregnant' | 'menopause' | '';
+  stage: 'pre-menstrual' | 'regular-cycle' | 'trying-to-conceive' | 'pregnant' | 'postpartum' | 'menopause' | '';
 }
 
 interface RegularCycleData {
@@ -50,6 +50,11 @@ interface MenopauseData {
   mainConcerns: string[];
 }
 
+interface PostpartumData {
+  birthDate: Date | undefined;
+  mainConcerns: string[];
+}
+
 export interface OnboardingData {
   basicInfo: BasicInfo;
   lifeStage: LifeStage;
@@ -58,6 +63,7 @@ export interface OnboardingData {
   pregnancy?: PregnancyData;
   preMenstrual?: PreMenstrualData;
   menopause?: MenopauseData;
+  postpartum?: PostpartumData;
   currentStep: number;
 }
 
@@ -70,6 +76,7 @@ interface OnboardingContextType {
   updatePregnancy: (pregData: Partial<PregnancyData>) => void;
   updatePreMenstrual: (pmData: Partial<PreMenstrualData>) => void;
   updateMenopause: (menoData: Partial<MenopauseData>) => void;
+  updatePostpartum: (ppData: Partial<PostpartumData>) => void;
   setCurrentStep: (step: number) => void;
   resetOnboarding: () => void;
 }
@@ -150,6 +157,13 @@ export const OnboardingProvider = ({ children }: { children: ReactNode }) => {
     }));
   };
 
+  const updatePostpartum = (ppData: Partial<PostpartumData>) => {
+    setData(prev => ({
+      ...prev,
+      postpartum: { ...prev.postpartum, ...ppData } as PostpartumData,
+    }));
+  };
+
   const setCurrentStep = (step: number) => {
     setData(prev => ({ ...prev, currentStep: step }));
   };
@@ -170,6 +184,7 @@ export const OnboardingProvider = ({ children }: { children: ReactNode }) => {
         updatePregnancy,
         updatePreMenstrual,
         updateMenopause,
+        updatePostpartum,
         setCurrentStep,
         resetOnboarding,
       }}
