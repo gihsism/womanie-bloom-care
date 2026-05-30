@@ -45,7 +45,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const signalCutoff = thirtyDaysAgo.toISOString().split('T')[0];
 
   try {
-    const [profileRows, signalRows, docRows, extractedRows, noteRows, apptRows] = await Promise.all([
+    const [profileRows, signalRows, docRows, extractedRows, noteRows, apptRows, periodRows] = await Promise.all([
       sql.query('SELECT id, full_name, life_stage, pregnancy_due_date, ivf_phase FROM profiles WHERE id = $1', [patientId]),
       sql.query(
         `SELECT * FROM daily_health_signals
@@ -82,7 +82,17 @@ async function handler(req: VercelRequest, res: VercelResponse) {
            ORDER BY scheduled_at DESC`,
         [doctor.id, patientId]
       ),
-    ]) as [unknown[], unknown[], unknown[], unknown[], unknown[], unknown[]];
+      // Period records — used by the doctor's lab view to tag each
+      // cycle-hormone reading with the cycle phase it was drawn in.
+      // Limited to the last 2 years; older history isn't useful for
+      // mapping recent labs and keeps the payload tight.
+      sql.query(
+        `SELECT period_start_date, cycle_length FROM period_tracking
+          WHERE user_id = $1 AND period_start_date >= NOW() - INTERVAL '2 years'
+          ORDER BY period_start_date ASC`,
+        [patientId]
+      ),
+    ]) as [unknown[], unknown[], unknown[], unknown[], unknown[], unknown[], unknown[]];
 
     return res.status(200).json({
       profile: profileRows[0] ?? null,
@@ -91,6 +101,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       medicalData: extractedRows,
       notes: noteRows,
       appointments: apptRows,
+      periodRecords: periodRows,
     });
   } catch (error) {
     console.error('doctors/patient error:', error);

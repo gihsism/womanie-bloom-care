@@ -102,6 +102,7 @@ const PatientDetails = () => {
   const [doctorNotes, setDoctorNotes] = useState<DoctorNote[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [medicalData, setMedicalData] = useState<MedicalDataRow[]>([]);
+  const [periodRecords, setPeriodRecords] = useState<Array<{ period_start_date: string; cycle_length: number }>>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
   
@@ -260,6 +261,7 @@ const PatientDetails = () => {
       setDoctorNotes(payload.notes || []);
       setAppointments(payload.appointments || []);
       setMedicalData(payload.medicalData || []);
+      setPeriodRecords(payload.periodRecords || []);
     } catch (error) {
       console.error('Error loading patient data:', error);
       toast({
@@ -600,7 +602,7 @@ const PatientDetails = () => {
 
           {/* Lab Results Tab */}
           <TabsContent value="labs" className="space-y-6">
-            <LabResultsView medicalData={medicalData} documents={documents} />
+            <LabResultsView medicalData={medicalData} documents={documents} periodRecords={periodRecords} />
           </TabsContent>
 
           {/* Documents Tab */}
@@ -981,9 +983,57 @@ function formatValue(v: string | number | null, unit: string | null): string {
   return unit ? `${base} ${unit}` : base;
 }
 
-const LabResultsView = ({ medicalData, documents }: { medicalData: MedicalDataRow[]; documents: HealthDocument[] }) => {
+const LabResultsView = ({
+  medicalData,
+  documents,
+  periodRecords,
+}: {
+  medicalData: MedicalDataRow[];
+  documents: HealthDocument[];
+  periodRecords: Array<{ period_start_date: string; cycle_length: number }>;
+}) => {
   const [query, setQuery] = useState('');
   const docNameById = new Map(documents.map(d => [d.id, d.ai_suggested_name || d.file_name]));
+
+  // Same phase-mapping the patient sees on PanelDetail (commit 1d8cd86).
+  // Doctor scanning a follicular-phase FSH 4 now sees "day 5 ·
+  // follicular" alongside the value instead of having to mentally
+  // overlay the patient's cycle on the lab dates.
+  const cyclePhaseForDate = (dateRecorded: string | null): { cycleDay: number; phase: 'follicular' | 'midcycle' | 'luteal' } | null => {
+    if (!dateRecorded || periodRecords.length === 0) return null;
+    const draw = new Date(dateRecorded);
+    if (Number.isNaN(draw.getTime())) return null;
+    let cycleStart: Date | null = null;
+    let cycleLen = 28;
+    for (let i = periodRecords.length - 1; i >= 0; i--) {
+      const ps = new Date(periodRecords[i].period_start_date);
+      if (Number.isNaN(ps.getTime())) continue;
+      if (ps.getTime() <= draw.getTime()) {
+        cycleStart = ps;
+        cycleLen = periodRecords[i].cycle_length || 28;
+        if (i + 1 < periodRecords.length) {
+          const next = new Date(periodRecords[i + 1].period_start_date);
+          if (!Number.isNaN(next.getTime()) && next.getTime() <= draw.getTime()) continue;
+        }
+        break;
+      }
+    }
+    if (!cycleStart) return null;
+    const days = Math.floor((draw.getTime() - cycleStart.getTime()) / (1000 * 60 * 60 * 24));
+    const cycleDay = days + 1;
+    if (cycleDay < 1 || cycleDay > cycleLen + 7) return null;
+    const ovulation = cycleLen - 14;
+    let phase: 'follicular' | 'midcycle' | 'luteal';
+    if (Math.abs(cycleDay - ovulation) <= 2) phase = 'midcycle';
+    else if (cycleDay < ovulation) phase = 'follicular';
+    else phase = 'luteal';
+    return { cycleDay, phase };
+  };
+
+  // Identify cycle-hormone rows by title to keep the chip out of CBC,
+  // lipids, etc. Same regex as hormone-reference.ts but inlined to
+  // avoid pulling that module into the doctor page.
+  const isCycleHormone = (title: string): boolean => /^fsh$|^lh$|^estradiol$|^e2$|^progesterone$/i.test(title.trim());
 
   const filtered = medicalData.filter(r => {
     if (!query.trim()) return true;
@@ -1023,7 +1073,9 @@ const LabResultsView = ({ medicalData, documents }: { medicalData: MedicalDataRo
     );
   }
 
-  const Row = ({ r }: { r: MedicalDataRow }) => (
+  const Row = ({ r }: { r: MedicalDataRow }) => {
+    const phaseInfo = isCycleHormone(r.title) ? cyclePhaseForDate(r.date_recorded) : null;
+    return (
     <div className="flex items-start gap-3 border rounded-lg p-3 bg-card">
       <Badge className={`text-[10px] capitalize shrink-0 ${statusBadgeClass(r.status)}`} variant="outline">
         {r.status || 'unknown'}
@@ -1032,6 +1084,11 @@ const LabResultsView = ({ medicalData, documents }: { medicalData: MedicalDataRo
         <p className="text-sm font-medium truncate">{r.title}</p>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5 text-xs">
           <span className="font-mono">{formatValue(r.value, r.unit)}</span>
+          {phaseInfo && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
+              day {phaseInfo.cycleDay} · {phaseInfo.phase}
+            </span>
+          )}
           {r.reference_range && (
             <span className="text-muted-foreground">ref {r.reference_range}</span>
           )}
@@ -1047,7 +1104,8 @@ const LabResultsView = ({ medicalData, documents }: { medicalData: MedicalDataRo
         )}
       </div>
     </div>
-  );
+    );
+  };
 
   return (
     <div className="space-y-6">
