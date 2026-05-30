@@ -19,6 +19,7 @@ import {
 import { differenceInDays, differenceInWeeks, format, parseISO, addDays } from 'date-fns';
 import PostpartumFeedingTracker from './PostpartumFeedingTracker';
 import PostpartumLochiaCard from './PostpartumLochiaCard';
+import PostpartumPelvicFloor from './PostpartumPelvicFloor';
 
 // Postpartum-mode dashboard.
 //
@@ -361,6 +362,10 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
           when feed timing is the most active question. After that
           the cadence stabilises and the tool isn't really needed. */}
       {weeksPp <= 26 && <PostpartumFeedingTracker />}
+
+      {/* Pelvic floor habit — surfaces from week 2 (vaginal) /
+          week 6 (C-section), most useful through ~6 months. */}
+      {weeksPp >= 2 && weeksPp <= 26 && <PostpartumPelvicFloor />}
 
       {/* Wellness tips */}
       <Card className="p-4">
