@@ -20,6 +20,8 @@ import DashboardHeader, { getModeStats, type LifeStage } from '@/components/dash
 import CycleCalendar from '@/components/dashboard/CycleCalendar';
 import PregnancyTracker from '@/components/dashboard/PregnancyTracker';
 import PregnancyNutrition from '@/components/dashboard/PregnancyNutrition';
+import MenopauseNutrition from '@/components/dashboard/MenopauseNutrition';
+import IVFNutrition from '@/components/dashboard/IVFNutrition';
 import IVFTracker from '@/components/dashboard/IVFTracker';
 import DailyLogging from '@/components/dashboard/DailyLogging';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
@@ -749,13 +751,14 @@ const PatientDashboard = () => {
               {selectedMode === 'ivf' ? (
                 /* ─── IVF Mode ─── */
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2">
+                  <div className="lg:col-span-2 space-y-4">
                     <IVFTracker
                       ivfStartDate={ivfStartDate}
                       ivfPhase={ivfPhase}
                       onSetIVFStart={handleSetIVFStart}
                       onUpdatePhase={handleUpdateIVFPhase}
                     />
+                    <IVFNutrition phase={(ivfPhase as Parameters<typeof IVFNutrition>[0]['phase']) ?? null} />
                   </div>
                   <div className="lg:col-span-1 space-y-4">
                     <ModeLabInsights mode="ivf" />
@@ -844,6 +847,7 @@ const PatientDashboard = () => {
                       isPostMenopause={selectedMode === 'post-menopause'}
                       onNavigateToDoctorChat={() => navigate('/dashboard/ai-doctor')}
                     />
+                    <MenopauseNutrition postmenopausal={selectedMode === 'post-menopause'} />
                   </div>
                   <div className="lg:col-span-1">
                     <ModeLabInsights mode={selectedMode} />
