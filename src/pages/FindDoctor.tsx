@@ -12,6 +12,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
 import UserMenu from '@/components/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
+import { db } from '@/integrations/db/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Search, Star, Clock, Video, Calendar as CalendarIcon, CheckCircle, User, Loader2 } from 'lucide-react';
 import { format, addDays, setHours, setMinutes } from 'date-fns';
@@ -65,6 +66,10 @@ const FindDoctor = () => {
   // can't both be offered the same slot.
   const [busySlots, setBusySlots] = useState<{ scheduled_at: string; duration: number | null }[]>([]);
   const [busySlotsLoading, setBusySlotsLoading] = useState(false);
+  // Patient's life_stage so we can highlight specialties that match
+  // her current mode (OB-GYN for pregnancy, menopause specialist for
+  // menopause, fertility specialist for conception, etc).
+  const [lifeStage, setLifeStage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -75,6 +80,17 @@ const FindDoctor = () => {
   useEffect(() => {
     if (user) {
       fetchDoctors();
+      // Pull life_stage so we can surface a "Recommended for you"
+      // badge on doctors whose specialty matches the patient's
+      // current mode. Fail silently — the list still works.
+      db.from('profiles')
+        .select('life_stage')
+        .eq('id', user.id)
+        .maybeSingle()
+        .then(res => {
+          const stage = (res.data as { life_stage?: string | null } | null)?.life_stage ?? null;
+          if (stage) setLifeStage(stage);
+        });
     }
   }, [user]);
 
@@ -222,6 +238,41 @@ const FindDoctor = () => {
 
   const specialties = [...new Set(doctors.map(d => d.specialty).filter(Boolean))];
 
+  // Map the patient's life stage → specialty keywords we look for on
+  // a doctor's specialty / specialties / bio. A match earns the
+  // doctor a "Recommended for you" badge and floats them to the top
+  // when sortBy='name' (the default) — explicit sort orders win.
+  const stageKeywords: string[] = (() => {
+    switch (lifeStage) {
+      case 'pregnancy':
+        return ['ob', 'obgyn', 'ob-gyn', 'obstetric', 'obstetrician', 'maternal', 'perinatal', 'midwif'];
+      case 'conception':
+      case 'ivf':
+        return ['fertility', 'reproductive endo', 'rei', 'infertility', 'ivf'];
+      case 'menopause':
+      case 'post-menopause':
+        return ['menopause', 'climacteric', 'hrt', 'hormone'];
+      case 'pre-menstrual':
+        return ['gynecolog', 'gynaecolog', 'reproductive'];
+      case 'contraception':
+        return ['gynecolog', 'gynaecolog', 'family planning', 'contracept'];
+      case 'menstrual-cycle':
+        return ['gynecolog', 'gynaecolog'];
+      default:
+        return [];
+    }
+  })();
+
+  const isRecommended = (d: Doctor): boolean => {
+    if (stageKeywords.length === 0) return false;
+    const hay = [
+      d.specialty ?? '',
+      ...(Array.isArray(d.specialties) ? d.specialties : []),
+      d.bio ?? '',
+    ].join(' ').toLowerCase();
+    return stageKeywords.some(k => hay.includes(k));
+  };
+
   const filteredDoctors = doctors.filter(doctor => {
     const q = searchQuery.toLowerCase();
     const matchesSearch = !q
@@ -237,6 +288,14 @@ const FindDoctor = () => {
   });
 
   const sortedDoctors = [...filteredDoctors].sort((a, b) => {
+    // When the user hasn't picked an explicit sort, recommended
+    // matches float to the top. Explicit sorts (rating / experience
+    // / price) take precedence.
+    if (sortBy === 'name') {
+      const ra = isRecommended(a) ? 1 : 0;
+      const rb = isRecommended(b) ? 1 : 0;
+      if (ra !== rb) return rb - ra;
+    }
     switch (sortBy) {
       case 'rating': {
         const ar = a.rating ?? 0;
@@ -387,6 +446,11 @@ const FindDoctor = () => {
                         </CardTitle>
                         {doctor.is_verified && (
                           <CheckCircle className="h-4 w-4 text-primary flex-shrink-0" aria-label="Verified" />
+                        )}
+                        {isRecommended(doctor) && (
+                          <Badge className="bg-secondary/15 text-secondary border-secondary/30 text-[10px] px-2 py-0.5">
+                            Recommended for you
+                          </Badge>
                         )}
                       </div>
                       <div className="flex flex-wrap items-center gap-1.5 mb-1">
