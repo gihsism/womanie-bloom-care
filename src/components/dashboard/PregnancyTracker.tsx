@@ -440,9 +440,23 @@ interface PregnancyTrackerProps {
   dueDate: Date | null;
   onSetDueDate: (date: Date) => void;
   onResetPregnancy?: () => void;
+  onSwitchToPostpartum?: () => void;
 }
 
-const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy }: PregnancyTrackerProps) => {
+const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToPostpartum }: PregnancyTrackerProps) => {
+  const { user } = useAuth();
+  // localStorage key tracks "user dismissed the past-due transition
+  // prompt." Lets a user who's a few days overdue but still pregnant
+  // hide the card without us being pushy.
+  const dismissKey = user ? `womanie_postpartum_transition_dismissed_${user.id}` : null;
+  const [transitionDismissed, setTransitionDismissed] = useState(false);
+
+  useEffect(() => {
+    if (!dismissKey) return;
+    try {
+      setTransitionDismissed(localStorage.getItem(dismissKey) === '1');
+    } catch { /* ignore */ }
+  }, [dismissKey]);
   const [showFullImage, setShowFullImage] = useState(false);
   const [dueDateInput, setDueDateInput] = useState('');
   const [lmpInput, setLmpInput] = useState('');
@@ -663,6 +677,44 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy }: Pregnancy
           </div>
         </div>
       </div>
+
+      {/* Past-due transition — surfaces from 14 days past the due
+          date if the user hasn't dismissed it. Babies arriving up to
+          ~10 days past due is medically expected; from 14 days the
+          dashboard offers a gentle "did baby arrive?" path so the
+          patient isn't stuck staring at "week 43" forever. Worded
+          carefully — pregnancy loss is a real scenario and the
+          dismiss option is unconditional. */}
+      {daysUntilDue <= -14 && onSwitchToPostpartum && !transitionDismissed && (
+        <Card className="p-4 border-l-4 border-l-primary bg-primary/5">
+          <h4 className="text-sm font-semibold mb-1">Has your baby arrived?</h4>
+          <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
+            Womanie can switch to the postpartum dashboard whenever you're ready. You'll get
+            recovery milestones, lochia tracking, mood self-checks, and a feeding log.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" onClick={onSwitchToPostpartum}>
+              Yes — switch to postpartum
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                if (dismissKey) {
+                  try { localStorage.setItem(dismissKey, '1'); } catch { /* ignore */ }
+                }
+                setTransitionDismissed(true);
+              }}
+            >
+              Not yet, hide this
+            </Button>
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-2 leading-relaxed">
+            If you've experienced a pregnancy loss, our hearts are with you — you can also reset
+            pregnancy tracking from the section below, or stay here, whatever feels right.
+          </p>
+        </Card>
+      )}
 
       {/* Due date info + edit */}
       <Card className="p-4">

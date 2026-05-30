@@ -277,6 +277,31 @@ const PatientDashboard = () => {
     }
   };
 
+  // Past-due transition: when a user is 14+ days past their due date,
+  // PregnancyTracker surfaces a "did baby arrive?" prompt. Yes →
+  // life_stage flips to postpartum, pregnancy due date cleared, mode
+  // dropdown follows. Birth date is left to the postpartum dashboard's
+  // empty state to capture (we don't know whether due-date - 14 or
+  // due-date or today is the right guess and don't want to fake it).
+  const handleSwitchToPostpartum = async () => {
+    if (!user) return;
+    try {
+      await db
+        .from('profiles')
+        .update({ life_stage: 'postpartum', pregnancy_due_date: null })
+        .eq('id', user.id);
+      setPregnancyDueDate(null);
+      setSelectedMode('postpartum' as LifeStage);
+      toast({
+        title: 'Switched to postpartum mode',
+        description: 'Add your baby\'s birth date in the postpartum card to anchor recovery milestones.',
+      });
+    } catch (error) {
+      console.error('Error switching to postpartum:', error);
+      toast({ title: 'Could not switch mode', description: 'Try again in a moment.', variant: 'destructive' });
+    }
+  };
+
   const handleSetIVFStart = async (date: Date, phase: string) => {
     setIvfStartDate(date);
     setIvfPhase(phase);
@@ -738,6 +763,7 @@ const PatientDashboard = () => {
                       dueDate={pregnancyDueDate}
                       onSetDueDate={handleSetPregnancyDueDate}
                       onResetPregnancy={handleResetPregnancy}
+                      onSwitchToPostpartum={handleSwitchToPostpartum}
                     />
                     {pregnancyDueDate && (
                       <CycleCalendar
