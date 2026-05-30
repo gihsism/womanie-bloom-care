@@ -54,6 +54,12 @@ const lifeStageOptions = [
     description: 'Expecting a baby',
   },
   {
+    value: 'postpartum',
+    icon: Baby,
+    title: 'Postpartum',
+    description: 'After giving birth — fourth-trimester and beyond',
+  },
+  {
     value: 'menopause',
     icon: Sunset,
     title: 'Menopause',
