@@ -19,6 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import DashboardHeader, { getModeStats, type LifeStage } from '@/components/dashboard/DashboardHeader';
 import CycleCalendar from '@/components/dashboard/CycleCalendar';
 import PregnancyTracker from '@/components/dashboard/PregnancyTracker';
+import PregnancyWeightTracker from '@/components/dashboard/PregnancyWeightTracker';
 import PregnancyNutrition from '@/components/dashboard/PregnancyNutrition';
 import MenopauseNutrition from '@/components/dashboard/MenopauseNutrition';
 import IVFNutrition from '@/components/dashboard/IVFNutrition';
@@ -787,6 +788,7 @@ const PatientDashboard = () => {
                       onResetPregnancy={handleResetPregnancy}
                       onSwitchToPostpartum={handleSwitchToPostpartum}
                     />
+                    <PregnancyWeightTracker dueDate={pregnancyDueDate} />
                     {pregnancyDueDate && (
                       <CycleCalendar
                         selectedMode={selectedMode}
