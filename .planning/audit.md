@@ -177,6 +177,22 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-06-01 (session 60 — 60h arc opening, +3 clinical-tooling commits)
+
+Alena re-authorized 60h continuation. Three clinical-tooling adds:
+
+- **3149dc4** — Pregnancy weight-gain tracker vs IOM 2009. Pre-preg
+  weight + height anchor → BMI category → expected gain by gest
+  week. Quick log, ±1 kg tolerance band, kg/lb/cm/in toggles.
+- **1d38ced** — EPDS depression screener (postpartum + pregnancy).
+  10-item self-screen, per-item reverse scoring, ≥10 possible / ≥13
+  likely, item-10 self-harm flag overrides total. Cox/Holden/Sagovsky
+  1987. localStorage history (last 20).
+- **f01a32b** — Blood pressure tracker (pregnancy + menopause).
+  ACOG 2020 categories with pregnancy-aware labels (gestational
+  hypertension ≥140/90, severe ≥160/110 → destructive toast).
+  7-day rolling average + collapsible log.
+
 ### 2026-05-30 (session 59 — 50h arc, +21 commits so far)
 
 Wave 3, four more commits:
