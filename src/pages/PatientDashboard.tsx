@@ -20,6 +20,7 @@ import DashboardHeader, { getModeStats, type LifeStage } from '@/components/dash
 import CycleCalendar from '@/components/dashboard/CycleCalendar';
 import PregnancyTracker from '@/components/dashboard/PregnancyTracker';
 import PregnancyWeightTracker from '@/components/dashboard/PregnancyWeightTracker';
+import BloodPressureTracker from '@/components/dashboard/BloodPressureTracker';
 import PregnancyNutrition from '@/components/dashboard/PregnancyNutrition';
 import PregnancyExercise from '@/components/dashboard/PregnancyExercise';
 import MenopauseNutrition from '@/components/dashboard/MenopauseNutrition';
@@ -791,6 +792,7 @@ const PatientDashboard = () => {
                       onSwitchToPostpartum={handleSwitchToPostpartum}
                     />
                     <PregnancyWeightTracker dueDate={pregnancyDueDate} />
+                    <BloodPressureTracker mode="pregnancy" />
                     <EpdsScreener mode="pregnancy" />
                     {pregnancyDueDate && (
                       <CycleCalendar
@@ -866,6 +868,7 @@ const PatientDashboard = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="lg:col-span-2 space-y-6">
                     <PerimenopauseStageCard mode={selectedMode} />
+                    <BloodPressureTracker mode={selectedMode} />
                     <MenopauseSymptomCalendar mode={selectedMode} />
                     <MenopauseDashboard
                       isPostMenopause={selectedMode === 'post-menopause'}
