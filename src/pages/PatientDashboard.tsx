@@ -21,6 +21,7 @@ import CycleCalendar from '@/components/dashboard/CycleCalendar';
 import PregnancyTracker from '@/components/dashboard/PregnancyTracker';
 import PregnancyWeightTracker from '@/components/dashboard/PregnancyWeightTracker';
 import PregnancyNutrition from '@/components/dashboard/PregnancyNutrition';
+import PregnancyExercise from '@/components/dashboard/PregnancyExercise';
 import MenopauseNutrition from '@/components/dashboard/MenopauseNutrition';
 import IVFNutrition from '@/components/dashboard/IVFNutrition';
 import IVFTracker from '@/components/dashboard/IVFTracker';
@@ -30,6 +31,7 @@ import OvulationPrediction from '@/components/dashboard/OvulationPrediction';
 import PreMenstrualDashboard from '@/components/dashboard/PreMenstrualDashboard';
 import MenopauseDashboard from '@/components/dashboard/MenopauseDashboard';
 import PostpartumDashboard from '@/components/dashboard/PostpartumDashboard';
+import EpdsScreener from '@/components/dashboard/EpdsScreener';
 import MenopauseSymptomCalendar from '@/components/dashboard/MenopauseSymptomCalendar';
 import PerimenopauseStageCard from '@/components/dashboard/PerimenopauseStageCard';
 import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
@@ -799,7 +801,12 @@ const PatientDashboard = () => {
                       const gestationStart = new Date(pregnancyDueDate.getTime() - 280 * 24 * 60 * 60 * 1000);
                       const totalDays = Math.floor((Date.now() - gestationStart.getTime()) / (24 * 60 * 60 * 1000));
                       const weeks = Math.max(0, Math.min(42, Math.floor(totalDays / 7)));
-                      return <PregnancyNutrition weeksPregnant={weeks} />;
+                      return (
+                        <>
+                          <PregnancyNutrition weeksPregnant={weeks} />
+                          <PregnancyExercise weeksPregnant={weeks} />
+                        </>
+                      );
                     })()}
                   </div>
                   <div className="lg:col-span-1 space-y-4">
