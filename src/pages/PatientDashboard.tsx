@@ -37,6 +37,7 @@ import CyclePredictionInsights from '@/components/dashboard/CyclePredictionInsig
 import CyclePredictionAccuracyCard from '@/components/dashboard/CyclePredictionAccuracyCard';
 import SleepCycleCorrelation from '@/components/dashboard/SleepCycleCorrelation';
 import CyclePhaseNutrition from '@/components/dashboard/CyclePhaseNutrition';
+import CyclePhaseExercise from '@/components/dashboard/CyclePhaseExercise';
 import VisitPrepCard from '@/components/dashboard/VisitPrepCard';
 import AmhAgeContext from '@/components/dashboard/AmhAgeContext';
 import FertilityOutlookCard from '@/components/dashboard/FertilityOutlookCard';
@@ -727,6 +728,10 @@ const PatientDashboard = () => {
             {/* Nutrition focus for the current cycle phase. Hides
                 when no period data exists. */}
             {selectedMode && <CyclePhaseNutrition mode={selectedMode} />}
+
+            {/* Movement / exercise focus for the current cycle
+                phase. Frames conservatively — tendencies not rules. */}
+            {selectedMode && <CyclePhaseExercise mode={selectedMode} />}
 
             {/* Personalised "questions for your next visit" — pulls
                 flagged labs + hormone flags + symptom patterns +
