@@ -65,6 +65,7 @@ check "me/delete-account (unauth)" POST "/api/me/delete-account"         401 '{}
 check "me/appointments (unauth)"   GET  "/api/me/appointments"           401
 check "me/doctor-notes (unauth)"   GET  "/api/me/doctor-notes"           401
 check "docs/delete (unauth)"       POST "/api/docs/delete"               401 '{"documentId":"x"}'
+check "docs/pending-retries (unauth)" POST "/api/docs/pending-retries"   401
 check "connections/pending (unauth)"      GET  "/api/connections/pending"        401
 check "connections/approved (unauth)"     GET  "/api/connections/approved"       401
 check "connections/redeem-code (unauth)"  POST "/api/connections/redeem-code"    401 '{"code":"X"}'
