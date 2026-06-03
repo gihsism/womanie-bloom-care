@@ -275,16 +275,42 @@ numbered item shipped). Verification: tsc clean, vite build clean,
 eslint errors in MedicalHistory.tsx (`any` types, a unicode regex) were
 left untouched — not introduced here and out of scope.
 
-All eight commits this session pushed; live on womanie.info.
+Then, on "keep going and don't ask anymore", grew the test suite over
+the highest-risk pure logic and verified the new work against the live
+site:
+
+- **ac01c1b** — `scorePassword` (10 cases, every score band + the
+  length/variety boundaries) and `buildIcs` (10 cases: UTC formatting,
+  duration roll-over, CRLF, the 15-min VALARM, RFC-5545 escaping,
+  optional-field presence).
+- **c1f94f2** — the two lab normalizers in `api/_lib`
+  (`normalizeTestTitle`, `normalizeUnit`) — extended the vitest include
+  to cover `api/`. These back every cross-document feature; a
+  regression makes the same test under two spellings read as two
+  different tests, or two identical units look different. 13 cases.
+- **bd7d927** — `smoke.sh` now asserts `/api/docs/pending-retries` is
+  auth-gated. Ran the full suite against **live womanie.info: 30/30
+  green**, confirming #18 deployed + gated and the live bundle matches
+  the local build (self-heal client code is live).
+
+Test suite now **70 tests across 6 files** (cycle-phase,
+hormone-reference, password-strength, ics, + the two normalizers). All
+green; tsc + vite build clean.
+
+Findings noted for later (no product-guessing):
+- Pre-existing eslint **errors** in MedicalHistory.tsx — 15 `any` types
+  + a `no-misleading-character-class` regex at ~L463-464. Not introduced
+  this session; the regex one may be a real matching bug worth a look.
 
 Next-session candidates:
-1. More test backfill (password-strength scorePassword, medical-utils
-   getFriendlyName/getStatusInfo, ics generation) — vitest is set up.
-2. Optional: server cron worker for background analysis retries (would
+1. Investigate the MedicalHistory.tsx unicode-regex lint error (possible
+   real bug) and clean the `any` types for a green lint baseline.
+2. More test backfill (medical-utils generateFallbackNote / getStatusInfo).
+3. Optional: server cron worker for background analysis retries (would
    need a CRON_SECRET service-auth path on analyze-document + vercel.json
    cron) — only if "retry while the user is away" is wanted.
-3. Continue mode-depth where it doesn't require product judgment.
-4. Worth a clinician's eye on the clinical content (vaccine windows,
+4. Continue mode-depth where it doesn't require product judgment.
+5. Worth a clinician's eye on the clinical content (vaccine windows,
    PMDD framing, AMH thresholds) before leaning on it publicly.
 
 ### 2026-06-01 (session 60 — 60h arc opening, +3 clinical-tooling commits)
