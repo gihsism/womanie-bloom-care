@@ -661,6 +661,46 @@ export default function MedicalHistory() {
     if (user) fetchData();
   }, [user]);
 
+  // Self-heal lost analyses (audit #18). A document's analysis is kicked
+  // off fire-and-forget at upload time; if that request never reached the
+  // server, the doc sits un-analyzed with nothing to retry it. On first
+  // load of Health Records we ask the server which of *our* documents are
+  // still un-analyzed (it caps attempts via pending_jobs so a genuinely
+  // unparseable file gives up instead of re-firing forever) and re-dispatch
+  // them under our own session. Runs once per mount.
+  const selfHealRef = useRef(false);
+  useEffect(() => {
+    if (!user || selfHealRef.current) return;
+    selfHealRef.current = true;
+    (async () => {
+      try {
+        const resp = await fetch('/api/docs/pending-retries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!resp.ok) return;
+        const { retries } = await resp.json();
+        if (!Array.isArray(retries) || retries.length === 0) return;
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        for (const r of retries) {
+          fetch('/api/analyze-document', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              documentId: r.documentId, userId: user.id,
+              filePath: r.filePath, fileName: r.fileName,
+              mimeType: r.mimeType, timezone: tz,
+            }),
+            keepalive: true,
+          }).catch(() => {});
+        }
+        // Surface the recovered docs as pending so the poller picks up
+        // their results as they land.
+        fetchData();
+      } catch { /* non-fatal — recovery is best-effort */ }
+    })();
+  }, [user]);
+
   // Poll for analysis completion while any doc is missing ai_summary.
   // Ref-tracked deadline so refetches don't reset the 3-minute budget.
   // Also tracks the previous pending id set so we can fire a data-
