@@ -297,10 +297,30 @@ Test suite now **70 tests across 6 files** (cycle-phase,
 hormone-reference, password-strength, ics, + the two normalizers). All
 green; tsc + vite build clean.
 
-Findings noted for later (no product-guessing):
-- Pre-existing eslint **errors** in MedicalHistory.tsx — 15 `any` types
-  + a `no-misleading-character-class` regex at ~L463-464. Not introduced
-  this session; the regex one may be a real matching bug worth a look.
+Then cleared those MedicalHistory.tsx lint errors — and one was a real
+bug:
+
+- **f58576d** — real bug. The cross-referenced-patterns icon prefix used
+  a character class `/^[🚨⚠️ℹ️]/u`, but `⚠️`/`ℹ️` are two codepoints each
+  (base + U+FE0F); inside `[...]` they split, so an item starting with
+  `⚠️`/`ℹ️` matched only the base char — icon lost its emoji presentation
+  and a stray invisible U+FE0F was left in front of the text. Switched to
+  an alternation group `/^(?:🚨|⚠️|ℹ️)/u`.
+- **2899d5c** — hygiene. The nine `item.raw_data as any` casts were
+  pointless (raw_data is already typed on MedicalDataItem); removed them,
+  typed the recharts dot render prop, dropped two useless regex escapes.
+  File: 15 eslint errors → 0 (only pre-existing fetchData dep warnings
+  left). No behaviour change.
+
+**Infrastructure finding (HANDOFF-ish):** there is no typecheck gate.
+`npx tsc --noEmit` is effectively a no-op (root tsconfig has `files: []`
++ project references, and api/ isn't in any include). `tsc -b` reveals
+**dozens of pre-existing type errors** across the codebase (TS6133 unused
+imports everywhere, TS1320 await-on-the-supabase-shim-thenable, a few
+TS7006/TS18046). The app ships fine because vite/esbuild transpiles
+without typechecking. Cleaning these up + adding a real `tsc -b` (or
+`vite build` + `tsc`) check to keep them from regressing is a worthwhile
+but large, careful sweep — flagging rather than starting it mid-arc.
 
 Next-session candidates:
 1. Investigate the MedicalHistory.tsx unicode-regex lint error (possible
