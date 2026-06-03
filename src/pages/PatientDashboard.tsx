@@ -43,6 +43,7 @@ import CyclePredictionAccuracyCard from '@/components/dashboard/CyclePredictionA
 import SleepCycleCorrelation from '@/components/dashboard/SleepCycleCorrelation';
 import CyclePhaseNutrition from '@/components/dashboard/CyclePhaseNutrition';
 import CyclePhaseExercise from '@/components/dashboard/CyclePhaseExercise';
+import PMSForecastCard from '@/components/dashboard/PMSForecastCard';
 import VisitPrepCard from '@/components/dashboard/VisitPrepCard';
 import AmhAgeContext from '@/components/dashboard/AmhAgeContext';
 import FertilityOutlookCard from '@/components/dashboard/FertilityOutlookCard';
@@ -737,6 +738,11 @@ const PatientDashboard = () => {
             {/* Movement / exercise focus for the current cycle
                 phase. Frames conservatively — tendencies not rules. */}
             {selectedMode && <CyclePhaseExercise mode={selectedMode} />}
+
+            {/* PMS-window forecast — surfaces in the 8 days before
+                the next predicted period, with the user's typical
+                PMS-window symptom profile + prep tips. */}
+            {selectedMode && <PMSForecastCard mode={selectedMode} />}
 
             {/* Personalised "questions for your next visit" — pulls
                 flagged labs + hormone flags + symptom patterns +
