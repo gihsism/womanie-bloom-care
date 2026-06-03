@@ -460,8 +460,8 @@ function renderEnhancedSummary(summary: string) {
               <ul className="space-y-2">
                 {items.map((item, j) => (
                   <li key={j} className="text-sm leading-relaxed flex items-start gap-2">
-                    <span className="flex-shrink-0">{item.match(/^[🚨⚠️ℹ️]/u)?.[0] || '🔗'}</span>
-                    <span>{item.replace(/^[🚨⚠️ℹ️]\s*/u, '')}</span>
+                    <span className="flex-shrink-0">{item.match(/^(?:🚨|⚠️|ℹ️)/u)?.[0] || '🔗'}</span>
+                    <span>{item.replace(/^(?:🚨|⚠️|ℹ️)\s*/u, '')}</span>
                   </li>
                 ))}
               </ul>
