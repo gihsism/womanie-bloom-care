@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { VitePWA } from "vite-plugin-pwa";
@@ -83,5 +83,12 @@ export default defineConfig(() => ({
     rollupOptions: {
       external: ['@niceplugins/capacitor-healthkit'],
     },
+  },
+  test: {
+    // Unit tests for pure logic (cycle math, lab interpretation, etc.).
+    // node environment is enough today since the first tests cover pure
+    // utils; switch to jsdom here if/when we add component tests.
+    environment: "node",
+    include: ["src/**/*.{test,spec}.{ts,tsx}"],
   },
 }));
