@@ -223,7 +223,7 @@ const PatientDashboard = () => {
 
   const fetchProfile = async (userId: string) => {
     try {
-      let { data, error } = await db
+      const { data, error } = await db
         .from('profiles')
         .select('full_name, life_stage, pregnancy_due_date, ivf_start_date, ivf_phase')
         .eq('id', userId)
