@@ -228,12 +228,20 @@ schema/table changes → HANDOFF), two higher-leverage adds:
   by flipping the environment later. This is the long-deferred
   "no tests anywhere" item from the audit appendix, now unblocked.
 
-All five commits built clean (tsc + vite, and now `npm test` green) and
-pushed; live on womanie.info.
+- **6fa8974** — Backfilled tests onto `hormone-reference.ts` (25 cases):
+  `assessAmh` percentile buckets + age brackets + guards,
+  `hormoneKeyForTitle` regex mapping (anti-Müllerian umlaut form,
+  free-vs-total testosterone), `cyclePhaseForDay` ovulation math,
+  `parseLabValue` (comparator prefixes, European decimal, units), and
+  `getPhaseRange` fallback. These feed the lab-flagging the AI doctor
+  and dashboard depend on, so they're worth pinning. 37 tests total.
+
+All six commits built clean (tsc + vite, `npm test` green) and pushed;
+live on womanie.info.
 
 Next-session candidates:
-1. Backfill tests onto other pure utils now that vitest exists
-   (medical-utils friendlyTitle, lab interpretation, AMH brackets).
+1. More test backfill (password-strength scorePassword, medical-utils
+   getFriendlyName/getStatusInfo, ics generation).
 2. Continue mode-depth where it doesn't require product judgment.
 3. HANDOFF still pending Alena's call: #8 cache-version column, #18
    pending_jobs retry table (both schema changes).
