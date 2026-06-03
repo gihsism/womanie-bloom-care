@@ -89,6 +89,11 @@ export default defineConfig(() => ({
     // node environment is enough today since the first tests cover pure
     // utils; switch to jsdom here if/when we add component tests.
     environment: "node",
-    include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    include: [
+      "src/**/*.{test,spec}.{ts,tsx}",
+      // The api/ layer is pure-Node serverless handlers; its dependency-free
+      // utils (lab title/unit normalisation, etc.) are worth unit-testing too.
+      "api/**/*.{test,spec}.{ts,tsx}",
+    ],
   },
 }));
