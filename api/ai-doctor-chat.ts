@@ -66,6 +66,10 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     if (postpartumWeeks !== null) {
       lines.push(`Postpartum week ${postpartumWeeks} (${postpartumWeeks * 7} days since birth)`);
     }
+    const cyclePhase = typeof personalContext.cyclePhase === 'string'
+      ? personalContext.cyclePhase.slice(0, 200)
+      : null;
+    if (cyclePhase) lines.push(`Cycle: ${cyclePhase}`);
     if (lines.length === 0) return '';
     return `\n## Personal context\n${lines.join('\n')}\n`;
   })();

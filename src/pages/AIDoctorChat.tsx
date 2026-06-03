@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
+import { db } from '@/integrations/db/client';
+import { computeCyclePhase } from '@/lib/cycle-phase';
 import UserMenu from '@/components/UserMenu';
 import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
@@ -48,6 +50,7 @@ interface PersonalContext {
   amhSummary?: string | null;
   flags?: string | null;
   postpartumWeeks?: number | null;
+  cyclePhase?: string | null;
 }
 
 async function streamChat({
@@ -244,6 +247,26 @@ export default function AIDoctorChat() {
     try { window.localStorage.setItem('womanie_chat_model', selectedModel); } catch { /* ignore */ }
   }, [selectedModel]);
   const [medicalContext, setMedicalContext] = useState<string | null>(null);
+  // Recent periods, used only to derive a coarse current-cycle-phase
+  // line for the chat context. computeCyclePhase stays silent when the
+  // data is stale or implausible, so this is safe to load opportunistically.
+  const [recentPeriods, setRecentPeriods] = useState<{ period_start_date: string; cycle_length: number | null }[]>([]);
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await db
+          .from('period_tracking')
+          .select('period_start_date, cycle_length')
+          .eq('user_id', user.id)
+          .order('period_start_date', { ascending: false })
+          .limit(3);
+        if (!cancelled && Array.isArray(data)) setRecentPeriods(data);
+      } catch { /* non-fatal — chat works without cycle context */ }
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -474,12 +497,24 @@ export default function AIDoctorChat() {
       } catch { /* ignore */ }
     }
 
+    // Current cycle phase, derived from recent periods. Suppressed for
+    // postpartum users (their old period rows would read as a stale,
+    // misleading "luteal phase") — the postpartum line above is the
+    // accurate time anchor for them. computeCyclePhase itself returns
+    // null on stale/implausible data, so this only ever sends a
+    // grounded, current phase.
+    const cyclePhase =
+      postpartumWeeks === null
+        ? (computeCyclePhase(recentPeriods, Date.now())?.summary ?? null)
+        : null;
+
     const personalContext = healthContext.loaded
       ? {
           age: healthContext.age,
           amhSummary,
           flags: flagsBits.length > 0 ? flagsBits.join('; ') : null,
           postpartumWeeks,
+          cyclePhase,
         }
       : undefined;
 
