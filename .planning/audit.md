@@ -177,6 +177,40 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-06-03 (session 61 — 60h re-authorization, finishing interrupted iteration)
+
+Alena re-authorized another 60h continuation. Opened by closing out an
+interrupted iteration that had two completed but unpushed dashboard
+cards sitting in the working tree (one wired, one not).
+
+- **acf1ebc** — `PMSForecastCard` for cycle modes. Surfaces in the 8
+  days before the next predicted period; reframes "period in X days"
+  into "what to expect + how to prep". Pulls the user's own typical
+  late-luteal symptom profile from the last 4 cycles (classifying each
+  logged signal day by days-before-next-period), shows
+  magnesium/sleep/training prep tips, flags PMDD when symptoms feel out
+  of proportion. Self-hides outside the PMS window, during
+  menstruation, and on unreliable predictions. Already wired into the
+  cycle-mode column of PatientDashboard.
+- **ff98700** — `PregnancyVaccinations` checklist. Tdap (27–36w), flu,
+  RSV/Abrysvo (32–36w), COVID — per ACOG/CDC 2024-25 windows. Computes
+  gestational week from the due date, ranks shots by urgency (due now →
+  upcoming → window passed), marks received / "not now" per-device,
+  share-with-OB reminder. Wired into the pregnancy column after the
+  fetal kick counter; this commit is what actually shipped the card
+  (it was built but never rendered before).
+- **9a31240** — Hygiene: `fetchProfile` in PatientDashboard used `let`
+  to destructure `{ data, error }` though neither is reassigned. Was
+  the one blocking eslint *error* in the file; now const. Remaining
+  exhaustive-deps warnings predate this work.
+
+All three built clean (tsc + vite) and pushed; live on womanie.info.
+
+Next-session candidates:
+1. Continue the next-highest item from the punch list / mode depth.
+2. The recurring "no tests" gap — a logged-in smoke flow would catch
+   the swap-the-auth-provider-forget-the-consumer class of bug.
+
 ### 2026-06-01 (session 60 — 60h arc opening, +3 clinical-tooling commits)
 
 Alena re-authorized 60h continuation. Three clinical-tooling adds:
