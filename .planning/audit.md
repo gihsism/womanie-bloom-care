@@ -91,7 +91,10 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 - Fix sketch: Add `created_at` column; expire rows older than 30 days on cache hit.
 - Risk class: SAFE (schema change needed — HANDOFF if new column)
 - Priority: P1
-- Status: open
+- Status: shipped (session 61, 2026-06-03) — `created_at` already existed on
+  `llm_cache`; read path now ignores rows older than 30 days, both ON CONFLICT
+  writes reset `created_at`/`hit_count`. Migration 004 added the index. Applied
+  to Neon. Alena authorized the schema work ("go ahead with everything").
 
 **9. src/pages/MedicalHistory.tsx — Polling has no backoff**
 - Where: Lines 614–630 (the polling effect I added earlier today)
@@ -150,6 +153,15 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 - Status: shipped — user turn is captured into `userTurnContent` but only inserted in the handler's `finally` block, paired with the assistant reply inside `sql.transaction([...])` (api/ai-doctor-chat.ts:186-206). If `assistantText` is empty (stream failed before any delta) nothing is written at all.
 
 **18. Fire-and-forget analysis dispatch not observable** — if the /api/analyze-document request is lost in flight before Vercel receives it, nothing retries. Should store a `pending_jobs` row and have a retry worker.
+- Status: shipped (session 61, 2026-06-03) — migration 005 `pending_jobs` ledger
+  (status / attempts / last_error); `POST /api/docs/pending-retries` finds the
+  caller's own un-analyzed docs (no ai_summary, no current analysis, 2-min grace,
+  14-day window), caps attempts at 3, returns them; MedicalHistory re-dispatches
+  once per mount under the existing session. Chose client-driven self-heal over a
+  server cron to avoid an auth-bypass service path into the analyze endpoint and a
+  refactor of the untested core pipeline — recovery happens on next Health Records
+  visit. Server cron can layer on later for background retries. Alena authorized
+  the schema work.
 
 **19. "Today's date" is UTC** — analyze-document.ts:98. Patient timezone not considered.
 - Status: shipped — `req.body.timezone` accepted, `resolveToday(timezone)` resolves to the patient's local date with UTC fallback (analyze-document.ts:123, 132-170). Client sends `Intl.DateTimeFormat().resolvedOptions().timeZone` on every reanalysis call (MedicalHistory.tsx:790).
@@ -236,15 +248,44 @@ schema/table changes → HANDOFF), two higher-leverage adds:
   `getPhaseRange` fallback. These feed the lab-flagging the AI doctor
   and dashboard depend on, so they're worth pinning. 37 tests total.
 
-All six commits built clean (tsc + vite, `npm test` green) and pushed;
-live on womanie.info.
+Then Alena said "go ahead with everything" — explicitly authorizing the
+two deferred DB-schema items the standing guardrail would have paused
+on. Both shipped, additively, with migrations applied to Neon via a new
+runner script:
+
+- **03313a8** — audit #8: expire `llm_cache` after 30 days. The
+  `created_at` column already existed (made outside version control), so
+  this was mostly a code change: read path ignores rows older than 30
+  days (model-version-pinned key would otherwise serve a prior model's
+  analysis forever), both ON CONFLICT writes reset created_at/hit_count.
+  Migration 004 added the index. Also added `scripts/apply-migration.mjs`
+  (repo had no migration runner — the root cause of the user_roles loss
+  in session ~5). 12 existing cache rows untouched.
+- **9642a20** — audit #18: self-heal lost analyses. migration 005
+  `pending_jobs` ledger + `POST /api/docs/pending-retries` (session-
+  scoped scan for the caller's own un-analyzed docs, attempts capped at
+  3) + MedicalHistory re-dispatch once per mount. Chose client-driven
+  self-heal over a server cron deliberately: no auth-bypass service path
+  into the analyze endpoint, no refactor of the untested core pipeline.
+  Recovery fires when the user next opens Health Records.
+
+With these two, the original audit P0–P2 list is fully closed (every
+numbered item shipped). Verification: tsc clean, vite build clean,
+`npm test` 37 green; both migrations confirmed in Neon. Pre-existing
+eslint errors in MedicalHistory.tsx (`any` types, a unicode regex) were
+left untouched — not introduced here and out of scope.
+
+All eight commits this session pushed; live on womanie.info.
 
 Next-session candidates:
 1. More test backfill (password-strength scorePassword, medical-utils
-   getFriendlyName/getStatusInfo, ics generation).
-2. Continue mode-depth where it doesn't require product judgment.
-3. HANDOFF still pending Alena's call: #8 cache-version column, #18
-   pending_jobs retry table (both schema changes).
+   getFriendlyName/getStatusInfo, ics generation) — vitest is set up.
+2. Optional: server cron worker for background analysis retries (would
+   need a CRON_SECRET service-auth path on analyze-document + vercel.json
+   cron) — only if "retry while the user is away" is wanted.
+3. Continue mode-depth where it doesn't require product judgment.
+4. Worth a clinician's eye on the clinical content (vaccine windows,
+   PMDD framing, AMH thresholds) before leaning on it publicly.
 
 ### 2026-06-01 (session 60 — 60h arc opening, +3 clinical-tooling commits)
 
