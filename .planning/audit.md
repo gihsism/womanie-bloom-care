@@ -204,12 +204,39 @@ cards sitting in the working tree (one wired, one not).
   the one blocking eslint *error* in the file; now const. Remaining
   exhaustive-deps warnings predate this work.
 
-All three built clean (tsc + vite) and pushed; live on womanie.info.
+Then, with the original audit punch-list now essentially exhausted
+(only #8 cache-version-expiry and #18 pending-jobs remain, both
+schema/table changes → HANDOFF), two higher-leverage adds:
+
+- **9cc3bc2** — AI doctor grounded in the user's current cycle phase.
+  New shared `src/lib/cycle-phase.ts` `computeCyclePhase()` turns recent
+  period logs into a coarse phase (menstrual / follicular / ovulation /
+  luteal / late-luteal PMS) + days-to-next-period. Chat client fetches
+  last 3 periods, passes a one-line `personalContext.cyclePhase`; server
+  adds a "Cycle: …" line to the Personal-context block. So "why am I so
+  bloated/anxious this week?" lands grounded without the user restating
+  her cycle position. Conservative: util returns null on stale /
+  implausible / future-dated data, and the client suppresses phase for
+  postpartum users (old period rows would read as a misleading luteal
+  phase).
+- **9ebc9ce** — **Testing foothold, finally.** Stood up vitest in the
+  existing vite config (node env, `src/**/*.test.ts` glob), added
+  `npm test` / `test:watch`. First suite: 12 cases on
+  `computeCyclePhase`, deliberately weighted toward the silent-null
+  guards (those are what keep stale cycle context out of a medical
+  prompt). Pure-logic utils first; jsdom + component tests can layer on
+  by flipping the environment later. This is the long-deferred
+  "no tests anywhere" item from the audit appendix, now unblocked.
+
+All five commits built clean (tsc + vite, and now `npm test` green) and
+pushed; live on womanie.info.
 
 Next-session candidates:
-1. Continue the next-highest item from the punch list / mode depth.
-2. The recurring "no tests" gap — a logged-in smoke flow would catch
-   the swap-the-auth-provider-forget-the-consumer class of bug.
+1. Backfill tests onto other pure utils now that vitest exists
+   (medical-utils friendlyTitle, lab interpretation, AMH brackets).
+2. Continue mode-depth where it doesn't require product judgment.
+3. HANDOFF still pending Alena's call: #8 cache-version column, #18
+   pending_jobs retry table (both schema changes).
 
 ### 2026-06-01 (session 60 — 60h arc opening, +3 clinical-tooling commits)
 
