@@ -421,7 +421,7 @@ function renderEnhancedSummary(summary: string) {
                 {items.map((item, j) => (
                   <li key={j} className="text-sm leading-relaxed flex items-start gap-2">
                     <span className="text-primary mt-0.5 flex-shrink-0">💡</span>
-                    <span>{item.replace(/^[•\-]\s*/, '')}</span>
+                    <span>{item.replace(/^[•-]\s*/, '')}</span>
                   </li>
                 ))}
               </ul>
@@ -441,7 +441,7 @@ function renderEnhancedSummary(summary: string) {
                 {items.map((item, j) => (
                   <li key={j} className="text-sm leading-relaxed flex items-start gap-2">
                     <span className="text-amber-600 mt-0.5 flex-shrink-0">→</span>
-                    <span>{item.replace(/^[•\-]\s*/, '')}</span>
+                    <span>{item.replace(/^[•-]\s*/, '')}</span>
                   </li>
                 ))}
               </ul>
@@ -535,14 +535,14 @@ function ResultCard({ item, history = [] }: { item: MedicalDataItem; history?: M
       )}
       {/* Possible conditions — only for abnormal/critical */}
       {(item.status === 'abnormal' || item.status === 'critical') &&
-        (item.raw_data as any)?.possible_conditions?.length > 0 && (
+        (item.raw_data?.possible_conditions?.length ?? 0) > 0 && (
         <div className="mt-2.5 bg-background/80 rounded-lg px-3 py-2.5 border border-border/40">
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5 flex items-center gap-1">
             <HelpCircle className="h-3 w-3" />
             What this could mean
           </p>
           <div className="flex flex-wrap gap-1.5">
-            {((item.raw_data as any).possible_conditions as string[]).map((condition: string, idx: number) => (
+            {(item.raw_data?.possible_conditions ?? []).map((condition: string, idx: number) => (
               <span key={idx} className={`text-xs px-2.5 py-1 rounded-full border ${
                 item.status === 'critical'
                   ? 'bg-red-50 dark:bg-red-900/15 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800'
@@ -918,7 +918,7 @@ export default function MedicalHistory() {
     // Group labs by panel
     const labsByPanel: Record<string, MedicalDataItem[]> = {};
     labResults.forEach(lab => {
-      const rawData = lab.raw_data as any;
+      const rawData = lab.raw_data;
       const panel = rawData?.panel || 'Other Tests';
       if (!labsByPanel[panel]) labsByPanel[panel] = [];
       labsByPanel[panel].push(lab);
@@ -939,7 +939,7 @@ export default function MedicalHistory() {
       .map(l => ({
         ...l,
         numVal: parseFloat(l.value!),
-        rawData: l.raw_data as any,
+        rawData: l.raw_data,
       }));
 
     const labsByTitle: Record<string, typeof labsWithValues> = {};
@@ -1042,7 +1042,7 @@ export default function MedicalHistory() {
   const flaggedItems = useMemo(() =>
     [...medicalData]
       .filter(i => i.status === 'abnormal' || i.status === 'critical')
-      .sort((a, b) => (priorityOrder[(a.raw_data as any)?.priority || 'low'] ?? 2) - (priorityOrder[(b.raw_data as any)?.priority || 'low'] ?? 2)),
+      .sort((a, b) => (priorityOrder[a.raw_data?.priority || 'low'] ?? 2) - (priorityOrder[b.raw_data?.priority || 'low'] ?? 2)),
     [medicalData]
   );
 
@@ -1849,8 +1849,8 @@ export default function MedicalHistory() {
                             </button>
                             {isExpanded && (() => {
                               const sorted = [...filteredLabs].sort((a, b) => {
-                                const aPri = (a.raw_data as any)?.priority || 'low';
-                                const bPri = (b.raw_data as any)?.priority || 'low';
+                                const aPri = a.raw_data?.priority || 'low';
+                                const bPri = b.raw_data?.priority || 'low';
                                 return (priorityOrder[aPri] ?? 2) - (priorityOrder[bPri] ?? 2);
                               });
                               const abnormals = sorted.filter(l => l.status === 'abnormal' || l.status === 'critical');
@@ -2048,12 +2048,12 @@ export default function MedicalHistory() {
                                     dataKey="value"
                                     stroke="hsl(var(--primary))"
                                     strokeWidth={2}
-                                    dot={(props: any) => {
+                                    dot={(props: { cx?: number; cy?: number; payload?: { date?: string } }) => {
                                       const { cx, cy, payload } = props;
-                                      if (payload.date === 'Next?') {
+                                      if (payload?.date === 'Next?') {
                                         return <circle key="predicted" cx={cx} cy={cy} r={4} fill="hsl(var(--primary))" stroke="hsl(var(--primary))" strokeWidth={2} strokeDasharray="4 2" opacity={0.4} />;
                                       }
-                                      return <circle key={payload.date} cx={cx} cy={cy} r={3} fill="hsl(var(--primary))" />;
+                                      return <circle key={payload?.date} cx={cx} cy={cy} r={3} fill="hsl(var(--primary))" />;
                                     }}
                                   />
                                 </ComposedChart>
