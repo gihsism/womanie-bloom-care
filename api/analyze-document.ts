@@ -482,8 +482,15 @@ async function processWithAI(
   // the llm_cache naturally. Model name is hashed in too.
   const cacheKey = await hashRequest(STATIC_RULES + dynamicHeader + contentStr + 'claude-sonnet-4-20250514');
 
-  // Check cache
-  const cached = await sql.query('SELECT response_text FROM llm_cache WHERE request_hash = $1', [cacheKey]);
+  // Check cache. Entries older than 30 days are treated as a miss so a model
+  // upgrade (or any drift) refreshes within a month instead of lingering
+  // forever — the cacheKey is pinned to the model version, so without an age
+  // bound a returning user would keep seeing the previous model's analysis
+  // until they happened to re-upload (audit #8).
+  const cached = await sql.query(
+    "SELECT response_text FROM llm_cache WHERE request_hash = $1 AND created_at > now() - interval '30 days'",
+    [cacheKey],
+  );
 
   let aiContent: string;
 
@@ -530,8 +537,10 @@ async function processWithAI(
     });
 
     if (aiContent) {
+      // Reset created_at + hit_count on conflict so refreshing an expired
+      // entry restarts its 30-day clock and hit accounting (audit #8).
       await sql.query(
-        'INSERT INTO llm_cache (request_hash, response_text, model) VALUES ($1, $2, $3) ON CONFLICT (request_hash) DO UPDATE SET response_text = $2',
+        "INSERT INTO llm_cache (request_hash, response_text, model) VALUES ($1, $2, $3) ON CONFLICT (request_hash) DO UPDATE SET response_text = $2, created_at = now(), hit_count = 0, last_hit_at = NULL",
         [cacheKey, aiContent, 'claude-sonnet-4-20250514']
       ).catch((e: unknown) => console.error('Cache store error:', e));
     }
@@ -570,7 +579,7 @@ async function processWithAI(
       // Overwrite the cache with the corrected content so we don't
       // replay the broken one on the next identical doc.
       await sql.query(
-        'INSERT INTO llm_cache (request_hash, response_text, model) VALUES ($1, $2, $3) ON CONFLICT (request_hash) DO UPDATE SET response_text = $2',
+        "INSERT INTO llm_cache (request_hash, response_text, model) VALUES ($1, $2, $3) ON CONFLICT (request_hash) DO UPDATE SET response_text = $2, created_at = now(), hit_count = 0, last_hit_at = NULL",
         [cacheKey, fixContent, 'claude-sonnet-4-20250514']
       ).catch(() => {});
     }
