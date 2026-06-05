@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Lightbulb, AlertTriangle, TrendingUp, Calendar } from 'lucide-react';
+import { Lightbulb } from 'lucide-react';
 
 interface LabResult {
   title: string;
@@ -117,7 +117,11 @@ export default function SmartRecommendations({ medicalData, lifeStage }: SmartRe
       const sorted = sameTitle.sort((a, b) => new Date(a.date_recorded!).getTime() - new Date(b.date_recorded!).getTime());
       const last = sorted[sorted.length - 1];
       const prev = sorted[sorted.length - 2];
-      return prev.status === 'abnormal' && last.status === 'normal' && last.id === l.id;
+      // Only flag on the latest entry of this title. `last` and `l` are
+      // references into the same `labs` array, so identity comparison is
+      // correct here — LabResult has no id field (the old `last.id === l.id`
+      // compared undefined === undefined and was always true).
+      return prev.status === 'abnormal' && last.status === 'normal' && last === l;
     });
 
     if (improvingTests.length > 0) {
