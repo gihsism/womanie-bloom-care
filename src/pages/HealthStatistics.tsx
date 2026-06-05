@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FileText, Calendar, ArrowLeft, Activity, AlertTriangle, CheckCircle2, FlaskConical, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import UserMenu from "@/components/UserMenu";
 import { format } from "date-fns";
 
 interface DocumentSummary {
