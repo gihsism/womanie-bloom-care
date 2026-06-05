@@ -4,7 +4,11 @@
 
 const API_BASE = '/api';
 
-interface QueryBuilder {
+// Extends PromiseLike so `await db.from(...).select(...)...` resolves to a
+// typed { data, error } instead of `unknown` — without this the await operand
+// is an untyped thenable, which both errors (TS1320) and makes every `.data`
+// access an error (TS18046/TS2339) across the app.
+interface QueryBuilder extends PromiseLike<{ data: any; error: any }> {
   select: (columns?: string) => QueryBuilder;
   insert: (data: any) => QueryBuilder;
   update: (data: any) => QueryBuilder;
@@ -21,7 +25,7 @@ interface QueryBuilder {
   limit: (count: number) => QueryBuilder;
   single: () => Promise<{ data: any; error: any }>;
   maybeSingle: () => Promise<{ data: any; error: any }>;
-  then: (resolve: any) => Promise<any>;
+  // `then` is provided by the PromiseLike base (makes the builder awaitable).
 }
 
 function createQueryBuilder(table: string): QueryBuilder {
@@ -54,7 +58,7 @@ function createQueryBuilder(table: string): QueryBuilder {
     limit(count) { limitCount = count; return builder; },
     single() { isSingle = true; return execute(); },
     maybeSingle() { isMaybeSingle = true; return execute(); },
-    then(resolve) { return execute().then(resolve); },
+    then(onfulfilled, onrejected) { return execute().then(onfulfilled, onrejected); },
   };
 
   async function execute(): Promise<{ data: any; error: any }> {
