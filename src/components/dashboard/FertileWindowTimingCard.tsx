@@ -100,8 +100,9 @@ const FertileWindowTimingCard = ({ userId, cycleLength, periodLength }: FertileW
       const cycleLen = nextStart
         ? differenceInDays(nextStart, cycleStart)
         : (periodsAsc[i].cycle_length ?? cycleLength);
-      const periodLen = periodsAsc[i].period_end_date
-        ? Math.max(1, differenceInDays(parseISO(periodsAsc[i].period_end_date), cycleStart) + 1)
+      const periodEnd = periodsAsc[i].period_end_date;
+      const periodLen = periodEnd
+        ? Math.max(1, differenceInDays(parseISO(periodEnd), cycleStart) + 1)
         : periodLength;
 
       // Skip cycles too short to be meaningful (< 10 days = probably not a real cycle).

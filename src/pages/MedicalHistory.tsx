@@ -91,7 +91,9 @@ import {
   priorityOrder,
   getStatusInfo,
   getFriendlyName,
-  generateFallbackNote,
+  // NB: generateFallbackNote is intentionally NOT imported — this file
+  // defines its own local generateFallbackNote below, which shadowed the
+  // import and won at runtime. Importing it too was a conflicting no-op.
 } from '@/lib/medical-utils';
 
 
