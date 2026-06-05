@@ -172,6 +172,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           case 'gte': return `${col} >= ${p}`;
           case 'lt': return `${col} < ${p}`;
           case 'lte': return `${col} <= ${p}`;
+          // `.in(col, [a, b, c])` — val is an array; `= ANY($p)` matches any
+          // element (and correctly matches nothing for an empty array).
+          case 'in': return `${col} = ANY(${p})`;
           default: return `${col} = ${p}`;
         }
       });

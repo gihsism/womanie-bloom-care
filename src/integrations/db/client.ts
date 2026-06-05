@@ -16,6 +16,7 @@ interface QueryBuilder {
   gte: (column: string, value: any) => QueryBuilder;
   lt: (column: string, value: any) => QueryBuilder;
   lte: (column: string, value: any) => QueryBuilder;
+  in: (column: string, values: any[]) => QueryBuilder;
   order: (column: string, options?: any) => QueryBuilder;
   limit: (count: number) => QueryBuilder;
   single: () => Promise<{ data: any; error: any }>;
@@ -48,6 +49,7 @@ function createQueryBuilder(table: string): QueryBuilder {
     gte(col, val) { filters.push([col, 'gte', val]); return builder; },
     lt(col, val) { filters.push([col, 'lt', val]); return builder; },
     lte(col, val) { filters.push([col, 'lte', val]); return builder; },
+    in(col, vals) { filters.push([col, 'in', vals]); return builder; },
     order(col, opts) { orderBy = { column: col, ascending: opts?.ascending ?? true }; return builder; },
     limit(count) { limitCount = count; return builder; },
     single() { isSingle = true; return execute(); },
