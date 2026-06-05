@@ -189,6 +189,47 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-06-05 (session 62 — typecheck triage: 5 real bugs + db-shim typing)
+
+Started a hardening pass on the "no typecheck gate" finding from session
+61. `tsc -b` surfaced 326 pre-existing type errors; triaging them for
+real bugs (vs. cosmetic unused-imports) found **five genuine bugs**, all
+now fixed and live:
+
+- **Settings page crash** (missing import) — the "Blood type" dropdown
+  used `<Select>`/`<SelectItem>`/… with no import → `ReferenceError`
+  when the basic-info section rendered. (also fixed the same class on
+  HealthStatistics → `<UserMenu/>` unimported.)
+- **VisitPrepCard broken query** — called `.in('status', [...])` but the
+  Neon db shim never implemented `.in()` → `db…in is not a function`, so
+  the flagged-labs query threw and the card never loaded. Added `.in()`
+  to the shim + an `in`→`= ANY($p)` operator to `/api/db`.
+- **🔴 New-user signup crash — a regression I introduced in 9a31240.**
+  That commit changed `let { data, error }` to `const` in
+  `fetchProfile` to clear a lint error, but `data` is reassigned when
+  auto-creating a profile for a first-time user. So since 2026-06-03,
+  every brand-new signup hit `TypeError: Assignment to constant
+  variable` and their dashboard profile-create crashed. Existing users
+  never entered that branch, so it was silent. Fixed (destructure to
+  const `existing` + `let data`). Caught by tsc -b (TS2588).
+- **SmartRecommendations** — the "improving test" guard compared
+  `last.id === l.id` but LabResult has no id (undefined === undefined,
+  always true); a downstream Set-dedup masked it. Fixed to `last === l`
+  (reference identity).
+
+Then the big lever: typed the db shim's query builder as
+`PromiseLike<{data,error}>` (it was a loose `then` thenable), so every
+`await db.from(...)` resolves typed instead of `unknown`. That one change
+cleared **128 errors** (the TS1320 await-thenable + TS18046/TS2339
+unknown-`.data` classes). Added `npm run typecheck` (tsc -b). Also
+resolved a generateFallbackNote import/local-def conflict (TS2440) and a
+null-narrowing nit.
+
+Net: tsc -b **326 → 150 errors**; remaining are ~134 unused-import
+(TS6133) + 13 implicit-any (TS7006) — cosmetic, no bugs. Verified every
+step with vite build + `npm test` (70 green). Next: clear the remaining
+unused-imports so `npm run typecheck` can become a real gate.
+
 ### 2026-06-03 (session 61 — 60h re-authorization, finishing interrupted iteration)
 
 Alena re-authorized another 60h continuation. Opened by closing out an
