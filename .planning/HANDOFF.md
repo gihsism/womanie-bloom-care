@@ -1,84 +1,70 @@
-# Handoff notes
+# Handoff notes — async decision queue for Alena
 
-Items the autonomous arc surfaced but chose not to ship without
-product/owner judgment.
+**Status: NOT blocking.** The autonomous arc keeps running on other work
+regardless of this file. These are items I deliberately did NOT ship
+because they need an owner/product/legal call, not engineering judgment.
+Answer any of them whenever — no rush, nothing is stuck. Ordered by
+priority.
 
-## 2026-05-19
+---
 
-### Newsletter subscribe form (Footer) is a no-op
+## 1. ⚠️ Public site claims physician review that isn't happening (PRIORITY)
 
-`src/components/Footer.tsx:13-21` — handleSubscribe validates the
-email, fires a "Subscribed!" toast, and clears the input. Nothing
-gets sent anywhere. The marketing page is implicitly promising a
-newsletter sign-up that doesn't exist.
+`src/components/TrustSecurity.tsx` shows two legally-significant claims on
+the public landing page:
+- **"All health content is reviewed by board-certified physicians and
+  specialists."** — This is currently **not true**. No clinician has
+  reviewed the clinical content (vaccine windows, PMDD framing, AMH
+  thresholds, etc.). Leaving a false medical-review claim live is an
+  honesty + liability risk.
+- **"HIPAA Compliant"** — a compliance claim I can't verify.
 
-Three options:
+What I need: tell me to either (a) soften the copy to what's true today
+(e.g. "guided by ACOG / CDC / Mayo Clinic references" instead of
+"reviewed by physicians"), or (b) confirm a real physician review is in
+place / planned and leave it. I won't rewrite public legal copy without
+your say-so. `HIPAA Compliant` stays untouched until you confirm.
 
-1. **Remove the form.** Replace with a `mailto:` link or "Follow
-   on social" callout. Honest, no infra needed.
-2. **Wire it.** New `newsletter_subscribers(id, email, subscribed_at,
-   unsubscribe_token)` table + `/api/newsletter/subscribe` endpoint
-   that inserts + sends a double-opt-in email. Schema + email
-   delivery infra needed.
-3. **Punt to a third-party.** Hosted form (Mailchimp / Buttondown
-   / ConvertKit) — change the `<form>` action and the fake handler
-   goes away. Paid integration but no schema work here.
+## 2. Newsletter subscribe form is a no-op
 
-Default if nothing else: option 1 (remove). It's the only one that
-doesn't promise more than we deliver.
+`src/components/Footer.tsx` — the footer "Stay Informed" form validates
+the email, fires a "Subscribed!" toast, and clears the field. Nothing is
+stored or sent. So the page promises a newsletter that doesn't exist.
+Options: (1) remove the form / swap for a social-follow callout; (2) wire
+it for real — single-opt-in capture into a `newsletter_subscribers`
+table is cheap and needs no email infra (a confirmation email would);
+(3) hand off to Mailchimp/Buttondown (paid). Tell me which and I'll ship
+it — I didn't pick for you since it's a product call.
 
-### Marketing-claim review on `<TrustSecurity>`
+## 3. Patient appointment reschedule (one-step)
 
-`src/components/TrustSecurity.tsx` claims:
-- "HIPAA Compliant"
-- "All health content is reviewed by board-certified physicians and
-  specialists."
+Patients can cancel + rebook, but there's no single-step reschedule.
+A `/api/appointments/reschedule` endpoint validating the new slot against
+the doctor's availability is ~1h of work and needs no product judgment —
+I can just build it if you want it; flagging only so it's a deliberate
+yes.
 
-Both are legally significant claims. Confirm with counsel before
-they ride on the public-facing landing page. If either is aspiration
-rather than fact, the language should be softened.
+## 4. HEIC / HEIF photo upload
 
-### Patient appointment reschedule
+iPhones default to HEIC; Claude vision only reads JPEG/PNG/GIF/WebP, so
+we reject HEIC at upload with a "change your camera format" hint. Real
+fix is a decoder in `api/analyze-document.ts`: (1) `heic-convert` (pure
+JS, ~1.5 MB, slow); (2) `sharp` + libheif (needs a custom Vercel
+runtime); (3) Vercel Image Optimization (paid). Needs your pick on the
+infra/cost trade-off.
 
-Patients can cancel + rebook today. There's no single-step reschedule.
-Worth a `/api/appointments/reschedule` endpoint that validates the new
-slot against the doctor's schedule + busy-slots before updating
-`scheduled_at`. About an hour to ship. Deferred so this arc could stay
-in small, atomic commits.
+## 5. Auto-create pending doctor↔patient connection on booking
 
-## 2026-05-23
+When a patient books via FindDoctor, no connection row is created, so the
+doctor can't open the (consent-gated) chart without the patient sending a
+separate access code. Auto-inserting a *pending* connection on booking
+would smooth this — but it needs your read on whether booking implies
+consent to share full history.
 
-### HEIC / HEIF photo upload
+## 6. Doctor chart-access audit log
 
-iPhone defaults to HEIC. Claude vision only reads JPEG / PNG / GIF /
-WebP, so we reject HEIC at upload (DocumentUpload, 755f81e) with a
-"change Settings → Camera → Formats" hint. That works but it's a
-weird thing to make the patient do.
-
-Real fix: HEIC decoder inside api/analyze-document.ts. Options:
-1. `heic-convert` (pure JS, ~1.5 MB pulled into the bundle, slow).
-2. `sharp` with the HEIF system library — fast but Vercel functions
-   don't include libheif by default; needs a custom runtime image.
-3. Vercel Image Optimization API (paid, transforms on the fly).
-
-For now, the user-facing message is honest. Worth doing once HEIC
-share is non-trivial in upload telemetry.
-
-### Auto-create pending doctor-patient connection on booking
-
-When a patient books with a doctor through FindDoctor, no connection
-row is created. The doctor sees the appointment but can't open
-PatientDetails (consent-gated). Currently the patient has to
-separately send an access code.
-
-Right call is to auto-insert a pending connection on booking so the
-patient sees an approval request in PendingConnections. Approving
-unlocks the chart in time for the visit. Skipped — needs Alena's
-read on whether booking implies consent to share full history.
-
-### Access audit log
-
-There's no record of when a doctor opens a patient's chart. For
-GDPR-friendly transparency, a small `access_log(id, doctor_id,
-patient_id, viewed_at, surface)` table that the patient can review
-from Settings would be a good addition. Schema change, so HANDOFF.
+No record of when a doctor opens a patient's chart. A small
+`access_log(id, doctor_id, patient_id, viewed_at, surface)` table the
+patient could review from Settings would be good GDPR-friendly
+transparency. Schema change + a small feature; flagging for a deliberate
+yes before building.
