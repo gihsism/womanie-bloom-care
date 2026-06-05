@@ -223,7 +223,7 @@ const PatientDashboard = () => {
 
   const fetchProfile = async (userId: string) => {
     try {
-      const { data, error } = await db
+      const { data: existing, error } = await db
         .from('profiles')
         .select('full_name, life_stage, pregnancy_due_date, ivf_start_date, ivf_phase')
         .eq('id', userId)
@@ -231,7 +231,11 @@ const PatientDashboard = () => {
 
       if (error) throw error;
 
-      // Auto-create profile if it doesn't exist
+      // Auto-create profile if it doesn't exist. `data` is reassigned in
+      // that branch, so it must be `let` — keeping `existing`/`error` const
+      // satisfies prefer-const without making `data` a const we then reassign
+      // (which is what regressed new-user signups in 9a31240).
+      let data = existing;
       if (!data) {
         const userName = user?.user_metadata?.full_name || null;
         await db.from('profiles').insert({
