@@ -2,6 +2,7 @@ import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import bcrypt from 'bcryptjs';
 import { withSentry } from '../_lib/sentry.js';
+import { notifyAdmin } from '../_lib/notify.js';
 
 // Doctor account signup.
 //
@@ -71,6 +72,15 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     // Intentionally NOT inserting into user_roles. Admin approval is
     // required before the doctor can log into the professional
     // dashboard; see audit.md HANDOFFs.
+
+    // Ping Alena so the signup doesn't sit unnoticed waiting for
+    // approval (fire-and-forget — never fails the signup).
+    void notifyAdmin(
+      `🩺 New doctor signup on Womanie: ${fullName}` +
+      (specialty ? ` (${specialty})` : '') +
+      `\nLicense: ${licenseNumber}` +
+      `\nApprove or reject at https://womanie.info/admin/doctors`
+    );
 
     return res.status(200).json({
       success: true,
