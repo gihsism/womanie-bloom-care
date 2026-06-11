@@ -23,7 +23,7 @@ import { useNavigate } from 'react-router-dom';
 // user's bracket with a pin at the user's value. Below: the brief
 // note assessAmh() produced.
 
-type Mode = 'conception' | 'ivf' | 'menstrual-cycle' | 'pre-menstrual' | 'contraception' | 'pregnancy' | 'menopause' | 'post-menopause';
+type Mode = 'conception' | 'ivf' | 'menstrual-cycle' | 'pre-menstrual' | 'contraception' | 'pregnancy' | 'postpartum' | 'menopause' | 'post-menopause';
 
 interface AmhAgeContextProps {
   mode: Mode;

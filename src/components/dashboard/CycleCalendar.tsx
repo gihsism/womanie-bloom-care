@@ -26,13 +26,6 @@ interface CycleCalendarProps {
   periodLength?: number;
   selectedMode?: string;
   pregnancyDueDate?: Date | null;
-  ovulationPrediction?: {
-    predictedOvulationDate?: string;
-    fertileWindowStart?: string;
-    fertileWindowEnd?: string;
-    confidence: string;
-    keyIndicators: string[];
-  } | null;
 }
 
 const CycleCalendar = ({ 

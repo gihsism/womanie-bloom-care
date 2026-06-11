@@ -102,12 +102,6 @@ const PatientDashboard = () => {
   usePageTitle('Dashboard');
   const [profile, setProfile] = useState<{ full_name?: string; life_stage?: string; pregnancy_due_date?: string | null; ivf_start_date?: string | null; ivf_phase?: string | null } | null>(null);
   const [selectedMode, setSelectedMode] = useState<LifeStage | null>(null);
-  const [ovulationPrediction, setOvulationPrediction] = useState<{
-    ovulationDate?: string;
-    fertileWindowStart?: string;
-    fertileWindowEnd?: string;
-    confidence?: string;
-  } | null>(null);
   const [periodData, setPeriodData] = useState<{ lastPeriodStart: Date; cycleLength: number } | null>(null);
   const [nameInput, setNameInput] = useState('');
   const [savingName, setSavingName] = useState(false);
@@ -167,47 +161,6 @@ const PatientDashboard = () => {
       }
     } catch (error) {
       console.error('Error loading period data:', error);
-    }
-  };
-
-  // Auto-fetch ovulation prediction when we have period data
-  useEffect(() => {
-    if (user && periodData && (selectedMode === 'conception' || selectedMode === 'menstrual-cycle')) {
-      fetchOvulationPrediction();
-    }
-  }, [user, selectedMode, periodData]);
-
-  const fetchOvulationPrediction = async () => {
-    if (!user || !periodData) return;
-    
-    try {
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-      const { data: healthData } = await db
-        .from('daily_health_signals')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('signal_date', thirtyDaysAgo.toISOString().split('T')[0])
-        .order('signal_date', { ascending: false });
-
-      if (!healthData || healthData.length === 0) return;
-
-      const { data } = await db.functions.invoke('predict-ovulation', {
-        body: {
-          healthData,
-          cycleData: {
-            cycleLength: periodData.cycleLength,
-            lastPeriodStart: periodData.lastPeriodStart.toISOString(),
-          },
-        },
-      });
-
-      if (data?.prediction) {
-        setOvulationPrediction(data.prediction);
-      }
-    } catch (error) {
-      console.error('Auto-prediction error:', error);
     }
   };
 
@@ -913,7 +866,6 @@ const PatientDashboard = () => {
                       cycleLength={periodData?.cycleLength ?? 28} 
                       periodLength={5}
                       selectedMode={selectedMode}
-                      ovulationPrediction={ovulationPrediction}
                     />
                   </div>
                   <div className="lg:col-span-1 space-y-4">
@@ -978,7 +930,6 @@ const PatientDashboard = () => {
                   userId={user.id}
                   lastPeriodStart={periodData.lastPeriodStart}
                   cycleLength={periodData.cycleLength}
-                  onPredictionUpdate={setOvulationPrediction}
                 />
               </div>
             )}
