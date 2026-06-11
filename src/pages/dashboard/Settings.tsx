@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { scorePassword } from '@/lib/password-strength';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import ChartAccessLog from '@/components/dashboard/ChartAccessLog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -769,6 +770,9 @@ const Settings = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Chart access transparency */}
+        <ChartAccessLog />
 
         {/* Privacy & Security */}
         <Card>

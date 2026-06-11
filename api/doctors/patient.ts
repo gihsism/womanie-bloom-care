@@ -40,6 +40,19 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(403).json({ error: 'No approved connection to this patient' });
   }
 
+  // Audit trail: one row per chart fetch, written server-side at the
+  // single consent-gated chokepoint so it can't be skipped. The patient
+  // reviews these from Settings (/api/me/chart-access). Best-effort —
+  // a logging failure must not block care.
+  try {
+    await sql.query(
+      `INSERT INTO chart_access_log (doctor_id, patient_id, surface) VALUES ($1, $2, 'patient_chart')`,
+      [doctor.id, patientId]
+    );
+  } catch (logErr) {
+    console.error('doctors/patient: chart_access_log insert failed (non-fatal):', logErr);
+  }
+
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   const signalCutoff = thirtyDaysAgo.toISOString().split('T')[0];
