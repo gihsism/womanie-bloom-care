@@ -6,6 +6,7 @@ import { normalizeUnit } from './_lib/normalize-unit.js';
 import { checkAndConsume } from './_lib/ratelimit.js';
 import { withSentry } from './_lib/sentry.js';
 import { callAnthropicWithRetry } from './_lib/anthropic.js';
+import heicConvert from 'heic-convert';
 
 // Allow longer execution for AI analysis. Claude PDF analysis on a full
 // lab panel with max_tokens: 8000 plus the per-result INSERTs routinely
@@ -127,7 +128,27 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         const fileResp = await fetch(filePath);
         if (fileResp.ok) {
           const buffer = await fileResp.arrayBuffer();
-          const base64 = Buffer.from(buffer).toString('base64');
+
+          // iPhone HEIC/HEIF: Claude vision can't read it, so decode to
+          // JPEG first (pure-JS, ~1-3s per photo — acceptable inside a
+          // 300s budget). On decode failure fall through with the
+          // original mime so the error surfaces as the usual unreadable-
+          // format path instead of a hard 500.
+          let effectiveMime = mimeType;
+          let effectiveBuffer = Buffer.from(buffer);
+          const looksHeic =
+            mimeType === 'image/heic' || mimeType === 'image/heif' ||
+            /\.heic$|\.heif$/i.test(fileName || '');
+          if (looksHeic) {
+            try {
+              const jpeg = await heicConvert({ buffer: effectiveBuffer, format: 'JPEG', quality: 0.85 });
+              effectiveBuffer = Buffer.from(jpeg);
+              effectiveMime = 'image/jpeg';
+            } catch (heicErr) {
+              console.error('HEIC decode failed, sending original:', heicErr);
+            }
+          }
+          const base64 = effectiveBuffer.toString('base64');
 
           // Fetch patient context
           const profiles = await sql.query('SELECT life_stage, pregnancy_due_date, ivf_phase FROM profiles WHERE id = $1', [userId]);
@@ -149,10 +170,10 @@ async function handler(req: VercelRequest, res: VercelResponse) {
               { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
               { type: 'text', text: `Analyze this medical document "${fileName}". Read every page carefully. Extract EVERY test result as a separate item — lab reports contain tables with many values. A typical blood test has 10-25 results.\n\n${patientContext}` },
             ];
-          } else if (['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(mimeType)) {
+          } else if (['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(effectiveMime)) {
             // Send image to Claude vision
             userContent = [
-              { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64 } },
+              { type: 'image', source: { type: 'base64', media_type: effectiveMime, data: base64 } },
               { type: 'text', text: `Analyze this medical document image "${fileName}". Extract EVERY test result you can see in the image.\n\n${patientContext}` },
             ];
           } else {

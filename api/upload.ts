@@ -43,6 +43,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
               'image/png',
               'image/jpg',
               'image/webp',
+              'image/heic',
+              'image/heif',
               'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             ],
             maximumSizeInBytes: 200 * 1024 * 1024,

@@ -57,10 +57,9 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
       }
 
       // Validate file type. We accept formats Claude vision can read
-      // (JPEG, PNG, WebP) plus PDF and DOCX, which we handle separately.
-      // HEIC / HEIF (iPhone default) is *not* supported by Claude vision,
-      // so we reject it at the door with a useful hint rather than
-      // accepting an upload that will silently fail at analysis time.
+      // (JPEG, PNG, WebP) plus PDF and DOCX, which we handle separately,
+      // and HEIC/HEIF (iPhone default) which the analysis endpoint
+      // decodes to JPEG server-side before sending to Claude.
       const allowedMimes = [
         'application/pdf',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -68,24 +67,15 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
         'image/jpg',
         'image/png',
         'image/webp',
+        'image/heic',
+        'image/heif',
       ];
       const ext = (selectedFile.name.split('.').pop() || '').toLowerCase();
-      const allowedExts = ['pdf', 'docx', 'jpg', 'jpeg', 'png', 'webp'];
-      const blockedHeic = ext === 'heic' || ext === 'heif'
-        || selectedFile.type === 'image/heic'
-        || selectedFile.type === 'image/heif';
-      if (blockedHeic) {
-        toast({
-          title: 'HEIC photos not yet supported',
-          description: 'iPhone defaults to HEIC. Change Settings → Camera → Formats to "Most Compatible" (JPEG), or convert this photo first.',
-          variant: 'destructive',
-        });
-        return;
-      }
+      const allowedExts = ['pdf', 'docx', 'jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
       if (!allowedMimes.includes(selectedFile.type) && !allowedExts.includes(ext)) {
         toast({
           title: 'Invalid file type',
-          description: 'Please upload a PDF, DOCX, or image (JPG, PNG, WebP).',
+          description: 'Please upload a PDF, DOCX, or image (JPG, PNG, WebP, HEIC).',
           variant: 'destructive',
         });
         return;
@@ -225,7 +215,7 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
               <Input
                 id="file"
                 type="file"
-                accept=".pdf,.jpg,.jpeg,.png,.docx"
+                accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,.docx"
                 onChange={handleFileChange}
                 className="flex-1"
               />
