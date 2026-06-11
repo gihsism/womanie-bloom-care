@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { format } from 'date-fns';
 import { Heart, AlertCircle, Smile, Droplet, X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -60,6 +61,20 @@ const DailyLogSheet = ({
   onUpdateSignal,
   activeTab = 'symptoms'
 }: DailyLogSheetProps) => {
+  // The sheet is one scrollable list of sections; scroll the requested
+  // one into view on open (day-action menu passes mood/intimacy/etc.).
+  useEffect(() => {
+    if (!open || activeTab === 'symptoms') return;
+    // Radix mounts the sheet content in a portal after open flips —
+    // defer one frame so the target section exists.
+    const t = window.setTimeout(() => {
+      document
+        .getElementById(`daily-log-${activeTab}`)
+        ?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }, 150);
+    return () => window.clearTimeout(t);
+  }, [open, activeTab]);
+
   if (!date) return null;
 
   const toggleSymptom = (symptom: string) => {
@@ -132,7 +147,7 @@ const DailyLogSheet = ({
             </section>
 
             {/* Mood Section */}
-            <section className="space-y-3">
+            <section id="daily-log-mood" className="space-y-3">
               <h4 className="font-semibold text-sm flex items-center gap-2">
                 <Smile className="h-4 w-4 text-yellow-500" />
                 Mood
@@ -161,7 +176,7 @@ const DailyLogSheet = ({
             </section>
 
             {/* Intimacy Section */}
-            <section className="space-y-3">
+            <section id="daily-log-intimacy" className="space-y-3">
               <h4 className="font-semibold text-sm flex items-center gap-2">
                 <Heart className="h-4 w-4 text-pink-500" />
                 Intimacy
@@ -214,7 +229,7 @@ const DailyLogSheet = ({
             </section>
 
             {/* Discharge Section */}
-            <section className="space-y-3">
+            <section id="daily-log-discharge" className="space-y-3">
               <h4 className="font-semibold text-sm flex items-center gap-2">
                 <Droplet className="h-4 w-4 text-blue-500" />
                 Cervical Mucus
