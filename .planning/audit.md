@@ -189,6 +189,49 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-06-11 (session 63 — typecheck to ZERO, build now gated, 1 UX bug + dead-cost removal)
+
+Finished what session 62 started: tsc -b is at **0 errors** (was 150)
+and `npm run build` now runs `tsc -b` first — so Vercel deploys hard-fail
+on any new type error. The gate is real.
+
+Along the way the triage surfaced real product issues, not just lint:
+
+- **484b82c — dead auto-fetch ovulation prediction.** PatientDashboard
+  fired a real `/api/predict-ovulation` call + a 30-day
+  daily_health_signals query on every dashboard load for cycle/
+  conception users — and the result was never rendered anywhere (its
+  only consumer was a prop CycleCalendar declared but never read).
+  Removed; the visible OvulationPrediction card fetches on demand.
+  Also fixed the 2 genuine type mismatches: AmhAgeContext's Mode union
+  missing 'postpartum', and the dashboard's stale prediction shape
+  (`ovulationDate` vs the API's `predictedOvulationDate`).
+- **3c10b55 — day-action menu opened the wrong section.** The calendar
+  day menu's "Log mood / intimacy / discharge" buttons passed
+  activeTab into DailyLogSheet, which ignored it — the sheet always
+  opened at the top (Symptoms). Now scrolls the requested section into
+  view on open.
+- **c5abd34 — the bulk clear.** ~100 unused imports (scripted —
+  `.planning/fix-unused-imports.py`, reusable), dead helpers/props
+  (vestigial DashboardHeader props, superseded handleStart, unused
+  findTest lookups...), deleted `src/lib/db.ts` entirely (zero
+  importers; Supabase→Neon leftover), and typed all implicit-any
+  callbacks with explicit row shapes. Replaced a pre-existing
+  `as any[]` with `DaySignal['intercourse']`.
+
+Verified each commit with tsc -b + vite build + 70/70 tests; lint on
+touched files 0 errors.
+
+Next-session candidates:
+1. Overlay predicted ovulation / fertile window on the calendar grid —
+   that's what the dead CycleCalendar prop was probably meant for
+   (small feature, real value for conception mode).
+2. Burn down the exhaustive-deps lint warnings the same way (they're
+   the same "real bugs hide among cosmetic noise" class — stale-closure
+   bugs).
+3. HANDOFF queue still has 6 items awaiting Alena (TrustSecurity copy
+   is top priority).
+
 ### 2026-06-05 (session 62 — typecheck triage: 5 real bugs + db-shim typing)
 
 Started a hardening pass on the "no typecheck gate" finding from session
