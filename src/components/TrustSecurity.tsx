@@ -4,15 +4,15 @@ const TrustSecurity = () => {
   const features = [
     {
       icon: Shield,
-      title: 'HIPAA Compliant',
+      title: 'Private by Design',
       description:
-        'We meet the highest standards for healthcare data protection and privacy.',
+        'Your health data belongs to you. We never sell it, and you can export or delete it at any time.',
     },
     {
       icon: Lock,
       title: 'Encrypted Data',
       description:
-        'Bank-level 256-bit encryption ensures your health data is always secure.',
+        'Your health data is encrypted in transit and at rest, so it stays secure.',
     },
     {
       icon: UserCheck,
@@ -22,9 +22,9 @@ const TrustSecurity = () => {
     },
     {
       icon: Stethoscope,
-      title: 'Medical Experts',
+      title: 'Evidence-Based Content',
       description:
-        'All health content is reviewed by board-certified physicians and specialists.',
+        'Health content is guided by clinical references from ACOG, CDC, and other leading medical sources.',
     },
   ];
 

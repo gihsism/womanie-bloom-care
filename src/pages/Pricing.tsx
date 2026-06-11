@@ -58,7 +58,7 @@ const Pricing = () => {
         'Telemedicine consultations',
         'Digital health records',
         'Appointment scheduling',
-        'HIPAA compliance',
+        'Encrypted health data',
         'Team collaboration',
         'Dedicated account manager',
       ],
@@ -156,7 +156,7 @@ const Pricing = () => {
               <Card className="p-6">
                 <h3 className="font-semibold mb-2">Is my data secure?</h3>
                 <p className="text-muted-foreground">
-                  Absolutely. We use bank-level encryption and are fully HIPAA compliant.
+                  Yes. Your health data is encrypted in transit and at rest, you decide exactly what is shared with whom, and you can export or delete your data at any time.
                   Your health data is never shared with third parties.
                 </p>
               </Card>

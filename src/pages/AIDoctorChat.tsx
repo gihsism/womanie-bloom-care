@@ -195,7 +195,7 @@ function RealDoctorPanel() {
           Find a Doctor
         </Button>
         <p className="text-[10px] text-muted-foreground text-center">
-          All consultations are private and HIPAA-compliant.
+          All consultations are private and encrypted.
         </p>
       </div>
     </div>

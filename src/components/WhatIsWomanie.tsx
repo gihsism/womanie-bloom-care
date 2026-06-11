@@ -23,7 +23,7 @@ const WhatIsWomanie = () => {
   ];
 
   const badges = [
-    { icon: Shield, label: 'HIPAA Compliant' },
+    { icon: Shield, label: 'Encrypted & Private' },
     { icon: Lock, label: 'Bank-Level Encryption' },
     { icon: Award, label: 'Medical Board Reviewed' },
   ];

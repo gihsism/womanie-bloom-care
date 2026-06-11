@@ -25,7 +25,7 @@ const KeyFeatures = () => {
       icon: Video,
       title: 'Doctor Consultations',
       description:
-        'Connect with board-certified OB-GYNs, endocrinologists, and mental health specialists via secure video calls. No waiting rooms.',
+        'Connect with verified OB-GYNs, endocrinologists, and mental health specialists via secure video calls. No waiting rooms.',
     },
     {
       icon: FolderHeart,

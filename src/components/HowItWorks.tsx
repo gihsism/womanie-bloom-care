@@ -18,7 +18,7 @@ const HowItWorks = () => {
       icon: Stethoscope,
       title: 'Connect with doctors',
       description:
-        'Schedule video consultations with board-certified specialists. Get prescriptions and referrals.',
+        'Schedule video consultations with verified specialists. Get prescriptions and referrals.',
     },
     {
       icon: TrendingUp,
