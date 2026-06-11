@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -83,16 +83,7 @@ const CycleCalendar = ({
   const cycleLength = prediction.averageCycleLength;
   const periodLength = prediction.averagePeriodLength;
 
-  useEffect(() => {
-    loadCalendarData();
-  }, []);
-
-  // Refresh when other surfaces emit a health-data change — e.g. the
-  // patient logs a period from DailyLogging in another tab/page and
-  // the calendar should reflect it without a manual reload.
-  useEffect(() => onHealthDataChange(loadCalendarData), []);
-
-  const loadCalendarData = async () => {
+  const loadCalendarData = useCallback(async () => {
     try {
       if (!user) return;
 
@@ -132,12 +123,23 @@ const CycleCalendar = ({
     } finally {
       setIsLoading(false);
     }
-  };
-  
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  // Load on mount and again when auth resolves (user can arrive after
+  // first render); also refresh when other surfaces emit a health-data
+  // change — e.g. the patient logs a period from DailyLogging in
+  // another tab/page and the calendar should reflect it without a
+  // manual reload.
+  useEffect(() => {
+    loadCalendarData();
+  }, [loadCalendarData]);
+  useEffect(() => onHealthDataChange(loadCalendarData), [loadCalendarData]);
+
   // Determine which record is the "active" (ongoing) period:
   // - end_date is null, OR
   // - end_date === start_date AND start is within avgPeriodLength+2 days of today (legacy single-day record)
-  const getEffectiveEnd = (record: PeriodRecord): string | null => {
+  const getEffectiveEnd = useCallback((record: PeriodRecord): string | null => {
     if (record.period_end_date === null) return null;
     // Legacy: if end === start and it's recent, treat as active
     if (
@@ -147,7 +149,7 @@ const CycleCalendar = ({
       return null; // treat as active/unconfirmed
     }
     return record.period_end_date;
-  };
+  }, [periodLength]);
 
   // Confirmed period days: from start to confirmed end_date (solid)
   const confirmedPeriodDays = useMemo(() => {
@@ -164,7 +166,7 @@ const CycleCalendar = ({
       }
     });
     return days;
-  }, [periodRecords, periodLength]);
+  }, [periodRecords, getEffectiveEnd]);
 
   // Active (unconfirmed) period days: start is confirmed, end is predicted.
   //
@@ -217,7 +219,7 @@ const CycleCalendar = ({
     }
 
     return { activePeriodConfirmedDays: confirmed, activePeriodPredictedDays: predicted };
-  }, [periodRecords, periodLength]);
+  }, [periodRecords, periodLength, getEffectiveEnd]);
 
   // Merge all confirmed period days
   const allConfirmedPeriodDays = useMemo(() => {

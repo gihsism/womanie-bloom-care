@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -645,9 +645,26 @@ export default function MedicalHistory() {
     if (!authLoading && !user) navigate('/auth/login');
   }, [user, authLoading, navigate]);
 
+  const fetchData = useCallback(async () => {
+    try {
+      const [medRes, docRes, profileRes] = await Promise.all([
+        db.from('current_extracted_data').select('*').eq('user_id', user!.id).order('date_recorded', { ascending: false, nullsFirst: false }),
+        db.from('health_documents').select('id, file_name, file_path, mime_type, ai_suggested_name, ai_summary, ai_suggested_category, uploaded_at, document_type').eq('user_id', user!.id).order('uploaded_at', { ascending: false }),
+        db.from('profiles').select('life_stage').eq('id', user!.id).single(),
+      ]);
+      if (medRes.data) setMedicalData(medRes.data as MedicalDataItem[]);
+      if (docRes.data) setDocuments(docRes.data);
+      if (profileRes.data) setLifeStage(profileRes.data.life_stage);
+    } catch (error) {
+      console.error('Error fetching medical history:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (user) fetchData();
-  }, [user]);
+  }, [user, fetchData]);
 
   // Self-heal lost analyses (audit #18). A document's analysis is kicked
   // off fire-and-forget at upload time; if that request never reached the
@@ -687,7 +704,7 @@ export default function MedicalHistory() {
         fetchData();
       } catch { /* non-fatal — recovery is best-effort */ }
     })();
-  }, [user]);
+  }, [user, fetchData]);
 
   // Poll for analysis completion while any doc is missing ai_summary.
   // Ref-tracked deadline so refetches don't reset the 3-minute budget.
@@ -732,7 +749,7 @@ export default function MedicalHistory() {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [documents, user]);
+  }, [documents, user, fetchData]);
 
   // Listen for external data changes (e.g. other pages' DocumentUpload)
   // and refetch our own list.
@@ -740,24 +757,7 @@ export default function MedicalHistory() {
     return onHealthDataChange(() => {
       if (user) fetchData();
     });
-  }, [user]);
-
-  const fetchData = async () => {
-    try {
-      const [medRes, docRes, profileRes] = await Promise.all([
-        db.from('current_extracted_data').select('*').eq('user_id', user!.id).order('date_recorded', { ascending: false, nullsFirst: false }),
-        db.from('health_documents').select('id, file_name, file_path, mime_type, ai_suggested_name, ai_summary, ai_suggested_category, uploaded_at, document_type').eq('user_id', user!.id).order('uploaded_at', { ascending: false }),
-        db.from('profiles').select('life_stage').eq('id', user!.id).single(),
-      ]);
-      if (medRes.data) setMedicalData(medRes.data as MedicalDataItem[]);
-      if (docRes.data) setDocuments(docRes.data);
-      if (profileRes.data) setLifeStage(profileRes.data.life_stage);
-    } catch (error) {
-      console.error('Error fetching medical history:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [user, fetchData]);
 
   const togglePanel = (panel: string) => {
     setExpandedPanels(prev => {

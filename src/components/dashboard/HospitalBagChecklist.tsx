@@ -90,12 +90,13 @@ const KEY = (uid: string) => `womanie_hospital_bag_${uid}`;
 
 const HospitalBagChecklist = ({ weeksPregnant }: HospitalBagChecklistProps) => {
   const { user } = useAuth();
+  const userId = user?.id;
   const [packed, setPacked] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
     try {
-      const raw = localStorage.getItem(KEY(user.id));
+      const raw = localStorage.getItem(KEY(userId));
       if (raw) {
         const arr = JSON.parse(raw) as string[];
         if (Array.isArray(arr)) setPacked(new Set(arr));
@@ -103,13 +104,13 @@ const HospitalBagChecklist = ({ weeksPregnant }: HospitalBagChecklistProps) => {
     } catch {
       // Corrupt JSON — start empty.
     }
-  }, [user?.id]);
+  }, [userId]);
 
   const persist = (next: Set<string>) => {
     setPacked(next);
-    if (!user) return;
+    if (!userId) return;
     try {
-      localStorage.setItem(KEY(user.id), JSON.stringify(Array.from(next)));
+      localStorage.setItem(KEY(userId), JSON.stringify(Array.from(next)));
     } catch {
       // Quota / private mode — accept in-memory state.
     }

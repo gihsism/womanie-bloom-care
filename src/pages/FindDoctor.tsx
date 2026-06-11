@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
@@ -77,24 +77,7 @@ const FindDoctor = () => {
     }
   }, [user, loading, navigate]);
 
-  useEffect(() => {
-    if (user) {
-      fetchDoctors();
-      // Pull life_stage so we can surface a "Recommended for you"
-      // badge on doctors whose specialty matches the patient's
-      // current mode. Fail silently — the list still works.
-      db.from('profiles')
-        .select('life_stage')
-        .eq('id', user.id)
-        .maybeSingle()
-        .then(res => {
-          const stage = (res.data as { life_stage?: string | null } | null)?.life_stage ?? null;
-          if (stage) setLifeStage(stage);
-        });
-    }
-  }, [user]);
-
-  const fetchDoctors = async () => {
+  const fetchDoctors = useCallback(async () => {
     try {
       // Delegate to /api/doctors/list — patients can't hit
       // doctor_profiles / doctor_schedule through /api/db because of
@@ -113,7 +96,24 @@ const FindDoctor = () => {
     } finally {
       setLoadingDoctors(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    if (user) {
+      fetchDoctors();
+      // Pull life_stage so we can surface a "Recommended for you"
+      // badge on doctors whose specialty matches the patient's
+      // current mode. Fail silently — the list still works.
+      db.from('profiles')
+        .select('life_stage')
+        .eq('id', user.id)
+        .maybeSingle()
+        .then(res => {
+          const stage = (res.data as { life_stage?: string | null } | null)?.life_stage ?? null;
+          if (stage) setLifeStage(stage);
+        });
+    }
+  }, [user, fetchDoctors]);
 
   const getAvailableTimeSlots = (doctor: Doctor, date: Date) => {
     return computeFreeSlots({
@@ -125,17 +125,18 @@ const FindDoctor = () => {
   };
 
   // Reload busy slots whenever the doctor or date changes inside the booking dialog.
+  const selectedDoctorId = selectedDoctor?.user_id ?? null;
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
-      if (!selectedDoctor || !selectedDate) {
+      if (!selectedDoctorId || !selectedDate) {
         setBusySlots([]);
         return;
       }
       setBusySlotsLoading(true);
       try {
         const dateStr = format(selectedDate, 'yyyy-MM-dd');
-        const params = new URLSearchParams({ doctor_id: selectedDoctor.user_id, date: dateStr });
+        const params = new URLSearchParams({ doctor_id: selectedDoctorId, date: dateStr });
         const resp = await fetch(`/api/doctors/availability?${params.toString()}`);
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const payload = await resp.json();
@@ -149,7 +150,7 @@ const FindDoctor = () => {
     };
     run();
     return () => { cancelled = true; };
-  }, [selectedDoctor?.user_id, selectedDate]);
+  }, [selectedDoctorId, selectedDate]);
 
   const handleBookAppointment = async () => {
     if (!selectedDoctor || !selectedDate || !selectedTime || !user) return;

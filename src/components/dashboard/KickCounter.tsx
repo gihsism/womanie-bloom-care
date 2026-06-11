@@ -13,7 +13,7 @@ import { format, formatDistanceToNowStrict } from 'date-fns';
 // is a reason to call your provider for monitoring.
 //
 // We deliberately keep this client-only (localStorage scoped by
-// user.id). Kick counting is a personal logging activity — there's
+// userId). Kick counting is a personal logging activity — there's
 // no clinical benefit to syncing it server-side until the patient
 // shares the session with a doctor.
 
@@ -69,6 +69,7 @@ const formatDuration = (ms: number): string => {
 
 const KickCounter = () => {
   const { user } = useAuth();
+  const userId = user?.id;
   const { toast } = useToast();
   const [current, setCurrent] = useState<KickSession | null>(null);
   const [history, setHistory] = useState<KickSession[]>([]);
@@ -77,12 +78,12 @@ const KickCounter = () => {
 
   // Load any in-progress session + history when the user changes.
   useEffect(() => {
-    if (!user) return;
-    const c = readJson<KickSession | null>(SESSION_STORAGE_KEY(user.id), null);
-    const h = readJson<KickSession[]>(HISTORY_STORAGE_KEY(user.id), []);
+    if (!userId) return;
+    const c = readJson<KickSession | null>(SESSION_STORAGE_KEY(userId), null);
+    const h = readJson<KickSession[]>(HISTORY_STORAGE_KEY(userId), []);
     setCurrent(c);
     setHistory(h);
-  }, [user?.id]);
+  }, [userId]);
 
   // Re-tick once a second only when there's an active session, so the
   // "elapsed" display stays accurate without spinning when idle.
@@ -102,16 +103,16 @@ const KickCounter = () => {
   }, [current]);
 
   const persistCurrent = (next: KickSession | null) => {
-    if (!user) return;
+    if (!userId) return;
     setCurrent(next);
-    if (next) writeJson(SESSION_STORAGE_KEY(user.id), next);
-    else localStorage.removeItem(SESSION_STORAGE_KEY(user.id));
+    if (next) writeJson(SESSION_STORAGE_KEY(userId), next);
+    else localStorage.removeItem(SESSION_STORAGE_KEY(userId));
   };
 
   const persistHistory = (next: KickSession[]) => {
-    if (!user) return;
+    if (!userId) return;
     setHistory(next);
-    writeJson(HISTORY_STORAGE_KEY(user.id), next);
+    writeJson(HISTORY_STORAGE_KEY(userId), next);
   };
 
   const start = () => {

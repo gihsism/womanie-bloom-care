@@ -134,6 +134,7 @@ const stages = [
 
 export default function MenopauseDashboard({ isPostMenopause = false, onNavigateToDoctorChat }: MenopauseDashboardProps) {
   const { user } = useAuth();
+  const userId = user?.id;
   const scope = isPostMenopause ? 'post' : 'meno';
   const [trackedSymptoms, setTrackedSymptoms] = useState<Set<string>>(new Set());
   const [activeSection, setActiveSection] = useState<string | null>('symptoms');
@@ -144,29 +145,29 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
 
   // ─── Persist tracked symptoms + myth index per user, per scope ───
   useEffect(() => {
-    if (!user) return;
-    setTrackedSymptoms(new Set(readLS<string[]>(user.id, scope, 'trackedSymptoms', [])));
-    setCurrentMythIndex(readLS<number>(user.id, scope, 'mythIndex', 0));
-  }, [user?.id, scope]);
+    if (!userId) return;
+    setTrackedSymptoms(new Set(readLS<string[]>(userId, scope, 'trackedSymptoms', [])));
+    setCurrentMythIndex(readLS<number>(userId, scope, 'mythIndex', 0));
+  }, [userId, scope]);
 
   useEffect(() => {
-    if (!user) return;
-    writeLS(user.id, scope, 'trackedSymptoms', Array.from(trackedSymptoms));
-  }, [user?.id, scope, trackedSymptoms]);
+    if (!userId) return;
+    writeLS(userId, scope, 'trackedSymptoms', Array.from(trackedSymptoms));
+  }, [userId, scope, trackedSymptoms]);
 
   useEffect(() => {
-    if (!user) return;
-    writeLS(user.id, scope, 'mythIndex', currentMythIndex);
-  }, [user?.id, scope, currentMythIndex]);
+    if (!userId) return;
+    writeLS(userId, scope, 'mythIndex', currentMythIndex);
+  }, [userId, scope, currentMythIndex]);
 
   // ─── Hot-flash history from daily_health_signals notes ───
   const loadSignals = async () => {
-    if (!user) return;
+    if (!userId) return;
     try {
       const { data } = await db
         .from('daily_health_signals')
         .select('signal_date, notes')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .gte('signal_date', format(subDays(new Date(), 30), 'yyyy-MM-dd'))
         .order('signal_date', { ascending: false });
       setSignals(((data as SignalRow[]) || []));
@@ -180,18 +181,18 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
     loadSignals();
     return onHealthDataChange(() => loadSignals());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  }, [userId]);
 
   // Pull the most recent period start so we can compute the
   // days-since-last-period count for the stage tracker.
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
     const load = async () => {
       try {
         const { data } = await db
           .from('period_tracking')
           .select('period_start_date')
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .order('period_start_date', { ascending: false })
           .limit(1);
         const row = Array.isArray(data) ? data[0] : null;
@@ -208,7 +209,7 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
     };
     load();
     return onHealthDataChange(load);
-  }, [user?.id]);
+  }, [userId]);
 
   const hotFlashStats = useMemo(() => {
     const last7: { date: string; count: number }[] = [];

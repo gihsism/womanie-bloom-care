@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -35,7 +35,7 @@ const RecoverDocuments = () => {
     if (!authLoading && !user) navigate('/auth/login');
   }, [user, authLoading, navigate]);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const r = await fetch('/api/admin/docs', { credentials: 'include' });
@@ -46,11 +46,11 @@ const RecoverDocuments = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     if (user) load();
-  }, [user]);
+  }, [user, load]);
 
   const claim = async (oldUserId: string) => {
     setClaiming(oldUserId);

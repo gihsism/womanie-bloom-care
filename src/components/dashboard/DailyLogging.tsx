@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -99,11 +99,7 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => {
-    loadTodaysData();
-  }, []);
-
-  const loadTodaysData = async () => {
+  const loadTodaysData = useCallback(async () => {
     try {
       if (!user) return;
       const today = format(new Date(), 'yyyy-MM-dd');
@@ -174,7 +170,14 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
     } catch (error) {
       console.error('Error loading today data:', error);
     }
-  };
+  }, [user]);
+
+  // Load on mount and again when auth resolves — with the old
+  // mount-only effect, a user whose session loaded after first render
+  // never got today's log hydrated.
+  useEffect(() => {
+    loadTodaysData();
+  }, [loadTodaysData]);
 
   const toggleMood = (mood: string) => {
     setData(prev => ({

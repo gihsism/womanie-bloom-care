@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -73,13 +73,7 @@ const DoctorDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [consultationPrice, setConsultationPrice] = useState<{ price: number; currency: string } | null>(null);
 
-  useEffect(() => {
-    if (user) {
-      loadDoctorData();
-    }
-  }, [user]);
-
-  const loadDoctorData = async () => {
+  const loadDoctorData = useCallback(async () => {
     if (!user) return;
     setIsLoadingData(true);
 
@@ -143,7 +137,12 @@ const DoctorDashboard = () => {
     } finally {
       setIsLoadingData(false);
     }
-  };
+     
+  }, [user]);
+
+  useEffect(() => {
+    loadDoctorData();
+  }, [loadDoctorData]);
 
   const handleLogout = async () => {
     window.location.href = '/api/auth/logout';
@@ -942,11 +941,7 @@ const ConsultationSettings = ({ doctorId }: { doctorId: string }) => {
     video_enabled: true,
   });
 
-  useEffect(() => {
-    loadSettings();
-  }, [doctorId]);
-
-  const loadSettings = async () => {
+  const loadSettings = useCallback(async () => {
     try {
       const { data } = await db
         .from('consultation_settings')
@@ -968,7 +963,12 @@ const ConsultationSettings = ({ doctorId }: { doctorId: string }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+     
+  }, [doctorId]);
+
+  useEffect(() => {
+    loadSettings();
+  }, [loadSettings]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -1152,17 +1152,19 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
         .eq('doctor_id', doctorId);
 
       if (data && data.length > 0) {
-        const loaded = { ...schedule };
-        data.forEach((s: { day_of_week: number | null; start_time: string; end_time: string; is_active: boolean | null }) => {
-          if (s.day_of_week !== null) {
-            loaded[s.day_of_week] = {
-              start: s.start_time,
-              end: s.end_time,
-              active: s.is_active ?? true,
-            };
-          }
+        setSchedule(prev => {
+          const loaded = { ...prev };
+          data.forEach((s: { day_of_week: number | null; start_time: string; end_time: string; is_active: boolean | null }) => {
+            if (s.day_of_week !== null) {
+              loaded[s.day_of_week] = {
+                start: s.start_time,
+                end: s.end_time,
+                active: s.is_active ?? true,
+              };
+            }
+          });
+          return loaded;
         });
-        setSchedule(loaded);
       }
     };
     loadSchedule();

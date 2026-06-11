@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -128,14 +128,7 @@ const PatientDashboard = () => {
     }
   };
 
-  // Load period data
-  useEffect(() => {
-    if (user) {
-      loadPeriodData();
-    }
-  }, [user]);
-
-  const loadPeriodData = async () => {
+  const loadPeriodData = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -159,19 +152,18 @@ const PatientDashboard = () => {
     } catch (error) {
       console.error('Error loading period data:', error);
     }
-  };
+  }, [user]);
+
+  // Load period data once auth resolves.
+  useEffect(() => {
+    loadPeriodData();
+  }, [loadPeriodData]);
 
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
-  // Fetch profile when user is available or when navigating back to this page
   const location = useLocation();
-  useEffect(() => {
-    if (user) {
-      fetchProfile(user.id);
-    }
-  }, [user, location.key]);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = useCallback(async (userId: string) => {
     try {
       const { data: existing, error } = await db
         .from('profiles')
@@ -213,7 +205,14 @@ const PatientDashboard = () => {
       console.error('Error fetching profile:', error);
       setSelectedMode('menstrual-cycle');
     }
-  };
+  }, [user]);
+
+  // Fetch profile when user is available or when navigating back to this page
+  useEffect(() => {
+    if (user) {
+      fetchProfile(user.id);
+    }
+  }, [user, location.key, fetchProfile]);
 
   const handleSetPregnancyDueDate = async (date: Date) => {
     setPregnancyDueDate(date);

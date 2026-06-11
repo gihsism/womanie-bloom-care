@@ -97,13 +97,14 @@ const KEY = (uid: string) => `womanie_screenings_${uid}`;
 
 const ScreeningTracker = ({ scope }: ScreeningTrackerProps) => {
   const { user } = useAuth();
+  const userId = user?.id;
   const { toast } = useToast();
   const [records, setRecords] = useState<Record<string, ScreeningRecord>>({});
 
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
     try {
-      const raw = localStorage.getItem(KEY(user.id));
+      const raw = localStorage.getItem(KEY(userId));
       if (raw) {
         const parsed = JSON.parse(raw) as Record<string, ScreeningRecord>;
         setRecords(parsed);
@@ -111,13 +112,13 @@ const ScreeningTracker = ({ scope }: ScreeningTrackerProps) => {
     } catch {
       // Corrupt JSON — start empty.
     }
-  }, [user?.id]);
+  }, [userId]);
 
   const persist = (next: Record<string, ScreeningRecord>) => {
     setRecords(next);
-    if (!user) return;
+    if (!userId) return;
     try {
-      localStorage.setItem(KEY(user.id), JSON.stringify(next));
+      localStorage.setItem(KEY(userId), JSON.stringify(next));
     } catch {
       // Quota / private mode — accept in-memory state.
     }

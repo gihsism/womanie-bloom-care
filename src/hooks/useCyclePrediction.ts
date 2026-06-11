@@ -118,7 +118,6 @@ export function isActivePeriod(record: PeriodRecord): boolean {
 // Main prediction hook — always returns a prediction (never null)
 export function useCyclePrediction({
   periodRecords,
-  daySignals,
   onboardingEstimates,
   manualOverrides,
   healthContext,
@@ -349,7 +348,7 @@ export function useCyclePrediction({
       currentCycleAnomaly, anomalyMessage, excludedCycles,
       riskFactors, ageAdjusted,
     };
-  }, [periodRecords, daySignals, onboardingEstimates, manualOverrides, healthContext]);
+  }, [periodRecords, onboardingEstimates, manualOverrides, healthContext]);
 }
 
 // Symptom pattern recognition

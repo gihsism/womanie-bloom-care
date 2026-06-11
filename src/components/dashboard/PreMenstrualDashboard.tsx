@@ -77,26 +77,27 @@ function writeLS(userId: string, key: string, value: unknown) {
 
 export default function PreMenstrualDashboard() {
   const { user } = useAuth();
+  const userId = user?.id;
   const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
   const [activeSection, setActiveSection] = useState<string | null>('changes');
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
 
   // Persist readiness checklist + fact carousel position so they survive a refresh.
   useEffect(() => {
-    if (!user) return;
-    setCheckedItems(new Set(readLS<number[]>(user.id, 'checkedItems', [])));
-    setCurrentFactIndex(readLS<number>(user.id, 'factIndex', 0));
-  }, [user?.id]);
+    if (!userId) return;
+    setCheckedItems(new Set(readLS<number[]>(userId, 'checkedItems', [])));
+    setCurrentFactIndex(readLS<number>(userId, 'factIndex', 0));
+  }, [userId]);
 
   useEffect(() => {
-    if (!user) return;
-    writeLS(user.id, 'checkedItems', Array.from(checkedItems));
-  }, [user?.id, checkedItems]);
+    if (!userId) return;
+    writeLS(userId, 'checkedItems', Array.from(checkedItems));
+  }, [userId, checkedItems]);
 
   useEffect(() => {
-    if (!user) return;
-    writeLS(user.id, 'factIndex', currentFactIndex);
-  }, [user?.id, currentFactIndex]);
+    if (!userId) return;
+    writeLS(userId, 'factIndex', currentFactIndex);
+  }, [userId, currentFactIndex]);
 
   const toggleCheck = (id: number) => {
     setCheckedItems(prev => {

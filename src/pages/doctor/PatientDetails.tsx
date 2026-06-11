@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
@@ -226,13 +226,7 @@ const PatientDetails = () => {
     }
   };
 
-  useEffect(() => {
-    if (user && patientId) {
-      checkAccessAndLoadData();
-    }
-  }, [user, patientId]);
-
-  const checkAccessAndLoadData = async () => {
+  const checkAccessAndLoadData = useCallback(async () => {
     if (!user || !patientId) return;
     setIsLoadingData(true);
 
@@ -271,7 +265,12 @@ const PatientDetails = () => {
     } finally {
       setIsLoadingData(false);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, patientId]);
+
+  useEffect(() => {
+    checkAccessAndLoadData();
+  }, [checkAccessAndLoadData]);
 
   const handleAddNote = async () => {
     if (!user || !patientId || !newNote.title || !newNote.content) return;

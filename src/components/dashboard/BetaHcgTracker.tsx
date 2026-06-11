@@ -42,6 +42,7 @@ function toIsoMinute(date: string, time: string | null): string {
 
 const BetaHcgTracker = ({ ivfPhase }: BetaHcgTrackerProps) => {
   const { user } = useAuth();
+  const userId = user?.id;
   const { toast } = useToast();
   const [draws, setDraws] = useState<BetaDraw[]>([]);
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
@@ -49,9 +50,9 @@ const BetaHcgTracker = ({ ivfPhase }: BetaHcgTrackerProps) => {
   const [value, setValue] = useState('');
 
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
     try {
-      const raw = localStorage.getItem(KEY(user.id));
+      const raw = localStorage.getItem(KEY(userId));
       if (raw) {
         const parsed = JSON.parse(raw) as BetaDraw[];
         if (Array.isArray(parsed)) setDraws(parsed);
@@ -59,13 +60,13 @@ const BetaHcgTracker = ({ ivfPhase }: BetaHcgTrackerProps) => {
     } catch {
       // Corrupt JSON — start empty.
     }
-  }, [user?.id]);
+  }, [userId]);
 
   const persist = (next: BetaDraw[]) => {
     setDraws(next);
-    if (!user) return;
+    if (!userId) return;
     try {
-      localStorage.setItem(KEY(user.id), JSON.stringify(next));
+      localStorage.setItem(KEY(userId), JSON.stringify(next));
     } catch {
       // Quota / private mode — accept in-memory state.
     }

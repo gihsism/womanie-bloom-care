@@ -441,6 +441,10 @@ export default function AIDoctorChat() {
       next.delete('q');
       setSearchParams(next, { replace: true });
     }, 0);
+    // handleSend is intentionally omitted: this is a ref-guarded one-shot
+    // dispatch and memoizing the whole streaming sender for it would be
+    // churn without behavior change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, historyLoaded, isStreaming, searchParams, setSearchParams]);
 
   const handleSend = async () => {

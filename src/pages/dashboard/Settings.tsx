@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Shield, Bell, User, Download, Loader2, Trash2, Wand2, KeyRound, Eye, EyeOff } from 'lucide-react';
@@ -334,13 +334,7 @@ const Settings = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notifications]);
 
-  useEffect(() => {
-    if (user) {
-      loadSettings();
-    }
-  }, [user]);
-
-  const loadSettings = async () => {
+  const loadSettings = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -357,7 +351,11 @@ const Settings = () => {
     } catch (error) {
       console.error('Error loading settings:', error);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    loadSettings();
+  }, [loadSettings]);
 
   const handleLifeStageChange = async (value: string) => {
     const stage = value as LifeStage;

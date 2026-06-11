@@ -98,6 +98,7 @@ function writeLS(userId: string, key: string, value: unknown) {
 
 export default function ContraceptionDashboard({ onNavigateToDoctorChat }: ContraceptionDashboardProps) {
   const { user } = useAuth();
+  const userId = user?.id;
   const { toast } = useToast();
 
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
@@ -111,42 +112,42 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
 
   // ─── Persisted preferences via localStorage ───
   useEffect(() => {
-    if (!user) return;
-    setSelectedMethod(readLS<string | null>(user.id, 'method', 'pill'));
-    setTrackedSideEffects(new Set(readLS<string[]>(user.id, 'sideEffects', [])));
-    setReminderTime(readLS<string>(user.id, 'reminderTime', '21:00'));
-    setPackStartDate(readLS<string | null>(user.id, 'packStartDate', null));
-  }, [user?.id]);
+    if (!userId) return;
+    setSelectedMethod(readLS<string | null>(userId, 'method', 'pill'));
+    setTrackedSideEffects(new Set(readLS<string[]>(userId, 'sideEffects', [])));
+    setReminderTime(readLS<string>(userId, 'reminderTime', '21:00'));
+    setPackStartDate(readLS<string | null>(userId, 'packStartDate', null));
+  }, [userId]);
 
   useEffect(() => {
-    if (!user || selectedMethod === null) return;
-    writeLS(user.id, 'method', selectedMethod);
-  }, [user?.id, selectedMethod]);
+    if (!userId || selectedMethod === null) return;
+    writeLS(userId, 'method', selectedMethod);
+  }, [userId, selectedMethod]);
 
   useEffect(() => {
-    if (!user) return;
-    writeLS(user.id, 'sideEffects', Array.from(trackedSideEffects));
-  }, [user?.id, trackedSideEffects]);
+    if (!userId) return;
+    writeLS(userId, 'sideEffects', Array.from(trackedSideEffects));
+  }, [userId, trackedSideEffects]);
 
   useEffect(() => {
-    if (!user) return;
-    writeLS(user.id, 'reminderTime', reminderTime);
-  }, [user?.id, reminderTime]);
+    if (!userId) return;
+    writeLS(userId, 'reminderTime', reminderTime);
+  }, [userId, reminderTime]);
 
   useEffect(() => {
-    if (!user) return;
-    writeLS(user.id, 'packStartDate', packStartDate);
-  }, [user?.id, packStartDate]);
+    if (!userId) return;
+    writeLS(userId, 'packStartDate', packStartDate);
+  }, [userId, packStartDate]);
 
   // ─── Recent pill-take history from the database ───
   const loadSignals = async () => {
-    if (!user) return;
+    if (!userId) return;
     setIsLoadingSignals(true);
     try {
       const { data } = await db
         .from('daily_health_signals')
         .select('signal_date, notes')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .gte('signal_date', format(subDays(new Date(), 60), 'yyyy-MM-dd'))
         .order('signal_date', { ascending: false });
       setSignals(((data as SignalRow[]) || []));
@@ -162,7 +163,7 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
     loadSignals();
     return onHealthDataChange(() => loadSignals());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  }, [userId]);
 
   const currentMethod = CONTRACEPTION_METHODS.find((m) => m.id === selectedMethod);
   const isPillBased = ['pill', 'patch', 'ring'].includes(selectedMethod || '');
@@ -208,13 +209,13 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
   }, [packStartDate]);
 
   const handleTakePill = async (status: PillStatus = 'on-time') => {
-    if (!user) return;
+    if (!userId) return;
     try {
       // Read existing today row to preserve other note segments + structured fields.
       const { data: existing } = await db
         .from('daily_health_signals')
         .select('notes')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .eq('signal_date', today)
         .maybeSingle();
 
@@ -223,7 +224,7 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
         .from('daily_health_signals')
         .upsert(
           {
-            user_id: user.id,
+            user_id: userId,
             signal_date: today,
             notes: newNotes,
           },

@@ -58,6 +58,7 @@ function fmtMs(ms: number): string {
 
 const ContractionTimer = () => {
   const { user } = useAuth();
+  const userId = user?.id;
   const [history, setHistory] = useState<Contraction[]>([]);
   const [active, setActive] = useState<Contraction | null>(null);
   const [now, setNow] = useState(Date.now());
@@ -65,12 +66,12 @@ const ContractionTimer = () => {
 
   // Load history + any in-progress contraction.
   useEffect(() => {
-    if (!user) return;
-    const all = readJson<Contraction[]>(KEY(user.id), []);
+    if (!userId) return;
+    const all = readJson<Contraction[]>(KEY(userId), []);
     const inProgress = all.find(c => c.endedAt === null) ?? null;
     setActive(inProgress);
     setHistory(all.filter(c => c.endedAt !== null));
-  }, [user?.id]);
+  }, [userId]);
 
   // Tick once a second while there's an active contraction or while
   // we're inside a "recent" window so the time-since-last counter
@@ -85,9 +86,9 @@ const ContractionTimer = () => {
   const persist = (allHistory: Contraction[], current: Contraction | null) => {
     setHistory(allHistory);
     setActive(current);
-    if (!user) return;
+    if (!userId) return;
     const merged = current ? [...allHistory, current] : allHistory;
-    writeJson(KEY(user.id), merged.slice(-MAX_HISTORY));
+    writeJson(KEY(userId), merged.slice(-MAX_HISTORY));
   };
 
   const start = () => {

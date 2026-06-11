@@ -82,6 +82,7 @@ function expectedGainKg(week: number, lowTotal: number, highTotal: number): { lo
 
 const MaternalWeightTracker = ({ weeksPregnant }: MaternalWeightTrackerProps) => {
   const { user } = useAuth();
+  const userId = user?.id;
   const { toast } = useToast();
   const [state, setState] = useState<StoredState>(ZERO);
   const [showSettings, setShowSettings] = useState(false);
@@ -89,12 +90,12 @@ const MaternalWeightTracker = ({ weeksPregnant }: MaternalWeightTrackerProps) =>
   const [logDate, setLogDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
     // Seed pre-pregnancy weight + height from the basic-info card
     // Settings stores under a separate key. The user can override here
     // (and likely should — pre-pregnancy weight isn't current weight).
     try {
-      const raw = localStorage.getItem(KEY(user.id));
+      const raw = localStorage.getItem(KEY(userId));
       if (raw) {
         const parsed = JSON.parse(raw) as StoredState;
         setState({
@@ -107,7 +108,7 @@ const MaternalWeightTracker = ({ weeksPregnant }: MaternalWeightTrackerProps) =>
       // Fall back to the basic-info card's stash for height — it's the
       // same number — but leave pre-pregnancy weight blank so the user
       // explicitly sets it (current weight ≠ pre-pregnancy weight).
-      const basicRaw = localStorage.getItem(`womanie_basic_info_${user.id}`);
+      const basicRaw = localStorage.getItem(`womanie_basic_info_${userId}`);
       if (basicRaw) {
         const basic = JSON.parse(basicRaw) as { heightCm?: number | null };
         setState({
@@ -119,13 +120,13 @@ const MaternalWeightTracker = ({ weeksPregnant }: MaternalWeightTrackerProps) =>
     } catch {
       // Corrupt JSON — leave blank.
     }
-  }, [user?.id]);
+  }, [userId]);
 
   const persist = (next: StoredState) => {
     setState(next);
-    if (!user) return;
+    if (!userId) return;
     try {
-      localStorage.setItem(KEY(user.id), JSON.stringify(next));
+      localStorage.setItem(KEY(userId), JSON.stringify(next));
     } catch {
       // Quota / private mode — accept in-memory state.
     }

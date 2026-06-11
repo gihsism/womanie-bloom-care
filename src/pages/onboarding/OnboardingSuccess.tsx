@@ -25,7 +25,7 @@ const OnboardingSuccess = () => {
     commitOnboarding(user, data)
       .catch((e) => console.error('Onboarding commit failed', e))
       .finally(() => setCommitting(false));
-  }, [user?.id, data]);
+  }, [user, data]);
 
   const handleStartExploring = () => {
     resetOnboarding();
