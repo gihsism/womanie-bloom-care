@@ -95,6 +95,29 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
+    // Auto-create a *pending* connection so the doctor can request
+    // chart access without the patient hunting for an access code
+    // (approved by Alena 2026-06-11). Pending only — no data is shared
+    // until the patient approves it from PendingConnections. The NOT
+    // EXISTS guard (the table has no unique pair constraint) skips the
+    // insert when any connection already exists for this pair; since
+    // reject/revoke delete the row, re-booking after one creates a
+    // fresh pending request the patient still controls. A failure here
+    // never fails the booking itself.
+    try {
+      await sql.query(
+        `INSERT INTO doctor_patient_connections (doctor_id, patient_id, connection_type, status)
+         SELECT $1, $2, 'booking', 'pending'
+          WHERE NOT EXISTS (
+            SELECT 1 FROM doctor_patient_connections
+             WHERE doctor_id = $1 AND patient_id = $2
+          )`,
+        [body.doctor_id, user.id]
+      );
+    } catch (connErr) {
+      console.error('appointments/book: pending-connection insert failed (non-fatal):', connErr);
+    }
+
     return res.status(200).json({ appointment: inserted[0] });
   } catch (error) {
     console.error('appointments/book error:', error);
