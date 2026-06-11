@@ -189,6 +189,46 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-06-11 (session 65 — 60h re-auth; authed smoke catches doctor-funnel total breakage)
+
+Alena re-authorized 60h with broader decision authority ("make
+decisions by yourself"), local backups (git bundle + env copy →
+~/backups/womanie/), Telegram updates. Iterations this session:
+
+- **Smoke coverage** for session-64 endpoints (34 checks, green).
+- **Migration 008**: unique (doctor_id, patient_id) on
+  doctor_patient_connections (table verified empty first). Redeem-code's
+  23505 branch is no longer dead code.
+- **Calendar-overlay candidate resolved by investigation**: CalendarGrid
+  already renders predictedOvulationSet/fertileSet from the statistical
+  prediction; overlaying the AI prediction would double-mark. Dropped.
+- **All 40 exhaustive-deps warnings cleared** — 2 real fixes
+  (CycleCalendar + DailyLogging never loaded when auth resolved after
+  mount; DoctorDashboard schedule stale-state read) + 1 perf win
+  (useCyclePrediction recomputed on every symptom edit) + mechanical
+  useCallback/userId-narrowing across ~15 files.
+- **All 30 lint errors cleared** — incl. a real rules-of-hooks
+  violation (PanelDetail useCallback after early return). eslint src
+  now exits 0.
+- **🔴 THE BIG ONE — new .planning/smoke-authed.sh** (e2e patient
+  account, creds in .env.local) immediately caught live 500s with a
+  shared root cause: doctor_profiles never got title/specialties/
+  years_experience/languages/rating/review_count/credentials in the
+  Supabase→Neon migration. Consequences in prod: /api/doctors/list
+  500 (FindDoctor empty), /api/me/appointments 500 (dashboard card
+  never rendered), and **/api/auth/doctor-signup 500 — no doctor has
+  ever been able to register** (explains doctor_profiles = 0 rows).
+  Migration 009 (applied) + list.ts query fix (consultation_settings
+  had fictional column names too). Authed smoke now 12/12 against live.
+
+Open questions for next iterations:
+1. Doctor-side smoke flow (needs a doctor e2e account + verification —
+   requires ADMIN_EMAILS bypass or seeded role; design carefully).
+2. The 11 react-refresh lint warnings (move shadcn variants/hooks to
+   separate files — churn, low value, maybe skip permanently).
+3. Sentry: were the directory 500s visible there? Worth checking the
+   project has alerting Alena would actually see.
+
 ### 2026-06-11 (session 64 — Alena cleared the ENTIRE handoff queue; all 6 shipped same-day)
 
 Alena sat down and answered every open HANDOFF decision in one pass.
