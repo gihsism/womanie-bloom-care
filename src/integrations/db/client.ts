@@ -8,34 +8,41 @@ const API_BASE = '/api';
 // typed { data, error } instead of `unknown` — without this the await operand
 // is an untyped thenable, which both errors (TS1320) and makes every `.data`
 // access an error (TS18046/TS2339) across the app.
-interface QueryBuilder extends PromiseLike<{ data: any; error: any }> {
+//
+// `data: any` is the one deliberate loose boundary in the codebase: rows come
+// back from /api/db untyped, and call sites narrow them locally. Params, by
+// contrast, only get serialized into the request body, so `unknown` suffices.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DbResult = { data: any; error: unknown };
+
+interface QueryBuilder extends PromiseLike<DbResult> {
   select: (columns?: string) => QueryBuilder;
-  insert: (data: any) => QueryBuilder;
-  update: (data: any) => QueryBuilder;
+  insert: (data: unknown) => QueryBuilder;
+  update: (data: unknown) => QueryBuilder;
   delete: () => QueryBuilder;
-  upsert: (data: any, options?: any) => QueryBuilder;
-  eq: (column: string, value: any) => QueryBuilder;
-  neq: (column: string, value: any) => QueryBuilder;
-  gt: (column: string, value: any) => QueryBuilder;
-  gte: (column: string, value: any) => QueryBuilder;
-  lt: (column: string, value: any) => QueryBuilder;
-  lte: (column: string, value: any) => QueryBuilder;
-  in: (column: string, values: any[]) => QueryBuilder;
-  order: (column: string, options?: any) => QueryBuilder;
+  upsert: (data: unknown, options?: { onConflict?: string }) => QueryBuilder;
+  eq: (column: string, value: unknown) => QueryBuilder;
+  neq: (column: string, value: unknown) => QueryBuilder;
+  gt: (column: string, value: unknown) => QueryBuilder;
+  gte: (column: string, value: unknown) => QueryBuilder;
+  lt: (column: string, value: unknown) => QueryBuilder;
+  lte: (column: string, value: unknown) => QueryBuilder;
+  in: (column: string, values: unknown[]) => QueryBuilder;
+  order: (column: string, options?: { ascending?: boolean; nullsFirst?: boolean }) => QueryBuilder;
   limit: (count: number) => QueryBuilder;
-  single: () => Promise<{ data: any; error: any }>;
-  maybeSingle: () => Promise<{ data: any; error: any }>;
+  single: () => Promise<DbResult>;
+  maybeSingle: () => Promise<DbResult>;
   // `then` is provided by the PromiseLike base (makes the builder awaitable).
 }
 
 function createQueryBuilder(table: string): QueryBuilder {
   let operation = 'select';
   let selectColumns = '*';
-  let insertData: any = null;
-  let updateData: any = null;
-  let upsertData: any = null;
-  let upsertOptions: any = null;
-  const filters: [string, string, any][] = [];
+  let insertData: unknown = null;
+  let updateData: unknown = null;
+  let upsertData: unknown = null;
+  let upsertOptions: { onConflict?: string } | null = null;
+  const filters: [string, string, unknown][] = [];
   let orderBy: { column: string; ascending: boolean } | null = null;
   let limitCount: number | null = null;
   let isSingle = false;
@@ -46,7 +53,7 @@ function createQueryBuilder(table: string): QueryBuilder {
     insert(data) { insertData = data; operation = 'insert'; return builder; },
     update(data) { updateData = data; operation = 'update'; return builder; },
     delete() { operation = 'delete'; return builder; },
-    upsert(data, opts) { upsertData = data; upsertOptions = opts; operation = 'upsert'; return builder; },
+    upsert(data, opts) { upsertData = data; upsertOptions = opts ?? null; operation = 'upsert'; return builder; },
     eq(col, val) { filters.push([col, 'eq', val]); return builder; },
     neq(col, val) { filters.push([col, 'neq', val]); return builder; },
     gt(col, val) { filters.push([col, 'gt', val]); return builder; },
@@ -61,7 +68,7 @@ function createQueryBuilder(table: string): QueryBuilder {
     then(onfulfilled, onrejected) { return execute().then(onfulfilled, onrejected); },
   };
 
-  async function execute(): Promise<{ data: any; error: any }> {
+  async function execute(): Promise<DbResult> {
     try {
       const resp = await fetch(`${API_BASE}/db`, {
         method: 'POST',
@@ -117,7 +124,7 @@ export const db = {
     }),
   },
   functions: {
-    invoke: async (name: string, options?: { body: any }) => {
+    invoke: async (name: string, options?: { body: unknown }) => {
       const resp = await fetch(`/api/${name}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

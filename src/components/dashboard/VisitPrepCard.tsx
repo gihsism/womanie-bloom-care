@@ -214,7 +214,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
       const label = topSymptom[0].replace(/_/g, ' ');
       out.push({
         id: `sym:${topSymptom[0]}`,
-        text: `I\'ve been logging "${label}" on ${topSymptom[1]} days in the last 60. Is that worth investigating?`,
+        text: `I've been logging "${label}" on ${topSymptom[1]} days in the last 60. Is that worth investigating?`,
       });
     }
 

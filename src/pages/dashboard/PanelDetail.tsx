@@ -248,7 +248,9 @@ export default function PanelDetail() {
     navigate(`/dashboard/ai-doctor?q=${encodeURIComponent(q)}`);
   };
 
-  const generateAiSummary = useCallback(async (force: boolean) => {
+  // Plain function (not useCallback): defined after the !loaded early
+  // return, so it must not be a hook; it's only called from onClick.
+  const generateAiSummary = async (force: boolean) => {
     if (!panelDisplayName) return;
     setAiLoading(true);
     setAiError(null);
@@ -274,7 +276,7 @@ export default function PanelDetail() {
     } finally {
       setAiLoading(false);
     }
-  }, [panelDisplayName]);
+  };
 
   return (
     <div className="min-h-screen bg-background">
