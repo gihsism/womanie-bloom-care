@@ -221,13 +221,38 @@ decisions by yourself"), local backups (git bundle + env copy →
   Migration 009 (applied) + list.ts query fix (consultation_settings
   had fictional column names too). Authed smoke now 12/12 against live.
 
-Open questions for next iterations:
-1. Doctor-side smoke flow (needs a doctor e2e account + verification —
-   requires ADMIN_EMAILS bypass or seeded role; design carefully).
-2. The 11 react-refresh lint warnings (move shadcn variants/hooks to
-   separate files — churn, low value, maybe skip permanently).
-3. Sentry: were the directory 500s visible there? Worth checking the
-   project has alerting Alena would actually see.
+Second half of session 65 (same day):
+
+- **Doctor-funnel smoke**: e2e doctor account (creds .env.local),
+  .planning/seed-e2e-doctor.mjs seeds verification with
+  is_available=FALSE — verified the test doctor never appears in the
+  public directory. First successful production doctor registration
+  ever. Authed smoke now 16 checks.
+- **ADMIN_EMAILS was missing from Vercel prod env** — the approval
+  surface failed closed, so even with signup fixed a real doctor could
+  never be approved. Set to Alena's email.
+- **Sentry was blind to handled 500s** — withSentry only captured
+  uncaught exceptions, but every endpoint catches and returns 500
+  itself; the directory outage never reached Sentry. Wrapper now
+  reports any handled >=500 response (method+path tags).
+- **Telegram ping on doctor signup** (api/_lib/notify.ts; bot creds
+  added to Vercel env) — verified end-to-end with a labeled test
+  signup against production, then cleaned the test rows from Neon.
+
+Verification at session close: 70/70 unit, 34/34 public smoke,
+16/16 authed smoke, tsc 0, eslint 0 errors. Local backup refreshed.
+
+Open candidates for next iterations:
+1. The 11 react-refresh lint warnings — decided: skip permanently
+   (shadcn boilerplate; churn without value).
+2. Friendlier first-time empty states (session-12 candidate, still
+   open): dashboard with zero data should guide the user to first
+   actions instead of hiding cards.
+3. Authenticated HEIC upload→analyze e2e against prod (decode verified
+   locally only).
+4. Doctor approval e2e: exercise /api/admin/doctors under Alena's admin
+   session — can't be automated without her cookie; verify manually
+   next time a real doctor signs up.
 
 ### 2026-06-11 (session 64 — Alena cleared the ENTIRE handoff queue; all 6 shipped same-day)
 
