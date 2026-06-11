@@ -9,15 +9,29 @@ const Footer = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
+  const [subscribing, setSubscribing] = useState(false);
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       toast({ variant: 'destructive', title: 'Invalid email', description: 'Please enter a valid email address.' });
       return;
     }
-    toast({ title: 'Subscribed!', description: 'Thanks for signing up. We\'ll keep you in the loop.' });
-    setEmail('');
+    setSubscribing(true);
+    try {
+      const resp = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      if (!resp.ok) throw new Error(`subscribe failed (${resp.status})`);
+      toast({ title: 'Subscribed!', description: 'Thanks for signing up. We\'ll keep you in the loop.' });
+      setEmail('');
+    } catch {
+      toast({ variant: 'destructive', title: 'Something went wrong', description: 'Could not subscribe right now — please try again later.' });
+    } finally {
+      setSubscribing(false);
+    }
   };
 
   const footerLinks = {
@@ -69,7 +83,7 @@ const Footer = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 aria-label="Email address for newsletter"
               />
-              <Button type="submit">Subscribe</Button>
+              <Button type="submit" disabled={subscribing}>{subscribing ? 'Subscribing…' : 'Subscribe'}</Button>
             </form>
           </div>
         </div>
