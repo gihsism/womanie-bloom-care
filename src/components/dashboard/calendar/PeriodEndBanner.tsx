@@ -1,7 +1,7 @@
-import { format, differenceInDays, addDays, parseISO, isSameDay } from 'date-fns';
+import { format, differenceInDays, addDays, parseISO } from 'date-fns';
 import { Droplet, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { PeriodRecord, isActivePeriod, getEffectiveEndDate } from '@/hooks/useCyclePrediction';
+import { PeriodRecord, isActivePeriod } from '@/hooks/useCyclePrediction';
 
 interface PeriodEndBannerProps {
   periodRecords: PeriodRecord[];

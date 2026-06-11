@@ -6,11 +6,7 @@ import {
   Sun,
   Flower2,
   Egg,
-  Baby,
-  Thermometer,
   HeartPulse,
-  Sparkles,
-  AlertTriangle,
 } from 'lucide-react';
 
 interface LabResult {
@@ -108,7 +104,7 @@ function detectPhase(hormones: {
   const scores: Record<PhaseKey, number> = { follicular: 0, ovulatory: 0, luteal: 0, menstrual: 0 };
   let totalChecks = 0;
 
-  const check = (val: number | undefined, phaseRanges: Record<PhaseKey, { low: number; high: number }>, key: string) => {
+  const check = (val: number | undefined, phaseRanges: Record<PhaseKey, { low: number; high: number }>) => {
     if (val === undefined) return;
     totalChecks++;
     for (const [phase, range] of Object.entries(phaseRanges) as [PhaseKey, { low: number; high: number }][]) {
@@ -129,28 +125,28 @@ function detectPhase(hormones: {
     ovulatory: HORMONE_PHASES.ovulatory.estradiol,
     luteal: HORMONE_PHASES.luteal.estradiol,
     menstrual: HORMONE_PHASES.menstrual.estradiol,
-  }, 'estradiol');
+  });
 
   check(progesterone, {
     follicular: HORMONE_PHASES.follicular.progesterone,
     ovulatory: HORMONE_PHASES.ovulatory.progesterone,
     luteal: HORMONE_PHASES.luteal.progesterone,
     menstrual: HORMONE_PHASES.menstrual.progesterone,
-  }, 'progesterone');
+  });
 
   check(fsh, {
     follicular: HORMONE_PHASES.follicular.fsh,
     ovulatory: HORMONE_PHASES.ovulatory.fsh,
     luteal: HORMONE_PHASES.luteal.fsh,
     menstrual: HORMONE_PHASES.menstrual.fsh,
-  }, 'fsh');
+  });
 
   check(lh, {
     follicular: HORMONE_PHASES.follicular.lh,
     ovulatory: HORMONE_PHASES.ovulatory.lh,
     luteal: HORMONE_PHASES.luteal.lh,
     menstrual: HORMONE_PHASES.menstrual.lh,
-  }, 'lh');
+  });
 
   const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]) as [PhaseKey, number][];
   const bestPhase = sorted[0][0];

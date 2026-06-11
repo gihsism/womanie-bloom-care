@@ -24,7 +24,6 @@ import {
   LogOut,
   UserPlus,
   Clock,
-  FileText,
   Video,
   DollarSign,
   ArrowRightLeft,
@@ -65,8 +64,7 @@ interface Appointment {
 const DoctorDashboard = () => {
   const navigate = useNavigate();
   usePageTitle('Doctor Portal');
-  const { toast } = useToast();
-  const { hasRole, loading } = useRequireRole('doctor', '/auth/doctor-login');
+  const { loading } = useRequireRole('doctor', '/auth/doctor-login');
   const { user } = useAuth();
   const [doctorProfile, setDoctorProfile] = useState<DoctorProfile | null>(null);
   const [patients, setPatients] = useState<PatientConnection[]>([]);
@@ -449,7 +447,6 @@ const DoctorDashboard = () => {
             <PatientManagement 
               patients={patients} 
               onRefresh={loadDoctorData}
-              doctorId={user.id}
             />
           </TabsContent>
 
@@ -470,7 +467,7 @@ const DoctorDashboard = () => {
 };
 
 // Sub-components
-const PatientManagement = ({ patients, onRefresh, doctorId }: { patients: PatientConnection[], onRefresh: () => void, doctorId: string }) => {
+const PatientManagement = ({ patients, onRefresh }: { patients: PatientConnection[], onRefresh: () => void }) => {
   const [accessCode, setAccessCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -1156,7 +1153,7 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
 
       if (data && data.length > 0) {
         const loaded = { ...schedule };
-        data.forEach(s => {
+        data.forEach((s: { day_of_week: number | null; start_time: string; end_time: string; is_active: boolean | null }) => {
           if (s.day_of_week !== null) {
             loaded[s.day_of_week] = {
               start: s.start_time,

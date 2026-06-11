@@ -7,16 +7,14 @@ import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Baby,
-  Calendar as CalendarIcon,
   Heart,
-  AlertCircle,
   CheckCircle2,
   Activity,
   Moon,
   Apple,
   Droplet,
 } from 'lucide-react';
-import { differenceInDays, differenceInWeeks, format, parseISO, addDays } from 'date-fns';
+import { differenceInDays, differenceInWeeks, format, parseISO } from 'date-fns';
 import PostpartumFeedingTracker from './PostpartumFeedingTracker';
 import PostpartumLochiaCard from './PostpartumLochiaCard';
 import PostpartumPelvicFloor from './PostpartumPelvicFloor';

@@ -247,12 +247,6 @@ export default function PrintHealthRecord() {
     return flaggedRows;
   }, [items]);
 
-  const docName = useCallback((id: string | null): string => {
-    if (!id) return '—';
-    const d = docs.find(x => x.id === id);
-    return d ? (d.ai_suggested_name || d.file_name) : '—';
-  }, [docs]);
-
   if (!loaded) {
     return (
       <div className="min-h-screen flex items-center justify-center">

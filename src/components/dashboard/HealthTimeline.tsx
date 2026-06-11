@@ -1,8 +1,7 @@
 import { useMemo } from 'react';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { format, differenceInDays } from 'date-fns';
-import { FileText, FlaskConical, Pill, Stethoscope, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { FileText, FlaskConical, Pill, Stethoscope } from 'lucide-react';
 
 interface TimelineDocument {
   id: string;

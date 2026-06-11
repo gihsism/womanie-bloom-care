@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { FileText, Brain, TrendingUp, MessageCircle, Shield, Heart, ArrowRight, Baby, Flame, Pill } from 'lucide-react';
+import { FileText, Brain, TrendingUp, MessageCircle, Shield, Heart, ArrowRight } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';

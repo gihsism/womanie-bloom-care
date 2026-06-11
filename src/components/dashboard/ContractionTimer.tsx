@@ -3,7 +3,6 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 import { Timer, Play, Square, RotateCcw, AlertTriangle, History } from 'lucide-react';
 import { format, formatDistanceToNowStrict } from 'date-fns';
 
@@ -59,7 +58,6 @@ function fmtMs(ms: number): string {
 
 const ContractionTimer = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [history, setHistory] = useState<Contraction[]>([]);
   const [active, setActive] = useState<Contraction | null>(null);
   const [now, setNow] = useState(Date.now());

@@ -1,14 +1,4 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,24 +13,12 @@ import {
   Smartphone, 
   Users,
   Calendar as CalendarIcon,
-  Droplet,
   Heart,
   Pill,
   TrendingUp,
   Baby,
   Flame,
-  Bot,
-  Stethoscope,
-  CheckCircle,
-  HelpCircle,
-  Lightbulb,
-  Video,
-  Clock,
-  ClipboardList,
-  FileCheck,
-  Bell,
   Upload,
-  Sparkles
 } from 'lucide-react';
 
 export type LifeStage =
@@ -58,14 +36,11 @@ interface DashboardHeaderProps {
   userName: string;
   selectedMode: LifeStage;
   onModeChange: (mode: LifeStage) => void;
-  onNavigate: (section: string) => void;
   onUploadClick?: () => void;
   onDoctorChatClick?: () => void;
-  cycleDay?: number;
-  cyclePhase?: string;
 }
 
-const DashboardHeader = ({ userName, selectedMode, onModeChange, onNavigate, onUploadClick, onDoctorChatClick, cycleDay = 14, cyclePhase = 'follicular' }: DashboardHeaderProps) => {
+const DashboardHeader = ({ userName, selectedMode, onModeChange, onUploadClick, onDoctorChatClick }: DashboardHeaderProps) => {
   const navigate = useNavigate();
 
   const getGreeting = () => {

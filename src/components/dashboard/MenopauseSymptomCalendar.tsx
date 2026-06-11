@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
-import { addDays, format, parseISO, startOfDay, subDays } from 'date-fns';
+import { format, parseISO, startOfDay, subDays } from 'date-fns';
 import { CalendarHeart, Flame, Activity } from 'lucide-react';
 
 // 60-day rolling symptom calendar for menopause / post-menopause modes.

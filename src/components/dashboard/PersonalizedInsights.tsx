@@ -37,13 +37,6 @@ function findTest(data: LabResult[], names: string[]): { value: number; status: 
   return null;
 }
 
-function hasCondition(data: LabResult[], names: string[]): boolean {
-  return data.some(d =>
-    d.data_type === 'condition' &&
-    d.status === 'active' &&
-    names.some(n => d.title.toLowerCase().includes(n.toLowerCase()))
-  );
-}
 
 function generateCrossInsights(data: LabResult[], lifeStage?: string | null): CrossInsight[] {
   const insights: CrossInsight[] = [];
@@ -307,10 +300,8 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
   const lh = findTest(data, ['LH', 'Luteinizing Hormone']);
   const fsh = findTest(data, ['FSH', 'Follicle Stimulating Hormone', 'Follicle-Stimulating Hormone']);
   const amh = findTest(data, ['AMH', 'Anti-Mullerian Hormone', 'Anti-Müllerian Hormone']);
-  const dheas = findTest(data, ['DHEA-S', 'DHEAS', 'Dehydroepiandrosterone Sulfate']);
   const shbg = findTest(data, ['SHBG', 'Sex Hormone Binding Globulin']);
   const insulin = findTest(data, ['Insulin', 'Fasting Insulin']);
-  const androstenedione = findTest(data, ['Androstenedione']);
 
   if (lh && fsh && fsh.value > 0 && lh.value / fsh.value > 2) {
     const connected = ['LH', 'FSH'];
@@ -444,9 +435,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
   }
 
   // ═══ AUTOIMMUNE PATTERNS ═══
-  const ana = findTest(data, ['ANA', 'Antinuclear Antibody']);
   const antiTPO = findTest(data, ['Anti-TPO', 'Thyroid Peroxidase Antibody', 'TPO Antibody']);
-  const antiTG = findTest(data, ['Anti-Thyroglobulin', 'Thyroglobulin Antibody', 'TgAb']);
   const rf = findTest(data, ['RF', 'Rheumatoid Factor']);
   const antiCCP = findTest(data, ['Anti-CCP', 'Cyclic Citrullinated Peptide']);
 

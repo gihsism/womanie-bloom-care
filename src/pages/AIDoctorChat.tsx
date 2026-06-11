@@ -3,14 +3,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 import { db } from '@/integrations/db/client';
 import { computeCyclePhase } from '@/lib/cycle-phase';
-import UserMenu from '@/components/UserMenu';
 import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
 import {
@@ -18,7 +16,6 @@ import {
   Send,
   Bot,
   User,
-  Sparkles,
   Loader2,
   Trash2,
   Download,
@@ -27,7 +24,6 @@ import {
   MessageCircle,
   Search,
   Calendar,
-  Star,
   Shield,
   Copy,
   Check,
@@ -284,31 +280,36 @@ export default function AIDoctorChat() {
           fetch('/api/me/doctor-notes').then(r => (r.ok ? r.json() : { notes: [] })),
         ]);
 
+        type ExtractedRow = { title: string; value: string | null; unit: string | null; status: string | null; data_type: string };
+        type DocRow = { ai_suggested_name: string | null; ai_summary: string | null; document_type: string };
+        const extractedRows = (extractedRes.data ?? []) as ExtractedRow[];
+        const docRows = (docsRes.data ?? []) as DocRow[];
+
         const parts: string[] = [];
         if (profileRes.data?.life_stage) {
           parts.push(`Life stage: ${profileRes.data.life_stage}`);
         }
-        if (extractedRes.data && extractedRes.data.length > 0) {
-          const labs = extractedRes.data
+        if (extractedRows.length > 0) {
+          const labs = extractedRows
             .filter(d => d.data_type === 'lab_result' && d.value)
             .map(d => `${d.title}: ${d.value}${d.unit ? ' ' + d.unit : ''}${d.status && d.status !== 'normal' ? ' (' + d.status + ')' : ''}`)
             .join('; ');
           if (labs) parts.push(`Recent lab results: ${labs}`);
 
-          const conditions = extractedRes.data
+          const conditions = extractedRows
             .filter(d => d.data_type === 'condition')
             .map(d => d.title)
             .join(', ');
           if (conditions) parts.push(`Conditions: ${conditions}`);
 
-          const medications = extractedRes.data
+          const medications = extractedRows
             .filter(d => d.data_type === 'medication')
             .map(d => `${d.title}${d.value ? ' ' + d.value : ''}`)
             .join(', ');
           if (medications) parts.push(`Medications: ${medications}`);
         }
-        if (docsRes.data && docsRes.data.length > 0) {
-          const summaries = docsRes.data
+        if (docRows.length > 0) {
+          const summaries = docRows
             .filter(d => d.ai_summary)
             .map(d => `${d.ai_suggested_name || d.document_type}: ${d.ai_summary!.slice(0, 200)}`)
             .join('\n');

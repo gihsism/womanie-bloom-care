@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +10,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { db } from '@/integrations/db/client';
@@ -78,7 +77,6 @@ import {
   MessageSquare,
   Activity,
   FileText,
-  Smartphone,
   Menu,
   Settings,
   Phone,
@@ -88,7 +86,6 @@ import {
   Info,
   User as UserIcon,
   LogOut,
-  Calendar,
   Sparkles,
   Droplet,
   ArrowLeft
@@ -97,7 +94,7 @@ import {
 const PatientDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, session, loading } = useAuth();
+  const { user, loading } = useAuth();
   const notificationPrefs = useNotificationPrefs();
   usePageTitle('Dashboard');
   const [profile, setProfile] = useState<{ full_name?: string; life_stage?: string; pregnancy_due_date?: string | null; ivf_start_date?: string | null; ivf_phase?: string | null } | null>(null);
@@ -315,13 +312,6 @@ const PatientDashboard = () => {
   };
 
   const attention = useAttentionCount();
-
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 18) return 'Good afternoon';
-    return 'Good evening';
-  };
 
   const getUserName = () => {
     if (profile?.full_name) {
@@ -549,10 +539,8 @@ const PatientDashboard = () => {
                 userName={getUserName()}
                 selectedMode={selectedMode}
                 onModeChange={handleModeChange}
-                onNavigate={() => {}}
                 onUploadClick={() => setUploadDialogOpen(true)}
                 onDoctorChatClick={() => navigate('/dashboard/ai-doctor')}
-                cycleDay={currentCycleDay}
               />
             </div>
           </div>

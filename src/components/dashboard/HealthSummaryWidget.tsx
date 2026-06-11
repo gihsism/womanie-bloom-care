@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { db } from '@/integrations/db/client';
@@ -12,7 +12,6 @@ import {
   FileText,
   AlertTriangle,
   CheckCircle2,
-  TrendingUp,
 } from 'lucide-react';
 
 interface ExtractedItem {

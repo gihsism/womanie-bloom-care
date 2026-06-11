@@ -32,7 +32,6 @@ const FLOW_TONE: Record<FlowLevel, { dot: string; label: string }> = {
   heavy:    { dot: 'bg-pink-700 dark:bg-pink-500',   label: 'Heavy' },
 };
 
-const SCAN_DAYS = 95; // ~3 cycles plus padding
 
 function parseFlow(notes: string | null): FlowLevel | null {
   if (!notes) return null;

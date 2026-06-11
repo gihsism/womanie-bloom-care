@@ -35,15 +35,6 @@ const statusColor = (status: string | null) => {
   }
 };
 
-const statusBg = (status: string | null) => {
-  switch (status) {
-    case 'normal': case 'expected': return 'bg-green-100 dark:bg-green-900/20';
-    case 'abnormal': return 'bg-amber-100 dark:bg-amber-900/20';
-    case 'critical': return 'bg-red-100 dark:bg-red-900/20';
-    default: return 'bg-muted';
-  }
-};
-
 export default function ResultsRangeChart({ medicalData }: ResultsRangeChartProps) {
   const items = useMemo(() => {
     const labs = medicalData.filter(d =>

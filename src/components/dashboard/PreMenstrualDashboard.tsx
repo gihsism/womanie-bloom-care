@@ -15,10 +15,8 @@ import {
   Sun,
   ChevronRight,
   CheckCircle2,
-  Star,
   Lightbulb,
   Activity,
-  Smile,
 } from 'lucide-react';
 
 const bodyChangesData = [

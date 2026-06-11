@@ -35,10 +35,8 @@ import fruitWeek36 from '@/assets/fruit-week-36.png';
 import fruitWeek40 from '@/assets/fruit-week-40.png';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { differenceInDays, differenceInWeeks, addDays, format, parseISO } from 'date-fns';
+import { differenceInDays, addDays, format, parseISO } from 'date-fns';
 import {
   Baby,
   Calendar,
@@ -46,7 +44,6 @@ import {
   Activity,
   AlertCircle,
   Sparkles,
-  ChevronRight,
   Ruler,
   Scale,
   Apple,
@@ -618,7 +615,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
 
   if (!pregnancyInfo) return null;
 
-  const { weeksPregnant, daysExtra, daysUntilDue, trimester, trimesterLabel, trimesterKey, progressPercent, weekData } = pregnancyInfo;
+  const { weeksPregnant, daysExtra, daysUntilDue, trimesterLabel, trimesterKey, progressPercent, weekData } = pregnancyInfo;
   const symptoms = PREGNANCY_SYMPTOMS[trimesterKey] || [];
 
   return (
@@ -1136,7 +1133,6 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
           {Array.from({ length: 40 }, (_, i) => i + 1).map(week => {
             const isCurrent = week === weeksPregnant;
             const isPast = week < weeksPregnant;
-            const isTrimesterBorder = week === 13 || week === 27;
             return (
               <div key={week} className="flex flex-col items-center flex-shrink-0" style={{ width: '20px' }}>
                 <div className={`w-full h-3 rounded-sm ${

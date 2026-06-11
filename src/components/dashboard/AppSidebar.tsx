@@ -7,7 +7,6 @@ import {
   Shield,
   Bell,
   Info,
-  FileText,
   User,
   LogOut,
   CalendarClock,
@@ -22,9 +21,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useToast } from "@/hooks/use-toast";
-import { db } from "@/integrations/db/client";
-import { useNavigate } from "react-router-dom";
 import { useAttentionCount } from "@/hooks/useAttentionCount";
 
 const menuItems = [
@@ -41,8 +37,6 @@ const menuItems = [
 export function AppSidebar() {
   const [isExpanded, setIsExpanded] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
-  const { toast } = useToast();
   const currentPath = location.pathname;
 
   const isActive = (path: string) => currentPath === path;

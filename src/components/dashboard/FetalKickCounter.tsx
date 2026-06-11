@@ -95,11 +95,6 @@ export default function FetalKickCounter({ dueDate }: FetalKickCounterProps) {
     ? Math.floor((Date.now() - activeStart.getTime()) / 60_000)
     : 0;
 
-  const handleStart = () => {
-    setActiveStart(new Date());
-    setActiveCount(0);
-  };
-
   const handleTap = () => {
     if (!activeStart) {
       // First tap starts the session.

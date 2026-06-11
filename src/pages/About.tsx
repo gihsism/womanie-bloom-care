@@ -1,5 +1,5 @@
 import { Card } from '@/components/ui/card';
-import { Heart, Target, Users, Award, Shield, Code } from 'lucide-react';
+import { Heart, Target, Users, Award, Shield } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import alenaPhoto from '@/assets/alena-photo.png';

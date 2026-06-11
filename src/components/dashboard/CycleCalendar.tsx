@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -6,7 +6,7 @@ import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Settings2, Sparkles } from 'lucide-react';
-import { format, addMonths, subMonths, addDays, differenceInDays, startOfDay, isSameDay, parseISO } from 'date-fns';
+import { format, addMonths, subMonths, addDays, differenceInDays, startOfDay, parseISO } from 'date-fns';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -17,7 +17,7 @@ import DailyLogSheet from './calendar/DailyLogSheet';
 import DayActionSheet from './calendar/DayActionSheet';
 import PeriodEndBanner from './calendar/PeriodEndBanner';
 
-import { useCyclePrediction, useSymptomPatterns, getCurrentCycleDay, isActivePeriod, getEffectiveEndDate, type PeriodRecord, type DaySignal } from '@/hooks/useCyclePrediction';
+import { useCyclePrediction, useSymptomPatterns, getCurrentCycleDay, isActivePeriod, type PeriodRecord, type DaySignal } from '@/hooks/useCyclePrediction';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 
 interface CycleCalendarProps {
@@ -114,11 +114,11 @@ const CycleCalendar = ({
 
       if (signalsData) {
         const signalsMap: Record<string, DaySignal> = {};
-        signalsData.forEach(signal => {
+        signalsData.forEach((signal: { signal_date: string; symptoms: string[] | null; intercourse: unknown; mood: string[] | null; discharge: string | null; notes: string | null }) => {
           signalsMap[signal.signal_date] = {
             date: signal.signal_date,
             symptoms: signal.symptoms || [],
-            intercourse: signal.intercourse as any[] || [],
+            intercourse: (signal.intercourse as DaySignal['intercourse']) || [],
             mood: signal.mood || [],
             discharge: signal.discharge || 'none',
             notes: signal.notes || '',
@@ -455,9 +455,7 @@ const CycleCalendar = ({
       {showCycleInfo && hasAnyData && (
         <TodayStatusCard
           cycleDay={currentCycleDay}
-          cycleLength={cycleLength}
           periodLength={periodLength}
-          lastPeriodStart={lastPeriodStart}
           selectedMode={selectedMode}
           prediction={prediction}
           symptomPatterns={symptomPatterns}

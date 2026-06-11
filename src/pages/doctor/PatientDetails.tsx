@@ -14,8 +14,6 @@ import { useToast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
 import { useRequireRole } from '@/hooks/useRequireRole';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import {
   ArrowLeft,
   FileText,
@@ -94,7 +92,7 @@ const PatientDetails = () => {
   const { patientId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
-  const { hasRole, loading } = useRequireRole('doctor', '/auth/doctor-login');
+  const { loading } = useRequireRole('doctor', '/auth/doctor-login');
   const { user } = useAuth();
   
   const [patient, setPatient] = useState<PatientProfile | null>(null);

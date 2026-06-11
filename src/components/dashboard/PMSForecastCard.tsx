@@ -147,7 +147,6 @@ export default function PMSForecastCard({ mode }: Props) {
     let pmsDaysLogged = 0;
 
     for (let i = 0; i < sorted.length - 1; i++) {
-      const start = parseISO(sorted[i].period_start_date);
       const nextStart = parseISO(sorted[i + 1].period_start_date);
       const pmsRangeStart = addDays(nextStart, -PMS_WINDOW_LEN);
 

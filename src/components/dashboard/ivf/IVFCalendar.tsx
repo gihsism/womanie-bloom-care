@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek, addMonths, subMonths } from 'date-fns';
-import { ChevronLeft, ChevronRight, Syringe, Pill, Stethoscope, Baby, FlaskConical, Clock, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Syringe, Pill, Stethoscope, Baby, FlaskConical, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface IVFEvent {
@@ -22,7 +21,6 @@ export interface IVFEvent {
 
 interface IVFCalendarProps {
   events: IVFEvent[];
-  currentPhase: string | null;
   onSelectDate: (date: Date) => void;
   selectedDate: Date | null;
 }
@@ -36,7 +34,7 @@ const EVENT_TYPE_CONFIG: Record<string, { icon: typeof Syringe; color: string; l
   test: { icon: Clock, color: 'bg-muted-foreground text-background', label: 'Test' },
 };
 
-const IVFCalendar = ({ events, currentPhase, onSelectDate, selectedDate }: IVFCalendarProps) => {
+const IVFCalendar = ({ events, onSelectDate, selectedDate }: IVFCalendarProps) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const eventsByDate = useMemo(() => {
@@ -122,7 +120,6 @@ const IVFCalendar = ({ events, currentPhase, onSelectDate, selectedDate }: IVFCa
                   {hasEvents && (
                     <div className="absolute -bottom-0.5 flex gap-0.5">
                       {dayEvents.slice(0, 3).map((ev, i) => {
-                        const config = EVENT_TYPE_CONFIG[ev.event_type] || EVENT_TYPE_CONFIG.injection;
                         return (
                           <div
                             key={i}

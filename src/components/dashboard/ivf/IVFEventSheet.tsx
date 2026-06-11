@@ -1,12 +1,8 @@
-import { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
-import { Trash2, CheckCircle2, Circle, Clock } from 'lucide-react';
+import { Trash2, CheckCircle2, Circle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { IVFEvent } from './IVFCalendar';
-import { EVENT_TYPE_CONFIG } from './IVFCalendar';
 
 interface IVFEventSheetProps {
   open: boolean;

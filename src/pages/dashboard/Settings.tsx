@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Pill, Shield, Bell, User, Download, Loader2, Trash2, Wand2, KeyRound, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Shield, Bell, User, Download, Loader2, Trash2, Wand2, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { scorePassword } from '@/lib/password-strength';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import UserMenu from '@/components/UserMenu';
 import type { LifeStage } from '@/components/dashboard/DashboardHeader';
 
 const lifeStageOptions = [
@@ -300,8 +299,9 @@ const Settings = () => {
   // column this can swap to a server round-trip keyed on user.id
   // while keeping the same shape.
   const NOTIFICATION_STORAGE_KEY = user ? `womanie_notification_prefs_${user.id}` : 'womanie_notification_prefs';
-  const [notifications, setNotifications] = useState(() => {
-    const fallback = { cycleReminders: true, appointmentReminders: true, healthTips: true };
+  type NotificationPrefs = { cycleReminders: boolean; appointmentReminders: boolean; healthTips: boolean };
+  const [notifications, setNotifications] = useState<NotificationPrefs>(() => {
+    const fallback: NotificationPrefs = { cycleReminders: true, appointmentReminders: true, healthTips: true };
     try {
       const raw = localStorage.getItem(NOTIFICATION_STORAGE_KEY);
       if (!raw) return fallback;

@@ -199,7 +199,7 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
       </div>
 
       {/* Treatment Calendar */}
-      <IVFCalendar events={events} currentPhase={ivfPhase} onSelectDate={handleSelectDate} selectedDate={selectedDate} />
+      <IVFCalendar events={events} onSelectDate={handleSelectDate} selectedDate={selectedDate} />
 
       {/* Event sheet */}
       <IVFEventSheet

@@ -7,9 +7,7 @@ import { useNotificationPrefs } from '@/hooks/useNotificationPrefs';
 
 interface TodayStatusCardProps {
   cycleDay: number;
-  cycleLength: number;
   periodLength: number;
-  lastPeriodStart: Date;
   selectedMode: string;
   prediction: CyclePrediction;
   symptomPatterns?: SymptomPattern[];
@@ -18,9 +16,7 @@ interface TodayStatusCardProps {
 
 const TodayStatusCard = ({
   cycleDay,
-  cycleLength,
   periodLength,
-  lastPeriodStart,
   selectedMode,
   prediction,
   symptomPatterns = [],
@@ -29,7 +25,6 @@ const TodayStatusCard = ({
   const today = new Date();
   const notificationPrefs = useNotificationPrefs();
 
-  const ovulationCycleDay = differenceInDays(prediction.predictedOvulationDate, lastPeriodStart) + 1;
   const rawDaysToNextPeriod = Math.ceil((prediction.predictedPeriodStart.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   const daysToNextPeriod = Math.max(0, rawDaysToNextPeriod);
   // Negative ⇒ past predicted start ⇒ period is "late". We allow a

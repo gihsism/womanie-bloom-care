@@ -195,7 +195,6 @@ const Navigation = () => {
                       variant="outline"
                       className="w-full"
                       onClick={async () => {
-                        const { db } = await import('@/integrations/db/client');
                         window.location.href = '/api/auth/logout';
                       }}
                     >
