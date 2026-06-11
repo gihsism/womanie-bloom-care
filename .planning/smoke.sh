@@ -74,6 +74,13 @@ check "doctors/list (unauth)"             GET  "/api/doctors/list"              
 check "doctors/patient (unauth)"          GET  "/api/doctors/patient?id=x"       401
 check "admin/doctors GET (unauth)"        GET  "/api/admin/doctors"              403
 check "admin/doctors POST (unauth)"       POST "/api/admin/doctors"              403 '{"userId":"x","action":"approve"}'
+check "appointments/reschedule (unauth)"  POST "/api/appointments/reschedule"    401 '{"appointment_id":"x","scheduled_at":"2030-01-01T10:00:00Z"}'
+check "me/chart-access (unauth)"          GET  "/api/me/chart-access"            401
+
+echo
+echo "== Newsletter (public) =="
+check "newsletter (invalid email)"  POST "/api/newsletter/subscribe"  400 '{"email":"not-an-email"}'
+check "newsletter (GET rejected)"   GET  "/api/newsletter/subscribe"  405
 
 echo
 echo "== Public auth endpoints =="
