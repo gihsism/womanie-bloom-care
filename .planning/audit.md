@@ -189,6 +189,54 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-06-11 (session 64 — Alena cleared the ENTIRE handoff queue; all 6 shipped same-day)
+
+Alena sat down and answered every open HANDOFF decision in one pass.
+All six shipped, each as its own commit, each verified with
+tsc -b (0 errors) + vite build + 70/70 tests before push:
+
+- **Trust copy (was top priority).** Dropped the false "reviewed by
+  board-certified physicians" claim and all "HIPAA Compliant" badges
+  sitewide (TrustSecurity, WhatIsWomanie, AIDoctorChat, Pricing ×2,
+  HowItWorks, KeyFeatures). Replacements are verifiable: "guided by
+  clinical references from ACOG, CDC…", "encrypted in transit and at
+  rest", "export or delete at any time" (both endpoints exist),
+  "verified" specialists (matches the admin verification flow).
+- **Newsletter wired for real.** Migration 006 (applied to Neon):
+  `newsletter_subscribers`. Public POST /api/newsletter/subscribe with
+  per-IP daily rate limit + ON CONFLICT DO NOTHING (no list
+  enumeration). Footer posts to it with in-flight + failure states.
+- **One-step reschedule.** POST /api/appointments/reschedule with the
+  same conflict-guarded overlap math as book.ts (excluding self).
+  Extracted the FindDoctor slot engine into src/lib/timeSlots.ts and
+  built RescheduleDialog on it — wired into UpcomingAppointments and
+  the Appointments page.
+- **Auto-connect on booking (pending).** book.ts inserts a 'booking'-
+  type pending connection guarded by NOT EXISTS — discovered the table
+  has NO unique (doctor_id, patient_id) constraint (redeem-code's
+  23505 branch is dead code; flagged, not fixed — constraint addition
+  needs a dup-scan first). Reject/revoke delete the row, so re-booking
+  after one creates a fresh request. Never fails the booking.
+- **Chart-access audit log.** Migration 007 (applied): chart_access_log
+  + patient-side index. /api/doctors/patient logs each fetch at the
+  consent-gated chokepoint; GET /api/me/chart-access serves the
+  patient; Settings gains a "Chart Access History" card.
+- **HEIC uploads.** heic-convert decodes to JPEG inside
+  analyze-document before the vision call (verified locally with a
+  sips-generated HEIC round-trip → valid JPEG). Upload gate, accept
+  attr, and blob token allowlist now admit image/heic|heif.
+
+HANDOFF.md is now EMPTY — first time since May 19.
+
+Next-session candidates:
+1. Unique constraint on doctor_patient_connections(doctor_id,
+   patient_id) after a duplicate scan (schema change — needs approval).
+2. Calendar overlay of predicted ovulation/fertile window (the
+   session-63 candidate still stands).
+3. Exhaustive-deps lint-warning burn-down (stale-closure bug class).
+4. Smoke-test additions for the four new endpoints (newsletter,
+   reschedule, chart-access, + HEIC path needs a live doc).
+
 ### 2026-06-11 (session 63 — typecheck to ZERO, build now gated, 1 UX bug + dead-cost removal)
 
 Finished what session 62 started: tsc -b is at **0 errors** (was 150)
