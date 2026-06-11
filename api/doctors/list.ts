@@ -34,8 +34,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   );
 
   const settingsPromise = sql.query(
-    `SELECT doctor_id, consultation_price, consultation_duration_minutes,
-            is_available, currency, accepted_insurance, consultation_modes
+    `SELECT doctor_id, consultation_price, consultation_duration,
+            is_available, currency, video_enabled
        FROM consultation_settings
       WHERE is_available = true`,
     []
