@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/integrations/db/client';
-import { CalendarClock, Video, MapPin, Stethoscope, ShieldCheck, X } from 'lucide-react';
+import { CalendarClock, Video, MapPin, Stethoscope, ShieldCheck, X, CalendarCog } from 'lucide-react';
+import RescheduleDialog from './RescheduleDialog';
 import { format, formatDistanceToNowStrict, isToday, isTomorrow } from 'date-fns';
 import { errorMessage } from '@/lib/errors';
 import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
@@ -51,6 +52,7 @@ export default function UpcomingAppointments() {
   const [rows, setRows] = useState<AppointmentRow[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [rescheduling, setRescheduling] = useState<AppointmentRow | null>(null);
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -192,17 +194,30 @@ export default function UpcomingAppointments() {
                   </span>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 text-muted-foreground hover:text-destructive"
-                onClick={() => cancel(apt)}
-                disabled={busyId === apt.id}
-                aria-label="Cancel appointment"
-                title="Cancel appointment"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-muted-foreground hover:text-primary"
+                  onClick={() => setRescheduling(apt)}
+                  disabled={busyId === apt.id}
+                  aria-label="Reschedule appointment"
+                  title="Reschedule appointment"
+                >
+                  <CalendarCog className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-muted-foreground hover:text-destructive"
+                  onClick={() => cancel(apt)}
+                  disabled={busyId === apt.id}
+                  aria-label="Cancel appointment"
+                  title="Cancel appointment"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </li>
           );
         })}
@@ -228,6 +243,13 @@ export default function UpcomingAppointments() {
           See all appointments
         </Button>
       </div>
+
+      <RescheduleDialog
+        appointment={rescheduling}
+        open={rescheduling !== null}
+        onOpenChange={(open) => { if (!open) setRescheduling(null); }}
+        onRescheduled={() => { emitHealthDataChange(); load(); }}
+      />
     </Card>
   );
 }

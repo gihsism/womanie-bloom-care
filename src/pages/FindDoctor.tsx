@@ -15,6 +15,7 @@ import { db } from '@/integrations/db/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Search, Star, Clock, Video, Calendar as CalendarIcon, CheckCircle, User, Loader2 } from 'lucide-react';
 import { format, setHours, setMinutes } from 'date-fns';
+import { computeFreeSlots } from '@/lib/timeSlots';
 
 interface Doctor {
   id: string;
@@ -115,42 +116,12 @@ const FindDoctor = () => {
   };
 
   const getAvailableTimeSlots = (doctor: Doctor, date: Date) => {
-    const dayOfWeek = date.getDay();
-    const daySchedule = doctor.schedule?.find(s => s.day_of_week === dayOfWeek);
-
-    if (!daySchedule) return [];
-
-    const slots: string[] = [];
-    const duration = doctor.consultation_settings?.consultation_duration || 30;
-    const [startHour, startMin] = daySchedule.start_time.split(':').map(Number);
-    const [endHour, endMin] = daySchedule.end_time.split(':').map(Number);
-
-    let currentTime = setMinutes(setHours(date, startHour), startMin);
-    const endTime = setMinutes(setHours(date, endHour), endMin);
-
-    // Precompute busy intervals as [startMs, endMs) so overlap is a tight check.
-    const busyIntervals = busySlots.map(b => {
-      const startMs = new Date(b.scheduled_at).getTime();
-      const dur = typeof b.duration === 'number' && b.duration > 0 ? b.duration : duration;
-      return [startMs, startMs + dur * 60000] as const;
-    });
-
-    const nowMs = Date.now();
-
-    while (currentTime < endTime) {
-      const slotStart = currentTime.getTime();
-      const slotEnd = slotStart + duration * 60000;
-      const overlapsBusy = busyIntervals.some(([bs, be]) => slotStart < be && slotEnd > bs);
-      // Also hide slots that have already started — picking 10:00 at 10:15
-      // would just produce a server-side error.
-      const inPast = slotEnd <= nowMs;
-      if (!overlapsBusy && !inPast) {
-        slots.push(format(currentTime, 'HH:mm'));
-      }
-      currentTime = new Date(currentTime.getTime() + duration * 60000);
-    }
-
-    return slots;
+    return computeFreeSlots({
+      date,
+      schedule: doctor.schedule,
+      durationMin: doctor.consultation_settings?.consultation_duration || 30,
+      busy: busySlots,
+    }).map(d => format(d, 'HH:mm'));
   };
 
   // Reload busy slots whenever the doctor or date changes inside the booking dialog.

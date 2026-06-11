@@ -22,8 +22,10 @@ import {
   Search,
   History,
   CalendarPlus,
+  CalendarCog,
 } from 'lucide-react';
 import { downloadIcs } from '@/lib/ics';
+import RescheduleDialog from '@/components/dashboard/RescheduleDialog';
 
 // Patient-side full appointments view: upcoming + past in one page.
 // Backed by the same /api/me/appointments endpoint the dashboard widget
@@ -79,6 +81,7 @@ const Appointments = () => {
   const [rows, setRows] = useState<AppointmentRow[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [rescheduling, setRescheduling] = useState<AppointmentRow | null>(null);
   const [pastFilter, setPastFilter] = useState<PastFilter>('all');
 
   const load = async () => {
@@ -297,6 +300,16 @@ const Appointments = () => {
             <Button
               variant="ghost"
               size="sm"
+              className="text-xs gap-1 text-muted-foreground hover:text-foreground"
+              onClick={() => setRescheduling(apt)}
+              disabled={busyId === apt.id}
+            >
+              <CalendarCog className="h-3.5 w-3.5" />
+              Reschedule
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               className="text-xs gap-1 text-muted-foreground hover:text-destructive"
               onClick={() => cancel(apt)}
               disabled={busyId === apt.id}
@@ -424,6 +437,13 @@ const Appointments = () => {
           )}
         </section>
       </div>
+
+      <RescheduleDialog
+        appointment={rescheduling}
+        open={rescheduling !== null}
+        onOpenChange={(open) => { if (!open) setRescheduling(null); }}
+        onRescheduled={() => { emitHealthDataChange(); load(); }}
+      />
     </div>
   );
 };
