@@ -87,6 +87,37 @@ req GET /api/doctors/list 200
 req POST /api/appointments/reschedule 404 '{"appointment_id":"00000000-0000-0000-0000-000000000000","scheduled_at":"2030-01-01T10:00:00Z"}'
 
 echo
+echo "== Doctor funnel (e2e doctor: verified but is_available=false, so never in public directory) =="
+E2E_DOCTOR_EMAIL=$(grep '^E2E_DOCTOR_EMAIL=' .env.local | cut -d= -f2)
+E2E_DOCTOR_PASSWORD=$(grep '^E2E_DOCTOR_PASSWORD=' .env.local | cut -d= -f2)
+if [[ -n "$E2E_DOCTOR_EMAIL" && -n "$E2E_DOCTOR_PASSWORD" ]]; then
+  rm -f "$JAR"  # fresh cookie jar — switch identities
+  DLOGIN=$(curl -sS -o /tmp/smoke_authed_body -w '%{http_code}' -X POST -c "$JAR" \
+    -H 'Content-Type: application/json' \
+    -d "{\"email\":\"$E2E_DOCTOR_EMAIL\",\"password\":\"$E2E_DOCTOR_PASSWORD\"}" "$BASE/api/auth/login")
+  if [[ "$DLOGIN" != "200" ]]; then
+    echo "  doctor login -> $DLOGIN; creating doctor account (then seed verification: node .planning/seed-e2e-doctor.mjs)"
+    req POST /api/auth/doctor-signup 200 "{\"email\":\"$E2E_DOCTOR_EMAIL\",\"password\":\"$E2E_DOCTOR_PASSWORD\",\"fullName\":\"E2E Doctor\",\"specialty\":\"Internal test\",\"licenseNumber\":\"E2E-0000\",\"bio\":\"Synthetic test account\"}" || exit 1
+    # Doctor-signup deliberately does NOT set a session cookie or grant
+    # the role — seed verification out-of-band, then re-run.
+    echo "  NOTE: run 'node .planning/seed-e2e-doctor.mjs' once, then re-run this script."
+  else
+    echo "  ok   doctor login -> 200"
+    PASS=$((PASS + 1))
+    # Role row readable through /api/db (what useRequireRole does)
+    ROLE=$(db '{"table":"user_roles","operation":"select","selectColumns":"role","filters":[["role","eq","doctor"]],"isSingle":false,"isMaybeSingle":true}')
+    if echo "$ROLE" | grep -q '"role"\s*:\s*"doctor"'; then echo "  ok   doctor role visible via /api/db"; PASS=$((PASS+1)); else echo "  FAIL doctor role: $(echo "$ROLE" | head -c 200)" >&2; FAIL=$((FAIL+1)); fi
+    # Doctor-side endpoints respond under the doctor session
+    req GET /api/doctors/connections 200
+    # Schedule upsert round-trip via /api/db (doctor_schedule is doctor-owned)
+    SCHED=$(db '{"table":"doctor_schedule","operation":"select","selectColumns":"day_of_week","filters":[],"isSingle":false,"isMaybeSingle":false}')
+    if echo "$SCHED" | grep -q '"rows"'; then echo "  ok   doctor_schedule readable"; PASS=$((PASS+1)); else echo "  FAIL doctor_schedule: $(echo "$SCHED" | head -c 200)" >&2; FAIL=$((FAIL+1)); fi
+  fi
+else
+  echo "  skipped — E2E_DOCTOR_EMAIL / E2E_DOCTOR_PASSWORD not in .env.local"
+fi
+
+echo
 echo "== Logout =="
 req POST /api/auth/logout 302
 req GET /api/me/chart-access 401
