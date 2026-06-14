@@ -189,6 +189,41 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-06-14 (session 66 — make it installable as a phone app)
+
+Alena asked to "continue improving" and "prepare it so it works as an
+app from a phone." The PWA scaffolding (service worker, manifest,
+install shortcuts, standalone display) was already wired in vite.config
+from earlier sessions, so the site was installable on Android — but two
+gaps remained, both fixed this session:
+
+- **Real PNG app icons (the iPhone gap).** apple-touch-icon pointed at
+  an SVG, which iOS Safari silently ignores — "Add to Home Screen" on an
+  iPhone showed a blank/letter icon, not the brand mark. Generated
+  full-bleed PNGs from the heart logo (macOS qlmanage + sips, no extra
+  deps): apple-touch-icon.png (180), pwa-192/512 (manifest + maskable),
+  og-image.png (1200×630) for link previews. Wired into index.html
+  (PNG apple-touch-icon, viewport-fit=cover for the notch) and the
+  vite-plugin-pwa manifest icons. Now installs cleanly on iPhone +
+  Android.
+- **Nobody could find the install option.** A full /install page existed
+  but nothing surfaced it. New src/components/InstallBanner.tsx (mounted
+  app-wide): triggers the native prompt on Chromium/Android, links to
+  /install for the Share→Add-to-Home-Screen steps on iOS. Hidden when
+  already installed, on /install, or for 14 days after dismissal;
+  respects the safe-area inset.
+
+Verification: tsc 0, eslint 0 on changed files, vite build OK (SW
+regenerated), 70/70 unit tests. Two commits, both pushed.
+
+HANDOFF.md also truncated to truly-empty earlier today — the Telegram
+watcher was false-pinging "waiting for input" on the 13-line
+"Status: empty" boilerplate.
+
+Still open (carried from session 65): friendlier first-run empty states;
+authenticated HEIC upload→analyze e2e against prod; doctor-approval e2e
+under Alena's admin cookie (manual).
+
 ### 2026-06-11 (session 65 — 60h re-auth; authed smoke catches doctor-funnel total breakage)
 
 Alena re-authorized 60h with broader decision authority ("make
