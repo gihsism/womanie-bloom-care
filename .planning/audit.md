@@ -216,6 +216,22 @@ gaps remained, both fixed this session:
 Verification: tsc 0, eslint 0 on changed files, vite build OK (SW
 regenerated), 70/70 unit tests. Two commits, both pushed.
 
+**24h continuation (started 17:30, self-paced loop) — further mobile/PWA polish:**
+- **Code-split vendor libs** (vite.config manualChunks): react-vendor
+  (~327 KB), ui-vendor (radix/cmdk/vaul ~128 KB), charts (recharts/d3,
+  still lazy). Main entry dropped from the ~508 KB chunk the build was
+  warning about to ~117/148 KB pieces — faster first paint on cellular,
+  and app-code deploys no longer bust the cached vendor bundles.
+- **Offline indicator** (src/components/OfflineIndicator.tsx): slim
+  top banner on the online/offline events so installed-app users in a
+  dead zone understand why /api data won't load instead of hitting
+  silently-failing buttons. Notch-safe, self-clearing.
+- Investigated the session-65 "friendlier empty states" candidate:
+  largely already done (GettingStarted 3-step checklist on the
+  dashboard; MedicalHistory "upload your first document" hero; AI Doctor
+  suggested-question chips; FindDoctor "no doctors" card). Marked
+  effectively complete; no churn added.
+
 HANDOFF.md also truncated to truly-empty earlier today — the Telegram
 watcher was false-pinging "waiting for input" on the 13-line
 "Status: empty" boilerplate.
