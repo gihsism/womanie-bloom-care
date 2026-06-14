@@ -2138,3 +2138,16 @@ Sessions 1-8 have been rotated into .planning/SHIPPED.md.
   +5 tests) at every interpolation point and coerced LIMIT to a bounded
   integer. Verified all legitimate callers send plain column lists / '*'
   so nothing breaks. Suite 145 -> 150.
+
+**API review pass (overnight, iterations 13-19) — outcomes:**
+Reviewed the server handlers for correctness/security bugs. Found + fixed 2:
+analyze-document (array guard) and db.ts (identifier SQL-injection, the big one).
+Reviewed and confirmed CORRECT (no change needed):
+- appointments/book + reschedule — atomic overlap guards, past/ownership/state checks
+- predict-ovulation — luteal/fertile-window math sound
+- ai-doctor-chat — messages validated as array before use
+- summary/generate + summary/panel — return prose, no unguarded array .map
+- me/delete-account — wipes all user-owned tables atomically (current_extracted_data is a view)
+- me/export — complete patient data-portability export, all parameterized
+- chat/messages — every query scoped to user.id, bounded pagination
+- SQL sweep: all other handlers use neon tagged-template params (auto-parameterized); db.ts was the only raw-identifier surface.
