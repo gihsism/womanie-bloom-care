@@ -270,6 +270,15 @@ regenerated), 70/70 unit tests. Two commits, both pushed.
   timezone-independent day-offset assertions. data-events: subscribe,
   unsubscribe, multi-subscriber, throwing-listener isolation. Suite
   99 → 117.
+- **+11 tests for useCyclePrediction's exported helpers** (core cycle
+  logic): getEffectiveEndDate (confirmed vs projected end),
+  isActivePeriod, getCurrentCycleDay (day-1 start, mid-cycle offset,
+  next-cycle wrap; fake timers), isInFertileWindow boundaries,
+  isOvulationDay same-day match, getPredictionMessage (single date when
+  regular, ±window range when irregular). Reviewed the main hook's
+  trend/anomaly logic for bugs — defensible as-is (the "days late"
+  figure is measured from period end, a minor approximation, left alone
+  rather than churn product-sensitive code). Suite 117 → 128.
 
 Carried-forward candidates (not yet done):
 - **Bottom tab navigation bar for mobile** — would most make it "feel
