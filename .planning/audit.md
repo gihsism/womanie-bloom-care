@@ -2151,3 +2151,14 @@ Reviewed and confirmed CORRECT (no change needed):
 - me/export — complete patient data-portability export, all parameterized
 - chat/messages — every query scoped to user.id, bounded pagination
 - SQL sweep: all other handlers use neon tagged-template params (auto-parameterized); db.ts was the only raw-identifier surface.
+
+- **Hardening: OAuth callback no longer leaks internal error details.**
+  api/auth/callback.ts caught errors and returned { details: error.message }
+  to the client (an acknowledged debug leftover) — could expose DB/internal
+  messages. Now logs server-side (+ Sentry) and redirects to
+  /auth/login?error=auth_failed like the other failure paths.
+- **NEEDS-ALENA (security, larger): OAuth flow has no `state` parameter.**
+  The Google login flow doesn't set/verify a state token, leaving it open
+  to login-CSRF / session-fixation. Fixing is two-sided (set a state cookie
+  at login initiation + verify it in callback) — flagged rather than
+  rewritten blind. Worth doing with Alena's awareness.

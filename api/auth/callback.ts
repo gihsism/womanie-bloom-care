@@ -100,9 +100,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader('Set-Cookie', `womanie_session=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}`);
     res.redirect(302, '/welcome');
   } catch (error) {
+    // Log full details server-side (also captured by Sentry); never leak
+    // internal error messages to the client. Redirect to login with a
+    // generic code, consistent with the other failure paths above.
     console.error('Auth callback error:', error);
-    // Show error details instead of redirecting to help debug
-    return res.status(500).json({ error: 'Auth failed', details: error instanceof Error ? error.message : String(error) });
+    return res.redirect(302, '/auth/login?error=auth_failed');
   }
 }
 
