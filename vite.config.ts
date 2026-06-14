@@ -15,9 +15,15 @@ export default defineConfig(() => ({
       registerType: "autoUpdate",
       includeAssets: ["favicon.svg", "apple-touch-icon.png", "og-image.png"],
       manifest: {
+        // Stable install identity so updates/re-installs are recognised
+        // as the same app rather than spawning a duplicate entry.
+        id: "/",
         name: "Womanie - Women's Health Companion",
         short_name: "Womanie",
         description: "Personalized health tracking that adapts to every stage of your reproductive journey",
+        // Surfaces the app under the right sections in install dialogs /
+        // app catalogues.
+        categories: ["health", "medical", "lifestyle"],
         theme_color: "#E8B4D8",
         background_color: "#FDF8FC",
         display: "standalone",
