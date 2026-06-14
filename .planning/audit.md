@@ -279,6 +279,16 @@ regenerated), 70/70 unit tests. Two commits, both pushed.
   trend/anomaly logic for bugs — defensible as-is (the "days late"
   figure is measured from period end, a minor approximation, left alone
   rather than churn product-sensitive code). Suite 117 → 128.
+- **Extracted deriveLabFlags into hormone-reference + tested** (TSH/FSH/
+  PCOS/prolactin/testosterone thresholds, was inline in
+  useUserHealthContext's async callback). Behaviour-preserving. +6
+  tests. Suite 128 → 134.
+- **Extracted health-trends logic into src/lib/health-trends.ts +
+  tested** (computeTrends/parseNumeric/statusShift — the dashboard's
+  "your result is improving/worsening" card). Moving the pure logic out
+  of the .tsx also cleared the react-refresh lint warnings that
+  exporting-from-a-component would have introduced. +11 tests, all green
+  on review. Suite 134 → 145.
 
 Carried-forward candidates (not yet done):
 - **Bottom tab navigation bar for mobile** — would most make it "feel
