@@ -231,6 +231,26 @@ regenerated), 70/70 unit tests. Two commits, both pushed.
   dashboard; MedicalHistory "upload your first document" hero; AI Doctor
   suggested-question chips; FindDoctor "no doctors" card). Marked
   effectively complete; no churn added.
+- **Branded launch splash** (index.html + main.tsx): static HTML/CSS
+  Womanie mark on the brand gradient, painted instantly so the installed
+  app / cold web load no longer flashes a blank white screen; fades out
+  on mount. Cross-platform (no per-device iOS splash images);
+  prefers-reduced-motion respected.
+- **Scroll-to-top on route change** (src/components/ScrollToTop.tsx):
+  react-router was preserving the prior page's scroll offset, landing
+  you mid-page after navigation — bad on mobile. Resets on pathname
+  change; ignores hash so in-page anchor scrolls still work.
+
+Carried-forward candidates (not yet done):
+- **Bottom tab navigation bar for mobile** — would most make it "feel
+  like an app," but it's a cross-page layout sweep (content padding,
+  z-index vs InstallBanner/OfflineIndicator) that needs on-device visual
+  QA + Alena's product eye on which destinations. Not safe to ship blind
+  in the autonomous loop; flagged for a hands-on session. The 4 PWA
+  shortcuts (AI Doctor, Health records, Appointments, Settings) + Home
+  give a principled starting set.
+- Authenticated HEIC upload→analyze e2e against prod (heavier: creates
+  blob/db rows + spends Claude credits; deferred).
 
 HANDOFF.md also truncated to truly-empty earlier today — the Telegram
 watcher was false-pinging "waiting for input" on the 13-line
