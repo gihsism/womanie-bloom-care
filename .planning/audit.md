@@ -253,6 +253,13 @@ regenerated), 70/70 unit tests. Two commits, both pushed.
   Test suite 70 → 79.
 - Sent Alena the evening Telegram digest (phone-app recap + bottom-nav
   parked for a hands-on session).
+- **Test-coverage pass (overnight):** +13 tests for medical-utils
+  (generateFallbackNote lab-note generation + getStatusInfo/
+  getFriendlyName) and +7 for the api rate limiter (checkAndConsume:
+  limit enforcement, remaining countdown, retryInSec from oldest hit,
+  window expiry, blocked-attempts-don't-extend-window, per-user and
+  per-endpoint isolation). Both modules were correct on review; tests
+  lock the behaviour. Suite 79 → 99.
 
 Carried-forward candidates (not yet done):
 - **Bottom tab navigation bar for mobile** — would most make it "feel
