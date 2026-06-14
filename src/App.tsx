@@ -10,6 +10,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { InstallBanner } from "@/components/InstallBanner";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import { Loader2 } from "lucide-react";
 
 // Custom auth — no third-party dependency
@@ -86,6 +87,7 @@ const App = () => (
           <Sonner />
           <OfflineIndicator />
           <BrowserRouter>
+            <ScrollToTop />
             <InstallBanner />
             <ErrorBoundary>
               <Suspense fallback={<PageLoader />}>
