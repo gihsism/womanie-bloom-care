@@ -260,6 +260,16 @@ regenerated), 70/70 unit tests. Two commits, both pushed.
   window expiry, blocked-attempts-don't-extend-window, per-user and
   per-endpoint isolation). Both modules were correct on review; tests
   lock the behaviour. Suite 79 → 99.
+- **Switched to fast cadence (Alena: "speed and never slow down").** No
+  more overnight slow-down; recorded as a standing preference in memory.
+- **+18 tests for onboarding routing + the health-data event bus.**
+  Exported deriveLifeStage + derivePregnancyDueDate (decide which
+  dashboard mode a new user lands on) and covered the stage→mode map,
+  regular-cycle focus branching, and due-date derivation (explicit /
+  Naegele 280-day / current-week projection + the >40wk clamp);
+  timezone-independent day-offset assertions. data-events: subscribe,
+  unsubscribe, multi-subscriber, throwing-listener isolation. Suite
+  99 → 117.
 
 Carried-forward candidates (not yet done):
 - **Bottom tab navigation bar for mobile** — would most make it "feel

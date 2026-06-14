@@ -24,7 +24,7 @@ interface UserShape {
 // Map the onboarding-side life stage (broad, user-facing) to the
 // dashboard's life-stage key (8 modes). Returns null when we can't
 // determine — caller defaults to 'menstrual-cycle'.
-function deriveLifeStage(data: OnboardingData): string | null {
+export function deriveLifeStage(data: OnboardingData): string | null {
   const stage = data.lifeStage?.stage;
   if (!stage) return null;
   if (stage === 'pre-menstrual') return 'pre-menstrual';
@@ -42,7 +42,7 @@ function deriveLifeStage(data: OnboardingData): string | null {
   return null;
 }
 
-function derivePregnancyDueDate(data: OnboardingData): Date | null {
+export function derivePregnancyDueDate(data: OnboardingData): Date | null {
   const p = data.pregnancy;
   if (!p) return null;
   if (p.dateType === 'dueDate' && p.dueDate) return new Date(p.dueDate);
