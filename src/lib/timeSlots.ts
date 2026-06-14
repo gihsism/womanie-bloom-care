@@ -51,10 +51,15 @@ export function computeFreeSlots(opts: {
     const slotStart = currentTime.getTime();
     const slotEnd = slotStart + durationMin * 60000;
     const overlapsBusy = busyIntervals.some(([bs, be]) => slotStart < be && slotEnd > bs);
+    // Don't offer a slot that would run past the end of the doctor's
+    // hours — only happens when the duration doesn't divide the window
+    // evenly (e.g. a 45-min slot in a window that ends at 10:00).
+    const overrunsWindow = slotEnd > endTime.getTime();
     // Hide slots that have already started — picking 10:00 at 10:15
-    // would just produce a server-side error.
-    const inPast = slotEnd <= nowMs;
-    if (!overlapsBusy && !inPast) {
+    // would just produce a server-side error. (Keyed on slotStart, not
+    // slotEnd: a slot already in progress is no longer bookable.)
+    const inPast = slotStart <= nowMs;
+    if (!overlapsBusy && !inPast && !overrunsWindow) {
       slots.push(new Date(currentTime));
     }
     currentTime = new Date(currentTime.getTime() + durationMin * 60000);
