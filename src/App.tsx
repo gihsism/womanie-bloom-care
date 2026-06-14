@@ -9,6 +9,7 @@ import { OnboardingProvider } from "@/contexts/OnboardingContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { InstallBanner } from "@/components/InstallBanner";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { Loader2 } from "lucide-react";
 
 // Custom auth — no third-party dependency
@@ -83,6 +84,7 @@ const App = () => (
         <OnboardingProvider>
           <Toaster />
           <Sonner />
+          <OfflineIndicator />
           <BrowserRouter>
             <InstallBanner />
             <ErrorBoundary>
