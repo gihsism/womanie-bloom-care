@@ -290,6 +290,26 @@ regenerated), 70/70 unit tests. Two commits, both pushed.
   exporting-from-a-component would have introduced. +11 tests, all green
   on review. Suite 134 → 145.
 
+**Coverage status (overnight, ~22:50):** worked through the testable
+pure-logic surface — timeSlots, medical-utils, rate limiter, onboarding
+routing, event bus, cycle-prediction helpers, lab-flag thresholds, and
+health-trends are now covered (suite 70 → 145, 2 real bugs fixed).
+Reviewed the remaining logic-heavy code for bugs (useCyclePrediction
+trend/anomaly, useUserHealthContext, useAttentionCount filters,
+DailyLogging date handling, the two classifyPhase variants) and found it
+sound — date keys correctly use local-time format(), no TZ off-by-one.
+The safe, blind-shippable backlog is essentially exhausted; the
+highest-value next items need Alena's input (below). Not manufacturing
+filler commits.
+
+Needs-Alena decisions (flagged, non-blocking):
+- **Component-test infrastructure** — the UI components shipped this arc
+  (InstallBanner, OfflineIndicator, ScrollToTop) have no tests because
+  there's no jsdom/@testing-library setup. Adding it means new devDeps +
+  a vitest env tweak (repo has both bun.lock and package-lock.json, so
+  the package-manager/lockfile choice is hers). Anticipated in the
+  session-65 note. Would unlock real component coverage.
+
 Carried-forward candidates (not yet done):
 - **Bottom tab navigation bar for mobile** — would most make it "feel
   like an app," but it's a cross-page layout sweep (content padding,
