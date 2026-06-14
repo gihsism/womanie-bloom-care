@@ -2117,3 +2117,12 @@ Next-session candidates:
 
 
 Sessions 1-8 have been rotated into .planning/SHIPPED.md.
+
+- **Bug fix in analyze-document.ts:** key_takeaways / action_items were
+  guarded with `?.length > 0` then .map()'d — but if the model returns
+  those fields as a bare string (it sometimes does), .length is truthy
+  and .map throws, 500-ing the whole analysis. Added Array.isArray
+  guards to match the cross_references handling right below. Can't be
+  cleanly unit-tested without refactoring the 750-line handler; the
+  guard is the fix. (Also reviewed appointments/book + reschedule —
+  both correct, atomic overlap guards + past/ownership checks.)

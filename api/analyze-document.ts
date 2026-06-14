@@ -624,10 +624,14 @@ async function processWithAI(
 
   // Build summary
   let enhancedSummary = analysis.summary || 'Document analyzed.';
-  if (analysis.key_takeaways?.length > 0) {
+  // Guard with Array.isArray (like cross_references below): the model
+  // occasionally returns these as a bare string, and `string?.length > 0`
+  // is truthy — calling .map() on it would throw and 500 the whole
+  // analysis. A non-array value just means "no takeaways/actions".
+  if (Array.isArray(analysis.key_takeaways) && analysis.key_takeaways.length > 0) {
     enhancedSummary += '\n\n📋 Key Takeaways:\n' + analysis.key_takeaways.map((t: string) => `• ${t}`).join('\n');
   }
-  if (analysis.action_items?.length > 0) {
+  if (Array.isArray(analysis.action_items) && analysis.action_items.length > 0) {
     enhancedSummary += '\n\n⚡ Action Items:\n' + analysis.action_items.map((a: string) => `• ${a}`).join('\n');
   }
   if (Array.isArray(analysis.cross_references) && analysis.cross_references.length > 0) {
