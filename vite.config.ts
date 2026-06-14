@@ -100,6 +100,32 @@ export default defineConfig(() => ({
   build: {
     rollupOptions: {
       external: ['@niceplugins/capacitor-healthkit'],
+      output: {
+        // Split the stable, rarely-changing vendor libraries into their
+        // own long-cached chunks. Two wins for the phone app on cellular:
+        // (1) the main entry shrinks (it was ~500 KB), so first paint is
+        // faster; (2) shipping an app-code change no longer busts the
+        // React/Radix/chart bundles, so returning users re-download only
+        // what actually changed. Grouped by family to avoid a waterfall
+        // of dozens of tiny requests.
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+          if (id.includes("recharts") || id.includes("/d3-") || id.includes("victory-vendor")) {
+            return "charts";
+          }
+          if (
+            id.includes("/react-dom/") ||
+            id.includes("/react-router") ||
+            id.includes("/react/") ||
+            id.includes("/scheduler/")
+          ) {
+            return "react-vendor";
+          }
+          if (id.includes("@radix-ui") || id.includes("cmdk") || id.includes("vaul")) {
+            return "ui-vendor";
+          }
+        },
+      },
     },
   },
   test: {
