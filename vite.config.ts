@@ -13,7 +13,7 @@ export default defineConfig(() => ({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.svg"],
+      includeAssets: ["favicon.svg", "apple-touch-icon.png", "og-image.png"],
       manifest: {
         name: "Womanie - Women's Health Companion",
         short_name: "Womanie",
@@ -24,16 +24,34 @@ export default defineConfig(() => ({
         orientation: "portrait",
         scope: "/",
         start_url: "/",
-        // Only the SVG favicon ships — the old pwa-*.png / apple-
-        // touch-icon.png files were Lovable-scaffolding JPEGs
-        // mislabelled as PNGs. Chrome 93+ / Firefox / Edge accept
-        // SVG icons in manifests with "any maskable".
+        // Real PNG icons generated from the brand mark (public/*.png).
+        // SVG stays as the scalable "any" icon; the 192/512 PNGs satisfy
+        // the Android install prompt + Lighthouse, and the 512 doubles as
+        // the maskable icon (full-bleed gradient, heart inside the safe zone).
         icons: [
           {
             src: "/favicon.svg",
             sizes: "any",
             type: "image/svg+xml",
-            purpose: "any maskable",
+            purpose: "any",
+          },
+          {
+            src: "/pwa-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "/pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "/pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
           },
         ],
         // PWA shortcuts — long-press the home-screen icon (Android)
