@@ -5,10 +5,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
 import {
   AMH_BY_AGE,
-  FSH_DAY3_THRESHOLDS,
-  PCOS_LH_FSH_RATIO_THRESHOLD,
-  TSH_RANGE,
   assessAmh,
+  deriveLabFlags,
   hormoneKeyForTitle,
   parseLabValue,
   type HormoneKey,
@@ -134,18 +132,9 @@ export function useUserHealthContext(): UserHealthContext {
         }
       }
 
-      // Derived flags.
-      const tshOutOfRange = labs.tsh
-        ? labs.tsh.value < TSH_RANGE.low || labs.tsh.value > TSH_RANGE.high
-        : null;
-      const highFsh = labs.fsh ? labs.fsh.value > FSH_DAY3_THRESHOLDS.normal.high : null;
-      const menopausalFsh = labs.fsh ? labs.fsh.value > FSH_DAY3_THRESHOLDS.menopausal.low : null;
-      const pcosLhFshPattern =
-        labs.lh && labs.fsh && labs.fsh.value > 0
-          ? labs.lh.value / labs.fsh.value > PCOS_LH_FSH_RATIO_THRESHOLD && labs.lh.value > 10
-          : null;
-      const highProlactin = labs.prolactin ? labs.prolactin.value > 23 : null;
-      const highTestosterone = labs.testosterone_total ? labs.testosterone_total.value > 70 : null;
+      // Derived flags (pure, shared logic — see deriveLabFlags).
+      const { tshOutOfRange, highFsh, menopausalFsh, pcosLhFshPattern, highProlactin, highTestosterone } =
+        deriveLabFlags(labs);
       const amhAssessment = labs.amh ? assessAmh(labs.amh.value, age) : null;
 
       setState({

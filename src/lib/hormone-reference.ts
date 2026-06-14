@@ -82,6 +82,49 @@ export const TSH_RANGE = {
   source: 'NACB/AACE',
 };
 
+// Prolactin above this (ng/mL) can suppress ovulation and skip cycles.
+export const PROLACTIN_HIGH_NG_ML = 23;
+// Total testosterone above this (ng/dL) often co-occurs with cycle
+// irregularity (upper end of the typical female reference range).
+export const TESTOSTERONE_TOTAL_HIGH_NG_DL = 70;
+// The PCOS ratio is only meaningful when LH itself is elevated, so we
+// also require LH above this floor before flagging the pattern.
+export const PCOS_LH_FLOOR = 10;
+
+export interface LabFlags {
+  tshOutOfRange: boolean | null;
+  highFsh: boolean | null;
+  menopausalFsh: boolean | null;
+  pcosLhFshPattern: boolean | null;
+  highProlactin: boolean | null;
+  highTestosterone: boolean | null;
+}
+
+// Derive the cycle-affecting lab flags from the latest values. Each flag
+// is `null` until its lab arrives, then boolean. Pure so it can be unit-
+// tested independently of the data-loading hook that calls it
+// (useUserHealthContext). Only reads `.value`, so any {value:number} map
+// keyed by HormoneKey works.
+export function deriveLabFlags(
+  labs: Partial<Record<HormoneKey, { value: number }>>,
+): LabFlags {
+  return {
+    tshOutOfRange: labs.tsh
+      ? labs.tsh.value < TSH_RANGE.low || labs.tsh.value > TSH_RANGE.high
+      : null,
+    highFsh: labs.fsh ? labs.fsh.value > FSH_DAY3_THRESHOLDS.normal.high : null,
+    menopausalFsh: labs.fsh ? labs.fsh.value > FSH_DAY3_THRESHOLDS.menopausal.low : null,
+    pcosLhFshPattern:
+      labs.lh && labs.fsh && labs.fsh.value > 0
+        ? labs.lh.value / labs.fsh.value > PCOS_LH_FSH_RATIO_THRESHOLD && labs.lh.value > PCOS_LH_FLOOR
+        : null,
+    highProlactin: labs.prolactin ? labs.prolactin.value > PROLACTIN_HIGH_NG_ML : null,
+    highTestosterone: labs.testosterone_total
+      ? labs.testosterone_total.value > TESTOSTERONE_TOTAL_HIGH_NG_DL
+      : null,
+  };
+}
+
 // Cycle-phase-adjusted ranges for estradiol, LH, progesterone. Pulled
 // from Mayo / LabCorp reference tables. Picking the right phase
 // requires knowing where the user is in her cycle.

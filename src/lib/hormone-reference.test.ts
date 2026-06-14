@@ -5,6 +5,7 @@ import {
   cyclePhaseForDay,
   parseLabValue,
   getPhaseRange,
+  deriveLabFlags,
 } from './hormone-reference';
 
 describe('assessAmh', () => {
@@ -161,5 +162,51 @@ describe('getPhaseRange', () => {
   it('falls back to the "any" range for single-range hormones', () => {
     expect(getPhaseRange('tsh', 'follicular')).toMatchObject({ low: 0.4, high: 4.0 });
     expect(getPhaseRange('prolactin', 'midcycle')).toMatchObject({ low: 4, high: 23 });
+  });
+});
+
+describe('deriveLabFlags', () => {
+  it('returns null for every flag when no labs are present', () => {
+    expect(deriveLabFlags({})).toEqual({
+      tshOutOfRange: null,
+      highFsh: null,
+      menopausalFsh: null,
+      pcosLhFshPattern: null,
+      highProlactin: null,
+      highTestosterone: null,
+    });
+  });
+
+  it('flags TSH outside 0.4–4.0 in either direction', () => {
+    expect(deriveLabFlags({ tsh: { value: 5.2 } }).tshOutOfRange).toBe(true);
+    expect(deriveLabFlags({ tsh: { value: 0.2 } }).tshOutOfRange).toBe(true);
+    expect(deriveLabFlags({ tsh: { value: 2.0 } }).tshOutOfRange).toBe(false);
+  });
+
+  it('flags FSH thresholds (high > 10, menopausal > 25)', () => {
+    expect(deriveLabFlags({ fsh: { value: 12 } })).toMatchObject({ highFsh: true, menopausalFsh: false });
+    expect(deriveLabFlags({ fsh: { value: 30 } })).toMatchObject({ highFsh: true, menopausalFsh: true });
+    expect(deriveLabFlags({ fsh: { value: 8 } })).toMatchObject({ highFsh: false, menopausalFsh: false });
+  });
+
+  it('flags the PCOS LH/FSH pattern only when ratio > 2 AND LH is elevated', () => {
+    // ratio 3 (15/5), LH 15 > 10 => pattern
+    expect(deriveLabFlags({ lh: { value: 15 }, fsh: { value: 5 } }).pcosLhFshPattern).toBe(true);
+    // ratio 3 (6/2) but LH only 6 (not > 10) => no pattern
+    expect(deriveLabFlags({ lh: { value: 6 }, fsh: { value: 2 } }).pcosLhFshPattern).toBe(false);
+    // high LH but ratio <= 2 (12/8 = 1.5) => no pattern
+    expect(deriveLabFlags({ lh: { value: 12 }, fsh: { value: 8 } }).pcosLhFshPattern).toBe(false);
+  });
+
+  it('needs both LH and FSH for the PCOS flag and avoids divide-by-zero (null when FSH is 0)', () => {
+    expect(deriveLabFlags({ lh: { value: 15 } }).pcosLhFshPattern).toBeNull();
+    expect(deriveLabFlags({ lh: { value: 15 }, fsh: { value: 0 } }).pcosLhFshPattern).toBeNull();
+  });
+
+  it('flags high prolactin (> 23) and high testosterone (> 70)', () => {
+    expect(deriveLabFlags({ prolactin: { value: 30 } }).highProlactin).toBe(true);
+    expect(deriveLabFlags({ prolactin: { value: 10 } }).highProlactin).toBe(false);
+    expect(deriveLabFlags({ testosterone_total: { value: 90 } }).highTestosterone).toBe(true);
+    expect(deriveLabFlags({ testosterone_total: { value: 40 } }).highTestosterone).toBe(false);
   });
 });
