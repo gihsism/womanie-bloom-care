@@ -2,6 +2,7 @@ import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from './_lib/auth.js';
 import { withSentry } from './_lib/sentry.js';
+import { isIdent, isIdentList } from './_lib/sql-ident.js';
 
 // Which column identifies "mine" for each table accessible via /api/db.
 // - string: single owner column; its value must equal the session user id.
@@ -58,6 +59,15 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const { table, operation, selectColumns, insertData, updateData, upsertData, upsertOptions, orderBy, limitCount } = req.body;
     let { filters } = req.body as { filters?: Array<[string, string, unknown]> };
     filters = Array.isArray(filters) ? [...filters] : [];
+
+    // Every client-supplied filter must name a real column. (Server-added
+    // owner filters and the '__owner_or__' sentinel are appended later and
+    // are trusted.)
+    for (const f of filters) {
+      if (!Array.isArray(f) || !isIdent(f[0])) {
+        return res.status(400).json({ error: 'Invalid filter column' });
+      }
+    }
 
     if (!table) return res.status(400).json({ error: 'Missing table' });
 
@@ -122,10 +132,15 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     let paramIdx = 1;
 
     if (operation === 'select') {
-      query = `SELECT ${selectColumns || '*'} FROM ${table}`;
+      const sel = selectColumns || '*';
+      if (sel !== '*' && !isIdentList(sel)) {
+        return res.status(400).json({ error: 'Invalid selectColumns' });
+      }
+      query = `SELECT ${sel} FROM ${table}`;
     } else if (operation === 'insert') {
       const data = Array.isArray(insertData) ? insertData[0] : insertData;
       const keys = Object.keys(data);
+      if (!keys.every(isIdent)) return res.status(400).json({ error: 'Invalid column name' });
       const values = keys.map(k => data[k]);
       query = `INSERT INTO ${table} (${keys.join(', ')}) VALUES (${keys.map(() => `$${paramIdx++}`).join(', ')}) RETURNING *`;
       params = values;
@@ -135,15 +150,19 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       for (const c of cols) delete safeUpdate[c];
       const keys = Object.keys(safeUpdate);
       if (keys.length === 0) return res.status(400).json({ error: 'No updatable columns' });
+      if (!keys.every(isIdent)) return res.status(400).json({ error: 'Invalid column name' });
       const setClauses = keys.map(k => `${k} = $${paramIdx++}`);
       params = keys.map(k => safeUpdate[k]);
       query = `UPDATE ${table} SET ${setClauses.join(', ')}, updated_at = now()`;
     } else if (operation === 'upsert') {
       const data = Array.isArray(upsertData) ? upsertData[0] : upsertData;
       const keys = Object.keys(data);
-      const values = keys.map(k => data[k]);
+      if (!keys.every(isIdent)) return res.status(400).json({ error: 'Invalid column name' });
       const conflictCol = upsertOptions?.onConflict || 'id';
-      const updateClauses = keys.filter(k => k !== conflictCol && !cols.includes(k)).map(k => `${k} = EXCLUDED.${k}`);
+      if (!isIdentList(conflictCol)) return res.status(400).json({ error: 'Invalid onConflict target' });
+      const values = keys.map(k => data[k]);
+      const conflictKeys = conflictCol.split(',').map((c: string) => c.trim());
+      const updateClauses = keys.filter(k => !conflictKeys.includes(k) && !cols.includes(k)).map(k => `${k} = EXCLUDED.${k}`);
       query = `INSERT INTO ${table} (${keys.join(', ')}) VALUES (${keys.map(() => `$${paramIdx++}`).join(', ')}) ON CONFLICT (${conflictCol}) DO UPDATE SET ${updateClauses.join(', ')} RETURNING *`;
       params = values;
     } else if (operation === 'delete') {
@@ -187,12 +206,18 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (orderBy) {
+      if (!isIdent(orderBy.column)) return res.status(400).json({ error: 'Invalid orderBy column' });
       query += ` ORDER BY ${orderBy.column} ${orderBy.ascending ? 'ASC' : 'DESC'}`;
       if (orderBy.nullsFirst) query += ' NULLS FIRST';
     }
 
-    if (limitCount) {
-      query += ` LIMIT ${limitCount}`;
+    if (limitCount !== undefined && limitCount !== null) {
+      // Coerce to a bounded positive integer — never interpolate a raw
+      // client value into the LIMIT clause.
+      const lim = Math.floor(Number(limitCount));
+      if (Number.isFinite(lim) && lim > 0) {
+        query += ` LIMIT ${Math.min(lim, 1000)}`;
+      }
     }
 
     const rows = await sql.query(query, params);

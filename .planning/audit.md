@@ -2126,3 +2126,15 @@ Sessions 1-8 have been rotated into .planning/SHIPPED.md.
   cleanly unit-tested without refactoring the 750-line handler; the
   guard is the fix. (Also reviewed appointments/book + reschedule —
   both correct, atomic overlap guards + past/ownership checks.)
+
+- **SECURITY: hardened api/db.ts against identifier SQL injection.**
+  The generic query router parameterizes values but interpolated
+  client-supplied *identifiers* raw: selectColumns, filter columns,
+  orderBy.column, ON CONFLICT target, and insert/update/upsert keys.
+  An authenticated user could smuggle a subquery (e.g. selectColumns
+  '(SELECT … FROM auth_users)') to read data past the row-ownership
+  guard, or inject extra clauses via column names. Added strict
+  identifier validation (api/_lib/sql-ident.ts: isIdent/isIdentList,
+  +5 tests) at every interpolation point and coerced LIMIT to a bounded
+  integer. Verified all legitimate callers send plain column lists / '*'
+  so nothing breaks. Suite 145 -> 150.
