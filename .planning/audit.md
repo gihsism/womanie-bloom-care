@@ -241,6 +241,19 @@ regenerated), 70/70 unit tests. Two commits, both pushed.
   you mid-page after navigation — bad on mobile. Resets on pathname
   change; ignores hash so in-page anchor scrolls still work.
 
+**Evening — broadened from phone-app polish to the general arc:**
+- **computeFreeSlots (appointment slots): two bugs fixed + 9 tests.**
+  Writing coverage for the booking/reschedule slot logic surfaced two
+  cases where the code fought its own comments: (1) slots could run past
+  the doctor's end_time when duration didn't divide the window (45-min
+  slot offered at 09:45 in a window closing 10:00) — now must end by
+  end_time; (2) the "already started" filter keyed on slotEnd<=now, so
+  at 10:15 it still offered the 10:00 slot — re-keyed on slotStart.
+  Conservative (offer fewer, valid slots; server still source of truth).
+  Test suite 70 → 79.
+- Sent Alena the evening Telegram digest (phone-app recap + bottom-nav
+  parked for a hands-on session).
+
 Carried-forward candidates (not yet done):
 - **Bottom tab navigation bar for mobile** — would most make it "feel
   like an app," but it's a cross-page layout sweep (content padding,
