@@ -2197,3 +2197,10 @@ padding-bottom rule in index.css so the fixed bar never covers content.
 NEEDS ALENA: review live on phone at womanie.info — check the AI Doctor
 chat page (input vs bar spacing) and overall feel. One-commit revert if
 not wanted.
+
+- **Bottom-nav follow-through:** AI Doctor chat pins its input to the
+  bottom of a min-h-screen flex column, so the global body padding
+  couldn't clear the new fixed bottom nav — the bar would have overlapped
+  the message input on mobile. Added pb-[calc(4rem+safe-area)] md:pb-0 to
+  the chat's outer container so the input sits just above the bar.
+  Verified no other page pins content to the bottom the same way.

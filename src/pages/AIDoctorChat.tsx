@@ -734,7 +734,10 @@ export default function AIDoctorChat() {
   const currentModelLabel = AI_MODELS.find(m => m.id === selectedModel)?.label || 'Gemini Flash';
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    // pb clears the fixed mobile bottom nav (BottomNav, h-16 + safe area):
+    // this page pins its input to the bottom of a min-h-screen flex column,
+    // so the global body padding can't push it up — it needs its own.
+    <div className="min-h-screen bg-background flex flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="px-3 py-2.5 sm:px-4 sm:py-3 flex items-center gap-2 sm:gap-3">
