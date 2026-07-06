@@ -2204,3 +2204,10 @@ not wanted.
   the message input on mobile. Added pb-[calc(4rem+safe-area)] md:pb-0 to
   the chat's outer container so the input sits just above the bar.
   Verified no other page pins content to the bottom the same way.
+
+- **Component test: GettingStarted** (new-user onboarding checklist) — the
+  highest-value untested UX component. Mocks the db client (fluent chain),
+  auth, toast, and data-events; covers new-user (all 3 CTAs), all-complete
+  (renders null), and partial (completed step drops its CTA, others remain).
+  Establishes a reusable db-mock pattern for future component tests.
+  Suite 175 -> 178.
