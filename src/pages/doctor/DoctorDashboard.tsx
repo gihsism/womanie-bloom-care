@@ -1189,23 +1189,26 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
     }
     setIsSaving(true);
     try {
-      // Delete existing schedule
-      await db.from('doctor_schedule').delete().eq('doctor_id', doctorId);
-
-      // Insert new schedule for active days
-      const rows = Object.entries(schedule)
+      // Replace the whole schedule atomically server-side. A previous
+      // delete-then-insert via /api/db could wipe the schedule and then
+      // fail the insert, leaving the doctor unbookable.
+      const days = Object.entries(schedule)
         .filter(([, s]) => s.active)
         .map(([day, s]) => ({
-          doctor_id: doctorId,
           day_of_week: Number(day),
           start_time: s.start,
           end_time: s.end,
-          is_active: true,
         }));
 
-      if (rows.length > 0) {
-        const { error } = await db.from('doctor_schedule').insert(rows);
-        if (error) throw error;
+      const resp = await fetch('/api/doctors/schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ days }),
+      });
+      if (!resp.ok) {
+        const { error } = await resp.json().catch(() => ({ error: 'Failed to save schedule' }));
+        throw new Error(error || 'Failed to save schedule');
       }
 
       toast({ title: 'Schedule saved', description: 'Your weekly schedule has been updated.' });

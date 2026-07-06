@@ -2211,3 +2211,14 @@ not wanted.
   (renders null), and partial (completed step drops its CTA, others remain).
   Establishes a reusable db-mock pattern for future component tests.
   Suite 175 -> 178.
+
+### 2026-07-06 — atomic doctor-schedule save (real bug)
+DoctorDashboard saved the weekly schedule as DELETE-all + INSERT via two
+separate /api/db calls. If the insert failed after the delete, the doctor
+was left with NO schedule — and computeFreeSlots returns zero slots
+without one, so no patient could book them until the doctor noticed and
+re-saved. New POST /api/doctors/schedule replaces the schedule in one
+Neon transaction (delete + per-day inserts), doctor_id pinned to the
+session user, with HH:MM + day-range + end>start validation. Client swaps
+the two db calls for the endpoint. Same atomicity class as the earlier
+docs/delete + analyze-document fixes. tsc/lint/build/178 tests green.
