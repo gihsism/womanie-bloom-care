@@ -166,6 +166,13 @@
     body.has-bottom-nav {
       padding-bottom: calc(4rem + env(safe-area-inset-bottom));
     }
+
+    /* Lift the install prompt above the tab bar so the two fixed-bottom
+       elements don't stack on dashboard routes (same 4rem + safe-area
+       offset the body padding uses). */
+    body.has-bottom-nav .install-banner-root {
+      bottom: calc(4rem + env(safe-area-inset-bottom));
+    }
   }
 }
 

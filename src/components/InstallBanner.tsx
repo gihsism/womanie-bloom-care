@@ -117,7 +117,7 @@ export function InstallBanner() {
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-50 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 sm:px-6"
+      className="install-banner-root fixed inset-x-0 bottom-0 z-50 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 sm:px-6"
       role="region"
       aria-label="Install Womanie"
     >
