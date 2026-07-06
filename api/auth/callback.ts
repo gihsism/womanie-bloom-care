@@ -3,12 +3,20 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import * as jose from 'jose';
 import { getAuthSecret } from '../_lib/auth.js';
 import { withSentry } from '../_lib/sentry.js';
+import { readCookie, safeEqual, clearStateCookie, STATE_COOKIE } from '../_lib/oauth-state.js';
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    const { code } = req.query;
+    const { code, state } = req.query;
     if (!code || typeof code !== 'string') {
       return res.redirect(302, '/auth/login?error=no_code');
+    }
+
+    // CSRF check: the `state` Google echoed back must match the cookie we
+    // set at /api/auth/google. Reject before spending the code otherwise.
+    const cookieState = readCookie(req.headers.cookie, STATE_COOKIE);
+    if (typeof state !== 'string' || !safeEqual(state, cookieState)) {
+      return res.redirect(302, '/auth/login?error=bad_state');
     }
 
     const siteUrl = process.env.SITE_URL || 'https://womanie.info';
@@ -96,8 +104,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       .setExpirationTime('30d')
       .sign(getAuthSecret());
 
-    // Set cookie and redirect
-    res.setHeader('Set-Cookie', `womanie_session=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}`);
+    // Set the session cookie and clear the now-consumed CSRF state cookie.
+    res.setHeader('Set-Cookie', [
+      `womanie_session=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}`,
+      clearStateCookie(),
+    ]);
     res.redirect(302, '/welcome');
   } catch (error) {
     // Log full details server-side (also captured by Sentry); never leak

@@ -2162,3 +2162,13 @@ Reviewed and confirmed CORRECT (no change needed):
   to login-CSRF / session-fixation. Fixing is two-sided (set a state cookie
   at login initiation + verify it in callback) — flagged rather than
   rewritten blind. Worth doing with Alena's awareness.
+
+### 2026-07-06 (resumed) — OAuth CSRF (`state`) protection
+Closed the needs-Alena OAuth item flagged 2026-06-15. The Google login
+flow now mints a random state token (api/_lib/oauth-state.ts), stores it
+in a short-lived HttpOnly cookie at /api/auth/google, echoes it to Google
+as `state`, and /api/auth/callback verifies it (constant-time compare)
+before spending the code — rejecting login-CSRF / session-fixation with
+?error=bad_state. State cookie cleared once consumed. +10 tests
+(token shape, safe-equal empty-guards, cookie parse incl. suffix-name
+confusion, cookie flags). Suite 150 -> 160. Both sides deploy together.
