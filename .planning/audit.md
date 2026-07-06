@@ -2172,3 +2172,16 @@ before spending the code — rejecting login-CSRF / session-fixation with
 ?error=bad_state. State cookie cleared once consumed. +10 tests
 (token shape, safe-equal empty-guards, cookie parse incl. suffix-name
 confusion, cookie flags). Suite 150 -> 160. Both sides deploy together.
+
+### 2026-07-06 — component-test tooling (Alena's pick)
+Added the jsdom/@testing-library harness so UI components can be unit-
+tested (was the other needs-Alena item). Installed via npm (the source-
+of-truth PM: package-lock.json maintained Jun 11, bun.lock frozen at the
+Mar scaffold, bun not installed). jsdom + @testing-library/react+dom+
+jest-dom+user-event as devDeps. vitest routes src/**/*.test.tsx to jsdom
+via environmentMatchGlobs (node stays default so the pure-logic suite stays
+fast); src/test/setup.ts registers jest-dom matchers + guarded DOM cleanup.
+First component test (OfflineIndicator, 3 cases) proves the harness end-to-
+end. Suite 160 -> 163. Component coverage for the other new UI pieces
+(InstallBanner needs matchMedia/Router stubs, ScrollToTop needs Router) can
+follow now that the harness exists.

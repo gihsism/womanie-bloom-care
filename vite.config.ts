@@ -135,10 +135,13 @@ export default defineConfig(() => ({
     },
   },
   test: {
-    // Unit tests for pure logic (cycle math, lab interpretation, etc.).
-    // node environment is enough today since the first tests cover pure
-    // utils; switch to jsdom here if/when we add component tests.
+    // Pure-logic tests (cycle math, lab interpretation, api utils) run in
+    // the fast node environment by default. Component tests — file suffix
+    // .test.tsx under src/ — opt into jsdom via environmentMatchGlobs so
+    // they get a DOM without slowing down the node suite.
     environment: "node",
+    environmentMatchGlobs: [["src/**/*.test.tsx", "jsdom"]],
+    setupFiles: ["./src/test/setup.ts"],
     include: [
       "src/**/*.{test,spec}.{ts,tsx}",
       // The api/ layer is pure-Node serverless handlers; its dependency-free
