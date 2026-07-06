@@ -11,6 +11,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { InstallBanner } from "@/components/InstallBanner";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { BottomNav } from "@/components/BottomNav";
 import { Loader2 } from "lucide-react";
 
 // Custom auth — no third-party dependency
@@ -143,6 +144,7 @@ const App = () => (
                 </Routes>
               </Suspense>
             </ErrorBoundary>
+            <BottomNav />
           </BrowserRouter>
         </OnboardingProvider>
       </AuthProvider>

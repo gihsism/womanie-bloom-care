@@ -2185,3 +2185,15 @@ First component test (OfflineIndicator, 3 cases) proves the harness end-to-
 end. Suite 160 -> 163. Component coverage for the other new UI pieces
 (InstallBanner needs matchMedia/Router stubs, ScrollToTop needs Router) can
 follow now that the harness exists.
+
+### 2026-07-06 — mobile bottom tab bar (48h arc)
+Added src/components/BottomNav.tsx: mobile-only (md:hidden — desktop keeps
+the dropdown) fixed bottom tab bar with 5 tabs (Home, Records, Ask AI,
+Visits, Settings), active-route highlighting, safe-area inset. Shown only
+on /dashboard* (off marketing/auth/onboarding/doctor/print). Mounted once
+in App.tsx. Content clearance via a body.has-bottom-nav class + a mobile
+padding-bottom rule in index.css so the fixed bar never covers content.
++5 component tests. Suite 170 -> 175.
+NEEDS ALENA: review live on phone at womanie.info — check the AI Doctor
+chat page (input vs bar spacing) and overall feel. One-commit revert if
+not wanted.

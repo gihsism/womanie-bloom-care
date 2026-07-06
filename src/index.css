@@ -157,6 +157,16 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
+
+  /* When the mobile bottom tab bar is visible (BottomNav toggles this
+     class), pad the page so the fixed bar never covers the last row of
+     content. Bar is h-16 (4rem) + the device safe-area inset; only on
+     small screens where the bar itself shows (md:hidden). */
+  @media (max-width: 767px) {
+    body.has-bottom-nav {
+      padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+    }
+  }
 }
 
 @layer utilities {
