@@ -8,8 +8,9 @@ import { useToast } from '@/hooks/use-toast';
 import { db } from '@/integrations/db/client';
 import { CalendarClock, Video, MapPin, Stethoscope, ShieldCheck, X, CalendarCog } from 'lucide-react';
 import RescheduleDialog from './RescheduleDialog';
-import { format, formatDistanceToNowStrict, isToday, isTomorrow } from 'date-fns';
+import { format, formatDistanceToNowStrict } from 'date-fns';
 import { errorMessage } from '@/lib/errors';
+import { relativeDay } from '@/lib/relative-day';
 import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
 
 // Upcoming consultations on the patient dashboard. Patients can already
@@ -34,16 +35,6 @@ interface AppointmentRow {
 }
 
 const VISIBLE_LIMIT = 3;
-
-function relativeDay(d: Date): string {
-  if (isToday(d)) return 'Today';
-  if (isTomorrow(d)) return 'Tomorrow';
-  // Within the next 6 days, lead with the weekday so "Thursday" reads
-  // more naturally than "Apr 24" for near-term appointments.
-  const days = Math.round((d.getTime() - Date.now()) / 86_400_000);
-  if (days >= 0 && days < 7) return format(d, 'EEEE');
-  return format(d, 'MMM d');
-}
 
 export default function UpcomingAppointments() {
   const navigate = useNavigate();
