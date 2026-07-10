@@ -2222,3 +2222,12 @@ Neon transaction (delete + per-day inserts), doctor_id pinned to the
 session user, with HH:MM + day-range + end>start validation. Client swaps
 the two db calls for the endpoint. Same atomicity class as the earlier
 docs/delete + analyze-document fixes. tsc/lint/build/178 tests green.
+
+### 2026-07-06 — redeem-code hardening (single-use + rate-limit)
+connections/redeem-code.ts did SELECT is_used=false then a later UPDATE,
+so two concurrent redemptions of one code could both pass — not truly
+single-use. Replaced with an atomic UPDATE ... WHERE is_used=false
+RETURNING claim (race-safe), with rollback of the claim if the connection
+insert fails so a transient error doesn't burn the patient's code. Added
+a per-doctor rate limit (20) to stop code brute-forcing. Reviewed
+connections/respond.ts too — correctly patient-only + state-guarded.
