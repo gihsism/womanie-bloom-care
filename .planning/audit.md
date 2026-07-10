@@ -2246,3 +2246,10 @@ Also reviewed (all correct): connections/respond (patient-only, state-
 guarded), chart-access (patient-scoped), doctors/availability (only
 start+duration, no identity leak), connections/pending + approved
 (patient-scoped reads).
+
+- **Core-algorithm coverage: useCyclePrediction main hook** (renderHook).
+  Previously only its exported helpers were tested; now the central
+  prediction logic is locked: tier selection (1 population / 2 onboarding /
+  3 few-cycles / 4 personal-pattern), derived averages, implausible-cycle
+  exclusion, manual-override precedence, and the 14-day ovulation +
+  fertile-window offsets. Suite 185 -> 192.
