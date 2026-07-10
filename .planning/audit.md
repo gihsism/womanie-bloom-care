@@ -2231,3 +2231,18 @@ RETURNING claim (race-safe), with rollback of the claim if the connection
 insert fails so a transient error doesn't burn the patient's code. Added
 a per-doctor rate limit (20) to stop code brute-forcing. Reviewed
 connections/respond.ts too — correctly patient-only + state-guarded.
+
+### 2026-07-10 — consent leak fix: doctors/connections pre-approval health data
+**Privacy bug.** /api/doctors/connections filtered only by doctor_id (no
+status), and the doctor UI renders pending connections in the patient
+list — so a doctor saw an unapproved patient's life_stage + document
+activity (last_upload_at, recent_doc_count) before the patient approved.
+The endpoint comment even claimed it was 'consent-gated the same way' as
+/api/doctors/patient, but it wasn't. Gated life_stage + activity on
+status='approved' (NULL for pending) via CASE; UI already tolerates null.
+Patient NAME still shows for pending (they initiated via booking/code) —
+flagged for Alena if she wants that gated too.
+Also reviewed (all correct): connections/respond (patient-only, state-
+guarded), chart-access (patient-scoped), doctors/availability (only
+start+duration, no identity leak), connections/pending + approved
+(patient-scoped reads).

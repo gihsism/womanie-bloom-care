@@ -7,9 +7,13 @@ import { withSentry } from '../_lib/sentry.js';
 // against profiles so the UI can show the patient's actual name instead of
 // "Patient #abc12345". The /api/db generic router can't join across tables
 // and pins the visible profiles row to the session user, so doctors going
-// through it see no names. This endpoint sits next to /api/doctors/patient
-// and is consent-gated the same way: only rows where doctor_id matches the
-// caller are returned.
+// through it see no names.
+//
+// Consent: only the calling doctor's own connection rows are returned, and
+// the patient's health-derived fields (life stage, document activity) are
+// exposed ONLY once the connection is 'approved'. Pending rows still surface
+// the name — the patient initiated contact by booking or sharing a code —
+// but not their health data, matching the /api/doctors/patient gate.
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -23,13 +27,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const sql = neon(process.env.DATABASE_URL!);
-    // Adds patient activity signal so the doctor's connected-patients list
-    // can sort by recency and flag patients with new uploads:
+    // Patient activity signal for the connected-patients list (sort by
+    // recency, flag new uploads):
     //   - last_upload_at: most recent health_documents row for the patient
     //   - recent_doc_count: count of docs uploaded in the last 14 days
-    // These are LATERAL subqueries scoped to c.patient_id so they don't
-    // leak data — a connection row only surfaces patient activity if the
-    // doctor already has the connection.
+    // life_stage + these activity fields are health data, so they are gated
+    // on status='approved' (NULL for pending) — a pending connection must
+    // not reveal the patient's health information before they consent.
     const rows = await sql.query(
       `SELECT
          c.id,
@@ -39,9 +43,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
          c.connection_type,
          c.created_at,
          p.full_name AS patient_full_name,
-         p.life_stage AS patient_life_stage,
-         u.last_upload_at,
-         u.recent_doc_count
+         CASE WHEN c.status = 'approved' THEN p.life_stage END AS patient_life_stage,
+         CASE WHEN c.status = 'approved' THEN u.last_upload_at END AS last_upload_at,
+         CASE WHEN c.status = 'approved' THEN u.recent_doc_count END AS recent_doc_count
        FROM doctor_patient_connections c
        LEFT JOIN profiles p ON p.id = c.patient_id
        LEFT JOIN LATERAL (
