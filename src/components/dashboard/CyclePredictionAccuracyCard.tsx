@@ -4,7 +4,8 @@ import { Target, Info } from 'lucide-react';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
-import { differenceInDays, format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
+import { scorePredictions, type ScoredPrediction } from '@/lib/prediction-accuracy';
 import type { LifeStage } from './DashboardHeader';
 
 // Builds trust in the cycle predictor by retrospectively scoring it.
@@ -24,26 +25,9 @@ interface PeriodRow {
   period_start_date: string;
 }
 
-interface ScoredPrediction {
-  actual: Date;
-  predicted: Date;
-  deltaDays: number; // actual - predicted, signed
-  basedOnNCycles: number;
-}
-
 const RELEVANT_MODES: LifeStage[] = [
   'menstrual-cycle', 'conception', 'pre-menstrual', 'contraception',
 ];
-
-const MIN_VALID_CYCLE = 18;
-const MAX_VALID_CYCLE = 60;
-
-function median(values: number[]): number {
-  if (values.length === 0) return 0;
-  const sorted = [...values].sort((a, b) => a - b);
-  const m = Math.floor(sorted.length / 2);
-  return sorted.length % 2 !== 0 ? sorted[m] : (sorted[m - 1] + sorted[m]) / 2;
-}
 
 interface Props {
   mode: LifeStage;
@@ -68,35 +52,10 @@ export default function CyclePredictionAccuracyCard({ mode }: Props) {
   useEffect(() => { load(); }, [load]);
   useEffect(() => onHealthDataChange(load), [load]);
 
-  const scored = useMemo<ScoredPrediction[]>(() => {
-    if (rows.length < 4) return [];
-
-    // For each period starting at index i (where i >= 2), use the
-    // cycle gaps from indices [0..i-1] to predict where period i
-    // *would* have started, then compare to the actual date.
-    const out: ScoredPrediction[] = [];
-    for (let i = 2; i < rows.length; i++) {
-      const priorStarts = rows.slice(0, i).map(r => parseISO(r.period_start_date));
-      // Cycle gaps between consecutive prior starts.
-      const gaps: number[] = [];
-      for (let j = 1; j < priorStarts.length; j++) {
-        const g = differenceInDays(priorStarts[j], priorStarts[j - 1]);
-        if (g >= MIN_VALID_CYCLE && g <= MAX_VALID_CYCLE) gaps.push(g);
-      }
-      if (gaps.length === 0) continue;
-      const recent = gaps.slice(-6); // weight to recent cycles
-      const med = Math.round(median(recent));
-      const lastPriorStart = priorStarts[priorStarts.length - 1];
-      const predicted = new Date(lastPriorStart);
-      predicted.setDate(predicted.getDate() + med);
-      const actual = parseISO(rows[i].period_start_date);
-      const deltaDays = differenceInDays(actual, predicted);
-      // Skip extreme outliers (likely missed entries between).
-      if (Math.abs(deltaDays) > 30) continue;
-      out.push({ actual, predicted, deltaDays, basedOnNCycles: recent.length });
-    }
-    return out.slice(-4); // last 4 scoreable predictions
-  }, [rows]);
+  const scored = useMemo<ScoredPrediction[]>(
+    () => scorePredictions(rows.map(r => r.period_start_date)),
+    [rows]
+  );
 
   if (!RELEVANT_MODES.includes(mode)) return null;
   if (!loaded) return null;
