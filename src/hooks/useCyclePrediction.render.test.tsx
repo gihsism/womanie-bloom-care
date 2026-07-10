@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { differenceInDays } from "date-fns";
 import { useCyclePrediction, type PeriodRecord } from "./useCyclePrediction";
+import type { UserHealthContext } from "./useUserHealthContext";
 
 // Exercises the core prediction hook end-to-end (tier selection, averages,
 // confidence, and the ovulation/fertile-window offsets). The exported
@@ -86,5 +87,78 @@ describe("useCyclePrediction (core hook)", () => {
     // Fertile window: ovulation - 5 .. ovulation + 1.
     expect(differenceInDays(p.predictedOvulationDate, p.fertileWindowStart)).toBe(5);
     expect(differenceInDays(p.fertileWindowEnd, p.predictedOvulationDate)).toBe(1);
+  });
+});
+
+// Minimal health-context builder; all flags null / no labs unless overridden.
+function hc(over: Partial<UserHealthContext>): UserHealthContext {
+  return {
+    loaded: true,
+    age: null,
+    ageBracket: null,
+    amhAssessment: null,
+    labs: {},
+    tshOutOfRange: null,
+    highFsh: null,
+    menopausalFsh: null,
+    pcosLhFshPattern: null,
+    highProlactin: null,
+    highTestosterone: null,
+    ...over,
+  } as unknown as UserHealthContext;
+}
+const lab = (value: number) => ({ value }) as UserHealthContext["labs"]["tsh"];
+
+const fourCycles: PeriodRecord[] = [
+  rec("2026-03-26"),
+  rec("2026-02-26"),
+  rec("2026-01-29"),
+  rec("2026-01-01"),
+];
+
+describe("useCyclePrediction — lab-driven caveats", () => {
+  it("adds no risk factors and does not age-adjust without a health context", () => {
+    const p = predict({ periodRecords: [], daySignals: {} });
+    expect(p.riskFactors).toEqual([]);
+    expect(p.ageAdjusted).toBe(false);
+  });
+
+  it("flags out-of-range TSH and widens the confidence window", () => {
+    const p = predict({
+      periodRecords: [],
+      daySignals: {},
+      healthContext: hc({ tshOutOfRange: true, labs: { tsh: lab(5.2) } }),
+    });
+    expect(p.riskFactors.some((r) => /TSH 5\.2 mIU\/L is outside/.test(r))).toBe(true);
+    expect(p.confidenceWindow).toBeGreaterThan(1); // widened past the regular baseline
+  });
+
+  it("uses the menopausal-FSH message when FSH is in the menopausal range", () => {
+    const p = predict({
+      periodRecords: [],
+      daySignals: {},
+      healthContext: hc({ menopausalFsh: true, highFsh: true, labs: { fsh: lab(30) } }),
+    });
+    expect(p.riskFactors.some((r) => /menopausal range/.test(r))).toBe(true);
+    expect(p.riskFactors.some((r) => /above 10/.test(r))).toBe(false); // not both messages
+  });
+
+  it("flags the PCOS LH/FSH pattern", () => {
+    const p = predict({
+      periodRecords: [],
+      daySignals: {},
+      healthContext: hc({ pcosLhFshPattern: true }),
+    });
+    expect(p.riskFactors.some((r) => /PCOS pattern/.test(r))).toBe(true);
+  });
+
+  it("age-adjusts and adds a perimenopausal caveat at 40+ with enough cycles", () => {
+    const p = predict({
+      periodRecords: fourCycles,
+      daySignals: {},
+      healthContext: hc({ age: 45 }),
+    });
+    expect(p.ageAdjusted).toBe(true);
+    expect(p.riskFactors.some((r) => /Perimenopausal range \(age 45\)/.test(r))).toBe(true);
   });
 });
