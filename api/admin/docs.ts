@@ -1,14 +1,18 @@
 import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getAuthUser } from '../_lib/auth.js';
+import { getAdminUser } from '../_lib/admin.js';
 import { withSentry } from '../_lib/sentry.js';
 
 // Combined admin-docs endpoint (fits the Hobby-plan function cap):
 //   GET  /api/admin/docs  → diagnose user_id groupings in health_documents
 //   POST /api/admin/docs  { oldUserId } → claim rows from an orphan id
+//
+// Admin-only (ADMIN_EMAILS). GET lists every user's id + email + doc
+// counts, and POST can move orphaned medical records onto the caller's
+// account — neither is safe for an ordinary signed-in user.
 async function handler(req: VercelRequest, res: VercelResponse) {
-  const user = await getAuthUser(req);
-  if (!user) return res.status(401).json({ error: 'Not authenticated' });
+  const user = await getAdminUser(req);
+  if (!user) return res.status(403).json({ error: 'Forbidden' });
 
   const sql = neon(process.env.DATABASE_URL!);
 

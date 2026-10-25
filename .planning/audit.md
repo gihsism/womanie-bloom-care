@@ -189,6 +189,18 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-10-25 — security fix: /api/admin/docs had no admin gate
+Found by the daily cloud routine (its push was blocked, so re-applied
+locally). The endpoint only checked "signed in", so ANY patient or doctor
+could GET every user's id + email + document counts, and POST could move
+orphaned medical records (ids with no auth_users row) onto their own
+account. Now gated by getAdminUser (ADMIN_EMAILS, fails closed), 403
+otherwise. The /dashboard/recover-documents page that uses it is not
+linked in the UI, so no patient flow changes. NOTE: ADMIN_EMAILS must be
+set in Vercel for the admin to keep using the recovery page.
+Also found: the cloud routine has never been able to push (Claude GitHub
+App lacks repo access) — every daily run since Aug was lost.
+
 ### 2026-06-14 (session 66 — make it installable as a phone app)
 
 Alena asked to "continue improving" and "prepare it so it works as an
