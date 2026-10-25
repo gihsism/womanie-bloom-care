@@ -189,6 +189,19 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-10-25 (evening) — deploys unblocked; everything live
+Vercel error was exceeded_serverless_functions_per_deployment: account is
+on Hobby (12-function cap), project had 38. Moved 33 config-free handlers
+to api/_routes/ behind api/router.ts + a vercel.json rewrite (URLs
+unchanged); 38 -> 6 functions. Deployed 85b0ad9; live-verified signed out
+(all routes, 403/401/404, redirects) and signed in with the E2E account
+(login, /api/db, appointments, fake verified-doctor insert -> 403, old
+token -> 401 after logout). ADMIN_EMAILS is set in prod.
+NEW RULE: adding a file under api/ adds a function — put new handlers in
+api/_routes/ and register them in api/router.ts (router.test enforces).
+Still blocked: cloud routine can't push until the Claude GitHub App is
+installed on the repo (needs Alena's GitHub sign-in).
+
 ### 2026-10-25 (later) — backlog the cloud routine found but couldn't push
 Recovered from the routine's run logs and re-done by hand, each verified
 (tsc / 232 tests / vite build): sessions now really end on logout /
