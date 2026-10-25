@@ -4,6 +4,12 @@ import * as jose from 'jose';
 import bcrypt from 'bcryptjs';
 import { getAuthSecret } from '../_lib/auth.js';
 import { withSentry } from '../_lib/sentry.js';
+import { checkAndConsume } from '../_lib/ratelimit.js';
+
+// Brute-force brakes (per warm pod, see ratelimit.ts): attempts per IP and
+// per target email per day. Generous enough that a real user never hits them.
+const ATTEMPTS_PER_IP_PER_DAY = 100;
+const ATTEMPTS_PER_EMAIL_PER_DAY = 30;
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -17,6 +23,19 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const ip =
+      (typeof req.headers['x-forwarded-for'] === 'string'
+        ? req.headers['x-forwarded-for'].split(',')[0].trim()
+        : null) || req.socket?.remoteAddress || 'unknown';
+    const byIp = checkAndConsume('login-ip', ip, ATTEMPTS_PER_IP_PER_DAY);
+    const byEmail = checkAndConsume('login-email', String(email).toLowerCase(), ATTEMPTS_PER_EMAIL_PER_DAY);
+    if (!byIp.ok || !byEmail.ok) {
+      return res.status(429).json({
+        error: 'Too many sign-in attempts. Please try again later, or use "Forgot password?".',
+        retryInSec: Math.max(byIp.retryInSec, byEmail.retryInSec),
+      });
     }
 
     const sql = neon(process.env.DATABASE_URL!);
