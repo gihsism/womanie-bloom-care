@@ -94,4 +94,9 @@ describe("getPredictionMessage", () => {
     // 2026-01-20 ± 2 days => Jan 18-22
     expect(getPredictionMessage(base({ isRegular: false, confidenceWindow: 2 }))).toBe("Expected Jan 18-22");
   });
+
+  it("names both months when the window crosses a month boundary", () => {
+    const p = base({ isRegular: false, confidenceWindow: 3, predictedPeriodStart: new Date(2026, 0, 30) });
+    expect(getPredictionMessage(p)).toBe("Expected Jan 27-Feb 2");
+  });
 });

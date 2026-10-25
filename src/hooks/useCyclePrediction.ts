@@ -414,5 +414,8 @@ export function getPredictionMessage(prediction: CyclePrediction): string {
   }
   const rangeStart = addDays(prediction.predictedPeriodStart, -prediction.confidenceWindow);
   const rangeEnd = addDays(prediction.predictedPeriodStart, prediction.confidenceWindow);
-  return `Expected ${format(rangeStart, 'MMM d')}-${format(rangeEnd, 'd')}`;
+  // Repeat the month when the window crosses into the next one
+  // ("Jan 29-Feb 4", not "Jan 29-4").
+  const endFmt = rangeStart.getMonth() === rangeEnd.getMonth() ? 'd' : 'MMM d';
+  return `Expected ${format(rangeStart, 'MMM d')}-${format(rangeEnd, endFmt)}`;
 }
