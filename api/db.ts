@@ -38,6 +38,20 @@ const WRITE_BLOCKED: Set<string> = new Set([
   'user_roles',
 ]);
 
+// Rows that may be edited but not CREATED through /api/db. doctor_profiles
+// rows are created by /api/auth/doctor-signup (pending verification); a
+// client-side insert would let any patient mint their own doctor profile.
+const INSERT_BLOCKED: Set<string> = new Set([
+  'doctor_profiles',
+]);
+
+// Columns only server endpoints may write. is_verified/verification_status
+// are flipped by /api/admin/doctors on approval; letting the owner set them
+// would put an unvetted "verified doctor" in every patient's directory.
+const PROTECTED_COLUMNS: Record<string, string[]> = {
+  doctor_profiles: ['is_verified', 'verification_status', 'rating', 'review_count'],
+};
+
 function ownerCols(table: string): string[] | null {
   const o = OWNER_COLUMN[table];
   if (!o) return null;
@@ -79,6 +93,19 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       (operation === 'insert' || operation === 'update' || operation === 'upsert' || operation === 'delete')
     ) {
       return res.status(403).json({ error: `Table is read-only via /api/db: ${table}` });
+    }
+    if (INSERT_BLOCKED.has(table) && (operation === 'insert' || operation === 'upsert')) {
+      return res.status(403).json({ error: `Rows can't be created via /api/db: ${table}` });
+    }
+    if (operation === 'insert' || operation === 'update' || operation === 'upsert') {
+      const raw = operation === 'insert' ? insertData : operation === 'update' ? updateData : upsertData;
+      const rows = Array.isArray(raw) ? raw : [raw];
+      const blocked = (PROTECTED_COLUMNS[table] ?? []).filter(c =>
+        rows.some(r => r && typeof r === 'object' && c in r)
+      );
+      if (blocked.length) {
+        return res.status(403).json({ error: `Column(s) not writable via /api/db: ${blocked.join(', ')}` });
+      }
     }
 
     // Ownership enforcement — reads / updates / deletes.
@@ -163,8 +190,21 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       const values = keys.map(k => data[k]);
       const conflictKeys = conflictCol.split(',').map((c: string) => c.trim());
       const updateClauses = keys.filter(k => !conflictKeys.includes(k) && !cols.includes(k)).map(k => `${k} = EXCLUDED.${k}`);
-      query = `INSERT INTO ${table} (${keys.join(', ')}) VALUES (${keys.map(() => `$${paramIdx++}`).join(', ')}) ON CONFLICT (${conflictCol}) DO UPDATE SET ${updateClauses.join(', ')} RETURNING *`;
+      const placeholders = keys.map(() => `$${paramIdx++}`).join(', ');
+      // The ownership check above only vets the INCOMING row. On conflict the
+      // EXISTING row is updated, so it must also belong to the caller —
+      // otherwise an upsert carrying another user's row id would overwrite
+      // that row and RETURNING * would hand it back. With nothing to update,
+      // DO NOTHING (an empty SET list is invalid SQL).
+      let onConflict = 'DO NOTHING';
       params = values;
+      if (updateClauses.length) {
+        const ownerParam = `$${paramIdx++}`;
+        const ownerGuard = cols.map(c => `${table}.${c} = ${ownerParam}`).join(' OR ');
+        onConflict = `DO UPDATE SET ${updateClauses.join(', ')} WHERE ${ownerGuard}`;
+        params = [...values, user.id];
+      }
+      query = `INSERT INTO ${table} (${keys.join(', ')}) VALUES (${placeholders}) ON CONFLICT (${conflictCol}) ${onConflict} RETURNING *`;
     } else if (operation === 'delete') {
       query = `DELETE FROM ${table}`;
     } else {
