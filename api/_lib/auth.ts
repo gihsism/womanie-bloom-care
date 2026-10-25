@@ -1,5 +1,6 @@
 import type { VercelRequest } from '@vercel/node';
 import * as jose from 'jose';
+import { neon } from '@neondatabase/serverless';
 
 export function getAuthSecret(): Uint8Array {
   const secret = process.env.AUTH_SECRET;
@@ -25,6 +26,16 @@ export async function getAuthUser(req: VercelRequest): Promise<AuthUser | null> 
 
   try {
     const { payload } = await jose.jwtVerify(match[1], getAuthSecret());
+    // A valid signature isn't enough: logout, password change and account
+    // deletion revoke by deleting the auth_sessions row, so the token must
+    // still map to a live session (same check as /api/auth/me).
+    if (!payload.sid || !payload.sub) return null;
+    const sql = neon(process.env.DATABASE_URL!);
+    const live = await sql.query(
+      'SELECT 1 FROM auth_sessions WHERE id = $1 AND user_id = $2 AND expires_at > now()',
+      [payload.sid, payload.sub]
+    );
+    if (live.length === 0) return null;
     return {
       id: payload.sub as string,
       email: payload.email as string | undefined,
