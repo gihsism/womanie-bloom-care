@@ -3,6 +3,9 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from '../../_lib/auth.js';
 import { withSentry } from '../../_lib/sentry.js';
 
+// Upper bound on a localStorage history import (see POST).
+const MAX_IMPORT = 500;
+
 async function handler(req: VercelRequest, res: VercelResponse) {
   const user = await getAuthUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
@@ -64,16 +67,29 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ imported: 0, reason: 'user already has messages' });
     }
 
-    let imported = 0;
-    for (const m of messages) {
-      if (!m || (m.role !== 'user' && m.role !== 'assistant')) continue;
-      if (typeof m.content !== 'string' || !m.content) continue;
-      await sql.query(
-        'INSERT INTO chat_messages (user_id, role, content) VALUES ($1, $2, $3)',
-        [user.id, m.role, m.content]
-      );
-      imported++;
-    }
+    // One multi-row INSERT: all-or-nothing, so a timeout can't leave a
+    // partial history that then blocks the rest (the zero-messages guard
+    // above) while the client keeps its local copy. Capped to the most
+    // recent MAX_IMPORT messages; created_at is staggered by ordinality so
+    // the oldest-first order survives the shared now().
+    const valid = messages
+      .filter((m: unknown): m is { role: string; content: string } => {
+        const r = m as { role?: unknown; content?: unknown } | null;
+        return !!r && (r.role === 'user' || r.role === 'assistant') &&
+          typeof r.content === 'string' && r.content.length > 0;
+      })
+      .slice(-MAX_IMPORT);
+    if (valid.length === 0) return res.status(200).json({ imported: 0 });
+
+    const rows = await sql.query(
+      `INSERT INTO chat_messages (user_id, role, content, created_at)
+       SELECT $1, m.role, m.content,
+              now() - (($4::int - m.ord) * interval '1 millisecond')
+         FROM unnest($2::text[], $3::text[]) WITH ORDINALITY AS m(role, content, ord)
+       RETURNING id`,
+      [user.id, valid.map(m => m.role), valid.map(m => m.content), valid.length]
+    );
+    const imported = rows.length;
     return res.status(200).json({ imported });
   }
 
