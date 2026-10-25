@@ -189,6 +189,25 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-10-25 (later) — backlog the cloud routine found but couldn't push
+Recovered from the routine's run logs and re-done by hand, each verified
+(tsc / 232 tests / vite build): sessions now really end on logout /
+password change (getAuthUser checks auth_sessions, +5 tests); login rate
+limit (100/IP, 30/email per day); account deletion erases chart_access_log;
+chart-access log shows doctor specialties; patient + doctor signup atomic
+(proven: Neon transaction rolls back together); npm audit fix non-breaking
+(56 -> 20, Capacitor critical fixed; remaining criticals dev-only vitest).
+New, found while fixing: /api/db upsert could overwrite another user's row
+by id (now owner-guarded, proven on Postgres); any user could create a
+doctor_profiles row with is_verified=true and appear in the patient
+directory (inserts + verification columns now server-only; prod has no
+such rows). Still open from the routine's list: ovulation indicators read
+the wrong discharge values / BBT+LH from notes; cross-month prediction
+label; chat-history import one-row-at-a-time.
+BLOCKER: every Vercel deploy since today fails after a successful build
+(local `vercel build` completes; same 38 functions as the July deploy).
+Suspect an account/plan limit. Needs `vercel login` to read the logs.
+
 ### 2026-10-25 — security fix: /api/admin/docs had no admin gate
 Found by the daily cloud routine (its push was blocked, so re-applied
 locally). The endpoint only checked "signed in", so ANY patient or doctor
