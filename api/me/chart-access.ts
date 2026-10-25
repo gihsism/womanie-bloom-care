@@ -23,7 +23,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const rows = await sql.query(
       `SELECT l.id, l.viewed_at, l.surface,
               dp.full_name AS doctor_name,
-              dp.specialty AS doctor_specialty,
+              COALESCE(NULLIF(array_to_string(dp.specialties, ', '), ''), dp.specialty) AS doctor_specialty,
               dp.avatar_url AS doctor_avatar_url
          FROM chart_access_log l
          LEFT JOIN doctor_profiles dp ON dp.user_id = l.doctor_id
