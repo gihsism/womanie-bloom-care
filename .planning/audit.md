@@ -189,6 +189,14 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-10-26 — GDPR erasure gap: account deletion now removes newsletter subscription
+Deleting your account left your email in newsletter_subscribers (the table
+is email-keyed, not user_id-keyed, so it was invisible to the DELETE sweep).
+Fix: api/_routes/me/delete-account.ts queries the canonical email from
+auth_users before the transaction, then includes a DELETE from
+newsletter_subscribers inside the same atomic block. No-op if the user never
+subscribed. Verified: tsc 0, eslint 0, 241/241 tests, vite build clean.
+
 ### 2026-10-25 (night) — last three routine findings closed
 Cross-month prediction label ("Jan 27-Feb 2"); ovulation indicators now
 read the stored values (ewcm/watery, BBT + LH from notes) — live-verified

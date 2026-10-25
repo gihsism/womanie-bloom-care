@@ -37,6 +37,16 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const sql = neon(process.env.DATABASE_URL!);
 
   try {
+    // Resolve the canonical email before the transaction erases auth_users,
+    // so we can also unsubscribe from the newsletter (keyed by email, not
+    // user_id — otherwise deleting the account silently leaves the email on
+    // the mailing list, violating GDPR right to erasure).
+    const emailRows = await sql.query(
+      'SELECT email FROM auth_users WHERE id = $1',
+      [user.id]
+    ) as Array<{ email: string }>;
+    const canonicalEmail = emailRows[0]?.email ?? null;
+
     // Tables to wipe, in dependency order: children first, parents
     // last. The transaction commits atomically so we never leave a
     // half-deleted user behind.
@@ -59,6 +69,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       sql`DELETE FROM user_roles WHERE user_id = ${user.id}`,
       sql`DELETE FROM profiles WHERE id = ${user.id}`,
       sql`DELETE FROM auth_sessions WHERE user_id = ${user.id}`,
+      ...(canonicalEmail ? [sql`DELETE FROM newsletter_subscribers WHERE email = ${canonicalEmail}`] : []),
       sql`DELETE FROM auth_users WHERE id = ${user.id}`,
     ]);
 
