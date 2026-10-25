@@ -189,6 +189,12 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-10-25 (night) — last three routine findings closed
+Cross-month prediction label ("Jan 27-Feb 2"); ovulation indicators now
+read the stored values (ewcm/watery, BBT + LH from notes) — live-verified
+all three indicators fire; chat-history import is one atomic capped insert
+(verified on Postgres). Suite 241. Routine backlog is empty.
+
 ### 2026-10-25 (evening) — deploys unblocked; everything live
 Vercel error was exceeded_serverless_functions_per_deployment: account is
 on Hobby (12-function cap), project had 38. Moved 33 config-free handlers
