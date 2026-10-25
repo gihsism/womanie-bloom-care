@@ -34,25 +34,26 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const passwordHash = await bcrypt.hash(password, 10);
     const userId = 'user_' + crypto.randomUUID().replace(/-/g, '').slice(0, 20);
 
-    await sql.query(
-      'INSERT INTO auth_users (id, email, name, password_hash) VALUES ($1, $2, $3, $4)',
-      [userId, email.toLowerCase(), name || null, passwordHash]
-    );
-
-    // Create profile
-    await sql.query(
-      'INSERT INTO profiles (id, full_name, life_stage) VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING',
-      [userId, name || null, 'menstrual-cycle']
-    );
-
-    // Create session
     const sessionId = 'sess_' + crypto.randomUUID().replace(/-/g, '').slice(0, 20);
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
-    await sql.query(
-      'INSERT INTO auth_sessions (id, user_id, expires_at) VALUES ($1, $2, $3)',
-      [sessionId, userId, expiresAt.toISOString()]
-    );
+    // User, profile and session in one transaction: if any insert fails the
+    // email isn't left registered without a profile (which would also block
+    // a retry with the 409 above).
+    await sql.transaction([
+      sql.query(
+        'INSERT INTO auth_users (id, email, name, password_hash) VALUES ($1, $2, $3, $4)',
+        [userId, email.toLowerCase(), name || null, passwordHash]
+      ),
+      sql.query(
+        'INSERT INTO profiles (id, full_name, life_stage) VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING',
+        [userId, name || null, 'menstrual-cycle']
+      ),
+      sql.query(
+        'INSERT INTO auth_sessions (id, user_id, expires_at) VALUES ($1, $2, $3)',
+        [sessionId, userId, expiresAt.toISOString()]
+      ),
+    ]);
 
     // Create JWT
     const token = await new jose.SignJWT({ sub: userId, sid: sessionId, email: email.toLowerCase(), name })

@@ -48,26 +48,29 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const passwordHash = await bcrypt.hash(password, 10);
     const userId = 'user_' + crypto.randomUUID().replace(/-/g, '').slice(0, 20);
 
-    await sql.query(
-      'INSERT INTO auth_users (id, email, name, password_hash) VALUES ($1, $2, $3, $4)',
-      [userId, emailLower, fullName, passwordHash]
-    );
-
-    // doctor_profiles with is_verified=false. Specialties is a text[]
-    // in the schema (per the session-5 /api/doctors/list select), so
-    // wrap the single specialty string into an array.
-    await sql.query(
-      `INSERT INTO doctor_profiles
-         (user_id, full_name, specialties, license_number, bio, is_verified, verification_status)
-       VALUES ($1, $2, $3, $4, $5, false, 'pending')`,
-      [
-        userId,
-        fullName,
-        specialty ? [specialty] : null,
-        licenseNumber,
-        bio ?? null,
-      ]
-    );
+    // Account + doctor profile in one transaction, so a failed profile
+    // insert can't leave a login with no profile (and the email taken).
+    await sql.transaction([
+      sql.query(
+        'INSERT INTO auth_users (id, email, name, password_hash) VALUES ($1, $2, $3, $4)',
+        [userId, emailLower, fullName, passwordHash]
+      ),
+      // doctor_profiles with is_verified=false. Specialties is a text[]
+      // in the schema (per the session-5 /api/doctors/list select), so
+      // wrap the single specialty string into an array.
+      sql.query(
+        `INSERT INTO doctor_profiles
+           (user_id, full_name, specialties, license_number, bio, is_verified, verification_status)
+         VALUES ($1, $2, $3, $4, $5, false, 'pending')`,
+        [
+          userId,
+          fullName,
+          specialty ? [specialty] : null,
+          licenseNumber,
+          bio ?? null,
+        ]
+      ),
+    ]);
 
     // Intentionally NOT inserting into user_roles. Admin approval is
     // required before the doctor can log into the professional
