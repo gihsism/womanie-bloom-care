@@ -52,6 +52,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       sql`DELETE FROM doctor_patient_connections WHERE patient_id = ${user.id} OR doctor_id = ${user.id}`,
       sql`DELETE FROM doctor_notes WHERE doctor_id = ${user.id} OR patient_id = ${user.id}`,
       sql`DELETE FROM appointments WHERE patient_id = ${user.id} OR doctor_id = ${user.id}`,
+      sql`DELETE FROM chart_access_log WHERE patient_id = ${user.id} OR doctor_id = ${user.id}`,
       sql`DELETE FROM doctor_schedule WHERE doctor_id = ${user.id}`,
       sql`DELETE FROM consultation_settings WHERE doctor_id = ${user.id}`,
       sql`DELETE FROM doctor_profiles WHERE user_id = ${user.id}`,
