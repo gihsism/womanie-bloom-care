@@ -48,6 +48,10 @@ async function handler(req: VercelRequest, res: VercelResponse) {
               'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             ],
             maximumSizeInBytes: 200 * 1024 * 1024,
+            // Blobs are publicly readable by URL, so the URL must be
+            // unguessable: without a random suffix it was
+            // <user id>/<ms timestamp>-<original file name>.
+            addRandomSuffix: true,
             tokenPayload: JSON.stringify({ userId: user.id }),
           };
         },
@@ -75,6 +79,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
       const blob = await put(filename, req, {
         access: 'public',
+        addRandomSuffix: true,
         token: process.env.BLOB_READ_WRITE_TOKEN,
       });
 
