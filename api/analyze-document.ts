@@ -4,6 +4,7 @@ import { getAuthUser } from './_lib/auth.js';
 import { normalizeTestTitle } from './_lib/normalize-test-title.js';
 import { normalizeUnit } from './_lib/normalize-unit.js';
 import { checkAndConsume } from './_lib/ratelimit.js';
+import { isBlobUrl } from './_lib/blob-url.js';
 import { withSentry } from './_lib/sentry.js';
 import { callAnthropicWithRetry } from './_lib/anthropic.js';
 import heicConvert from 'heic-convert';
@@ -98,13 +99,27 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
     if (!ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured');
 
-    const { documentId, userId, filePath, fileName, mimeType, timezone } = req.body;
+    const { documentId, userId, timezone } = req.body;
     if (!documentId || !userId) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     if (userId !== sessionUser.id) {
       return res.status(403).json({ error: 'Cannot analyze a document owned by another user' });
     }
+    // The file to analyse comes from the caller's own health_documents row,
+    // never from the request body: a client-supplied URL let the server
+    // fetch arbitrary addresses (SSRF) and analyse a document id that
+    // belongs to someone else.
+    const docRows = await sql.query(
+      'SELECT file_path, file_name, mime_type FROM health_documents WHERE id = $1 AND user_id = $2',
+      [documentId, sessionUser.id]
+    );
+    if (docRows.length === 0) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+    const filePath = docRows[0].file_path as string | null;
+    const fileName = (docRows[0].file_name as string | null) ?? req.body.fileName ?? '';
+    const mimeType = (docRows[0].mime_type as string | null) ?? req.body.mimeType ?? '';
 
     // "Today" gets embedded in the system prompt; compute it in the
     // user's timezone when the client sent one, so the model doesn't
@@ -123,7 +138,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Download file from Vercel Blob URL
     let documentText = '';
-    if (filePath && filePath.startsWith('http')) {
+    if (filePath && isBlobUrl(filePath)) {
       try {
         const fileResp = await fetch(filePath);
         if (fileResp.ok) {
