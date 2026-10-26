@@ -4,6 +4,11 @@ import * as jose from 'jose';
 import bcrypt from 'bcryptjs';
 import { getAuthSecret } from '../../_lib/auth.js';
 import { withSentry } from '../../_lib/sentry.js';
+import { checkAndConsume } from '../../_lib/ratelimit.js';
+
+// Cap signups per source IP so scripts can't mass-create accounts or
+// probe which emails are registered via the 409 conflict response.
+const SIGNUPS_PER_IP_PER_DAY = 10;
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -11,6 +16,18 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const ip =
+    (typeof req.headers['x-forwarded-for'] === 'string'
+      ? req.headers['x-forwarded-for'].split(',')[0].trim()
+      : null) || req.socket?.remoteAddress || 'unknown';
+  const rl = checkAndConsume('signup-ip', ip, SIGNUPS_PER_IP_PER_DAY);
+  if (!rl.ok) {
+    return res.status(429).json({
+      error: 'Too many signup attempts. Please try again later.',
+      retryInSec: rl.retryInSec,
+    });
+  }
 
   try {
     const { email, password, name } = req.body;

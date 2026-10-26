@@ -189,6 +189,13 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-10-26 — Signup rate-limit gap: both signup routes now protected against IP-based abuse
+auth/signup and auth/doctor-signup had no IP rate limiting, while auth/login did.
+An attacker could enumerate registered emails via the 409 conflict response or
+mass-create accounts. Added checkAndConsume('signup-ip' / 'doctor-signup-ip', ip, 10)
+at the top of both handlers — same pattern as login.ts. Limit of 10/IP/day is generous
+for real users while stopping scripts. Verified: tsc 0, eslint 0, 241/241 tests, vite build clean.
+
 ### 2026-10-26 — GDPR erasure gap: account deletion now removes newsletter subscription
 Deleting your account left your email in newsletter_subscribers (the table
 is email-keyed, not user_id-keyed, so it was invisible to the DELETE sweep).

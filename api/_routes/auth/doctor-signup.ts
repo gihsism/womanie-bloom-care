@@ -3,6 +3,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import bcrypt from 'bcryptjs';
 import { withSentry } from '../../_lib/sentry.js';
 import { notifyAdmin } from '../../_lib/notify.js';
+import { checkAndConsume } from '../../_lib/ratelimit.js';
 
 // Doctor account signup.
 //
@@ -16,12 +17,27 @@ import { notifyAdmin } from '../../_lib/notify.js';
 // shown a "pending verification" message. This is deliberate — a
 // half-authenticated "doctor" with no role would just be confusing.
 
+// Cap doctor signups per source IP — same pattern as auth/signup.
+const SIGNUPS_PER_IP_PER_DAY = 10;
+
 async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const ip =
+    (typeof req.headers['x-forwarded-for'] === 'string'
+      ? req.headers['x-forwarded-for'].split(',')[0].trim()
+      : null) || req.socket?.remoteAddress || 'unknown';
+  const rl = checkAndConsume('doctor-signup-ip', ip, SIGNUPS_PER_IP_PER_DAY);
+  if (!rl.ok) {
+    return res.status(429).json({
+      error: 'Too many signup attempts. Please try again later.',
+      retryInSec: rl.retryInSec,
+    });
+  }
 
   try {
     const { email, password, fullName, specialty, licenseNumber, bio } = req.body ?? {};
