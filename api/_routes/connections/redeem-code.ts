@@ -47,39 +47,43 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(403).json({ error: 'Only doctors can redeem access codes' });
   }
 
-  // Atomically claim the code: flip is_used false->true in one statement
-  // so two concurrent redemptions can't both pass a separate is_used check
-  // (true single-use, race-safe). RETURNING tells us if we won the claim.
-  const claimed = (await sql.query(
-    `UPDATE patient_access_codes
-        SET is_used = true
-      WHERE code = $1 AND is_used = false AND expires_at > now()
-      RETURNING id, patient_id`,
-    [code.trim()]
-  )) as Array<{ id: string; patient_id: string }>;
-  if (claimed.length === 0) {
-    return res.status(404).json({ error: 'Invalid, expired, or already-used code' });
-  }
-  const entry = claimed[0];
-
+  // Atomically claim the code AND create the connection in one CTE so
+  // the two operations either both commit or both roll back — no separate
+  // rollback query that could fail and permanently burn the code.
+  //
+  // claimed=0 → code not found / expired / already used → 404
+  // constraint 23505 (unique on doctor_id+patient_id) → already connected
+  //   → entire statement rolls back, is_used stays false → 409
+  // claimed=1, connected=1 → success → 200
+  let claimResult: Array<{ claimed: number }>;
   try {
-    await sql.query(
-      `INSERT INTO doctor_patient_connections (doctor_id, patient_id, connection_type, status)
-         VALUES ($1, $2, 'code', 'pending')`,
-      [user.id, entry.patient_id]
-    );
+    claimResult = (await sql.query(
+      `WITH claim AS (
+         UPDATE patient_access_codes
+            SET is_used = true
+          WHERE code = $1 AND is_used = false AND expires_at > now()
+          RETURNING patient_id
+       ),
+       conn_insert AS (
+         INSERT INTO doctor_patient_connections
+               (doctor_id, patient_id, connection_type, status)
+           SELECT $2, patient_id, 'code', 'pending' FROM claim
+         RETURNING doctor_id
+       )
+       SELECT (SELECT COUNT(*) FROM claim)::int AS claimed`,
+      [code.trim(), user.id]
+    )) as Array<{ claimed: number }>;
   } catch (err) {
     const pgcode = (err as { code?: string } | undefined)?.code;
-    // Roll back the claim so a failed connection insert doesn't burn the
-    // patient's code (they'd otherwise have to generate a new one).
-    await sql
-      .query('UPDATE patient_access_codes SET is_used = false WHERE id = $1', [entry.id])
-      .catch(() => {});
     if (pgcode === '23505') {
       return res.status(409).json({ error: 'Already connected with this patient' });
     }
-    console.error('redeem-code insert error:', err);
+    console.error('redeem-code error:', err);
     return res.status(500).json({ error: 'Failed to create connection' });
+  }
+
+  if ((claimResult[0]?.claimed ?? 0) === 0) {
+    return res.status(404).json({ error: 'Invalid, expired, or already-used code' });
   }
 
   return res.status(200).json({ success: true });

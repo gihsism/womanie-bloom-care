@@ -189,6 +189,16 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-10-27 — redeem-code: make claim + connection insert atomic via CTE
+The handler was claiming an access code (marking is_used=true) and then inserting
+the doctor_patient_connections row in two separate queries. If the insert failed
+and the compensating rollback query also failed (network blip), the patient's code
+was permanently burned and they would have to generate a new one. Fixed by
+collapsing both operations into a single CTE — the UPDATE and INSERT now commit or
+roll back together. A duplicate-connection constraint (23505) now rolls back the
+claim cleanly, returning 409 with the code still valid. Verified: tsc 0, eslint 0,
+243/243 tests, vite build clean.
+
 ### 2026-10-26 — Signup rate-limit gap: both signup routes now protected against IP-based abuse
 auth/signup and auth/doctor-signup had no IP rate limiting, while auth/login did.
 An attacker could enumerate registered emails via the 409 conflict response or
