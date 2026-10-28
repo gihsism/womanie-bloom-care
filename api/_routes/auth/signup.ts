@@ -81,6 +81,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader('Set-Cookie', `womanie_session=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}`);
     return res.status(200).json({ success: true, user: { id: userId, email, name } });
   } catch (error) {
+    // Concurrent signups with the same email can both pass the pre-check
+    // before the first transaction commits; the second hits the unique
+    // constraint (23505) and should get the same friendly 409 as the
+    // pre-check, not a generic 500.
+    if ((error as { code?: string }).code === '23505') {
+      return res.status(409).json({ error: 'An account with this email already exists. Try logging in.' });
+    }
     console.error('Signup error:', error);
     return res.status(500).json({ error: 'Failed to create account' });
   }

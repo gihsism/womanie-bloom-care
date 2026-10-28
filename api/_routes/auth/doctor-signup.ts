@@ -107,6 +107,12 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       message: 'Your doctor account has been submitted for verification. License review typically takes 1–3 business days; try logging in again once approved.',
     });
   } catch (error) {
+    // Concurrent signups with the same email can both pass the pre-check
+    // before the first transaction commits; the second hits the unique
+    // constraint (23505) and should get the same friendly 409, not a 500.
+    if ((error as { code?: string }).code === '23505') {
+      return res.status(409).json({ error: 'An account with this email already exists.' });
+    }
     console.error('Doctor signup error:', error);
     return res.status(500).json({ error: 'Failed to create doctor account' });
   }

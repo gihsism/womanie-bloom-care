@@ -189,6 +189,15 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-10-28 — signup TOCTOU: handle duplicate-email constraint in catch block
+Both auth/signup and auth/doctor-signup pre-check for a duplicate email before the
+atomic insert transaction. Under concurrent requests (double-click, scripted retry)
+two requests can both pass the pre-check, then the second hits the unique constraint
+on auth_users.email and was returning 500 instead of the expected 409. Added a 23505
+catch in both handlers so the second request gets the same friendly "email already
+exists" 409 as the pre-check path. No schema change; no functional change for the
+normal (non-race) path. Verified: tsc 0, eslint 0, 243/243 tests, vite build clean.
+
 ### 2026-10-27 — redeem-code: make claim + connection insert atomic via CTE
 The handler was claiming an access code (marking is_used=true) and then inserting
 the doctor_patient_connections row in two separate queries. If the insert failed
