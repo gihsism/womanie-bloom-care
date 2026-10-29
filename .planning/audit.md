@@ -189,6 +189,16 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-10-29 — GDPR erasure gap: account deletion now clears llm_cache summary entries
+AI health summaries cached in llm_cache are keyed with a user-id prefix
+(summary_v1:{user.id}:... and panel_summary_v1:{user.id}:...). Account deletion
+was erasing all user tables but never touched llm_cache, leaving AI-generated
+health summaries in the database after erasure. Added two LIKE-based DELETEs
+inside the existing atomic delete-account transaction to wipe both prefix
+families. analyze-document cache entries are content-addressed with no user id
+in the key and may be shared across users, so they are left as-is.
+Verified: tsc 0, eslint 0, 243/243 tests, vite build clean.
+
 ### 2026-10-28 — signup TOCTOU: handle duplicate-email constraint in catch block
 Both auth/signup and auth/doctor-signup pre-check for a duplicate email before the
 atomic insert transaction. Under concurrent requests (double-click, scripted retry)

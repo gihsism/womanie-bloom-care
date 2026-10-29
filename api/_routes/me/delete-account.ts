@@ -70,6 +70,12 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       sql`DELETE FROM profiles WHERE id = ${user.id}`,
       sql`DELETE FROM auth_sessions WHERE user_id = ${user.id}`,
       ...(canonicalEmail ? [sql`DELETE FROM newsletter_subscribers WHERE email = ${canonicalEmail}`] : []),
+      // llm_cache has no user_id column; summary and panel-summary entries
+      // are keyed by a prefix that embeds the user id, so we wipe them with
+      // LIKE. analyze-document entries are content-addressed with no user id
+      // in the key and may be shared with other users, so we leave them.
+      sql`DELETE FROM llm_cache WHERE request_hash LIKE ${'summary_v1:' + user.id + ':%'}`,
+      sql`DELETE FROM llm_cache WHERE request_hash LIKE ${'panel_summary_v1:' + user.id + ':%'}`,
       sql`DELETE FROM auth_users WHERE id = ${user.id}`,
     ]);
 
