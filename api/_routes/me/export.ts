@@ -11,6 +11,12 @@ import { withSentry } from '../../_lib/sentry.js';
 // any doctor connections. Document file URLs are included so the
 // caller can download the raw uploads alongside; we don't inline the
 // bytes because PDF analyses can be tens of MB each.
+//
+// Doctor users also receive their professional data: doctor_profiles,
+// authored doctor_notes, schedule, consultation settings, and
+// chart_access_log entries. These are erased by delete-account; not
+// exporting them would create an erasure-complete / portability-
+// incomplete asymmetry that violates GDPR Article 20.
 
 type Row = Record<string, unknown>;
 
@@ -31,6 +37,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       profile, authUser, documents, analyses, extracted,
       periods, signals, ivfEvents, connections, chatMessages,
       accessCodes, appointments, visibleDoctorNotes,
+      doctorProfile, doctorNotes, doctorSchedule,
+      consultationSettings, chartAccessLog,
     ] = await Promise.all([
       sql.query('SELECT * FROM profiles WHERE id = $1', [user.id]),
       sql.query('SELECT id, email, name, created_at FROM auth_users WHERE id = $1', [user.id]),
@@ -100,6 +108,25 @@ async function handler(req: VercelRequest, res: VercelResponse) {
            ORDER BY created_at DESC`,
         [user.id]
       ),
+      // Doctor-specific data. These return empty for patient-only accounts.
+      sql.query('SELECT * FROM doctor_profiles WHERE user_id = $1', [user.id]),
+      sql.query(
+        `SELECT id, patient_id, title, content, note_type, is_visible_to_patient, created_at
+           FROM doctor_notes WHERE doctor_id = $1 ORDER BY created_at DESC`,
+        [user.id]
+      ),
+      sql.query(
+        `SELECT * FROM doctor_schedule WHERE doctor_id = $1
+           ORDER BY day_of_week, start_time`,
+        [user.id]
+      ),
+      sql.query('SELECT * FROM consultation_settings WHERE doctor_id = $1', [user.id]),
+      sql.query(
+        `SELECT * FROM chart_access_log
+           WHERE patient_id = $1 OR doctor_id = $1
+           ORDER BY viewed_at DESC`,
+        [user.id]
+      ),
     ]) as Row[][];
 
     const payload = {
@@ -120,6 +147,12 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       patient_access_codes: accessCodes,
       appointments,
       visible_doctor_notes: visibleDoctorNotes,
+      chart_access_log: chartAccessLog,
+      // Doctor-specific sections; empty arrays for patient-only accounts.
+      doctor_profile: doctorProfile[0] ?? null,
+      doctor_authored_notes: doctorNotes,
+      doctor_schedule: doctorSchedule,
+      consultation_settings: consultationSettings[0] ?? null,
       notes: {
         documents_note:
           'The file_path field on each document is a Vercel Blob URL — fetch those separately to download the original upload.',

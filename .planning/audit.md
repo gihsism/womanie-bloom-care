@@ -189,6 +189,17 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-10-30 — GDPR portability gap: data export now includes doctor-specific data
+The delete-account handler correctly erased doctor_profiles, doctor_notes (authored),
+doctor_schedule, consultation_settings, and chart_access_log for doctor users. The
+data export (Settings → "Download my data") included none of these, creating an
+asymmetry: erasure was complete but portability was incomplete, violating GDPR Article 20
+for doctor accounts. Fixed api/_routes/me/export.ts to fetch all five tables in the
+same Promise.all call and add them to the JSON payload (empty arrays/null for
+patient-only accounts). Also added chart_access_log for patient users (shows which
+doctors viewed their chart — previously missing despite being a transparency feature).
+Verified: tsc 0, eslint 0, 243/243 tests, vite build clean.
+
 ### 2026-10-29 — GDPR erasure gap: account deletion now clears llm_cache summary entries
 AI health summaries cached in llm_cache are keyed with a user-id prefix
 (summary_v1:{user.id}:... and panel_summary_v1:{user.id}:...). Account deletion
