@@ -189,6 +189,19 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-10-31 — Test coverage: added security-invariant tests for api/_routes/db.ts
+api/_routes/db.ts is the most security-critical file in the codebase — it is the
+generic database access layer that every frontend query goes through, and it enforces
+all per-user data isolation via OWNER_COLUMN, WRITE_BLOCKED, INSERT_BLOCKED, and
+PROTECTED_COLUMNS. Despite the recent hardening (upsert owner guard, 2026-10-25),
+the file had no tests. Added api/_routes/db.test.ts with 8 tests covering: unauthenticated
+returns 401; unknown table returns 403; inserting into user_roles (WRITE_BLOCKED) returns
+403; inserting into doctor_profiles (INSERT_BLOCKED) returns 403; setting is_verified on
+doctor_profiles (PROTECTED_COLUMNS) returns 403; owner-mismatch filter on select returns
+403; auto-injection of the session user's owner filter; and upsert SQL contains the
+WHERE owner guard that prevents overwriting another user's row. Verified: tsc 0, eslint 0,
+251/251 tests, vite build clean.
+
 ### 2026-10-30 — GDPR portability gap: data export now includes doctor-specific data
 The delete-account handler correctly erased doctor_profiles, doctor_notes (authored),
 doctor_schedule, consultation_settings, and chart_access_log for doctor users. The
