@@ -126,6 +126,8 @@ const App = () => (
                   <Route path="/dashboard/notifications" element={<Notifications />} />
                   <Route path="/dashboard/help" element={<Help />} />
                   <Route path="/dashboard/privacy" element={<Privacy />} />
+                  {/* Public URL for the App Store / Play listing privacy-policy link. */}
+                  <Route path="/privacy" element={<Privacy />} />
                   <Route path="/dashboard/emergency" element={<Emergency />} />
                   <Route path="/dashboard/compare" element={<CompareDocs />} />
                   <Route path="/dashboard/panel/:slug" element={<PanelDetail />} />
