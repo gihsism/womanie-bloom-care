@@ -1,12 +1,18 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
+// Native shell for the App Store / Play Store. It loads the live site so
+// sign-in (cookie sessions), uploads and the API behave exactly as on the
+// web and every deploy reaches the app without a store release.
 const config: CapacitorConfig = {
-  appId: 'app.lovable.7cbac8a46624453fbf4b7137d5f21846',
-  appName: 'womanie-bloom-care',
+  appId: 'info.womanie.app',
+  appName: 'Womanie',
   webDir: 'dist',
   server: {
-    url: 'https://7cbac8a4-6624-453f-bf4b-7137d5f21846.lovableproject.com?forceHideBadge=true',
-    cleartext: true,
+    url: 'https://womanie.info',
+    allowNavigation: ['womanie.info', '*.womanie.info'],
+  },
+  ios: {
+    contentInset: 'automatic',
   },
 };
 
