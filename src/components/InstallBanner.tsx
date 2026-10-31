@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Download, Share, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { isNativeApp } from "@/lib/platform";
 
 // Captures the Chromium "you can install this" event so we can trigger
 // the native prompt from our own button instead of relying on the
@@ -21,6 +22,8 @@ const SHOW_DELAY_MS = 4000;
 function isStandalone(): boolean {
   if (typeof window === "undefined") return false;
   return (
+    // Already the installed app (App Store / Play shell).
+    isNativeApp() ||
     window.matchMedia("(display-mode: standalone)").matches ||
     // iOS Safari exposes its own flag rather than display-mode.
     (window.navigator as Navigator & { standalone?: boolean }).standalone === true
