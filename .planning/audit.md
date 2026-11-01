@@ -189,6 +189,17 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-01 — Google OAuth callback: make new-user creation atomic
+The Google OAuth callback (api/_routes/auth/callback.ts) was creating new users
+in two separate queries: INSERT INTO auth_users first, then INSERT INTO profiles.
+If the profiles insert failed (transient DB error, constraint violation), the user
+ended up with an auth_users row but no profiles row — they could sign in via Google
+again but their health data context would be absent or broken, and the orphaned row
+would block future error recovery. Fixed by wrapping both inserts in a single
+sql.transaction([...]), matching the same pattern already in place for email/password
+signup (auth/signup.ts). No schema change; no functional change for the normal path.
+Verified: tsc 0, eslint 0, 251/251 tests, vite build clean.
+
 ### 2026-10-31 — Test coverage: added security-invariant tests for api/_routes/db.ts
 api/_routes/db.ts is the most security-critical file in the codebase — it is the
 generic database access layer that every frontend query goes through, and it enforces

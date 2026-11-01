@@ -62,19 +62,20 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       users = await sql.query('SELECT * FROM auth_users WHERE email = $1', [googleUser.email]);
 
       if (users.length === 0) {
-        // Create new user
+        // Create new user — both inserts in one transaction so a partial
+        // failure can't leave an auth_users row without a profiles row.
         const userId = 'user_' + crypto.randomUUID().replace(/-/g, '').slice(0, 20);
-        await sql.query(
-          'INSERT INTO auth_users (id, email, name, avatar_url, google_id) VALUES ($1, $2, $3, $4, $5)',
-          [userId, googleUser.email, googleUser.name, googleUser.picture, googleUser.id]
-        );
+        await sql.transaction([
+          sql.query(
+            'INSERT INTO auth_users (id, email, name, avatar_url, google_id) VALUES ($1, $2, $3, $4, $5)',
+            [userId, googleUser.email, googleUser.name, googleUser.picture, googleUser.id]
+          ),
+          sql.query(
+            'INSERT INTO profiles (id, full_name, life_stage) VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING',
+            [userId, googleUser.name, 'menstrual-cycle']
+          ),
+        ]);
         users = [{ id: userId, email: googleUser.email, name: googleUser.name, avatar_url: googleUser.picture, google_id: googleUser.id }];
-
-        // Also create profile
-        await sql.query(
-          'INSERT INTO profiles (id, full_name, life_stage) VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING',
-          [userId, googleUser.name, 'menstrual-cycle']
-        );
       } else {
         // Link Google ID to existing email user
         await sql.query('UPDATE auth_users SET google_id = $1, name = $2, avatar_url = $3 WHERE id = $4',
