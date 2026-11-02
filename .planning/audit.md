@@ -189,6 +189,19 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-02 — admin/doctors: make approve/revoke/reject operations atomic
+The admin endpoint for managing doctor verification (api/_routes/admin/doctors.ts)
+ran each action as two separate queries: for 'approve', it UPDATE'd doctor_profiles
+(is_verified=true) then INSERT'd into user_roles; for 'revoke', it UPDATE'd
+doctor_profiles (is_verified=false) then DELETE'd from user_roles; for 'reject',
+same pattern. If the first query succeeded and the second failed, the two tables
+would be left inconsistent — a revoked doctor would still hold the 'doctor' role
+and could redeem patient access codes; an approved doctor would have is_verified=true
+but no role, making the approval effectively invisible. Fixed all three branches to
+use sql.transaction([...]) so both writes commit or roll back together. The GET path
+and response shape are unchanged. No schema change.
+Verified: tsc 0, eslint 0, 251/251 tests, vite build clean.
+
 ### 2026-11-01 — Google OAuth callback: make new-user creation atomic
 The Google OAuth callback (api/_routes/auth/callback.ts) was creating new users
 in two separate queries: INSERT INTO auth_users first, then INSERT INTO profiles.

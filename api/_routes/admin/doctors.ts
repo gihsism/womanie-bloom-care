@@ -64,47 +64,58 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     try {
       if (action === 'approve') {
-        await sql.query(
-          `UPDATE doctor_profiles
-              SET is_verified = true, verification_status = 'approved'
-            WHERE user_id = $1`,
-          [userId]
-        );
-        // Idempotent — safe to re-run if the admin clicks twice.
-        await sql.query(
-          `INSERT INTO user_roles (user_id, role)
-             VALUES ($1, 'doctor')
-           ON CONFLICT DO NOTHING`,
-          [userId]
-        );
+        // Both writes must commit together: is_verified=true without the
+        // role leaves a verified-but-unusable profile; the role without
+        // is_verified makes the doctor invisible in the directory.
+        await sql.transaction([
+          sql.query(
+            `UPDATE doctor_profiles
+                SET is_verified = true, verification_status = 'approved'
+              WHERE user_id = $1`,
+            [userId]
+          ),
+          // Idempotent — safe to re-run if the admin clicks twice.
+          sql.query(
+            `INSERT INTO user_roles (user_id, role)
+               VALUES ($1, 'doctor')
+             ON CONFLICT DO NOTHING`,
+            [userId]
+          ),
+        ]);
       } else if (action === 'revoke') {
         // Already-approved doctor turned bad: flip is_verified off,
         // mark verification_status='revoked' so the history is kept,
         // and strip the doctor role. Future patients won't see them
         // in the directory; existing approved connections stay unless
         // patients revoke individually.
-        await sql.query(
-          `UPDATE doctor_profiles
-              SET is_verified = false, verification_status = 'revoked'
-            WHERE user_id = $1`,
-          [userId]
-        );
-        await sql.query(
-          `DELETE FROM user_roles WHERE user_id = $1 AND role = 'doctor'`,
-          [userId]
-        );
+        // Both writes must commit together: the role without is_verified
+        // being false lets the doctor keep redeeming access codes.
+        await sql.transaction([
+          sql.query(
+            `UPDATE doctor_profiles
+                SET is_verified = false, verification_status = 'revoked'
+              WHERE user_id = $1`,
+            [userId]
+          ),
+          sql.query(
+            `DELETE FROM user_roles WHERE user_id = $1 AND role = 'doctor'`,
+            [userId]
+          ),
+        ]);
       } else {
-        await sql.query(
-          `UPDATE doctor_profiles
-              SET verification_status = 'rejected', is_verified = false
-            WHERE user_id = $1`,
-          [userId]
-        );
-        // If a role was mistakenly granted before, revoke it.
-        await sql.query(
-          `DELETE FROM user_roles WHERE user_id = $1 AND role = 'doctor'`,
-          [userId]
-        );
+        await sql.transaction([
+          sql.query(
+            `UPDATE doctor_profiles
+                SET verification_status = 'rejected', is_verified = false
+              WHERE user_id = $1`,
+            [userId]
+          ),
+          // If a role was mistakenly granted before, revoke it.
+          sql.query(
+            `DELETE FROM user_roles WHERE user_id = $1 AND role = 'doctor'`,
+            [userId]
+          ),
+        ]);
       }
       return res.status(200).json({ success: true });
     } catch (error) {
