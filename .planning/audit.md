@@ -189,6 +189,17 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-03 — change-password: make hash update and session revocation atomic
+The password-change handler updated the password hash and then, in a separate
+query, deleted all other sessions for the user (to boot out anything authenticated
+with the old password). If the UPDATE succeeded but the DELETE failed, an attacker
+holding a stolen session would retain access even after the victim reset their
+password. The pattern was identical to the non-atomic issues already fixed in
+signup, redeem-code, OAuth callback, and admin/doctors. Fixed by wrapping both
+queries in a single sql.transaction([...]), so both commit or roll back together.
+No schema change; no functional change on the normal (non-failure) path.
+Verified: tsc 0, eslint 0, 251/251 tests, vite build clean.
+
 ### 2026-11-02 — admin/doctors: make approve/revoke/reject operations atomic
 The admin endpoint for managing doctor verification (api/_routes/admin/doctors.ts)
 ran each action as two separate queries: for 'approve', it UPDATE'd doctor_profiles

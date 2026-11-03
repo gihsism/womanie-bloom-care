@@ -54,20 +54,23 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const newHash = await bcrypt.hash(newPassword, 10);
-    await sql.query(
-      'UPDATE auth_users SET password_hash = $1 WHERE id = $2',
-      [newHash, auth.id]
-    );
 
-    // Revoke every OTHER session for this user — keeps the caller signed in,
-    // boots out anything that may have been signed in with the old password
-    // (lost device, abandoned phone, etc.).
-    if (auth.sessionId) {
-      await sql.query(
+    // Both writes must commit or roll back together: if the hash update
+    // lands but the session DELETE fails, an attacker holding a stolen
+    // session retains access even after the victim resets their password.
+    // getAuthUser guarantees sessionId is set when it returns non-null.
+    await sql.transaction([
+      sql.query(
+        'UPDATE auth_users SET password_hash = $1 WHERE id = $2',
+        [newHash, auth.id]
+      ),
+      // Revoke every OTHER session — keeps the caller signed in, boots
+      // out anything authenticated with the old password.
+      sql.query(
         'DELETE FROM auth_sessions WHERE user_id = $1 AND id != $2',
-        [auth.id, auth.sessionId]
-      );
-    }
+        [auth.id, auth.sessionId!]
+      ),
+    ]);
 
     return res.status(200).json({ success: true });
   } catch (error) {
