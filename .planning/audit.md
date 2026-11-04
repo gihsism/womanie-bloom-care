@@ -189,6 +189,21 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-04 — admin/docs claim: make three-table move atomic and include document_analyses
+The admin document-claim endpoint (POST /api/admin/docs) lets an admin recover
+orphaned records from an old user ID onto their current account. The handler was
+running two separate UPDATE queries (health_documents, medical_extracted_data)
+without a transaction: if the second UPDATE failed mid-flight, health_documents
+would be under the new user while extracted_data stayed under the old one — a
+split that the next claim attempt couldn't recover because health_documents would
+no longer match the oldUserId filter. Additionally, document_analyses (which carries
+user_id NOT NULL and is scoped per-user) was never moved, so claimed documents
+would surface as "not yet analyzed" even when analyses existed, since the analyses
+still referenced the old user. Fixed by collapsing all three UPDATEs into one
+sql.transaction([...]) call. The response now also reports claimed_analyses so
+the admin can confirm all three tables moved. No schema change.
+Verified: tsc 0, eslint 0, 251/251 tests, vite build clean.
+
 ### 2026-11-03 — change-password: make hash update and session revocation atomic
 The password-change handler updated the password hash and then, in a separate
 query, deleted all other sessions for the user (to boot out anything authenticated

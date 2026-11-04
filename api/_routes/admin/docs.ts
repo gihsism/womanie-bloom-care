@@ -78,19 +78,35 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    const docs = await sql.query(
-      'UPDATE health_documents SET user_id = $1 WHERE user_id = $2 RETURNING id',
-      [user.id, oldUserId]
-    );
-    const data = await sql.query(
-      'UPDATE medical_extracted_data SET user_id = $1 WHERE user_id = $2 RETURNING id',
-      [user.id, oldUserId]
-    );
+    // All three tables must move together or not at all. If only
+    // health_documents moved and the extracted-data or analyses write
+    // failed, the records would be split across two user IDs and the
+    // admin would have to run again — but the second run would find
+    // no health_documents to claim (already moved) and return 0 rows,
+    // leaving the remaining rows permanently orphaned.
+    // document_analyses carries user_id NOT NULL, so it must be claimed
+    // alongside the parent docs; otherwise the analyses stay scoped to
+    // the old user and the new user sees documents with no analysis.
+    const [docs, data, analyses] = await sql.transaction([
+      sql.query(
+        'UPDATE health_documents SET user_id = $1 WHERE user_id = $2 RETURNING id',
+        [user.id, oldUserId]
+      ),
+      sql.query(
+        'UPDATE medical_extracted_data SET user_id = $1 WHERE user_id = $2 RETURNING id',
+        [user.id, oldUserId]
+      ),
+      sql.query(
+        'UPDATE document_analyses SET user_id = $1 WHERE user_id = $2 RETURNING id',
+        [user.id, oldUserId]
+      ),
+    ]);
 
     return res.status(200).json({
       success: true,
       claimed_documents: docs.length,
       claimed_extracted_data: data.length,
+      claimed_analyses: analyses.length,
       from: oldUserId,
       to: user.id,
     });
