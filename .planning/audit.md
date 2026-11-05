@@ -189,6 +189,19 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-05 — appointments/reschedule: re-verify status atomically in the UPDATE
+The reschedule handler checked `status = 'scheduled'` in an earlier SELECT, then
+ran a separate UPDATE with only a slot-conflict guard. Between those two queries,
+a concurrent cancel (via /api/db UPDATE) could change the appointment to
+'cancelled', but the reschedule UPDATE would still succeed — leaving a cancelled
+appointment with a new scheduled_at while returning HTTP 200. Added
+`AND COALESCE(status, 'scheduled') = 'scheduled'` to the UPDATE WHERE clause so
+the status check is atomic with the conflict guard. If 0 rows are returned now,
+the existing 409 response fires for either reason (the slot was taken, or the
+appointment was no longer schedulable), and the UI re-fetches to show actual state.
+No schema change.
+Verified: tsc 0, eslint 0, 251/251 tests, vite build clean.
+
 ### 2026-11-04 — admin/docs claim: make three-table move atomic and include document_analyses
 The admin document-claim endpoint (POST /api/admin/docs) lets an admin recover
 orphaned records from an old user ID onto their current account. The handler was

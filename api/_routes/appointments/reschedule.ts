@@ -64,11 +64,14 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Conflict-guarded move: same overlap math as book.ts, excluding
     // this appointment itself so moving within/adjacent to your own
-    // current slot is allowed.
+    // current slot is allowed. Re-check status in the WHERE so a
+    // concurrent cancel between the SELECT above and this UPDATE can't
+    // silently succeed and leave a cancelled appointment with a new time.
     const updated = await sql.query(
       `UPDATE appointments
           SET scheduled_at = $1, updated_at = now()
         WHERE id = $2
+          AND COALESCE(status, 'scheduled') = 'scheduled'
           AND NOT EXISTS (
             SELECT 1 FROM appointments a
              WHERE a.doctor_id = $3
