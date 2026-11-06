@@ -189,6 +189,17 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-06 — Test coverage: added security-invariant tests for appointments/reschedule
+The reschedule handler was hardened on 2026-11-05 with an atomic status re-check in
+the UPDATE WHERE clause (COALESCE(status,'scheduled')='scheduled'), but had no tests
+at all. Added api/_routes/appointments/reschedule.test.ts with 9 tests covering: 401
+on no session; 400 on missing or invalid fields; 400 on past timestamp; 404 when the
+appointment doesn't belong to the session user; 400 when it's already cancelled; 409
+when the UPDATE returns 0 rows (slot taken or status changed between SELECT and UPDATE,
+the TOCTOU race fixed 2026-11-05); a regression guard that confirms the UPDATE SQL
+still contains the atomic status re-check; and 200 on success.
+Verified: tsc 0, eslint 0, 260/260 tests, vite build clean.
+
 ### 2026-11-05 — appointments/reschedule: re-verify status atomically in the UPDATE
 The reschedule handler checked `status = 'scheduled'` in an earlier SELECT, then
 ran a separate UPDATE with only a slot-conflict guard. Between those two queries,
