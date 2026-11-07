@@ -189,6 +189,24 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-07 — connections/respond: fix TOCTOU race and add security tests
+The connection-respond handler (approve/reject/revoke) checked the connection's
+status in a preliminary SELECT, then ran a separate UPDATE or DELETE without
+re-verifying the status — the same TOCTOU pattern fixed in appointments/reschedule
+on 2026-11-05. A concurrent admin action or race between two requests could change
+the status after the SELECT passed but before the mutation ran; for example, a
+patient could delete an already-approved connection when they meant to reject a
+pending one, or approve a connection no longer in 'pending' state.
+Fixed by removing the preliminary SELECT entirely and folding the status check
+(AND status = 'pending' for approve/reject, AND status = 'approved' for revoke)
+into the WHERE clause of the actual UPDATE/DELETE with RETURNING id. If 0 rows are
+returned the handler now responds 404 (the connection wasn't in the expected state
+or doesn't belong to the session user) rather than silently succeeding on a stale
+state read. Added respond.test.ts with 12 tests covering 401/400/404 error paths,
+the three success actions, and three regression guards confirming the atomic status
+check is in each SQL mutation.
+Verified: tsc 0, eslint 0, 272/272 tests, vite build clean.
+
 ### 2026-11-06 — Test coverage: added security-invariant tests for appointments/reschedule
 The reschedule handler was hardened on 2026-11-05 with an atomic status re-check in
 the UPDATE WHERE clause (COALESCE(status,'scheduled')='scheduled'), but had no tests

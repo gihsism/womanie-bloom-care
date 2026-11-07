@@ -6,9 +6,10 @@ import { withSentry } from '../../_lib/sentry.js';
 // Patient accepts or rejects a pending doctor_patient_connection.
 //
 // The patient is the ONLY party who can do this — doctors can't
-// auto-approve themselves. We verify the target connection belongs
-// to the session user as patient_id, is still in 'pending', and then
-// update (approve) or delete (reject) accordingly.
+// auto-approve themselves. We verify ownership (patient_id = session
+// user) and the expected starting state inside the same atomic
+// UPDATE/DELETE so a concurrent state change is caught rather than
+// silently applied to a connection in the wrong state.
 
 type Action = 'approve' | 'reject' | 'revoke';
 
@@ -31,40 +32,38 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const sql = neon(process.env.DATABASE_URL!);
-
-  // approve / reject operate on a pending connection; revoke operates
-  // on an already-approved one. Enforce the expected starting state
-  // and the ownership (patient_id = session user) in one query so no
-  // action can cross between intended states.
+  // approve/reject expect 'pending'; revoke expects 'approved'.
   const expectedStatus = action === 'revoke' ? 'approved' : 'pending';
-  const rows = await sql.query(
-    `SELECT id FROM doctor_patient_connections
-       WHERE id = $1 AND patient_id = $2 AND status = $3`,
-    [connectionId, user.id, expectedStatus]
-  ) as unknown[];
-  if (rows.length === 0) {
-    const notFoundMsg = action === 'revoke'
-      ? 'Approved connection not found'
-      : 'Pending connection not found';
-    return res.status(404).json({ error: notFoundMsg });
-  }
 
   try {
+    let affected: unknown[];
     if (action === 'approve') {
-      await sql.query(
+      // status = 'pending' is in the WHERE clause, not a separate SELECT,
+      // so a concurrent revoke or admin change is caught atomically.
+      affected = await sql.query(
         `UPDATE doctor_patient_connections
             SET status = 'approved', approved_at = now()
-          WHERE id = $1 AND patient_id = $2`,
+          WHERE id = $1 AND patient_id = $2 AND status = 'pending'
+         RETURNING id`,
         [connectionId, user.id]
-      );
+      ) as unknown[];
     } else {
-      // reject on pending and revoke on approved both simply remove
-      // the row — the doctor can request access again later if the
-      // patient wants to reconnect.
-      await sql.query(
-        `DELETE FROM doctor_patient_connections WHERE id = $1 AND patient_id = $2`,
-        [connectionId, user.id]
-      );
+      // reject on pending and revoke on approved both remove the row —
+      // the doctor can request access again if the patient wants to reconnect.
+      // status = $3 in the WHERE makes the state check atomic with the DELETE.
+      affected = await sql.query(
+        `DELETE FROM doctor_patient_connections
+          WHERE id = $1 AND patient_id = $2 AND status = $3
+         RETURNING id`,
+        [connectionId, user.id, expectedStatus]
+      ) as unknown[];
+    }
+
+    if (affected.length === 0) {
+      const notFoundMsg = action === 'revoke'
+        ? 'Approved connection not found'
+        : 'Pending connection not found';
+      return res.status(404).json({ error: notFoundMsg });
     }
     return res.status(200).json({ success: true });
   } catch (error) {
