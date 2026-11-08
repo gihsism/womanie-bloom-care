@@ -189,6 +189,21 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-08 — Test coverage: added security-invariant tests for auth/change-password
+The change-password handler was hardened on 2026-11-03 so the password hash update
+and other-session revocation run inside one sql.transaction([...]) — if the hash
+lands but the DELETE fails, a stolen session would retain access after the victim
+resets their password. The handler had no tests at all. Added
+api/_routes/auth/change-password.test.ts with 11 tests covering: 401 on no session;
+429 when the per-user rate limit fires; 400 on missing body fields; 400 on a new
+password shorter than 8 characters; 400 when the new password equals the current one;
+404 when the account is not in the database; 400 for a Google-only account with no
+password_hash; 401 when bcrypt.compare rejects the current password; an atomicity
+guard confirming sql.transaction is called with exactly 2 query arguments (UPDATE +
+DELETE together); a regression guard confirming the DELETE SQL excludes the caller's
+own session (id != $2) so they stay signed in; and 200 on success.
+Verified: tsc 0, eslint 0, 283/283 tests, vite build clean.
+
 ### 2026-11-07 — connections/respond: fix TOCTOU race and add security tests
 The connection-respond handler (approve/reject/revoke) checked the connection's
 status in a preliminary SELECT, then ran a separate UPDATE or DELETE without
