@@ -749,7 +749,7 @@ export default function AIDoctorChat() {
               {chatMode === 'ai' ? <Bot className="h-3.5 w-3.5 text-primary" /> : <Stethoscope className="h-3.5 w-3.5 text-primary" />}
             </div>
             <div className="min-w-0">
-              <h1 className="text-xs sm:text-sm font-bold leading-tight truncate">Doctor Chat</h1>
+              <h1 className="text-xs sm:text-sm font-bold leading-tight truncate">Health Chat</h1>
               <p className="text-[9px] sm:text-[10px] text-muted-foreground hidden sm:block">
                 {chatMode === 'ai' ? 'AI-powered assistant' : 'Connect with real doctors'}
               </p>

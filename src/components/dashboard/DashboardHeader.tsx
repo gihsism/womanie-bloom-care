@@ -117,7 +117,7 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onUploadClick, 
           <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shadow-sm">
             <MessageSquare className="h-5 w-5 text-primary" aria-hidden="true" />
           </div>
-          <span className="text-xs font-medium text-foreground/80">Doctor Chat</span>
+          <span className="text-xs font-medium text-foreground/80">Health Chat</span>
         </button>
 
         {/* Upload */}

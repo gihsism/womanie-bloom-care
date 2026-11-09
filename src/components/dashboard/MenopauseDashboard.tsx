@@ -597,7 +597,7 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
             <h3 className="text-sm font-bold mb-0.5">
               {isPostMenopause ? 'Questions about your health?' : 'Considering HRT or other treatments?'}
             </h3>
-            <p className="text-xs text-muted-foreground">Talk to a specialist through our Doctor Chat.</p>
+            <p className="text-xs text-muted-foreground">Talk to a specialist through our Health Chat.</p>
           </div>
           <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
         </div>
