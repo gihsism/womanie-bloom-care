@@ -83,7 +83,7 @@ const FAQS: Array<{ question: string; icon: typeof HelpCircle; answer: string | 
     icon: Shield,
     answer: [
       'Your data lives in Neon (managed Postgres, US region) and Vercel Blob storage. Access is gated per-user at the database layer — nobody else, not even us, sees your data unless you explicitly approve a doctor connection.',
-      'The AI doctor chat runs against Anthropic\'s Claude API; your document text is sent with the request, but Anthropic doesn\'t train on API data.',
+      'The AI Health Assistant runs against Anthropic\'s Claude API; your document text is sent with the request, but Anthropic doesn\'t train on API data.',
       'Details of our data model + retention are in the About page.',
     ],
   },

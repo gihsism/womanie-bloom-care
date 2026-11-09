@@ -128,7 +128,7 @@ them. Suggested set, taken in the demo account:
    site is a full app (accounts, uploads, tracking), not a brochure. If
    rejected, add a native feature such as push reminders for period/pill
    logging.
-2. **Guideline 1.4.1 (medical apps):** the in-app name "AI Doctor" can read
+2. **Guideline 1.4.1 (medical apps):** DONE 2026-11-09 — renamed to "AI Health Assistant". The old name "AI Doctor" could read
    as a claim to provide a doctor. Consider "AI Health Assistant" in the app
    before submitting.
 3. **Doctor directory:** reviewers may ask how doctors are verified. Answer:

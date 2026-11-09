@@ -112,7 +112,7 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onUploadClick, 
         <button
           onClick={onDoctorChatClick}
           className="flex flex-col items-center gap-1.5 min-w-[72px] group"
-          aria-label="Open AI Doctor Chat"
+          aria-label="Open AI Health Assistant"
         >
           <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shadow-sm">
             <MessageSquare className="h-5 w-5 text-primary" aria-hidden="true" />

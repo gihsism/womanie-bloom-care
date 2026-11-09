@@ -151,7 +151,7 @@ const WELCOME_MESSAGE: Msg = {
 // ─── Real Doctor Panel ───
 function RealDoctorPanel() {
   const navigate = useNavigate();
-  usePageTitle('AI Doctor');
+  usePageTitle('AI Health Assistant');
 
   const features = [
     { icon: Search, label: 'Browse verified specialists', description: 'Find gynecologists, fertility experts, and more' },
@@ -592,7 +592,7 @@ export default function AIDoctorChat() {
     }
     const stamp = new Date();
     const header = [
-      `# Womanie AI Doctor Chat`,
+      `# Womanie AI Health Assistant`,
       ``,
       `Exported: ${stamp.toLocaleString()}`,
       `Model: ${selectedModel}`,

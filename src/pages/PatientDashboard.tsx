@@ -362,7 +362,7 @@ const PatientDashboard = () => {
     return { label: 'Find Doctor', description: 'Book consultation' };
   })();
   const quickLinks = [
-    { icon: MessageSquare, label: 'AI Doctor', description: 'Ask health questions', action: () => navigate('/dashboard/ai-doctor'), color: 'bg-primary/10 text-primary' },
+    { icon: MessageSquare, label: 'AI Health Assistant', description: 'Ask health questions', action: () => navigate('/dashboard/ai-doctor'), color: 'bg-primary/10 text-primary' },
     { icon: FileText, label: 'Health Records', description: 'Analysis & trends', action: () => navigate('/dashboard/medical-history'), color: 'bg-secondary/10 text-secondary' },
     { icon: Activity, label: doctorLink.label, description: doctorLink.description, action: () => navigate('/find-doctor'), color: 'bg-accent/10 text-accent' },
     { icon: Settings, label: 'Settings', description: 'Preferences', action: () => navigate('/dashboard/settings'), color: 'bg-muted text-muted-foreground' },
@@ -558,7 +558,7 @@ const PatientDashboard = () => {
                   <div className="flex-1">
                     <h3 className="text-lg font-bold mb-2">What should we call you?</h3>
                     <p className="text-sm text-muted-foreground">
-                      Just a first name is fine — we use it in your dashboard greeting and the AI Doctor chat.
+                      Just a first name is fine — we use it in your dashboard greeting and the AI Health Assistant.
                     </p>
                   </div>
                   <form

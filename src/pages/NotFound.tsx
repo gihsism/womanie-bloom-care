@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const suggestions = [
   { icon: Home, label: 'Homepage', path: '/', description: 'Back to the main site' },
   { icon: Calendar, label: 'Dashboard', path: '/dashboard', description: 'Your health dashboard', auth: true },
-  { icon: MessageSquare, label: 'AI Doctor', path: '/dashboard/ai-doctor', description: 'Chat with AI assistant', auth: true },
+  { icon: MessageSquare, label: 'AI Health Assistant', path: '/dashboard/ai-doctor', description: 'Chat with AI assistant', auth: true },
   { icon: FileText, label: 'Medical Records', path: '/dashboard/medical-history', description: 'View your documents', auth: true },
 ];
 

@@ -561,7 +561,7 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
           </div>
           <div className="flex-1">
             <h3 className="text-sm font-bold">Questions about contraception?</h3>
-            <p className="text-xs text-muted-foreground">Ask our AI Doctor Chat for guidance.</p>
+            <p className="text-xs text-muted-foreground">Ask our AI Health Assistant for guidance.</p>
           </div>
           <ChevronRight className="h-5 w-5 text-muted-foreground" />
         </div>

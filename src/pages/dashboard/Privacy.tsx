@@ -44,7 +44,7 @@ const SECTIONS: Array<{ icon: typeof Shield; title: string; body: string | strin
     icon: Cpu,
     title: 'The AI models',
     body: [
-      "Document analysis and AI doctor chat run against Anthropic's Claude API. Your document text and chat messages are sent with each request.",
+      "Document analysis and the AI Health Assistant run against Anthropic's Claude API. Your document text and chat messages are sent with each request.",
       "Anthropic does not train on API traffic. Their retention is 30 days for abuse detection and then deletion.",
       "We cache Claude responses locally by content hash to avoid re-analyzing identical text. Cache entries are invalidated when the prompt or model changes.",
     ],

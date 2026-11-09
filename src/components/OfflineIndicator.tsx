@@ -5,7 +5,7 @@ import { WifiOff } from "lucide-react";
  * A slim banner that appears when the device goes offline and clears
  * itself when the connection returns. Matters most for the installed
  * PWA: the app shell is cached and keeps running, but anything that
- * hits /api (health records, AI Doctor, appointments) will fail in a
+ * hits /api (health records, AI Health Assistant, appointments) will fail in a
  * dead zone — this tells the user why instead of letting buttons
  * silently do nothing. Mounted once, app-wide.
  */
