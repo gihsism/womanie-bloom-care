@@ -6,6 +6,21 @@
 // ai-doctor-chat so a single transient blip doesn't dump the whole
 // request onto the user.
 
+// Current Sonnet for the background jobs (document analysis, summaries).
+// Sonnet 4 (claude-sonnet-4-20250514) was retired on 2026-06-15.
+export const SONNET_MODEL = 'claude-sonnet-5-5';
+
+// Sonnet 5.5 rejects non-default temperature and thinks before answering
+// by default. These jobs return one JSON/text answer, so thinking is
+// switched off (between_tools = no reasoning pass without tools).
+export const SONNET_NO_THINKING = { type: 'between_tools' } as const;
+
+// First text block of a Messages API reply (a reply may start with a
+// thinking block, so content[0] is not always the text).
+export function replyText(data: { content?: Array<{ type?: string; text?: string }> }): string | undefined {
+  return data.content?.find(b => b.type === 'text')?.text;
+}
+
 export async function callAnthropicWithRetry(apiKey: string, body: unknown): Promise<Response> {
   const delays = [250, 1000, 4000];
   let lastErr: unknown;

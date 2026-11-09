@@ -6,7 +6,7 @@ import { normalizeUnit } from './_lib/normalize-unit.js';
 import { checkAndConsume } from './_lib/ratelimit.js';
 import { isBlobUrl } from './_lib/blob-url.js';
 import { withSentry } from './_lib/sentry.js';
-import { callAnthropicWithRetry } from './_lib/anthropic.js';
+import { callAnthropicWithRetry, SONNET_MODEL, SONNET_NO_THINKING, replyText } from './_lib/anthropic.js';
 import heicConvert from 'heic-convert';
 
 // Allow longer execution for AI analysis. Claude PDF analysis on a full
@@ -516,7 +516,7 @@ async function processWithAI(
   const contentStr = JSON.stringify(userContent);
   // Hash includes STATIC_RULES so a future prompt-rules revision invalidates
   // the llm_cache naturally. Model name is hashed in too.
-  const cacheKey = await hashRequest(STATIC_RULES + dynamicHeader + contentStr + 'claude-sonnet-4-20250514');
+  const cacheKey = await hashRequest(STATIC_RULES + dynamicHeader + contentStr + SONNET_MODEL);
 
   // Check cache. Entries older than 30 days are treated as a miss so a model
   // upgrade (or any drift) refreshes within a month instead of lingering
@@ -552,18 +552,18 @@ async function processWithAI(
     // token minimum required for caching on Sonnet.
     const anthropicStart = Date.now();
     const aiResponse = await callAnthropicWithRetry(apiKey, {
-      model: 'claude-sonnet-4-20250514',
+      model: SONNET_MODEL,
       max_tokens: 8000,
       system: [
         { type: 'text', text: STATIC_RULES, cache_control: { type: 'ephemeral' } },
         { type: 'text', text: dynamicHeader },
       ],
       messages,
-      temperature: 0.2,
+      thinking: SONNET_NO_THINKING,
     });
 
     const aiData = await aiResponse.json();
-    aiContent = aiData.content?.[0]?.text;
+    aiContent = replyText(aiData);
     const usage = aiData.usage || {};
     logStage(documentId, 'anthropic_ok', anthropicStart, {
       inputTokens: usage.input_tokens,
@@ -577,7 +577,7 @@ async function processWithAI(
       // entry restarts its 30-day clock and hit accounting (audit #8).
       await sql.query(
         "INSERT INTO llm_cache (request_hash, response_text, model) VALUES ($1, $2, $3) ON CONFLICT (request_hash) DO UPDATE SET response_text = $2, created_at = now(), hit_count = 0, last_hit_at = NULL",
-        [cacheKey, aiContent, 'claude-sonnet-4-20250514']
+        [cacheKey, aiContent, SONNET_MODEL]
       ).catch((e: unknown) => console.error('Cache store error:', e));
     }
   }
@@ -595,7 +595,7 @@ async function processWithAI(
   if (!analysis) {
     console.warn(`JSON parse failed on first attempt for ${documentId}; asking Claude for strict JSON.`);
     const fixResp = await callAnthropicWithRetry(apiKey, {
-      model: 'claude-sonnet-4-20250514',
+      model: SONNET_MODEL,
       max_tokens: 8000,
       system: [
         { type: 'text', text: STATIC_RULES, cache_control: { type: 'ephemeral' } },
@@ -606,17 +606,17 @@ async function processWithAI(
         { role: 'assistant', content: aiContent.slice(0, 4000) },
         { role: 'user', content: 'Your previous reply was not valid JSON. Return ONLY the JSON object described in the schema — no markdown fences, no prose before or after, no commentary. Start with { and end with }.' },
       ],
-      temperature: 0.1,
+      thinking: SONNET_NO_THINKING,
     });
     const fixData = await fixResp.json();
-    const fixContent: string = fixData.content?.[0]?.text ?? '';
+    const fixContent: string = replyText(fixData) ?? '';
     analysis = tryParseAnalysisJson(fixContent);
     if (analysis) {
       // Overwrite the cache with the corrected content so we don't
       // replay the broken one on the next identical doc.
       await sql.query(
         "INSERT INTO llm_cache (request_hash, response_text, model) VALUES ($1, $2, $3) ON CONFLICT (request_hash) DO UPDATE SET response_text = $2, created_at = now(), hit_count = 0, last_hit_at = NULL",
-        [cacheKey, fixContent, 'claude-sonnet-4-20250514']
+        [cacheKey, fixContent, SONNET_MODEL]
       ).catch(() => {});
     }
   }
@@ -659,7 +659,7 @@ async function processWithAI(
 
   const analysisName = analysis.name || fileName;
   const analysisCategory = analysis.category || 'other';
-  const model = 'claude-sonnet-4-20250514';
+  const model = SONNET_MODEL;
 
   // Step 1: create a new document_analyses row in a pending state
   // (is_current = FALSE). We only flip it to TRUE once all extracted

@@ -3,7 +3,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from '../_lib/auth.js';
 import { checkAndConsume } from '../_lib/ratelimit.js';
 import { withSentry } from '../_lib/sentry.js';
-import { callAnthropicWithRetry } from '../_lib/anthropic.js';
+import { callAnthropicWithRetry, SONNET_MODEL, SONNET_NO_THINKING, replyText } from '../_lib/anthropic.js';
 
 // On-demand narrative summary across the patient's documents.
 //
@@ -51,16 +51,16 @@ Do not invent numbers. If something isn't in the data, don't mention it.`;
 
 async function callClaude(apiKey: string, userContent: string): Promise<string> {
   const resp = await callAnthropicWithRetry(apiKey, {
-    model: 'claude-sonnet-4-20250514',
+    model: SONNET_MODEL,
     max_tokens: 2000,
     system: [
       { type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } },
     ],
     messages: [{ role: 'user', content: userContent }],
-    temperature: 0.4,
+    thinking: SONNET_NO_THINKING,
   });
   const data = await resp.json();
-  const text: string | undefined = data.content?.[0]?.text;
+  const text: string | undefined = replyText(data);
   if (!text) throw new Error('Empty Claude response');
   return text;
 }
@@ -198,7 +198,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
          VALUES ($1, $2, $3)
        ON CONFLICT (request_hash)
          DO UPDATE SET response_text = EXCLUDED.response_text, created_at = now()`,
-      [cacheKey, summary, 'claude-sonnet-4-20250514']
+      [cacheKey, summary, SONNET_MODEL]
     ).catch((e: unknown) => console.error('Summary cache store error:', e));
 
     return res.status(200).json({

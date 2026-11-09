@@ -10,8 +10,8 @@ export const config = {
 
 const ALLOWED_MODELS = [
   'claude-haiku-4-5-20251001',
-  'claude-sonnet-4-20250514',
-  'claude-opus-4-20250514',
+  'claude-sonnet-5-5',
+  'claude-opus-5-5',
 ];
 
 async function handler(req: VercelRequest, res: VercelResponse) {

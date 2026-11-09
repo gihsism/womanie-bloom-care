@@ -37,8 +37,8 @@ const CHAT_URL = '/api/ai-doctor-chat';
 
 const AI_MODELS = [
   { id: 'claude-haiku-4-5-20251001', label: 'Claude Haiku', description: 'Fast responses' },
-  { id: 'claude-sonnet-4-20250514', label: 'Claude Sonnet', description: 'Best analysis' },
-  { id: 'claude-opus-4-20250514', label: 'Claude Opus', description: 'Most capable' },
+  { id: 'claude-sonnet-5-5', label: 'Claude Sonnet', description: 'Best analysis' },
+  { id: 'claude-opus-5-5', label: 'Claude Opus', description: 'Most capable' },
 ];
 
 interface PersonalContext {
