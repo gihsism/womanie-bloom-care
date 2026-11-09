@@ -189,6 +189,24 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-09 — Test coverage: added security-invariant tests for connections/redeem-code
+The doctor access-code redemption handler (connections/redeem-code.ts) is the entry
+point through which a doctor gains a pending connection to a patient — if its auth
+or role checks regressed, a non-doctor (or unauthenticated caller) could create
+connections and then use /api/doctors/patient to read patient chart data. It had no
+tests at all. Added api/_routes/connections/redeem-code.test.ts with 12 tests covering:
+401 on no session; 400 on missing code; 400 on whitespace-only code; 429 when the
+per-doctor rate limit fires; 403 when the caller holds no roles; 403 when the caller
+has a non-doctor role (e.g. 'admin'); 404 when the code is invalid, expired, or
+already used (claimed=0 from the CTE); 409 when a unique-constraint error signals
+the doctor is already connected to this patient; 200 on success; regression guard
+confirming the atomic CTE SQL still checks `is_used = false` (prevents reuse of
+burned codes); regression guard confirming the CTE checks `expires_at > now()`
+(prevents expired codes from working); and a consent guard confirming the connection
+is inserted as status='pending' and not 'approved' (the patient must still explicitly
+consent from PendingConnections before the doctor gains chart access).
+Verified: tsc 0, eslint 0, 295/295 tests, vite build clean.
+
 ### 2026-11-08 — Test coverage: added security-invariant tests for auth/change-password
 The change-password handler was hardened on 2026-11-03 so the password hash update
 and other-session revocation run inside one sql.transaction([...]) — if the hash
