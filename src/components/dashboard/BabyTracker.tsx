@@ -8,7 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLifeEvents, importLocalOnce, type LifeEvent } from '@/hooks/useLifeEvents';
-import { Baby, Milk, Moon, Droplets, Ruler, Syringe, Trash2, Play, Square } from 'lucide-react';
+import { Baby, Milk, Moon, Droplets, Ruler, Syringe, Trash2, Play, Square, BarChart3 } from 'lucide-react';
+import BabyStatsTab from './BabyStatsTab';
 import { differenceInMinutes, format, isToday, parseISO } from 'date-fns';
 
 // Baby tracker: feeds, sleep, nappies, growth and vaccinations, per baby
@@ -363,18 +364,20 @@ export default function BabyTracker() {
 
       {baby && (
         <Tabs defaultValue="feed">
-          <TabsList className="grid grid-cols-5 w-full h-auto">
+          <TabsList className="grid grid-cols-6 w-full h-auto">
             <TabsTrigger value="feed" className="text-[11px] px-1 flex-col gap-0.5 py-1.5"><Milk className="h-3.5 w-3.5" />Feed</TabsTrigger>
             <TabsTrigger value="sleep" className="text-[11px] px-1 flex-col gap-0.5 py-1.5"><Moon className="h-3.5 w-3.5" />Sleep</TabsTrigger>
             <TabsTrigger value="nappy" className="text-[11px] px-1 flex-col gap-0.5 py-1.5"><Droplets className="h-3.5 w-3.5" />Nappy</TabsTrigger>
             <TabsTrigger value="growth" className="text-[11px] px-1 flex-col gap-0.5 py-1.5"><Ruler className="h-3.5 w-3.5" />Growth</TabsTrigger>
             <TabsTrigger value="vax" className="text-[11px] px-1 flex-col gap-0.5 py-1.5"><Syringe className="h-3.5 w-3.5" />Vaccines</TabsTrigger>
+            <TabsTrigger value="stats" className="text-[11px] px-1 flex-col gap-0.5 py-1.5"><BarChart3 className="h-3.5 w-3.5" />Stats</TabsTrigger>
           </TabsList>
           <TabsContent value="feed" className="pt-3"><FeedTab babyId={baby.id} /></TabsContent>
           <TabsContent value="sleep" className="pt-3"><SleepTab babyId={baby.id} /></TabsContent>
           <TabsContent value="nappy" className="pt-3"><NappyTab babyId={baby.id} /></TabsContent>
           <TabsContent value="growth" className="pt-3"><GrowthTab babyId={baby.id} /></TabsContent>
           <TabsContent value="vax" className="pt-3"><VaccineTab babyId={baby.id} /></TabsContent>
+          <TabsContent value="stats" className="pt-3"><BabyStatsTab babyId={baby.id} /></TabsContent>
         </Tabs>
       )}
     </Card>
