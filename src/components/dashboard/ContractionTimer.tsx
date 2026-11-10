@@ -5,15 +5,18 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { Timer, Play, Square, RotateCcw, AlertTriangle, History } from 'lucide-react';
 import { format, formatDistanceToNowStrict } from 'date-fns';
+import { useLifeEvents, importLocalOnce } from '@/hooks/useLifeEvents';
 
 // Contraction timer for late pregnancy. Standard advice when labor
 // starts: time the frequency (start-to-start) and duration. The
 // "5-1-1 rule" (every 5 min, lasting 1 min, for 1 hour) is the
 // classic threshold for heading to the hospital, though clinics vary.
 //
-// We deliberately keep this on-device only. Contraction timing is a
-// real-time tool, not a longitudinal record, and there's no clinical
-// benefit to syncing it server-side.
+// Finished contractions are saved to the account (life_events, kind
+// 'contraction') so they survive a phone change, appear in the data
+// export and can be shown to a midwife. The one in progress stays on the
+// device so Start/Stop are instant even on a poor connection; history
+// from older versions (device-only) is moved into the account once.
 
 interface Contraction {
   id: string;
@@ -22,6 +25,7 @@ interface Contraction {
 }
 
 const KEY = (uid: string) => `womanie_contractions_${uid}`;
+const ACTIVE_KEY = (uid: string) => `womanie_contraction_active_${uid}`;
 const MAX_HISTORY = 50;
 
 function uid() {
@@ -59,18 +63,24 @@ function fmtMs(ms: number): string {
 const ContractionTimer = () => {
   const { user } = useAuth();
   const userId = user?.id;
-  const [history, setHistory] = useState<Contraction[]>([]);
+  const { events, add, remove, error } = useLifeEvents('contraction', {
+    limit: MAX_HISTORY,
+    beforeLoad: (id) => importLocalOnce<Contraction, Record<string, never>>(id, KEY(id), 'contraction', c =>
+      c.endedAt === null ? null : { occurred_at: new Date(c.startedAt).toISOString(), ended_at: new Date(c.endedAt).toISOString() }),
+  });
+  // Oldest first, like the device-only version kept them.
+  const history: Contraction[] = events
+    .filter(e => e.ended_at !== null)
+    .map(e => ({ id: e.id, startedAt: Date.parse(e.occurred_at), endedAt: Date.parse(e.ended_at as string) }))
+    .sort((a, b) => a.startedAt - b.startedAt);
   const [active, setActive] = useState<Contraction | null>(null);
   const [now, setNow] = useState(Date.now());
   const tickRef = useRef<number | null>(null);
 
-  // Load history + any in-progress contraction.
+  // Restore an in-progress contraction (kept on the device).
   useEffect(() => {
     if (!userId) return;
-    const all = readJson<Contraction[]>(KEY(userId), []);
-    const inProgress = all.find(c => c.endedAt === null) ?? null;
-    setActive(inProgress);
-    setHistory(all.filter(c => c.endedAt !== null));
+    setActive(readJson<Contraction | null>(ACTIVE_KEY(userId), null));
   }, [userId]);
 
   // Tick once a second while there's an active contraction or while
@@ -83,39 +93,42 @@ const ContractionTimer = () => {
     };
   }, []);
 
-  const persist = (allHistory: Contraction[], current: Contraction | null) => {
-    setHistory(allHistory);
-    setActive(current);
+  const setActiveSaved = (c: Contraction | null) => {
+    setActive(c);
     if (!userId) return;
-    const merged = current ? [...allHistory, current] : allHistory;
-    writeJson(KEY(userId), merged.slice(-MAX_HISTORY));
+    if (c) writeJson(ACTIVE_KEY(userId), c);
+    else { try { localStorage.removeItem(ACTIVE_KEY(userId)); } catch { /* ignore */ } }
   };
 
   const start = () => {
-    const c: Contraction = { id: uid(), startedAt: Date.now(), endedAt: null };
-    persist(history, c);
+    setActiveSaved({ id: uid(), startedAt: Date.now(), endedAt: null });
   };
 
-  const stop = () => {
+  const stop = async () => {
     if (!active) return;
-    const ended: Contraction = { ...active, endedAt: Date.now() };
-    persist([...history, ended].slice(-MAX_HISTORY), null);
+    const endedAt = Date.now();
+    const startedAt = active.startedAt;
+    setActiveSaved(null);
+    const saved = await add({ occurred_at: new Date(startedAt).toISOString(), ended_at: new Date(endedAt).toISOString() });
+    // Keep the contraction on screen if the save failed, so it isn't lost.
+    if (!saved) setActiveSaved({ id: uid(), startedAt, endedAt: null });
   };
 
   const discardActive = () => {
     if (!active) return;
     if (!window.confirm('Discard this contraction?')) return;
-    persist(history, null);
+    setActiveSaved(null);
   };
 
   const removeOne = (id: string) => {
-    persist(history.filter(c => c.id !== id), active);
+    void remove(id);
   };
 
-  const reset = () => {
+  const reset = async () => {
     if (history.length === 0 && !active) return;
     if (!window.confirm('Clear all contraction history?')) return;
-    persist([], null);
+    setActiveSaved(null);
+    for (const c of history) await remove(c.id);
   };
 
   // Sliding-window stats: last hour's average frequency (start-to-start)
@@ -173,6 +186,8 @@ const ContractionTimer = () => {
         every 5 minutes, lasting 1 minute, for 1 hour — is the typical "head to the
         hospital" threshold. Your provider may use a different rule; follow theirs.
       </p>
+
+      {error && <p className="text-xs text-destructive">{error}</p>}
 
       {/* Active contraction big surface */}
       {active ? (

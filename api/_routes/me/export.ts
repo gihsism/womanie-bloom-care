@@ -39,6 +39,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       accessCodes, appointments, visibleDoctorNotes,
       doctorProfile, doctorNotes, doctorSchedule,
       consultationSettings, chartAccessLog,
+      lifeEvents, medications, babies, birthRecords,
     ] = await Promise.all([
       sql.query('SELECT * FROM profiles WHERE id = $1', [user.id]),
       sql.query('SELECT id, email, name, created_at FROM auth_users WHERE id = $1', [user.id]),
@@ -127,6 +128,10 @@ async function handler(req: VercelRequest, res: VercelResponse) {
            ORDER BY viewed_at DESC`,
         [user.id]
       ),
+      sql.query('SELECT * FROM life_events WHERE user_id = $1 ORDER BY occurred_at DESC', [user.id]),
+      sql.query('SELECT * FROM medications WHERE user_id = $1 ORDER BY created_at DESC', [user.id]),
+      sql.query('SELECT * FROM babies WHERE user_id = $1 ORDER BY created_at', [user.id]),
+      sql.query('SELECT * FROM birth_records WHERE user_id = $1 ORDER BY birth_at DESC NULLS LAST', [user.id]),
     ]) as Row[][];
 
     const payload = {
@@ -148,6 +153,10 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       appointments,
       visible_doctor_notes: visibleDoctorNotes,
       chart_access_log: chartAccessLog,
+      life_events: lifeEvents,
+      medications,
+      babies,
+      birth_records: birthRecords,
       // Doctor-specific sections; empty arrays for patient-only accounts.
       doctor_profile: doctorProfile[0] ?? null,
       doctor_authored_notes: doctorNotes,

@@ -6,16 +6,19 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Activity, RotateCcw, AlertCircle, History } from 'lucide-react';
 import { format, formatDistanceToNowStrict } from 'date-fns';
+import { useLifeEvents, importLocalOnce } from '@/hooks/useLifeEvents';
 
 // Kick counter for late pregnancy. Standard methodology (ACOG):
 // from ~28 weeks on, count fetal movements daily. 10 distinct
 // movements in 2 hours or less is reassuring; substantially fewer
 // is a reason to call your provider for monitoring.
 //
-// We deliberately keep this client-only (localStorage scoped by
-// userId). Kick counting is a personal logging activity — there's
-// no clinical benefit to syncing it server-side until the patient
-// shares the session with a doctor.
+// Finished sessions are saved to the account (life_events, kind
+// 'kick_session', data = { count, taps }) so they survive a phone change,
+// are in the data export, and can be shown to a midwife. The session in
+// progress stays on the device so every tap is instant. Sessions from the
+// older device-only counters (this one and the retired FetalKickCounter)
+// are moved into the account once.
 
 interface KickSession {
   id: string;
@@ -32,6 +35,10 @@ const REASSURING_MS = 2 * 60 * 60 * 1000; // 2 hours
 const SESSION_STORAGE_KEY = (userId: string) => `womanie_kick_session_${userId}`;
 const HISTORY_STORAGE_KEY = (userId: string) => `womanie_kick_history_${userId}`;
 const HISTORY_LIMIT = 14;
+// Storage key of the retired FetalKickCounter (sessions: {startedAt, endedAt, count, durationMin}, ISO dates).
+const OLD_FETAL_KEY = (userId: string) => `womanie_kick_sessions_${userId}`;
+
+interface KickData { count: number; taps: number[] }
 
 function uid(): string {
   return crypto.randomUUID();
@@ -72,17 +79,37 @@ const KickCounter = () => {
   const userId = user?.id;
   const { toast } = useToast();
   const [current, setCurrent] = useState<KickSession | null>(null);
-  const [history, setHistory] = useState<KickSession[]>([]);
+  const { events, add, error } = useLifeEvents<KickData>('kick_session', {
+    limit: HISTORY_LIMIT,
+    beforeLoad: async (id) => {
+      await importLocalOnce<KickSession, KickData>(id, HISTORY_STORAGE_KEY(id), 'kick_session', k =>
+        k.endedAt === null ? null : {
+          occurred_at: new Date(k.startedAt).toISOString(),
+          ended_at: new Date(k.endedAt).toISOString(),
+          data: { count: k.count, taps: k.taps ?? [] },
+        });
+      await importLocalOnce<{ startedAt: string; endedAt: string; count: number }, KickData>(id, OLD_FETAL_KEY(id), 'kick_session', k => ({
+        occurred_at: k.startedAt,
+        ended_at: k.endedAt,
+        data: { count: k.count, taps: [] },
+      }));
+    },
+  });
+  // Newest first.
+  const history: KickSession[] = events.map(e => ({
+    id: e.id,
+    startedAt: Date.parse(e.occurred_at),
+    endedAt: e.ended_at ? Date.parse(e.ended_at) : null,
+    count: Number(e.data?.count ?? 0),
+    taps: Array.isArray(e.data?.taps) ? e.data.taps : [],
+  }));
   const [now, setNow] = useState(Date.now());
   const tickRef = useRef<number | null>(null);
 
-  // Load any in-progress session + history when the user changes.
+  // Restore an in-progress session (kept on the device).
   useEffect(() => {
     if (!userId) return;
-    const c = readJson<KickSession | null>(SESSION_STORAGE_KEY(userId), null);
-    const h = readJson<KickSession[]>(HISTORY_STORAGE_KEY(userId), []);
-    setCurrent(c);
-    setHistory(h);
+    setCurrent(readJson<KickSession | null>(SESSION_STORAGE_KEY(userId), null));
   }, [userId]);
 
   // Re-tick once a second only when there's an active session, so the
@@ -109,10 +136,15 @@ const KickCounter = () => {
     else localStorage.removeItem(SESSION_STORAGE_KEY(userId));
   };
 
-  const persistHistory = (next: KickSession[]) => {
-    if (!userId) return;
-    setHistory(next);
-    writeJson(HISTORY_STORAGE_KEY(userId), next);
+  // Save a finished session to the account; if that fails, put it back
+  // on screen so the count isn't lost.
+  const saveCompleted = async (completed: KickSession) => {
+    const saved = await add({
+      occurred_at: new Date(completed.startedAt).toISOString(),
+      ended_at: new Date(completed.endedAt ?? Date.now()).toISOString(),
+      data: { count: completed.count, taps: completed.taps },
+    });
+    if (!saved) persistCurrent({ ...completed, endedAt: null });
   };
 
   const start = () => {
@@ -137,9 +169,8 @@ const KickCounter = () => {
     // Auto-complete at 10 movements — that's the reassurance threshold.
     if (next.count >= TARGET_KICKS) {
       const completed: KickSession = { ...next, endedAt: t };
-      const newHistory = [completed, ...history].slice(0, HISTORY_LIMIT);
       persistCurrent(null);
-      persistHistory(newHistory);
+      void saveCompleted(completed);
       const duration = t - completed.startedAt;
       const reassuring = duration <= REASSURING_MS;
       toast({
@@ -159,9 +190,8 @@ const KickCounter = () => {
     if (!current) return;
     const t = Date.now();
     const completed: KickSession = { ...current, endedAt: t };
-    const newHistory = [completed, ...history].slice(0, HISTORY_LIMIT);
     persistCurrent(null);
-    persistHistory(newHistory);
+    if (completed.count > 0) void saveCompleted(completed);
     if (completed.count > 0) {
       toast({
         title: 'Session saved',
@@ -181,6 +211,7 @@ const KickCounter = () => {
 
   return (
     <Card className="p-4 space-y-4">
+      {error && <p className="text-xs text-destructive">{error}</p>}
       <div className="flex items-center justify-between">
         <h4 className="font-semibold flex items-center gap-2">
           <Activity className="h-4 w-4 text-primary" />

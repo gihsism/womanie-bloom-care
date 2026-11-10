@@ -20,7 +20,6 @@ import CycleCalendar from '@/components/dashboard/CycleCalendar';
 import PregnancyTracker from '@/components/dashboard/PregnancyTracker';
 import PregnancyWeightTracker from '@/components/dashboard/PregnancyWeightTracker';
 import BloodPressureTracker from '@/components/dashboard/BloodPressureTracker';
-import FetalKickCounter from '@/components/dashboard/FetalKickCounter';
 import PregnancyVaccinations from '@/components/dashboard/PregnancyVaccinations';
 import PregnancyNutrition from '@/components/dashboard/PregnancyNutrition';
 import PregnancyExercise from '@/components/dashboard/PregnancyExercise';
@@ -745,7 +744,6 @@ const PatientDashboard = () => {
                     />
                     <PregnancyWeightTracker dueDate={pregnancyDueDate} />
                     <BloodPressureTracker mode="pregnancy" />
-                    <FetalKickCounter dueDate={pregnancyDueDate} />
                     <PregnancyVaccinations dueDate={pregnancyDueDate} />
                     <EpdsScreener mode="pregnancy" />
                     {pregnancyDueDate && (
