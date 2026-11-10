@@ -16,7 +16,8 @@ export type LifeEventKind =
   | 'nappy'
   | 'baby_growth'
   | 'med_dose'
-  | 'labour_med';
+  | 'labour_med'
+  | 'baby_vaccine';
 
 export interface LifeEvent<D = Record<string, unknown>> {
   id: string;

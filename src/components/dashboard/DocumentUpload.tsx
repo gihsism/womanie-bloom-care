@@ -17,9 +17,11 @@ interface DocumentUploadProps {
   onOpenChange?: (open: boolean) => void;
   showTrigger?: boolean;
   onUploaded?: () => void;
+  /** Pre-selects the document type (e.g. from the Labour & birth page). */
+  defaultType?: string;
 }
 
-const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true, onUploaded }: DocumentUploadProps) => {
+const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true, onUploaded, defaultType }: DocumentUploadProps) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setIsOpen = (v: boolean) => {
@@ -27,7 +29,7 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
     setInternalOpen(v);
   };
   const [file, setFile] = useState<File | null>(null);
-  const [documentType, setDocumentType] = useState('');
+  const [documentType, setDocumentType] = useState(defaultType ?? '');
   const [notes, setNotes] = useState('');
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
@@ -39,6 +41,8 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
     'Medical Record',
     'Prescription',
     'Test Result',
+    'Labour / Birth Report',
+    'Hospital Discharge Summary',
     'Other'
   ];
 
@@ -131,7 +135,7 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
 
       // Reset form and close dialog
       setFile(null);
-      setDocumentType('');
+      setDocumentType(defaultType ?? '');
       setNotes('');
       setIsOpen(false);
 

@@ -34,6 +34,7 @@ import MenopauseDashboard from '@/components/dashboard/MenopauseDashboard';
 import PostpartumDashboard from '@/components/dashboard/PostpartumDashboard';
 import EpdsScreener from '@/components/dashboard/EpdsScreener';
 import MedicineLog from '@/components/dashboard/MedicineLog';
+import LifeLinkCard from '@/components/dashboard/LifeLinkCard';
 import MenopauseSymptomCalendar from '@/components/dashboard/MenopauseSymptomCalendar';
 import PerimenopauseStageCard from '@/components/dashboard/PerimenopauseStageCard';
 import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
@@ -88,7 +89,9 @@ import {
   LogOut,
   Sparkles,
   Droplet,
-  ArrowLeft
+  ArrowLeft,
+  Baby,
+  Milk
 } from 'lucide-react';
 
 const PatientDashboard = () => {
@@ -746,6 +749,7 @@ const PatientDashboard = () => {
                     <PregnancyWeightTracker dueDate={pregnancyDueDate} />
                     <BloodPressureTracker mode="pregnancy" />
                     <PregnancyVaccinations dueDate={pregnancyDueDate} />
+                    <LifeLinkCard to="/dashboard/birth" icon={Baby} title="Labour & birth" description="Contractions, medicines given in labour, birth details and hospital reports" />
                     <EpdsScreener mode="pregnancy" />
                     {pregnancyDueDate && (
                       <CycleCalendar
@@ -809,6 +813,8 @@ const PatientDashboard = () => {
                 /* ─── Postpartum Mode ─── */
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="lg:col-span-2 space-y-6">
+                    <LifeLinkCard to="/dashboard/birth" icon={Baby} title="Labour & birth" description="Your birth details, medicines given in labour and hospital reports" />
+                    <LifeLinkCard to="/dashboard/baby" icon={Milk} title="Baby tracker" description="Feeds, sleep, nappies, growth and vaccinations" />
                     <EpdsScreener mode="postpartum" />
                     <PostpartumDashboard onNavigateToDoctorChat={() => navigate('/dashboard/ai-doctor')} />
                   </div>

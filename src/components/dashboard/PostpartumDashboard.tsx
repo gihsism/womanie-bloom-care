@@ -15,7 +15,7 @@ import {
   Droplet,
 } from 'lucide-react';
 import { differenceInDays, differenceInWeeks, format, parseISO } from 'date-fns';
-import PostpartumFeedingTracker from './PostpartumFeedingTracker';
+import BabyTracker from './BabyTracker';
 import PostpartumLochiaCard from './PostpartumLochiaCard';
 import PostpartumPelvicFloor from './PostpartumPelvicFloor';
 import PostpartumNutrition from './PostpartumNutrition';
@@ -360,7 +360,7 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
       {/* Feeding tracker — shows for the first 6 months postpartum
           when feed timing is the most active question. After that
           the cadence stabilises and the tool isn't really needed. */}
-      {weeksPp <= 26 && <PostpartumFeedingTracker />}
+      {weeksPp <= 26 && <BabyTracker />}
 
       {/* Pelvic floor habit — surfaces from week 2 (vaginal) /
           week 6 (C-section), most useful through ~6 months. */}
