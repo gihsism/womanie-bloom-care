@@ -366,13 +366,11 @@ export default function BirthRecord() {
 
         {/* Hospital reports */}
         <Card className="p-4 space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="font-semibold flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Hospital reports</h2>
-            <DocumentUpload defaultType="Labour / Birth Report" onUploaded={() => { void loadDocs(); }} />
-          </div>
+          <h2 className="font-semibold flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Hospital reports</h2>
           <p className="text-xs text-muted-foreground">
             Upload your labour notes, birth report or discharge letter. They’re read and explained in plain language like your other records.
           </p>
+          <DocumentUpload defaultType="Labour / Birth Report" onUploaded={() => { void loadDocs(); }} />
           {docs.length === 0 ? (
             <p className="text-xs text-muted-foreground">No birth reports uploaded yet.</p>
           ) : (
