@@ -189,6 +189,23 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-10 — Test coverage: added security-invariant tests for auth/login
+auth/login.ts is the credential entry point for all email/password users. A regression
+in its rate limiting, session insertion, or cookie flags would directly enable account
+takeover. The handler had no tests at all. Added api/_routes/auth/login.test.ts with
+11 tests covering: 400 when email or password is missing; 429 when the IP rate limit
+fires; 429 when the per-email rate limit fires; regression guard confirming the database
+is never queried when the rate limit fires (prevents an attacker from using the first
+attempt each day to enumerate registered emails via timing before the counter saturates);
+401 when the email is not registered; 401 for a Google-only account with no password_hash
+(different error message signals Google sign-in path); 401 when bcrypt.compare rejects
+the password; invariant guard confirming a session row is inserted into auth_sessions on
+every successful login (without this, getAuthUser's session-existence check — added
+2026-10-25 to make logout real — would reject every token); invariant guard confirming
+the Set-Cookie header carries HttpOnly and Secure flags (prevents XSS from stealing the
+token); and 200 with user info on successful login.
+Verified: tsc 0, eslint 0, 306/306 tests, vite build clean.
+
 ### 2026-11-09 — Test coverage: added security-invariant tests for connections/redeem-code
 The doctor access-code redemption handler (connections/redeem-code.ts) is the entry
 point through which a doctor gains a pending connection to a patient — if its auth
