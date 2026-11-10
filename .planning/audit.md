@@ -2513,3 +2513,12 @@ start+duration, no identity leak), connections/pending + approved
   3 few-cycles / 4 personal-pattern), derived averages, implausible-cycle
   exclusion, manual-override precedence, and the 14-day ovulation +
   fertile-window offsets. Suite 185 -> 192.
+
+### 2026-11-10 — life-cycle features (Alena: "all of the above")
+- 010_life_cycle.sql (additive): life_events, medications, babies, birth_records; in /api/db owner map, export, delete-account.
+- Contractions + kick counts saved to account (useLifeEvents, one-time device import); duplicate FetalKickCounter retired.
+- Medicine & supplement log on every stage (on-screen "Due" reminders; phone notifications need the native app).
+- /dashboard/birth (birth details, labour medicines, contractions in labour, hospital reports with 2 new doc types).
+- /dashboard/baby + postpartum inline: feeds/sleep/nappies/growth/vaccines; old device feeds imported.
+- Live E2E on demo account passed (saved + survives reload); test rows removed afterwards.
+- Open: AI assistant doesn't yet read these logs; doctor sharing of them not decided; phone push reminders after iOS build.
