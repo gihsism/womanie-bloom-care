@@ -76,14 +76,14 @@ export default function BabyStatsTab({ babyId }: { babyId: string }) {
       <section className="space-y-1">
         <h4 className="text-sm font-semibold">Feeds per day</h4>
         {hasFeeds ? (
-          <div className="h-40" role="img" aria-label={`Feeds per day, last 7 days: ${rows.map(r => `${r.label} ${r.feeds}`).join(', ')}`}>
+          <div className="h-40 text-primary" role="img" aria-label={`Feeds per day, last 7 days: ${rows.map(r => `${r.label} ${r.feeds}`).join(', ')}`}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={rows} margin={{ top: 8, right: 4, left: -24, bottom: 0 }}>
                 <CartesianGrid vertical={false} stroke="hsl(var(--border))" strokeDasharray="0" />
                 <XAxis dataKey="label" tick={axis} tickLine={false} axisLine={false} />
                 <YAxis allowDecimals={false} tick={axis} tickLine={false} axisLine={false} width={40} />
                 <Tooltip content={<ChartTip />} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }} />
-                <Bar dataKey="feeds" name="Feeds" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} maxBarSize={22} />
+                <Bar dataKey="feeds" name="Feeds" fill="currentColor" radius={[4, 4, 0, 0]} maxBarSize={22} isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -106,8 +106,8 @@ export default function BabyStatsTab({ babyId }: { babyId: string }) {
                 <XAxis dataKey="label" tick={axis} tickLine={false} axisLine={false} />
                 <YAxis allowDecimals={false} tick={axis} tickLine={false} axisLine={false} width={40} />
                 <Tooltip content={<ChartTip />} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }} />
-                <Bar dataKey="wet" name="Wet" stackId="n" fill={WET} stroke="hsl(var(--card))" strokeWidth={2} maxBarSize={22} />
-                <Bar dataKey="dirty" name="Dirty" stackId="n" fill={DIRTY} stroke="hsl(var(--card))" strokeWidth={2} radius={[4, 4, 0, 0]} maxBarSize={22} />
+                <Bar dataKey="wet" name="Wet" stackId="n" fill={WET} stroke="hsl(var(--card))" strokeWidth={2} maxBarSize={22} isAnimationActive={false} />
+                <Bar dataKey="dirty" name="Dirty" stackId="n" fill={DIRTY} stroke="hsl(var(--card))" strokeWidth={2} radius={[4, 4, 0, 0]} maxBarSize={22} isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
           </div>
