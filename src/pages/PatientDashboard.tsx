@@ -33,6 +33,7 @@ import PreMenstrualDashboard from '@/components/dashboard/PreMenstrualDashboard'
 import MenopauseDashboard from '@/components/dashboard/MenopauseDashboard';
 import PostpartumDashboard from '@/components/dashboard/PostpartumDashboard';
 import EpdsScreener from '@/components/dashboard/EpdsScreener';
+import MedicineLog from '@/components/dashboard/MedicineLog';
 import MenopauseSymptomCalendar from '@/components/dashboard/MenopauseSymptomCalendar';
 import PerimenopauseStageCard from '@/components/dashboard/PerimenopauseStageCard';
 import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
@@ -907,6 +908,13 @@ const PatientDashboard = () => {
                 </div>
               )}
             </div>
+
+            {/* Medicines & supplements - every life stage */}
+            {user && (
+              <div className="mb-6">
+                <MedicineLog stage={selectedMode} />
+              </div>
+            )}
 
             {/* Ovulation Prediction - Show for conception and menstrual cycle modes */}
             {(selectedMode === 'conception' || selectedMode === 'menstrual-cycle') && user && periodData && (
