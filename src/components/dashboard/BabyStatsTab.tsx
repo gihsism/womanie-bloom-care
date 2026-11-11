@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useLifeEvents } from '@/hooks/useLifeEvents';
+import { Button } from '@/components/ui/button';
 import { dailyRows, feedSummary, type DayRow } from '@/lib/babyStats';
 
 // Feeding and nappy statistics for one baby (last 7 days).
@@ -43,7 +44,7 @@ function ChartTip({ active, payload, label }: { active?: boolean; payload?: Arra
   );
 }
 
-export default function BabyStatsTab({ babyId }: { babyId: string }) {
+export default function BabyStatsTab({ babyId, onGoTo }: { babyId: string; onGoTo?: (tab: string) => void }) {
   const feeds = useLifeEvents('feed', { babyId, limit: 500 });
   const nappies = useLifeEvents('nappy', { babyId, limit: 500 });
   const [showTable, setShowTable] = useState(false);
@@ -87,7 +88,12 @@ export default function BabyStatsTab({ babyId }: { babyId: string }) {
               </BarChart>
             </ResponsiveContainer>
           </div>
-        ) : <p className="text-xs text-muted-foreground">No feeds logged in the last 7 days.</p>}
+        ) : (
+          <div className="rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground space-y-2">
+            <p>No feeds logged yet. Log feeds in the Feed tab and they’ll be counted here.</p>
+            {onGoTo && <Button size="sm" variant="outline" onClick={() => onGoTo('feed')}>Log a feed</Button>}
+          </div>
+        )}
       </section>
 
       <section className="space-y-1">
@@ -111,7 +117,12 @@ export default function BabyStatsTab({ babyId }: { babyId: string }) {
               </BarChart>
             </ResponsiveContainer>
           </div>
-        ) : <p className="text-xs text-muted-foreground">No nappies logged in the last 7 days.</p>}
+        ) : (
+          <div className="rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground space-y-2">
+            <p>No nappies logged yet. Tap Wet, Dirty or Both in the Nappy tab.</p>
+            {onGoTo && <Button size="sm" variant="outline" onClick={() => onGoTo('nappy')}>Log a nappy</Button>}
+          </div>
+        )}
       </section>
 
       <button type="button" className="text-[11px] text-muted-foreground underline" onClick={() => setShowTable(v => !v)}>

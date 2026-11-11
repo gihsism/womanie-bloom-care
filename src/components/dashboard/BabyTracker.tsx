@@ -304,6 +304,7 @@ export default function BabyTracker() {
   const [newName, setNewName] = useState('');
   const [newDate, setNewDate] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useState('feed');
 
   const load = useCallback(async () => {
     if (!userId) return;
@@ -363,7 +364,7 @@ export default function BabyTracker() {
       )}
 
       {baby && (
-        <Tabs defaultValue="feed">
+        <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="grid grid-cols-6 w-full h-auto">
             <TabsTrigger value="feed" className="text-[11px] px-1 flex-col gap-0.5 py-1.5"><Milk className="h-3.5 w-3.5" />Feed</TabsTrigger>
             <TabsTrigger value="sleep" className="text-[11px] px-1 flex-col gap-0.5 py-1.5"><Moon className="h-3.5 w-3.5" />Sleep</TabsTrigger>
@@ -377,7 +378,7 @@ export default function BabyTracker() {
           <TabsContent value="nappy" className="pt-3"><NappyTab babyId={baby.id} /></TabsContent>
           <TabsContent value="growth" className="pt-3"><GrowthTab babyId={baby.id} /></TabsContent>
           <TabsContent value="vax" className="pt-3"><VaccineTab babyId={baby.id} /></TabsContent>
-          <TabsContent value="stats" className="pt-3"><BabyStatsTab babyId={baby.id} /></TabsContent>
+          <TabsContent value="stats" className="pt-3"><BabyStatsTab babyId={baby.id} onGoTo={setTab} /></TabsContent>
         </Tabs>
       )}
     </Card>
