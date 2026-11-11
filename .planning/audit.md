@@ -189,6 +189,24 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-11 — Test coverage: added security-invariant tests for appointments/book
+The appointment-booking handler (appointments/book.ts) is the only endpoint that
+enforces the double-booking conflict guard: it uses a single INSERT ... SELECT ...
+WHERE NOT EXISTS query so two patients claiming the same slot simultaneously only
+produce one row. It also gates on doctor existence, verification status, and
+availability, and must bind the session user's id as patient_id rather than trusting
+any client-supplied value. The handler had no tests at all.
+Added api/_routes/appointments/book.test.ts with 12 tests covering: 401 on no session;
+400 on missing doctor_id; 400 on missing scheduled_at; 400 on an invalid ISO timestamp;
+400 when scheduled_at is in the past; 400 when duration exceeds the 240-minute cap;
+404 when the doctor does not exist; 400 when the doctor is not verified; 400 when the
+doctor is marked unavailable; 409 when WHERE NOT EXISTS returns 0 rows (slot already
+taken by a concurrent request); a regression guard confirming the INSERT still uses
+WHERE NOT EXISTS with a doctor_id filter (dropping this silently re-enables double-
+booking); an ownership invariant confirming the session user's id is bound as $2
+(patient_id) in the INSERT, never a client-supplied value; and 200 on success.
+Verified: tsc 0, eslint 0, 334/334 tests, vite build clean.
+
 ### 2026-11-10 — Test coverage: added security-invariant tests for auth/login
 auth/login.ts is the credential entry point for all email/password users. A regression
 in its rate limiting, session insertion, or cookie flags would directly enable account
