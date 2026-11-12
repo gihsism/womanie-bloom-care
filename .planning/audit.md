@@ -189,6 +189,27 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-12 — Test coverage: added security-invariant tests for doctors/patient
+doctors/patient.ts is the most sensitive data endpoint in the codebase: it is the
+only path through which a doctor can read a patient's full chart (profile,
+health signals, lab data, documents, notes, appointments, period records). The
+ownership enforcement in /api/db intentionally prevents doctors from using that
+generic endpoint to reach patient data, so this endpoint bridges the gap under
+strict consent control — but it had no tests at all.
+Added api/_routes/doctors/patient.test.ts with 7 tests covering: 401 on no
+session; 400 on missing patient ID; 403 when no approved connection exists for
+the doctor–patient pair (covers pending, revoked, and absent connections); a
+regression guard confirming the consent SQL checks status = 'approved' (weakening
+this to a bare existence check would let a doctor with a pending or revoked
+connection read full chart data before or after the patient has consented); an
+ownership invariant confirming the consent query binds the authenticated session's
+doctor id as doctor_id — not a client-supplied value (a refactor that trusted a
+query param would let any authenticated user impersonate a doctor); an audit-log
+guard confirming chart_access_log is written on every successful fetch (the GDPR
+transparency row the patient reviews from Settings); and 200 with the full
+response shape on success.
+Verified: tsc 0, eslint 0, 341/341 tests, vite build clean.
+
 ### 2026-11-11 — Test coverage: added security-invariant tests for appointments/book
 The appointment-booking handler (appointments/book.ts) is the only endpoint that
 enforces the double-booking conflict guard: it uses a single INSERT ... SELECT ...
