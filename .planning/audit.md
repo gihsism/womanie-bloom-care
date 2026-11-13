@@ -189,6 +189,26 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-13 — Test coverage: added security-invariant tests for auth/signup
+auth/signup.ts is the email/password account creation entry point. It has had
+several hardening patches with no test coverage: IP rate limiting (2026-10-26),
+friendly 409 on duplicate email via pre-check, atomic 3-query transaction wrapping
+auth_users + profiles + auth_sessions (so a failure leaves no orphaned rows),
+and a 23505 catch block that returns 409 instead of 500 when two concurrent
+requests race past the pre-check (TOCTOU, 2026-10-28). Added
+api/_routes/auth/signup.test.ts with 11 tests covering: 400 when email or
+password is missing; 400 when password is shorter than 8 characters; 429 when
+the IP rate limit fires; a no-DB-query guard confirming the rate limit fires
+before any database access (prevents email enumeration on the first attempt of
+each day); 409 when the pre-check finds an existing email; 409 on a 23505
+unique-constraint error (TOCTOU race); an atomicity guard confirming
+sql.transaction is called with exactly 3 query arguments (auth_users + profiles +
+auth_sessions); a session-row guard confirming auth_sessions is included in the
+transaction (without this row getAuthUser's session-existence check rejects the
+new user's first request); HttpOnly and Secure cookie flags; and 200 with user
+info on success.
+Verified: tsc 0, eslint 0, 352/352 tests, vite build clean.
+
 ### 2026-11-12 — Test coverage: added security-invariant tests for doctors/patient
 doctors/patient.ts is the most sensitive data endpoint in the codebase: it is the
 only path through which a doctor can read a patient's full chart (profile,
