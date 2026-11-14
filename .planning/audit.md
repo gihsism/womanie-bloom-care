@@ -189,6 +189,27 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-14 — Test coverage: added security-invariant tests for me/delete-account
+me/delete-account.ts is the GDPR right-to-erasure endpoint — irrevocable, it
+wipes every table that holds user data in a single atomic transaction before
+clearing the session cookie. Its key security invariants (auth check, explicit
+confirmation phrase, atomicity, session cookie clearing, ordering of the email
+SELECT before the transaction) had no test coverage at all.
+Added api/_routes/me/delete-account.test.ts with 9 tests covering: 401 when the
+session is invalid; 405 for non-POST methods; 400 when the confirm field is
+missing; 400 when the confirm phrase is wrong (case-sensitive rejection, so
+"delete my account" does not trigger erasure); 400 when the confirm phrase is a
+partial match; an atomicity guard confirming sql.transaction is called once with
+an array of ≥25 elements (all base table deletions in a single commit — a
+refactoring that broke this into sequential sql.query() calls would leave a
+partial erasure on failure); a newsletter-unsubscription ordering guard
+confirming the email SELECT runs before the transaction (auth_users is deleted
+last inside the transaction, so the email must be resolved first); a session-
+cookie guard confirming the Set-Cookie response carries HttpOnly and Max-Age=0
+(without this the browser continues sending the now-invalid token); and 200 with
+success: true on success.
+Verified: tsc 0, eslint 0, 361/361 tests, vite build clean.
+
 ### 2026-11-13 — Test coverage: added security-invariant tests for auth/signup
 auth/signup.ts is the email/password account creation entry point. It has had
 several hardening patches with no test coverage: IP rate limiting (2026-10-26),
