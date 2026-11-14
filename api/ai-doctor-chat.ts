@@ -3,6 +3,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from './_lib/auth.js';
 import { checkAndConsume } from './_lib/ratelimit.js';
 import { withSentry } from './_lib/sentry.js';
+import { buildLifeContext } from './_lib/life-context.js';
 
 export const config = {
   maxDuration: 60,
@@ -86,7 +87,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       ? lastMsg.content
       : null;
 
-  const [docs, extracted, profileRow, upcomingApts, visibleNotes] = await Promise.all([
+  const [docs, extracted, profileRow, upcomingApts, visibleNotes, lifeMeds, lifeEvents, lifeBirth, lifeBabies] = await Promise.all([
     sql.query(
       `SELECT file_name, ai_suggested_name, ai_summary, ai_suggested_category, document_type
        FROM health_documents WHERE user_id = $1 ORDER BY uploaded_at DESC LIMIT 20`,
@@ -124,6 +125,14 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         LIMIT 5`,
       [user.id]
     ),
+    // Life-cycle logs (medicines, birth record, baby tracker, pregnancy
+    // self-monitoring). Best-effort: a failure here must not break chat.
+    sql.query(`SELECT id, name, dose, reminder_times FROM medications WHERE user_id = $1 AND active = TRUE ORDER BY created_at LIMIT 15`, [user.id]).catch(() => []),
+    sql.query(`SELECT kind, baby_id, occurred_at, ended_at, data FROM life_events
+                WHERE user_id = $1 AND occurred_at >= NOW() - INTERVAL '7 days'
+                ORDER BY occurred_at DESC LIMIT 600`, [user.id]).catch(() => []),
+    sql.query(`SELECT * FROM birth_records WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`, [user.id]).catch(() => []),
+    sql.query(`SELECT id, name, birth_date FROM babies WHERE user_id = $1 ORDER BY created_at LIMIT 3`, [user.id]).catch(() => []),
   ]);
 
   const profile = profileRow[0];
@@ -212,6 +221,14 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
+  medicalContext += buildLifeContext({
+    now: new Date(),
+    medications: lifeMeds as Row[],
+    events: lifeEvents as Row[],
+    birth: ((lifeBirth as Row[])[0] ?? null),
+    babies: lifeBabies as Row[],
+  });
+
   if (personalContextBlock) {
     medicalContext += personalContextBlock;
   }
@@ -227,6 +244,7 @@ IMPORTANT RULES:
 - Format responses with markdown for readability.
 - Focus on women's health topics: reproductive health, menstrual cycles, fertility, pregnancy, menopause, general wellness.
 - Never fabricate medical data not present in the records.
+- Medicine, birth, baby and pregnancy logs are self-reported in the app; use them to answer questions like "how did my baby feed overnight?" and say when something is worth raising with a midwife, health visitor or doctor.
 - When discussing lab results, explain what values mean in plain language.
 
 ## Patient Medical Records
