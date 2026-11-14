@@ -18,3 +18,13 @@ fetch Cordova bdcd8eab2d62a077efd76c3c8b9629e65ae7043c1462289a1e55de9be19bbf1f
 f="$(dirname "$0")/../ios/App/CapApp-SPM/Package.swift"
 sed -i '' 's#\.package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", exact: "[0-9.]*")#.package(name: "capacitor-swift-pm", path: "../../vendor/capacitor-swift-pm")#' "$f"
 grep -q 'vendor/capacitor-swift-pm' "$f" && echo "CapApp-SPM now uses the vendored Capacitor package"
+
+# Plugins installed from npm declare capacitor-swift-pm by URL too; point them
+# at the same local copy (SwiftPM rejects one package from two locations).
+root="$(cd "$(dirname "$0")/.." && pwd)"
+for pf in "$root"/node_modules/@capacitor/*/Package.swift; do
+  grep -q 'ionic-team/capacitor-swift-pm.git' "$pf" || continue
+  sed -i '' -E 's#\.package\(url: "https://github.com/ionic-team/capacitor-swift-pm.git", [^)]*\)#.package(name: "capacitor-swift-pm", path: "'"$root"'/ios/vendor/capacitor-swift-pm")#' "$pf"
+  echo "plugin re-pointed: $(basename "$(dirname "$pf")")"
+done
+
