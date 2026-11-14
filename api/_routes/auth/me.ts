@@ -64,12 +64,23 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const email = (payload.email as string | undefined)?.toLowerCase();
     const isAdmin = Boolean(email && adminList.includes(email));
 
+    // Whether the account has a password (Google-only accounts don't), so
+    // Settings can offer "Set a password" instead of "Change password".
+    let hasPassword = true;
+    try {
+      const pw = await sql.query('SELECT password_hash IS NOT NULL AS has FROM auth_users WHERE id = $1', [payload.sub]) as Array<{ has: boolean }>;
+      if (pw[0]) hasPassword = Boolean(pw[0].has);
+    } catch (e) {
+      console.error('me: password flag lookup failed', e);
+    }
+
     return res.status(200).json({
       user: {
         id: payload.sub,
         email: payload.email,
         name: resolvedName,
         isAdmin,
+        hasPassword,
       },
     });
   } catch (error) {

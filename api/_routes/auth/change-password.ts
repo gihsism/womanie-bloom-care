@@ -25,14 +25,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const { currentPassword, newPassword } = req.body || {};
-    if (typeof currentPassword !== 'string' || typeof newPassword !== 'string') {
-      return res.status(400).json({ error: 'currentPassword and newPassword are required' });
+    if (typeof newPassword !== 'string') {
+      return res.status(400).json({ error: 'newPassword is required' });
     }
     if (newPassword.length < 8) {
       return res.status(400).json({ error: 'New password must be at least 8 characters' });
-    }
-    if (newPassword === currentPassword) {
-      return res.status(400).json({ error: 'New password must differ from current password' });
     }
 
     const sql = neon(process.env.DATABASE_URL!);
@@ -42,10 +39,26 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     }
     const user = users[0];
     if (!user.password_hash) {
-      // Google-only accounts have no password to change.
-      return res.status(400).json({
-        error: 'This account uses Google sign-in. Password changes are managed in your Google account.',
-      });
+      // Google-only account setting its FIRST password, so it can also sign
+      // in with email + password. The caller is already authenticated by
+      // session; the IS NULL guard makes this a one-time set (a password
+      // that exists can only be changed with the current one, below).
+      const firstHash = await bcrypt.hash(newPassword, 10);
+      const updated = await sql.query(
+        'UPDATE auth_users SET password_hash = $1 WHERE id = $2 AND password_hash IS NULL RETURNING id',
+        [firstHash, auth.id]
+      );
+      if (updated.length === 0) {
+        return res.status(409).json({ error: 'A password was already set. Use your current password to change it.' });
+      }
+      return res.status(200).json({ success: true, set: true });
+    }
+
+    if (typeof currentPassword !== 'string') {
+      return res.status(400).json({ error: 'currentPassword and newPassword are required' });
+    }
+    if (newPassword === currentPassword) {
+      return res.status(400).json({ error: 'New password must differ from current password' });
     }
 
     const valid = await bcrypt.compare(currentPassword, user.password_hash);

@@ -92,12 +92,26 @@ describe('auth/change-password security invariants', () => {
     expect(res._status).toBe(404);
   });
 
-  it('returns 400 for a Google-only account with no password_hash', async () => {
-    query.mockResolvedValue([{ id: 'user_1', password_hash: null }]);
+  it('lets a Google-only account (no password_hash) set its first password without a current one', async () => {
+    query.mockResolvedValueOnce([{ id: 'user_1', password_hash: null }]).mockResolvedValueOnce([{ id: 'user_1' }]);
     const res = mockRes();
-    await handler(mockReq({ currentPassword: 'old_pass', newPassword: 'new_pass_8' }), res);
+    await handler(mockReq({ newPassword: 'new_pass_8' }), res);
+    expect(res._status).toBe(200);
+    const [sqlText] = query.mock.calls[1];
+    expect(sqlText).toMatch(/password_hash IS NULL/);
+  });
+
+  it('refuses to "set" a first password if one appeared meanwhile (race guard)', async () => {
+    query.mockResolvedValueOnce([{ id: 'user_1', password_hash: null }]).mockResolvedValueOnce([]);
+    const res = mockRes();
+    await handler(mockReq({ newPassword: 'new_pass_8' }), res);
+    expect(res._status).toBe(409);
+  });
+
+  it('still requires the current password when the account already has one', async () => {
+    const res = mockRes();
+    await handler(mockReq({ newPassword: 'new_pass_8' }), res);
     expect(res._status).toBe(400);
-    expect((res._body as Record<string, string>).error).toMatch(/google/i);
   });
 
   it('returns 401 when the current password is incorrect', async () => {

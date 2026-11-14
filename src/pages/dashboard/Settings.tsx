@@ -86,6 +86,9 @@ const Settings = () => {
   const [normalizing, setNormalizing] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
+  // Google-only accounts have no password yet: offer "Set a password".
+  const [passwordJustSet, setPasswordJustSet] = useState(false);
+  const settingFirst = user?.hasPassword === false && !passwordJustSet;
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPasswords, setShowPasswords] = useState(false);
@@ -165,16 +168,16 @@ const Settings = () => {
       const resp = await fetch('/api/auth/change-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ currentPassword, newPassword }),
+        body: JSON.stringify(settingFirst ? { newPassword } : { currentPassword, newPassword }),
       });
       const data = await resp.json().catch(() => ({}));
       if (!resp.ok) {
         throw new Error(data.error || `HTTP ${resp.status}`);
       }
-      toast({
-        title: 'Password updated',
-        description: 'Other devices have been signed out.',
-      });
+      toast(settingFirst
+        ? { title: 'Password set', description: 'You can now also sign in with your email and this password.' }
+        : { title: 'Password updated', description: 'Other devices have been signed out.' });
+      if (settingFirst) setPasswordJustSet(true);
       resetPasswordForm();
       setShowPasswordForm(false);
     } catch (error) {
@@ -663,7 +666,9 @@ const Settings = () => {
               Password
             </CardTitle>
             <CardDescription>
-              Change the password you use to sign in.
+              {settingFirst
+                ? 'Your account uses Google sign-in. Set a password to also sign in with your email address.'
+                : 'Change the password you use to sign in.'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -673,11 +678,11 @@ const Settings = () => {
                 className="w-full"
                 onClick={() => setShowPasswordForm(true)}
               >
-                Change password
+                {settingFirst ? 'Set a password' : 'Change password'}
               </Button>
             ) : (
               <form onSubmit={handleChangePassword} className="space-y-3">
-                <div className="space-y-1.5">
+                {!settingFirst && <div className="space-y-1.5">
                   <Label htmlFor="current-password">Current password</Label>
                   <Input
                     id="current-password"
@@ -687,7 +692,7 @@ const Settings = () => {
                     autoComplete="current-password"
                     required
                   />
-                </div>
+                </div>}
                 <div className="space-y-1.5">
                   <Label htmlFor="new-password">New password</Label>
                   <Input
