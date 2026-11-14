@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import BabyImage3DOverlay from './BabyImage3DOverlay';
 import KickCounter from './KickCounter';
+import GuidesSection from './GuidesSection';
 import MaternalWeightTracker from './MaternalWeightTracker';
 import ContractionTimer from './ContractionTimer';
 import HospitalBagChecklist from './HospitalBagChecklist';
@@ -987,43 +988,6 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
         </div>
       </Card>
 
-      {/* Multi-perspective framing of the current week — what it means
-          for the baby, the mother, a supporting partner, and the
-          workplace. Resolves to the nearest preceding anchor week
-          (defined for weeks 4 / 8 / 12 / 16 / 20 / 24 / 28 / 32 / 36 / 40)
-          so users at week 17 see the week-16 perspectives, etc. */}
-      {(() => {
-        const persp = getNearestPerspectives(weeksPregnant);
-        if (!persp) return null;
-        const sections = [
-          { key: 'baby', label: 'For the baby', tone: 'bg-pink-50/60 dark:bg-pink-950/20 border-pink-200/60 dark:border-pink-800/40', emoji: '👶', text: persp.baby },
-          { key: 'mother', label: 'For you', tone: 'bg-primary/5 border-primary/20', emoji: '💗', text: persp.mother },
-          { key: 'partner', label: 'For your partner', tone: 'bg-secondary/10 border-secondary/30', emoji: '🤝', text: persp.partner },
-          { key: 'employer', label: 'At work', tone: 'bg-muted/60 border-border', emoji: '💼', text: persp.employer },
-        ];
-        return (
-          <Card className="p-4 space-y-3">
-            <h4 className="font-semibold flex items-center gap-2">
-              <Baby className="h-4 w-4 text-primary" />
-              What week {weeksPregnant} means
-            </h4>
-            <p className="text-[11px] text-muted-foreground -mt-1">
-              The same milestone, four perspectives.
-            </p>
-            <div className="space-y-2">
-              {sections.map(s => (
-                <div key={s.key} className={`p-3 rounded-lg border ${s.tone}`}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm" aria-hidden="true">{s.emoji}</span>
-                    <span className="text-xs font-semibold uppercase tracking-wide">{s.label}</span>
-                  </div>
-                  <p className="text-sm leading-relaxed">{s.text}</p>
-                </div>
-              ))}
-            </div>
-          </Card>
-        );
-      })()}
 
       {/* Maternal weight gain — tracker for mom's side of the pregnancy.
           Uses IOM guidelines to recommend total + expected-by-now gain. */}
@@ -1123,36 +1087,6 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
         );
       })()}
 
-      {/* Week-by-week mini timeline */}
-      <Card className="p-4 space-y-3">
-        <h4 className="font-semibold flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-primary" />
-          Your Pregnancy Journey
-        </h4>
-        <div className="flex gap-0.5 overflow-x-auto pb-1">
-          {Array.from({ length: 40 }, (_, i) => i + 1).map(week => {
-            const isCurrent = week === weeksPregnant;
-            const isPast = week < weeksPregnant;
-            return (
-              <div key={week} className="flex flex-col items-center flex-shrink-0" style={{ width: '20px' }}>
-                <div className={`w-full h-3 rounded-sm ${
-                  isCurrent ? 'bg-primary ring-2 ring-primary/30' :
-                  isPast ? (week <= 13 ? 'bg-pink-300' : week <= 27 ? 'bg-violet-300' : 'bg-indigo-300') :
-                  'bg-muted'
-                }`} />
-                {(week === 1 || week === 13 || week === 27 || week === 40 || isCurrent) && (
-                  <span className={`text-[8px] mt-0.5 ${isCurrent ? 'text-primary font-bold' : 'text-muted-foreground'}`}>{week}</span>
-                )}
-              </div>
-            );
-          })}
-        </div>
-        <div className="flex gap-4 text-[10px] text-muted-foreground">
-          <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-pink-300" /> 1st trimester</span>
-          <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-violet-300" /> 2nd trimester</span>
-          <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-indigo-300" /> 3rd trimester</span>
-        </div>
-      </Card>
 
       {/* Important dates */}
       <Card className="p-4 space-y-2.5">
@@ -1214,54 +1148,124 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
         </div>
       </Card>
 
-      {/* Trimester symptoms */}
-      <Card className="p-4 space-y-3">
-        <h4 className="font-semibold flex items-center gap-2">
-          <Activity className="h-4 w-4 text-primary" />
-          Common {trimesterLabel} Trimester Symptoms
-        </h4>
-        <div className="grid grid-cols-3 gap-2">
-          {symptoms.map((symptom) => (
-            <div
-              key={symptom.label}
-              className="flex flex-col items-center gap-1 p-3 rounded-xl bg-muted/50 text-center"
-            >
-              <span className="text-2xl">{symptom.icon}</span>
-              <span className="text-xs font-medium">{symptom.label}</span>
-            </div>
-          ))}
-        </div>
-      </Card>
 
-      {/* Milestones timeline */}
-      <Card className="p-4 space-y-3">
-        <h4 className="font-semibold flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-primary" />
-          Upcoming Milestones
-        </h4>
-        <div className="space-y-3">
-          {getMilestones(weeksPregnant).map((milestone, i) => (
-            <div
-              key={i}
-              className={cn(
-                "flex items-start gap-3 p-3 rounded-xl border",
-                milestone.passed ? "bg-muted/30 opacity-60" : "bg-card"
-              )}
-            >
-              <div className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold",
-                milestone.passed ? "bg-primary/20 text-primary" : "bg-primary text-primary-foreground"
-              )}>
-                {milestone.week}
+      {/* Reading material, folded away so the trackers stay near the top. */}
+      <GuidesSection title={`Week ${weeksPregnant}: what it means, symptoms & milestones`}>
+        {/* Multi-perspective framing of the current week — what it means
+            for the baby, the mother, a supporting partner, and the
+            workplace. Resolves to the nearest preceding anchor week
+            (defined for weeks 4 / 8 / 12 / 16 / 20 / 24 / 28 / 32 / 36 / 40)
+            so users at week 17 see the week-16 perspectives, etc. */}
+        {(() => {
+          const persp = getNearestPerspectives(weeksPregnant);
+          if (!persp) return null;
+          const sections = [
+            { key: 'baby', label: 'For the baby', tone: 'bg-pink-50/60 dark:bg-pink-950/20 border-pink-200/60 dark:border-pink-800/40', emoji: '👶', text: persp.baby },
+            { key: 'mother', label: 'For you', tone: 'bg-primary/5 border-primary/20', emoji: '💗', text: persp.mother },
+            { key: 'partner', label: 'For your partner', tone: 'bg-secondary/10 border-secondary/30', emoji: '🤝', text: persp.partner },
+            { key: 'employer', label: 'At work', tone: 'bg-muted/60 border-border', emoji: '💼', text: persp.employer },
+          ];
+          return (
+            <Card className="p-4 space-y-3">
+              <h4 className="font-semibold flex items-center gap-2">
+                <Baby className="h-4 w-4 text-primary" />
+                What week {weeksPregnant} means
+              </h4>
+              <p className="text-[11px] text-muted-foreground -mt-1">
+                The same milestone, four perspectives.
+              </p>
+              <div className="space-y-2">
+                {sections.map(s => (
+                  <div key={s.key} className={`p-3 rounded-lg border ${s.tone}`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm" aria-hidden="true">{s.emoji}</span>
+                      <span className="text-xs font-semibold uppercase tracking-wide">{s.label}</span>
+                    </div>
+                    <p className="text-sm leading-relaxed">{s.text}</p>
+                  </div>
+                ))}
               </div>
-              <div>
-                <div className="text-sm font-medium">{milestone.title}</div>
-                <div className="text-xs text-muted-foreground">{milestone.description}</div>
+            </Card>
+          );
+        })()}
+        {/* Week-by-week mini timeline */}
+        <Card className="p-4 space-y-3">
+          <h4 className="font-semibold flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-primary" />
+            Your Pregnancy Journey
+          </h4>
+          <div className="flex gap-0.5 overflow-x-auto pb-1">
+            {Array.from({ length: 40 }, (_, i) => i + 1).map(week => {
+              const isCurrent = week === weeksPregnant;
+              const isPast = week < weeksPregnant;
+              return (
+                <div key={week} className="flex flex-col items-center flex-shrink-0" style={{ width: '20px' }}>
+                  <div className={`w-full h-3 rounded-sm ${
+                    isCurrent ? 'bg-primary ring-2 ring-primary/30' :
+                    isPast ? (week <= 13 ? 'bg-pink-300' : week <= 27 ? 'bg-violet-300' : 'bg-indigo-300') :
+                    'bg-muted'
+                  }`} />
+                  {(week === 1 || week === 13 || week === 27 || week === 40 || isCurrent) && (
+                    <span className={`text-[8px] mt-0.5 ${isCurrent ? 'text-primary font-bold' : 'text-muted-foreground'}`}>{week}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex gap-4 text-[10px] text-muted-foreground">
+            <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-pink-300" /> 1st trimester</span>
+            <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-violet-300" /> 2nd trimester</span>
+            <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-indigo-300" /> 3rd trimester</span>
+          </div>
+        </Card>
+        {/* Trimester symptoms */}
+        <Card className="p-4 space-y-3">
+          <h4 className="font-semibold flex items-center gap-2">
+            <Activity className="h-4 w-4 text-primary" />
+            Common {trimesterLabel} Trimester Symptoms
+          </h4>
+          <div className="grid grid-cols-3 gap-2">
+            {symptoms.map((symptom) => (
+              <div
+                key={symptom.label}
+                className="flex flex-col items-center gap-1 p-3 rounded-xl bg-muted/50 text-center"
+              >
+                <span className="text-2xl">{symptom.icon}</span>
+                <span className="text-xs font-medium">{symptom.label}</span>
               </div>
-            </div>
-          ))}
-        </div>
-      </Card>
+            ))}
+          </div>
+        </Card>
+        {/* Milestones timeline */}
+        <Card className="p-4 space-y-3">
+          <h4 className="font-semibold flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            Upcoming Milestones
+          </h4>
+          <div className="space-y-3">
+            {getMilestones(weeksPregnant).map((milestone, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "flex items-start gap-3 p-3 rounded-xl border",
+                  milestone.passed ? "bg-muted/30 opacity-60" : "bg-card"
+                )}
+              >
+                <div className={cn(
+                  "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold",
+                  milestone.passed ? "bg-primary/20 text-primary" : "bg-primary text-primary-foreground"
+                )}>
+                  {milestone.week}
+                </div>
+                <div>
+                  <div className="text-sm font-medium">{milestone.title}</div>
+                  <div className="text-xs text-muted-foreground">{milestone.description}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </GuidesSection>
     </div>
   );
 };
