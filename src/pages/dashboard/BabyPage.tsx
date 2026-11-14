@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
 import BabyTracker from '@/components/dashboard/BabyTracker';
@@ -9,6 +9,9 @@ import { ArrowLeft } from 'lucide-react';
 export default function BabyPage() {
   usePageTitle('Baby');
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const tab = params.get('tab');
+  const initialTab = tab && ['feed', 'sleep', 'nappy', 'growth', 'vax', 'stats'].includes(tab) ? tab : 'feed';
   return (
     <div className="min-h-screen bg-background pb-24">
       <div className="border-b border-border bg-card sticky top-0 z-10">
@@ -21,7 +24,7 @@ export default function BabyPage() {
         </div>
       </div>
       <div className="max-w-3xl mx-auto px-4 py-6">
-        <BabyTracker />
+        <BabyTracker initialTab={initialTab} />
       </div>
     </div>
   );

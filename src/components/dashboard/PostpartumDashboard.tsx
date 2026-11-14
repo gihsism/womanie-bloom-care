@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
+import { db } from '@/integrations/db/client';
 import {
   Baby,
   Heart,
@@ -94,10 +95,28 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
 
   useEffect(() => {
     if (!userId) return;
+    let localBirth: string | null = null;
     try {
-      const raw = localStorage.getItem(lsKey(userId));
-      if (raw) setBirthDateStr(raw);
+      localBirth = localStorage.getItem(lsKey(userId));
+      if (localBirth) setBirthDateStr(localBirth);
     } catch { /* ignore */ }
+    // The account's Labour & birth record is the source of truth, so the
+    // date entered there (or on another device) shows up here too.
+    void (async () => {
+      const { data } = await db.from('birth_records').select('id, birth_at')
+        .eq('user_id', userId).order('created_at', { ascending: false }).limit(1);
+      const rec = data?.[0] as { id?: string; birth_at?: string | null } | undefined;
+      if (rec?.birth_at) {
+        const d = format(new Date(rec.birth_at), 'yyyy-MM-dd');
+        setBirthDateStr(d);
+        try { localStorage.setItem(lsKey(userId), d); } catch { /* ignore */ }
+      } else if (localBirth) {
+        // Older device-only date: copy it into the account once.
+        const birthAt = new Date(`${localBirth}T12:00:00`).toISOString();
+        if (rec?.id) await db.from('birth_records').update({ birth_at: birthAt }).eq('id', rec.id).eq('user_id', userId);
+        else await db.from('birth_records').insert({ user_id: userId, birth_at: birthAt }).select('id');
+      }
+    })();
     try {
       const raw = localStorage.getItem(recoveryMilestonesKey(userId));
       if (raw) setDone(JSON.parse(raw));
@@ -137,6 +156,15 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
     try { localStorage.setItem(lsKey(userId), pendingDate); } catch { /* ignore */ }
     setBirthDateStr(pendingDate);
     setShowBirthForm(false);
+    // Save to the account's Labour & birth record (create it if missing).
+    const birthAt = new Date(`${pendingDate}T12:00:00`).toISOString();
+    void (async () => {
+      const { data } = await db.from('birth_records').select('id')
+        .eq('user_id', userId).order('created_at', { ascending: false }).limit(1);
+      const id = (data?.[0] as { id?: string } | undefined)?.id;
+      if (id) await db.from('birth_records').update({ birth_at: birthAt, updated_at: new Date().toISOString() }).eq('id', id).eq('user_id', userId);
+      else await db.from('birth_records').insert({ user_id: userId, birth_at: birthAt }).select('id');
+    })();
   };
 
   const ackPpd = () => {

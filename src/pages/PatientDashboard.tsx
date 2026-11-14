@@ -35,6 +35,8 @@ import PostpartumDashboard from '@/components/dashboard/PostpartumDashboard';
 import EpdsScreener from '@/components/dashboard/EpdsScreener';
 import MedicineLog from '@/components/dashboard/MedicineLog';
 import LifeLinkCard from '@/components/dashboard/LifeLinkCard';
+import TodayActions from '@/components/dashboard/TodayActions';
+import GuidesSection from '@/components/dashboard/GuidesSection';
 import MenopauseSymptomCalendar from '@/components/dashboard/MenopauseSymptomCalendar';
 import PerimenopauseStageCard from '@/components/dashboard/PerimenopauseStageCard';
 import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
@@ -627,6 +629,14 @@ const PatientDashboard = () => {
               />
             )}
 
+            {/* Quick-log row: the most common actions for this stage, one tap away. */}
+            {selectedMode && (
+              <TodayActions
+                mode={selectedMode}
+                weeksPregnant={pregnancyDueDate ? Math.max(0, Math.floor((Date.now() - (pregnancyDueDate.getTime() - 280 * 86400000)) / (7 * 86400000))) : null}
+              />
+            )}
+
             {/* Day-of reminder banner — appears above the upcoming card
                 only when there's an appointment scheduled for today.
                 Gated by the appointmentReminders notification toggle. */}
@@ -681,11 +691,17 @@ const PatientDashboard = () => {
 
             {/* Nutrition focus for the current cycle phase. Hides
                 when no period data exists. */}
-            {selectedMode && <CyclePhaseNutrition mode={selectedMode} />}
+            {selectedMode && periodData && (selectedMode === 'menstrual-cycle' || selectedMode === 'conception' || selectedMode === 'pre-menstrual' || selectedMode === 'contraception') && (
+              <div className="mb-6">
+                <GuidesSection title="Guides for this cycle phase: food & movement">
+                  <CyclePhaseNutrition mode={selectedMode} />
+                  <CyclePhaseExercise mode={selectedMode} />
+                </GuidesSection>
+              </div>
+            )}
 
             {/* Movement / exercise focus for the current cycle
                 phase. Frames conservatively — tendencies not rules. */}
-            {selectedMode && <CyclePhaseExercise mode={selectedMode} />}
 
             {/* PMS-window forecast — surfaces in the 8 days before
                 the next predicted period, with the user's typical
@@ -730,7 +746,9 @@ const PatientDashboard = () => {
                       onSetIVFStart={handleSetIVFStart}
                       onUpdatePhase={handleUpdateIVFPhase}
                     />
-                    <IVFNutrition phase={(ivfPhase as Parameters<typeof IVFNutrition>[0]['phase']) ?? null} />
+                    <GuidesSection title="Guides: nutrition during IVF">
+                      <IVFNutrition phase={(ivfPhase as Parameters<typeof IVFNutrition>[0]['phase']) ?? null} />
+                    </GuidesSection>
                   </div>
                   <div className="lg:col-span-1 space-y-4">
                     <ModeLabInsights mode="ivf" />
@@ -746,11 +764,11 @@ const PatientDashboard = () => {
                       onResetPregnancy={handleResetPregnancy}
                       onSwitchToPostpartum={handleSwitchToPostpartum}
                     />
-                    <PregnancyWeightTracker dueDate={pregnancyDueDate} />
+                    <div id="weight" className="scroll-mt-24"><PregnancyWeightTracker dueDate={pregnancyDueDate} /></div>
                     <BloodPressureTracker mode="pregnancy" />
                     <PregnancyVaccinations dueDate={pregnancyDueDate} />
                     <LifeLinkCard to="/dashboard/birth" icon={Baby} title="Labour & birth" description="Contractions, medicines given in labour, birth details and hospital reports" />
-                    <EpdsScreener mode="pregnancy" />
+                    <div id="mood-check" className="scroll-mt-24"><EpdsScreener mode="pregnancy" /></div>
                     {pregnancyDueDate && (
                       <CycleCalendar
                         selectedMode={selectedMode}
@@ -762,10 +780,10 @@ const PatientDashboard = () => {
                       const totalDays = Math.floor((Date.now() - gestationStart.getTime()) / (24 * 60 * 60 * 1000));
                       const weeks = Math.max(0, Math.min(42, Math.floor(totalDays / 7)));
                       return (
-                        <>
+                        <GuidesSection title="Pregnancy guides: food & movement">
                           <PregnancyNutrition weeksPregnant={weeks} />
                           <PregnancyExercise weeksPregnant={weeks} />
-                        </>
+                        </GuidesSection>
                       );
                     })()}
                   </div>
@@ -815,7 +833,7 @@ const PatientDashboard = () => {
                   <div className="lg:col-span-2 space-y-6">
                     <LifeLinkCard to="/dashboard/birth" icon={Baby} title="Labour & birth" description="Your birth details, medicines given in labour and hospital reports" />
                     <LifeLinkCard to="/dashboard/baby" icon={Milk} title="Baby tracker" description="Feeds, sleep, nappies, growth and vaccinations" />
-                    <EpdsScreener mode="postpartum" />
+                    <div id="mood-check" className="scroll-mt-24"><EpdsScreener mode="postpartum" /></div>
                     <PostpartumDashboard onNavigateToDoctorChat={() => navigate('/dashboard/ai-doctor')} />
                   </div>
                   <div className="lg:col-span-1">
@@ -828,12 +846,14 @@ const PatientDashboard = () => {
                   <div className="lg:col-span-2 space-y-6">
                     <PerimenopauseStageCard mode={selectedMode} />
                     <BloodPressureTracker mode={selectedMode} />
-                    <MenopauseSymptomCalendar mode={selectedMode} />
+                    <div id="symptoms" className="scroll-mt-24"><MenopauseSymptomCalendar mode={selectedMode} /></div>
                     <MenopauseDashboard
                       isPostMenopause={selectedMode === 'post-menopause'}
                       onNavigateToDoctorChat={() => navigate('/dashboard/ai-doctor')}
                     />
-                    <MenopauseNutrition postmenopausal={selectedMode === 'post-menopause'} />
+                    <GuidesSection title="Guides: nutrition in menopause">
+                      <MenopauseNutrition postmenopausal={selectedMode === 'post-menopause'} />
+                    </GuidesSection>
                   </div>
                   <div className="lg:col-span-1">
                     <ModeLabInsights mode={selectedMode} />
@@ -852,7 +872,7 @@ const PatientDashboard = () => {
               ) : (
                 /* ─── Cycle Mode ─── */
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2">
+                  <div className="lg:col-span-2 scroll-mt-24" id="cycle-calendar">
                     <CycleCalendar 
                       lastPeriodStart={periodData?.lastPeriodStart} 
                       cycleLength={periodData?.cycleLength ?? 28} 
@@ -917,7 +937,7 @@ const PatientDashboard = () => {
 
             {/* Medicines & supplements - every life stage */}
             {user && (
-              <div className="mb-6">
+              <div id="medicines" className="mb-6 scroll-mt-24">
                 <MedicineLog stage={selectedMode} />
               </div>
             )}
@@ -1029,8 +1049,8 @@ const PatientDashboard = () => {
                 </Card>
               )}
 
-              {/* Quick Links */}
-              <Card className="p-4">
+              {/* Quick Links — desktop only; on phones the bottom tab bar covers these. */}
+              <Card className="p-4 hidden md:block">
                 <h3 className="text-sm font-bold mb-3">Quick Access</h3>
                 <div className="grid grid-cols-2 gap-2">
                   {quickLinks.map(link => {
@@ -1058,7 +1078,7 @@ const PatientDashboard = () => {
             {/* Upload + Daily Log side by side */}
             <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
               <DocumentUpload />
-              <DailyLogging selectedMode={selectedMode} />
+              <div id="daily-log" className="scroll-mt-24"><DailyLogging selectedMode={selectedMode} /></div>
             </div>
           </div>
 

@@ -295,7 +295,7 @@ function EntryList<D>({ events, onRemove, render, dateOnly }: {
   );
 }
 
-export default function BabyTracker() {
+export default function BabyTracker({ initialTab = 'feed' }: { initialTab?: string }) {
   const { user } = useAuth();
   const userId = user?.id ?? '';
   const [babies, setBabies] = useState<BabyRow[]>([]);
@@ -304,7 +304,7 @@ export default function BabyTracker() {
   const [newName, setNewName] = useState('');
   const [newDate, setNewDate] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState('feed');
+  const [tab, setTab] = useState(initialTab);
 
   const load = useCallback(async () => {
     if (!userId) return;
