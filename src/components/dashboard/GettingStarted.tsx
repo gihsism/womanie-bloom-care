@@ -70,6 +70,18 @@ export default function GettingStarted() {
   }, [user]);
 
   useEffect(() => { load(); }, [load]);
+
+  // "Hide" for people who don't want the checklist; remembered per user on this device.
+  const hideKey = user ? `womanie_getting_started_hidden_${user.id}` : '';
+  const [hidden, setHidden] = useState(false);
+  useEffect(() => {
+    if (!hideKey) return;
+    try { setHidden(localStorage.getItem(hideKey) === '1'); } catch { /* ignore */ }
+  }, [hideKey]);
+  const hide = () => {
+    setHidden(true);
+    try { localStorage.setItem(hideKey, '1'); } catch { /* ignore */ }
+  };
   useEffect(() => onHealthDataChange(load), [load]);
 
   // Track which steps we've already congratulated so a re-fetch of
@@ -140,7 +152,7 @@ export default function GettingStarted() {
   ];
 
   const doneCount = steps.filter(s => s.done).length;
-  if (doneCount === steps.length) return null;
+  if (doneCount === steps.length || hidden) return null;
 
   return (
     <Card className="p-4 mb-4 border-l-4 border-l-primary">
@@ -154,6 +166,9 @@ export default function GettingStarted() {
             {doneCount} of {steps.length} done — a couple more steps to light up the dashboard.
           </p>
         </div>
+        <button type="button" onClick={hide} className="ml-auto text-[11px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline">
+          Hide
+        </button>
       </div>
 
       <ul className="space-y-2">

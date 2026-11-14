@@ -51,7 +51,8 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onUploadClick, 
   };
 
   const quickActions = [
-    { id: 'B3', icon: TrendingUp, label: 'Med Records', color: 'text-accent', action: () => navigate('/dashboard/medical-history') },
+    // Phones already have Records in the bottom tab bar, so this one is desktop-only.
+    { id: 'B3', icon: TrendingUp, label: 'Med Records', color: 'text-accent', action: () => navigate('/dashboard/medical-history'), desktopOnly: true },
     { id: 'B4', icon: Smartphone, label: 'Devices', color: 'text-muted-foreground', action: () => navigate('/dashboard/devices') },
     { id: 'B5', icon: Users, label: 'Community', color: 'text-primary', action: () => navigate('/community') },
   ];
@@ -107,11 +108,11 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onUploadClick, 
       </div>
 
       {/* Quick Actions */}
-      <div className="flex items-center justify-center gap-2 sm:gap-3 overflow-x-auto pb-1 -mx-1 px-1">
+      <div className="flex items-start justify-around md:justify-center gap-2 sm:gap-3 pb-1">
         {/* Doctor Chat */}
         <button
           onClick={onDoctorChatClick}
-          className="flex flex-col items-center gap-1.5 min-w-[72px] group"
+          className="hidden md:flex flex-col items-center gap-1.5 min-w-[72px] group"
           aria-label="Open AI Health Assistant"
         >
           <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shadow-sm">
@@ -138,7 +139,7 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onUploadClick, 
             <button
               key={action.id}
               onClick={action.action}
-              className="flex flex-col items-center gap-1.5 min-w-[72px] group"
+              className={`${action.desktopOnly ? 'hidden md:flex' : 'flex'} flex-col items-center gap-1.5 min-w-[72px] group`}
               aria-label={action.label}
             >
               <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center group-hover:bg-muted transition-colors shadow-sm">
