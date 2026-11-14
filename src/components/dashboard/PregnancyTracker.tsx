@@ -995,7 +995,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
 
       {/* Daily kick counter — only relevant from ~week 28 onward, when
           fetal movement-counting becomes part of standard self-monitoring. */}
-      {weeksPregnant >= 28 && <div id="kick-counter" className="scroll-mt-24"><KickCounter /></div>}
+      {weeksPregnant >= 28 && <div id="kick-counter" className="scroll-mt-4 md:scroll-mt-28"><KickCounter /></div>}
 
       {/* Hospital bag checklist — packing reminders surface from week
           32 onward (most providers recommend having it ready by week
@@ -1007,7 +1007,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
       {/* Contraction timer — only relevant from ~week 36 onward when
           labor could realistically start. Earlier contractions are
           almost certainly Braxton-Hicks and don't need timing. */}
-      {weeksPregnant >= 36 && <div id="contraction-timer" className="scroll-mt-24"><ContractionTimer /></div>}
+      {weeksPregnant >= 36 && <div id="contraction-timer" className="scroll-mt-4 md:scroll-mt-28"><ContractionTimer /></div>}
 
       {/* Recommended prenatal milestones — what's due now, what's
           coming up, what may have been missed. Sourced from ACOG/NICE

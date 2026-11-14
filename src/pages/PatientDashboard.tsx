@@ -458,7 +458,7 @@ const PatientDashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="border-b border-border bg-card sticky top-0 z-10">
+      <div className="border-b border-border bg-card md:sticky md:top-0 z-10">
         <div className="w-full px-4 py-4">
           <div className="flex items-center justify-between mb-4">
              <div className="flex items-center gap-1 sm:gap-2">
@@ -558,7 +558,7 @@ const PatientDashboard = () => {
                 profile" button scroll to this banner instead of routing
                 to a dead destination. */}
             {!profile?.full_name && user && (
-              <Card id="name-banner" className="p-4 mb-6 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 scroll-mt-24">
+              <Card id="name-banner" className="p-4 mb-6 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 scroll-mt-4 md:scroll-mt-28">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                   <div className="flex-1">
                     <h3 className="text-lg font-bold mb-2">What should we call you?</h3>
@@ -613,6 +613,14 @@ const PatientDashboard = () => {
                 at least one step is still incomplete, so it's
                 invisible once Alena (or any established user) is past
                 onboarding. */}
+            {/* Quick-log row: the most common actions for this stage, one tap away. */}
+            {selectedMode && (
+              <TodayActions
+                mode={selectedMode}
+                weeksPregnant={pregnancyDueDate ? Math.max(0, Math.floor((Date.now() - (pregnancyDueDate.getTime() - 280 * 86400000)) / (7 * 86400000))) : null}
+              />
+            )}
+
             <GettingStarted />
 
             {/* Mode-specific "today at a glance" hero — surfaces the one
@@ -629,13 +637,6 @@ const PatientDashboard = () => {
               />
             )}
 
-            {/* Quick-log row: the most common actions for this stage, one tap away. */}
-            {selectedMode && (
-              <TodayActions
-                mode={selectedMode}
-                weeksPregnant={pregnancyDueDate ? Math.max(0, Math.floor((Date.now() - (pregnancyDueDate.getTime() - 280 * 86400000)) / (7 * 86400000))) : null}
-              />
-            )}
 
             {/* Day-of reminder banner — appears above the upcoming card
                 only when there's an appointment scheduled for today.
@@ -764,11 +765,11 @@ const PatientDashboard = () => {
                       onResetPregnancy={handleResetPregnancy}
                       onSwitchToPostpartum={handleSwitchToPostpartum}
                     />
-                    <div id="weight" className="scroll-mt-24"><PregnancyWeightTracker dueDate={pregnancyDueDate} /></div>
+                    <div id="weight" className="scroll-mt-4 md:scroll-mt-28"><PregnancyWeightTracker dueDate={pregnancyDueDate} /></div>
                     <BloodPressureTracker mode="pregnancy" />
                     <PregnancyVaccinations dueDate={pregnancyDueDate} />
                     <LifeLinkCard to="/dashboard/birth" icon={Baby} title="Labour & birth" description="Contractions, medicines given in labour, birth details and hospital reports" />
-                    <div id="mood-check" className="scroll-mt-24"><EpdsScreener mode="pregnancy" /></div>
+                    <div id="mood-check" className="scroll-mt-4 md:scroll-mt-28"><EpdsScreener mode="pregnancy" /></div>
                     {pregnancyDueDate && (
                       <CycleCalendar
                         selectedMode={selectedMode}
@@ -833,7 +834,7 @@ const PatientDashboard = () => {
                   <div className="lg:col-span-2 space-y-6">
                     <LifeLinkCard to="/dashboard/birth" icon={Baby} title="Labour & birth" description="Your birth details, medicines given in labour and hospital reports" />
                     <LifeLinkCard to="/dashboard/baby" icon={Milk} title="Baby tracker" description="Feeds, sleep, nappies, growth and vaccinations" />
-                    <div id="mood-check" className="scroll-mt-24"><EpdsScreener mode="postpartum" /></div>
+                    <div id="mood-check" className="scroll-mt-4 md:scroll-mt-28"><EpdsScreener mode="postpartum" /></div>
                     <PostpartumDashboard onNavigateToDoctorChat={() => navigate('/dashboard/ai-doctor')} />
                   </div>
                   <div className="lg:col-span-1">
@@ -846,7 +847,7 @@ const PatientDashboard = () => {
                   <div className="lg:col-span-2 space-y-6">
                     <PerimenopauseStageCard mode={selectedMode} />
                     <BloodPressureTracker mode={selectedMode} />
-                    <div id="symptoms" className="scroll-mt-24"><MenopauseSymptomCalendar mode={selectedMode} /></div>
+                    <div id="symptoms" className="scroll-mt-4 md:scroll-mt-28"><MenopauseSymptomCalendar mode={selectedMode} /></div>
                     <MenopauseDashboard
                       isPostMenopause={selectedMode === 'post-menopause'}
                       onNavigateToDoctorChat={() => navigate('/dashboard/ai-doctor')}
@@ -872,7 +873,7 @@ const PatientDashboard = () => {
               ) : (
                 /* ─── Cycle Mode ─── */
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2 scroll-mt-24" id="cycle-calendar">
+                  <div className="lg:col-span-2 scroll-mt-4 md:scroll-mt-28" id="cycle-calendar">
                     <CycleCalendar 
                       lastPeriodStart={periodData?.lastPeriodStart} 
                       cycleLength={periodData?.cycleLength ?? 28} 
@@ -937,7 +938,7 @@ const PatientDashboard = () => {
 
             {/* Medicines & supplements - every life stage */}
             {user && (
-              <div id="medicines" className="mb-6 scroll-mt-24">
+              <div id="medicines" className="mb-6 scroll-mt-4 md:scroll-mt-28">
                 <MedicineLog stage={selectedMode} />
               </div>
             )}
@@ -1078,7 +1079,7 @@ const PatientDashboard = () => {
             {/* Upload + Daily Log side by side */}
             <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
               <DocumentUpload />
-              <div id="daily-log" className="scroll-mt-24"><DailyLogging selectedMode={selectedMode} /></div>
+              <div id="daily-log" className="scroll-mt-4 md:scroll-mt-28"><DailyLogging selectedMode={selectedMode} /></div>
             </div>
           </div>
 
