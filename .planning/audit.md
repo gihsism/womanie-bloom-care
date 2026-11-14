@@ -2602,3 +2602,12 @@ start+duration, no identity leak), connections/pending + approved
 - /dashboard/baby + postpartum inline: feeds/sleep/nappies/growth/vaccines; old device feeds imported.
 - Live E2E on demo account passed (saved + survives reload); test rows removed afterwards.
 - Open: AI assistant doesn't yet read these logs; doctor sharing of them not decided; phone push reminders after iOS build.
+
+### 2026-11-14 — UX pass (Alena: "lets improve user experience")
+- AI assistant reads life-cycle logs (api/_lib/life-context.ts, tested; verified live).
+- Quick-log row per stage (TodayActions + src/lib/todayActions.ts), anchors on trackers, baby page ?tab=.
+- GuidesSection folds nutrition/movement + pregnancy reading cards; pregnancy dashboard 11.4k → 8.5k px.
+- Header pinned on md+ only (was ~40% of phone screen). Quick Access card hidden on phones.
+- Postpartum birth date synced with birth_records (was device-only).
+- Xcode installed 2026-11-14; needs her: sudo xcodebuild -license accept + xcode-select -s, Apple ID in Xcode.
+- Test account ux-review@womanie.test used for review (password in scratchpad only).
