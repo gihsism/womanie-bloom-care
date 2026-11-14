@@ -253,3 +253,24 @@
     border-color: hsl(var(--turquoise));
   }
 }
+
+/* iPhone notch / status bar (iOS app and home-screen web app). env() is 0 in
+   normal browsers, so this is a no-op there. A solid strip sits behind the
+   clock/battery, content starts below it, and sticky/fixed headers stick
+   just under it instead of sliding beneath the clock. */
+body {
+  padding-top: env(safe-area-inset-top);
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: env(safe-area-inset-top);
+  background: hsl(var(--background));
+  z-index: 60;
+  pointer-events: none;
+}
+.sticky.top-0,
+.fixed.top-0 {
+  top: env(safe-area-inset-top);
+}

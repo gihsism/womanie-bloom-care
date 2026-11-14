@@ -12,7 +12,8 @@ const config: CapacitorConfig = {
     allowNavigation: ['womanie.info', '*.womanie.info'],
   },
   ios: {
-    contentInset: 'automatic',
+    // The web page handles the status-bar area itself (safe-area CSS in index.css).
+    contentInset: 'never',
   },
 };
 
