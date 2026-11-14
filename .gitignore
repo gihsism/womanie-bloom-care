@@ -29,3 +29,7 @@ dist-ssr
 
 # TypeScript incremental build info (from tsc -b)
 *.tsbuildinfo
+
+# iOS: vendored Capacitor binaries (fetched + checksum-verified by scripts/ios-use-vendored-capacitor.sh)
+ios/vendor/capacitor-swift-pm/*.xcframework/
+.ios-logs/
