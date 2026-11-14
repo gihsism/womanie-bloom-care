@@ -2611,3 +2611,5 @@ start+duration, no identity leak), connections/pending + approved
 - Postpartum birth date synced with birth_records (was device-only).
 - Xcode installed 2026-11-14; needs her: sudo xcodebuild -license accept + xcode-select -s, Apple ID in Xcode.
 - Test account ux-review@womanie.test used for review (password in scratchpad only).
+
+- 2026-11-14 evening: Records "wellness score" -> "Results in normal range X of Y" (her "Rename"); Google-only accounts can set a first password (her "2 yes"; tested live); category bars recoloured. iOS: license STILL not accepted; asked her a) TestFlight vs b) cable.
