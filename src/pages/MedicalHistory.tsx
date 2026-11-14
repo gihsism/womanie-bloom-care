@@ -1630,12 +1630,12 @@ export default function MedicalHistory() {
                       {stats.overallHealthScore !== null && (
                         <div className="mt-4 bg-muted/30 rounded-xl p-3">
                           <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-xs font-medium text-muted-foreground">Overall wellness score</span>
+                            <span className="text-xs font-medium text-muted-foreground">Results in normal range</span>
                             <span className={`text-sm font-bold ${
                               stats.overallHealthScore >= 80 ? 'text-green-600' : stats.overallHealthScore >= 50 ? 'text-amber-600' : 'text-red-600'
-                            }`}>{stats.overallHealthScore}%</span>
+                            }`}>{stats.normalLabs} of {stats.labResults.length}</span>
                           </div>
-                          <Progress value={stats.overallHealthScore} className="h-2.5" />
+                          <Progress value={stats.overallHealthScore} className="h-2.5 bg-muted" indicatorClassName={stats.overallHealthScore >= 80 ? 'bg-green-500' : stats.overallHealthScore >= 50 ? 'bg-amber-500' : 'bg-red-500'} />
                           <p className="text-[10px] text-muted-foreground mt-1.5">
                             {stats.overallHealthScore >= 80 ? '🌟 Most of your results look great!' :
                              stats.overallHealthScore >= 50 ? '💬 Some results need a conversation with your doctor.' :
