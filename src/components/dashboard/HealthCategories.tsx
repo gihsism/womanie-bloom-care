@@ -149,7 +149,7 @@ export default function HealthCategories({ medicalData }: HealthCategoriesProps)
                     }`}>{cat.score}%</span>
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <Progress value={cat.score} className="h-1 flex-1" />
+                    <Progress value={cat.score} className="h-1 flex-1 bg-muted" indicatorClassName={cat.score >= 80 ? 'bg-green-500' : cat.score >= 50 ? 'bg-amber-500' : 'bg-red-500'} />
                     <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                       {cat.normal}/{cat.total} ok
                       {flagged.length > 0 && ` · ${flagged.length} flagged`}
