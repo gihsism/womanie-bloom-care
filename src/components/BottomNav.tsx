@@ -69,12 +69,12 @@ export function BottomNav() {
               <>
                 {/* Vertical museum-index label, read bottom-to-top */}
                 <span className="flex rotate-180 items-center gap-2 whitespace-nowrap text-[12.5px] uppercase tracking-[0.16em] [writing-mode:vertical-rl]">
+                  {isActive && <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />}
+                  {!isActive && ai && <span aria-hidden="true" className="text-[11px]">&#10022;</span>}
+                  <span className={cn(isActive && "font-medium")}>{label}</span>
                   <span className={cn("font-mono text-[10px] tracking-normal", isActive ? "text-primary" : "text-border")}>
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span className={cn(isActive && "font-medium")}>{label}</span>
-                  {isActive && <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />}
-                  {!isActive && ai && <span aria-hidden="true" className="text-[11px]">&#10022;</span>}
                 </span>
                 {isActive && <span className="absolute right-[-1px] top-1/2 h-20 w-[2px] -translate-y-1/2 bg-foreground" aria-hidden="true" />}
               </>

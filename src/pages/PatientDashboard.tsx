@@ -60,6 +60,7 @@ import UpcomingAppointments from '@/components/dashboard/UpcomingAppointments';
 import DoctorNotesCard from '@/components/dashboard/DoctorNotesCard';
 import AppointmentTodayBanner from '@/components/dashboard/AppointmentTodayBanner';
 import ModeHeroStat from '@/components/dashboard/ModeHeroStat';
+import PregnancyBodyMap from '@/components/dashboard/PregnancyBodyMap';
 import OverdueTests from '@/components/dashboard/OverdueTests';
 import SymptomPatternsCard from '@/components/dashboard/SymptomPatternsCard';
 import FertileWindowTimingCard from '@/components/dashboard/FertileWindowTimingCard';
@@ -613,6 +614,22 @@ const PatientDashboard = () => {
                 at least one step is still incomplete, so it's
                 invisible once Alena (or any established user) is past
                 onboarding. */}
+            {/* Mode-specific "today at a glance" hero — surfaces the one
+                most important fact for your current life stage right at
+                the top, instead of scattering it across cards below
+                (cycle day, pill streak, week of pregnancy, etc.). */}
+            {selectedMode === 'pregnancy' && pregnancyDueDate ? (
+              <PregnancyBodyMap dueDate={pregnancyDueDate} name={profile?.full_name} />
+            ) : selectedMode && (
+              <ModeHeroStat
+                selectedMode={selectedMode}
+                periodData={periodData}
+                pregnancyDueDate={pregnancyDueDate}
+                ivfStartDate={ivfStartDate}
+                ivfPhase={ivfPhase}
+              />
+            )}
+
             {/* Quick-log row: the most common actions for this stage, one tap away. */}
             {selectedMode && (
               <TodayActions
@@ -623,19 +640,6 @@ const PatientDashboard = () => {
 
             <GettingStarted />
 
-            {/* Mode-specific "today at a glance" hero — surfaces the one
-                most important fact for your current life stage right at
-                the top, instead of scattering it across cards below
-                (cycle day, pill streak, week of pregnancy, etc.). */}
-            {selectedMode && (
-              <ModeHeroStat
-                selectedMode={selectedMode}
-                periodData={periodData}
-                pregnancyDueDate={pregnancyDueDate}
-                ivfStartDate={ivfStartDate}
-                ivfPhase={ivfPhase}
-              />
-            )}
 
 
             {/* Day-of reminder banner — appears above the upcoming card

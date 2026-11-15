@@ -208,7 +208,7 @@ function weightEquivalent(g: number | null | undefined): string | null {
   return 'a large watermelon';
 }
 
-const getWeekData = (week: number) => {
+export const getWeekData = (week: number) => {
   const keys = Object.keys(WEEK_DATA).map(Number).sort((a, b) => a - b);
   let bestKey = keys[0];
   for (const k of keys) {
