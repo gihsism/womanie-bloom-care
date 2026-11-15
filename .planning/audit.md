@@ -189,6 +189,27 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-15 — Test coverage: added security-invariant tests for docs/delete
+docs/delete.ts is the atomic document-deletion endpoint (a P0 fix from the
+original audit: the previous client-side flow ran three independent queries and
+wasn't transactional, so a mid-flight failure left orphaned extracted-data rows
+with no parent document). It had no tests at all.
+Added api/_routes/docs/delete.test.ts with 8 tests covering: 401 when the
+session is invalid; 405 for non-POST methods; 400 when documentId is missing;
+404 when the ownership-check SELECT returns no rows (the document doesn't exist
+or belongs to a different user); an ownership invariant confirming the SELECT
+binds the authenticated session's user id as the $2 filter — not any
+client-supplied value (a refactor that only used WHERE id = $1 would let any
+authenticated user delete another user's documents by guessing a document UUID);
+an atomicity invariant confirming sql.transaction is called once with an array of
+exactly 3 statements (medical_extracted_data, document_analyses, health_documents
+— sequential sql.query() calls would not be atomic and would leave orphans on
+failure); a defense-in-depth guard confirming the transaction's DELETE template
+literals also bind the session user id (so a handler that removed the preliminary
+SELECT could not silently delete another user's data); and 200 with success: true
+on success.
+Verified: tsc 0, eslint 0, 380/380 tests, vite build clean.
+
 ### 2026-11-14 — Test coverage: added security-invariant tests for me/delete-account
 me/delete-account.ts is the GDPR right-to-erasure endpoint — irrevocable, it
 wipes every table that holds user data in a single atomic transaction before
