@@ -116,7 +116,9 @@ export function InstallBanner() {
   };
 
   // Don't compete with the dedicated install page.
-  if (!visible || pathname === "/install") return null;
+  // Not on the front page or sign-in screens: there it covered the main
+  // "Get Started" / "Log in" buttons on phones (the page has its own Install link).
+  if (!visible || pathname === "/install" || pathname === "/" || pathname.startsWith("/auth")) return null;
 
   return (
     <div

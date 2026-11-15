@@ -34,7 +34,7 @@ function fireBeforeInstallPrompt() {
 
 function renderBanner() {
   return render(
-    <MemoryRouter initialEntries={["/"]}>
+    <MemoryRouter initialEntries={["/dashboard"]}>
       <InstallBanner />
     </MemoryRouter>,
   );

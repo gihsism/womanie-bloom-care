@@ -134,6 +134,16 @@ const Navigation = () => {
               )}
             </div>
 
+            {/* Phones: keep one auth button outside the menu so login is always visible */}
+            <Button
+              size="sm"
+              variant={user ? 'ghost' : 'outline'}
+              className="md:hidden h-9 px-4"
+              onClick={() => navigate(user ? '/welcome' : '/auth/login')}
+            >
+              {user ? 'My Space' : 'Log In'}
+            </Button>
+
             {/* Hamburger */}
             <button
               ref={toggleRef}

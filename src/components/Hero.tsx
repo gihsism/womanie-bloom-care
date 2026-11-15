@@ -74,6 +74,14 @@ const Hero = () => {
                 See How It Works
               </Button>
             </div>
+            {!user && (
+              <p className="text-[15px] text-muted-foreground">
+                Already have an account?{' '}
+                <button type="button" onClick={() => navigate('/auth/login')} className="font-medium text-primary underline underline-offset-4">
+                  Log in
+                </button>
+              </p>
+            )}
           </div>
 
           {/* Right Visual */}
