@@ -281,3 +281,30 @@ export function pillRing(byDate: Map<string, 'taken' | 'late' | 'missed'>, packS
   }
   return { packDay, pills, streak, todayMark: byDate.get(ymd(today)) ?? 'none' };
 }
+
+// ---- Menopause body map ---------------------------------------------------
+
+/** Hot flushes logged in daily-signal notes ("Hot flashes: N"). */
+export function hotFlushes(signals: { signal_date: string; notes: string | null }[], now: Date): { today: number | null; total7: number; daysLogged7: number } {
+  const todayKey = ymd(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
+  const weekAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6).getTime();
+  let today: number | null = null; let total7 = 0; let daysLogged7 = 0;
+  for (const s of signals) {
+    const m = (s.notes ?? '').match(/Hot flashes:\s*(\d+)/i);
+    if (!m) continue;
+    const n = parseInt(m[1], 10);
+    const key = String(s.signal_date).slice(0, 10);
+    const t = new Date(`${key}T00:00:00`).getTime();
+    if (key === todayKey) today = n;
+    if (t >= weekAgo && t <= now.getTime()) { total7 += n; daysLogged7 += 1; }
+  }
+  return { today, total7, daysLogged7 };
+}
+
+/** Whole months between the last period start and today. */
+export function monthsSince(lastStart: Date | null, now: Date): number | null {
+  if (!lastStart) return null;
+  let m = (now.getFullYear() - lastStart.getFullYear()) * 12 + (now.getMonth() - lastStart.getMonth());
+  if (now.getDate() < lastStart.getDate()) m -= 1;
+  return Math.max(0, m);
+}

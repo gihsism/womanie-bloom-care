@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseRange, pickFlaggedLab, medsToday, kicksToday, weekWord, fmtGrams, lastFeed, nappiesToday, sleepTodayMin, fmtAgo, dayOfLife, countToday, cycleDial, pillRing, pillFromNotes } from './bodyMap';
+import { parseRange, pickFlaggedLab, medsToday, kicksToday, weekWord, fmtGrams, lastFeed, nappiesToday, sleepTodayMin, fmtAgo, dayOfLife, countToday, cycleDial, pillRing, pillFromNotes, hotFlushes, monthsSince } from './bodyMap';
 
 const now = new Date(2026, 10, 15, 14, 0);
 const at = (h: number, dayOffset = 0) => new Date(2026, 10, 15 + dayOffset, h, 0).toISOString();
@@ -150,5 +150,22 @@ describe('pillRing', () => {
     expect(r.pills[27]).toMatchObject({ date: '2026-11-15', today: true, mark: 'none' });
     expect(r.streak).toBe(2);
     expect(r.todayMark).toBe('none');
+  });
+});
+
+describe('menopause helpers', () => {
+  it('counts hot flushes today and over 7 days', () => {
+    const r = hotFlushes([
+      { signal_date: '2026-11-15', notes: 'Hot flashes: 4; Mood: ok' },
+      { signal_date: '2026-11-12', notes: 'Hot flashes: 6' },
+      { signal_date: '2026-11-01', notes: 'Hot flashes: 9' },
+      { signal_date: '2026-11-14', notes: 'Slept badly' },
+    ], now);
+    expect(r).toEqual({ today: 4, total7: 10, daysLogged7: 2 });
+  });
+  it('months since last period', () => {
+    expect(monthsSince(new Date(2026, 3, 20), now)).toBe(6);
+    expect(monthsSince(new Date(2026, 3, 10), now)).toBe(7);
+    expect(monthsSince(null, now)).toBeNull();
   });
 });
