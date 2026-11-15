@@ -80,8 +80,7 @@ import PregnancyLabInsights from '@/components/dashboard/PregnancyLabInsights';
 import CycleLabInsights from '@/components/dashboard/CycleLabInsights';
 import ModeLabInsights from '@/components/dashboard/ModeLabInsights';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { format, addDays, differenceInDays } from 'date-fns';
-import { useMemo } from 'react';
+import { format } from 'date-fns';
 import {
   MessageSquare,
   Activity,
@@ -95,8 +94,6 @@ import {
   Info,
   User as UserIcon,
   LogOut,
-  Sparkles,
-  Droplet,
   ArrowLeft,
   Baby,
   Milk
@@ -330,21 +327,6 @@ const PatientDashboard = () => {
     return 'there';
   };
 
-  // Pre-compute next ovulation and period dates to avoid repeated inline calculations
-  const cyclePhases = useMemo(() => {
-    if (!periodData) return null;
-    const now = new Date();
-    let nextOvulation = addDays(periodData.lastPeriodStart, periodData.cycleLength - 13);
-    while (nextOvulation < now) nextOvulation = addDays(nextOvulation, periodData.cycleLength);
-    let nextPeriod = addDays(periodData.lastPeriodStart, periodData.cycleLength);
-    while (nextPeriod < now) nextPeriod = addDays(nextPeriod, periodData.cycleLength);
-    return {
-      nextOvulation,
-      nextPeriod,
-      daysToOvulation: differenceInDays(nextOvulation, now),
-      daysToPeriod: differenceInDays(nextPeriod, now),
-    };
-  }, [periodData]);
 
   // Quick links — the doctor-search slot's label nudges users toward
   // the right specialty for their life stage. The destination is the
@@ -865,51 +847,13 @@ const PatientDashboard = () => {
                       cycleLength={periodData?.cycleLength ?? 28} 
                       periodLength={5}
                       selectedMode={selectedMode}
+                      withHero={selectedMode === 'menstrual-cycle' || selectedMode === 'conception'}
                     />
                   </div>
                   <div className="lg:col-span-1 space-y-4">
                     <CycleLabInsights mode={selectedMode} />
-                    {periodData ? (
-                      <>
-                        <Card className="p-4">
-                          <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
-                            Cycle Phases
-                          </h4>
-                          {cyclePhases && (
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-start">
-                              <div className="flex items-start gap-2 flex-1">
-                                <Sparkles className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" aria-hidden="true" />
-                                <div className="flex-1">
-                                  <div className="text-xs font-medium text-muted-foreground">Next Ovulation</div>
-                                  <p className="text-[10px] text-muted-foreground mt-0.5">
-                                    {cyclePhases.daysToOvulation} days
-                                  </p>
-                                </div>
-                              </div>
-                              <span className="text-sm font-bold whitespace-nowrap">
-                                {format(cyclePhases.nextOvulation, 'MMM d')}
-                              </span>
-                            </div>
-                            <div className="flex justify-between items-start">
-                              <div className="flex items-start gap-2 flex-1">
-                                <Droplet className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" aria-hidden="true" />
-                                <div className="flex-1">
-                                  <div className="text-xs font-medium text-muted-foreground">Next Period</div>
-                                  <p className="text-[10px] text-muted-foreground mt-0.5">
-                                    {cyclePhases.daysToPeriod} days
-                                  </p>
-                                </div>
-                              </div>
-                              <span className="text-sm font-bold whitespace-nowrap">
-                                {format(cyclePhases.nextPeriod, 'MMM d')}
-                              </span>
-                            </div>
-                          </div>
-                          )}
-                        </Card>
-                      </>
-                    ) : (
+                    {/* Next ovulation / next period live in the cycle dial at the top. */}
+                    {!periodData && (
                       <Card className="p-4 text-center">
                         <h3 className="text-lg font-bold mb-2">Cycle Health</h3>
                         <p className="text-sm text-muted-foreground">

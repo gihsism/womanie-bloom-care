@@ -26,6 +26,9 @@ interface CycleCalendarProps {
   periodLength?: number;
   selectedMode?: string;
   pregnancyDueDate?: Date | null;
+  /** Home shows the cycle dial above, so the calendar skips its own
+   *  day / next-period / fertile cards. */
+  withHero?: boolean;
 }
 
 const CycleCalendar = ({ 
@@ -34,6 +37,7 @@ const CycleCalendar = ({
   periodLength: initialPeriodLength = 5,
   selectedMode = 'menstrual-cycle',
   pregnancyDueDate,
+  withHero = false,
 }: CycleCalendarProps) => {
   const { toast } = useToast();
   
@@ -462,6 +466,7 @@ const CycleCalendar = ({
           prediction={prediction}
           symptomPatterns={symptomPatterns}
           periodRecords={periodRecords}
+          withHero={withHero}
         />
       )}
 

@@ -67,8 +67,14 @@ const CalendarGrid = ({
 
     const avgCycle = prediction.averageCycleLength;
     const avgPeriod = prediction.averagePeriodLength;
-    const lutealPhase = 14;
+    // Her own luteal length (learned from LH/temperature cycles) so the
+    // calendar marks the same ovulation day as the Home dial and cards.
+    const lutealPhase = prediction.lutealLength ?? 14;
     const window = prediction.confidenceWindow;
+    const key = (d: Date) => format(d, 'yyyy-MM-dd');
+    // Past cycles where an ovulation day was actually found in her logs.
+    const detectedByStart = new Map<string, Date>();
+    for (const c of prediction.learnedCycles ?? []) detectedByStart.set(key(c.start), c.ovulation.date);
 
     const sorted = [...periodRecords].sort(
       (a, b) => new Date(a.period_start_date).getTime() - new Date(b.period_start_date).getTime()
@@ -77,11 +83,14 @@ const CalendarGrid = ({
     // Past cycles: calculate ovulation/fertile for each
     for (let i = 0; i < sorted.length; i++) {
       const currentStart = parseISO(sorted[i].period_start_date);
-      const nextStart = i < sorted.length - 1
+      const isRunning = i === sorted.length - 1;
+      const nextStart = !isRunning
         ? parseISO(sorted[i + 1].period_start_date)
-        : addDays(currentStart, avgCycle);
+        : prediction.predictedPeriodStart;
 
-      const ovDate = addDays(nextStart, -lutealPhase);
+      const ovDate = isRunning
+        ? prediction.predictedOvulationDate
+        : detectedByStart.get(key(currentStart)) ?? addDays(nextStart, -lutealPhase);
       pOvulation.add(format(ovDate, 'yyyy-MM-dd'));
 
       let d = addDays(ovDate, -5);
@@ -93,10 +102,12 @@ const CalendarGrid = ({
     }
 
     // Future predictions: 3 cycles
-    const lastStart = parseISO(sorted[sorted.length - 1].period_start_date);
+    // Anchored on the personal next-period prediction, then whole
+    // average cycles after it.
+    const firstFuture = prediction.predictedPeriodStart;
 
     for (let cycle = 1; cycle <= 3; cycle++) {
-      const futureStart = addDays(lastStart, avgCycle * cycle);
+      const futureStart = addDays(firstFuture, avgCycle * (cycle - 1));
       const futureEnd = addDays(futureStart, avgPeriod - 1);
       let d = futureStart;
       while (d <= futureEnd) { fPeriod.add(format(d, 'yyyy-MM-dd')); d = addDays(d, 1); }
@@ -113,7 +124,7 @@ const CalendarGrid = ({
         }
       }
 
-      const nextCycleStart = addDays(lastStart, avgCycle * (cycle + 1));
+      const nextCycleStart = addDays(firstFuture, avgCycle * cycle);
       const ovDate = addDays(nextCycleStart, -lutealPhase);
       pOvulation.add(format(ovDate, 'yyyy-MM-dd'));
 

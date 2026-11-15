@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useCycleModel } from '@/hooks/useCycleModel';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
@@ -115,23 +116,35 @@ const FertilityForecast = ({ lastPeriodStart, cycleLengthFallback = 28 }: Fertil
       : recent[mid];
   }, [rows]);
 
+  // Same personal model as the Home dial and calendar: next period from
+  // her own prediction, ovulation one learned luteal phase before each
+  // following period (12 days for some women, not always 14).
+  const model = useCycleModel();
+  const luteal = model.loaded ? model.prediction.lutealLength ?? 14 : 14;
+  const personalNext = model.loaded && model.periodRecords.length > 0 ? model.prediction.predictedPeriodStart : null;
+
   const cycles = useMemo<ForecastCycle[]>(() => {
     if (!lastPeriodStart) return [];
     const today = new Date();
-    // Move forward to the *next* cycle (the current one's already
-    // running). If the most recent period is far in the past, skip
-    // forward until we land in the future.
-    let cursor = new Date(lastPeriodStart);
-    while (differenceInDays(today, cursor) >= medianCycleLength) {
+    let cursor: Date;
+    if (personalNext && differenceInDays(personalNext, today) >= -2) {
+      cursor = new Date(personalNext);
+    } else {
+      // Move forward to the *next* cycle (the current one's already
+      // running). If the most recent period is far in the past, skip
+      // forward until we land in the future.
+      cursor = new Date(lastPeriodStart);
+      while (differenceInDays(today, cursor) >= medianCycleLength) {
+        cursor = addDays(cursor, medianCycleLength);
+      }
       cursor = addDays(cursor, medianCycleLength);
     }
-    cursor = addDays(cursor, medianCycleLength);
 
     const out: ForecastCycle[] = [];
     for (let i = 0; i < 3; i++) {
       const startDate = new Date(cursor);
       const endDate = addDays(startDate, medianPeriodLength - 1);
-      const ovulation = addDays(startDate, medianCycleLength - 14);
+      const ovulation = addDays(startDate, medianCycleLength - luteal);
       const fertileStart = addDays(ovulation, -5);
       const fertileEnd = addDays(ovulation, 1);
       out.push({
@@ -146,7 +159,7 @@ const FertilityForecast = ({ lastPeriodStart, cycleLengthFallback = 28 }: Fertil
       cursor = addDays(cursor, medianCycleLength);
     }
     return out;
-  }, [lastPeriodStart, medianCycleLength, medianPeriodLength]);
+  }, [lastPeriodStart, medianCycleLength, medianPeriodLength, luteal, personalNext]);
 
   if (!loaded || !lastPeriodStart) return null;
 
@@ -164,7 +177,7 @@ const FertilityForecast = ({ lastPeriodStart, cycleLengthFallback = 28 }: Fertil
         </Badge>
       </div>
       <p className="text-xs text-muted-foreground -mt-1">
-        Forecast using a {medianCycleLength}-day median cycle. Real cycles vary; treat these
+        Forecast using a {medianCycleLength}-day median cycle{luteal !== 14 ? ` and your own ${luteal}-day second half` : ''}. Real cycles vary; treat these
         as planning estimates, not guarantees.
       </p>
 
@@ -230,7 +243,7 @@ const FertilityForecast = ({ lastPeriodStart, cycleLengthFallback = 28 }: Fertil
                   <div className="font-medium text-foreground inline-flex items-center gap-1">
                     <Sparkles className="h-3 w-3 text-secondary" /> Ovulation
                   </div>
-                  {format(c.ovulation, 'MMM d')}
+                  <div>{format(c.ovulation, 'MMM d')}</div>
                 </div>
                 <div className="text-right">
                   <div className="font-medium text-foreground">Cycle</div>

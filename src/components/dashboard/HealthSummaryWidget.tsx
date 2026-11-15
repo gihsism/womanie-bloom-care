@@ -9,7 +9,6 @@ import { onHealthDataChange } from '@/lib/data-events';
 import {
   HeartPulse,
   ArrowRight,
-  FileText,
   AlertTriangle,
   CheckCircle2,
 } from 'lucide-react';
@@ -49,25 +48,9 @@ export default function HealthSummaryWidget() {
 
   if (loading) return null;
 
-  // No documents uploaded yet
-  if (docCount === 0) {
-    return (
-      <Card className="p-4 mb-6 border-dashed">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <FileText className="h-5 w-5 text-primary" />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-semibold">Upload health documents</p>
-            <p className="text-xs text-muted-foreground">Get AI-powered analysis of your lab results, prescriptions, and medical records</p>
-          </div>
-          <Button size="sm" variant="outline" onClick={() => navigate('/dashboard/medical-history')}>
-            Get started
-          </Button>
-        </div>
-      </Card>
-    );
-  }
+  // No documents yet: stay hidden. The Getting-started checklist and the
+  // upload card further down already ask for the first document.
+  if (docCount === 0) return null;
 
   const labs = data.filter(d => d.data_type === 'lab_result');
   const normalCount = labs.filter(d => d.status === 'normal' || d.status === 'expected').length;

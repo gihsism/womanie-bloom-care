@@ -12,6 +12,9 @@ interface TodayStatusCardProps {
   prediction: CyclePrediction;
   symptomPatterns?: SymptomPattern[];
   periodRecords?: PeriodRecord[];
+  /** Home already shows the cycle dial (day, next period, fertile window,
+   *  phase), so skip those cards and keep only what the dial lacks. */
+  withHero?: boolean;
 }
 
 const TodayStatusCard = ({
@@ -20,7 +23,8 @@ const TodayStatusCard = ({
   selectedMode,
   prediction,
   symptomPatterns = [],
-  periodRecords = []
+  periodRecords = [],
+  withHero = false,
 }: TodayStatusCardProps) => {
   const today = new Date();
   const notificationPrefs = useNotificationPrefs();
@@ -180,7 +184,7 @@ const TodayStatusCard = ({
   return (
     <div className="space-y-3">
       {/* Main status card */}
-      <div className="bg-gradient-to-br from-muted/50 to-muted rounded-2xl p-5">
+      {!withHero && <div className="bg-gradient-to-br from-muted/50 to-muted rounded-2xl p-5">
         <div className="text-center mb-4">
           <div className="text-6xl font-light text-foreground mb-1">
             {status.main}
@@ -219,7 +223,7 @@ const TodayStatusCard = ({
             : `${format(addDays(prediction.predictedPeriodStart, -prediction.confidenceWindow), 'MMM d')}-${format(addDays(prediction.predictedPeriodStart, prediction.confidenceWindow), 'd')}`
           }
         </div>
-      </div>
+      </div>}
 
       {/* Period-late alert — surfaced before the phase card so the
           user sees it first when applicable. Only flagged once the
@@ -247,7 +251,7 @@ const TodayStatusCard = ({
           phase the user is in right now plus a one-line
           explanation. Replaces the previous mental-math reader had
           to do from cycleDay alone. */}
-      <div className="bg-card rounded-2xl border p-4">
+      {!withHero && <div className="bg-card rounded-2xl border p-4">
         <div className="flex items-start gap-3">
           <div className={cn("w-1 h-12 rounded-full mt-0.5 bg-current opacity-60", cyclePhase.tone)} />
           <div className="flex-1 min-w-0">
@@ -257,10 +261,10 @@ const TodayStatusCard = ({
             </p>
           </div>
         </div>
-      </div>
+      </div>}
 
       {/* Fertility info card */}
-      <div className="bg-card rounded-2xl border p-4">
+      {!withHero && <div className="bg-card rounded-2xl border p-4">
         <div className="flex items-start gap-2">
           <div className={cn(
             "w-1 h-12 rounded-full mt-0.5",
@@ -285,10 +289,10 @@ const TodayStatusCard = ({
             </div>
           </div>
         </div>
-      </div>
+      </div>}
 
       {/* Cycle insights card */}
-      {(prediction.cyclesLogged >= 3 || prediction.currentCycleAnomaly) && (
+      {(withHero ? (prediction.cycleTrend !== 'stable' || prediction.currentCycleAnomaly) : (prediction.cyclesLogged >= 3 || prediction.currentCycleAnomaly)) && (
         <div className="bg-card rounded-2xl border p-4 space-y-3">
           <div className="flex items-center gap-2">
             <Info className="h-4 w-4 text-muted-foreground" />
@@ -296,7 +300,7 @@ const TodayStatusCard = ({
           </div>
 
           <div className="space-y-2 text-sm text-muted-foreground">
-            {prediction.isRegular !== undefined && prediction.cyclesLogged >= 3 && (
+            {!withHero && prediction.isRegular !== undefined && prediction.cyclesLogged >= 3 && (
               <p>
                 Your cycles are <span className="font-medium text-foreground">
                   {prediction.isRegular ? 'regular' : 'somewhat irregular'}
