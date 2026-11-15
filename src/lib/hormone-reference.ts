@@ -292,3 +292,58 @@ export function parseLabValue(raw: string | number | null | undefined): number |
   const n = Number(match[0]);
   return Number.isFinite(n) ? n : null;
 }
+
+// ---- Egg reserve vs age (soft wording) -------------------------------------
+// Alena's call (2026-11-15): no "reserve age 34" number; say whether AMH is
+// typical / lower / higher for her age, and name the age range where her
+// value would be typical. Built on the AMH_BY_AGE medians.
+
+const AMH_MEDIAN_CURVE: Array<[age: number, median: number]> = AMH_BY_AGE
+  .map(b => [b.ageTo >= 99 ? 52 : (b.ageFrom + b.ageTo) / 2, b.median] as [number, number]);
+
+export interface AmhAgeComparison {
+  verdict: 'typical' | 'lower' | 'higher';
+  headline: string;            // "Lower than typical for 35"
+  detail: string;              // "Closer to what's usual around 38–40."
+  typicalAround: string | null; // "38–40"
+}
+
+/** Age at which `ngml` is the median AMH (curve is monotone decreasing). */
+export function amhTypicalAge(ngml: number): number {
+  const c = AMH_MEDIAN_CURVE;
+  if (ngml >= c[0][1]) return c[0][0];
+  if (ngml <= c[c.length - 1][1]) return c[c.length - 1][0];
+  for (let i = 0; i + 1 < c.length; i++) {
+    const [a0, m0] = c[i]; const [a1, m1] = c[i + 1];
+    if (ngml <= m0 && ngml >= m1) return a0 + ((m0 - ngml) / (m0 - m1)) * (a1 - a0);
+  }
+  return c[c.length - 1][0];
+}
+
+export function amhAgeComparison(value: number, unit: string | null, age: number, fsh?: number | null): AmhAgeComparison | null {
+  if (!Number.isFinite(value) || value < 0 || !Number.isFinite(age) || age < 18 || age > 60) return null;
+  const ngml = (unit ?? '').toLowerCase().includes('pmol') ? value / 7.14 : value;
+  const a = assessAmh(ngml, age);
+  if (!a) return null;
+  const t = amhTypicalAge(ngml);
+  const lo = Math.round(t - 1); const hi = Math.round(t + 1);
+  const around = t <= 22 ? 'under 25' : t >= 50 ? 'over 50' : `${lo}–${hi}`;
+  const fshNote = fsh != null && fsh > 10 ? ' Your FSH is also above 10, which points the same way.' : '';
+  if (a.percentileBucket === 'average') {
+    return { verdict: 'typical', headline: `Typical for ${age}`, detail: `Your egg reserve is in the usual range for your age.${fshNote}`, typicalAround: null };
+  }
+  if (ngml < a.median) {
+    return {
+      verdict: 'lower',
+      headline: `Lower than typical for ${age}`,
+      detail: `Closer to what's usual around ${around}.${fshNote} This is about egg numbers, not egg quality or your chance of getting pregnant naturally — worth discussing if you're planning a pregnancy.`,
+      typicalAround: around,
+    };
+  }
+  return {
+    verdict: 'higher',
+    headline: `Higher than typical for ${age}`,
+    detail: `Closer to what's usual around ${around}.${a.percentileBucket === 'very_high' ? ' Very high AMH can come with PCOS, especially if cycles are irregular.' : ''}`,
+    typicalAround: around,
+  };
+}

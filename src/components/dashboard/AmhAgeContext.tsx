@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
-import { hormoneKeyForTitle, parseLabValue } from '@/lib/hormone-reference';
+import { hormoneKeyForTitle, parseLabValue, amhAgeComparison } from '@/lib/hormone-reference';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
@@ -115,6 +115,7 @@ export default function AmhAgeContext({ mode }: AmhAgeContextProps) {
 
   const a = ctx.amhAssessment;
   const lab = ctx.labs.amh;
+  const cmp = ctx.age != null ? amhAgeComparison(lab.value, lab.unit, ctx.age, ctx.labs.fsh?.value ?? null) : null;
   const dateLine = lab.dateRecorded
     ? `tested ${format(parseISO(lab.dateRecorded), 'MMM d, yyyy')}`
     : null;
@@ -136,6 +137,14 @@ export default function AmhAgeContext({ mode }: AmhAgeContextProps) {
           </p>
         </div>
       </div>
+
+      {cmp && (
+        <div className={`mb-3 border-t pt-2 ${cmp.verdict === 'typical' ? 'border-foreground' : 'border-primary'}`}>
+          <p className={`label-mono ${cmp.verdict === 'typical' ? '' : '!text-primary'}`}>Egg reserve</p>
+          <p className="font-display text-[24px] leading-tight mt-1">{cmp.headline}</p>
+          <p className="text-[13px] text-muted-foreground mt-1 leading-snug">{cmp.detail}</p>
+        </div>
+      )}
 
       <div className="flex items-baseline gap-2 mb-2">
         <span className="text-2xl font-bold">{fmt(lab.value)}</span>
