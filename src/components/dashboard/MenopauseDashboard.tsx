@@ -99,7 +99,7 @@ const postSymptoms = [
 const menoWellness = [
   { icon: Dumbbell, title: 'Strength Training', tip: 'Protects bone density and boosts metabolism. 2-3 sessions weekly.', priority: 'Essential' },
   { icon: Salad, title: 'Anti-Inflammatory Diet', tip: 'Omega-3s, leafy greens, berries. Reduce sugar and alcohol.', priority: 'Essential' },
-  { icon: Moon, title: 'Sleep Hygiene', tip: 'Cool bedroom (65-68°F), breathable bedding, consistent schedule.', priority: 'Essential' },
+  { icon: Moon, title: 'Sleep Hygiene', tip: 'Cool bedroom (16–19 °C), breathable bedding, consistent schedule.', priority: 'Essential' },
   { icon: Brain, title: 'Stress Management', tip: 'Meditation and yoga can reduce hot flash frequency by up to 40%.', priority: 'High' },
   { icon: Bone, title: 'Bone Health', tip: '1200mg calcium + 800IU vitamin D daily. Consider DEXA scan.', priority: 'Essential' },
   { icon: Heart, title: 'Heart Health', tip: 'Monitor blood pressure, cholesterol. Stay active.', priority: 'High' },

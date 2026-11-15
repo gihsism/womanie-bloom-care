@@ -398,7 +398,7 @@ const PatientDashboard = () => {
       { emoji: '🌡️', tip: 'Log hot flashes to track patterns' },
       { emoji: '🦴', tip: 'Check vitamin D and calcium levels' },
       { emoji: '🏃', tip: 'Weight-bearing exercise supports bone health' },
-      { emoji: '😴', tip: 'A cool bedroom (65–68°F) reduces night sweats' },
+      { emoji: '😴', tip: 'A cool bedroom (16–19 °C) reduces night sweats' },
     ],
     'post-menopause': [
       { emoji: '🦴', tip: 'A DEXA bone-density scan every 2 years is the gold standard' },

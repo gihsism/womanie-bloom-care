@@ -131,8 +131,10 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
         // What remains after stripping the encoded segments is the
         // user's freeform note. Each segment is separated by `. ` per
         // handleSave's join, so split on that, drop matches, rejoin.
+        // Split only on ". " (how handleSave joins parts) so decimals like
+        // "BBT: 36.6°C" or "Sleep: 7.5h" are not cut into stray fragments.
         const freeform = notes
-          .split('.')
+          .split(/\.\s+|\.$/)
           .map(s => s.trim())
           .filter(s =>
             s &&
@@ -142,7 +144,7 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
             !/^Pill:\s*(on-time|late|missed)$/i.test(s) &&
             !/^Medication:\s*(all-on-time|late|missed)$/i.test(s) &&
             !/^Hot flashes:\s*\d+$/i.test(s) &&
-            !/^BBT:\s*\d+(?:\.\d+)?°?F?$/i.test(s) &&
+            !/^BBT:\s*\d+(?:\.\d+)?\s*°?\s*[CF]?$/i.test(s) &&
             !/^Sleep:\s*\d+(?:\.\d+)?h$/i.test(s) &&
             !/^Sleep quality:\s*[1-5]\/5$/i.test(s) &&
             !/^Lochia:\s*(none|spotting|light-red|heavy-red|pink-brown|yellow-clear)$/i.test(s)
@@ -213,7 +215,8 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
         data.pillTaken && `Pill: ${data.pillTaken}`,
         data.medicationTaken && `Medication: ${data.medicationTaken}`,
         data.hotFlashCount && `Hot flashes: ${data.hotFlashCount}`,
-        data.basalTemp && `BBT: ${data.basalTemp}°F`,
+        // °C by default (Swiss users); a reading typed in °F (above 50) keeps its unit.
+        data.basalTemp && `BBT: ${data.basalTemp}°${parseFloat(data.basalTemp) > 50 ? 'F' : 'C'}`,
         data.sleepHours && `Sleep: ${data.sleepHours}h`,
         data.sleepQuality && `Sleep quality: ${data.sleepQuality}/5`,
         data.lochia && `Lochia: ${data.lochia}`,
@@ -463,8 +466,8 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
             )}
             {showBBT && (
               <div className="space-y-1.5">
-                <Label className="text-xs">Basal temp (°F)</Label>
-                <Input type="number" step="0.1" placeholder="97.8" className="h-9" value={data.basalTemp} onChange={(e) => update('basalTemp', e.target.value)} />
+                <Label className="text-xs">Basal temp (°C)</Label>
+                <Input type="number" step="0.01" inputMode="decimal" placeholder="36.5" className="h-9" value={data.basalTemp} onChange={(e) => update('basalTemp', e.target.value)} />
               </div>
             )}
           </div>

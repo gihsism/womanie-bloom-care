@@ -72,7 +72,7 @@ const BBTChart = ({ lastPeriodStart }: BBTChartProps) => {
   const { user } = useAuth();
   const [points, setPoints] = useState<BBTPoint[]>([]);
   const [loaded, setLoaded] = useState(false);
-  const [unit, setUnit] = useState<'F' | 'C'>('F');
+  const [unit, setUnit] = useState<'F' | 'C'>('C');
 
   const load = async () => {
     if (!user) return;
@@ -189,7 +189,7 @@ const BBTChart = ({ lastPeriodStart }: BBTChartProps) => {
           <Info className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
           <span>
             BBT is most accurate first thing in the morning before getting out of bed.
-            Same time each day, same thermometer. The post-ovulation rise is small (0.2–0.5 °F)
+            Same time each day, same thermometer. The post-ovulation rise is small (0.1–0.3 °C)
             but consistent.
           </span>
         </div>
@@ -215,20 +215,20 @@ const BBTChart = ({ lastPeriodStart }: BBTChartProps) => {
         </h4>
         <div className="flex items-center gap-1">
           <Button
-            variant={unit === 'F' ? 'default' : 'ghost'}
-            size="sm"
-            className="h-6 text-[11px] px-2"
-            onClick={() => setUnit('F')}
-          >
-            °F
-          </Button>
-          <Button
             variant={unit === 'C' ? 'default' : 'ghost'}
             size="sm"
             className="h-6 text-[11px] px-2"
             onClick={() => setUnit('C')}
           >
             °C
+          </Button>
+          <Button
+            variant={unit === 'F' ? 'default' : 'ghost'}
+            size="sm"
+            className="h-6 text-[11px] px-2"
+            onClick={() => setUnit('F')}
+          >
+            °F
           </Button>
         </div>
       </div>

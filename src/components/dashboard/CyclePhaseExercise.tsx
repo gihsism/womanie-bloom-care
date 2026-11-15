@@ -71,7 +71,7 @@ const GUIDANCE: Record<Phase, PhaseGuidance> = {
       'Steady-state cardio (zone 2) feels easier than the same work at sprint pace',
       'Strength is still useful — work submaximal, focus on form',
       'Last 5-7 days (PMS window): reduce intensity, prioritise sleep + magnesium',
-      'Hot environment + intensity is harder — body temperature is already elevated by ~0.5°F',
+      'Hot environment + intensity is harder — body temperature is already elevated by ~0.3 °C',
       'Stretching + mobility work pays off here; tissues are slightly stiffer',
     ],
     tone: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200',
