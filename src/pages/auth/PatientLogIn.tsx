@@ -84,7 +84,7 @@ const PatientLogIn = () => {
               <Label htmlFor="email">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input id="email" name="email" type="email" autoComplete="username email" inputMode="email" autoCapitalize="none" placeholder="your@email.com" className="pl-10" value={email} onChange={e => setEmail(e.target.value)} required />
+                <Input id="email" name="email" type="email" autoComplete="username" inputMode="email" autoCapitalize="none" placeholder="your@email.com" className="pl-10" value={email} onChange={e => setEmail(e.target.value)} required />
               </div>
             </div>
             <div className="space-y-2">
