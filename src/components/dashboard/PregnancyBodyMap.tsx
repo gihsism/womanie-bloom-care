@@ -118,7 +118,6 @@ export default function PregnancyBodyMap({ dueDate, name }: { dueDate: Date; nam
           <g fill="none" strokeWidth="1">
             <path d="M171,22 H116 M116,17 v10" stroke="#1A1A19" />
             <path d={`M193.5,118 H116 M116,113 v10`} stroke={flagged ? 'hsl(var(--destructive))' : '#1A1A19'} />
-            <path d="M229,271 H116 M116,266 v10" stroke="#1A1A19" />
             <path d="M245,218 L270,250 V322 M265,322 h10" stroke="hsl(var(--primary))" />
           </g>
           {/* hotspots */}
@@ -127,7 +126,6 @@ export default function PregnancyBodyMap({ dueDate, name }: { dueDate: Date; nam
             <circle cx="193.5" cy="118" r="4" fill={flagged ? 'hsl(var(--destructive))' : '#1A1A19'} />
             <circle cx="193.5" cy="118" r="9" fill="none" stroke={flagged ? 'hsl(var(--destructive))' : '#1A1A19'} strokeWidth=".9" />
             {flagged && <circle cx="193.5" cy="118" r="14" fill="none" stroke="hsl(var(--destructive))" strokeWidth=".6" opacity=".45" />}
-            <circle cx="229" cy="271" r="3.5" fill="#1A1A19" /><circle cx="229" cy="271" r="8" fill="none" stroke="#1A1A19" strokeWidth=".8" />
             <circle cx="245" cy="218" r="4.5" fill="hsl(var(--primary))" />
             <circle cx="245" cy="218" r="10" fill="none" stroke="hsl(var(--primary))" strokeWidth=".9" />
             <circle cx="245" cy="218" r="16" fill="none" stroke="hsl(var(--primary))" strokeWidth=".6" opacity=".45" />
@@ -190,10 +188,10 @@ export default function PregnancyBodyMap({ dueDate, name }: { dueDate: Date; nam
           )}
         </button>
 
-        {/* Hand · medicines */}
+        {/* Medicines today: a plain caption, not pinned to the body (her 2026-11-15 note: "why hand at all?") */}
         <button type="button" onClick={() => go('#medicines')}
-          className="absolute w-[35%] text-right leading-tight" style={pct(0, 245)}>
-          <span className="label-mono block">Hand · {med.lastAt ? format(new Date(med.lastAt), 'HH:mm') : 'today'}</span>
+          className="absolute w-[35%] text-right leading-tight border-t border-border pt-2" style={pct(0, 245)}>
+          <span className="label-mono block">Medicines · {med.lastAt ? format(new Date(med.lastAt), 'HH:mm') : 'today'}</span>
           {med.total === 0 ? (
             <>
               <span className="block text-[15px] font-medium mt-1">No medicines</span>

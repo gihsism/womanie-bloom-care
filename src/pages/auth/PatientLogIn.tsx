@@ -15,7 +15,8 @@ const PatientLogIn = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [email, setEmail] = useState('');
+  // Pre-fill the last email used on this device (saved by AuthContext / on login).
+  const [email, setEmail] = useState(() => { try { return localStorage.getItem('womanie_last_email') ?? ''; } catch { return ''; } });
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -43,6 +44,7 @@ const PatientLogIn = () => {
         return;
       }
 
+      try { localStorage.setItem('womanie_last_email', email.trim()); } catch { /* storage blocked */ }
       window.location.href = '/welcome';
     } catch {
       toast({ variant: 'destructive', title: 'Error', description: 'Something went wrong' });
@@ -82,7 +84,7 @@ const PatientLogIn = () => {
               <Label htmlFor="email">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input id="email" type="email" placeholder="your@email.com" className="pl-10" value={email} onChange={e => setEmail(e.target.value)} required />
+                <Input id="email" name="email" type="email" autoComplete="username email" inputMode="email" autoCapitalize="none" placeholder="your@email.com" className="pl-10" value={email} onChange={e => setEmail(e.target.value)} required />
               </div>
             </div>
             <div className="space-y-2">
@@ -97,7 +99,7 @@ const PatientLogIn = () => {
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="Enter password" className="pl-10 pr-10" value={password} onChange={e => setPassword(e.target.value)} required />
+                <Input id="password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" autoFocus={Boolean(email)} placeholder="Enter password" className="pl-10 pr-10" value={password} onChange={e => setPassword(e.target.value)} required />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-muted-foreground hover:text-foreground" aria-label={showPassword ? 'Hide' : 'Show'}>
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>

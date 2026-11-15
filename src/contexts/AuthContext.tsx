@@ -42,6 +42,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .then(r => r.json())
       .then(data => {
         if (data.user) {
+          // Remembered so the login page can pre-fill it next time.
+          try { if (data.user.email) localStorage.setItem('womanie_last_email', data.user.email); } catch { /* storage blocked */ }
           setUser({
             id: data.user.id,
             email: data.user.email,

@@ -34,6 +34,24 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ user: null });
     }
 
+    // Stay logged in while she keeps using the app: once less than 20 of the
+    // 30 days are left, push the session out another 30 days and re-issue the
+    // cookie (same session id, so logout / delete-account still revoke it).
+    try {
+      const expiresAt = new Date(String((sessions[0] as { expires_at: string | Date }).expires_at)).getTime();
+      if (Number.isFinite(expiresAt) && expiresAt - Date.now() < 20 * 24 * 60 * 60 * 1000) {
+        const renewed = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        await sql.query('UPDATE auth_sessions SET expires_at = $1 WHERE id = $2 AND user_id = $3', [renewed.toISOString(), payload.sid, payload.sub]);
+        const fresh = await new jose.SignJWT({ sub: payload.sub, sid: payload.sid, email: payload.email, name: payload.name })
+          .setProtectedHeader({ alg: 'HS256' })
+          .setExpirationTime('30d')
+          .sign(getAuthSecret());
+        res.setHeader('Set-Cookie', `womanie_session=${fresh}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}`);
+      }
+    } catch (e) {
+      console.error('me: session renewal failed', e); // non-fatal, the current session is still valid
+    }
+
     // JWT carries the name set at signup; users who added their name
     // later through the inline profile form had a stale JWT. Fall back
     // to profiles.full_name when the JWT name is blank.

@@ -9,7 +9,7 @@ import { hotFlushes, monthsSince, medsToday, weekWord } from '@/lib/bodyMap';
 
 // Version 8 "body map" hero for menopause and after: the same sculpted
 // figure as pregnancy without the bump. Hotspots: mind (latest mood),
-// chest (hot flushes today / this week), hand (HRT & medicines today),
+// chest (hot flushes today / this week), an unpinned HRT & medicines caption,
 // pelvis (months since the last period — 12 in a row means menopause).
 // The scale on the right counts those 12 months.
 
@@ -105,7 +105,6 @@ export default function MenopauseBodyMap({ name, mode }: { name?: string | null;
           <g fill="none" strokeWidth="1">
             <path d="M171,22 H116 M116,17 v10" stroke="#1A1A19" />
             <path d="M186,118 H116 M116,113 v10" stroke="hsl(var(--primary))" />
-            <path d="M216,271 H116 M116,266 v10" stroke="#1A1A19" />
             <path d="M206,300 L262,300 V330 M257,330 h10" stroke="#1A1A19" />
           </g>
           <g>
@@ -113,7 +112,6 @@ export default function MenopauseBodyMap({ name, mode }: { name?: string | null;
             <circle cx="186" cy="118" r="4.5" fill="hsl(var(--primary))" />
             <circle cx="186" cy="118" r="10" fill="none" stroke="hsl(var(--primary))" strokeWidth=".9" />
             <circle cx="186" cy="118" r="16" fill="none" stroke="hsl(var(--primary))" strokeWidth=".6" opacity=".45" />
-            <circle cx="216" cy="271" r="3.5" fill="#1A1A19" /><circle cx="216" cy="271" r="8" fill="none" stroke="#1A1A19" strokeWidth=".8" />
             <circle cx="206" cy="300" r="3.5" fill="#1A1A19" /><circle cx="206" cy="300" r="8" fill="none" stroke="#1A1A19" strokeWidth=".8" />
           </g>
           {months != null && (
@@ -147,8 +145,8 @@ export default function MenopauseBodyMap({ name, mode }: { name?: string | null;
           </span>
         </button>
 
-        <button type="button" onClick={() => go('#medicines')} className="absolute w-[35%] text-right leading-tight" style={pct(0, 245)}>
-          <span className="label-mono block">Hand · HRT</span>
+        <button type="button" onClick={() => go('#medicines')} className="absolute w-[35%] text-right leading-tight border-t border-border pt-2" style={pct(0, 245)}>
+          <span className="label-mono block">HRT · today</span>
           {med.total === 0 ? (
             <><span className="block text-[15px] font-medium mt-1">No medicines</span><span className="block text-[13px] text-primary mt-0.5">Add HRT →</span></>
           ) : med.takenToday >= med.total ? (
