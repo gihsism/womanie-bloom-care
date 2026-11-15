@@ -82,7 +82,7 @@ export default function MenopauseBodyMap({ name, mode }: { name?: string | null;
         <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" aria-hidden="true">
           <defs>
             <linearGradient id="mb-stone" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#F6F6F3" /><stop offset=".55" stopColor="#DEDDD8" /><stop offset="1" stopColor="#CBCAC4" />
+              <stop offset="0" stopColor="#FCF6F4" /><stop offset=".55" stopColor="#EADDD9" /><stop offset="1" stopColor="#D9C8C3" />
             </linearGradient>
             <filter id="mb-shadow" x="-30%" y="-10%" width="160%" height="130%">
               <feGaussianBlur in="SourceAlpha" stdDeviation="10" /><feOffset dx="8" dy="10" />
@@ -120,13 +120,13 @@ export default function MenopauseBodyMap({ name, mode }: { name?: string | null;
             <g>
               <line x1="310" y1="30" x2="310" y2="290" stroke="hsl(var(--border))" strokeWidth=".8" />
               {Array.from({ length: 13 }, (_, i) => (
-                <line key={i} x1="310" x2={i % 3 === 0 ? 304 : 307} y1={scaleY(i)} y2={scaleY(i)} stroke="#9C9C96" strokeWidth=".7" />
+                <line key={i} x1="310" x2={i % 3 === 0 ? 304 : 307} y1={scaleY(i)} y2={scaleY(i)} stroke="hsl(var(--muted-foreground) / .5)" strokeWidth=".7" />
               ))}
               <line x1="310" y1="30" x2="310" y2={scaleY(months)} stroke="hsl(var(--primary))" strokeWidth="1.6" />
               <circle cx="310" cy={scaleY(months)} r="3.2" fill="hsl(var(--primary))" />
               <text x="301" y={scaleY(months) + 4} textAnchor="end" fontFamily="DM Mono, monospace" fontSize="10.5" fill="hsl(var(--primary))">{Math.min(months, 12)}</text>
-              <text x="301" y="34" textAnchor="end" fontFamily="DM Mono, monospace" fontSize="9.5" fill="#76766F">0</text>
-              <text x="301" y="294" textAnchor="end" fontFamily="DM Mono, monospace" fontSize="9.5" fill="#76766F">12</text>
+              <text x="301" y="34" textAnchor="end" fontFamily="DM Mono, monospace" fontSize="9.5" fill="hsl(var(--muted-foreground))">0</text>
+              <text x="301" y="294" textAnchor="end" fontFamily="DM Mono, monospace" fontSize="9.5" fill="hsl(var(--muted-foreground))">12</text>
             </g>
           )}
         </svg>

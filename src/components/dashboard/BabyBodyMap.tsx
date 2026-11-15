@@ -91,7 +91,7 @@ export default function BabyBodyMap() {
         <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" aria-hidden="true">
           <defs>
             <linearGradient id="bb-stone" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#F6F6F3" /><stop offset=".55" stopColor="#DEDDD8" /><stop offset="1" stopColor="#CBCAC4" />
+              <stop offset="0" stopColor="#FCF6F4" /><stop offset=".55" stopColor="#EADDD9" /><stop offset="1" stopColor="#D9C8C3" />
             </linearGradient>
             <radialGradient id="bb-glow" cx=".5" cy=".5" r=".6">
               <stop offset="0" stopColor="hsl(var(--primary))" stopOpacity=".2" />

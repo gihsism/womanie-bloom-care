@@ -86,7 +86,7 @@ export default function PregnancyBodyMap({ dueDate, name }: { dueDate: Date; nam
         <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" aria-hidden="true">
           <defs>
             <linearGradient id="bm-stone" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#F6F6F3" /><stop offset=".55" stopColor="#DEDDD8" /><stop offset="1" stopColor="#CBCAC4" />
+              <stop offset="0" stopColor="#FCF6F4" /><stop offset=".55" stopColor="#EADDD9" /><stop offset="1" stopColor="#D9C8C3" />
             </linearGradient>
             <radialGradient id="bm-glow" cx=".55" cy=".45" r=".6">
               <stop offset="0" stopColor="hsl(var(--primary))" stopOpacity=".22" />
@@ -136,13 +136,13 @@ export default function PregnancyBodyMap({ dueDate, name }: { dueDate: Date; nam
           <g>
             <line x1="310" y1="30" x2="310" y2="290" stroke="hsl(var(--border))" strokeWidth=".8" />
             {Array.from({ length: 41 }, (_, i) => (
-              <line key={i} x1="310" x2={i % 5 === 0 ? 305 : 307} y1={scaleY(i)} y2={scaleY(i)} stroke="#9C9C96" strokeWidth=".7" />
+              <line key={i} x1="310" x2={i % 5 === 0 ? 305 : 307} y1={scaleY(i)} y2={scaleY(i)} stroke="hsl(var(--muted-foreground) / .5)" strokeWidth=".7" />
             ))}
             <line x1="310" y1="30" x2="310" y2={scaleY(week)} stroke="hsl(var(--primary))" strokeWidth="1.6" />
             <circle cx="310" cy={scaleY(week)} r="3.2" fill="hsl(var(--primary))" />
             <text x="301" y={scaleY(week) + 4} textAnchor="end" fontFamily="DM Mono, monospace" fontSize="10.5" fill="hsl(var(--primary))">{week}</text>
-            <text x="301" y="34" textAnchor="end" fontFamily="DM Mono, monospace" fontSize="9.5" fill="#76766F">1</text>
-            <text x="301" y="294" textAnchor="end" fontFamily="DM Mono, monospace" fontSize="9.5" fill="#76766F">40</text>
+            <text x="301" y="34" textAnchor="end" fontFamily="DM Mono, monospace" fontSize="9.5" fill="hsl(var(--muted-foreground))">1</text>
+            <text x="301" y="294" textAnchor="end" fontFamily="DM Mono, monospace" fontSize="9.5" fill="hsl(var(--muted-foreground))">40</text>
           </g>
         </svg>
 

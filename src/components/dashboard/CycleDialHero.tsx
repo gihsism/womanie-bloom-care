@@ -93,7 +93,7 @@ export default function CycleDialHero({
           <circle cx={CX} cy={CY} r={R} fill="none" stroke="hsl(var(--border))" strokeWidth="1" />
           {Array.from({ length: L }, (_, i) => {
             const a = point(i / L, R - 4); const b = point(i / L, R + (i % 7 === 0 ? 5 : 2));
-            return <line key={i} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#9C9C96" strokeWidth=".7" />;
+            return <line key={i} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="hsl(var(--muted-foreground) / .5)" strokeWidth=".7" />;
           })}
           {/* period, fertile window, pms */}
           <path d={arc(t(1), t(d.periodDays + 1))} fill="none" stroke="hsl(var(--foreground))" strokeWidth="5" strokeLinecap="round" />
@@ -108,7 +108,7 @@ export default function CycleDialHero({
           <text x={CX} y={CY - 44} textAnchor="middle" fontFamily="DM Mono, monospace" fontSize="10.5" letterSpacing="1.5" fill="hsl(var(--muted-foreground))">{phase.name.toUpperCase()}</text>
           <text x={CX} y={CY + 22} textAnchor="middle" fontFamily="Fraunces, Georgia, serif" fontSize="62" fill="hsl(var(--foreground))">{d.day}</text>
           <text x={CX} y={CY + 44} textAnchor="middle" fontFamily="Jost, sans-serif" fontSize="13" fill="hsl(var(--muted-foreground))">of {L} days</text>
-          <text x={CX} y={CY - R - 10} textAnchor="middle" fontFamily="DM Mono, monospace" fontSize="9.5" fill="#76766F">DAY 1</text>
+          <text x={CX} y={CY - R - 10} textAnchor="middle" fontFamily="DM Mono, monospace" fontSize="9.5" fill="hsl(var(--muted-foreground))">DAY 1</text>
         </svg>
       </div>
 
