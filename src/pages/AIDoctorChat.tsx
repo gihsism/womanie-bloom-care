@@ -747,8 +747,8 @@ export default function AIDoctorChat() {
             <div className="hidden sm:flex w-8 h-8 rounded-full bg-primary/10 items-center justify-center flex-shrink-0">
               {chatMode === 'ai' ? <Bot className="h-3.5 w-3.5 text-primary" /> : <Stethoscope className="h-3.5 w-3.5 text-primary" />}
             </div>
-            <div className="min-w-0">
-              <p className="label-mono !text-primary !text-[10px] leading-none">&#10022; Ask AI</p>
+            <div className="min-w-0 overflow-hidden">
+              <p className="label-mono !text-primary !text-[10px] leading-none whitespace-nowrap">&#10022; Ask AI</p>
               <h1 className="font-display text-[17px] font-medium leading-tight whitespace-nowrap">Health Chat</h1>
               <p className="text-[10px] text-muted-foreground hidden sm:block">
                 {chatMode === 'ai' ? 'AI-powered assistant' : 'Connect with real doctors'}
@@ -762,9 +762,12 @@ export default function AIDoctorChat() {
           {chatMode === 'ai' && (
             <>
               <Select value={selectedModel} onValueChange={setSelectedModel} disabled={isStreaming}>
-                <SelectTrigger className="w-auto h-8 text-xs gap-1 border-border">
-                  <Cpu className="h-3 w-3" />
-                  <SelectValue>{currentModelLabel}</SelectValue>
+                <SelectTrigger className="w-auto h-8 text-xs gap-1 border-border shrink-0 px-2.5" aria-label={`AI model: ${currentModelLabel}`}>
+                  <Cpu className="h-3 w-3 hidden sm:block" />
+                  <SelectValue>
+                    <span className="sm:hidden">{currentModelLabel.replace(/^Claude\s+/, '')}</span>
+                    <span className="hidden sm:inline">{currentModelLabel}</span>
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {AI_MODELS.map((m) => (
@@ -777,10 +780,10 @@ export default function AIDoctorChat() {
                   ))}
                 </SelectContent>
               </Select>
-              <Button variant="ghost" size="icon" onClick={exportChat} title="Export chat as markdown">
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={exportChat} title="Export chat as markdown" aria-label="Export chat">
                 <Download className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={clearChat} title="Clear chat">
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={clearChat} title="Clear chat" aria-label="Clear chat">
                 <Trash2 className="h-4 w-4" />
               </Button>
             </>

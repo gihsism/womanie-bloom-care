@@ -50,6 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             name: data.user.name,
             isAdmin: Boolean(data.user.isAdmin),
             hasPassword: data.user.hasPassword !== false,
+            created_at: data.user.created_at ?? undefined,
             user_metadata: { full_name: data.user.name },
           });
         }

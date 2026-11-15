@@ -92,6 +92,16 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       console.error('me: password flag lookup failed', e);
     }
 
+    // Account creation date for "Member since" in Settings. Separate
+    // query so a schema difference can never break the session check.
+    let createdAt: string | null = null;
+    try {
+      const r = await sql.query('SELECT created_at FROM auth_users WHERE id = $1', [payload.sub]) as Array<{ created_at: string | Date | null }>;
+      if (r[0]?.created_at) createdAt = new Date(r[0].created_at).toISOString();
+    } catch (e) {
+      console.error('me: created_at lookup failed', e);
+    }
+
     return res.status(200).json({
       user: {
         id: payload.sub,
@@ -99,6 +109,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         name: resolvedName,
         isAdmin,
         hasPassword,
+        created_at: createdAt,
       },
     });
   } catch (error) {
