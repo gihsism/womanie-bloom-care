@@ -62,6 +62,7 @@ import AppointmentTodayBanner from '@/components/dashboard/AppointmentTodayBanne
 import ModeHeroStat from '@/components/dashboard/ModeHeroStat';
 import PregnancyBodyMap from '@/components/dashboard/PregnancyBodyMap';
 import BabyBodyMap from '@/components/dashboard/BabyBodyMap';
+import CycleDialHero from '@/components/dashboard/CycleDialHero';
 import OverdueTests from '@/components/dashboard/OverdueTests';
 import SymptomPatternsCard from '@/components/dashboard/SymptomPatternsCard';
 import FertileWindowTimingCard from '@/components/dashboard/FertileWindowTimingCard';
@@ -623,6 +624,8 @@ const PatientDashboard = () => {
               <PregnancyBodyMap dueDate={pregnancyDueDate} name={profile?.full_name} />
             ) : selectedMode === 'postpartum' ? (
               <BabyBodyMap />
+            ) : (selectedMode === 'menstrual-cycle' || selectedMode === 'conception') && periodData ? (
+              <CycleDialHero lastPeriodStart={periodData.lastPeriodStart} cycleLength={periodData.cycleLength} name={profile?.full_name} mode={selectedMode} />
             ) : selectedMode && (
               <ModeHeroStat
                 selectedMode={selectedMode}

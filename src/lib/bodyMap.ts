@@ -179,3 +179,40 @@ export function dayOfLife(birthDate: string | null | undefined, now: Date): numb
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   return Math.floor((today.getTime() - b.getTime()) / 86400000) + 1;
 }
+
+// ---- Cycle dial (period / conception) -------------------------------------
+
+export interface CycleDialData {
+  day: number; // 1-based day of the current cycle
+  length: number;
+  periodDays: number;
+  ovulationDay: number; // 1-based
+  fertileStart: number; // 1-based, inclusive
+  fertileEnd: number; // = ovulation day + 1 (egg survives ~1 day)
+  phase: 'period' | 'follicular' | 'fertile' | 'luteal' | 'pms';
+  daysToPeriod: number;
+  nextPeriod: Date;
+  daysToFertile: number | null; // null once the window has passed this cycle
+}
+
+export function cycleDial(lastStart: Date, cycleLength: number, now: Date, periodDays = 5): CycleDialData {
+  const length = Math.max(15, Math.min(60, Math.round(cycleLength)));
+  const start = new Date(lastStart.getFullYear(), lastStart.getMonth(), lastStart.getDate());
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const elapsed = Math.floor((today.getTime() - start.getTime()) / 86400000);
+  const day = (((elapsed % length) + length) % length) + 1;
+  const ovulationDay = Math.max(periodDays + 1, length - 14);
+  const fertileStart = Math.max(periodDays + 1, ovulationDay - 5);
+  const fertileEnd = Math.min(length, ovulationDay + 1);
+  let phase: CycleDialData['phase'] = 'luteal';
+  if (day <= periodDays) phase = 'period';
+  else if (day < fertileStart) phase = 'follicular';
+  else if (day <= fertileEnd) phase = 'fertile';
+  else if (day > length - 5) phase = 'pms';
+  const daysToPeriod = length - day + 1;
+  const nextPeriod = new Date(today.getFullYear(), today.getMonth(), today.getDate() + daysToPeriod);
+  return {
+    day, length, periodDays, ovulationDay, fertileStart, fertileEnd, phase, daysToPeriod, nextPeriod,
+    daysToFertile: day < fertileStart ? fertileStart - day : day <= fertileEnd ? 0 : null,
+  };
+}

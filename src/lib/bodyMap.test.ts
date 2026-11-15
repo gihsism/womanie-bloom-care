@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseRange, pickFlaggedLab, medsToday, kicksToday, weekWord, fmtGrams, lastFeed, nappiesToday, sleepTodayMin, fmtAgo, dayOfLife, countToday } from './bodyMap';
+import { parseRange, pickFlaggedLab, medsToday, kicksToday, weekWord, fmtGrams, lastFeed, nappiesToday, sleepTodayMin, fmtAgo, dayOfLife, countToday, cycleDial } from './bodyMap';
 
 const now = new Date(2026, 10, 15, 14, 0);
 const at = (h: number, dayOffset = 0) => new Date(2026, 10, 15 + dayOffset, h, 0).toISOString();
@@ -104,5 +104,23 @@ describe('baby body map helpers', () => {
     expect(fmtAgo(120)).toEqual({ value: '2h', unit: '' });
     expect(dayOfLife('2026-11-04', now)).toBe(12);
     expect(dayOfLife(null, now)).toBeNull();
+  });
+});
+
+describe('cycleDial', () => {
+  const start = new Date(2026, 10, 4); // day 1
+  it('day, phase and next period in a 28-day cycle', () => {
+    const d = cycleDial(start, 28, new Date(2026, 10, 15, 9));
+    expect(d).toMatchObject({ day: 12, length: 28, ovulationDay: 14, fertileStart: 9, fertileEnd: 15, phase: 'fertile', daysToPeriod: 17, daysToFertile: 0 });
+    expect(d.nextPeriod.getDate()).toBe(2); // 2 Dec
+  });
+  it('wraps into the next cycle when the period was not logged', () => {
+    const d = cycleDial(start, 28, new Date(2026, 11, 3));
+    expect(d.day).toBe(2);
+    expect(d.phase).toBe('period');
+  });
+  it('follicular counts down to the fertile window; late cycle is pms', () => {
+    expect(cycleDial(start, 28, new Date(2026, 10, 10))).toMatchObject({ day: 7, phase: 'follicular', daysToFertile: 2 });
+    expect(cycleDial(start, 28, new Date(2026, 10, 29))).toMatchObject({ day: 26, phase: 'pms', daysToFertile: null });
   });
 });
