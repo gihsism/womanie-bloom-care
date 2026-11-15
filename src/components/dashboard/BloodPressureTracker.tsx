@@ -45,7 +45,9 @@ const SHOWN_MODES = new Set(['pregnancy', 'menopause', 'post-menopause']);
 
 function classify(sys: number, dia: number, isPregnancy: boolean):
   { band: 'normal' | 'elevated' | 'stage1' | 'stage2' | 'severe'; label: string; color: string; urgent: boolean } {
-  if (sys >= 160 || dia >= 110) {
+  // Severe line: ≥160/110 in pregnancy (ACOG); outside pregnancy a
+  // hypertensive crisis is ≥180/120 (AHA/ACC 2017).
+  if (isPregnancy ? (sys >= 160 || dia >= 110) : (sys >= 180 || dia >= 120)) {
     return {
       band: 'severe',
       label: isPregnancy ? 'Severe — call your OB now' : 'Hypertensive crisis range',
@@ -166,7 +168,9 @@ export default function BloodPressureTracker({ mode }: BloodPressureTrackerProps
       toast({
         variant: 'destructive',
         title: 'Severe range — call your clinician',
-        description: `${s}/${d} mmHg is in the severe range. ACOG recommends contacting your OB now.`,
+        description: isPregnancy
+          ? `${s}/${d} mmHg is in the severe range. ACOG recommends contacting your OB now.`
+          : `${s}/${d} mmHg is in the hypertensive-crisis range. Re-measure after 5 minutes of rest; if it stays this high, call your doctor now, or emergency services with chest pain, breathlessness or vision changes.`,
       });
     } else {
       toast({ title: 'Reading logged', description: `${s}/${d} mmHg — ${c.label}` });
@@ -316,8 +320,9 @@ export default function BloodPressureTracker({ mode }: BloodPressureTrackerProps
       )}
 
       <p className="text-[10px] text-muted-foreground mt-3 leading-relaxed">
-        Reference: ACOG 2020 hypertension in pregnancy guidance. Home readings supplement, don't
-        replace, clinic measurements. Severe range (≥160/≥110) is an immediate call-your-OB situation.
+        {isPregnancy
+          ? <>Reference: ACOG 2020 hypertension in pregnancy guidance. Home readings supplement, don't replace, clinic measurements. Severe range (≥160/≥110) is an immediate call-your-OB situation.</>
+          : <>Reference: AHA/ACC 2017 blood pressure categories. Blood pressure tends to rise after menopause; home readings supplement, don't replace, clinic measurements. ≥180/≥120 is a hypertensive crisis — call your doctor right away.</>}
       </p>
     </Card>
   );

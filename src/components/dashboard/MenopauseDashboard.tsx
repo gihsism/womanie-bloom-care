@@ -33,6 +33,10 @@ import {
 interface MenopauseDashboardProps {
   isPostMenopause?: boolean;
   onNavigateToDoctorChat?: () => void;
+  /** Home shows the menopause figure (last period, months to go) and the
+   *  STRAW+10 stage card above, so skip the intro, the generic stage
+   *  strip and the second last-period countdown. */
+  withHero?: boolean;
 }
 
 interface SignalRow {
@@ -132,7 +136,7 @@ const stages = [
   { name: 'Post-Menopause', duration: 'The rest of life', description: 'Symptoms often ease. Focus shifts to long-term health prevention.' },
 ];
 
-export default function MenopauseDashboard({ isPostMenopause = false, onNavigateToDoctorChat }: MenopauseDashboardProps) {
+export default function MenopauseDashboard({ isPostMenopause = false, onNavigateToDoctorChat, withHero = false }: MenopauseDashboardProps) {
   const { user } = useAuth();
   const userId = user?.id;
   const scope = isPostMenopause ? 'post' : 'meno';
@@ -252,7 +256,7 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
   return (
     <div className="space-y-5">
       {/* Welcome Card */}
-      <Card className={`p-5 border ${
+      {!withHero && <Card className={`p-5 border ${
         isPostMenopause
           ? 'bg-gradient-to-br from-green-50 via-teal-50 to-blue-50 dark:from-green-950/30 dark:via-teal-950/30 dark:to-blue-950/30 border-green-200/50 dark:border-green-800/30'
           : 'bg-gradient-to-br from-amber-50 via-rose-50 to-purple-50 dark:from-amber-950/30 dark:via-rose-950/30 dark:to-purple-950/30 border-amber-200/50 dark:border-amber-800/30'
@@ -274,7 +278,7 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
             </p>
           </div>
         </div>
-      </Card>
+      </Card>}
 
       {/* Post-menopause: Health priorities at a glance */}
       {isPostMenopause && (
@@ -294,7 +298,7 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
       )}
 
       {/* Stages Overview (menopause only) */}
-      {!isPostMenopause && (
+      {!isPostMenopause && !withHero && (
         <div className="flex gap-2 overflow-x-auto pb-1">
           {stages.map(stage => (
             <Card key={stage.name} className="p-3 min-w-[160px] flex-shrink-0 border">
@@ -310,7 +314,7 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
           period_tracking entry. The 12-consecutive-months-no-period
           threshold is the clinical line between perimenopause and
           menopause, so we surface progress toward it explicitly. */}
-      {!isPostMenopause && periodLoaded && lastPeriodStart && (() => {
+      {!isPostMenopause && !withHero && periodLoaded && lastPeriodStart && (() => {
         const daysSince = Math.max(
           0,
           Math.floor((Date.now() - lastPeriodStart.getTime()) / 86_400_000)

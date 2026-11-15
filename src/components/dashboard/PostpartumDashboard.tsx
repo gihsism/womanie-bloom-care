@@ -115,6 +115,14 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
         const birthAt = new Date(`${localBirth}T12:00:00`).toISOString();
         if (rec?.id) await db.from('birth_records').update({ birth_at: birthAt }).eq('id', rec.id).eq('user_id', userId);
         else await db.from('birth_records').insert({ user_id: userId, birth_at: birthAt }).select('id');
+      } else {
+        // No birth record yet, but the baby tracker knows the birthday
+        // (the Home figure already counts "day N of life" from it) —
+        // use it instead of asking again. Display only; nothing written.
+        const { data: babies } = await db.from('babies').select('birth_date')
+          .eq('user_id', userId).order('created_at', { ascending: true }).limit(1);
+        const bd = (babies?.[0] as { birth_date?: string | null } | undefined)?.birth_date;
+        if (bd) setBirthDateStr(String(bd).slice(0, 10));
       }
     })();
     try {

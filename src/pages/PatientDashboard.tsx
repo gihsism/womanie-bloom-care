@@ -678,7 +678,7 @@ const PatientDashboard = () => {
 
             {/* Retrospective: how close did past predictions land?
                 Hides until there are ≥4 logged periods. */}
-            {selectedMode && <CyclePredictionAccuracyCard mode={selectedMode} />}
+            {selectedMode && selectedMode !== 'contraception' && <CyclePredictionAccuracyCard mode={selectedMode} />}
 
             {/* Sleep-by-cycle-phase correlation. Hides when there
                 isn't enough overlap or no phase deviates meaningfully. */}
@@ -739,6 +739,7 @@ const PatientDashboard = () => {
                       ivfStartDate={ivfStartDate}
                       ivfPhase={ivfPhase}
                       onSetIVFStart={handleSetIVFStart}
+                      withHero
                       onUpdatePhase={handleUpdateIVFPhase}
                     />
                     <GuidesSection title="Guides: nutrition during IVF">
@@ -818,6 +819,7 @@ const PatientDashboard = () => {
                     <div id="symptoms" className="scroll-mt-4 md:scroll-mt-28"><MenopauseSymptomCalendar mode={selectedMode} /></div>
                     <div id="menopause-stage" className="scroll-mt-4 md:scroll-mt-28"><MenopauseDashboard
                       isPostMenopause={selectedMode === 'post-menopause'}
+                      withHero
                       onNavigateToDoctorChat={() => navigate('/dashboard/ai-doctor')}
                     /></div>
                     <GuidesSection title="Guides: nutrition in menopause">
@@ -966,7 +968,8 @@ const PatientDashboard = () => {
             {/* Two-column layout: Tips + Quick Links */}
             <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Daily Tips — gated by the Health Tips notification toggle */}
-              {stageTips[selectedMode] && notificationPrefs.healthTips && (
+              {/* Contraception already has an "Important reminders" card with the same points. */}
+              {stageTips[selectedMode] && notificationPrefs.healthTips && selectedMode !== 'contraception' && (
                 <Card className="p-4">
                   <h3 className="text-sm font-bold mb-3">Daily Reminders</h3>
                   <div className="space-y-2">

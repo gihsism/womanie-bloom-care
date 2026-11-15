@@ -34,9 +34,12 @@ interface IVFTrackerProps {
   ivfPhase: string | null;
   onSetIVFStart: (date: Date, phase: string) => void;
   onUpdatePhase: (phase: string) => void;
+  /** Home shows the IVF timeline hero (phase, day, tip), so skip the
+   *  second status card and fold the phase list into "Change phase". */
+  withHero?: boolean;
 }
 
-const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IVFTrackerProps) => {
+const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase, withHero = false }: IVFTrackerProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [startDateInput, setStartDateInput] = useState('');
@@ -188,7 +191,7 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
       )}
 
       {/* Current phase status */}
-      <div className="bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 rounded-2xl p-5">
+      {!withHero && <div className="bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 rounded-2xl p-5">
         <div className="text-center mb-4">
           <div className="text-5xl mb-2">{currentPhaseData.icon}</div>
           <div className="text-2xl font-semibold text-foreground mb-1">{currentPhaseData.label}</div>
@@ -196,7 +199,7 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
           <Badge variant="secondary" className="mt-2">Phase {currentPhaseIndex + 1} of {IVF_PHASES.length}</Badge>
         </div>
         <p className="text-sm text-center text-muted-foreground max-w-sm mx-auto">{currentPhaseData.description}</p>
-      </div>
+      </div>}
 
       {/* Treatment Calendar */}
       <IVFCalendar events={events} onSelectDate={handleSelectDate} selectedDate={selectedDate} />
@@ -214,11 +217,13 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
 
       {/* Phase timeline */}
       <Card className="p-4 space-y-3">
-        <h4 className="font-semibold flex items-center gap-2">
+        <details open={!withHero} className="group">
+        <summary className="font-semibold flex items-center gap-2 cursor-pointer list-none">
           <Timer className="h-4 w-4 text-primary" />
-          IVF Journey
-        </h4>
-        <div className="space-y-1">
+          {withHero ? 'Change phase' : 'IVF Journey'}
+          {withHero && <span className="ml-auto text-xs font-normal text-muted-foreground">{currentPhaseData.label}</span>}
+        </summary>
+        <div className="space-y-1 mt-3">
           {IVF_PHASES.map((phase, i) => {
             const isActive = phase.key === ivfPhase;
             const isPast = i < currentPhaseIndex;
@@ -255,6 +260,7 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase }: IV
             );
           })}
         </div>
+        </details>
       </Card>
 
       {/* Tips */}

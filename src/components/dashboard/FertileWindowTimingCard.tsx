@@ -5,6 +5,7 @@ import { Heart, Target, AlertCircle } from 'lucide-react';
 import { db } from '@/integrations/db/client';
 import { parseISO, differenceInDays, format, addDays, subDays } from 'date-fns';
 import { onHealthDataChange } from '@/lib/data-events';
+import { useCycleModel } from '@/hooks/useCycleModel';
 
 interface FertileWindowTimingCardProps {
   userId: string;
@@ -36,6 +37,16 @@ interface CycleSummary {
 }
 
 const FertileWindowTimingCard = ({ userId, cycleLength, periodLength }: FertileWindowTimingCardProps) => {
+  // Same personal model as the Home dial: her learned luteal length, and
+  // the ovulation day actually found in her logs where there is one.
+  const model = useCycleModel();
+  const luteal = model.prediction.lutealLength ?? 14;
+  const detected = useMemo(() => {
+    const m = new Map<string, Date>();
+    for (const c of model.prediction.learnedCycles ?? []) m.set(format(c.start, 'yyyy-MM-dd'), c.ovulation.date);
+    return m;
+  }, [model.prediction.learnedCycles]);
+  const runningOvulation = model.prediction.predictedOvulationDate;
   const [periods, setPeriods] = useState<PeriodRow[]>([]);
   const [signals, setSignals] = useState<SignalRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -108,7 +119,12 @@ const FertileWindowTimingCard = ({ userId, cycleLength, periodLength }: FertileW
       // Skip cycles too short to be meaningful (< 10 days = probably not a real cycle).
       if (cycleLen < 10) continue;
 
-      const ovulationDay = cycleLen - 14;
+      const found = detected.get(format(cycleStart, 'yyyy-MM-dd'));
+      const ovulationDay = found
+        ? differenceInDays(found, cycleStart)
+        : isActive && runningOvulation
+          ? differenceInDays(runningOvulation, cycleStart)
+          : cycleLen - luteal;
       const fertileStartDay = Math.max(0, ovulationDay - 5);
       const fertileEndDay = ovulationDay;
 
@@ -139,7 +155,7 @@ const FertileWindowTimingCard = ({ userId, cycleLength, periodLength }: FertileW
 
     // Most-recent first, take top 3.
     return result.reverse().slice(0, 3);
-  }, [periods, signals, cycleLength, periodLength]);
+  }, [periods, signals, cycleLength, periodLength, detected, luteal, runningOvulation]);
 
   const stats = useMemo(() => {
     let fertileDaysSeen = 0;
