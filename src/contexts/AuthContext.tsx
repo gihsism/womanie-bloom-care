@@ -43,7 +43,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .then(data => {
         if (data.user) {
           // Remembered so the login page can pre-fill it next time.
-          try { if (data.user.email) localStorage.setItem('womanie_last_email', data.user.email); } catch { /* storage blocked */ }
+          try {
+            if (data.user.email) localStorage.setItem('womanie_last_email', data.user.email);
+            // Google-only accounts have no password: the login page then leads with Google.
+            if (data.user.hasPassword === false) localStorage.setItem('womanie_last_method', 'google');
+          } catch { /* storage blocked */ }
           setUser({
             id: data.user.id,
             email: data.user.email,

@@ -25,6 +25,29 @@ if (import.meta.env.DEV && "serviceWorker" in navigator) {
     });
 }
 
+// Production: when a new version's service worker takes over, switch to it
+// instead of showing the old cached design until the next visit. Reload
+// only when that can't lose anything typed: right after opening, or while
+// the app is in the background. Also check for a new version each time the
+// app comes back to the foreground (home-screen apps rarely check on their own).
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  const openedAt = Date.now();
+  let pendingReload = false;
+  const hadController = Boolean(navigator.serviceWorker.controller);
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!hadController) return; // first install: the page is already current
+    if (document.hidden || Date.now() - openedAt < 15000) window.location.reload();
+    else pendingReload = true;
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      if (pendingReload) window.location.reload();
+      return;
+    }
+    navigator.serviceWorker.getRegistration().then((r) => r?.update()).catch(() => { /* offline */ });
+  });
+}
+
 createRoot(document.getElementById("root")!).render(
   <App />
 );

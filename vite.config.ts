@@ -24,8 +24,8 @@ export default defineConfig(() => ({
         // Surfaces the app under the right sections in install dialogs /
         // app catalogues.
         categories: ["health", "medical", "lifestyle"],
-        theme_color: "#E8B4D8",
-        background_color: "#FDF8FC",
+        theme_color: "#F7ECE9",
+        background_color: "#F7ECE9",
         display: "standalone",
         orientation: "portrait",
         scope: "/",
