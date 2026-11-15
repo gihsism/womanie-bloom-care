@@ -18,7 +18,7 @@ import IVFMedicationAdherence from './IVFMedicationAdherence';
 import type { IVFEvent } from './ivf/IVFCalendar';
 
 // ─── IVF phases ───
-const IVF_PHASES = [
+export const IVF_PHASES = [
   { key: 'prep', label: 'Preparation', duration: '2–4 weeks', icon: '💊', description: 'Birth control or estrogen priming to synchronize your cycle', tips: ['Take medications on time', 'Reduce caffeine intake', 'Start CoQ10 and prenatal vitamins'] },
   { key: 'stimulation', label: 'Ovarian Stimulation', duration: '8–14 days', icon: '💉', description: 'Hormone injections to stimulate multiple egg growth', tips: ['Keep injection times consistent', 'Stay hydrated — aim for 2L/day', 'Avoid intense exercise', 'Attend all monitoring appointments'] },
   { key: 'trigger', label: 'Trigger Shot', duration: '1 day', icon: '⏰', description: 'Precisely timed injection to mature eggs before retrieval', tips: ['Timing is critical — follow exact schedule', 'Set multiple alarms', 'Arrange transport for retrieval day'] },

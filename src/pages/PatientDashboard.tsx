@@ -65,6 +65,7 @@ import BabyBodyMap from '@/components/dashboard/BabyBodyMap';
 import CycleDialHero from '@/components/dashboard/CycleDialHero';
 import PillRingHero from '@/components/dashboard/PillRingHero';
 import MenopauseBodyMap from '@/components/dashboard/MenopauseBodyMap';
+import IVFTimelineHero from '@/components/dashboard/IVFTimelineHero';
 import OverdueTests from '@/components/dashboard/OverdueTests';
 import SymptomPatternsCard from '@/components/dashboard/SymptomPatternsCard';
 import FertileWindowTimingCard from '@/components/dashboard/FertileWindowTimingCard';
@@ -632,6 +633,8 @@ const PatientDashboard = () => {
               <PillRingHero name={profile?.full_name} />
             ) : selectedMode === 'menopause' || selectedMode === 'post-menopause' ? (
               <MenopauseBodyMap name={profile?.full_name} mode={selectedMode} />
+            ) : selectedMode === 'ivf' ? (
+              <IVFTimelineHero startDate={ivfStartDate} phase={ivfPhase} name={profile?.full_name} />
             ) : selectedMode && (
               <ModeHeroStat
                 selectedMode={selectedMode}
@@ -756,7 +759,7 @@ const PatientDashboard = () => {
               {selectedMode === 'ivf' ? (
                 /* ─── IVF Mode ─── */
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2 space-y-4">
+                  <div className="lg:col-span-2 space-y-4 scroll-mt-4 md:scroll-mt-28" id="ivf-tracker">
                     <IVFTracker
                       ivfStartDate={ivfStartDate}
                       ivfPhase={ivfPhase}
