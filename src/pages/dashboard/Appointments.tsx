@@ -334,7 +334,7 @@ const Appointments = () => {
                 Back
               </Button>
               <div className="h-6 w-px bg-border" />
-              <h1 className="text-xl font-bold text-primary">My Appointments</h1>
+              <h1 className="font-display text-xl font-medium whitespace-nowrap">Visits</h1>
             </div>
             <Button
               variant="default"

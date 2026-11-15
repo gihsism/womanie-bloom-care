@@ -20,7 +20,7 @@ export default function BabyPage() {
             <ArrowLeft className="h-4 w-4" /> Back
           </Button>
           <div className="h-6 w-px bg-border" />
-          <h1 className="text-xl font-bold text-primary">Baby</h1>
+          <h1 className="font-display text-xl font-medium">Baby</h1>
         </div>
       </div>
       <div className="max-w-3xl mx-auto px-4 py-6">

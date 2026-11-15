@@ -406,7 +406,7 @@ const Settings = () => {
                 Back
               </Button>
               <div className="h-6 w-px bg-border" />
-              <h1 className="text-xl font-bold text-primary">Settings</h1>
+              <h1 className="font-display text-xl font-medium">Settings</h1>
             </div>
             <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
               Womanie

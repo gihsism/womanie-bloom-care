@@ -734,10 +734,9 @@ export default function AIDoctorChat() {
   const currentModelLabel = AI_MODELS.find(m => m.id === selectedModel)?.label || 'Gemini Flash';
 
   return (
-    // pb clears the fixed mobile bottom nav (BottomNav, h-16 + safe area):
-    // this page pins its input to the bottom of a min-h-screen flex column,
-    // so the global body padding can't push it up — it needs its own.
-    <div className="min-h-screen bg-background flex flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
+    // The mobile nav is a left rail now, so the pinned input only needs to
+    // clear the phone's home-indicator safe area.
+    <div className="min-h-screen bg-background flex flex-col pb-[env(safe-area-inset-bottom)]">
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="px-3 py-2.5 sm:px-4 sm:py-3 flex items-center gap-2 sm:gap-3">
@@ -745,12 +744,13 @@ export default function AIDoctorChat() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <div className="hidden sm:flex w-8 h-8 rounded-full bg-primary/10 items-center justify-center flex-shrink-0">
               {chatMode === 'ai' ? <Bot className="h-3.5 w-3.5 text-primary" /> : <Stethoscope className="h-3.5 w-3.5 text-primary" />}
             </div>
             <div className="min-w-0">
-              <h1 className="text-xs sm:text-sm font-bold leading-tight truncate">Health Chat</h1>
-              <p className="text-[9px] sm:text-[10px] text-muted-foreground hidden sm:block">
+              <p className="label-mono !text-primary !text-[10px] leading-none">&#10022; Ask AI</p>
+              <h1 className="font-display text-[17px] font-medium leading-tight whitespace-nowrap">Health Chat</h1>
+              <p className="text-[10px] text-muted-foreground hidden sm:block">
                 {chatMode === 'ai' ? 'AI-powered assistant' : 'Connect with real doctors'}
               </p>
             </div>

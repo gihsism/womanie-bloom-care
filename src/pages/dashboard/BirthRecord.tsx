@@ -206,7 +206,7 @@ export default function BirthRecord() {
             <ArrowLeft className="h-4 w-4" /> Back
           </Button>
           <div className="h-6 w-px bg-border" />
-          <h1 className="text-xl font-bold text-primary">Labour & birth</h1>
+          <h1 className="font-display text-xl font-medium">Labour & birth</h1>
         </div>
       </div>
 

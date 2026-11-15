@@ -261,3 +261,12 @@ body::before {
 .fixed.top-0 {
   top: env(safe-area-inset-top);
 }
+
+/* Version 8: serif headings stay light. Fraunces is loaded at 400-600;
+   older markup asks for font-bold/semibold, which would look heavy (or
+   faux-bold), so headings settle at 500. */
+:is(h1, h2, h3).font-bold,
+:is(h1, h2, h3).font-semibold,
+:is(h1, h2, h3).font-extrabold {
+  font-weight: 500;
+}
