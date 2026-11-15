@@ -74,6 +74,7 @@ export default function MenopauseBodyMap({ name, mode }: { name?: string | null;
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
         {months == null ? <>Your body<br /><span className="text-muted-foreground">this week</span></>
           : reached ? <>{mode === 'post-menopause' ? 'After' : 'Menopause'}<br /><span className="text-muted-foreground">{mode === 'post-menopause' ? 'menopause' : 'reached'}</span></>
+          : months === 0 ? <>A period<br /><span className="text-muted-foreground">this month</span></>
           : <>{weekWord(months).replace(/^./, c => c.toUpperCase())} month{months === 1 ? '' : 's'}<br /><span className="text-muted-foreground">without a period</span></>}
       </h2>
 
@@ -132,24 +133,24 @@ export default function MenopauseBodyMap({ name, mode }: { name?: string | null;
 
         <button type="button" onClick={() => go('#daily-log')} className="absolute w-[35%] text-right leading-tight" style={pct(0, 0)}>
           <span className="label-mono block">Mind · mood</span>
-          <span className="block text-[15px] font-medium mt-1 capitalize">{mood ?? 'Not logged'}</span>
-          <span className="block text-[13px] text-primary mt-0.5">{mood ? 'Update today →' : 'How do you feel? →'}</span>
+          <span className={`block text-[15px] font-medium mt-1 ${mood ? 'capitalize' : ''}`}>{mood ?? 'Not logged'}</span>
+          <span className="block text-[13px] text-primary mt-0.5">{mood ? 'Update →' : 'Log mood →'}</span>
         </button>
 
         <button type="button" onClick={() => go('#symptoms')} className="absolute w-[35%] text-right leading-tight" style={pct(0, 82)}>
-          <span className="label-mono block !text-primary">Chest · hot flushes</span>
+          <span className="label-mono block !text-primary">Hot flushes</span>
           <span className="block font-display text-[30px] leading-none mt-1">
             {hf.today ?? '—'}<small className="font-sans text-xs text-muted-foreground ml-1">today</small>
           </span>
           <span className="block text-[13px] text-muted-foreground mt-1">
-            {hf.daysLogged7 ? `${hf.total7} this week` : 'Log them to see patterns'}
+            {hf.daysLogged7 ? `${hf.total7} this week` : 'Log to see patterns'}
           </span>
         </button>
 
         <button type="button" onClick={() => go('#medicines')} className="absolute w-[35%] text-right leading-tight" style={pct(0, 245)}>
           <span className="label-mono block">Hand · HRT</span>
           {med.total === 0 ? (
-            <><span className="block text-[15px] font-medium mt-1">No medicines</span><span className="block text-[13px] text-primary mt-0.5">Add HRT or vitamins →</span></>
+            <><span className="block text-[15px] font-medium mt-1">No medicines</span><span className="block text-[13px] text-primary mt-0.5">Add HRT →</span></>
           ) : med.takenToday >= med.total ? (
             <><span className="block text-[15px] font-medium mt-1">All taken ✓</span><span className="block text-[13px] text-muted-foreground mt-0.5">Today’s doses, done.</span></>
           ) : (
@@ -163,7 +164,7 @@ export default function MenopauseBodyMap({ name, mode }: { name?: string | null;
             <>
               <span className="block font-display text-[30px] leading-none mt-1">{format(lastPeriod, 'd MMM')}</span>
               <span className="block text-[13px] text-muted-foreground mt-1">
-                {reached ? '12+ months — menopause' : months != null ? `${12 - months} more month${12 - months === 1 ? '' : 's'} to 12` : ''}
+                {reached ? '12+ months — menopause' : months != null ? `${12 - months} month${12 - months === 1 ? '' : 's'} to go` : ''}
               </span>
             </>
           ) : (
