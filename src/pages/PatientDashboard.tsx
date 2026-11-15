@@ -634,7 +634,7 @@ const PatientDashboard = () => {
             )}
 
             {/* Quick-log row: the most common actions for this stage, one tap away. */}
-            {selectedMode && (
+            {selectedMode && selectedMode !== 'postpartum' && (
               <TodayActions
                 mode={selectedMode}
                 weeksPregnant={pregnancyDueDate ? Math.max(0, Math.floor((Date.now() - (pregnancyDueDate.getTime() - 280 * 86400000)) / (7 * 86400000))) : null}

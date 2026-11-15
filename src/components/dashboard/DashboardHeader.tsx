@@ -75,77 +75,61 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onUploadClick, 
   };
 
   return (
-    <div className="space-y-4">
-      {/* Greeting */}
+    <div className="space-y-3">
+      {/* Greeting + life-stage switch (version 8: quiet serif line, mono label) */}
       <div>
-        <h1 className="text-2xl font-bold">
-          {getGreeting()}, {userName}! 👋
+        <h1 className="font-display text-[26px] font-normal leading-tight">
+          {getGreeting()}, {userName}
         </h1>
-        <p className="text-sm text-muted-foreground flex items-center flex-wrap gap-0.5">
-          Your personalized health dashboard •{' '}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="inline-flex items-center gap-1 font-medium text-primary hover:underline focus:outline-none">
-                {getModeLabel(selectedMode)}
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-primary"><path d="M3 5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-52">
-              <DropdownMenuLabel className="text-xs text-muted-foreground">Switch mode</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {modeOptions.map((option) => (
-                <DropdownMenuItem
-                  key={option.value}
-                  onClick={() => onModeChange(option.value as LifeStage)}
-                  className={selectedMode === option.value ? 'bg-primary/10 font-medium' : ''}
-                >
-                  {option.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </p>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="label-mono !text-primary inline-flex items-center gap-1 mt-1 hover:underline focus:outline-none" aria-label="Switch life stage">
+              {getModeLabel(selectedMode)}
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M3 5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-52">
+            <DropdownMenuLabel className="text-xs text-muted-foreground">Switch mode</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {modeOptions.map((option) => (
+              <DropdownMenuItem
+                key={option.value}
+                onClick={() => onModeChange(option.value as LifeStage)}
+                className={selectedMode === option.value ? 'bg-primary/10 font-medium' : ''}
+              >
+                {option.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
-      {/* Quick Actions */}
-      <div className="flex items-start justify-around md:justify-center gap-2 sm:gap-3 pb-1">
-        {/* Doctor Chat */}
-        <button
-          onClick={onDoctorChatClick}
-          className="hidden md:flex flex-col items-center gap-1.5 min-w-[72px] group"
-          aria-label="Open AI Health Assistant"
-        >
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shadow-sm">
-            <MessageSquare className="h-5 w-5 text-primary" aria-hidden="true" />
-          </div>
-          <span className="text-xs font-medium text-foreground/80">Health Chat</span>
-        </button>
-
-        {/* Upload */}
+      {/* Quick actions as pills */}
+      <div className="flex flex-wrap items-center gap-2 pb-1">
         <button
           onClick={onUploadClick}
-          className="flex flex-col items-center gap-1.5 min-w-[72px] group"
+          className="inline-flex items-center gap-1.5 rounded-full bg-foreground text-background px-3.5 py-1.5 text-[13px] font-medium"
           aria-label="Upload health document"
         >
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shadow-sm">
-            <Upload className="h-5 w-5 text-primary" aria-hidden="true" />
-          </div>
-          <span className="text-xs font-medium text-foreground/80">Upload</span>
+          <Upload className="h-3.5 w-3.5" aria-hidden="true" /> Upload
         </button>
-
+        <button
+          onClick={onDoctorChatClick}
+          className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-primary text-primary px-3.5 py-1.5 text-[13px] font-medium"
+          aria-label="Open AI Health Assistant"
+        >
+          <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" /> Health Chat
+        </button>
         {quickActions.map((action) => {
           const IconComponent = action.icon;
           return (
             <button
               key={action.id}
               onClick={action.action}
-              className={`${action.desktopOnly ? 'hidden md:flex' : 'flex'} flex-col items-center gap-1.5 min-w-[72px] group`}
+              className={`${action.desktopOnly ? 'hidden md:inline-flex' : 'inline-flex'} items-center gap-1.5 rounded-full border border-foreground/70 px-3.5 py-1.5 text-[13px] font-medium`}
               aria-label={action.label}
             >
-              <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center group-hover:bg-muted transition-colors shadow-sm">
-                <IconComponent className={`h-5 w-5 ${action.color}`} aria-hidden="true" />
-              </div>
-              <span className="text-xs font-medium text-foreground/80">{action.label}</span>
+              <IconComponent className="h-3.5 w-3.5" aria-hidden="true" /> {action.label}
             </button>
           );
         })}

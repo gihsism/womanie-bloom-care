@@ -21,15 +21,13 @@ export default function TodayActions({ mode, weeksPregnant }: { mode: string; we
   if (!actions.length) return null;
   return (
     <div className="mb-5">
-      <p className="text-xs font-medium text-muted-foreground mb-2">Quick log</p>
-      <div className={`grid gap-2 ${actions.length >= 4 ? 'grid-cols-4' : 'grid-cols-3'}`}>
-        {actions.map(a => (
+      <p className="label-mono mb-2">Quick log</p>
+      <div className="flex flex-wrap gap-2">
+        {actions.map((a, i) => (
           <button key={a.label} type="button" onClick={() => go(a.target)}
-            className="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-card border py-3 px-1 text-center hover:bg-muted/50 active:scale-[0.98] transition min-h-[72px]">
-            <span className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-              <a.icon className="h-[18px] w-[18px] text-primary" aria-hidden="true" />
-            </span>
-            <span className="text-[11px] font-medium leading-tight">{a.label}</span>
+            className={`inline-flex items-center gap-1.5 rounded-full border border-foreground px-3.5 py-2 text-[13px] font-medium active:scale-[0.98] transition ${i === 0 ? 'bg-foreground text-background' : 'hover:bg-foreground/5'}`}>
+            <a.icon className="h-3.5 w-3.5" aria-hidden="true" />
+            {a.label}
           </button>
         ))}
       </div>

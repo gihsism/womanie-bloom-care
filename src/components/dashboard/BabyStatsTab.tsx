@@ -8,8 +8,8 @@ import { dailyRows, feedSummary, type DayRow } from '@/lib/babyStats';
 // Colours: feeds = brand primary (single series, title names it);
 // nappies wet = blue, dirty = amber - validated colour-blind safe in
 // light and dark mode. Text stays in text colours, never series colours.
-const WET = '#3b82f6';
-const DIRTY = '#d97706';
+const WET = 'hsl(var(--foreground))';
+const DIRTY = 'hsl(var(--primary))';
 
 const fmtMin = (m: number | null) => {
   if (m === null) return '—';
@@ -19,10 +19,10 @@ const fmtMin = (m: number | null) => {
 
 function Tile({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="bg-muted/50 rounded-lg p-2">
-      <div className="text-[10px] text-muted-foreground">{label}</div>
-      <div className="font-semibold text-sm">{value}</div>
-      {hint && <div className="text-[10px] text-muted-foreground">{hint}</div>}
+    <div className="border-t border-border pt-2 text-left">
+      <div className="label-mono !text-[10px]">{label}</div>
+      <div className="font-display text-[22px] leading-tight mt-0.5">{value}</div>
+      {hint && <div className="text-[11px] text-muted-foreground">{hint}</div>}
     </div>
   );
 }
@@ -61,21 +61,21 @@ export default function BabyStatsTab({ babyId, onGoTo }: { babyId: string; onGoT
       {(feeds.error || nappies.error) && <p className="text-xs text-destructive">{feeds.error || nappies.error}</p>}
 
       <section className="space-y-2">
-        <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Feeding · last 24 hours</h4>
-        <div className="grid grid-cols-3 gap-2 text-center">
+        <h4 className="label-mono">Feeding · last 24 hours</h4>
+        <div className="grid grid-cols-3 gap-x-4 gap-y-3">
           <Tile label="Feeds" value={String(s.feeds24h)} />
           <Tile label="Average gap" value={fmtMin(s.avgGapMin)} />
           <Tile label="Longest stretch" value={fmtMin(s.longestStretchMin)} />
         </div>
-        <div className="grid grid-cols-3 gap-2 text-center">
+        <div className="grid grid-cols-3 gap-x-4 gap-y-3">
           <Tile label="Feeds a day" value={s.avgFeedsPerDay === null ? '—' : s.avgFeedsPerDay.toFixed(1)} hint="7-day average" />
-          <Tile label="Left / right" value={sideTotal ? `${Math.round((s.left / sideTotal) * 100)}% / ${Math.round((s.right / sideTotal) * 100)}%` : '—'} hint="7 days" />
+          <Tile label="Left / right" value={sideTotal ? `${s.left} / ${s.right}` : '—'} hint="7 days" />
           <Tile label="Bottle" value={s.bottleMlWindow ? `${s.bottleMlWindow} ml` : '—'} hint="7 days" />
         </div>
       </section>
 
       <section className="space-y-1">
-        <h4 className="text-sm font-semibold">Feeds per day</h4>
+        <h4 className="label-mono">Feeds per day</h4>
         {hasFeeds ? (
           <div className="h-40 text-primary" role="img" aria-label={`Feeds per day, last 7 days: ${rows.map(r => `${r.label} ${r.feeds}`).join(', ')}`}>
             <ResponsiveContainer width="100%" height="100%">
@@ -84,7 +84,7 @@ export default function BabyStatsTab({ babyId, onGoTo }: { babyId: string; onGoT
                 <XAxis dataKey="label" tick={axis} tickLine={false} axisLine={false} />
                 <YAxis allowDecimals={false} tick={axis} tickLine={false} axisLine={false} width={40} />
                 <Tooltip content={<ChartTip />} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }} />
-                <Bar dataKey="feeds" name="Feeds" fill="currentColor" radius={[4, 4, 0, 0]} maxBarSize={22} isAnimationActive={false} />
+                <Bar dataKey="feeds" name="Feeds" fill="currentColor" radius={[4, 4, 0, 0]} maxBarSize={12} isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -98,7 +98,7 @@ export default function BabyStatsTab({ babyId, onGoTo }: { babyId: string; onGoT
 
       <section className="space-y-1">
         <div className="flex items-center justify-between">
-          <h4 className="text-sm font-semibold">Nappies per day</h4>
+          <h4 className="label-mono">Nappies per day</h4>
           <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
             <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm" style={{ background: WET }} />Wet</span>
             <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm" style={{ background: DIRTY }} />Dirty</span>
@@ -112,8 +112,8 @@ export default function BabyStatsTab({ babyId, onGoTo }: { babyId: string; onGoT
                 <XAxis dataKey="label" tick={axis} tickLine={false} axisLine={false} />
                 <YAxis allowDecimals={false} tick={axis} tickLine={false} axisLine={false} width={40} />
                 <Tooltip content={<ChartTip />} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }} />
-                <Bar dataKey="wet" name="Wet" stackId="n" fill={WET} stroke="hsl(var(--card))" strokeWidth={2} maxBarSize={22} isAnimationActive={false} />
-                <Bar dataKey="dirty" name="Dirty" stackId="n" fill={DIRTY} stroke="hsl(var(--card))" strokeWidth={2} radius={[4, 4, 0, 0]} maxBarSize={22} isAnimationActive={false} />
+                <Bar dataKey="wet" name="Wet" stackId="n" fill={WET} stroke="hsl(var(--card))" strokeWidth={2} maxBarSize={12} isAnimationActive={false} />
+                <Bar dataKey="dirty" name="Dirty" stackId="n" fill={DIRTY} stroke="hsl(var(--card))" strokeWidth={2} radius={[4, 4, 0, 0]} maxBarSize={12} isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
           </div>
