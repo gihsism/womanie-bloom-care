@@ -183,7 +183,7 @@ export default function PregnancyBodyMap({ dueDate, name }: { dueDate: Date; nam
             </>
           ) : (
             <>
-              <span className="label-mono block">Blood · records</span>
+              <span className="label-mono block">Blood</span>
               <span className="block text-[15px] font-medium mt-1">{labs.length ? 'All in range' : 'No results yet'}</span>
               <span className="block text-[13px] text-muted-foreground mt-0.5">{labs.length ? `${labs.length} values read` : 'Upload a lab report'}</span>
             </>

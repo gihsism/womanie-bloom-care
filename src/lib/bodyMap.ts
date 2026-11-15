@@ -111,3 +111,71 @@ export function fmtGrams(g: number): { value: string; unit: string } {
   if (g < 1000) return { value: String(Math.round(g)), unit: 'g' };
   return { value: (g / 1000).toFixed(1), unit: 'kg' };
 }
+
+// ---- Baby (postpartum) body map ------------------------------------------
+
+type Ev = { occurred_at: string; ended_at?: string | null; data: Record<string, unknown> };
+
+export interface LastFeed {
+  minutesAgo: number;
+  method: string; // breast_l | breast_r | bottle | ...
+  durationMin: number | null;
+  ml: number | null;
+  nextSide: 'left' | 'right' | null; // suggest the other breast after a breast feed
+}
+
+export function lastFeed(feeds: Ev[], now: Date): LastFeed | null {
+  const past = feeds.filter(f => Date.parse(f.occurred_at) <= now.getTime()).sort((a, b) => b.occurred_at.localeCompare(a.occurred_at));
+  const f = past[0];
+  if (!f) return null;
+  const method = String(f.data?.method ?? '');
+  const dur = f.ended_at ? Math.round((Date.parse(f.ended_at) - Date.parse(f.occurred_at)) / 60000) : null;
+  const ml = Number(f.data?.ml);
+  return {
+    minutesAgo: Math.max(0, Math.round((now.getTime() - Date.parse(f.occurred_at)) / 60000)),
+    method,
+    durationMin: dur != null && dur > 0 && dur < 180 ? dur : null,
+    ml: Number.isFinite(ml) && ml > 0 ? ml : null,
+    nextSide: method === 'breast_l' ? 'right' : method === 'breast_r' ? 'left' : null,
+  };
+}
+
+export function countToday(events: Ev[], now: Date): number {
+  return events.filter(e => sameDay(e.occurred_at, now)).length;
+}
+
+export function nappiesToday(nappies: Ev[], now: Date): { wet: number; dirty: number } {
+  let wet = 0; let dirty = 0;
+  for (const n of nappies) {
+    if (!sameDay(n.occurred_at, now)) continue;
+    const t = n.data?.type;
+    if (t === 'wet' || t === 'both') wet += 1;
+    if (t === 'dirty' || t === 'both') dirty += 1;
+  }
+  return { wet, dirty };
+}
+
+/** Total finished sleep today in minutes (sleep that started today). */
+export function sleepTodayMin(sleeps: Ev[], now: Date): number {
+  return sleeps.reduce((s, e) => {
+    if (!e.ended_at || !sameDay(e.occurred_at, now)) return s;
+    const m = (Date.parse(e.ended_at) - Date.parse(e.occurred_at)) / 60000;
+    return m > 0 && m < 16 * 60 ? s + m : s;
+  }, 0);
+}
+
+/** "1h 20" / "42 min" for compact labels. */
+export function fmtAgo(min: number): { value: string; unit: string } {
+  if (min < 60) return { value: String(min), unit: 'min' };
+  const h = Math.floor(min / 60); const m = min % 60;
+  return { value: m ? `${h}h ${String(m).padStart(2, '0')}` : `${h}h`, unit: '' };
+}
+
+/** Day of life, birth day = day 1. */
+export function dayOfLife(birthDate: string | null | undefined, now: Date): number | null {
+  if (!birthDate) return null;
+  const b = new Date(`${birthDate.slice(0, 10)}T00:00:00`);
+  if (Number.isNaN(b.getTime())) return null;
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.floor((today.getTime() - b.getTime()) / 86400000) + 1;
+}

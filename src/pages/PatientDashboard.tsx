@@ -61,6 +61,7 @@ import DoctorNotesCard from '@/components/dashboard/DoctorNotesCard';
 import AppointmentTodayBanner from '@/components/dashboard/AppointmentTodayBanner';
 import ModeHeroStat from '@/components/dashboard/ModeHeroStat';
 import PregnancyBodyMap from '@/components/dashboard/PregnancyBodyMap';
+import BabyBodyMap from '@/components/dashboard/BabyBodyMap';
 import OverdueTests from '@/components/dashboard/OverdueTests';
 import SymptomPatternsCard from '@/components/dashboard/SymptomPatternsCard';
 import FertileWindowTimingCard from '@/components/dashboard/FertileWindowTimingCard';
@@ -620,6 +621,8 @@ const PatientDashboard = () => {
                 (cycle day, pill streak, week of pregnancy, etc.). */}
             {selectedMode === 'pregnancy' && pregnancyDueDate ? (
               <PregnancyBodyMap dueDate={pregnancyDueDate} name={profile?.full_name} />
+            ) : selectedMode === 'postpartum' ? (
+              <BabyBodyMap />
             ) : selectedMode && (
               <ModeHeroStat
                 selectedMode={selectedMode}

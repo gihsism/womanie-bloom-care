@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseRange, pickFlaggedLab, medsToday, kicksToday, weekWord, fmtGrams } from './bodyMap';
+import { parseRange, pickFlaggedLab, medsToday, kicksToday, weekWord, fmtGrams, lastFeed, nappiesToday, sleepTodayMin, fmtAgo, dayOfLife, countToday } from './bodyMap';
 
 const now = new Date(2026, 10, 15, 14, 0);
 const at = (h: number, dayOffset = 0) => new Date(2026, 10, 15 + dayOffset, h, 0).toISOString();
@@ -76,5 +76,33 @@ describe('weekWord / fmtGrams', () => {
   it('formats grams', () => {
     expect(fmtGrams(780)).toEqual({ value: '780', unit: 'g' });
     expect(fmtGrams(1559)).toEqual({ value: '1.6', unit: 'kg' });
+  });
+});
+
+
+describe('baby body map helpers', () => {
+  const ev = (h: number, data: Record<string, unknown>, endMin?: number, dayOffset = 0) => {
+    const iso = new Date(2026, 10, 15 + dayOffset, h, 0).toISOString();
+    return { occurred_at: iso, ended_at: endMin ? new Date(Date.parse(iso) + endMin * 60000).toISOString() : null, data };
+  };
+  it('last feed: time ago, duration and the other side next', () => {
+    const r = lastFeed([ev(9, { method: 'breast_r' }, 10), ev(12, { method: 'breast_l' }, 14)], now);
+    expect(r).toMatchObject({ minutesAgo: 120, method: 'breast_l', durationMin: 14, nextSide: 'right' });
+    expect(lastFeed([ev(13, { method: 'bottle', ml: 90 })], now)).toMatchObject({ ml: 90, nextSide: null });
+    expect(lastFeed([], now)).toBeNull();
+  });
+  it('counts today only', () => {
+    expect(countToday([ev(8, {}), ev(9, {}), ev(9, {}, undefined, -1)], now)).toBe(2);
+    expect(nappiesToday([ev(8, { type: 'both' }), ev(9, { type: 'wet' }), ev(9, { type: 'dirty' }, undefined, -1)], now)).toEqual({ wet: 2, dirty: 1 });
+  });
+  it('sleep today sums finished sleeps', () => {
+    expect(sleepTodayMin([ev(1, {}, 90), ev(10, {}, 30), ev(12, {})], now)).toBe(120);
+  });
+  it('formats and counts days of life', () => {
+    expect(fmtAgo(42)).toEqual({ value: '42', unit: 'min' });
+    expect(fmtAgo(80)).toEqual({ value: '1h 20', unit: '' });
+    expect(fmtAgo(120)).toEqual({ value: '2h', unit: '' });
+    expect(dayOfLife('2026-11-04', now)).toBe(12);
+    expect(dayOfLife(null, now)).toBeNull();
   });
 });
