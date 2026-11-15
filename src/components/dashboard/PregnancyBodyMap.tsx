@@ -191,7 +191,7 @@ export default function PregnancyBodyMap({ dueDate, name }: { dueDate: Date; nam
         {/* Medicines today: a plain caption, not pinned to the body (her 2026-11-15 note: "why hand at all?") */}
         <button type="button" onClick={() => go('#medicines')}
           className="absolute w-[35%] text-right leading-tight border-t border-border pt-2" style={pct(0, 245)}>
-          <span className="label-mono block">Medicines · {med.lastAt ? format(new Date(med.lastAt), 'HH:mm') : 'today'}</span>
+          <span className="label-mono block">Medicines{med.lastAt ? ` · ${format(new Date(med.lastAt), 'HH:mm')}` : ''}</span>
           {med.total === 0 ? (
             <>
               <span className="block text-[15px] font-medium mt-1">No medicines</span>
