@@ -13,7 +13,7 @@ import { lastFeed, countToday, nappiesToday, sleepTodayMin, fmtAgo, dayOfLife, f
 // the matching tab. Same 320 x 520 coordinate box as PregnancyBodyMap.
 
 const W = 320;
-const H = 500;
+const H = 536;
 const pct = (x: number, y: number) => ({ left: `${(x / W) * 100}%`, top: `${(y / H) * 100}%` });
 
 interface Baby { id: string; name: string | null; birth_date: string | null }
@@ -104,7 +104,7 @@ export default function BabyBodyMap() {
               <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
             </filter>
           </defs>
-          <g transform="translate(-48,-170)" stroke="#1A1A19">
+          <g transform="translate(-48,-134)" stroke="#1A1A19">
             <ellipse cx="236" cy="640" rx="70" ry="6" fill="#1A1A19" opacity=".08" stroke="none" />
             <g filter="url(#bb-shadow)">
               <ellipse cx="232" cy="248" rx="46" ry="50" fill="url(#bb-stone)" strokeWidth="1.2" />
@@ -119,23 +119,23 @@ export default function BabyBodyMap() {
           </g>
           {/* leaders (box coordinates) */}
           <g fill="none" strokeWidth="1">
-            <path d="M184,100 H116 M116,95 v10" stroke="hsl(var(--primary))" />
-            <path d="M206,74 H252 V50 M247,50 h10" stroke="#1A1A19" />
-            <path d="M188,390 H116 M116,385 v10" stroke="#1A1A19" />
-            <path d="M238,282 H272 V336 M267,336 h10" stroke="#1A1A19" />
+            <path d="M184,136 H116 M116,131 v10" stroke="hsl(var(--primary))" />
+            <path d="M206,110 H254 V64 M249,64 h10" stroke="#1A1A19" />
+            <path d="M188,426 H116 M116,421 v10" stroke="#1A1A19" />
+            <path d="M238,318 H272 V372 M267,372 h10" stroke="#1A1A19" />
           </g>
           <g>
-            <circle cx="184" cy="100" r="4.5" fill="hsl(var(--primary))" />
-            <circle cx="184" cy="100" r="10" fill="none" stroke="hsl(var(--primary))" strokeWidth=".9" />
-            <circle cx="184" cy="100" r="16" fill="none" stroke="hsl(var(--primary))" strokeWidth=".6" opacity=".45" />
-            <circle cx="206" cy="74" r="3.5" fill="#1A1A19" /><circle cx="206" cy="74" r="8" fill="none" stroke="#1A1A19" strokeWidth=".8" />
-            <circle cx="188" cy="390" r="3.5" fill="#1A1A19" /><circle cx="188" cy="390" r="8" fill="none" stroke="#1A1A19" strokeWidth=".8" />
-            <circle cx="238" cy="282" r="3.5" fill="#1A1A19" /><circle cx="238" cy="282" r="8" fill="none" stroke="#1A1A19" strokeWidth=".8" />
+            <circle cx="184" cy="136" r="4.5" fill="hsl(var(--primary))" />
+            <circle cx="184" cy="136" r="10" fill="none" stroke="hsl(var(--primary))" strokeWidth=".9" />
+            <circle cx="184" cy="136" r="16" fill="none" stroke="hsl(var(--primary))" strokeWidth=".6" opacity=".45" />
+            <circle cx="206" cy="110" r="3.5" fill="#1A1A19" /><circle cx="206" cy="110" r="8" fill="none" stroke="#1A1A19" strokeWidth=".8" />
+            <circle cx="188" cy="426" r="3.5" fill="#1A1A19" /><circle cx="188" cy="426" r="8" fill="none" stroke="#1A1A19" strokeWidth=".8" />
+            <circle cx="238" cy="318" r="3.5" fill="#1A1A19" /><circle cx="238" cy="318" r="8" fill="none" stroke="#1A1A19" strokeWidth=".8" />
           </g>
         </svg>
 
         {/* Mouth · feed */}
-        <button type="button" onClick={() => open('feed')} className="absolute w-[35%] text-right leading-tight" style={pct(0, 66)}>
+        <button type="button" onClick={() => open('feed')} className="absolute w-[35%] text-right leading-tight" style={pct(0, 102)}>
           <span className="label-mono block !text-primary">Mouth · feed</span>
           {lf && ago ? (
             <>
@@ -156,14 +156,14 @@ export default function BabyBodyMap() {
         </button>
 
         {/* Eyes · sleep */}
-        <button type="button" onClick={() => open('sleep')} className="absolute w-[33%] text-left leading-tight" style={pct(214, -2)}>
+        <button type="button" onClick={() => open('sleep')} className="absolute w-[33%] text-left leading-tight" style={pct(214, 0)}>
           <span className="label-mono block">Eyes · sleep</span>
           <span className="block text-[15px] font-medium mt-1">{asleepMin != null ? `Asleep ${fmtAgo(asleepMin).value}${fmtAgo(asleepMin).unit ? ' min' : ''}` : sleptMin ? 'Awake' : 'Log sleep'}</span>
           <span className="block text-[13px] text-muted-foreground mt-0.5">{sleptMin ? `${fmtAgo(sleptMin).value}${fmtAgo(sleptMin).unit ? ' min' : ''} today` : 'nothing yet today'}</span>
         </button>
 
         {/* Nappy · today */}
-        <button type="button" onClick={() => open('nappy')} className="absolute w-[35%] text-right leading-tight" style={pct(0, 352)}>
+        <button type="button" onClick={() => open('nappy')} className="absolute w-[35%] text-right leading-tight" style={pct(0, 388)}>
           <span className="label-mono block">Nappy · today</span>
           <span className="flex justify-end items-baseline gap-3 mt-1">
             <span><span className="font-display text-[28px] leading-none">{np.wet}</span> <span className="text-[12px] text-muted-foreground">wet</span></span>
@@ -173,7 +173,7 @@ export default function BabyBodyMap() {
         </button>
 
         {/* Growth */}
-        <button type="button" onClick={() => open('growth')} className="absolute w-[26%] text-left leading-tight" style={pct(240, 344)}>
+        <button type="button" onClick={() => open('growth')} className="absolute w-[26%] text-left leading-tight" style={pct(240, 382)}>
           <span className="label-mono block">Growth</span>
           {weight ? (
             <>
