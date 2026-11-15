@@ -5,7 +5,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import BabyImage3DOverlay from './BabyImage3DOverlay';
 import KickCounter from './KickCounter';
 import GuidesSection from './GuidesSection';
-import MaternalWeightTracker from './MaternalWeightTracker';
 import ContractionTimer from './ContractionTimer';
 import HospitalBagChecklist from './HospitalBagChecklist';
 
@@ -35,7 +34,6 @@ import fruitWeek32 from '@/assets/fruit-week-32.png';
 import fruitWeek36 from '@/assets/fruit-week-36.png';
 import fruitWeek40 from '@/assets/fruit-week-40.png';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { differenceInDays, addDays, format, parseISO } from 'date-fns';
 import {
@@ -43,7 +41,6 @@ import {
   Calendar,
   Heart,
   Activity,
-  AlertCircle,
   Sparkles,
   Ruler,
   Scale,
@@ -607,70 +604,11 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
 
   if (!pregnancyInfo) return null;
 
-  const { weeksPregnant, daysExtra, daysUntilDue, trimesterLabel, trimesterKey, progressPercent, weekData } = pregnancyInfo;
+  const { weeksPregnant, daysUntilDue, trimesterLabel, trimesterKey, weekData } = pregnancyInfo;
   const symptoms = PREGNANCY_SYMPTOMS[trimesterKey] || [];
 
   return (
     <div className="space-y-4">
-      {/* Main pregnancy status */}
-      <div className="bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 rounded-2xl p-5">
-        <div className="text-center mb-4">
-          {/* Hero image: the baby illustration is the headline, with the
-              fruit comparison overlaid in the corner so users get both
-              "what does this stage look like" and "size of a lemon" in
-              one glance. Click to open the 3D overlay. */}
-          <div
-            className="relative w-32 h-32 sm:w-36 sm:h-36 mx-auto mb-2 cursor-pointer hover:scale-105 transition-transform"
-            onClick={() => setShowFullImage(true)}
-            title="Tap to see this week in 3D"
-          >
-            <img
-              src={getWeekImage(weeksPregnant)}
-              alt={`Baby at week ${weeksPregnant}`}
-              className="w-full h-full object-contain"
-            />
-            <div className="absolute -bottom-1 -right-1 bg-background/95 backdrop-blur rounded-full p-1.5 border shadow-sm">
-              {getFruitImage(weekData.size) ? (
-                <img
-                  src={getFruitImage(weekData.size)!}
-                  alt={`Size of a ${weekData.size}`}
-                  className="w-9 h-9 object-contain"
-                />
-              ) : (
-                <span role="img" aria-label={`Size of a ${weekData.size}`} className="w-9 h-9 flex items-center justify-center text-[26px] leading-none">{weekData.emoji}</span>
-              )}
-            </div>
-          </div>
-          <div className="text-4xl font-light text-foreground mb-1">
-            Week {weeksPregnant}
-            <span className="text-lg text-muted-foreground ml-1">+{daysExtra}d</span>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            {trimesterLabel} Trimester · size of a {weekData.size}
-          </div>
-          <Badge variant="secondary" className="mt-2">
-            {daysUntilDue > 0 ? `${daysUntilDue} days until due date` : daysUntilDue === 0 ? 'Due today! 🎉' : `${Math.abs(daysUntilDue)} days past due date`}
-          </Badge>
-        </div>
-
-        {/* Progress bar */}
-        <div className="space-y-1.5">
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Week 1</span>
-            <span>Week 40</span>
-          </div>
-          <div className="h-3 bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-500"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-          <div className="text-center text-xs text-muted-foreground">
-            {progressPercent}% complete
-          </div>
-        </div>
-      </div>
-
       {/* Past-due transition — surfaces from 14 days past the due
           date if the user hasn't dismissed it. Babies arriving up to
           ~10 days past due is medically expected; from 14 days the
@@ -715,8 +653,11 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
           <div className="flex items-center gap-3">
             <Calendar className="h-5 w-5 text-primary" />
             <div>
-              <div className="text-sm font-medium">Due Date</div>
+              <div className="text-sm font-medium">Due date</div>
               <div className="text-lg font-bold">{format(dueDate, 'MMMM d, yyyy')}</div>
+              <div className="text-xs text-muted-foreground">
+                {daysUntilDue > 0 ? `${daysUntilDue} days to go · ${trimesterLabel.toLowerCase()} trimester` : daysUntilDue === 0 ? 'Due today' : `${Math.abs(daysUntilDue)} days past the due date`}
+              </div>
             </div>
           </div>
           <Button
@@ -988,7 +929,6 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
 
       {/* Maternal weight gain — tracker for mom's side of the pregnancy.
           Uses IOM guidelines to recommend total + expected-by-now gain. */}
-      <MaternalWeightTracker weeksPregnant={weeksPregnant} />
 
       {/* Daily kick counter — only relevant from ~week 28 onward, when
           fetal movement-counting becomes part of standard self-monitoring. */}
@@ -1083,67 +1023,6 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
           </Card>
         );
       })()}
-
-
-      {/* Important dates */}
-      <Card className="p-4 space-y-2.5">
-        <h4 className="font-semibold flex items-center gap-2">
-          <AlertCircle className="h-4 w-4 text-primary" />
-          Key Dates & Reminders
-        </h4>
-        {weeksPregnant < 12 && (
-          <div className="flex items-center gap-3 p-2.5 rounded-lg bg-primary/5 border border-primary/10">
-            <span className="text-lg">🩺</span>
-            <div>
-              <p className="text-xs font-semibold">First prenatal visit</p>
-              <p className="text-[10px] text-muted-foreground">Schedule before week 12 — includes blood tests & first ultrasound</p>
-            </div>
-          </div>
-        )}
-        {weeksPregnant >= 11 && weeksPregnant < 14 && (
-          <div className="flex items-center gap-3 p-2.5 rounded-lg bg-violet-50 dark:bg-violet-900/10 border border-violet-200 dark:border-violet-800">
-            <span className="text-lg">🔬</span>
-            <div>
-              <p className="text-xs font-semibold">Nuchal translucency scan</p>
-              <p className="text-[10px] text-muted-foreground">Best done between weeks 11-14 — screening for chromosomal conditions</p>
-            </div>
-          </div>
-        )}
-        {weeksPregnant >= 18 && weeksPregnant < 22 && (
-          <div className="flex items-center gap-3 p-2.5 rounded-lg bg-secondary/5 border border-secondary/10">
-            <span className="text-lg">👶</span>
-            <div>
-              <p className="text-xs font-semibold">Anatomy scan</p>
-              <p className="text-[10px] text-muted-foreground">Detailed ultrasound between weeks 18-22 — checks baby's development</p>
-            </div>
-          </div>
-        )}
-        {weeksPregnant >= 24 && weeksPregnant < 28 && (
-          <div className="flex items-center gap-3 p-2.5 rounded-lg bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800">
-            <span className="text-lg">🍬</span>
-            <div>
-              <p className="text-xs font-semibold">Glucose tolerance test</p>
-              <p className="text-[10px] text-muted-foreground">Screening for gestational diabetes — usually done weeks 24-28</p>
-            </div>
-          </div>
-        )}
-        {weeksPregnant >= 35 && (
-          <div className="flex items-center gap-3 p-2.5 rounded-lg bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800">
-            <span className="text-lg">🧳</span>
-            <div>
-              <p className="text-xs font-semibold">Pack hospital bag</p>
-              <p className="text-[10px] text-muted-foreground">Baby could arrive any time now — be prepared!</p>
-            </div>
-          </div>
-        )}
-        <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50">
-          <span className="text-lg">📅</span>
-          <div>
-            <p className="text-xs font-semibold">Due date: {format(dueDate, 'MMMM d, yyyy')}</p>
-            <p className="text-[10px] text-muted-foreground">{daysUntilDue > 0 ? `${daysUntilDue} days to go` : 'Any day now!'}</p>
-          </div>
-        </div>
-      </Card>
 
 
       {/* Reading material, folded away so the trackers stay near the top. */}

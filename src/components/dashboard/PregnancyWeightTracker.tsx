@@ -85,6 +85,30 @@ export default function PregnancyWeightTracker({ dueDate }: PregnancyWeightTrack
   useEffect(() => {
     if (!user) return;
     try {
+      // One-time merge from the second weight card that used to sit
+      // inside PregnancyTracker (MaternalWeightTracker, now removed):
+      // fill missing setup fields and add any entries for dates not
+      // already logged here. The old key is left in place untouched.
+      const mergeFlag = `womanie_preg_weight_merged_${user.id}`;
+      const oldRaw = window.localStorage.getItem(`womanie_maternal_weight_${user.id}`);
+      if (oldRaw && !window.localStorage.getItem(mergeFlag)) {
+        const old = JSON.parse(oldRaw) as { prePregnancyKg?: number | null; heightCm?: number | null; entries?: WeightEntry[] };
+        const cur = JSON.parse(window.localStorage.getItem(SETUP_KEY(user.id)) || '{}') as Partial<WeightSetup>;
+        window.localStorage.setItem(SETUP_KEY(user.id), JSON.stringify({
+          prePregKg: typeof cur.prePregKg === 'number' ? cur.prePregKg : (typeof old.prePregnancyKg === 'number' ? old.prePregnancyKg : null),
+          heightCm: typeof cur.heightCm === 'number' ? cur.heightCm : (typeof old.heightCm === 'number' ? old.heightCm : null),
+          unit: cur.unit === 'us' ? 'us' : 'metric',
+        }));
+        const curLog = JSON.parse(window.localStorage.getItem(LOG_KEY(user.id)) || '[]') as WeightEntry[];
+        const have = new Set((Array.isArray(curLog) ? curLog : []).map(e => e.date));
+        const extra = (Array.isArray(old.entries) ? old.entries : []).filter(e => e?.date && typeof e?.kg === 'number' && !have.has(e.date));
+        if (extra.length) {
+          window.localStorage.setItem(LOG_KEY(user.id), JSON.stringify([...(Array.isArray(curLog) ? curLog : []), ...extra].sort((x, y) => x.date.localeCompare(y.date))));
+        }
+        window.localStorage.setItem(mergeFlag, '1');
+      }
+    } catch { /* ignore */ }
+    try {
       const rawSetup = window.localStorage.getItem(SETUP_KEY(user.id));
       if (rawSetup) {
         const parsed = JSON.parse(rawSetup) as Partial<WeightSetup>;

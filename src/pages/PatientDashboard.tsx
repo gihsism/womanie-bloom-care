@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { db } from '@/integrations/db/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import DashboardHeader, { getModeStats, type LifeStage } from '@/components/dashboard/DashboardHeader';
+import DashboardHeader, { type LifeStage } from '@/components/dashboard/DashboardHeader';
 import CycleCalendar from '@/components/dashboard/CycleCalendar';
 import PregnancyTracker from '@/components/dashboard/PregnancyTracker';
 import PregnancyWeightTracker from '@/components/dashboard/PregnancyWeightTracker';
@@ -329,13 +329,6 @@ const PatientDashboard = () => {
     }
     return 'there';
   };
-
-  // Calculate current cycle day
-  const currentCycleDay = periodData 
-    ? Math.floor((new Date().getTime() - periodData.lastPeriodStart.getTime()) / (1000 * 60 * 60 * 24)) % periodData.cycleLength + 1
-    : 14;
-
-  const healthStats = selectedMode ? getModeStats(selectedMode, currentCycleDay, pregnancyDueDate) : [];
 
   // Pre-compute next ovulation and period dates to avoid repeated inline calculations
   const cyclePhases = useMemo(() => {
@@ -809,32 +802,6 @@ const PatientDashboard = () => {
                   </div>
                   <div className="lg:col-span-1 space-y-4">
                     <PregnancyLabInsights />
-                    {pregnancyDueDate && (
-                      <Card className="p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <h3 className="text-sm font-bold">Pregnancy Stats</h3>
-                          <Button variant="outline" size="sm" className="h-6 text-[10px] gap-1" onClick={() => navigate('/dashboard/settings')}>
-                            <Settings className="h-3 w-3" />
-                            Settings
-                          </Button>
-                        </div>
-                        <div className="space-y-3">
-                          {healthStats.map((stat) => {
-                            const IconComponent = stat.icon;
-                            return (
-                              <div key={stat.title} className="flex items-start gap-2.5 pb-2.5 border-b last:border-0 last:pb-0">
-                                <IconComponent className={`h-4 w-4 ${stat.color} mt-0.5`} aria-hidden="true" />
-                                <div className="flex-1">
-                                  <div className="text-[10px] text-muted-foreground">{stat.title}</div>
-                                  <div className="text-sm font-bold">{stat.value}</div>
-                                  <div className="text-[10px] text-muted-foreground">{stat.subtitle}</div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </Card>
-                    )}
                   </div>
                 </div>
               ) : selectedMode === 'pre-menstrual' ? (
