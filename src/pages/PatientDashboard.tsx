@@ -63,6 +63,7 @@ import ModeHeroStat from '@/components/dashboard/ModeHeroStat';
 import PregnancyBodyMap from '@/components/dashboard/PregnancyBodyMap';
 import BabyBodyMap from '@/components/dashboard/BabyBodyMap';
 import CycleDialHero from '@/components/dashboard/CycleDialHero';
+import PillRingHero from '@/components/dashboard/PillRingHero';
 import OverdueTests from '@/components/dashboard/OverdueTests';
 import SymptomPatternsCard from '@/components/dashboard/SymptomPatternsCard';
 import FertileWindowTimingCard from '@/components/dashboard/FertileWindowTimingCard';
@@ -626,6 +627,8 @@ const PatientDashboard = () => {
               <BabyBodyMap />
             ) : (selectedMode === 'menstrual-cycle' || selectedMode === 'conception') && periodData ? (
               <CycleDialHero lastPeriodStart={periodData.lastPeriodStart} cycleLength={periodData.cycleLength} name={profile?.full_name} mode={selectedMode} />
+            ) : selectedMode === 'contraception' ? (
+              <PillRingHero name={profile?.full_name} />
             ) : selectedMode && (
               <ModeHeroStat
                 selectedMode={selectedMode}
@@ -873,7 +876,7 @@ const PatientDashboard = () => {
               ) : selectedMode === 'contraception' ? (
                 /* ─── Contraception Mode ─── */
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2">
+                  <div className="lg:col-span-2 scroll-mt-4 md:scroll-mt-28" id="contraception">
                     <ContraceptionDashboard onNavigateToDoctorChat={() => navigate('/dashboard/ai-doctor')} />
                   </div>
                   <div className="lg:col-span-1">

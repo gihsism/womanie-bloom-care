@@ -92,7 +92,7 @@ export default function CycleDialHero({
           <circle cx={today.x} cy={today.y} r="13" fill="none" stroke="hsl(var(--primary))" strokeWidth=".9" />
           <circle cx={today.x} cy={today.y} r="20" fill="none" stroke="hsl(var(--primary))" strokeWidth=".6" opacity=".45" />
           {/* centre */}
-          <text x={CX} y={CY - 26} textAnchor="middle" fontFamily="DM Mono, monospace" fontSize="10.5" letterSpacing="1.5" fill="hsl(var(--muted-foreground))">{phase.name.toUpperCase()}</text>
+          <text x={CX} y={CY - 44} textAnchor="middle" fontFamily="DM Mono, monospace" fontSize="10.5" letterSpacing="1.5" fill="hsl(var(--muted-foreground))">{phase.name.toUpperCase()}</text>
           <text x={CX} y={CY + 22} textAnchor="middle" fontFamily="Fraunces, Georgia, serif" fontSize="62" fill="hsl(var(--foreground))">{d.day}</text>
           <text x={CX} y={CY + 44} textAnchor="middle" fontFamily="Jost, sans-serif" fontSize="13" fill="hsl(var(--muted-foreground))">of {L} days</text>
           <text x={CX} y={CY - R - 10} textAnchor="middle" fontFamily="DM Mono, monospace" fontSize="9.5" fill="#76766F">DAY 1</text>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseRange, pickFlaggedLab, medsToday, kicksToday, weekWord, fmtGrams, lastFeed, nappiesToday, sleepTodayMin, fmtAgo, dayOfLife, countToday, cycleDial } from './bodyMap';
+import { parseRange, pickFlaggedLab, medsToday, kicksToday, weekWord, fmtGrams, lastFeed, nappiesToday, sleepTodayMin, fmtAgo, dayOfLife, countToday, cycleDial, pillRing, pillFromNotes } from './bodyMap';
 
 const now = new Date(2026, 10, 15, 14, 0);
 const at = (h: number, dayOffset = 0) => new Date(2026, 10, 15 + dayOffset, h, 0).toISOString();
@@ -122,5 +122,33 @@ describe('cycleDial', () => {
   it('follicular counts down to the fertile window; late cycle is pms', () => {
     expect(cycleDial(start, 28, new Date(2026, 10, 10))).toMatchObject({ day: 7, phase: 'follicular', daysToFertile: 2 });
     expect(cycleDial(start, 28, new Date(2026, 10, 29))).toMatchObject({ day: 26, phase: 'pms', daysToFertile: null });
+  });
+});
+
+describe('pillRing', () => {
+  const now2 = new Date(2026, 10, 15, 20);
+  const m = new Map<string, 'taken' | 'late' | 'missed'>([
+    ['2026-11-15', 'taken'], ['2026-11-14', 'late'], ['2026-11-13', 'taken'], ['2026-11-12', 'missed'], ['2026-11-11', 'taken'],
+  ]);
+  it('reads notes', () => {
+    expect(pillFromNotes('Mood: ok; Pill: on-time')).toBe('taken');
+    expect(pillFromNotes('Pill: Missed')).toBe('missed');
+    expect(pillFromNotes(null)).toBeNull();
+  });
+  it('aligns to the pack and marks the break week', () => {
+    const r = pillRing(m, '2026-11-04', now2);
+    expect(r.packDay).toBe(12);
+    expect(r.pills[11]).toMatchObject({ date: '2026-11-15', mark: 'taken', today: true, placebo: false });
+    expect(r.pills[12].mark).toBe('future');
+    expect(r.pills[21].placebo).toBe(true);
+    expect(r.streak).toBe(3); // missed on the 12th breaks it
+  });
+  it('without a pack start shows the last 28 days; untaken today does not break the streak yet', () => {
+    const m2 = new Map(m); m2.delete('2026-11-15');
+    const r = pillRing(m2, null, now2);
+    expect(r.packDay).toBeNull();
+    expect(r.pills[27]).toMatchObject({ date: '2026-11-15', today: true, mark: 'none' });
+    expect(r.streak).toBe(2);
+    expect(r.todayMark).toBe('none');
   });
 });

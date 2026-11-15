@@ -216,3 +216,68 @@ export function cycleDial(lastStart: Date, cycleLength: number, now: Date, perio
     daysToFertile: day < fertileStart ? fertileStart - day : day <= fertileEnd ? 0 : null,
   };
 }
+
+// ---- Pill ring (contraception) --------------------------------------------
+
+export type PillMark = 'taken' | 'late' | 'missed' | 'none' | 'future';
+
+export interface PillRing {
+  packDay: number | null; // 1-28 when the pack start is known
+  pills: { index: number; date: string; mark: PillMark; placebo: boolean; today: boolean }[];
+  streak: number;
+  todayMark: PillMark;
+}
+
+const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+/** Parse "Pill: on-time|late|missed" out of a daily-signal note. */
+export function pillFromNotes(notes: string | null | undefined): 'taken' | 'late' | 'missed' | null {
+  const m = (notes ?? '').match(/Pill:\s*(on-time|late|missed)/i);
+  if (!m) return null;
+  const s = m[1].toLowerCase();
+  return s === 'on-time' ? 'taken' : (s as 'late' | 'missed');
+}
+
+/**
+ * 28 pills. With a known pack start the ring is the current pack (days
+ * 22-28 are the break / placebo week); without one it is the last 28 days
+ * ending today.
+ */
+export function pillRing(byDate: Map<string, 'taken' | 'late' | 'missed'>, packStart: string | null, now: Date): PillRing {
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let packDay: number | null = null;
+  let first: Date;
+  if (packStart) {
+    const ps = new Date(`${packStart.slice(0, 10)}T00:00:00`);
+    const days = Math.floor((today.getTime() - ps.getTime()) / 86400000);
+    if (Number.isFinite(days) && days >= 0) {
+      packDay = (days % 28) + 1;
+      first = new Date(today.getFullYear(), today.getMonth(), today.getDate() - (packDay - 1));
+    } else {
+      first = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 27);
+    }
+  } else {
+    first = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 27);
+  }
+  const pills = Array.from({ length: 28 }, (_, i) => {
+    const d = new Date(first.getFullYear(), first.getMonth(), first.getDate() + i);
+    const key = ymd(d);
+    const isToday = key === ymd(today);
+    const future = d.getTime() > today.getTime();
+    return {
+      index: i + 1,
+      date: key,
+      mark: (future ? 'future' : byDate.get(key) ?? 'none') as PillMark,
+      placebo: packDay != null && i >= 21,
+      today: isToday,
+    };
+  });
+  let streak = 0;
+  for (let i = 0; i < 400; i++) {
+    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+    const s = byDate.get(ymd(d));
+    if (!s || s === 'missed') { if (i === 0 && !s) continue; break; }
+    streak++;
+  }
+  return { packDay, pills, streak, todayMark: byDate.get(ymd(today)) ?? 'none' };
+}
