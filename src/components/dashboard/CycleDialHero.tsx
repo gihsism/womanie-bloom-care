@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
+import { differenceInDays, format } from 'date-fns';
 import { cycleDial, weekWord } from '@/lib/bodyMap';
+import { useCycleModel } from '@/hooks/useCycleModel';
+import { METHOD_TEXT } from '@/lib/ovulation';
 
 // Version 8 hero for period tracking and trying to conceive: the cycle
 // as a dial. The ring is one cycle, starting at the top; a thick ink
@@ -35,7 +37,18 @@ export default function CycleDialHero({
 }: { lastPeriodStart: Date; cycleLength: number; name?: string | null; mode: string }) {
   const navigate = useNavigate();
   const now = new Date();
-  const d = cycleDial(lastPeriodStart, cycleLength, now);
+  // Full personal prediction (her logged periods, LH / temperature /
+  // discharge signs, labs). Falls back to the stored length until loaded.
+  const { prediction: p, loaded, periodRecords } = useCycleModel();
+  const usable = loaded && periodRecords.length > 0;
+  const start = usable ? new Date(`${periodRecords[0].period_start_date}T00:00:00`) : lastPeriodStart;
+  const predictedLen = usable ? differenceInDays(p.predictedPeriodStart, start) : 0;
+  const len = usable && predictedLen >= 15 && predictedLen <= 60 ? predictedLen : (usable ? p.averageCycleLength : cycleLength);
+  const ovuDay = usable && predictedLen >= 15 && predictedLen <= 60 ? differenceInDays(p.predictedOvulationDate, start) + 1 : undefined;
+  const d = cycleDial(start, len, now, usable ? Math.min(p.averagePeriodLength, 8) : 5, ovuDay);
+  const confirmed = usable && p.currentOvulation && p.currentOvulation.confidence !== 'low' ? p.currentOvulation : null;
+  const roughSign = usable && p.currentOvulation?.confidence === 'low' ? p.currentOvulation : null;
+  const win = usable ? p.confidenceWindow : 0;
   const L = d.length;
   const t = (day: number) => (day - 1) / L; // start of a day on the ring
   const today = point((d.day - 0.5) / L);
@@ -105,10 +118,10 @@ export default function CycleDialHero({
           <span className="block font-display text-[28px] leading-none mt-1">
             {d.daysToPeriod}<small className="font-sans text-xs text-muted-foreground ml-1">day{d.daysToPeriod === 1 ? '' : 's'}</small>
           </span>
-          <span className="block text-[13px] text-muted-foreground mt-1">{format(d.nextPeriod, 'EEE d MMM')}</span>
+          <span className="block text-[13px] text-muted-foreground mt-1">{format(d.nextPeriod, 'EEE d MMM')}{win > 0 ? ` · ±${win} day${win === 1 ? '' : 's'}` : ''}</span>
         </button>
         <button type="button" onClick={() => go('#cycle-calendar')} className="text-left border-t border-primary pt-2">
-          <span className="label-mono block !text-primary">{ttc ? 'Best days' : 'Fertile window'}</span>
+          <span className="label-mono block !text-primary">{ttc ? 'Best days' : 'Fertile window'}{confirmed ? ' · confirmed' : ''}</span>
           <span className="block text-[15px] font-medium mt-1.5">Day {d.fertileStart}–{d.fertileEnd}</span>
           <span className={`block text-[13px] mt-0.5 ${d.daysToFertile === 0 ? 'text-primary font-medium' : 'text-muted-foreground'}`}>{fertileLine}</span>
         </button>
@@ -126,7 +139,19 @@ export default function CycleDialHero({
 
       <div className="mt-4 flex items-start justify-between border-t border-foreground pt-2.5">
         <p className="text-[13px] leading-snug">
-          Predicted from the periods you logged.<br /><span className="text-muted-foreground">Log each period start to sharpen it.</span>
+          {confirmed ? (
+            <>You ovulated around {format(confirmed.date, 'd MMM')} ({METHOD_TEXT[confirmed.method]}).<br />
+              <span className="text-muted-foreground">Your period follows {p.lutealSource === 'personal' ? `your own ${p.lutealLength}-day` : 'a typical 14-day'} second half.</span></>
+          ) : usable && p.lutealSource === 'personal' ? (
+            <>Uses your own {p.lutealLength}-day second half,<br />
+              <span className="text-muted-foreground">learned from {p.learnedCycles.filter(c => c.ovulation.confidence !== 'low').length} cycle{p.learnedCycles.length === 1 ? '' : 's'} of LH / temperature logs.</span></>
+          ) : roughSign ? (
+            <>Probably ovulated around {format(roughSign.date, 'd MMM')} ({METHOD_TEXT[roughSign.method]}).<br />
+              <span className="text-muted-foreground">An LH test or morning temperature would confirm it.</span></>
+          ) : (
+            <>Predicted from the periods you logged.<br />
+              <span className="text-muted-foreground">Log LH tests or morning temperature to find your own ovulation day.</span></>
+          )}
         </p>
         <p className="label-mono text-right leading-relaxed">Day {d.day} / {L}{first ? <><br />{first}</> : null}</p>
       </div>

@@ -195,13 +195,15 @@ export interface CycleDialData {
   daysToFertile: number | null; // null once the window has passed this cycle
 }
 
-export function cycleDial(lastStart: Date, cycleLength: number, now: Date, periodDays = 5): CycleDialData {
+export function cycleDial(lastStart: Date, cycleLength: number, now: Date, periodDays = 5, ovulationDayOverride?: number): CycleDialData {
   const length = Math.max(15, Math.min(60, Math.round(cycleLength)));
   const start = new Date(lastStart.getFullYear(), lastStart.getMonth(), lastStart.getDate());
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const elapsed = Math.floor((today.getTime() - start.getTime()) / 86400000);
   const day = (((elapsed % length) + length) % length) + 1;
-  const ovulationDay = Math.max(periodDays + 1, length - 14);
+  // Her own ovulation day when the prediction knows it (LH / temperature /
+  // learned luteal length); otherwise the textbook 14 days before the period.
+  const ovulationDay = Math.max(periodDays + 1, Math.min(length - 1, Math.round(ovulationDayOverride ?? length - 14)));
   const fertileStart = Math.max(periodDays + 1, ovulationDay - 5);
   const fertileEnd = Math.min(length, ovulationDay + 1);
   let phase: CycleDialData['phase'] = 'luteal';

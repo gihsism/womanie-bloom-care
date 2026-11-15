@@ -162,3 +162,35 @@ describe("useCyclePrediction — lab-driven caveats", () => {
     expect(p.riskFactors.some((r) => /Perimenopausal range \(age 45\)/.test(r))).toBe(true);
   });
 });
+
+describe("useCyclePrediction — personal ovulation", () => {
+  const ymd = (x: Date) => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
+  const back = (n: number) => { const t = new Date(); return ymd(new Date(t.getFullYear(), t.getMonth(), t.getDate() - n)); };
+  const sig = (notes: string) => ({ date: "", symptoms: [], intercourse: [], mood: [], discharge: "none", notes });
+
+  it("learns a 12-day luteal phase and predicts the period from this cycle's LH surge", () => {
+    // Three past 28-day cycles, each with a positive LH on cycle day 16 (ovulation day 17 → luteal 12),
+    // and the current cycle (day 19 today) with a positive LH on day 16.
+    const starts = [back(18 + 84), back(18 + 56), back(18 + 28), back(18)];
+    const daySignals: Record<string, ReturnType<typeof sig>> = {};
+    for (const s of starts) {
+      const [y, m, d] = s.split("-").map(Number);
+      daySignals[ymd(new Date(y, m - 1, d + 15))] = sig("LH test: positive");
+    }
+    const p = predict({ periodRecords: starts.map(s => rec(s)), daySignals });
+    expect(p.lutealSource).toBe("personal");
+    expect(p.lutealLength).toBe(12);
+    expect(p.learnedCycles).toHaveLength(3);
+    expect(p.currentOvulation?.method).toBe("lh");
+    // ovulation = cycle day 17 = 2 days ago; next period = +12 → 10 days from now
+    const t = new Date(); t.setHours(0, 0, 0, 0);
+    expect(differenceInDays(p.predictedPeriodStart, t)).toBe(10);
+    expect(p.confidenceWindow).toBe(1);
+  });
+
+  it("without ovulation signs keeps the 14-day default", () => {
+    const p = predict({ periodRecords: [rec(back(40)), rec(back(12))], daySignals: {} });
+    expect(p.lutealSource).toBe("default");
+    expect(differenceInDays(p.predictedPeriodStart, p.predictedOvulationDate)).toBe(14);
+  });
+});

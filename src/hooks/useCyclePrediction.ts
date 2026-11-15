@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { parseISO, differenceInDays, addDays, format, isSameDay } from 'date-fns';
 import type { UserHealthContext } from './useUserHealthContext';
+import { detectOvulation, learnLuteal, type OvulationEstimate, type LearnedCycle } from '@/lib/ovulation';
 
 // Types
 export interface PeriodRecord {
@@ -51,6 +52,14 @@ export interface CyclePrediction {
   // (perimenopausal variability is normal, shouldn't be flagged as
   // "irregular" the same way it would be at 25).
   ageAdjusted: boolean;
+  // Personal ovulation model (src/lib/ovulation.ts). lutealLength is HER
+  // second-half length when LH / temperature logs let us learn it.
+  lutealLength: number;
+  lutealSource: 'personal' | 'default';
+  // Ovulation found in the running cycle from her own signs (null = not yet).
+  currentOvulation: OvulationEstimate | null;
+  // Past cycles where an ovulation day was found.
+  learnedCycles: LearnedCycle[];
 }
 
 export interface SymptomPattern {
@@ -76,7 +85,6 @@ interface CyclePredictionInput {
 // Constants
 const POPULATION_CYCLE_LENGTH = 28.5;
 const POPULATION_PERIOD_LENGTH = 5;
-const LUTEAL_PHASE = 14;
 const MIN_VALID_CYCLE = 18;
 const MAX_VALID_CYCLE = 60;
 
@@ -118,6 +126,7 @@ export function isActivePeriod(record: PeriodRecord): boolean {
 // Main prediction hook — always returns a prediction (never null)
 export function useCyclePrediction({
   periodRecords,
+  daySignals,
   onboardingEstimates,
   manualOverrides,
   healthContext,
@@ -204,13 +213,30 @@ export function useCyclePrediction({
       lastCycleStart = addDays(now, -14);
     }
 
+    // Personal ovulation: learn her luteal length from past cycles and look
+    // for this cycle's ovulation in her logged signs (LH, BBT, mucus, labs).
+    const progesterone = healthContext?.labs.progesterone ?? null;
+    const signals = daySignals ?? {};
+    const luteal = learnLuteal(sortedRecords.map(r => r.period_start_date), signals, progesterone);
+    const lutealLength = luteal.lutealLength;
+    const currentOvulation = sortedRecords.length > 0 ? detectOvulation(signals, lastCycleStart, now, progesterone) : null;
+    const preciseCurrent = currentOvulation && currentOvulation.confidence !== 'low' ? currentOvulation : null;
+
     let predictedPeriodStart = addDays(lastCycleStart, avgCycleLength);
     while (predictedPeriodStart < now) {
       predictedPeriodStart = addDays(predictedPeriodStart, avgCycleLength);
     }
+    // Ovulation seen this cycle → the period follows one luteal phase later.
+    // That beats any average of cycle lengths (unless she set it by hand).
+    if (preciseCurrent && !manualOverrides?.cycleLength) {
+      const fromOv = addDays(preciseCurrent.date, lutealLength);
+      if (differenceInDays(fromOv, now) >= -1) predictedPeriodStart = fromOv;
+    }
     const predictedPeriodEnd = addDays(predictedPeriodStart, avgPeriodLength - 1);
 
-    const predictedOvulationDate = addDays(predictedPeriodStart, -LUTEAL_PHASE);
+    const predictedOvulationDate = preciseCurrent && differenceInDays(predictedPeriodStart, preciseCurrent.date) < 20
+      ? preciseCurrent.date
+      : addDays(predictedPeriodStart, -lutealLength);
     const fertileWindowStart = addDays(predictedOvulationDate, -5);
     const fertileWindowEnd = addDays(predictedOvulationDate, 1);
     const pmsWindowStart = addDays(predictedPeriodStart, -5);
@@ -238,6 +264,9 @@ export function useCyclePrediction({
     if (healthContext?.tshOutOfRange) confidenceWindow = Math.min(confidenceWindow + 1, 7);
     if (healthContext?.highFsh) confidenceWindow = Math.min(confidenceWindow + 1, 7);
     if (healthContext?.pcosLhFshPattern) confidenceWindow = Math.min(confidenceWindow + 2, 10);
+    // Ovulation confirmed this cycle: the luteal phase barely varies, so the
+    // next period is known to about a day (two if the luteal is the default).
+    if (preciseCurrent && !manualOverrides?.cycleLength) confidenceWindow = luteal.source === 'personal' ? 1 : 2;
 
     let confidenceLevel: 'low' | 'medium' | 'high' = 'low';
     let dataQualityMessage = '';
@@ -347,8 +376,9 @@ export function useCyclePrediction({
       tier, tierLabel, cycleTrend,
       currentCycleAnomaly, anomalyMessage, excludedCycles,
       riskFactors, ageAdjusted,
+      lutealLength, lutealSource: luteal.source, currentOvulation, learnedCycles: luteal.cycles,
     };
-  }, [periodRecords, onboardingEstimates, manualOverrides, healthContext]);
+  }, [periodRecords, daySignals, onboardingEstimates, manualOverrides, healthContext]);
 }
 
 // Symptom pattern recognition
