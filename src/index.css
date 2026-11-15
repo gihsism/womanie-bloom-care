@@ -6,147 +6,112 @@
 
 @layer base {
   :root {
-    /* Main backgrounds - Cream */
-    --background: 28 100% 98%;
-    --foreground: 220 9% 46%;
+    /* Version 8 "gallery wall": warm stone wall, ink, one cobalt accent,
+       red reserved for out-of-range values. */
+    --background: 60 8% 92%;
+    --foreground: 60 2% 10%;
 
-    /* Card surfaces - White */
-    --card: 0 0% 100%;
-    --card-foreground: 220 9% 46%;
+    --card: 60 11% 96%;
+    --card-foreground: 60 2% 10%;
 
-    /* Popovers */
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 9% 46%;
+    --popover: 60 11% 97%;
+    --popover-foreground: 60 2% 10%;
 
-    /* Pink/Rose - Primary brand color - MORE INTENSE */
-    --primary: 340 85% 65%;
-    --primary-foreground: 0 0% 100%;
+    /* Cobalt - the single accent */
+    --primary: 230 72% 49%;
+    --primary-foreground: 60 11% 97%;
 
-    /* Green - Health & wellness - VIBRANT */
-    --secondary: 145 70% 45%;
-    --secondary-foreground: 0 0% 100%;
+    /* Ink - solid buttons, strong text */
+    --secondary: 60 2% 10%;
+    --secondary-foreground: 60 11% 96%;
 
-    /* Bright Green - Accent */
-    --accent: 120 75% 50%;
+    /* Soft cobalt */
+    --accent: 230 48% 56%;
     --accent-foreground: 0 0% 100%;
 
-    /* Muted backgrounds - Soft pink tint */
-    --muted: 340 40% 95%;
-    --muted-foreground: 220 9% 50%;
+    --muted: 60 6% 87%;
+    --muted-foreground: 60 3% 30%;
 
-    /* Lavender - Premium & meditation */
-    --purple: 300 60% 65%;
+    --purple: 230 48% 56%;
     --purple-foreground: 0 0% 100%;
 
-    /* Mint/Teal - Fresh & vibrant */
-    --turquoise: 160 70% 50%;
+    --turquoise: 60 3% 30%;
     --turquoise-foreground: 0 0% 100%;
 
-    /* Destructive */
-    --destructive: 0 65% 51%;
+    /* Low / out of range */
+    --destructive: 5 63% 46%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders & inputs */
-    --border: 28 30% 90%;
-    --input: 28 30% 95%;
-    --ring: 350 43% 81%;
+    --border: 60 5% 76%;
+    --input: 60 5% 72%;
+    --ring: 230 72% 49%;
 
-    /* Border radius */
-    --radius: 1.5rem;
+    --radius: 0.875rem;
 
-    /* Chart colors - Vibrant */
-    --chart-1: 340 85% 65%;
-    --chart-2: 145 70% 45%;
-    --chart-3: 120 75% 50%;
-    --chart-4: 300 60% 65%;
-    --chart-5: 160 70% 50%;
+    --chart-1: 230 72% 49%;
+    --chart-2: 60 2% 10%;
+    --chart-3: 230 48% 70%;
+    --chart-4: 60 3% 45%;
+    --chart-5: 5 63% 46%;
 
-    /* Sidebar */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 9% 46%;
-    --sidebar-primary: 340 85% 65%;
+    --sidebar-background: 60 8% 92%;
+    --sidebar-foreground: 60 2% 10%;
+    --sidebar-primary: 230 72% 49%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 340 40% 95%;
-    --sidebar-accent-foreground: 220 9% 46%;
-    --sidebar-border: 340 30% 90%;
-    --sidebar-ring: 340 85% 65%;
+    --sidebar-accent: 60 6% 87%;
+    --sidebar-accent-foreground: 60 2% 10%;
+    --sidebar-border: 60 5% 76%;
+    --sidebar-ring: 230 72% 49%;
 
-    /* Gradients - Intense pink & green */
-    --gradient-pink: linear-gradient(135deg, hsl(340 85% 65%) 0%, hsl(300 60% 65%) 100%);
-    --gradient-calm: linear-gradient(135deg, hsl(145 70% 45%) 0%, hsl(160 70% 50%) 100%);
-    --gradient-nature: linear-gradient(135deg, hsl(120 75% 50%) 0%, hsl(160 70% 50%) 100%);
-    --gradient-wellness: linear-gradient(135deg, hsl(340 85% 65%) 0%, hsl(145 70% 45%) 100%);
+    --gradient-pink: linear-gradient(135deg, hsl(230 72% 49%) 0%, hsl(230 65% 58%) 100%);
+    --gradient-calm: linear-gradient(135deg, hsl(60 2% 10%) 0%, hsl(60 2% 24%) 100%);
+    --gradient-nature: linear-gradient(135deg, hsl(60 2% 14%) 0%, hsl(60 2% 28%) 100%);
+    --gradient-wellness: linear-gradient(135deg, hsl(230 72% 49%) 0%, hsl(60 2% 14%) 100%);
   }
 
   .dark {
-    /* Dark backgrounds */
-    --background: 220 15% 12%;
-    --foreground: 28 30% 92%;
-
-    /* Dark card surfaces */
-    --card: 220 15% 16%;
-    --card-foreground: 28 30% 92%;
-
-    /* Dark popovers */
-    --popover: 220 15% 16%;
-    --popover-foreground: 28 30% 92%;
-
-    /* Pink/Rose - Intense for dark mode */
-    --primary: 340 80% 60%;
-    --primary-foreground: 0 0% 100%;
-
-    /* Green - Vibrant for dark mode */
-    --secondary: 145 65% 50%;
-    --secondary-foreground: 0 0% 100%;
-
-    /* Bright Green - Accent for dark mode */
-    --accent: 120 70% 55%;
-    --accent-foreground: 0 0% 100%;
-
-    /* Dark muted */
-    --muted: 220 15% 20%;
-    --muted-foreground: 220 9% 65%;
-
-    /* Lavender - Adjusted for dark mode */
-    --purple: 300 55% 60%;
-    --purple-foreground: 0 0% 100%;
-
-    /* Mint/Teal - Fresh for dark mode */
-    --turquoise: 160 65% 55%;
-    --turquoise-foreground: 0 0% 100%;
-
-    /* Destructive */
-    --destructive: 0 70% 55%;
-    --destructive-foreground: 0 0% 100%;
-
-    /* Dark borders & inputs */
-    --border: 220 15% 22%;
-    --input: 220 15% 18%;
-    --ring: 340 80% 60%;
-
-    /* Chart colors - dark mode - Vibrant */
-    --chart-1: 340 80% 60%;
-    --chart-2: 145 65% 50%;
-    --chart-3: 120 70% 55%;
-    --chart-4: 300 55% 60%;
-    --chart-5: 160 65% 55%;
-
-    /* Dark sidebar */
-    --sidebar-background: 220 15% 14%;
-    --sidebar-foreground: 28 30% 92%;
-    --sidebar-primary: 340 80% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 15% 20%;
-    --sidebar-accent-foreground: 28 30% 92%;
-    --sidebar-border: 220 15% 22%;
-    --sidebar-ring: 340 80% 60%;
-
-    /* Gradients - dark mode - Intense */
-    --gradient-pink: linear-gradient(135deg, hsl(340 80% 60%) 0%, hsl(300 55% 60%) 100%);
-    --gradient-calm: linear-gradient(135deg, hsl(145 65% 50%) 0%, hsl(160 65% 55%) 100%);
-    --gradient-nature: linear-gradient(135deg, hsl(120 70% 55%) 0%, hsl(160 65% 55%) 100%);
-    --gradient-wellness: linear-gradient(135deg, hsl(340 80% 60%) 0%, hsl(145 65% 50%) 100%);
+    --background: 60 3% 9%;
+    --foreground: 60 8% 90%;
+    --card: 60 3% 12%;
+    --card-foreground: 60 8% 90%;
+    --popover: 60 3% 12%;
+    --popover-foreground: 60 8% 90%;
+    --primary: 230 85% 70%;
+    --primary-foreground: 60 3% 9%;
+    --secondary: 60 8% 90%;
+    --secondary-foreground: 60 3% 9%;
+    --accent: 230 60% 66%;
+    --accent-foreground: 60 3% 9%;
+    --muted: 60 3% 17%;
+    --muted-foreground: 60 4% 70%;
+    --purple: 230 60% 66%;
+    --purple-foreground: 60 3% 9%;
+    --turquoise: 60 4% 70%;
+    --turquoise-foreground: 60 3% 9%;
+    --destructive: 5 75% 62%;
+    --destructive-foreground: 60 3% 9%;
+    --border: 60 3% 24%;
+    --input: 60 3% 24%;
+    --ring: 230 85% 70%;
+    --chart-1: 230 85% 70%;
+    --chart-2: 60 8% 90%;
+    --chart-3: 230 50% 50%;
+    --chart-4: 60 4% 60%;
+    --chart-5: 5 75% 62%;
+    --sidebar-background: 60 3% 10%;
+    --sidebar-foreground: 60 8% 90%;
+    --sidebar-primary: 230 85% 70%;
+    --sidebar-primary-foreground: 60 3% 9%;
+    --sidebar-accent: 60 3% 17%;
+    --sidebar-accent-foreground: 60 8% 90%;
+    --sidebar-border: 60 3% 24%;
+    --sidebar-ring: 230 85% 70%;
+    --gradient-pink: linear-gradient(135deg, hsl(230 85% 70%) 0%, hsl(230 70% 62%) 100%);
+    --gradient-calm: linear-gradient(135deg, hsl(60 3% 20%) 0%, hsl(60 3% 28%) 100%);
+    --gradient-nature: linear-gradient(135deg, hsl(60 3% 20%) 0%, hsl(60 3% 28%) 100%);
+    --gradient-wellness: linear-gradient(135deg, hsl(230 85% 70%) 0%, hsl(60 3% 24%) 100%);
   }
+
 }
 
 @layer base {
@@ -156,7 +121,19 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    background-image: radial-gradient(70% 45% at 70% 30%, hsl(60 11% 95%) 0%, transparent 70%);
+    background-attachment: fixed;
   }
+
+  /* Version 8 typography: Fraunces for headings and big numbers, Jost for
+     reading, DM Mono for small uppercase labels. */
+  h1, h2, h3, .font-display {
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+    letter-spacing: -0.01em;
+  }
+  h1 { font-weight: 500; }
+  h2, h3 { font-weight: 500; }
 
   /* When the mobile bottom tab bar is visible (BottomNav toggles this
      class), pad the page so the fixed bar never covers the last row of
@@ -164,19 +141,29 @@
      small screens where the bar itself shows (md:hidden). */
   @media (max-width: 767px) {
     body.has-bottom-nav {
-      padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+      /* the nav is now a 46px rail on the left edge */
+      padding-left: 46px;
     }
 
     /* Lift the install prompt above the tab bar so the two fixed-bottom
        elements don't stack on dashboard routes (same 4rem + safe-area
        offset the body padding uses). */
     body.has-bottom-nav .install-banner-root {
-      bottom: calc(4rem + env(safe-area-inset-bottom));
+      left: 46px;
     }
   }
 }
 
 @layer utilities {
+  /* Small uppercase museum-label text (DM Mono) */
+  .label-mono {
+    font-family: "DM Mono", ui-monospace, Menlo, monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: hsl(var(--muted-foreground));
+  }
+
   .animate-fade-in {
     animation: fade-in 0.6s ease-out forwards;
   }

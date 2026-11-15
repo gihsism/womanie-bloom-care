@@ -17,7 +17,7 @@ const config: CapacitorConfig = {
   },
   plugins: {
     // Keep the web view below the clock/battery bar instead of under it.
-    StatusBar: { overlaysWebView: false, style: 'LIGHT', backgroundColor: '#FFF8F2' },
+    StatusBar: { overlaysWebView: false, style: 'LIGHT', backgroundColor: '#ECECE8' },
   },
 };
 

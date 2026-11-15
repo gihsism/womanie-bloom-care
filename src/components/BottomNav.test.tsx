@@ -15,7 +15,7 @@ describe("BottomNav", () => {
   it("shows all five tabs on a dashboard route", () => {
     renderAt("/dashboard");
     expect(screen.getByRole("navigation", { name: "Main" })).toBeInTheDocument();
-    for (const label of ["Home", "Records", "Ask AI", "Visits", "Settings"]) {
+    for (const label of ["Home", "Records", "Ask AI", "Visits", "Me"]) {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
   });
@@ -32,9 +32,9 @@ describe("BottomNav", () => {
 
   it("highlights the tab matching the current route", () => {
     renderAt("/dashboard/medical-history");
-    expect(screen.getByText("Records").closest("a")).toHaveClass("text-primary");
+    expect(screen.getByText("Records").closest("a")).toHaveAttribute("aria-current", "page");
     // Home is exact-match only, so it must not be active on a child route.
-    expect(screen.getByText("Home").closest("a")).not.toHaveClass("text-primary");
+    expect(screen.getByText("Home").closest("a")).not.toHaveAttribute("aria-current");
   });
 
   it("adds the content-clearance body class while visible", () => {
