@@ -189,6 +189,29 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-16 — Test coverage: added security-invariant tests for admin/doctors
+admin/doctors.ts is the privileged endpoint that approves, rejects, and revokes
+doctor accounts. It had no tests despite controlling doctor verification and the
+user_roles grant that unlocks every doctor-only flow in the system. Added
+api/_routes/admin/doctors.test.ts with 11 tests covering: 403 when getAdminUser
+returns null for GET and POST (the admin gate is the only access control — a
+regression bypassing it would let any authenticated user grant or strip doctor
+roles); 405 for unsupported HTTP methods; GET filtering of pending vs approved rows;
+400 when userId is missing; 400 when action is not approve/reject/revoke; an
+atomicity invariant confirming sql.transaction is called once with exactly 2 queries
+for approve (UPDATE doctor_profiles + INSERT INTO user_roles must commit together —
+only is_verified without the role leaves the doctor visible in the directory but
+unable to use doctor endpoints; only the role without is_verified hides the doctor
+but lets them redeem access codes and read patient charts); a regression guard
+confirming both UPDATE doctor_profiles (is_verified=true) and INSERT INTO user_roles
+are present in the approve SQL calls; a combined atomicity and regression guard for
+revoke confirming the transaction fires and the SQL includes UPDATE
+(is_verified=false) and DELETE FROM user_roles (dropping the DELETE would leave a
+revoked doctor's role in place, allowing them to still reach patient chart data via
+doctors/patient); an atomicity invariant for reject; and 200 with success: true on
+successful approve.
+Verified: tsc 0, eslint 0, 438/438 tests, vite build clean.
+
 ### 2026-11-15 — Test coverage: added security-invariant tests for docs/delete
 docs/delete.ts is the atomic document-deletion endpoint (a P0 fix from the
 original audit: the previous client-side flow ran three independent queries and
