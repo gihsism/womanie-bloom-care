@@ -51,7 +51,8 @@ export default function BabyBodyMap() {
   useEffect(() => { const t = window.setInterval(() => tick(n => n + 1), 60000); return () => window.clearInterval(t); }, []);
 
   if (!loaded) return null;
-  const open = (tab: string) => navigate(`/dashboard/baby?tab=${tab}`);
+  // "+ Feed" opens the add-a-feed form directly.
+  const open = (tab: string) => navigate(`/dashboard/baby?tab=${tab}${tab === 'feed' ? '&add=1' : ''}`);
 
   if (!baby) {
     return (

@@ -8,9 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLifeEvents, importLocalOnce, type LifeEvent } from '@/hooks/useLifeEvents';
-import { Baby, Milk, Moon, Droplets, Ruler, Syringe, Trash2, Play, Square, BarChart3 } from 'lucide-react';
+import { Baby, Milk, Moon, Droplets, Ruler, Syringe, Trash2, Play, Square, BarChart3, Plus, Timer } from 'lucide-react';
 import BabyStatsTab from './BabyStatsTab';
-import { differenceInMinutes, format, isToday, parseISO } from 'date-fns';
+import { differenceInMinutes, format, isToday, isYesterday, parseISO } from 'date-fns';
 
 // Baby tracker: feeds, sleep, nappies, growth and vaccinations, per baby
 // (table babies; entries are life_events tagged with baby_id).
@@ -36,7 +36,6 @@ const fmtMin = (m: number | null) => {
   const h = Math.floor(m / 60); const min = Math.round(m % 60);
   return h === 0 ? `${min}m` : min === 0 ? `${h}h` : `${h}h ${min}m`;
 };
-const when = (iso: string) => isToday(parseISO(iso)) ? format(parseISO(iso), 'HH:mm') : format(parseISO(iso), 'MMM d, HH:mm');
 const readActive = (key: string): number | null => { try { const v = localStorage.getItem(key); return v ? Number(v) : null; } catch { return null; } };
 const writeActive = (key: string, v: number | null) => { try { if (v === null) localStorage.removeItem(key); else localStorage.setItem(key, String(v)); } catch { /* ignore */ } };
 
@@ -58,7 +57,21 @@ function Remove({ onClick }: { onClick: () => void }) {
   );
 }
 
-function FeedTab({ babyId }: { babyId: string }) {
+// "Now" as the value of a datetime-local input (local time, minutes).
+const nowLocal = () => format(new Date(), "yyyy-MM-dd'T'HH:mm");
+
+function Saved({ text }: { text: string | null }) {
+  if (!text) return null;
+  return <p role="status" className="text-sm text-primary text-center">{text}</p>;
+}
+
+function useFlash() {
+  const [msg, setMsg] = useState<string | null>(null);
+  const flash = (m: string) => { setMsg(m); window.setTimeout(() => setMsg(null), 2500); };
+  return [msg, flash] as const;
+}
+
+function FeedTab({ babyId, openAdd = false }: { babyId: string; openAdd?: boolean }) {
   const feeds = useLifeEvents<FeedData>('feed', {
     babyId, limit: 200,
     beforeLoad: (id) => importLocalOnce<{ at: string; method: FeedMethod }, FeedData>(id, OLD_FEEDS_KEY(id), 'feed', f =>
@@ -67,9 +80,45 @@ function FeedTab({ babyId }: { babyId: string }) {
   const [active, setActive] = useState<{ side: FeedMethod; start: number } | null>(() => {
     try { const raw = localStorage.getItem(FEED_ACTIVE_KEY(babyId)); return raw ? JSON.parse(raw) : null; } catch { return null; }
   });
+  const now = useTick(!!active);
+  const [saved, flash] = useFlash();
+
+  // "Add a feed" form — for a feed that already happened (or one you
+  // don't want to time). Opens straight away from Home's "+ Feed".
+  const [adding, setAdding] = useState(openAdd);
+  const lastSide = feeds.events.find(f => f.data?.method !== 'bottle')?.data?.method;
+  const [method, setMethod] = useState<FeedMethod>('breast_l');
+  const [at, setAt] = useState(nowLocal);
+  const [minutes, setMinutes] = useState('15');
   const [ml, setMl] = useState('');
   const [milk, setMilk] = useState<'breast_milk' | 'formula'>('formula');
-  const now = useTick(!!active);
+  const [busy, setBusy] = useState(false);
+
+  // Suggest the other breast from last time.
+  useEffect(() => {
+    if (lastSide === 'breast_l') setMethod(m => (m === 'bottle' ? m : 'breast_r'));
+    if (lastSide === 'breast_r') setMethod(m => (m === 'bottle' ? m : 'breast_l'));
+  }, [lastSide]);
+
+  const openForm = () => { setAt(nowLocal()); setAdding(true); };
+
+  const saveFeed = async () => {
+    const start = new Date(at);
+    if (Number.isNaN(start.getTime())) return;
+    setBusy(true);
+    try {
+      if (method === 'bottle') {
+        const n = parseInt(ml, 10);
+        await feeds.add({ occurred_at: start.toISOString(), data: { method: 'bottle', ml: Number.isFinite(n) ? n : null, milk } });
+      } else {
+        const m = parseInt(minutes, 10);
+        const ended = Number.isFinite(m) && m > 0 ? new Date(start.getTime() + m * 60000).toISOString() : undefined;
+        await feeds.add({ occurred_at: start.toISOString(), ...(ended ? { ended_at: ended } : {}), data: { method } });
+      }
+      setAdding(false); setMl('');
+      flash('Feed added ✓');
+    } finally { setBusy(false); }
+  };
 
   const startBreast = (side: FeedMethod) => {
     const a = { side, start: Date.now() };
@@ -82,57 +131,91 @@ function FeedTab({ babyId }: { babyId: string }) {
     setActive(null);
     try { localStorage.removeItem(FEED_ACTIVE_KEY(babyId)); } catch { /* ignore */ }
     await feeds.add({ occurred_at: new Date(a.start).toISOString(), ended_at: new Date().toISOString(), data: { method: a.side } });
-  };
-  const logBottle = async () => {
-    const n = parseInt(ml, 10);
-    await feeds.add({ occurred_at: new Date().toISOString(), data: { method: 'bottle', ml: Number.isFinite(n) ? n : null, milk } });
-    setMl('');
+    flash('Feed saved ✓');
   };
 
   const today = feeds.events.filter(f => isToday(parseISO(f.occurred_at)));
   const mlToday = today.reduce((s, f) => s + (Number(f.data?.ml) || 0), 0);
   const sinceLast = feeds.events[0] ? differenceInMinutes(new Date(), parseISO(feeds.events[0].occurred_at)) : null;
-  const lastSide = feeds.events.find(f => f.data?.method !== 'bottle')?.data?.method;
+  const typeLabel: Record<FeedMethod, string> = { breast_l: 'Left breast', breast_r: 'Right breast', bottle: 'Bottle' };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {feeds.error && <p className="text-xs text-destructive">{feeds.error}</p>}
       <div className="grid grid-cols-3 gap-2 text-center">
         <Stat label="Last feed" value={sinceLast === null ? '—' : `${fmtMin(sinceLast)} ago`} />
         <Stat label="Feeds today" value={String(today.length)} />
         <Stat label="Bottle today" value={mlToday ? `${mlToday} ml` : '—'} />
       </div>
+
       {active ? (
-        <div className="rounded-xl bg-primary/10 border border-primary/30 p-3 text-center space-y-2">
-          <div className="text-xs text-primary">{METHOD_LABEL[active.side]} · feeding</div>
-          <div className="text-3xl font-bold tabular-nums">{fmtMin((now - active.start) / 60000)}</div>
-          <Button onClick={stopBreast} className="gap-1"><Square className="h-4 w-4" /> Stop</Button>
+        <div className="rounded-2xl bg-primary/10 border border-primary/30 p-4 text-center space-y-2">
+          <div className="text-sm text-primary">{METHOD_LABEL[active.side]} · feeding now</div>
+          <div className="font-display text-4xl tabular-nums">{fmtMin((now - active.start) / 60000)}</div>
+          <Button size="lg" onClick={stopBreast} className="gap-2 w-full"><Square className="h-4 w-4" /> Finished — save feed</Button>
+        </div>
+      ) : adding ? (
+        <div className="rounded-2xl border border-foreground/20 bg-card p-4 space-y-4" aria-label="Add a feed">
+          <p className="font-display text-lg">Add a feed</p>
+          <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Type of feed">
+            {(['breast_l', 'breast_r', 'bottle'] as FeedMethod[]).map(m => (
+              <button key={m} type="button" role="radio" aria-checked={method === m} onClick={() => setMethod(m)}
+                className={`rounded-xl border py-3 text-sm ${method === m ? 'bg-foreground text-background border-foreground' : 'border-border'}`}>
+                {typeLabel[m]}
+              </button>
+            ))}
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="feed-at" className="text-sm">When did it start?</Label>
+            <Input id="feed-at" type="datetime-local" value={at} max={nowLocal()} onChange={e => setAt(e.target.value)} className="h-11 text-base" />
+          </div>
+          {method === 'bottle' ? (
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="bottle-ml" className="text-sm">Amount (ml)</Label>
+                <Input id="bottle-ml" inputMode="numeric" value={ml} onChange={e => setMl(e.target.value)} placeholder="e.g. 90" className="h-11 text-base" />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {(['formula', 'breast_milk'] as const).map(m => (
+                  <button key={m} type="button" onClick={() => setMilk(m)} aria-pressed={milk === m}
+                    className={`rounded-xl border py-2.5 text-sm ${milk === m ? 'bg-foreground text-background border-foreground' : 'border-border'}`}>
+                    {m === 'formula' ? 'Formula' : 'Breast milk'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              <Label htmlFor="feed-min" className="text-sm">How long? (minutes)</Label>
+              <Input id="feed-min" inputMode="numeric" value={minutes} onChange={e => setMinutes(e.target.value)} placeholder="e.g. 15" className="h-11 text-base" />
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="outline" size="lg" onClick={() => setAdding(false)}>Cancel</Button>
+            <Button size="lg" onClick={saveFeed} disabled={busy}>Save feed</Button>
+          </div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-2">
-          <Button variant="outline" onClick={() => startBreast('breast_l')} className="gap-1">
-            <Play className="h-3.5 w-3.5" /> Left{lastSide === 'breast_l' ? ' (last)' : ''}
+        <div className="space-y-3">
+          <Button size="lg" className="w-full h-14 text-base gap-2" onClick={openForm}>
+            <Plus className="h-5 w-5" /> Add a feed
           </Button>
-          <Button variant="outline" onClick={() => startBreast('breast_r')} className="gap-1">
-            <Play className="h-3.5 w-3.5" /> Right{lastSide === 'breast_r' ? ' (last)' : ''}
-          </Button>
+          <div className="rounded-2xl border border-border p-3 space-y-2">
+            <p className="text-sm text-muted-foreground flex items-center gap-1.5"><Timer className="h-4 w-4" /> Breastfeeding now? Start a timer</p>
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="outline" onClick={() => startBreast('breast_l')} className="gap-1.5">
+                <Play className="h-3.5 w-3.5" /> Left{lastSide === 'breast_l' ? ' (last time)' : ''}
+              </Button>
+              <Button variant="outline" onClick={() => startBreast('breast_r')} className="gap-1.5">
+                <Play className="h-3.5 w-3.5" /> Right{lastSide === 'breast_r' ? ' (last time)' : ''}
+              </Button>
+            </div>
+          </div>
         </div>
       )}
-      <div className="flex items-end gap-2">
-        <div className="w-24">
-          <Label htmlFor="bottle-ml" className="text-xs">Bottle (ml)</Label>
-          <Input id="bottle-ml" inputMode="numeric" value={ml} onChange={e => setMl(e.target.value)} placeholder="90" />
-        </div>
-        <div className="flex gap-1">
-          {(['formula', 'breast_milk'] as const).map(m => (
-            <Button key={m} type="button" size="sm" variant={milk === m ? 'default' : 'outline'} className="text-xs" onClick={() => setMilk(m)}>
-              {m === 'formula' ? 'Formula' : 'Breast milk'}
-            </Button>
-          ))}
-        </div>
-        <Button size="sm" onClick={logBottle}>Log</Button>
-      </div>
-      <EntryList events={feeds.events.slice(0, 12)} onRemove={feeds.remove} render={f => (
+      <Saved text={saved} />
+
+      <EntryList events={feeds.events.slice(0, 30)} onRemove={feeds.remove} render={f => (
         <>
           {METHOD_LABEL[f.data?.method as FeedMethod] ?? 'Feed'}
           {f.ended_at ? ` · ${fmtMin(differenceInMinutes(parseISO(f.ended_at), parseISO(f.occurred_at)))}` : ''}
@@ -140,7 +223,7 @@ function FeedTab({ babyId }: { babyId: string }) {
           {f.data?.milk ? ` (${f.data.milk === 'formula' ? 'formula' : 'breast milk'})` : ''}
         </>
       )} />
-      <p className="text-[10px] text-muted-foreground">Newborns typically feed 8–12 times in 24 hours. Ask your midwife or health visitor if you’re unsure.</p>
+      <p className="text-xs text-muted-foreground">Newborns typically feed 8–12 times in 24 hours. Ask your midwife or health visitor if you’re unsure.</p>
     </div>
   );
 }
@@ -149,32 +232,63 @@ function SleepTab({ babyId }: { babyId: string }) {
   const sleeps = useLifeEvents('baby_sleep', { babyId, limit: 100 });
   const [start, setStart] = useState<number | null>(() => readActive(SLEEP_ACTIVE_KEY(babyId)));
   const now = useTick(start !== null);
+  const [saved, flash] = useFlash();
+  const [adding, setAdding] = useState(false);
+  const [from, setFrom] = useState(nowLocal);
+  const [mins, setMins] = useState('60');
   const begin = () => { const t = Date.now(); setStart(t); writeActive(SLEEP_ACTIVE_KEY(babyId), t); };
   const end = async () => {
     if (start === null) return;
     const s = start; setStart(null); writeActive(SLEEP_ACTIVE_KEY(babyId), null);
     await sleeps.add({ occurred_at: new Date(s).toISOString(), ended_at: new Date().toISOString() });
+    flash('Sleep saved ✓');
+  };
+  const savePast = async () => {
+    const s = new Date(from); const m = parseInt(mins, 10);
+    if (Number.isNaN(s.getTime()) || !Number.isFinite(m) || m <= 0) return;
+    await sleeps.add({ occurred_at: s.toISOString(), ended_at: new Date(s.getTime() + m * 60000).toISOString() });
+    setAdding(false); flash('Sleep added ✓');
   };
   const todayMin = sleeps.events
     .filter(e => e.ended_at && isToday(parseISO(e.ended_at)))
     .reduce((sum, e) => sum + differenceInMinutes(parseISO(e.ended_at as string), parseISO(e.occurred_at)), 0);
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {sleeps.error && <p className="text-xs text-destructive">{sleeps.error}</p>}
       <div className="grid grid-cols-2 gap-2 text-center">
         <Stat label="Sleep today" value={fmtMin(todayMin)} />
         <Stat label="Naps today" value={String(sleeps.events.filter(e => e.ended_at && isToday(parseISO(e.ended_at))).length)} />
       </div>
       {start !== null ? (
-        <div className="rounded-xl bg-primary/10 border border-primary/30 p-3 text-center space-y-2">
-          <div className="text-xs text-primary">Sleeping</div>
-          <div className="text-3xl font-bold tabular-nums">{fmtMin((now - start) / 60000)}</div>
-          <Button onClick={end} className="gap-1"><Square className="h-4 w-4" /> Woke up</Button>
+        <div className="rounded-2xl bg-primary/10 border border-primary/30 p-4 text-center space-y-2">
+          <div className="text-sm text-primary">Sleeping</div>
+          <div className="font-display text-4xl tabular-nums">{fmtMin((now - start) / 60000)}</div>
+          <Button size="lg" onClick={end} className="gap-2 w-full"><Square className="h-4 w-4" /> Woke up — save sleep</Button>
+        </div>
+      ) : adding ? (
+        <div className="rounded-2xl border border-foreground/20 bg-card p-4 space-y-4" aria-label="Add a sleep">
+          <p className="font-display text-lg">Add an earlier sleep</p>
+          <div className="space-y-1.5">
+            <Label htmlFor="sleep-from" className="text-sm">Fell asleep at</Label>
+            <Input id="sleep-from" type="datetime-local" value={from} max={nowLocal()} onChange={e => setFrom(e.target.value)} className="h-11 text-base" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="sleep-min" className="text-sm">Slept for (minutes)</Label>
+            <Input id="sleep-min" inputMode="numeric" value={mins} onChange={e => setMins(e.target.value)} className="h-11 text-base" />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="outline" size="lg" onClick={() => setAdding(false)}>Cancel</Button>
+            <Button size="lg" onClick={savePast}>Save sleep</Button>
+          </div>
         </div>
       ) : (
-        <Button onClick={begin} className="w-full gap-1"><Moon className="h-4 w-4" /> Fell asleep</Button>
+        <div className="space-y-2">
+          <Button size="lg" onClick={begin} className="w-full h-14 text-base gap-2"><Moon className="h-5 w-5" /> Fell asleep now</Button>
+          <Button variant="outline" onClick={() => { setFrom(nowLocal()); setAdding(true); }} className="w-full gap-1.5"><Plus className="h-4 w-4" /> Add an earlier sleep</Button>
+        </div>
       )}
-      <EntryList events={sleeps.events.slice(0, 10)} onRemove={sleeps.remove} render={e => (
+      <Saved text={saved} />
+      <EntryList events={sleeps.events.slice(0, 20)} onRemove={sleeps.remove} render={e => (
         <>{e.ended_at ? `Slept ${fmtMin(differenceInMinutes(parseISO(e.ended_at), parseISO(e.occurred_at)))}` : 'Sleep'}</>
       )} />
     </div>
@@ -188,6 +302,7 @@ function NappyTab({ babyId }: { babyId: string }) {
   const dirty = today.filter(e => e.data?.type !== 'wet').length;
   const log = (type: NappyData['type']) => nappies.add({ occurred_at: new Date().toISOString(), data: { type } });
   const label = { wet: 'Wet', dirty: 'Dirty', both: 'Wet + dirty' } as const;
+  const [saved, flash] = useFlash();
   return (
     <div className="space-y-3">
       {nappies.error && <p className="text-xs text-destructive">{nappies.error}</p>}
@@ -195,11 +310,15 @@ function NappyTab({ babyId }: { babyId: string }) {
         <Stat label="Wet today" value={String(wet)} />
         <Stat label="Dirty today" value={String(dirty)} />
       </div>
-      <div className="grid grid-cols-3 gap-2">
-        <Button variant="outline" onClick={() => log('wet')}>Wet</Button>
-        <Button variant="outline" onClick={() => log('dirty')}>Dirty</Button>
-        <Button variant="outline" onClick={() => log('both')}>Both</Button>
+      <div className="space-y-2">
+        <p className="text-sm text-muted-foreground">Tap to add a nappy changed now:</p>
+        <div className="grid grid-cols-3 gap-2">
+          <Button variant="outline" className="h-12 text-base" onClick={() => { void log('wet'); flash('Wet nappy added ✓'); }}>+ Wet</Button>
+          <Button variant="outline" className="h-12 text-base" onClick={() => { void log('dirty'); flash('Dirty nappy added ✓'); }}>+ Dirty</Button>
+          <Button variant="outline" className="h-12 text-base" onClick={() => { void log('both'); flash('Nappy added ✓'); }}>+ Both</Button>
+        </div>
       </div>
+      <Saved text={saved} />
       <EntryList events={nappies.events.slice(0, 10)} onRemove={nappies.remove} render={e => <>{label[e.data?.type ?? 'wet']}</>} />
       <p className="text-[10px] text-muted-foreground">From about day 5, around 6 or more wet nappies a day is a common sign of enough milk. Ask your midwife if you’re worried.</p>
     </div>
@@ -276,26 +395,58 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
+function dayHeading(iso: string) {
+  const d = parseISO(iso);
+  if (isToday(d)) return 'Today';
+  if (isYesterday(d)) return 'Yesterday';
+  return format(d, 'EEE d MMM');
+}
+
 function EntryList<D>({ events, onRemove, render, dateOnly }: {
   events: LifeEvent<D>[]; onRemove: (id: string) => unknown; render: (e: LifeEvent<D>) => React.ReactNode; dateOnly?: boolean;
 }) {
   if (events.length === 0) return null;
+  if (dateOnly) {
+    return (
+      <ul className="divide-y border-t">
+        {events.map(e => (
+          <li key={e.id} className="flex items-center gap-3 py-2.5 text-sm">
+            <span className="text-muted-foreground tabular-nums w-28 flex-shrink-0">{format(parseISO(e.occurred_at), 'd MMM yyyy')}</span>
+            <span className="flex-1">{render(e)}</span>
+            <Remove onClick={() => { void onRemove(e.id); }} />
+          </li>
+        ))}
+      </ul>
+    );
+  }
+  // Grouped by day: Today / Yesterday / date, newest first.
+  const groups: { label: string; items: LifeEvent<D>[] }[] = [];
+  for (const e of events) {
+    const label = dayHeading(e.occurred_at);
+    const g = groups[groups.length - 1];
+    if (g && g.label === label) g.items.push(e); else groups.push({ label, items: [e] });
+  }
   return (
-    <ul className="space-y-1 max-h-48 overflow-y-auto pt-2 border-t">
-      {events.map(e => (
-        <li key={e.id} className="flex items-center gap-2 text-xs">
-          <span className="text-muted-foreground tabular-nums w-24 flex-shrink-0">
-            {dateOnly ? format(parseISO(e.occurred_at), 'MMM d, yyyy') : when(e.occurred_at)}
-          </span>
-          <span className="flex-1">{render(e)}</span>
-          <Remove onClick={() => { void onRemove(e.id); }} />
-        </li>
+    <div className="space-y-3 border-t pt-3">
+      {groups.map(g => (
+        <section key={g.label}>
+          <p className="label-mono mb-1">{g.label}</p>
+          <ul className="divide-y">
+            {g.items.map(e => (
+              <li key={e.id} className="flex items-center gap-3 py-2.5 text-sm">
+                <span className="tabular-nums w-12 flex-shrink-0 font-medium">{format(parseISO(e.occurred_at), 'HH:mm')}</span>
+                <span className="flex-1">{render(e)}</span>
+                <Remove onClick={() => { void onRemove(e.id); }} />
+              </li>
+            ))}
+          </ul>
+        </section>
       ))}
-    </ul>
+    </div>
   );
 }
 
-export default function BabyTracker({ initialTab = 'feed' }: { initialTab?: string }) {
+export default function BabyTracker({ initialTab = 'feed', openAdd = false }: { initialTab?: string; openAdd?: boolean }) {
   const { user } = useAuth();
   const userId = user?.id ?? '';
   const [babies, setBabies] = useState<BabyRow[]>([]);
@@ -373,7 +524,7 @@ export default function BabyTracker({ initialTab = 'feed' }: { initialTab?: stri
             <TabsTrigger value="vax" className="text-[11px] px-1 flex-col gap-0.5 py-1.5"><Syringe className="h-3.5 w-3.5" />Vaccines</TabsTrigger>
             <TabsTrigger value="stats" className="text-[11px] px-1 flex-col gap-0.5 py-1.5"><BarChart3 className="h-3.5 w-3.5" />Stats</TabsTrigger>
           </TabsList>
-          <TabsContent value="feed" className="pt-3"><FeedTab babyId={baby.id} /></TabsContent>
+          <TabsContent value="feed" className="pt-3"><FeedTab babyId={baby.id} openAdd={openAdd} /></TabsContent>
           <TabsContent value="sleep" className="pt-3"><SleepTab babyId={baby.id} /></TabsContent>
           <TabsContent value="nappy" className="pt-3"><NappyTab babyId={baby.id} /></TabsContent>
           <TabsContent value="growth" className="pt-3"><GrowthTab babyId={baby.id} /></TabsContent>

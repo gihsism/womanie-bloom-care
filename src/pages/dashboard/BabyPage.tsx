@@ -24,7 +24,7 @@ export default function BabyPage() {
         </div>
       </div>
       <div className="max-w-3xl mx-auto px-4 py-6">
-        <BabyTracker initialTab={initialTab} />
+        <BabyTracker initialTab={initialTab} openAdd={params.get('add') === '1'} />
       </div>
     </div>
   );
