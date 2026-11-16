@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { startLogin } from '@/lib/login';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, FileText, Brain, Shield } from 'lucide-react';
 import heroIllustration from '@/assets/hero-illustration.png';
@@ -77,7 +78,7 @@ const Hero = () => {
             {!user && (
               <p className="text-[15px] text-muted-foreground">
                 Already have an account?{' '}
-                <button type="button" onClick={() => navigate('/auth/login')} className="font-medium text-primary underline underline-offset-4">
+                <button type="button" onClick={() => startLogin(navigate)} className="font-medium text-primary underline underline-offset-4">
                   Log in
                 </button>
               </p>

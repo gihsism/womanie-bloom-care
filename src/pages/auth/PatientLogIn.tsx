@@ -29,7 +29,7 @@ const PatientLogIn = () => {
   const leadWithGoogle = showGoogle && googleFirst;
 
   useEffect(() => {
-    if (!loading && user) navigate('/welcome', { replace: true });
+    if (!loading && user) navigate('/dashboard', { replace: true });
   }, [user, loading, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -60,7 +60,7 @@ const PatientLogIn = () => {
       }
 
       try { localStorage.setItem('womanie_last_email', email.trim()); localStorage.setItem('womanie_last_method', 'password'); } catch { /* storage blocked */ }
-      window.location.href = '/welcome';
+      window.location.href = '/dashboard';
     } catch {
       toast({ variant: 'destructive', title: 'Error', description: 'Something went wrong' });
     } finally {

@@ -55,6 +55,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const sql = neon(process.env.DATABASE_URL!);
 
     // Find or create user
+    let isNewUser = false;
     let users = await sql.query('SELECT * FROM auth_users WHERE google_id = $1', [googleUser.id]);
 
     if (users.length === 0) {
@@ -76,6 +77,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           ),
         ]);
         users = [{ id: userId, email: googleUser.email, name: googleUser.name, avatar_url: googleUser.picture, google_id: googleUser.id }];
+        isNewUser = true;
       } else {
         // Link Google ID to existing email user
         await sql.query('UPDATE auth_users SET google_id = $1, name = $2, avatar_url = $3 WHERE id = $4',
@@ -110,7 +112,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       `womanie_session=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}`,
       clearStateCookie(),
     ]);
-    res.redirect(302, '/welcome');
+    // First sign-in gets the short welcome tour; returning users go straight
+    // to their own Home page.
+    res.redirect(302, isNewUser ? '/welcome' : '/dashboard');
   } catch (error) {
     // Log full details server-side (also captured by Sentry); never leak
     // internal error messages to the client. Redirect to login with a

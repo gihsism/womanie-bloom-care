@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { withinWindow } from '@/lib/labWindow';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -36,9 +37,11 @@ const statusBg = (status: string | null) => {
   }
 };
 
-export default function PregnancyLabInsights() {
+export default function PregnancyLabInsights({ since = null }: { since?: Date | null } = {}) {
   const navigate = useNavigate();
-  const { labs, loading } = useLabResults();
+  const { labs: allLabs, loading } = useLabResults();
+  // Only results from this pregnancy (older ones stay in Health Records).
+  const labs = withinWindow(allLabs, since);
 
   if (loading) return null;
 
@@ -59,7 +62,7 @@ export default function PregnancyLabInsights() {
       <Card className="p-4 border-dashed">
         <div className="text-center space-y-2">
           <Upload className="h-6 w-6 text-primary mx-auto" />
-          <p className="text-sm font-semibold">Upload your blood tests</p>
+          <p className="text-sm font-semibold">{allLabs.length > 0 ? 'No blood tests from this pregnancy yet' : 'Upload your blood tests'}</p>
           <p className="text-[10px] text-muted-foreground">Get personalized pregnancy health insights from your lab results</p>
           <Button size="sm" variant="outline" onClick={() => navigate('/dashboard/medical-history')}>
             Upload documents

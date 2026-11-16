@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { withinWindow } from '@/lib/labWindow';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -54,7 +55,7 @@ const statusBadge = (s: string | null) => {
   return null;
 };
 
-export default function RecentFindings() {
+export default function RecentFindings({ since = null }: { since?: Date | null } = {}) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [findings, setFindings] = useState<Finding[]>([]);
@@ -68,7 +69,7 @@ export default function RecentFindings() {
       .from('current_extracted_data')
       .select('id, document_id, title, value, unit, reference_range, status, data_type, date_recorded, notes')
       .eq('user_id', user.id);
-    const rows = (data ?? []) as Finding[];
+    const rows = withinWindow((data ?? []) as Finding[], since);
     const flagged = rows.filter(r => r.status === 'critical' || r.status === 'abnormal');
     flagged.sort((a, b) => {
       const r = statusRank(a.status) - statusRank(b.status);
@@ -79,7 +80,7 @@ export default function RecentFindings() {
     });
     setFindings(flagged);
     setLoaded(true);
-  }, [user]);
+  }, [user, since]);
 
   useEffect(() => {
     load();

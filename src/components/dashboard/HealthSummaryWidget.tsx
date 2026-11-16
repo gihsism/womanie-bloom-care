@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { withinWindow } from '@/lib/labWindow';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,7 +23,7 @@ interface ExtractedItem {
   date_recorded: string | null;
 }
 
-export default function HealthSummaryWidget() {
+export default function HealthSummaryWidget({ since = null }: { since?: Date | null } = {}) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [data, setData] = useState<ExtractedItem[]>([]);
@@ -35,10 +36,10 @@ export default function HealthSummaryWidget() {
       db.from('medical_extracted_data').select('title, value, unit, status, data_type, date_recorded').eq('user_id', user.id),
       db.from('health_documents').select('id').eq('user_id', user.id),
     ]);
-    if (medRes.data) setData(medRes.data);
+    if (medRes.data) setData(withinWindow(medRes.data as ExtractedItem[], since));
     if (docRes.data) setDocCount(docRes.data.length);
     setLoading(false);
-  }, [user]);
+  }, [user, since]);
 
   useEffect(() => {
     load();

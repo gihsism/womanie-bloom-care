@@ -81,6 +81,8 @@ import CycleLabInsights from '@/components/dashboard/CycleLabInsights';
 import ModeLabInsights from '@/components/dashboard/ModeLabInsights';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { format } from 'date-fns';
+import { useMemo } from 'react';
+import { pregnancyStart } from '@/lib/labWindow';
 import {
   MessageSquare,
   Activity,
@@ -328,6 +330,13 @@ const PatientDashboard = () => {
   };
 
 
+  // Pregnancy Home shows only lab results from this pregnancy; older ones
+  // stay in Health Records. Memoised so the cards don't reload every render.
+  const labSince = useMemo(
+    () => (selectedMode === 'pregnancy' ? pregnancyStart(pregnancyDueDate) : null),
+    [selectedMode, pregnancyDueDate],
+  );
+
   // Quick links — the doctor-search slot's label nudges users toward
   // the right specialty for their life stage. The destination is the
   // same FindDoctor page regardless; the label adjusts so a pregnant
@@ -444,7 +453,7 @@ const PatientDashboard = () => {
           <div className="flex items-center justify-between mb-4">
              <div className="flex items-center gap-1 sm:gap-2">
               <button
-                onClick={() => navigate('/welcome')}
+                onClick={() => navigate('/')}
                 className="flex items-center justify-center h-8 w-8 sm:h-9 sm:w-9 rounded-md hover:bg-muted transition-colors"
                 aria-label="Go back"
               >
@@ -657,18 +666,18 @@ const PatientDashboard = () => {
             {/* Most important findings from recent analyses — shown
                 first so critical/abnormal results are visible at a
                 glance. Hides itself when there's nothing to flag. */}
-            <RecentFindings />
+            <RecentFindings since={labSince} />
 
             {/* Tests the patient has tracked at least twice but hasn't
                 seen in 12+ months. Hides when nothing is overdue. */}
-            <OverdueTests />
+            {selectedMode !== 'pregnancy' && <OverdueTests />}
 
             {/* Cross-document trends — how key tests have changed over
                 multiple uploads. Hidden when there's nothing to show. */}
-            <HealthTrends />
+            {selectedMode !== 'pregnancy' && <HealthTrends />}
 
             {/* Health Summary from medical documents */}
-            <HealthSummaryWidget />
+            <HealthSummaryWidget since={labSince} />
 
             {/* Lab + age signals that change how reliable the cycle
                 prediction is — TSH out of range, elevated FSH, PCOS
@@ -784,7 +793,7 @@ const PatientDashboard = () => {
                     })()}
                   </div>
                   <div className="lg:col-span-1 space-y-4">
-                    <PregnancyLabInsights />
+                    <PregnancyLabInsights since={labSince} />
                   </div>
                 </div>
               ) : selectedMode === 'pre-menstrual' ? (

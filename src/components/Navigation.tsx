@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { startLogin } from '@/lib/login';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
@@ -113,7 +114,7 @@ const Navigation = () => {
             <div className="hidden md:flex items-center gap-2">
               {user ? (
                 <>
-                  <Button variant="ghost" size="sm" onClick={() => navigate('/welcome')}>
+                  <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
                     My Space
                   </Button>
                   <Button variant="outline" size="sm" onClick={async () => {
@@ -124,7 +125,7 @@ const Navigation = () => {
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" size="sm" onClick={() => navigate('/auth/login')}>
+                  <Button variant="ghost" size="sm" onClick={() => startLogin(navigate)}>
                     Log In
                   </Button>
                   <Button size="sm" onClick={() => navigate('/auth/select-type')}>
@@ -139,7 +140,7 @@ const Navigation = () => {
               size="sm"
               variant={user ? 'ghost' : 'outline'}
               className="md:hidden h-9 px-4"
-              onClick={() => navigate(user ? '/welcome' : '/auth/login')}
+              onClick={() => (user ? navigate('/dashboard') : startLogin(navigate))}
             >
               {user ? 'My Space' : 'Log In'}
             </Button>
@@ -216,7 +217,7 @@ const Navigation = () => {
                     <Button
                       variant="ghost"
                       className="w-full"
-                      onClick={() => handleNav('/auth/login')}
+                      onClick={() => { setIsMobileMenuOpen(false); startLogin(navigate); }}
                     >
                       Log In
                     </Button>

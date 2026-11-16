@@ -20,6 +20,7 @@ export interface LabResult {
   unit: string | null;
   reference_range: string | null;
   status: string | null;
+  date_recorded?: string | null;
 }
 
 type CacheEntry = {
@@ -65,7 +66,7 @@ async function fetchForUser(userId: string): Promise<LabResult[]> {
   const promise = (async () => {
     const { data } = await db
       .from('medical_extracted_data')
-      .select('title, value, unit, reference_range, status')
+      .select('title, value, unit, reference_range, status, date_recorded')
       .eq('user_id', userId)
       .eq('data_type', 'lab_result');
     const rows = (data as LabResult[] | null) ?? [];
