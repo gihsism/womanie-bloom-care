@@ -189,6 +189,30 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-17 — Test coverage: added security-invariant tests for auth/logout
+auth/logout.ts is the session revocation endpoint added in the 2026-10-25 hardening
+work. Its core security property is the DELETE FROM auth_sessions it performs on a
+valid session cookie: without that deletion, getAuthUser's session-existence check
+(also added 2026-10-25) would still pass for a token the user has explicitly logged
+out of, making logout ineffective. The handler also clears the browser cookie with
+HttpOnly, Secure, and Max-Age=0, and must gracefully handle no-cookie and invalid-JWT
+calls without crashing or skipping the cookie clear. It had no tests at all.
+Added api/_routes/auth/logout.test.ts with 8 tests covering: the core revocation
+invariant confirming DELETE FROM auth_sessions is called when a valid cookie is
+present (a refactor that dropped this DELETE would leave all logged-out sessions
+replayable); a binding invariant confirming the DELETE parameter is payload.sid from
+the verified JWT, not any client-supplied value (substituting a request parameter
+would let an attacker revoke arbitrary sessions by guessing IDs); Max-Age=0 on the
+Set-Cookie header (without this the browser keeps sending the old cookie even though
+the server session is gone); HttpOnly and Secure on the clearing cookie (prevents
+an XSS script from observing or capturing the zero-lifetime cookie value); redirect
+to / when no cookie is present (graceful no-op, never crashes); redirect and cookie
+clear when the JWT is invalid (the inner try/catch must still clear the cookie even
+on a bad token); redirect status 302 (a 200 would leave the browser on a blank
+response); and no database query when no cookie is present (nothing to revoke, no
+unnecessary roundtrip).
+Verified: tsc 0, eslint 0, 446/446 tests, vite build clean.
+
 ### 2026-11-16 — Test coverage: added security-invariant tests for admin/doctors
 admin/doctors.ts is the privileged endpoint that approves, rejects, and revokes
 doctor accounts. It had no tests despite controlling doctor verification and the
