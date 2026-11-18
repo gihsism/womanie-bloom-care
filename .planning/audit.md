@@ -189,6 +189,28 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-18 — Test coverage: added security-invariant tests for me/doctor-notes
+me/doctor-notes.ts returns doctor-authored notes to a patient — but only the ones
+the doctor explicitly marked as visible to the patient (is_visible_to_patient = TRUE).
+This endpoint exists because the generic /api/db router owns doctor_notes by doctor_id,
+so a patient can't reach their own notes through it; this endpoint flips the perspective.
+It had no tests despite having two critical invariants: (1) the ownership filter must bind
+the session user's id as patient_id so a patient can only ever see notes addressed to
+them, and (2) the is_visible_to_patient = TRUE filter must always be present so notes the
+doctor marked internal-only never leak to the patient.
+Added api/_routes/me/doctor-notes.test.ts with 7 tests covering: 401 when getAuthUser
+returns null; 405 for non-GET methods (POST, PUT, DELETE, PATCH all rejected); an
+ownership invariant confirming $1 in the SQL is bound to the session user's id — not any
+client-supplied value (a refactor substituting a query param would let any authenticated
+user read another patient's notes by supplying a different patient_id); a visibility
+invariant confirming the SQL contains is_visible_to_patient = TRUE (the critical regression
+guard — dropping this filter exposes the doctor's internal notes to the patient, a direct
+privacy breach of a deliberate doctor decision); a regression guard confirming the WHERE
+clause references patient_id = $1 so the query is correctly scoped to the session patient;
+200 with a notes array containing the visible note on success; and an empty notes array
+when no visible notes exist.
+Verified: tsc 0, eslint 0, 453/453 tests, vite build clean.
+
 ### 2026-11-17 — Test coverage: added security-invariant tests for auth/logout
 auth/logout.ts is the session revocation endpoint added in the 2026-10-25 hardening
 work. Its core security property is the DELETE FROM auth_sessions it performs on a
