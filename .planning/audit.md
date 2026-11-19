@@ -189,6 +189,30 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-19 — Test coverage: added security-invariant tests for me/export
+me/export.ts is the GDPR data-portability export endpoint — it returns a JSON
+download containing every row Womanie holds for the session user: profile,
+all health documents and analyses, extracted lab values, period tracking, daily
+signals, IVF events, chat messages, connections, appointments, doctor notes
+(visible ones only), chart access log, life events, medications, babies, birth
+records, and doctor-specific tables if the account holds a doctor profile. It
+had no tests at all despite being the most data-dense endpoint in the codebase.
+Added api/_routes/me/export.test.ts with 7 tests covering: 401 when getAuthUser
+returns null; 405 for non-GET methods (POST, PUT, DELETE, PATCH all rejected);
+a privacy invariant confirming the auth_users SELECT never includes password_hash
+(exporting the hash would let an attacker with access to the JSON mount an offline
+brute-force attack — the query must name only id, email, name, created_at); an
+ownership invariant confirming the session user's id appears in the parameters of
+every one of the 20+ sql.query calls fired inside Promise.all (a refactor that
+dropped the user_id filter from any table would silently include other users' rows
+in the export — a cross-account data leak); a Content-Disposition guard confirming
+the response header triggers a file-save dialog rather than inline JSON rendering
+and includes the "womanie-export" filename pattern; 200 with the expected top-level
+payload shape (exported_at, user, documents, period_tracking, chat_messages,
+appointments, doctor sections as empty arrays for patient-only accounts); and 500
+on a database error.
+Verified: tsc 0, eslint 0, 460/460 tests, vite build clean.
+
 ### 2026-11-18 — Test coverage: added security-invariant tests for me/doctor-notes
 me/doctor-notes.ts returns doctor-authored notes to a patient — but only the ones
 the doctor explicitly marked as visible to the patient (is_visible_to_patient = TRUE).
