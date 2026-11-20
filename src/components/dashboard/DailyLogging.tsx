@@ -314,12 +314,12 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
         {showFlow && (
           <div>
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 block">Period flow</Label>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5 sm:gap-2">
               {FLOW_OPTIONS.map(f => (
                 <button
                   key={f.value}
                   onClick={() => update('periodFlow', f.value)}
-                  className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-all ${
+                  className={`flex-1 min-w-0 px-0.5 py-2 rounded-lg border text-[11px] sm:text-xs font-medium transition-all ${
                     data.periodFlow === f.value
                       ? 'border-primary bg-primary/10'
                       : 'border-border hover:border-primary/30'

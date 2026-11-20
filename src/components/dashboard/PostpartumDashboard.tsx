@@ -459,7 +459,7 @@ const RecoveryRow = ({ item, done, muted, onToggle }: RecoveryRowProps) => (
   <li className={`flex items-start gap-2 ${muted ? 'opacity-70' : ''}`}>
     <button
       type="button"
-      className={`flex-shrink-0 mt-0.5 h-4 w-4 rounded border ${done ? 'bg-primary border-primary' : 'border-border'} flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary`}
+      className={`relative before:absolute before:-inset-3 before:content-[''] flex-shrink-0 mt-0.5 h-4 w-4 rounded border ${done ? 'bg-primary border-primary' : 'border-border'} flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary`}
       onClick={onToggle}
       aria-label={done ? `Mark "${item.label}" not done` : `Mark "${item.label}" done`}
     >

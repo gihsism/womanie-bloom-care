@@ -51,7 +51,7 @@ function useTick(active: boolean) {
 
 function Remove({ onClick }: { onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} aria-label="Remove entry" className="text-muted-foreground/60 hover:text-destructive">
+    <button type="button" onClick={onClick} aria-label="Remove entry" className="-m-2.5 p-2.5 text-muted-foreground/60 hover:text-destructive">
       <Trash2 className="h-3.5 w-3.5" />
     </button>
   );
@@ -155,7 +155,7 @@ function FeedTab({ babyId, openAdd = false }: { babyId: string; openAdd?: boolea
           <Button size="lg" onClick={stopBreast} className="gap-2 w-full"><Square className="h-4 w-4" /> Finished — save feed</Button>
         </div>
       ) : adding ? (
-        <div className="rounded-2xl border border-foreground/20 bg-card p-4 space-y-4" aria-label="Add a feed">
+        <div className="rounded-2xl border border-foreground/20 bg-card p-4 space-y-4" aria-label="Add a feed" data-hide-install-banner>
           <p className="font-display text-lg">Add a feed</p>
           <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Type of feed">
             {(['breast_l', 'breast_r', 'bottle'] as FeedMethod[]).map(m => (
@@ -266,7 +266,7 @@ function SleepTab({ babyId }: { babyId: string }) {
           <Button size="lg" onClick={end} className="gap-2 w-full"><Square className="h-4 w-4" /> Woke up — save sleep</Button>
         </div>
       ) : adding ? (
-        <div className="rounded-2xl border border-foreground/20 bg-card p-4 space-y-4" aria-label="Add a sleep">
+        <div className="rounded-2xl border border-foreground/20 bg-card p-4 space-y-4" aria-label="Add a sleep" data-hide-install-banner>
           <p className="font-display text-lg">Add an earlier sleep</p>
           <div className="space-y-1.5">
             <Label htmlFor="sleep-from" className="text-sm">Fell asleep at</Label>
@@ -372,7 +372,7 @@ function VaccineTab({ babyId }: { babyId: string }) {
       <div className="flex flex-wrap gap-1">
         {COMMON_VACCINES.map(v => (
           <button key={v} type="button" onClick={() => setName(v)}
-            className={`text-[11px] px-2 py-0.5 rounded-full ${name === v ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/70'}`}>{v}</button>
+            className={`text-xs px-2.5 py-1.5 rounded-full ${name === v ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/70'}`}>{v}</button>
         ))}
       </div>
       <div className="flex items-end gap-2">

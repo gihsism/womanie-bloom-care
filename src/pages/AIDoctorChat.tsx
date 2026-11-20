@@ -945,8 +945,8 @@ export default function AIDoctorChat() {
             </div>
           )}
 
-          {/* Input Area */}
-          <div className="border-t border-border bg-card p-4">
+          {/* Input Area — the install banner stays away while it's on screen */}
+          <div className="border-t border-border bg-card p-4" data-hide-install-banner>
             <div className="max-w-4xl mx-auto flex gap-2 items-end">
               <Textarea
                 ref={textareaRef}

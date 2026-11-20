@@ -1807,15 +1807,15 @@ export default function MedicalHistory() {
                     <div className="flex items-center gap-2 mb-3">
                       <FlaskConical className="h-4 w-4 text-primary flex-shrink-0" />
                       <h3 className="text-sm font-bold flex-shrink-0">All Your Test Results</h3>
-                      <div className="flex-1" />
-                      <div className="relative">
+                      {/* Shrinks instead of pushing the page wider than a phone. */}
+                      <div className="relative ml-auto min-w-0 w-40 sm:w-52">
                         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                         <input
                           type="text"
                           placeholder="Search results..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="h-8 w-40 sm:w-52 pl-8 pr-3 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          className="h-8 w-full pl-8 pr-3 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
                         />
                       </div>
                     </div>
@@ -2013,8 +2013,8 @@ export default function MedicalHistory() {
                           <Card key={title}>
                             <CardHeader className="pb-1">
                               <CardTitle className="text-xs flex items-center justify-between">
-                                <span className="truncate">{getFriendlyName(title)}</span>
-                                <span className={`font-mono text-sm font-bold ${statusInfo.color}`}>
+                                <span className="truncate min-w-0">{getFriendlyName(title)}</span>
+                                <span className={`font-mono text-sm font-bold whitespace-nowrap shrink-0 ml-2 ${statusInfo.color}`}>
                                   {latestVal}{info.unit ? ` ${info.unit}` : ''}
                                 </span>
                               </CardTitle>
@@ -2065,8 +2065,8 @@ export default function MedicalHistory() {
                                 </ComposedChart>
                               </ResponsiveContainer>
                               {predictedNext !== null && (
-                                <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
-                                  <span className="text-primary">🔮</span> We predict your next result could be around <span className="font-bold">{predictedNext}{info.unit ? ` ${info.unit}` : ''}</span>
+                                <p className="text-[10px] text-muted-foreground mt-1">
+                                  <span className="text-primary">🔮</span> We predict your next result could be around <span className="font-bold whitespace-nowrap">{predictedNext}{info.unit ? ` ${info.unit}` : ''}</span>{' '}
                                   {hasRefRange && refLow !== undefined && refHigh !== undefined && (
                                     <span className={predictedNext >= refLow && predictedNext <= refHigh ? 'text-green-600' : 'text-amber-600'}>
                                       ({predictedNext >= refLow && predictedNext <= refHigh ? 'in the healthy range' : 'outside healthy range'})

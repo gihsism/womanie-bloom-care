@@ -144,10 +144,10 @@ export default function PregnancyBodyMap({ dueDate, name }: { dueDate: Date; nam
           </g>
         </svg>
 
-        {/* Head · next visit */}
+        {/* Next visit */}
         <button type="button" onClick={() => go('/dashboard/appointments')}
           className="absolute w-[35%] text-right leading-tight" style={pct(0, 0)}>
-          <span className="label-mono block">Head · next</span>
+          <span className="label-mono block">Next visit</span>
           {appt ? (
             <>
               <span className="block text-[15px] font-medium mt-1">Check-up</span>
@@ -249,7 +249,7 @@ export default function PregnancyBodyMap({ dueDate, name }: { dueDate: Date; nam
           {daysLeft > 0 ? <>{daysLeft} days remain. Due <b className="font-medium">{format(dueDate, 'd MMMM')}</b>.</> : <>Due date reached — <b className="font-medium">any day now</b>.</>}
           <br /><span className="text-muted-foreground">Touch any label to open it.</span>
         </p>
-        <p className="label-mono text-right leading-relaxed">No. {week} / 40{first ? <><br />{first}</> : null}</p>
+        <p className="label-mono text-right leading-relaxed shrink-0 whitespace-nowrap pl-3">No. {week} / 40{first ? <><br />{first}</> : null}</p>
       </div>
     </section>
   );

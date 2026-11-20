@@ -136,11 +136,11 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
       {(error || doses.error) && <p className="text-xs text-destructive">{error || doses.error}</p>}
 
       {adding && (
-        <div className="rounded-lg border p-3 space-y-2">
+        <div className="rounded-lg border p-3 space-y-2" data-hide-install-banner>
           <div className="flex flex-wrap gap-1">
             {examples.map(ex => (
               <button key={ex} type="button" onClick={() => setName(ex)}
-                className="text-[11px] px-2 py-0.5 rounded-full bg-muted hover:bg-muted/70">
+                className="text-xs px-2.5 py-1.5 rounded-full bg-muted hover:bg-muted/70">
                 {ex}
               </button>
             ))}

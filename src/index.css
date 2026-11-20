@@ -148,9 +148,24 @@
     /* Lift the install prompt above the tab bar so the two fixed-bottom
        elements don't stack on dashboard routes (same 4rem + safe-area
        offset the body padding uses). */
-    body.has-bottom-nav .install-banner-root {
+    body.has-bottom-nav .install-banner-root,
+    body.has-bottom-nav .toast-viewport-root {
       left: 46px;
     }
+  }
+
+  /* While the install prompt is on screen, reserve its height at the end of
+     the page so the last row (a Save button, a list's final item) can always
+     be scrolled clear of it. InstallBanner sets the class and measures the
+     variable; the fallback matches its usual height. */
+  body.has-install-banner {
+    padding-bottom: var(--install-banner-h, 6rem);
+  }
+  /* Full-height pages (e.g. Ask AI, whose message box sits at the bottom of
+     a min-h-screen column) shrink by the same amount, so their bottom row
+     lands just above the banner instead of under it. */
+  body.has-install-banner .min-h-screen {
+    min-height: calc(100vh - var(--install-banner-h, 6rem));
   }
 }
 

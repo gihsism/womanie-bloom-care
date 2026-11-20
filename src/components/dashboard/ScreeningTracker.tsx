@@ -234,8 +234,9 @@ const ScreeningTracker = ({ scope }: ScreeningTrackerProps) => {
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <label className="flex-1 text-[11px] text-muted-foreground flex items-center gap-2">
+              {/* Wraps on phones so the date stays readable and the button stays inside the card. */}
+              <div className="flex flex-wrap items-center gap-2">
+                <label className="flex flex-1 basis-[14rem] items-center gap-2 whitespace-nowrap text-[11px] text-muted-foreground">
                   Mark as done on
                   <input
                     type="date"
@@ -244,13 +245,13 @@ const ScreeningTracker = ({ scope }: ScreeningTrackerProps) => {
                     onChange={(e) => {
                       if (e.target.value) markDone(s.id, e.target.value);
                     }}
-                    className="px-2 py-1 border rounded bg-background text-foreground text-xs flex-1 min-w-0"
+                    className="px-2 py-1 border rounded bg-background text-foreground text-xs flex-1 min-w-[7.5rem]"
                   />
                 </label>
                 <Button
                   size="sm"
                   variant="outline"
-                  className="h-7 text-xs gap-1"
+                  className="h-7 text-xs gap-1 shrink-0"
                   onClick={() => markDone(s.id, format(new Date(), 'yyyy-MM-dd'))}
                 >
                   <Plus className="h-3 w-3" />

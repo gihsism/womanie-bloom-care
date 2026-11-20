@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Download, Share, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -52,6 +52,58 @@ function dismissedRecently(): boolean {
   }
 }
 
+// Anything that should never sit under the banner: an open dialog, sheet or
+// drawer (Radix renders those with role=dialog and locks body scroll), or an
+// inline form that opts out with data-hide-install-banner (e.g. the baby
+// "Add a feed" form, whose Save button lands at the bottom of the screen).
+const BLOCKING_SELECTOR =
+  '[role="dialog"], [role="alertdialog"], [data-hide-install-banner]';
+
+const NON_TYPING_INPUTS = ["button", "submit", "reset", "checkbox", "radio", "range", "color", "file"];
+
+function somethingNeedsTheBottom(): boolean {
+  if (typeof document === "undefined") return false;
+  if (document.body.hasAttribute("data-scroll-locked")) return true;
+  if (document.querySelector(BLOCKING_SELECTOR)) return true;
+  // Typing in a field: the phone keyboard is up and the banner would float
+  // right over the form being filled in.
+  const el = document.activeElement as HTMLElement | null;
+  if (!el) return false;
+  if (el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable) return true;
+  if (el.tagName === "INPUT") return !NON_TYPING_INPUTS.includes((el as HTMLInputElement).type);
+  return false;
+}
+
+/** True while somethingNeedsTheBottom(); re-checked on DOM and focus changes. */
+function useBottomBusy(active: boolean): boolean {
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (!active || typeof MutationObserver === "undefined") {
+      setBusy(false);
+      return;
+    }
+    const check = () => setBusy(somethingNeedsTheBottom());
+    check();
+    const mo = new MutationObserver(check);
+    mo.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["data-scroll-locked", "data-hide-install-banner", "role"],
+    });
+    // focusout fires before the next element gains focus; check a tick later.
+    const onFocus = () => setTimeout(check, 0);
+    document.addEventListener("focusin", onFocus);
+    document.addEventListener("focusout", onFocus);
+    return () => {
+      mo.disconnect();
+      document.removeEventListener("focusin", onFocus);
+      document.removeEventListener("focusout", onFocus);
+    };
+  }, [active]);
+  return busy;
+}
+
 /**
  * A small, dismissible "add Womanie to your home screen" prompt.
  * - Chromium (Android/desktop): triggers the real install prompt.
@@ -59,6 +111,11 @@ function dismissedRecently(): boolean {
  *   Screen walkthrough (iOS has no programmatic install API).
  * Hidden entirely when already installed, recently dismissed, or on the
  * /install page itself. Mounted once, app-wide.
+ *
+ * While shown it reserves its own height at the bottom of the page
+ * (body.has-install-banner + --install-banner-h) so the last buttons on any
+ * page can always be scrolled clear of it, and it steps aside entirely while
+ * a dialog or an opted-out form is open or a field is being typed in.
  */
 export function InstallBanner() {
   const navigate = useNavigate();
@@ -66,6 +123,7 @@ export function InstallBanner() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [ios, setIos] = useState(false);
   const [visible, setVisible] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (isStandalone() || dismissedRecently()) return;
@@ -118,10 +176,34 @@ export function InstallBanner() {
   // Don't compete with the dedicated install page.
   // Not on the front page or sign-in screens: there it covered the main
   // "Get Started" / "Log in" buttons on phones (the page has its own Install link).
-  if (!visible || pathname === "/install" || pathname === "/" || pathname.startsWith("/auth")) return null;
+  const allowedHere = !(pathname === "/install" || pathname === "/" || pathname.startsWith("/auth"));
+  const busy = useBottomBusy(visible && allowedHere);
+  const shown = visible && allowedHere && !busy;
+
+  // Reserve the banner's height at the bottom of the page while it is shown.
+  useEffect(() => {
+    if (!shown) return;
+    const root = document.documentElement;
+    const apply = () => {
+      const h = rootRef.current?.offsetHeight ?? 0;
+      if (h) root.style.setProperty("--install-banner-h", `${h}px`);
+    };
+    apply();
+    document.body.classList.add("has-install-banner");
+    const ro = typeof ResizeObserver !== "undefined" && rootRef.current ? new ResizeObserver(apply) : null;
+    if (ro && rootRef.current) ro.observe(rootRef.current);
+    return () => {
+      ro?.disconnect();
+      document.body.classList.remove("has-install-banner");
+      root.style.removeProperty("--install-banner-h");
+    };
+  }, [shown]);
+
+  if (!shown) return null;
 
   return (
     <div
+      ref={rootRef}
       className="install-banner-root fixed inset-x-0 bottom-0 z-50 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 sm:px-6"
       role="region"
       aria-label="Install Womanie"

@@ -277,7 +277,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
             <li key={q.id} className="flex items-start gap-2">
               <button
                 type="button"
-                className={`flex-shrink-0 mt-0.5 h-4 w-4 rounded border ${isChecked ? 'bg-primary border-primary' : 'border-border'} flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary`}
+                className={`relative before:absolute before:-inset-3 before:content-[''] flex-shrink-0 mt-0.5 h-4 w-4 rounded border ${isChecked ? 'bg-primary border-primary' : 'border-border'} flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary`}
                 onClick={() => persistChecked({ ...checked, [q.id]: !isChecked })}
                 aria-label={isChecked ? 'Mark as not asked' : 'Mark as asked'}
               >

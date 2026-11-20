@@ -201,7 +201,7 @@ export default function BabyBodyMap() {
           {feedsToday ? <>{feedsToday} feed{feedsToday === 1 ? '' : 's'} today.</> : <>No feeds logged today.</>}
           <br /><span className="text-muted-foreground">Touch any label to log or look back.</span>
         </p>
-        <p className="label-mono text-right leading-relaxed">{day ? <>No. {day}<br /></> : null}{name}</p>
+        <p className="label-mono text-right leading-relaxed pl-3">{day ? <>No. {day}<br /></> : null}{name}</p>
       </div>
     </section>
   );

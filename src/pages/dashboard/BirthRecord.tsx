@@ -320,7 +320,7 @@ export default function BirthRecord() {
           <div className="flex flex-wrap gap-1">
             {LABOUR_MEDS.map(m => (
               <button key={m} type="button" onClick={() => setMedName(m)}
-                className={`text-[11px] px-2 py-0.5 rounded-full ${medName === m ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/70'}`}>{m}</button>
+                className={`text-xs px-2.5 py-1.5 rounded-full ${medName === m ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/70'}`}>{m}</button>
             ))}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">

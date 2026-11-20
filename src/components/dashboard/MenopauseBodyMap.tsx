@@ -176,7 +176,7 @@ export default function MenopauseBodyMap({ name, mode }: { name?: string | null;
           {reached ? 'Twelve months without a period marks menopause.' : '12 months in a row without a period marks menopause.'}
           <br /><span className="text-muted-foreground">Touch any label to log or look back.</span>
         </p>
-        <p className="label-mono text-right leading-relaxed">{months != null ? `${Math.min(months, 12)} / 12` : '—'}{first ? <><br />{first}</> : null}</p>
+        <p className="label-mono text-right leading-relaxed shrink-0 whitespace-nowrap pl-3">{months != null ? `${Math.min(months, 12)} / 12` : '—'}{first ? <><br />{first}</> : null}</p>
       </div>
     </section>
   );

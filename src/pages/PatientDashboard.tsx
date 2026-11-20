@@ -447,7 +447,7 @@ const PatientDashboard = () => {
       <div className="border-b border-border bg-card md:sticky md:top-0 z-10">
         <div className="w-full px-4 py-4">
           <div className="flex items-center justify-between mb-4">
-             <div className="flex items-center gap-1 sm:gap-2">
+             <div className="flex items-center gap-2">
               <button
                 onClick={() => navigate('/')}
                 className="flex items-center justify-center h-8 w-8 sm:h-9 sm:w-9 rounded-md hover:bg-muted transition-colors"
