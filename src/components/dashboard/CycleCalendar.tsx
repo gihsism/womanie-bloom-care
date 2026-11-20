@@ -16,6 +16,7 @@ import CalendarLegend from './calendar/CalendarLegend';
 import DailyLogSheet from './calendar/DailyLogSheet';
 import DayActionSheet from './calendar/DayActionSheet';
 import PeriodEndBanner from './calendar/PeriodEndBanner';
+import OvulationHistoryCard from './calendar/OvulationHistoryCard';
 
 import { useCyclePrediction, useSymptomPatterns, getCurrentCycleDay, isActivePeriod, type PeriodRecord, type DaySignal } from '@/hooks/useCyclePrediction';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
@@ -83,6 +84,13 @@ const CycleCalendar = ({
     daySignals,
     prediction.averageCycleLength
   );
+
+  const periodStarts = useMemo(() => periodRecords.map(r => String(r.period_start_date).slice(0, 10)), [periodRecords]);
+  const lutealModel = useMemo(() => ({
+    lutealLength: prediction.lutealLength,
+    source: prediction.lutealSource,
+    cycles: prediction.learnedCycles,
+  }), [prediction.lutealLength, prediction.lutealSource, prediction.learnedCycles]);
 
   const cycleLength = prediction.averageCycleLength;
   const periodLength = prediction.averagePeriodLength;
@@ -569,6 +577,16 @@ const CycleCalendar = ({
 
         <CalendarLegend selectedMode={selectedMode} />
       </Card>
+
+      {/* Last 6 cycles: when ovulation happened and the luteal phase */}
+      {(selectedMode === 'menstrual-cycle' || selectedMode === 'conception') && (
+        <OvulationHistoryCard
+          periodStarts={periodStarts}
+          signals={daySignals}
+          progesterone={healthContext.labs.progesterone ?? null}
+          model={lutealModel}
+        />
+      )}
 
       {/* Day Action Sheet */}
       <DayActionSheet
