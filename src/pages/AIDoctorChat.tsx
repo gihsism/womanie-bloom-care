@@ -36,7 +36,7 @@ type Msg = { role: 'user' | 'assistant'; content: string };
 const CHAT_URL = '/api/ai-doctor-chat';
 
 const AI_MODELS = [
-  { id: 'claude-haiku-4-5-20251001', label: 'Claude Haiku', description: 'Fast responses' },
+  { id: 'claude-haiku-5-5', label: 'Claude Haiku', description: 'Fast responses' },
   { id: 'claude-sonnet-5-5', label: 'Claude Sonnet', description: 'Best analysis' },
   { id: 'claude-opus-5-5', label: 'Claude Opus', description: 'Most capable' },
 ];
@@ -237,7 +237,7 @@ export default function AIDoctorChat() {
       const saved = typeof window !== 'undefined' ? window.localStorage.getItem('womanie_chat_model') : null;
       if (saved && AI_MODELS.some(m => m.id === saved)) return saved;
     } catch { /* ignore */ }
-    return 'claude-haiku-4-5-20251001';
+    return 'claude-haiku-5-5';
   });
   useEffect(() => {
     try { window.localStorage.setItem('womanie_chat_model', selectedModel); } catch { /* ignore */ }

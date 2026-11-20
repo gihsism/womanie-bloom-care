@@ -9,8 +9,11 @@ export const config = {
   maxDuration: 60,
 };
 
+// Must match the model picker in src/pages/AIDoctorChat.tsx.
+// Haiku 4.5 (claude-haiku-4-5-20251001) was replaced by Haiku 5.5.
+const DEFAULT_MODEL = 'claude-haiku-5-5';
 const ALLOWED_MODELS = [
-  'claude-haiku-4-5-20251001',
+  DEFAULT_MODEL,
   'claude-sonnet-5-5',
   'claude-opus-5-5',
 ];
@@ -37,7 +40,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   if (!Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'Messages required' });
   }
-  const model = ALLOWED_MODELS.includes(requestedModel) ? requestedModel : 'claude-haiku-4-5-20251001';
+  const model = ALLOWED_MODELS.includes(requestedModel) ? requestedModel : DEFAULT_MODEL;
 
   // Client-supplied context: things the server can't see (age lives in
   // localStorage), or things we precomputed there and don't want to
@@ -262,6 +265,10 @@ ${medicalContext || 'No medical records available yet. Encourage the patient to 
   const requestBody = {
     model,
     max_tokens: model.includes('haiku') ? 2000 : 4000,
+    // Haiku 4.5 answered without a thinking pass; Haiku 5.5 thinks by
+    // default, so switch it off to keep the fast replies (and the 2000
+    // token cap) as they were. Sonnet/Opus keep their defaults.
+    ...(model.includes('haiku') ? { thinking: { type: 'disabled' as const } } : {}),
     system: systemPrompt,
     messages: anthropicMessages,
     stream: true,
