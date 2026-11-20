@@ -29,9 +29,13 @@ import {
   Check,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { ChatSources } from '@/components/chat/ChatSources';
+import { citedSources, linkCitations, splitSourcesFooter, stripSourcesFooter, type ChatSource } from '@/lib/research-sources';
 
 type ChatMode = 'ai' | 'real';
-type Msg = { role: 'user' | 'assistant'; content: string };
+// `sources`: research-library items the server gave the model for this
+// answer (live replies); reloaded replies carry them in a text footer.
+type Msg = { role: 'user' | 'assistant'; content: string; sources?: ChatSource[] };
 
 const CHAT_URL = '/api/ai-doctor-chat';
 
@@ -54,6 +58,7 @@ async function streamChat({
   model,
   personalContext,
   onDelta,
+  onSources,
   onDone,
   onError,
 }: {
@@ -61,6 +66,7 @@ async function streamChat({
   model: string;
   personalContext?: PersonalContext;
   onDelta: (text: string) => void;
+  onSources?: (sources: ChatSource[]) => void;
   onDone: () => void;
   onError: (err: string) => void;
 }) {
@@ -106,6 +112,7 @@ async function streamChat({
       }
       try {
         const parsed = JSON.parse(jsonStr);
+        if (Array.isArray(parsed.sources)) onSources?.(parsed.sources as ChatSource[]);
         const content = parsed.choices?.[0]?.delta?.content as string | undefined;
         if (content) onDelta(content);
       } catch {
@@ -458,7 +465,10 @@ export default function AIDoctorChat() {
     setIsStreaming(true);
 
     let assistantSoFar = '';
-    const conversationForApi = newMessages.filter(m => m !== WELCOME_MESSAGE);
+    let sourcesSoFar: ChatSource[] = [];
+    const conversationForApi = newMessages
+      .filter(m => m !== WELCOME_MESSAGE)
+      .map(m => ({ role: m.role, content: stripSourcesFooter(m.content) }));
 
     // We used to prepend a synthetic "[SYSTEM CONTEXT ...]" user
     // message with a brief snapshot of the patient's records. The
@@ -527,14 +537,15 @@ export default function AIDoctorChat() {
       messages: conversationForApi,
       model: selectedModel,
       personalContext,
+      onSources: (sources) => { sourcesSoFar = sources; },
       onDelta: (chunk) => {
         assistantSoFar += chunk;
         setMessages((prev) => {
           const last = prev[prev.length - 1];
           if (last?.role === 'assistant' && last !== WELCOME_MESSAGE) {
-            return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
+            return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar, sources: sourcesSoFar } : m));
           }
-          return [...prev, { role: 'assistant', content: assistantSoFar }];
+          return [...prev, { role: 'assistant', content: assistantSoFar, sources: sourcesSoFar }];
         });
       },
       onDone: () => setIsStreaming(false),
@@ -880,9 +891,20 @@ export default function AIDoctorChat() {
                 >
                   {msg.role === 'assistant' ? (
                     <>
-                      <div className="prose prose-sm dark:prose-invert max-w-none text-sm [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&>h1]:text-base [&>h2]:text-sm [&>h3]:text-sm">
-                        <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{msg.content}</ReactMarkdown>
-                      </div>
+                      {(() => {
+                        const { body, sources } = msg.sources
+                          ? { body: msg.content, sources: msg.sources }
+                          : splitSourcesFooter(msg.content);
+                        const cited = citedSources(body, sources);
+                        return (
+                          <>
+                            <div className="prose prose-sm dark:prose-invert max-w-none text-sm [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&>h1]:text-base [&>h2]:text-sm [&>h3]:text-sm [&_a]:text-primary [&_a]:no-underline [&_a]:font-medium">
+                              <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{linkCitations(body, cited)}</ReactMarkdown>
+                            </div>
+                            {cited.length > 0 && <ChatSources sources={cited} onBrowse={() => navigate('/library')} />}
+                          </>
+                        );
+                      })()}
                       {msg !== WELCOME_MESSAGE && msg.content.trim() && (
                         <button
                           type="button"
@@ -926,6 +948,13 @@ export default function AIDoctorChat() {
           {/* Suggested Questions */}
           {messages.length <= 1 && (
             <div className="px-4 pb-2">
+              <button
+                type="button"
+                onClick={() => navigate('/library')}
+                className="mb-2 text-xs text-primary hover:underline underline-offset-2"
+              >
+                Browse the research library &rarr;
+              </button>
               <div className="flex flex-wrap gap-2">
                 {suggestedQuestions.map((q) => (
                   <Button

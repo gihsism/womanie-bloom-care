@@ -1,0 +1,140 @@
+// End-to-end check of the research sources in the AI chat handler: the
+// sources injected into the system prompt are exactly the ones streamed
+// back to the page, and the stored reply keeps only the cited ones.
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+const query = vi.fn();
+const inserts: unknown[][] = [];
+vi.mock('@neondatabase/serverless', () => ({
+  neon: () => {
+    const sql = (strings: TemplateStringsArray, ...values: unknown[]) => {
+      inserts.push(values);
+      return { strings, values };
+    };
+    sql.query = query;
+    sql.transaction = vi.fn(async () => []);
+    return sql;
+  },
+}));
+vi.mock('../auth.js', () => ({ getAuthUser: vi.fn() }));
+vi.mock('../sentry.js', () => ({ withSentry: (h: unknown) => h }));
+
+import handler from '../../ai-doctor-chat';
+import { getAuthUser } from '../auth.js';
+import { selectChatSources } from './library';
+
+const USER = { id: 'user_abc', email: 'a@test.com', sessionId: 's1' };
+
+function sseStream(text: string) {
+  const enc = new TextEncoder();
+  const events = [
+    { type: 'message_start' },
+    { type: 'content_block_delta', delta: { type: 'text_delta', text } },
+    { type: 'message_stop' },
+  ];
+  return new ReadableStream({
+    start(c) {
+      for (const e of events) c.enqueue(enc.encode(`data: ${JSON.stringify(e)}\n\n`));
+      c.close();
+    },
+  });
+}
+
+function mockRes() {
+  const written: string[] = [];
+  const res = {
+    _status: 200,
+    _body: null as unknown,
+    written,
+    setHeader: vi.fn(),
+    flushHeaders: vi.fn(),
+    write: (chunk: string) => { written.push(chunk); return true; },
+    end: vi.fn(),
+    status(code: number) { res._status = code; return res; },
+    json(data: unknown) { res._body = data; return res; },
+  };
+  return res;
+}
+
+function req(content: string): VercelRequest {
+  return {
+    method: 'POST',
+    headers: {},
+    query: {},
+    body: { messages: [{ role: 'user', content }], model: 'claude-sonnet-5-5' },
+  } as unknown as VercelRequest;
+}
+
+describe('ai-doctor-chat research sources', () => {
+  let fetchMock: ReturnType<typeof vi.fn>;
+  let answer = '';
+
+  beforeEach(() => {
+    process.env.ANTHROPIC_API_KEY = 'test-key';
+    process.env.DATABASE_URL = 'postgres://test';
+    inserts.length = 0;
+    vi.mocked(getAuthUser).mockResolvedValue(USER);
+    query.mockReset();
+    // profile row says pregnancy; every other query returns nothing.
+    query.mockImplementation(async (sqlText: string) =>
+      /FROM profiles/.test(sqlText) ? [{ full_name: 'Test', life_stage: 'pregnancy' }] : []);
+    fetchMock = vi.fn(async () => new Response(sseStream(answer), { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('injects numbered sources and streams back the same list first', async () => {
+    answer = 'Up to about 200 mg of caffeine a day is usually fine [1].';
+    const question = 'Is coffee OK in pregnancy?';
+    const expected = selectChatSources(question, 'pregnancy');
+    expect(expected.length).toBeGreaterThanOrEqual(3);
+
+    const res = mockRes();
+    await handler(req(question), res as unknown as VercelResponse);
+
+    // What the model was given
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body as string);
+    expected.forEach((it, i) => expect(body.system).toContain(`[${i + 1}] ${it.title}`));
+    expect(body.system).not.toContain(`[${expected.length + 1}] `);
+    expect(body.system).toMatch(/Cite only sources you actually used/);
+
+    // What the page receives: the first SSE event carries the same list
+    const first = JSON.parse(res.written[0].replace(/^data: /, ''));
+    expect(first.sources.map((s: { pmid: string }) => s.pmid)).toEqual(expected.map((e) => e.pmid));
+    expect(first.sources.map((s: { n: number }) => s.n)).toEqual(expected.map((_, i) => i + 1));
+    expect(res.written.some((w) => w.includes('caffeine a day'))).toBe(true);
+    expect(res.written[res.written.length - 1]).toBe('data: [DONE]\n\n');
+
+    // Stored reply: answer + footer with only the cited source [1]
+    const stored = inserts.find((v) => typeof v[1] === 'string' && (v[1] as string).startsWith('Up to about'));
+    expect(stored).toBeDefined();
+    const text = stored![1] as string;
+    expect(text).toContain('**Sources**');
+    expect(text).toContain(expected[0].url);
+    if (expected[1]) expect(text).not.toContain(expected[1].url);
+  });
+
+  it('sends no sources event and forbids citations when nothing matches', async () => {
+    answer = 'Hello!';
+    const res = mockRes();
+    await handler(req('hi there'), res as unknown as VercelResponse);
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body as string);
+    expect(body.system).toMatch(/Do not cite any sources/);
+    expect(res.written.some((w) => w.includes('"sources"'))).toBe(false);
+  });
+
+  it('strips stored Sources footers from history before sending it to the model', async () => {
+    answer = 'Ok.';
+    const res = mockRes();
+    const r = req('And tea?');
+    (r.body as { messages: unknown[] }).messages = [
+      { role: 'user', content: 'Is coffee OK in pregnancy?' },
+      { role: 'assistant', content: 'Moderate is fine [1].\n\n---\n**Sources**\n- [1] [X](https://pubmed.ncbi.nlm.nih.gov/1/) — Y, 2020' },
+      { role: 'user', content: 'And tea?' },
+    ];
+    await handler(r, res as unknown as VercelResponse);
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body as string);
+    expect(body.messages[1].content).toBe('Moderate is fine [1].');
+  });
+});

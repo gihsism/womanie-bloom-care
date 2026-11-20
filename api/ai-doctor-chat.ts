@@ -4,6 +4,7 @@ import { getAuthUser } from './_lib/auth.js';
 import { checkAndConsume } from './_lib/ratelimit.js';
 import { withSentry } from './_lib/sentry.js';
 import { buildLifeContext } from './_lib/life-context.js';
+import { SOURCES_FOOTER_MARK, buildSourcesPrompt, formatSourcesFooter, selectChatSources, toChatSources, type ResearchItem } from './_lib/research/library.js';
 
 export const config = {
   maxDuration: 60,
@@ -236,6 +237,17 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     medicalContext += personalContextBlock;
   }
 
+  // Research library: the 0-6 best-matching guideline/review summaries
+  // for this question and life stage, given to the model as numbered
+  // sources. Never allowed to break the chat.
+  let researchItems: ResearchItem[] = [];
+  try {
+    researchItems = selectChatSources(userTurnContent, profile?.life_stage);
+  } catch (err) {
+    console.error('Research library unavailable:', err);
+  }
+  const chatSources = toChatSources(researchItems);
+
   const systemPrompt = `You are an AI medical assistant for a women's health platform called Womanie. You have access to the patient's uploaded health documents and extracted medical data shown below. Use this information to provide personalized, empathetic health guidance.
 
 IMPORTANT RULES:
@@ -251,11 +263,11 @@ IMPORTANT RULES:
 - When discussing lab results, explain what values mean in plain language.
 
 ## Patient Medical Records
-${medicalContext || 'No medical records available yet. Encourage the patient to upload their health documents for personalized advice.'}`;
+${medicalContext || 'No medical records available yet. Encourage the patient to upload their health documents for personalized advice.'}${buildSourcesPrompt(researchItems)}`;
 
   const anthropicMessages = messages.map((m: { role: string; content: string }) => ({
     role: m.role === 'system' ? 'user' : m.role,
-    content: m.content,
+    content: typeof m.content === 'string' ? m.content.split(SOURCES_FOOTER_MARK)[0] : m.content, // drop stored Sources footers
   }));
 
   // Retry the initial connection on transient 5xx — the stream itself
@@ -306,6 +318,8 @@ ${medicalContext || 'No medical records available yet. Encourage the patient to 
   res.setHeader('Cache-Control', 'no-cache, no-transform');
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders?.();
+  // Numbered sources first, so the page can link [n] while text streams.
+  if (chatSources.length > 0) res.write(`data: ${JSON.stringify({ sources: chatSources })}\n\n`);
 
   const reader = aiResponse.body!.getReader();
   const decoder = new TextDecoder();
@@ -341,16 +355,17 @@ ${medicalContext || 'No medical records available yet. Encourage the patient to 
     // text we also skip the user message — keeps chat history
     // internally consistent instead of half-logged conversations.
     if (assistantText) {
+      const storedText = assistantText + formatSourcesFooter(chatSources, assistantText);
       try {
         if (userTurnContent) {
           await sql.transaction([
             sql`INSERT INTO chat_messages (user_id, role, content) VALUES (${user.id}, 'user', ${userTurnContent})`,
-            sql`INSERT INTO chat_messages (user_id, role, content, model) VALUES (${user.id}, 'assistant', ${assistantText}, ${model})`,
+            sql`INSERT INTO chat_messages (user_id, role, content, model) VALUES (${user.id}, 'assistant', ${storedText}, ${model})`,
           ]);
         } else {
           await sql.query(
             'INSERT INTO chat_messages (user_id, role, content, model) VALUES ($1, $2, $3, $4)',
-            [user.id, 'assistant', assistantText, model]
+            [user.id, 'assistant', storedText, model]
           );
         }
       } catch (err) {
