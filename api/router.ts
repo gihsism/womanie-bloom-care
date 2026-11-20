@@ -32,6 +32,7 @@ import meExport from './_routes/me/export.js';
 import meNormalizeTitles from './_routes/me/normalize-titles.js';
 import newsletterSubscribe from './_routes/newsletter/subscribe.js';
 import predictOvulation from './_routes/predict-ovulation.js';
+import researchLibrary from './_routes/research/library.js';
 
 // Single entry point for the API routes that need no per-function config.
 //
@@ -80,6 +81,7 @@ export const ROUTES: Record<string, Handler> = {
   'me/normalize-titles': meNormalizeTitles,
   'newsletter/subscribe': newsletterSubscribe,
   'predict-ovulation': predictOvulation,
+  'research/library': researchLibrary,
 };
 
 export function routeKey(url: string | undefined, rewritten?: unknown): string {
