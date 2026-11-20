@@ -189,6 +189,29 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-20 — Test coverage: added security-invariant tests for chat/messages
+chat/messages.ts serves the AI-doctor chat history with GET, POST (one-time
+localStorage-to-server migration), and DELETE (clear all messages). All three
+paths carry ownership invariants — each must bind the session user's id as the
+WHERE filter rather than any client-supplied value — but none had tests at all.
+The DELETE path is the most dangerous: a regression that dropped its WHERE clause
+would let one authenticated user silently wipe every other user's chat history.
+Added api/_routes/chat/messages.test.ts with 9 tests covering: 401 when
+getAuthUser returns null; 405 for unsupported methods (PUT, PATCH, OPTIONS);
+a GET ownership invariant confirming the SELECT binds the session user's id as
+$1 (a refactor trusting req.query.userId would let any authenticated user read
+another user's history); a GET ordering guard confirming the handler reverses the
+DESC result to return messages oldest-first; POST 400 when messages is not an
+array; a POST idempotency guard confirming the import is skipped when the user
+already has server-side messages (without this guard a stale localStorage copy
+could silently overwrite server history on each sign-in); a POST ownership
+invariant confirming the INSERT binds the session user's id as $1 (not a
+client-supplied value); a DELETE ownership invariant confirming the SQL template
+contains WHERE user_id = $1 and $1 is bound to the session user's id (the most
+critical guard — dropping this filter would wipe all users' messages in one
+authenticated request); and DELETE returns {cleared: true} on success.
+Verified: tsc 0, eslint 0, 469/469 tests, vite build clean.
+
 ### 2026-11-19 — Test coverage: added security-invariant tests for me/export
 me/export.ts is the GDPR data-portability export endpoint — it returns a JSON
 download containing every row Womanie holds for the session user: profile,
