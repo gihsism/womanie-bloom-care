@@ -20,6 +20,8 @@ const OWNER_COLUMN: Record<string, string | string[]> = {
   medications: 'user_id',
   babies: 'user_id',
   birth_records: 'user_id',
+  // Personal data older versions kept only on the device (migration 011).
+  user_app_data: 'user_id',
   patient_access_codes: 'patient_id',
   user_roles: 'user_id',
   document_analyses: 'user_id',

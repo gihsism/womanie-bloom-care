@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { CheckCircle2, Plus, Trash2, Wind } from 'lucide-react';
 import { format, isToday, parseISO, subDays } from 'date-fns';
+import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 // Simple pelvic-floor exercise tracker for postpartum. Most clinicians
 // recommend starting light Kegels from week 2 (vaginal delivery) or
@@ -27,6 +28,7 @@ const PostpartumPelvicFloor = () => {
   const uid = user?.id ?? '';
   const [sets, setSets] = useState<SetEntry[]>([]);
 
+  const accountVersion = useAccountDataVersion([uid ? lsKey(uid) : null]);
   useEffect(() => {
     if (!uid) return;
     try {
@@ -36,12 +38,13 @@ const PostpartumPelvicFloor = () => {
         if (Array.isArray(parsed)) setSets(parsed);
       }
     } catch { /* ignore */ }
-  }, [uid]);
+  }, [uid, accountVersion]);
 
   const persist = (next: SetEntry[]) => {
     const trimmed = next.slice(0, MAX_ENTRIES);
     setSets(trimmed);
     try { localStorage.setItem(lsKey(uid), JSON.stringify(trimmed)); } catch { /* ignore */ }
+    pushAccountData(uid, lsKey(uid));
   };
 
   const logSet = () => {

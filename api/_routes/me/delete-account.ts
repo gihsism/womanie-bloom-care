@@ -47,6 +47,14 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     ) as Array<{ email: string }>;
     const canonicalEmail = emailRows[0]?.email ?? null;
 
+    // user_app_data arrives with migration 011. Only include it once the
+    // table exists, so a deploy that lands before the migration can't make
+    // the whole deletion transaction fail.
+    const appDataRows = await sql.query(
+      "SELECT to_regclass('public.user_app_data') IS NOT NULL AS present"
+    ) as Array<{ present?: boolean }>;
+    const hasAppData = appDataRows[0]?.present === true;
+
     // Tables to wipe, in dependency order: children first, parents
     // last. The transaction commits atomically so we never leave a
     // half-deleted user behind.
@@ -61,6 +69,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       sql`DELETE FROM medications WHERE user_id = ${user.id}`,
       sql`DELETE FROM birth_records WHERE user_id = ${user.id}`,
       sql`DELETE FROM babies WHERE user_id = ${user.id}`,
+      ...(hasAppData ? [sql`DELETE FROM user_app_data WHERE user_id = ${user.id}`] : []),
       sql`DELETE FROM chat_messages WHERE user_id = ${user.id}`,
       sql`DELETE FROM patient_access_codes WHERE patient_id = ${user.id}`,
       sql`DELETE FROM doctor_patient_connections WHERE patient_id = ${user.id} OR doctor_id = ${user.id}`,

@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format, parseISO } from 'date-fns';
 import { Activity, AlertTriangle, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 // Blood pressure log + preeclampsia / hypertension screen for
 // pregnancy mode. ACOG 2020:
@@ -96,6 +97,7 @@ export default function BloodPressureTracker({ mode }: BloodPressureTrackerProps
   const [pulse, setPulse] = useState('');
   const [note, setNote] = useState('');
 
+  const accountVersion = useAccountDataVersion([user ? STORAGE_KEY(user.id) : null]);
   useEffect(() => {
     if (!user) return;
     try {
@@ -105,11 +107,12 @@ export default function BloodPressureTracker({ mode }: BloodPressureTrackerProps
         if (Array.isArray(parsed)) setEntries(parsed.filter(e => e?.date && typeof e?.systolic === 'number' && typeof e?.diastolic === 'number'));
       }
     } catch { /* ignore */ }
-  }, [user]);
+  }, [user, accountVersion]);
 
   const persist = (next: BpEntry[]) => {
     if (!user) return;
     try { window.localStorage.setItem(STORAGE_KEY(user.id), JSON.stringify(next)); } catch { /* ignore */ }
+    pushAccountData(user.id, STORAGE_KEY(user.id));
     setEntries(next);
   };
 

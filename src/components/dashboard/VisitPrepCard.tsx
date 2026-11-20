@@ -12,6 +12,7 @@ import { differenceInDays, format, parseISO } from 'date-fns';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 import type { LifeStage } from './DashboardHeader';
 import { getFriendlyName } from '@/lib/medical-utils';
+import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 // Generates a personalised "questions to bring to your doctor"
 // checklist from the user's recent data + mode. Patients
@@ -107,18 +108,20 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
 
   const lsCheckedKey = user ? `womanie_visit_prep_checked_${user.id}` : null;
 
+  const accountVersion = useAccountDataVersion([lsCheckedKey]);
   useEffect(() => {
     if (!lsCheckedKey) return;
     try {
       const raw = localStorage.getItem(lsCheckedKey);
       if (raw) setChecked(JSON.parse(raw));
     } catch { /* ignore */ }
-  }, [lsCheckedKey]);
+  }, [lsCheckedKey, accountVersion]);
 
   const persistChecked = (next: Record<string, boolean>) => {
     setChecked(next);
     if (lsCheckedKey) {
       try { localStorage.setItem(lsCheckedKey, JSON.stringify(next)); } catch { /* ignore */ }
+      pushAccountData(user?.id, lsCheckedKey);
     }
   };
 

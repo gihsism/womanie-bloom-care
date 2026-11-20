@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { syncAccountData } from '@/lib/account-data';
 
 interface AuthUser {
   id: string;
@@ -57,6 +58,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             created_at: data.user.created_at ?? undefined,
             user_metadata: { full_name: data.user.name },
           });
+          // Bring device-only personal data into the account (only where
+          // the account has nothing yet) and refresh the local copy from it.
+          void syncAccountData(data.user.id);
         }
       })
       .catch(() => {})

@@ -1,6 +1,7 @@
 import { addDays } from 'date-fns';
 import { db } from '@/integrations/db/client';
 import type { OnboardingData } from '@/contexts/OnboardingContext';
+import { pushAccountData } from '@/lib/account-data';
 
 // Persists everything the user told us during the 3-step onboarding flow
 // into the database. Was previously dropped on the floor:
@@ -12,10 +13,9 @@ import type { OnboardingData } from '@/contexts/OnboardingContext';
 //   ivf_phase: real columns, written via /api/db upsert.
 // - period_tracking: a row for the user's last period start + cycle
 //   length, so the calendar isn't empty on first dashboard load.
-// - DOB / height / weight / blood type: no schema column yet, so
-//   parked in per-user localStorage under `womanie_basic_info_<id>`.
-//   When the schema lands, swap this localStorage path for an
-//   /api/db upsert without changing callers.
+// - DOB / height / weight / blood type: no profiles column, so kept in
+//   per-user localStorage under `womanie_basic_info_<id>` and saved to
+//   the account (user_app_data, see src/lib/account-data.ts).
 
 interface UserShape {
   id: string;
@@ -138,6 +138,7 @@ export async function commitOnboarding(user: UserShape, data: OnboardingData): P
           bloodType: basic.bloodType || null,
         })
       );
+      pushAccountData(user.id, `womanie_basic_info_${user.id}`);
     } catch {
       // Quota / private mode — silently ignore.
     }

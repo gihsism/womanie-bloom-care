@@ -4,6 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { CheckCircle2, Circle, Briefcase, RotateCcw } from 'lucide-react';
+import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 // Hospital bag checklist for late pregnancy (week 32+). Curated from
 // common OB/midwife packing lists. Grouped by recipient so the user
@@ -93,6 +94,7 @@ const HospitalBagChecklist = ({ weeksPregnant }: HospitalBagChecklistProps) => {
   const userId = user?.id;
   const [packed, setPacked] = useState<Set<string>>(new Set());
 
+  const accountVersion = useAccountDataVersion([userId ? KEY(userId) : null]);
   useEffect(() => {
     if (!userId) return;
     try {
@@ -104,13 +106,14 @@ const HospitalBagChecklist = ({ weeksPregnant }: HospitalBagChecklistProps) => {
     } catch {
       // Corrupt JSON — start empty.
     }
-  }, [userId]);
+  }, [userId, accountVersion]);
 
   const persist = (next: Set<string>) => {
     setPacked(next);
     if (!userId) return;
     try {
       localStorage.setItem(KEY(userId), JSON.stringify(Array.from(next)));
+      pushAccountData(userId, KEY(userId));
     } catch {
       // Quota / private mode — accept in-memory state.
     }

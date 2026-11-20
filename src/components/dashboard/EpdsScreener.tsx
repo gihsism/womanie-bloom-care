@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format, parseISO } from 'date-fns';
 import { Brain, RotateCcw, ChevronRight } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 // Edinburgh Postnatal Depression Scale (EPDS) — a 10-item validated
 // screening tool for postpartum and antenatal depression. Each item
@@ -145,6 +146,7 @@ export default function EpdsScreener({ mode }: EpdsScreenerProps) {
   const [taking, setTaking] = useState(false);
   const [answers, setAnswers] = useState<(number | null)[]>(Array(10).fill(null));
 
+  const accountVersion = useAccountDataVersion([user ? STORAGE_KEY(user.id) : null]);
   useEffect(() => {
     if (!user) return;
     try {
@@ -154,11 +156,12 @@ export default function EpdsScreener({ mode }: EpdsScreenerProps) {
         if (Array.isArray(parsed)) setHistory(parsed.filter(r => r?.date && typeof r?.total === 'number' && Array.isArray(r?.answers)));
       }
     } catch { /* ignore */ }
-  }, [user]);
+  }, [user, accountVersion]);
 
   const persist = (next: EpdsResult[]) => {
     if (!user) return;
     try { window.localStorage.setItem(STORAGE_KEY(user.id), JSON.stringify(next)); } catch { /* ignore */ }
+    pushAccountData(user.id, STORAGE_KEY(user.id));
     setHistory(next);
   };
 
@@ -222,7 +225,7 @@ export default function EpdsScreener({ mode }: EpdsScreenerProps) {
       {!taking && !latest && (
         <p className="text-xs text-muted-foreground">
           A brief, evidence-based screen for postnatal (and antenatal) depression. Your responses
-          stay on this device — nothing leaves the app.
+          are saved privately in your account.
         </p>
       )}
 

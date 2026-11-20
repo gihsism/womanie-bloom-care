@@ -29,6 +29,7 @@ import {
   HeartPulse,
   TrendingUp,
 } from 'lucide-react';
+import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 interface MenopauseDashboardProps {
   isPostMenopause?: boolean;
@@ -67,6 +68,7 @@ function readLS<T>(userId: string, scope: string, key: string, fallback: T): T {
 function writeLS(userId: string, scope: string, key: string, value: unknown) {
   try {
     localStorage.setItem(lsKey(userId, scope, key), JSON.stringify(value));
+    pushAccountData(userId, lsKey(userId, scope, key));
   } catch {
     // Quota / private mode — silently ignore.
   }
@@ -147,12 +149,13 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
   const [lastPeriodStart, setLastPeriodStart] = useState<Date | null>(null);
   const [periodLoaded, setPeriodLoaded] = useState(false);
 
+  const accountVersion = useAccountDataVersion(userId ? [lsKey(userId, scope, 'trackedSymptoms')] : []);
   // ─── Persist tracked symptoms + myth index per user, per scope ───
   useEffect(() => {
     if (!userId) return;
     setTrackedSymptoms(new Set(readLS<string[]>(userId, scope, 'trackedSymptoms', [])));
     setCurrentMythIndex(readLS<number>(userId, scope, 'mythIndex', 0));
-  }, [userId, scope]);
+  }, [userId, scope, accountVersion]);
 
   useEffect(() => {
     if (!userId) return;

@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Droplet, Plus, X, TrendingUp, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { format, parseISO, differenceInHours } from 'date-fns';
+import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 // Beta hCG tracker for IVF mode. After embryo transfer the clinic
 // draws a beta hCG blood test ~9-14 days later, then repeats it every
@@ -49,6 +50,7 @@ const BetaHcgTracker = ({ ivfPhase }: BetaHcgTrackerProps) => {
   const [time, setTime] = useState('');
   const [value, setValue] = useState('');
 
+  const accountVersion = useAccountDataVersion([userId ? KEY(userId) : null]);
   useEffect(() => {
     if (!userId) return;
     try {
@@ -60,13 +62,14 @@ const BetaHcgTracker = ({ ivfPhase }: BetaHcgTrackerProps) => {
     } catch {
       // Corrupt JSON — start empty.
     }
-  }, [userId]);
+  }, [userId, accountVersion]);
 
   const persist = (next: BetaDraw[]) => {
     setDraws(next);
     if (!userId) return;
     try {
       localStorage.setItem(KEY(userId), JSON.stringify(next));
+      pushAccountData(userId, KEY(userId));
     } catch {
       // Quota / private mode — accept in-memory state.
     }

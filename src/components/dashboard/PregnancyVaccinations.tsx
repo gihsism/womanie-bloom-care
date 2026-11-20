@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { Syringe, Check, Clock, Info } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 // Pregnancy vaccination checklist — Tdap (27–36w), flu (any
 // trimester, seasonal), RSV / Abrysvo (32–36w, seasonal), Hep B if
@@ -87,6 +88,7 @@ export default function PregnancyVaccinations({ dueDate }: PregnancyVaccinations
   const { toast } = useToast();
   const [state, setState] = useState<VaccineState>({});
 
+  const accountVersion = useAccountDataVersion([user ? STORAGE_KEY(user.id) : null]);
   useEffect(() => {
     if (!user) return;
     try {
@@ -96,11 +98,12 @@ export default function PregnancyVaccinations({ dueDate }: PregnancyVaccinations
         if (parsed && typeof parsed === 'object') setState(parsed);
       }
     } catch { /* ignore */ }
-  }, [user]);
+  }, [user, accountVersion]);
 
   const persist = (next: VaccineState) => {
     if (!user) return;
     try { window.localStorage.setItem(STORAGE_KEY(user.id), JSON.stringify(next)); } catch { /* ignore */ }
+    pushAccountData(user.id, STORAGE_KEY(user.id));
     setState(next);
   };
 
@@ -244,8 +247,8 @@ export default function PregnancyVaccinations({ dueDate }: PregnancyVaccinations
       <p className="text-[10px] text-muted-foreground mt-3 leading-relaxed flex items-start gap-1.5">
         <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
         <span>
-          Reference: ACOG / CDC immunization schedules for pregnancy (2024–2025). Status is tracked
-          on this device — share with your OB at the next visit. Schedules update annually.
+          Reference: ACOG / CDC immunization schedules for pregnancy (2024–2025). Status is saved
+          to your account — share with your OB at the next visit. Schedules update annually.
         </span>
       </p>
     </Card>

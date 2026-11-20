@@ -18,6 +18,7 @@ import {
   Lightbulb,
   Activity,
 } from 'lucide-react';
+import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 const bodyChangesData = [
   { title: 'Breast Development', icon: '🌸', description: 'One of the first signs of puberty. Totally normal for one side to grow faster.', ageRange: '8–13 years' },
@@ -70,6 +71,7 @@ function readLS<T>(userId: string, key: string, fallback: T): T {
 function writeLS(userId: string, key: string, value: unknown) {
   try {
     localStorage.setItem(lsKey(userId, key), JSON.stringify(value));
+    pushAccountData(userId, lsKey(userId, key));
   } catch {
     // Quota / private mode — silently ignore.
   }
@@ -83,11 +85,12 @@ export default function PreMenstrualDashboard() {
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
 
   // Persist readiness checklist + fact carousel position so they survive a refresh.
+  const accountVersion = useAccountDataVersion(userId ? [lsKey(userId, 'checkedItems')] : []);
   useEffect(() => {
     if (!userId) return;
     setCheckedItems(new Set(readLS<number[]>(userId, 'checkedItems', [])));
     setCurrentFactIndex(readLS<number>(userId, 'factIndex', 0));
-  }, [userId]);
+  }, [userId, accountVersion]);
 
   useEffect(() => {
     if (!userId) return;

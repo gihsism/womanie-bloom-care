@@ -17,6 +17,7 @@ import {
   Siren,
 } from 'lucide-react';
 import { errorMessage } from '@/lib/errors';
+import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 // Emergency contacts. Stored in localStorage keyed per user.id — no
 // schema changes needed. Shape matches what a future
@@ -72,15 +73,17 @@ export default function Emergency() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [form, setForm] = useState({ name: '', relationship: '', phone: '' });
 
+  const accountVersion = useAccountDataVersion([user ? storageKey : null]);
   useEffect(() => {
     if (!user) return;
     setContacts(loadFromStorage(storageKey));
-  }, [user, storageKey]);
+  }, [user, storageKey, accountVersion]);
 
   const persist = useCallback((next: Contact[]) => {
     setContacts(next);
     saveToStorage(storageKey, next);
-  }, [storageKey]);
+    pushAccountData(user?.id, storageKey);
+  }, [storageKey, user?.id]);
 
   const handleAdd = () => {
     const name = form.name.trim();
@@ -131,7 +134,7 @@ export default function Emergency() {
             <div>
               <p className="text-sm font-semibold mb-1">In a real emergency, call your local emergency number.</p>
               <p className="text-xs text-muted-foreground">
-                This list is a personal reminder of who to reach — Womanie does not place calls or notify them on your behalf. It's stored on this device.
+                This list is a personal reminder of who to reach — Womanie does not place calls or notify them on your behalf. It's saved to your account.
               </p>
             </div>
           </div>
@@ -217,7 +220,7 @@ export default function Emergency() {
           <div className="flex items-start gap-3">
             <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground">
-              Contacts live in this device's storage and don't sync to other devices. Clear your browser data and the list goes with it. When Womanie ships device-sync we'll migrate automatically.
+              Contacts are saved to your account, so they are there on a new phone too.
             </p>
           </div>
         </Card>

@@ -103,6 +103,24 @@ describe('me/delete-account security invariants', () => {
     expect(txArgs.length).toBeGreaterThanOrEqual(25);
   });
 
+  // user_app_data (migration 011) is erased with everything else once it
+  // exists, and its absence (migration not yet applied) can't break deletion.
+  it('erases user_app_data only when the table exists', async () => {
+    const sqlText = () => tagFn.mock.calls.map(c => (c[0] as string[]).join('?')).join('\n');
+    query.mockImplementation(async (q: string) =>
+      /to_regclass/.test(q) ? [{ present: true }] : [{ email: 'user@test.com' }]);
+    await handler(mockReq({ confirm: CONFIRM_PHRASE }), mockRes());
+    expect(sqlText()).toMatch(/DELETE FROM user_app_data WHERE user_id/);
+
+    tagFn.mockClear();
+    query.mockImplementation(async (q: string) =>
+      /to_regclass/.test(q) ? [{ present: false }] : [{ email: 'user@test.com' }]);
+    const res = mockRes();
+    await handler(mockReq({ confirm: CONFIRM_PHRASE }), res);
+    expect(sqlText()).not.toMatch(/user_app_data/);
+    expect(res._status).toBe(200);
+  });
+
   // Regression guard: the email SELECT must run BEFORE the transaction so
   // newsletter_subscribers can be unsubscribed — the transaction deletes auth_users
   // last, which is the row that holds the email address.

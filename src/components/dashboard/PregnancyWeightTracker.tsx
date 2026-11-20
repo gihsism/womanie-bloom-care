@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { Scale, Info, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 // Pregnancy weight-gain tracker against IOM 2009 guidelines.
 //
@@ -81,6 +82,7 @@ export default function PregnancyWeightTracker({ dueDate }: PregnancyWeightTrack
   const [draftHeight, setDraftHeight] = useState('');
   const [todayValue, setTodayValue] = useState('');
 
+  const accountVersion = useAccountDataVersion(user ? [SETUP_KEY(user.id), LOG_KEY(user.id)] : []);
   // Initial load from localStorage.
   useEffect(() => {
     if (!user) return;
@@ -106,6 +108,7 @@ export default function PregnancyWeightTracker({ dueDate }: PregnancyWeightTrack
           window.localStorage.setItem(LOG_KEY(user.id), JSON.stringify([...(Array.isArray(curLog) ? curLog : []), ...extra].sort((x, y) => x.date.localeCompare(y.date))));
         }
         window.localStorage.setItem(mergeFlag, '1');
+        pushAccountData(user.id, SETUP_KEY(user.id)); pushAccountData(user.id, LOG_KEY(user.id));
       }
     } catch { /* ignore */ }
     try {
@@ -126,17 +129,19 @@ export default function PregnancyWeightTracker({ dueDate }: PregnancyWeightTrack
         if (Array.isArray(parsed)) setEntries(parsed.filter(e => e?.date && typeof e?.kg === 'number'));
       }
     } catch { /* ignore */ }
-  }, [user]);
+  }, [user, accountVersion]);
 
   const persistSetup = useCallback((next: WeightSetup) => {
     if (!user) return;
     try { window.localStorage.setItem(SETUP_KEY(user.id), JSON.stringify(next)); } catch { /* ignore */ }
+    pushAccountData(user.id, SETUP_KEY(user.id));
     setSetup(next);
   }, [user]);
 
   const persistEntries = useCallback((next: WeightEntry[]) => {
     if (!user) return;
     try { window.localStorage.setItem(LOG_KEY(user.id), JSON.stringify(next)); } catch { /* ignore */ }
+    pushAccountData(user.id, LOG_KEY(user.id));
     setEntries(next);
   }, [user]);
 
@@ -329,7 +334,7 @@ export default function PregnancyWeightTracker({ dueDate }: PregnancyWeightTrack
           </div>
           <p className="text-[11px] text-muted-foreground flex items-start gap-1.5">
             <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
-            <span>Stored on this device for now. Gain ranges come from IOM 2009 based on your pre-pregnancy BMI.</span>
+            <span>Saved to your account. Gain ranges come from IOM 2009 based on your pre-pregnancy BMI.</span>
           </p>
         </div>
       ) : null}

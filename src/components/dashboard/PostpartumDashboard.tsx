@@ -20,6 +20,7 @@ import BabyTracker from './BabyTracker';
 import PostpartumLochiaCard from './PostpartumLochiaCard';
 import PostpartumPelvicFloor from './PostpartumPelvicFloor';
 import PostpartumNutrition from './PostpartumNutrition';
+import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 // Postpartum-mode dashboard.
 //
@@ -93,6 +94,7 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
   const [done, setDone] = useState<Record<string, boolean>>({});
   const [ppdLastCheck, setPpdLastCheck] = useState<string | null>(null);
 
+  const accountVersion = useAccountDataVersion(userId ? [recoveryMilestonesKey(userId), ppdSelfCheckKey(userId)] : []);
   useEffect(() => {
     if (!userId) return;
     let localBirth: string | null = null;
@@ -135,6 +137,18 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
     } catch { /* ignore */ }
   }, [userId]);
 
+  // Re-read the ticks once the account sync has refreshed them (kept out
+  // of the effect above so the birth-record logic doesn't run twice).
+  useEffect(() => {
+    if (!userId || !accountVersion) return;
+    try {
+      const raw = localStorage.getItem(recoveryMilestonesKey(userId));
+      if (raw) setDone(JSON.parse(raw));
+      const ppd = localStorage.getItem(ppdSelfCheckKey(userId));
+      if (ppd) setPpdLastCheck(ppd);
+    } catch { /* ignore */ }
+  }, [userId, accountVersion]);
+
   const birthDate = useMemo(() => {
     if (!birthDateStr) return null;
     const d = parseISO(birthDateStr);
@@ -151,6 +165,7 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
   const persistDone = (next: Record<string, boolean>) => {
     setDone(next);
     try { localStorage.setItem(recoveryMilestonesKey(userId), JSON.stringify(next)); } catch { /* ignore */ }
+    pushAccountData(userId, recoveryMilestonesKey(userId));
   };
 
   const setBirth = () => {
@@ -179,6 +194,7 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
     const today = format(new Date(), 'yyyy-MM-dd');
     setPpdLastCheck(today);
     try { localStorage.setItem(ppdSelfCheckKey(userId), today); } catch { /* ignore */ }
+    pushAccountData(userId, ppdSelfCheckKey(userId));
   };
 
   // ── Empty state: we don't know when birth happened ──

@@ -22,6 +22,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 const CONTRACEPTION_METHODS = [
   { id: 'pill', label: 'Birth Control Pill', emoji: '💊', effectiveness: '91-99%', schedule: 'Daily', description: 'Take at the same time every day for best protection.' },
@@ -91,6 +92,7 @@ function readLS<T>(userId: string, key: string, fallback: T): T {
 function writeLS(userId: string, key: string, value: unknown) {
   try {
     localStorage.setItem(lsKey(userId, key), JSON.stringify(value));
+    pushAccountData(userId, lsKey(userId, key));
   } catch {
     // Quota / private mode — silently ignore.
   }
@@ -110,6 +112,7 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
   const [signals, setSignals] = useState<SignalRow[]>([]);
   const [isLoadingSignals, setIsLoadingSignals] = useState(true);
 
+  const accountVersion = useAccountDataVersion(userId ? ['method', 'sideEffects', 'reminderTime', 'packStartDate'].map(k => lsKey(userId, k)) : []);
   // ─── Persisted preferences via localStorage ───
   useEffect(() => {
     if (!userId) return;
@@ -117,7 +120,7 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
     setTrackedSideEffects(new Set(readLS<string[]>(userId, 'sideEffects', [])));
     setReminderTime(readLS<string>(userId, 'reminderTime', '21:00'));
     setPackStartDate(readLS<string | null>(userId, 'packStartDate', null));
-  }, [userId]);
+  }, [userId, accountVersion]);
 
   useEffect(() => {
     if (!userId || selectedMethod === null) return;

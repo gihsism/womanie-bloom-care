@@ -16,6 +16,7 @@ import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import type { LifeStage } from '@/components/dashboard/DashboardHeader';
+import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 const lifeStageOptions = [
   {
@@ -107,6 +108,7 @@ const Settings = () => {
     bloodType: string | null;
   }>({ dateOfBirth: null, heightCm: null, weightKg: null, bloodType: null });
 
+  const accountVersion = useAccountDataVersion([basicInfoKey, user ? `womanie_notification_prefs_${user.id}` : null]);
   useEffect(() => {
     if (!basicInfoKey) return;
     try {
@@ -123,13 +125,14 @@ const Settings = () => {
     } catch {
       // Corrupt JSON — leave fields empty.
     }
-  }, [basicInfoKey]);
+  }, [basicInfoKey, accountVersion]);
 
   const saveBasicInfo = (next: typeof basicInfo) => {
     setBasicInfo(next);
     if (!basicInfoKey) return;
     try {
       localStorage.setItem(basicInfoKey, JSON.stringify(next));
+      pushAccountData(user?.id, basicInfoKey);
     } catch {
       // Quota / private mode — silently ignore.
     }
@@ -328,11 +331,12 @@ const Settings = () => {
       }
     } catch { /* ignore */ }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  }, [user?.id, accountVersion]);
 
   useEffect(() => {
     try {
       localStorage.setItem(NOTIFICATION_STORAGE_KEY, JSON.stringify(notifications));
+      pushAccountData(user?.id, NOTIFICATION_STORAGE_KEY);
     } catch { /* ignore */ }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notifications]);
@@ -497,9 +501,9 @@ const Settings = () => {
           </CardContent>
         </Card>
 
-        {/* Personal info — DOB / height / weight / blood type. Lives in
-            localStorage scoped by user.id until the profiles schema gets
-            dedicated columns. Onboarding writes the same key, so this is
+        {/* Personal info — DOB / height / weight / blood type. Saved to the
+            account (user_app_data via src/lib/account-data.ts) with a
+            localStorage copy. Onboarding writes the same key, so this is
             the place to view + edit what you entered then. */}
         <Card>
           <CardHeader>
@@ -508,7 +512,7 @@ const Settings = () => {
               Personal info
             </CardTitle>
             <CardDescription>
-              These show up in your health summary and help personalize insights. Stored on this device for now.
+              These show up in your health summary and help personalize insights. Saved to your account.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Shield, Plus, Check, AlertCircle, CalendarClock } from 'lucide-react';
 import { format, addMonths, differenceInDays, parseISO } from 'date-fns';
+import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 // Screening tracker for post-menopause / general adult preventive
 // care. The Post-Menopause dashboard already listed the screenings as
@@ -101,6 +102,7 @@ const ScreeningTracker = ({ scope }: ScreeningTrackerProps) => {
   const { toast } = useToast();
   const [records, setRecords] = useState<Record<string, ScreeningRecord>>({});
 
+  const accountVersion = useAccountDataVersion([userId ? KEY(userId) : null]);
   useEffect(() => {
     if (!userId) return;
     try {
@@ -112,13 +114,14 @@ const ScreeningTracker = ({ scope }: ScreeningTrackerProps) => {
     } catch {
       // Corrupt JSON — start empty.
     }
-  }, [userId]);
+  }, [userId, accountVersion]);
 
   const persist = (next: Record<string, ScreeningRecord>) => {
     setRecords(next);
     if (!userId) return;
     try {
       localStorage.setItem(KEY(userId), JSON.stringify(next));
+      pushAccountData(userId, KEY(userId));
     } catch {
       // Quota / private mode — accept in-memory state.
     }
