@@ -55,7 +55,8 @@ const statusBadge = (s: string | null) => {
   return null;
 };
 
-export default function RecentFindings({ since = null }: { since?: Date | null } = {}) {
+/** `showViewAll` hides the link to Health Records when the card is already on that page. */
+export default function RecentFindings({ since = null, showViewAll = true }: { since?: Date | null; showViewAll?: boolean } = {}) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [findings, setFindings] = useState<Finding[]>([]);
@@ -110,14 +111,16 @@ export default function RecentFindings({ since = null }: { since?: Date | null }
             </p>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-xs gap-1 h-7"
-          onClick={() => navigate('/dashboard/medical-history')}
-        >
-          View all <ArrowRight className="h-3 w-3" />
-        </Button>
+        {showViewAll && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs gap-1 h-7"
+            onClick={() => navigate('/dashboard/medical-history')}
+          >
+            View all <ArrowRight className="h-3 w-3" />
+          </Button>
+        )}
       </div>
 
       <ul className="space-y-2">

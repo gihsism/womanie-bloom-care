@@ -23,7 +23,8 @@ interface ExtractedItem {
   date_recorded: string | null;
 }
 
-export default function HealthSummaryWidget({ since = null }: { since?: Date | null } = {}) {
+/** `showViewAll` hides the link to Health Records when the card is already on that page. */
+export default function HealthSummaryWidget({ since = null, showViewAll = true }: { since?: Date | null; showViewAll?: boolean } = {}) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [data, setData] = useState<ExtractedItem[]>([]);
@@ -70,9 +71,11 @@ export default function HealthSummaryWidget({ since = null }: { since?: Date | n
           <HeartPulse className="h-4 w-4 text-primary" aria-hidden="true" />
           <h3 className="text-sm font-bold">Health Overview</h3>
         </div>
-        <Button variant="ghost" size="sm" className="text-xs gap-1 h-7" onClick={() => navigate('/dashboard/medical-history')}>
-          View all <ArrowRight className="h-3 w-3" />
-        </Button>
+        {showViewAll && (
+          <Button variant="ghost" size="sm" className="text-xs gap-1 h-7" onClick={() => navigate('/dashboard/medical-history')}>
+            View all <ArrowRight className="h-3 w-3" />
+          </Button>
+        )}
       </div>
 
       <div className="space-y-3">

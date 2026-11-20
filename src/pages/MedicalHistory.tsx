@@ -27,6 +27,11 @@ import TestComparisonTable from '@/components/dashboard/TestComparisonTable';
 import HealthTimeline from '@/components/dashboard/HealthTimeline';
 import ResultsRangeChart from '@/components/dashboard/ResultsRangeChart';
 import DocumentCycleAlert from '@/components/dashboard/DocumentCycleAlert';
+import WeeklySummary from '@/components/dashboard/WeeklySummary';
+import RecentFindings from '@/components/dashboard/RecentFindings';
+import OverdueTests from '@/components/dashboard/OverdueTests';
+import HealthTrends from '@/components/dashboard/HealthTrends';
+import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import { useToast } from '@/hooks/use-toast';
 import UserMenu from '@/components/UserMenu';
 import {
@@ -1646,6 +1651,19 @@ export default function MedicalHistory() {
                     </div>
                   </Card>
                 )}
+
+                {/* ============ LAB SUMMARY CARDS (moved here from Home) ============ */}
+                {/* Each card hides itself when it has nothing to show. Order: the */}
+                {/* week's story, what needs attention, what's due, how results    */}
+                {/* moved, then the overall picture. Their own margins are reset   */}
+                {/* so the page's space-y-6 rhythm applies.                        */}
+                <div className="space-y-6 [&>*]:!mb-0 empty:hidden">
+                  <WeeklySummary />
+                  <RecentFindings showViewAll={false} />
+                  <OverdueTests />
+                  <HealthTrends showViewAll={false} />
+                  <HealthSummaryWidget showViewAll={false} />
+                </div>
 
                 {/* ============ DOCUMENT-CYCLE CONNECTION ALERT ============ */}
                 <DocumentCycleAlert

@@ -50,7 +50,8 @@ function ShiftBadge({ shift }: { shift: TrendRow['statusShift'] }) {
   return null;
 }
 
-export default function HealthTrends() {
+/** `showViewAll` hides the link to Health Records when the card is already on that page. */
+export default function HealthTrends({ showViewAll = true }: { showViewAll?: boolean } = {}) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [trends, setTrends] = useState<TrendRow[]>([]);
@@ -88,14 +89,16 @@ export default function HealthTrends() {
             </p>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-xs gap-1 h-7"
-          onClick={() => navigate('/dashboard/medical-history')}
-        >
-          Full history <ArrowRight className="h-3 w-3" />
-        </Button>
+        {showViewAll && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs gap-1 h-7"
+            onClick={() => navigate('/dashboard/medical-history')}
+          >
+            Full history <ArrowRight className="h-3 w-3" />
+          </Button>
+        )}
       </div>
 
       <ul className="space-y-2">

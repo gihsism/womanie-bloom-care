@@ -40,7 +40,6 @@ import GuidesSection from '@/components/dashboard/GuidesSection';
 import MenopauseSymptomCalendar from '@/components/dashboard/MenopauseSymptomCalendar';
 import PerimenopauseStageCard from '@/components/dashboard/PerimenopauseStageCard';
 import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
-import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import CyclePredictionInsights from '@/components/dashboard/CyclePredictionInsights';
 import CyclePredictionAccuracyCard from '@/components/dashboard/CyclePredictionAccuracyCard';
 import SleepCycleCorrelation from '@/components/dashboard/SleepCycleCorrelation';
@@ -51,10 +50,7 @@ import VisitPrepCard from '@/components/dashboard/VisitPrepCard';
 import AmhAgeContext from '@/components/dashboard/AmhAgeContext';
 import FertilityOutlookCard from '@/components/dashboard/FertilityOutlookCard';
 import LabFreshnessCard from '@/components/dashboard/LabFreshnessCard';
-import RecentFindings from '@/components/dashboard/RecentFindings';
 import { useAttentionCount } from '@/hooks/useAttentionCount';
-import HealthTrends from '@/components/dashboard/HealthTrends';
-import WeeklySummary from '@/components/dashboard/WeeklySummary';
 import GettingStarted from '@/components/dashboard/GettingStarted';
 import UpcomingAppointments from '@/components/dashboard/UpcomingAppointments';
 import DoctorNotesCard from '@/components/dashboard/DoctorNotesCard';
@@ -66,7 +62,6 @@ import CycleDialHero from '@/components/dashboard/CycleDialHero';
 import PillRingHero from '@/components/dashboard/PillRingHero';
 import MenopauseBodyMap from '@/components/dashboard/MenopauseBodyMap';
 import IVFTimelineHero from '@/components/dashboard/IVFTimelineHero';
-import OverdueTests from '@/components/dashboard/OverdueTests';
 import SymptomPatternsCard from '@/components/dashboard/SymptomPatternsCard';
 import FertileWindowTimingCard from '@/components/dashboard/FertileWindowTimingCard';
 import BBTChart from '@/components/dashboard/BBTChart';
@@ -97,6 +92,7 @@ import {
   User as UserIcon,
   LogOut,
   ArrowLeft,
+  ArrowRight,
   Baby,
   Milk
 } from 'lucide-react';
@@ -331,7 +327,7 @@ const PatientDashboard = () => {
 
 
   // Pregnancy Home shows only lab results from this pregnancy; older ones
-  // stay in Health Records. Memoised so the cards don't reload every render.
+  // stay in Health Records. Memoised so the card doesn't reload every render.
   const labSince = useMemo(
     () => (selectedMode === 'pregnancy' ? pregnancyStart(pregnancyDueDate) : null),
     [selectedMode, pregnancyDueDate],
@@ -657,27 +653,20 @@ const PatientDashboard = () => {
                 sees them. Hides itself when there are none. */}
             <DoctorNotesCard />
 
-            {/* Narrative weekly summary across all uploaded documents
-                — generated on demand, cached per calendar week, and
-                auto-refreshed when a new analysis lands. Hides when
-                there's nothing to summarise. */}
-            <WeeklySummary />
-
-            {/* Most important findings from recent analyses — shown
-                first so critical/abnormal results are visible at a
-                glance. Hides itself when there's nothing to flag. */}
-            <RecentFindings since={labSince} />
-
-            {/* Tests the patient has tracked at least twice but hasn't
-                seen in 12+ months. Hides when nothing is overdue. */}
-            {selectedMode !== 'pregnancy' && <OverdueTests />}
-
-            {/* Cross-document trends — how key tests have changed over
-                multiple uploads. Hidden when there's nothing to show. */}
-            {selectedMode !== 'pregnancy' && <HealthTrends />}
-
-            {/* Health Summary from medical documents */}
-            <HealthSummaryWidget since={labSince} />
+            {/* The general lab cards (weekly summary, findings, overdue
+                tests, trends, health overview) live on Health Records so
+                Home stays calm. One quiet line points there. */}
+            <button
+              type="button"
+              onClick={() => navigate('/dashboard/medical-history')}
+              className="mb-6 w-full flex items-center justify-between gap-3 border-y border-border py-3 text-left text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <span>
+                <span className="label-mono block mb-0.5">Lab results</span>
+                Findings, trends and summaries are in Health Records
+              </span>
+              <ArrowRight className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+            </button>
 
             {/* Lab + age signals that change how reliable the cycle
                 prediction is — TSH out of range, elevated FSH, PCOS
