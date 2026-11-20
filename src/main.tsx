@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import * as Sentry from '@sentry/react';
 import App from './App.tsx';
 import './index.css';
+import { reloadOnceForStaleChunk } from './lib/staleChunk';
 
 if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({
@@ -47,6 +48,11 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistration().then((r) => r?.update()).catch(() => { /* offline */ });
   });
 }
+
+// A chunk from the previous deploy is gone: reload once to get the new version.
+window.addEventListener("vite:preloadError", (event) => {
+  if (reloadOnceForStaleChunk()) event.preventDefault();
+});
 
 createRoot(document.getElementById("root")!).render(
   <App />

@@ -2,6 +2,7 @@ import { Component, type ReactNode } from 'react';
 import * as Sentry from '@sentry/react';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import { isStaleChunkError, reloadOnceForStaleChunk } from '@/lib/staleChunk';
 
 interface Props {
   children: ReactNode;
@@ -24,6 +25,8 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
+    // Code from the previous deploy is gone: reload once instead of showing the error.
+    if (isStaleChunkError(error) && reloadOnceForStaleChunk()) return;
     console.error('ErrorBoundary caught:', error, info.componentStack);
     // Forward to Sentry so renders that crash the tree show up in the
     // dashboard alongside the API errors. componentStack lands on the
