@@ -33,3 +33,6 @@ dist-ssr
 # iOS: vendored Capacitor binaries (fetched + checksum-verified by scripts/ios-use-vendored-capacitor.sh)
 ios/vendor/capacitor-swift-pm/*.xcframework/
 .ios-logs/
+
+# agent worktrees
+.claude/worktrees/
