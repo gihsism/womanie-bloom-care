@@ -1,0 +1,12 @@
+{
+  "name": "womanie-research-library-builder",
+  "private": true,
+  "type": "module",
+  "description": "Builds api/_lib/research/library.json from PubMed (NCBI E-utilities) + Claude summaries. Kept separate from the app's package.json so the SDK never ships in the app bundle.",
+  "scripts": {
+    "build": "node build-library.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.12.0"
+  }
+}
