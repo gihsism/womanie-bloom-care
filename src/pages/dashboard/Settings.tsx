@@ -16,6 +16,7 @@ import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import type { LifeStage } from '@/components/dashboard/DashboardHeader';
+import { normalizeLifeStage } from '@/lib/lifeStage';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 const lifeStageOptions = [
@@ -353,7 +354,7 @@ const Settings = () => {
 
       if (error) throw error;
       if (data?.life_stage) {
-        setSelectedStage(data.life_stage as LifeStage);
+        setSelectedStage(normalizeLifeStage(data.life_stage));
       }
     } catch (error) {
       console.error('Error loading settings:', error);

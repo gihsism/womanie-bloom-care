@@ -16,6 +16,7 @@ import { db } from '@/integrations/db/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardHeader, { type LifeStage } from '@/components/dashboard/DashboardHeader';
+import { normalizeLifeStage } from '@/lib/lifeStage';
 import CycleCalendar from '@/components/dashboard/CycleCalendar';
 import PregnancyTracker from '@/components/dashboard/PregnancyTracker';
 import PregnancyWeightTracker from '@/components/dashboard/PregnancyWeightTracker';
@@ -198,7 +199,7 @@ const PatientDashboard = () => {
 
       setProfile(data);
 
-      setSelectedMode((data?.life_stage as LifeStage) || 'menstrual-cycle');
+      setSelectedMode(normalizeLifeStage(data?.life_stage));
       
       if (data?.pregnancy_due_date) {
         setPregnancyDueDate(new Date(data.pregnancy_due_date));
