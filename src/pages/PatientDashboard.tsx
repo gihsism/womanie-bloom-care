@@ -74,6 +74,8 @@ import { useNotificationPrefs } from '@/hooks/useNotificationPrefs';
 import PregnancyLabInsights from '@/components/dashboard/PregnancyLabInsights';
 import CycleLabInsights from '@/components/dashboard/CycleLabInsights';
 import ModeLabInsights from '@/components/dashboard/ModeLabInsights';
+import EvidenceNote from '@/components/research/EvidenceNote';
+import { evidenceSpec } from '@/lib/evidenceTopics';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { format } from 'date-fns';
 import { useMemo } from 'react';
@@ -852,6 +854,11 @@ const PatientDashboard = () => {
                   </div>
                   <div className="lg:col-span-1 space-y-4">
                     <CycleLabInsights mode={selectedMode} />
+                    {selectedMode === 'conception' && periodData && (
+                      <Card className="px-4 py-1">
+                        <EvidenceNote specs={[evidenceSpec('cycle-timing', selectedMode)]} className="" about="on timing" />
+                      </Card>
+                    )}
                     {/* Next ovulation / next period live in the cycle dial at the top. */}
                     {!periodData && (
                       <Card className="p-4 text-center">

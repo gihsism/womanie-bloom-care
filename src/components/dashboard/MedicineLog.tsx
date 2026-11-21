@@ -10,6 +10,8 @@ import { useLifeEvents } from '@/hooks/useLifeEvents';
 import { Pill, Plus, Check, Trash2, Bell, X } from 'lucide-react';
 import { format, isToday, parseISO } from 'date-fns';
 import { dueReminders } from '@/lib/medicine';
+import EvidenceNote from '@/components/research/EvidenceNote';
+import { medicineMarker, specsForMarkers } from '@/lib/evidenceTopics';
 
 // Medicine & supplement log for every life stage (table medications;
 // each "Taken" tap is a life_events row, kind 'med_dose').
@@ -248,6 +250,9 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
           </ul>
         </div>
       )}
+
+      {/* What the research says about what she takes (HRT, iron, folic acid...). */}
+      <EvidenceNote specs={specsForMarkers(meds.map(m => medicineMarker(m.name)), stage)} className="pt-1 border-t" />
     </Card>
   );
 }

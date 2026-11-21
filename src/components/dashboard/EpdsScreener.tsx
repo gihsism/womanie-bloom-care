@@ -6,6 +6,8 @@ import { format, parseISO } from 'date-fns';
 import { Brain, RotateCcw, ChevronRight } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
+import EvidenceNote from '@/components/research/EvidenceNote';
+import { evidenceSpec } from '@/lib/evidenceTopics';
 
 // Edinburgh Postnatal Depression Scale (EPDS) — a 10-item validated
 // screening tool for postpartum and antenatal depression. Each item
@@ -220,6 +222,11 @@ export default function EpdsScreener({ mode }: EpdsScreenerProps) {
           <p className="text-[11px] mt-1 leading-relaxed">{lastInterp.message}</p>
           <p className="text-[10px] mt-2 opacity-75">Taken {format(parseISO(latest.date), 'MMM d, yyyy')}</p>
         </div>
+      )}
+
+      {/* Not next to an item-10 result: that screen is about getting help now. */}
+      {!taking && latest && !latest.flaggedItem10 && (
+        <EvidenceNote specs={[evidenceSpec('epds', mode)]} className="mt-1" />
       )}
 
       {!taking && !latest && (

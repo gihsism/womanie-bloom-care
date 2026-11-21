@@ -5,6 +5,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
 import { format, parseISO, startOfDay, subDays } from 'date-fns';
 import { CalendarHeart, Flame, Activity } from 'lucide-react';
+import EvidenceNote from '@/components/research/EvidenceNote';
+import { evidenceSpec } from '@/lib/evidenceTopics';
 
 // 60-day rolling symptom calendar for menopause / post-menopause modes.
 //
@@ -209,6 +211,10 @@ export default function MenopauseSymptomCalendar({ mode }: MenopauseSymptomCalen
         <p className="text-[11px] text-muted-foreground mt-3 text-center">
           Log a daily entry to start seeing patterns here.
         </p>
+      )}
+
+      {summary && summary.totalHotFlashes > 0 && (
+        <EvidenceNote specs={[evidenceSpec('hot-flushes', mode)]} className="mt-2 border-t border-border/60" />
       )}
     </Card>
   );

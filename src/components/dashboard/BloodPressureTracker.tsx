@@ -8,6 +8,8 @@ import { format, parseISO } from 'date-fns';
 import { Activity, AlertTriangle, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
+import EvidenceNote from '@/components/research/EvidenceNote';
+import { evidenceSpec } from '@/lib/evidenceTopics';
 
 // Blood pressure log + preeclampsia / hypertension screen for
 // pregnancy mode. ACOG 2020:
@@ -321,6 +323,8 @@ export default function BloodPressureTracker({ mode }: BloodPressureTrackerProps
           </ul>
         </details>
       )}
+
+      {entries.length > 0 && <EvidenceNote specs={[evidenceSpec('blood-pressure', mode)]} className="mt-1" />}
 
       <p className="text-[10px] text-muted-foreground mt-3 leading-relaxed">
         {isPregnancy

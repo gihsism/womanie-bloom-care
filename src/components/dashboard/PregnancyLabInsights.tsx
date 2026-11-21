@@ -4,6 +4,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLabResults } from '@/hooks/useLabResults';
+import EvidenceNote from '@/components/research/EvidenceNote';
+import { specsForLabs } from '@/lib/evidenceTopics';
 import { ArrowRight, FlaskConical, AlertTriangle, CheckCircle2, Upload } from 'lucide-react';
 
 // Key tests to highlight during pregnancy
@@ -128,6 +130,11 @@ export default function PregnancyLabInsights({ since = null }: { since?: Date | 
           </div>
         </div>
       )}
+      {/* What the research says about her own tested markers (flagged first). */}
+      <EvidenceNote
+        specs={specsForLabs(tested.map(t => ({ title: t.result!.title, label: t.label, status: t.result!.status })), 'pregnancy')}
+        className="pt-1 border-t border-border/50"
+      />
     </Card>
   );
 }

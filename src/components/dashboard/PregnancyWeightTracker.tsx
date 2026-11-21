@@ -9,6 +9,8 @@ import { differenceInDays, format, parseISO } from 'date-fns';
 import { Scale, Info, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
+import EvidenceNote from '@/components/research/EvidenceNote';
+import { evidenceSpec } from '@/lib/evidenceTopics';
 
 // Pregnancy weight-gain tracker against IOM 2009 guidelines.
 //
@@ -408,6 +410,10 @@ export default function PregnancyWeightTracker({ dueDate }: PregnancyWeightTrack
             </div>
           )}
         </>
+      )}
+
+      {isSetup && entries.length > 0 && (
+        <EvidenceNote specs={[evidenceSpec('pregnancy-weight', 'pregnancy')]} className="mt-1" />
       )}
 
       <p className="text-[10px] text-muted-foreground mt-2 leading-relaxed">
