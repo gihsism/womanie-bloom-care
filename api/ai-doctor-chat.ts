@@ -4,7 +4,8 @@ import { getAuthUser } from './_lib/auth.js';
 import { checkAndConsume } from './_lib/ratelimit.js';
 import { withSentry } from './_lib/sentry.js';
 import { buildLifeContext } from './_lib/life-context.js';
-import { SOURCES_FOOTER_MARK, buildSourcesPrompt, formatSourcesFooter, selectChatSources, stripUnknownCitations, toChatSources, type ResearchItem } from './_lib/research/library.js';
+import { SOURCES_FOOTER_MARK, buildSourcesPrompt, formatSourcesFooter, stripUnknownCitations, toChatSources, type ResearchItem } from './_lib/research/library.js';
+import { selectChatSourcesHybrid } from './_lib/research/hybrid.js';
 
 export const config = {
   maxDuration: 60,
@@ -239,10 +240,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Research library: the 0-6 best-matching guideline/review summaries
   // for this question and life stage, given to the model as numbered
-  // sources. Never allowed to break the chat.
+  // sources. Hybrid keyword + semantic search; the question is embedded
+  // on this server (never sent to a third party) and the search falls
+  // back to keywords only if the model is unavailable or slower than
+  // ~3 s. Never allowed to break the chat.
   let researchItems: ResearchItem[] = [];
   try {
-    researchItems = selectChatSources(userTurnContent, profile?.life_stage);
+    researchItems = await selectChatSourcesHybrid(userTurnContent, profile?.life_stage);
   } catch (err) {
     console.error('Research library unavailable:', err);
   }

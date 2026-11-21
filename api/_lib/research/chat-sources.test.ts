@@ -22,7 +22,7 @@ vi.mock('../sentry.js', () => ({ withSentry: (h: unknown) => h }));
 
 import handler from '../../ai-doctor-chat';
 import { getAuthUser } from '../auth.js';
-import { selectChatSources } from './library';
+import { selectChatSourcesHybrid } from './hybrid';
 
 const USER = { id: 'user_abc', email: 'a@test.com', sessionId: 's1' };
 
@@ -87,7 +87,8 @@ describe('ai-doctor-chat research sources', () => {
   it('injects numbered sources and streams back the same list first', async () => {
     answer = 'Up to about 200 mg of caffeine a day is usually fine [1].';
     const question = 'Is coffee OK in pregnancy?';
-    const expected = selectChatSources(question, 'pregnancy');
+    // The handler uses the hybrid search (bundled model, keyword fallback).
+    const expected = await selectChatSourcesHybrid(question, 'pregnancy');
     expect(expected.length).toBeGreaterThanOrEqual(3);
 
     const res = mockRes();
@@ -143,7 +144,7 @@ describe('ai-doctor-chat research sources', () => {
 
   it('drops invented citation numbers from the stored reply', async () => {
     const question = 'Is coffee OK in pregnancy?';
-    const n = selectChatSources(question, 'pregnancy').length;
+    const n = (await selectChatSourcesHybrid(question, 'pregnancy')).length;
     answer = `Keep caffeine moderate [1]. Some say more is fine [${n + 3}].`;
     const res = mockRes();
     await handler(req(question), res as unknown as VercelResponse);

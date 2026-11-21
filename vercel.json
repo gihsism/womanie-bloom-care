@@ -1,4 +1,15 @@
 {
+  "functions": {
+    "api/ai-doctor-chat.ts": {
+      "maxDuration": 60,
+      "includeFiles": "{api/_lib/research/model/**,api/_lib/research/library-embeddings.json,node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.mjs,node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm}",
+      "excludeFiles": "node_modules/onnxruntime-web/dist/{*.map,ort.all*,ort.webgl*,ort.webgpu*,ort.jspi*,ort.wasm*,ort.bundle*,ort.min.*,ort.js,ort.mjs,*.jsep.*,*.asyncify.*,*.jspi.*}"
+    },
+    "api/router.ts": {
+      "includeFiles": "{api/_lib/research/model/**,api/_lib/research/library-embeddings.json,node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.mjs,node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm}",
+      "excludeFiles": "node_modules/onnxruntime-web/dist/{*.map,ort.all*,ort.webgl*,ort.webgpu*,ort.jspi*,ort.wasm*,ort.bundle*,ort.min.*,ort.js,ort.mjs,*.jsep.*,*.asyncify.*,*.jspi.*}"
+    }
+  },
   "rewrites": [
     { "source": "/api/:path((?!router$).*)", "destination": "/api/router?__route=:path" },
     { "source": "/((?!api/|assets/).*)", "destination": "/index.html" }

@@ -236,6 +236,46 @@ export interface SearchOptions {
   limit?: number;
   /** Drop results scoring below this (chat uses it to avoid weak sources). */
   minScore?: number;
+  /**
+   * Query + document embeddings for hybrid ranking (see hybrid.ts). Absent
+   * or null = keyword-only, exactly the original behaviour.
+   */
+  semantic?: SemanticInput | null;
+}
+
+export interface SemanticInput {
+  /** Unit-length query vector. */
+  query: Float32Array;
+  /** Unit-length document vectors by item id (missing = no semantic signal). */
+  docs: Map<string, Float32Array>;
+  /** Share of the blend given to the semantic score (0-1). */
+  weight: number;
+  /** Cosine at or below which an item gets no semantic credit. */
+  floor: number;
+  /** Cosine at or above which an item gets full semantic credit. */
+  ceil: number;
+}
+
+/**
+ * Keyword score that counts as a full-strength match when normalising:
+ * the keyword part of the blend is base / max(best base, KEYWORD_REF), so
+ * a weak best keyword match is not inflated to 1.
+ */
+export const KEYWORD_REF = 10;
+
+/** Cosine mapped onto 0-1 between the model's floor and ceil. */
+export function semanticStrength(cos: number, floor: number, ceil: number): number {
+  if (!(ceil > floor)) return 0;
+  return Math.max(0, Math.min(1, (cos - floor) / (ceil - floor)));
+}
+
+/**
+ * The hybrid base score, in keyword-score units so minScore and the chat
+ * cutoff keep their meaning: ref * ((1 - w) * keyword/ref + w * semantic).
+ */
+export function blendScores(keywordBase: number, semantic: number, weight: number, ref: number): number {
+  const w = Math.max(0, Math.min(1, weight));
+  return ref * ((1 - w) * Math.min(1, keywordBase / ref) + w * semantic);
 }
 
 export interface ScoredItem {
@@ -251,6 +291,13 @@ function stageAllowed(item: ResearchItem, stage: LifeStage | null, opts: SearchO
   if (!stage || !opts.strictStage) return true;
   if (item.lifeStages.includes(stage)) return true;
   return !opts.excludeGeneral && item.lifeStages.includes('general');
+}
+
+function dotProduct(a: Float32Array, b: Float32Array): number {
+  let s = 0;
+  const n = Math.min(a.length, b.length);
+  for (let i = 0; i < n; i++) s += a[i] * b[i];
+  return s;
 }
 
 function stageFactor(item: ResearchItem, stage: LifeStage | null): number {
@@ -281,6 +328,8 @@ export function searchItems(
   const qLower = ` ${query.toLowerCase().replace(/[^a-z0-9 -]+/g, ' ').replace(/\s+/g, ' ')} `;
   const nowYear = new Date().getFullYear();
   const results: ScoredItem[] = [];
+  const sem = query.trim() ? opts.semantic ?? null : null;
+  const candidates: { it: IndexedItem; base: number; strength: number }[] = [];
 
   for (const it of indexItems(items, topics)) {
     if (opts.topic && !it.item.topics.includes(opts.topic)) continue;
@@ -300,13 +349,28 @@ export function searchItems(
     }
     for (const p of it.phrases) if (qLower.includes(` ${p} `)) raw += 2;
 
-    if (qTokens.length > 0 && raw === 0) continue;
     const coverage = qTokens.length
       ? qTokens.filter((t) => matched.has(t) || (SYNONYMS[t] ?? []).some((s) => matched.has(stem(s)))).length / qTokens.length
       : 1;
+    const base = qTokens.length ? raw * (0.4 + 0.6 * coverage) : 1;
+    if (sem) {
+      const doc = sem.docs.get(it.item.id);
+      const strength = doc ? semanticStrength(dotProduct(sem.query, doc), sem.floor, sem.ceil) : 0;
+      if (raw === 0 && strength === 0) continue;
+      candidates.push({ it, base: raw === 0 ? 0 : base, strength });
+      continue;
+    }
+    if (qTokens.length > 0 && raw === 0) continue;
+    candidates.push({ it, base, strength: 0 });
+  }
+
+  // Hybrid: normalise the keyword part against the best keyword match of
+  // this query (at least KEYWORD_REF) and blend in the semantic strength.
+  const ref = sem ? Math.max(KEYWORD_REF, ...candidates.map((c) => c.base)) : 0;
+  for (const { it, base: kwBase, strength } of candidates) {
+    const base = sem ? blendScores(kwBase, strength, sem.weight, ref) : kwBase;
     const recency = 1 + Math.max(0, 10 - (nowYear - it.item.year)) * 0.005;
     const cochrane = /cochrane/i.test(it.item.journal) ? COCHRANE_BOOST : 1;
-    const base = qTokens.length ? raw * (0.4 + 0.6 * coverage) : 1;
     const score = base * stageFactor(it.item, stage) * EVIDENCE_BOOST[it.item.evidenceLevel] * cochrane * recency;
     if (opts.minScore && score < opts.minScore) continue;
     results.push({ item: it.item, score: Math.round(score * 100) / 100 });
@@ -346,13 +410,18 @@ function rankEvidence(item: ResearchItem): number {
 }
 
 /** For the Library page: filter by stage/topic and optional text. */
-export function browseItems(opts: { lifeStage?: string | null; topic?: string | null; q?: string | null }): ResearchItem[] {
+export function browseItems(opts: {
+  lifeStage?: string | null;
+  topic?: string | null;
+  q?: string | null;
+  semantic?: SemanticInput | null;
+}): ResearchItem[] {
   const lib = getLibrary();
   const q = (opts.q ?? '').trim();
   const res = searchItems(
     lib.items,
     q,
-    { lifeStage: opts.lifeStage, strictStage: Boolean(opts.lifeStage), topic: opts.topic || null },
+    { lifeStage: opts.lifeStage, strictStage: Boolean(opts.lifeStage), topic: opts.topic || null, semantic: opts.semantic },
     lib.topics,
   );
   if (q) return res.map((r) => r.item);
@@ -381,10 +450,11 @@ export function selectChatSources(
   lifeStage: string | null | undefined,
   items?: ResearchItem[],
   topics?: ResearchTopic[],
+  semantic?: SemanticInput | null,
 ): ResearchItem[] {
   if (!question || !question.trim()) return [];
   const lib = items ? { items, topics: topics ?? [] } : getLibrary();
-  const ranked = searchItems(lib.items, question.slice(0, 500), { lifeStage, minScore: 5 }, lib.topics);
+  const ranked = searchItems(lib.items, question.slice(0, 500), { lifeStage, minScore: 5, semantic }, lib.topics);
   if (ranked.length === 0) return [];
   // Keep items within reach of the best one so a strong match does not
   // drag in loosely related filler.

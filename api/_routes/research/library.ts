@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withSentry } from '../../_lib/sentry.js';
 import { browseItems, getLibrary, normalizeLifeStage, RESEARCH_DISCLAIMER } from '../../_lib/research/library.js';
 import { evidenceNotes } from '../../_lib/research/evidence-notes.js';
+import { browseItemsHybrid } from '../../_lib/research/hybrid.js';
 
 // GET /api/research/library?stage=pregnancy&topic=caffeine-pregnancy&q=coffee
 //
@@ -50,7 +51,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     .sort((a, b) => Number(own(b)) - Number(own(a)))
     .map((t) => ({ id: t.id, label: t.label, count: counts.get(t.id) ?? 0 }));
 
-  const items = browseItems({ lifeStage: stage, topic, q }).map((it) => ({
+  // Text search is hybrid (keywords + on-server embeddings, keyword-only
+  // fallback); the stage/topic browse above needs no model.
+  const items = (await browseItemsHybrid({ lifeStage: stage, topic, q })).map((it) => ({
     id: it.id,
     pmid: it.pmid,
     title: it.title,
