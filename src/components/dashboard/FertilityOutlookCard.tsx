@@ -206,7 +206,7 @@ export default function FertilityOutlookCard({ mode }: FertilityOutlookCardProps
       <div className="flex justify-end mt-2">
         <button
           type="button"
-          className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5"
+          className="tap-target inline-flex items-center gap-1 text-[11px] text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5"
           onClick={() => {
             const parts: string[] = [];
             if (ctx.age !== null) parts.push(`I'm ${ctx.age}`);

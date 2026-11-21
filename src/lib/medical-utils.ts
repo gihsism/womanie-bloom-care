@@ -33,14 +33,14 @@ export interface DocumentInfo {
 }
 
 // Status display config
-export const friendlyStatus: Record<string, { label: string; emoji: string; color: string; bgColor: string; description: string }> = {
-  normal: { label: 'All good', emoji: '✅', color: 'text-green-700 dark:text-green-400', bgColor: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800', description: 'This result is within the healthy range.' },
-  expected: { label: 'Normal for you', emoji: '💙', color: 'text-blue-700 dark:text-blue-400', bgColor: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800', description: 'This is outside the general range, but perfectly normal for your situation.' },
-  abnormal: { label: 'Worth discussing', emoji: '⚠️', color: 'text-amber-700 dark:text-amber-400', bgColor: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800', description: 'This result is outside the normal range. Talk to your doctor about it.' },
-  critical: { label: 'Needs attention', emoji: '🔴', color: 'text-red-700 dark:text-red-400', bgColor: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800', description: 'This needs urgent medical attention.' },
-  informational: { label: 'For reference', emoji: 'ℹ️', color: 'text-muted-foreground', bgColor: 'bg-muted/50 border-border', description: 'Tracked for your records.' },
-  active: { label: 'Current', emoji: '📌', color: 'text-blue-700 dark:text-blue-400', bgColor: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800', description: '' },
-  resolved: { label: 'Resolved', emoji: '✓', color: 'text-muted-foreground', bgColor: 'bg-muted/50 border-border', description: '' },
+export const friendlyStatus: Record<string, { label: string; emoji: string; color: string; bgColor: string; dot: string; description: string }> = {
+  normal: { label: 'All good', emoji: '✅', color: 'text-muted-foreground', bgColor: 'bg-muted/60 border-border', dot: 'bg-foreground/25', description: 'This result is within the healthy range.' },
+  expected: { label: 'Normal for you', emoji: '💙', color: 'text-foreground/75', bgColor: 'bg-muted/40 border-border', dot: 'bg-foreground/50', description: 'This is outside the general range, but perfectly normal for your situation.' },
+  abnormal: { label: 'Worth discussing', emoji: '⚠️', color: 'text-destructive/80', bgColor: 'bg-destructive/5 border-destructive/20', dot: 'bg-destructive/60', description: 'This result is outside the normal range. Talk to your doctor about it.' },
+  critical: { label: 'Needs attention', emoji: '🔴', color: 'text-destructive', bgColor: 'bg-destructive/10 border-destructive/30', dot: 'bg-destructive', description: 'This needs urgent medical attention.' },
+  informational: { label: 'For reference', emoji: 'ℹ️', color: 'text-muted-foreground', bgColor: 'bg-muted/50 border-border', dot: 'bg-muted-foreground/40', description: 'Tracked for your records.' },
+  active: { label: 'Current', emoji: '📌', color: 'text-primary', bgColor: 'bg-primary/5 border-primary/20', dot: 'bg-primary', description: '' },
+  resolved: { label: 'Resolved', emoji: '✓', color: 'text-muted-foreground', bgColor: 'bg-muted/50 border-border', dot: 'bg-muted-foreground/40', description: '' },
 };
 
 export const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };

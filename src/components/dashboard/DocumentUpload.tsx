@@ -193,7 +193,7 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
                 <Upload className="h-7 w-7 text-primary" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-base">Upload Health Document</h3>
+                <h3 className="font-medium text-base">Upload Health Document</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Lab results, prescriptions, imaging reports — AI will analyze and explain everything
                 </p>

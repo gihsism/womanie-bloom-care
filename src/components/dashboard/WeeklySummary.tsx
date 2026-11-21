@@ -117,7 +117,7 @@ export default function WeeklySummary() {
             <BookOpen className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <p className="text-sm font-semibold">Your health story, this week</p>
+            <p className="font-display text-base font-medium">Your health story, this week</p>
             <p className="text-[11px] text-muted-foreground">
               A plain-language read across all your uploaded documents
               {generatedLabel ? ` · updated ${generatedLabel}` : ''}

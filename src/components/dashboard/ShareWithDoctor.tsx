@@ -164,7 +164,7 @@ export default function ShareWithDoctor() {
             </p>
           ) : (
             <div className="space-y-2">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              <p className="label-mono">
                 Active codes
               </p>
               <ul className="space-y-2">
@@ -177,7 +177,7 @@ export default function ShareWithDoctor() {
                       className="flex items-center gap-3 p-3 rounded-lg border bg-muted/40"
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="text-lg font-mono font-bold tracking-wider">{c.code}</p>
+                        <p className="text-lg font-mono font-medium tracking-wider">{c.code}</p>
                         <p className="text-[11px] text-muted-foreground">
                           Expires {expiresLabel}
                         </p>

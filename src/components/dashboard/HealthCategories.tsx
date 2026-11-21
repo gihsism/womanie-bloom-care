@@ -36,26 +36,26 @@ interface Category {
 }
 
 const CATEGORIES: Category[] = [
-  { name: 'Blood Health', icon: Droplet, color: 'text-red-600', bgColor: 'bg-red-50 dark:bg-red-900/20', barColor: 'bg-red-500',
+  { name: 'Blood Health', icon: Droplet, color: 'text-primary', bgColor: 'bg-primary/5', barColor: 'bg-primary/60',
     tests: ['hemoglobin', 'ferritin', 'iron', 'hematocrit', 'mcv', 'mch', 'mchc', 'rdw', 'red blood cells', 'platelets', 'white blood cells', 'neutrophils', 'lymphocytes', 'monocytes', 'eosinophils', 'basophils'] },
-  { name: 'Hormones & Cycle', icon: HeartPulse, color: 'text-pink-600', bgColor: 'bg-pink-50 dark:bg-pink-900/20', barColor: 'bg-pink-500',
+  { name: 'Hormones & Cycle', icon: HeartPulse, color: 'text-primary', bgColor: 'bg-primary/5', barColor: 'bg-primary/60',
     tests: ['estradiol', 'progesterone', 'fsh', 'lh', 'hcg', 'amh', 'prolactin', 'testosterone', 'dhea', 'shbg'] },
-  { name: 'Thyroid', icon: Zap, color: 'text-violet-600', bgColor: 'bg-violet-50 dark:bg-violet-900/20', barColor: 'bg-violet-500',
+  { name: 'Thyroid', icon: Zap, color: 'text-primary', bgColor: 'bg-primary/5', barColor: 'bg-primary/60',
     tests: ['tsh', 't3', 't4', 'free t3', 'free t4', 'anti-tpo', 'anti-tg', 'thyroglobulin'] },
-  { name: 'Metabolic & Sugar', icon: Flame, color: 'text-orange-600', bgColor: 'bg-orange-50 dark:bg-orange-900/20', barColor: 'bg-orange-500',
+  { name: 'Metabolic & Sugar', icon: Flame, color: 'text-primary', bgColor: 'bg-primary/5', barColor: 'bg-primary/60',
     tests: ['glucose', 'fasting glucose', 'hba1c', 'insulin', 'c-peptide', 'cholesterol', 'total cholesterol', 'ldl', 'hdl', 'triglycerides'] },
-  { name: 'Liver', icon: Shield, color: 'text-emerald-600', bgColor: 'bg-emerald-50 dark:bg-emerald-900/20', barColor: 'bg-emerald-500',
+  { name: 'Liver', icon: Shield, color: 'text-primary', bgColor: 'bg-primary/5', barColor: 'bg-primary/60',
     tests: ['alt', 'ast', 'ggt', 'bilirubin', 'direct bilirubin', 'alkaline phosphatase', 'albumin', 'total protein'] },
-  { name: 'Kidney', icon: Droplet, color: 'text-cyan-600', bgColor: 'bg-cyan-50 dark:bg-cyan-900/20', barColor: 'bg-cyan-500',
+  { name: 'Kidney', icon: Droplet, color: 'text-primary', bgColor: 'bg-primary/5', barColor: 'bg-primary/60',
     tests: ['creatinine', 'urea', 'bun', 'gfr', 'egfr', 'uric acid', 'cystatin'] },
-  { name: 'Vitamins & Minerals', icon: Pill, color: 'text-amber-600', bgColor: 'bg-amber-50 dark:bg-amber-900/20', barColor: 'bg-amber-500',
+  { name: 'Vitamins & Minerals', icon: Pill, color: 'text-primary', bgColor: 'bg-primary/5', barColor: 'bg-primary/60',
     tests: ['vitamin d', 'vitamin b12', 'folate', 'folic acid', 'calcium', 'magnesium', 'phosphate', 'potassium', 'sodium', 'zinc', 'selenium'] },
-  { name: 'Immunity & Inflammation', icon: Brain, color: 'text-blue-600', bgColor: 'bg-blue-50 dark:bg-blue-900/20', barColor: 'bg-blue-500',
+  { name: 'Immunity & Inflammation', icon: Brain, color: 'text-primary', bgColor: 'bg-primary/5', barColor: 'bg-primary/60',
     tests: ['crp', 'esr', 'ana', 'anti-tpo', 'anticardiolipin', 'd-dimer', 'fibrinogen', 'complement', 'immunoglobulin'] },
 ];
 
-const statusEmoji = (s: string | null) =>
-  s === 'critical' ? '🔴' : s === 'abnormal' ? '⚠️' : s === 'expected' ? '💙' : '✅';
+const statusDot = (s: string | null) =>
+  s === 'critical' ? 'bg-destructive' : s === 'abnormal' ? 'bg-destructive/60' : s === 'expected' ? 'bg-foreground/50' : 'bg-foreground/25';
 
 function MiniBar({ value, refRange, status }: { value: string | null; refRange: string | null; status: string | null }) {
   if (!value || !refRange) return null;
@@ -69,11 +69,11 @@ function MiniBar({ value, refRange, status }: { value: string | null; refRange: 
   if (range <= 0) return null;
   const ext = range * 0.3;
   const pct = Math.max(0, Math.min(100, ((val - (low - ext)) / (range + ext * 2)) * 100));
-  const barColor = status === 'critical' ? 'bg-red-500' : status === 'abnormal' ? 'bg-amber-500' : 'bg-green-500';
+  const barColor = status === 'critical' ? 'bg-destructive' : status === 'abnormal' ? 'bg-destructive/70' : 'bg-foreground/35';
 
   return (
     <div className="w-16 h-2 rounded-full bg-muted relative overflow-hidden">
-      <div className="absolute top-0 bottom-0 bg-green-200/50 dark:bg-green-900/20" style={{ left: '23%', width: '54%' }} />
+      <div className="absolute top-0 bottom-0 bg-muted/60" style={{ left: '23%', width: '54%' }} />
       <div className={`absolute top-0 bottom-0 w-1.5 rounded-full ${barColor}`} style={{ left: `calc(${pct}% - 3px)` }} />
     </div>
   );
@@ -119,7 +119,7 @@ export default function HealthCategories({ medicalData }: HealthCategoriesProps)
 
   return (
     <div>
-      <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
+      <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
         <Shield className="h-4 w-4 text-primary" aria-hidden="true" />
         Health by Category
       </h3>
@@ -131,8 +131,8 @@ export default function HealthCategories({ medicalData }: HealthCategoriesProps)
 
           return (
             <Card key={cat.name} className={`overflow-hidden ${
-              cat.hasCritical ? 'border-red-200 dark:border-red-900/30' :
-              cat.hasIssues ? 'border-amber-200 dark:border-amber-900/30' : ''
+              cat.hasCritical ? 'border-destructive/30' :
+              cat.hasIssues ? 'border-destructive/20' : ''
             }`}>
               <button
                 onClick={() => toggle(cat.name)}
@@ -143,13 +143,13 @@ export default function HealthCategories({ medicalData }: HealthCategoriesProps)
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold">{cat.name}</p>
-                    <span className={`text-sm font-bold ${
-                      cat.score >= 80 ? 'text-green-600' : cat.score >= 50 ? 'text-amber-600' : 'text-red-600'
+                    <p className="text-sm font-medium">{cat.name}</p>
+                    <span className={`text-sm font-medium ${
+                      cat.score >= 80 ? 'text-muted-foreground' : cat.score >= 50 ? 'text-destructive/80' : 'text-destructive'
                     }`}>{cat.score}%</span>
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <Progress value={cat.score} className="h-1 flex-1 bg-muted" indicatorClassName={cat.score >= 80 ? 'bg-green-500' : cat.score >= 50 ? 'bg-amber-500' : 'bg-red-500'} />
+                    <Progress value={cat.score} className="h-1 flex-1 bg-muted" indicatorClassName={cat.score >= 80 ? 'bg-foreground/35' : cat.score >= 50 ? 'bg-destructive/70' : 'bg-destructive'} />
                     <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                       {cat.normal}/{cat.total} ok
                       {flagged.length > 0 && ` · ${flagged.length} flagged`}
@@ -164,15 +164,15 @@ export default function HealthCategories({ medicalData }: HealthCategoriesProps)
                   <div className="space-y-2">
                     {cat.matchingLabs.map((lab, i) => (
                       <div key={i} className={`flex items-center gap-2.5 py-1.5 px-2.5 rounded-lg ${
-                        lab.status === 'critical' ? 'bg-red-50 dark:bg-red-900/10' :
-                        lab.status === 'abnormal' ? 'bg-amber-50 dark:bg-amber-900/10' : ''
+                        lab.status === 'critical' ? 'bg-destructive/10' :
+                        lab.status === 'abnormal' ? 'bg-destructive/5' : ''
                       }`}>
-                        <span className="text-xs flex-shrink-0">{statusEmoji(lab.status)}</span>
+                        <span aria-hidden="true" className={`inline-block h-2 w-2 rounded-full flex-shrink-0 ${statusDot(lab.status)}`} />
                         <span className="text-xs font-medium flex-1 min-w-0 truncate">{lab.title}</span>
                         <MiniBar value={lab.value} refRange={lab.reference_range} status={lab.status} />
-                        <span className={`text-xs font-mono font-bold whitespace-nowrap ${
-                          lab.status === 'critical' ? 'text-red-600' :
-                          lab.status === 'abnormal' ? 'text-amber-600' :
+                        <span className={`text-xs font-mono font-medium whitespace-nowrap ${
+                          lab.status === 'critical' ? 'text-destructive' :
+                          lab.status === 'abnormal' ? 'text-destructive/80' :
                           'text-foreground'
                         }`}>
                           {lab.value}{lab.unit ? ` ${lab.unit}` : ''}

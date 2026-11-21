@@ -127,8 +127,8 @@ const OvulationPrediction = ({ userId, lastPeriodStart, cycleLength = 28, onPred
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-start justify-between">
-          <div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-primary" />
               Ovulation Prediction
@@ -140,7 +140,7 @@ const OvulationPrediction = ({ userId, lastPeriodStart, cycleLength = 28, onPred
           <Button 
             onClick={getPrediction} 
             disabled={loading}
-            className="gap-2"
+            className="gap-2 w-full sm:w-auto shrink-0"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             {loading ? 'Analyzing...' : 'Get Prediction'}

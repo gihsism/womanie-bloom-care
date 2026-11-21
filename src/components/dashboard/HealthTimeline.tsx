@@ -42,9 +42,9 @@ interface TimelineEvent {
 
 const statusColor = (status: string | null) => {
   switch (status) {
-    case 'normal': case 'expected': return 'bg-green-500';
-    case 'abnormal': return 'bg-amber-500';
-    case 'critical': return 'bg-red-500';
+    case 'normal': case 'expected': return 'bg-foreground/35';
+    case 'abnormal': return 'bg-destructive/70';
+    case 'critical': return 'bg-destructive';
     default: return 'bg-muted-foreground';
   }
 };
@@ -98,7 +98,7 @@ export default function HealthTimeline({ documents, medicalData }: HealthTimelin
 
   return (
     <div>
-      <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
+      <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
         <FileText className="h-4 w-4 text-primary" aria-hidden="true" />
         Health Timeline
       </h3>
@@ -118,20 +118,20 @@ export default function HealthTimeline({ documents, medicalData }: HealthTimelin
                 {/* Timeline dot */}
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 z-10 ${
                   event.status === 'abnormal' || event.status === 'critical'
-                    ? 'bg-amber-100 dark:bg-amber-900/30'
-                    : 'bg-green-100 dark:bg-green-900/30'
+                    ? 'bg-destructive/5'
+                    : 'bg-muted/60'
                 }`}>
                   <Icon className={`h-4.5 w-4.5 ${
                     event.status === 'abnormal' || event.status === 'critical'
-                      ? 'text-amber-600'
-                      : 'text-green-600'
+                      ? 'text-destructive/80'
+                      : 'text-muted-foreground'
                   }`} aria-hidden="true" />
                 </div>
 
                 {/* Content */}
                 <Card className="flex-1 p-3.5">
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <p className="text-sm font-semibold leading-tight">{event.title}</p>
+                    <p className="text-sm font-medium leading-tight">{event.title}</p>
                     <span className="text-[10px] text-muted-foreground whitespace-nowrap">{timeLabel}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">{event.dateLabel}</p>

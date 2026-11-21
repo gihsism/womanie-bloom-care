@@ -18,14 +18,14 @@ interface Props {
 }
 
 const STATUS_COLOR: Record<string, string> = {
-  critical: '#dc2626', // red-600
-  abnormal: '#d97706', // amber-600
-  normal: '#16a34a', // green-600
-  expected: '#16a34a',
+  critical: 'hsl(var(--destructive))', // red-600
+  abnormal: 'hsl(var(--destructive) / 0.7)', // amber-600
+  normal: 'hsl(var(--muted-foreground))', // green-600
+  expected: 'hsl(var(--muted-foreground))',
 };
 
 function statusStroke(s: string | null): string {
-  return (s && STATUS_COLOR[s]) || '#6b7280'; // muted
+  return (s && STATUS_COLOR[s]) || 'hsl(var(--muted-foreground))'; // muted
 }
 
 export default function ResultSparkline({ points, width = 96, height = 28 }: Props) {

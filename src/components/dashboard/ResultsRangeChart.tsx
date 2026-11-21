@@ -28,9 +28,9 @@ interface ChartItem {
 
 const statusColor = (status: string | null) => {
   switch (status) {
-    case 'normal': case 'expected': return 'bg-green-500';
-    case 'abnormal': return 'bg-amber-500';
-    case 'critical': return 'bg-red-500';
+    case 'normal': case 'expected': return 'bg-foreground/35';
+    case 'abnormal': return 'bg-destructive/70';
+    case 'critical': return 'bg-destructive';
     default: return 'bg-primary';
   }
 };
@@ -92,7 +92,7 @@ export default function ResultsRangeChart({ medicalData }: ResultsRangeChartProp
 
   return (
     <div>
-      <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
+      <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
         <BarChart3 className="h-4 w-4 text-primary" aria-hidden="true" />
         Your Results vs Healthy Ranges
       </h3>
@@ -102,10 +102,10 @@ export default function ResultsRangeChart({ medicalData }: ResultsRangeChartProp
             <div key={item.title} className="space-y-1">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium truncate flex-1">{item.title}</span>
-                <span className={`text-xs font-mono font-bold ml-2 ${
-                  item.status === 'critical' ? 'text-red-600' :
-                  item.status === 'abnormal' ? 'text-amber-600' :
-                  'text-green-600'
+                <span className={`text-xs font-mono font-medium ml-2 ${
+                  item.status === 'critical' ? 'text-destructive' :
+                  item.status === 'abnormal' ? 'text-destructive/80' :
+                  'text-muted-foreground'
                 }`}>
                   {item.value} {item.unit}
                 </span>
@@ -113,7 +113,7 @@ export default function ResultsRangeChart({ medicalData }: ResultsRangeChartProp
               <div className="relative h-5 rounded-full bg-muted overflow-hidden">
                 {/* Healthy zone */}
                 <div
-                  className="absolute top-0 bottom-0 bg-green-200/50 dark:bg-green-900/20"
+                  className="absolute top-0 bottom-0 bg-muted/60"
                   style={{ left: `${healthyStart}%`, width: `${healthyEnd - healthyStart}%` }}
                 />
                 {/* Value marker */}
@@ -128,7 +128,7 @@ export default function ResultsRangeChart({ medicalData }: ResultsRangeChartProp
             </div>
           ))}
           <p className="text-[9px] text-muted-foreground pt-1">
-            Green zone = healthy range. Dot shows where your value falls.
+            Shaded zone = healthy range. Dot shows where your value falls.
           </p>
         </CardContent>
       </Card>

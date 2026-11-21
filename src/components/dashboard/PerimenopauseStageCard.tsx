@@ -225,7 +225,7 @@ export default function PerimenopauseStageCard({ mode }: PerimenopauseStageCardP
         <div className="flex justify-end mt-2">
           <button
             type="button"
-            className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5"
+            className="tap-target inline-flex items-center gap-1 text-[11px] text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5"
             onClick={() => {
               const q = `My tracking suggests I'm at STRAW+10 stage ${result.stage} (${def.label}). ${result.rationale} What should I expect next and what's worth discussing with my doctor?`;
               navigate(`/dashboard/ai-doctor?q=${encodeURIComponent(q)}`);

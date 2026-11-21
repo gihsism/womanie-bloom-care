@@ -179,6 +179,21 @@
     color: hsl(var(--muted-foreground));
   }
 
+  /* Small text buttons ("Hide", "Ask AI", "Switch life stage") keep their
+     look but get an invisible ~44px touch area centred on them. */
+  .tap-target {
+    position: relative;
+  }
+  .tap-target::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 40px);
+    transform: translate(-50%, -50%);
+  }
+
   .animate-fade-in {
     animation: fade-in 0.6s ease-out forwards;
   }

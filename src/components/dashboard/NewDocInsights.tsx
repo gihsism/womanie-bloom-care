@@ -189,7 +189,7 @@ export default function NewDocInsights({ documents, medicalData }: Props) {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-2">
             <div>
-              <p className="text-sm font-semibold">
+              <p className="text-sm font-medium">
                 What's changed since your last test
               </p>
               <p className="text-[11px] text-muted-foreground">
@@ -211,9 +211,9 @@ export default function NewDocInsights({ documents, medicalData }: Props) {
                 ins.kind === 'worsened' ? TrendingUp :
                 AlertCircle;
               const tone =
-                ins.kind === 'improved' ? 'text-green-700 dark:text-green-300' :
-                ins.kind === 'worsened' ? 'text-red-700 dark:text-red-300' :
-                'text-amber-700 dark:text-amber-300';
+                ins.kind === 'improved' ? 'text-muted-foreground' :
+                ins.kind === 'worsened' ? 'text-destructive' :
+                'text-destructive/80';
               return (
                 <li key={idx} className="flex items-start gap-2 text-xs group">
                   <Icon className={`h-3.5 w-3.5 mt-0.5 flex-shrink-0 ${tone}`} />
@@ -238,7 +238,7 @@ export default function NewDocInsights({ documents, medicalData }: Props) {
                   </span>
                   <button
                     type="button"
-                    className="flex-shrink-0 inline-flex items-center gap-1 text-[11px] text-primary hover:underline opacity-70 group-hover:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1"
+                    className="tap-target flex-shrink-0 inline-flex items-center gap-1 text-[11px] text-primary hover:underline opacity-70 group-hover:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1"
                     onClick={() => {
                       navigate(`/dashboard/ai-doctor?q=${encodeURIComponent(buildAskQuery(ins))}`);
                     }}

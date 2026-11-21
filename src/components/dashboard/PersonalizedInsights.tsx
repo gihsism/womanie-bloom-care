@@ -636,10 +636,10 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
 }
 
 const severityStyles = {
-  positive: { bg: 'bg-green-50 dark:bg-green-900/15', border: 'border-green-200 dark:border-green-800', badge: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-  neutral: { bg: 'bg-blue-50 dark:bg-blue-900/15', border: 'border-blue-200 dark:border-blue-800', badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-  attention: { bg: 'bg-amber-50 dark:bg-amber-900/15', border: 'border-amber-200 dark:border-amber-800', badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
-  urgent: { bg: 'bg-red-50 dark:bg-red-900/15', border: 'border-red-200 dark:border-red-800', badge: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
+  positive: { bg: 'bg-muted/60', border: 'border-border', badge: 'bg-muted/60 text-muted-foreground' },
+  neutral: { bg: 'bg-primary/5', border: 'border-primary/20', badge: 'bg-primary/5 text-primary' },
+  attention: { bg: 'bg-destructive/5', border: 'border-destructive/20', badge: 'bg-destructive/5 text-destructive/80' },
+  urgent: { bg: 'bg-destructive/10', border: 'border-destructive/30', badge: 'bg-destructive/10 text-destructive' },
 };
 
 export default function PersonalizedInsights({ medicalData, lifeStage }: PersonalizedInsightsProps) {
@@ -649,7 +649,7 @@ export default function PersonalizedInsights({ medicalData, lifeStage }: Persona
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-bold flex items-center gap-2">
+      <h3 className="text-sm font-medium flex items-center gap-2">
         <Sparkles className="h-4 w-4 text-primary" />
         Personalized Health Insights
       </h3>
@@ -666,7 +666,7 @@ export default function PersonalizedInsights({ medicalData, lifeStage }: Persona
                 <div className="flex items-start gap-3">
                   <span className="text-2xl flex-shrink-0">{insight.emoji}</span>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-bold mb-1.5">{insight.title}</h4>
+                    <h4 className="text-sm font-medium mb-1.5">{insight.title}</h4>
 
                     {insight.connectedTests.length > 0 && (
                       <div className="flex items-center gap-1.5 flex-wrap mb-2.5">
@@ -684,7 +684,7 @@ export default function PersonalizedInsights({ medicalData, lifeStage }: Persona
                     </p>
 
                     <div className="bg-white/60 dark:bg-white/5 rounded-lg px-3 py-2.5 border border-border/30">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1">What you can do</p>
+                      <p className="label-mono mb-1">What you can do</p>
                       <p className="text-xs text-foreground/70 leading-relaxed">{insight.recommendation}</p>
                     </div>
                   </div>

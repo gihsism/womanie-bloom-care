@@ -83,7 +83,7 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onUploadClick, 
         </h1>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="label-mono !text-primary inline-flex items-center gap-1 mt-1 hover:underline focus:outline-none" aria-label="Switch life stage">
+            <button className="tap-target label-mono !text-primary inline-flex items-center gap-1 mt-1 hover:underline focus:outline-none" aria-label="Switch life stage">
               {getModeLabel(selectedMode)}
               <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M3 5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>

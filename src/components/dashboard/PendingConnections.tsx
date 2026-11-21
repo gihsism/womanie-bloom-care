@@ -94,7 +94,7 @@ export default function PendingConnections() {
           <Stethoscope className="h-4 w-4 text-secondary" />
         </div>
         <div>
-          <p className="text-sm font-semibold">
+          <p className="text-sm font-medium">
             {rows.length === 1 ? 'A doctor wants to view your records' : `${rows.length} doctors want to view your records`}
           </p>
           <p className="text-[11px] text-muted-foreground">
@@ -125,7 +125,7 @@ export default function PendingConnections() {
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-sm font-medium truncate">{name}</span>
                   {r.is_verified && (
-                    <span className="inline-flex items-center gap-1 text-[10px] text-green-700 dark:text-green-300">
+                    <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
                       <ShieldCheck className="h-3 w-3" />
                       Verified
                     </span>

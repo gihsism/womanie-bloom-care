@@ -154,19 +154,19 @@ export default function SmartRecommendations({ medicalData, lifeStage }: SmartRe
 
   return (
     <div>
-      <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
+      <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
         <Lightbulb className="h-4 w-4 text-primary" aria-hidden="true" />
         Smart Recommendations
       </h3>
       <div className="space-y-2.5">
         {recommendations.map((rec, i) => (
           <Card key={i} className={`overflow-hidden ${
-            rec.priority === 'high' ? 'border-amber-200 dark:border-amber-900/30' : ''
+            rec.priority === 'high' ? 'border-destructive/20' : ''
           }`}>
             <CardContent className="p-3.5 flex items-start gap-3">
               <span className="text-xl flex-shrink-0">{rec.emoji}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold">{rec.title}</p>
+                <p className="text-sm font-medium">{rec.title}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{rec.description}</p>
               </div>
             </CardContent>

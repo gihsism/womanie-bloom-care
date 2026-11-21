@@ -224,7 +224,7 @@ export default function AmhAgeContext({ mode }: AmhAgeContextProps) {
       <div className="flex justify-end mt-2">
         <button
           type="button"
-          className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5"
+          className="tap-target inline-flex items-center gap-1 text-[11px] text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5"
           onClick={() => {
             const trendBit = trend
               ? ` (${trend.annualizedPct > 0 ? '+' : ''}${trend.annualizedPct.toFixed(0)}%/yr trend over ${Math.round(trend.days / 30)} months)`

@@ -30,6 +30,12 @@ const RecoverDocuments = () => {
   const [data, setData] = useState<DiagnoseResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState<string | null>(null);
+  // 'forbidden' = signed in but not on the admin list (server said 401/403);
+  // 'failed' = anything else went wrong. Either way the spinner stops.
+  const [problem, setProblem] = useState<'forbidden' | 'failed' | null>(null);
+  // Admin-only tool. The server (api/_routes/admin/docs.ts) is the real
+  // guard; this only spares an ordinary user the request and the error.
+  const isAdmin = Boolean(user?.isAdmin);
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/auth/login');
@@ -37,20 +43,25 @@ const RecoverDocuments = () => {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setProblem(null);
     try {
       const r = await fetch('/api/admin/docs', { credentials: 'include' });
-      if (!r.ok) throw new Error((await r.json()).error || 'Failed');
+      if (r.status === 401 || r.status === 403) {
+        setProblem('forbidden');
+        return;
+      }
+      if (!r.ok) throw new Error('Failed');
       setData(await r.json());
-    } catch (e) {
-      toast({ variant: 'destructive', title: 'Error', description: e instanceof Error ? e.message : String(e) });
+    } catch {
+      setProblem('failed');
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, []);
 
   useEffect(() => {
-    if (user) load();
-  }, [user, load]);
+    if (user && isAdmin) load();
+  }, [user, isAdmin, load]);
 
   const claim = async (oldUserId: string) => {
     setClaiming(oldUserId);
@@ -74,6 +85,32 @@ const RecoverDocuments = () => {
       setClaiming(null);
     }
   };
+
+  if (user && (!isAdmin || problem === 'forbidden')) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <Card className="max-w-md w-full p-6 space-y-3 text-center">
+          <h1 className="text-2xl">Nothing to recover here</h1>
+          <p className="text-sm text-muted-foreground">
+            This page is a maintenance tool for the Womanie team. Your documents are safe and
+            always visible in your Health Records.
+          </p>
+          <Button onClick={() => navigate('/dashboard')} className="w-full">Back to dashboard</Button>
+        </Card>
+      </div>
+    );
+  }
+
+  if (problem === 'failed') {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <Card className="max-w-md w-full p-6 space-y-3 text-center">
+          <p className="text-sm text-muted-foreground">Couldn't load the document overview. Please try again.</p>
+          <Button onClick={load} variant="outline" className="w-full">Try again</Button>
+        </Card>
+      </div>
+    );
+  }
 
   if (loading || !data) {
     return (

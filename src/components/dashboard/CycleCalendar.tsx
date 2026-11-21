@@ -480,26 +480,26 @@ const CycleCalendar = ({
 
       {/* Calendar Card */}
       <Card className="p-4">
-        <div className="flex items-center justify-between mb-4">
-          <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="h-8 w-8">
+        <div className="flex items-center justify-between gap-1 mb-4">
+          <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="h-8 w-8 shrink-0" aria-label="Previous month">
             <ChevronLeft className="h-4 w-4" />
           </Button>
           
-          <h4 className="text-lg font-semibold">
+          <h4 className="font-display text-base sm:text-lg whitespace-nowrap min-w-0 truncate" style={{ fontWeight: 500 }}>
             {format(currentMonth, 'MMMM yyyy')}
           </h4>
           
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="h-8 w-8">
+          <div className="flex items-center gap-1 shrink-0">
+            <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="h-8 w-8" aria-label="Next month">
               <ChevronRight className="h-4 w-4" />
             </Button>
             
             {showCycleInfo && (
               <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs font-medium">
+                  <Button variant="outline" size="sm" className="h-8 w-8 p-0 sm:w-auto sm:px-3 gap-1.5 text-xs font-medium" aria-label="Cycle Settings">
                     <Settings2 className="h-3.5 w-3.5" />
-                    Cycle Settings
+                    <span className="hidden sm:inline">Cycle Settings</span>
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-sm">

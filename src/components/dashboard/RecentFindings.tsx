@@ -40,14 +40,14 @@ const statusRank = (s: string | null): number => {
 const statusBadge = (s: string | null) => {
   if (s === 'critical') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-200 text-[10px] font-semibold uppercase tracking-wide">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive text-[10px] font-medium uppercase tracking-wide">
         <AlertTriangle className="h-3 w-3" /> Critical
       </span>
     );
   }
   if (s === 'abnormal') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200 text-[10px] font-semibold uppercase tracking-wide">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/5 text-destructive/80 text-[10px] font-medium uppercase tracking-wide">
         <AlertCircle className="h-3 w-3" /> Attention
       </span>
     );
@@ -104,7 +104,7 @@ export default function RecentFindings({ since = null, showViewAll = true }: { s
             <Activity className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <p className="text-sm font-semibold">Results that need attention</p>
+            <p className="font-display text-base font-medium">Results that need attention</p>
             <p className="text-[11px] text-muted-foreground">
               {findings.length} flagged across your documents
               {criticalCount > 0 ? ` · ${criticalCount} critical` : ''}
@@ -160,7 +160,7 @@ export default function RecentFindings({ since = null, showViewAll = true }: { s
               </button>
               <button
                 type="button"
-                className="flex-shrink-0 inline-flex items-center gap-1 text-[11px] text-primary hover:underline opacity-70 group-hover:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5"
+                className="tap-target flex-shrink-0 inline-flex items-center gap-1 text-[11px] text-primary hover:underline opacity-70 group-hover:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5"
                 onClick={(e) => {
                   e.stopPropagation();
                   const valueBit = f.value ? `${f.value}${f.unit ? ' ' + f.unit : ''}` : '';

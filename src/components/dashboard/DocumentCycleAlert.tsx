@@ -37,8 +37,8 @@ export default function DocumentCycleAlert({ medicalData, lifeStage, onSwitchMod
     if (hcg && hcg > 25 && lifeStage !== 'pregnancy') {
       return {
         icon: Baby,
-        color: 'bg-pink-50 dark:bg-pink-900/20 border-pink-200 dark:border-pink-800',
-        iconColor: 'text-pink-600',
+        color: 'bg-primary/5 border-primary/20',
+        iconColor: 'text-primary',
         title: 'Your documents indicate pregnancy',
         description: `Your HCG level (${hcg} mIU/mL) indicates pregnancy, but your app is set to "${lifeStage?.replace('-', ' ') || 'menstrual cycle'}" mode. Switch to pregnancy mode for week-by-week tracking, prenatal tips, and pregnancy-specific health analysis.`,
         action: 'Switch to Pregnancy Mode',
@@ -50,8 +50,8 @@ export default function DocumentCycleAlert({ medicalData, lifeStage, onSwitchMod
     if (fsh && fsh > 25 && estradiol && estradiol < 30 && lifeStage !== 'menopause' && lifeStage !== 'post-menopause' && lifeStage !== 'pregnancy') {
       return {
         icon: Flame,
-        color: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800',
-        iconColor: 'text-orange-600',
+        color: 'bg-destructive/5 border-destructive/20',
+        iconColor: 'text-destructive/80',
         title: 'Your hormones suggest perimenopause',
         description: `Your FSH (${fsh}) is elevated and estradiol (${estradiol}) is low — this pattern indicates perimenopause. Switch to menopause mode for symptom tracking, hot flash logging, and menopause-specific health insights.`,
         action: 'Switch to Menopause Mode',
@@ -63,8 +63,8 @@ export default function DocumentCycleAlert({ medicalData, lifeStage, onSwitchMod
     if (progesterone && progesterone > 10 && (lifeStage === 'conception' || lifeStage === 'menstrual-cycle')) {
       return {
         icon: HeartPulse,
-        color: 'bg-violet-50 dark:bg-violet-900/20 border-violet-200 dark:border-violet-800',
-        iconColor: 'text-violet-600',
+        color: 'bg-primary/5 border-primary/20',
+        iconColor: 'text-primary',
         title: 'Ovulation confirmed by your lab results',
         description: `Your progesterone level (${progesterone} ng/mL) confirms that ovulation occurred recently. This is a great sign for fertility! Your cycle predictions have been updated.`,
         action: null,
@@ -88,8 +88,8 @@ export default function DocumentCycleAlert({ medicalData, lifeStage, onSwitchMod
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <AlertTriangle className="h-4 w-4 text-amber-500" aria-hidden="true" />
-              <h4 className="text-sm font-bold">{alert.title}</h4>
+              <AlertTriangle className="h-4 w-4 text-destructive/80" aria-hidden="true" />
+              <h4 className="text-sm font-medium">{alert.title}</h4>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed mb-3">{alert.description}</p>
             {alert.action && alert.mode && (

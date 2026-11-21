@@ -24,8 +24,8 @@ const MAX_VISIBLE = 6;
 
 function DirectionIcon({ direction, shift }: { direction: TrendRow['direction']; shift: TrendRow['statusShift'] }) {
   const color =
-    shift === 'improved' ? 'text-green-600' :
-    shift === 'worsened' ? 'text-red-600' :
+    shift === 'improved' ? 'text-muted-foreground' :
+    shift === 'worsened' ? 'text-destructive' :
     'text-muted-foreground';
   if (direction === 'up') return <TrendingUp className={`h-4 w-4 ${color}`} />;
   if (direction === 'down') return <TrendingDown className={`h-4 w-4 ${color}`} />;
@@ -35,14 +35,14 @@ function DirectionIcon({ direction, shift }: { direction: TrendRow['direction'];
 function ShiftBadge({ shift }: { shift: TrendRow['statusShift'] }) {
   if (shift === 'improved') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200 text-[10px] font-semibold uppercase tracking-wide">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted/60 text-muted-foreground text-[10px] font-medium uppercase tracking-wide">
         Improved
       </span>
     );
   }
   if (shift === 'worsened') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200 text-[10px] font-semibold uppercase tracking-wide">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/5 text-destructive/80 text-[10px] font-medium uppercase tracking-wide">
         Worsening
       </span>
     );
@@ -83,7 +83,7 @@ export default function HealthTrends({ showViewAll = true }: { showViewAll?: boo
             <Sparkles className="h-4 w-4 text-secondary" />
           </div>
           <div>
-            <p className="text-sm font-semibold">Your trends</p>
+            <p className="font-display text-base font-medium">Your trends</p>
             <p className="text-[11px] text-muted-foreground">
               How your results have changed across {trends.length === 1 ? 'this test' : `${trends.length} tests`}
             </p>
@@ -146,7 +146,7 @@ export default function HealthTrends({ showViewAll = true }: { showViewAll?: boo
               </button>
               <button
                 type="button"
-                className="flex-shrink-0 inline-flex items-center gap-1 text-[11px] text-primary hover:underline opacity-70 group-hover:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5"
+                className="tap-target flex-shrink-0 inline-flex items-center gap-1 text-[11px] text-primary hover:underline opacity-70 group-hover:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5"
                 onClick={(e) => {
                   e.stopPropagation();
                   const direction =

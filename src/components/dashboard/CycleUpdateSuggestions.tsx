@@ -194,7 +194,7 @@ export default function CycleUpdateSuggestions({ labResults, lifeStage, onUpdate
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-bold flex items-center gap-2">
+      <h3 className="text-sm font-medium flex items-center gap-2">
         <CalendarSync className="h-4 w-4 text-primary" />
         Cycle Updates From Your Lab Results
       </h3>
@@ -210,7 +210,7 @@ export default function CycleUpdateSuggestions({ labResults, lifeStage, onUpdate
           return (
             <Card key={suggestion.id} className={`overflow-hidden border ${
               isAccepted
-                ? 'border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10'
+                ? 'border-border bg-muted/60'
                 : suggestion.priority === 0
                   ? 'border-primary/30 bg-primary/5'
                   : 'border-border'
@@ -220,10 +220,10 @@ export default function CycleUpdateSuggestions({ labResults, lifeStage, onUpdate
                   <span className="text-2xl flex-shrink-0">{suggestion.emoji}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <h4 className="text-sm font-bold">{suggestion.title}</h4>
+                      <h4 className="text-sm font-medium">{suggestion.title}</h4>
                       <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${
-                        suggestion.confidence === 'high' ? 'text-green-600 border-green-300' :
-                        suggestion.confidence === 'medium' ? 'text-blue-600 border-blue-300' :
+                        suggestion.confidence === 'high' ? 'text-muted-foreground border-border' :
+                        suggestion.confidence === 'medium' ? 'text-primary border-primary/20' :
                         'text-muted-foreground border-border'
                       }`}>
                         {suggestion.confidence} confidence
@@ -237,7 +237,7 @@ export default function CycleUpdateSuggestions({ labResults, lifeStage, onUpdate
                     </div>
 
                     {isAccepted ? (
-                      <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                      <div className="flex items-center gap-2 text-muted-foreground">
                         <Check className="h-4 w-4" />
                         <span className="text-xs font-medium">Updated! Your cycle data has been adjusted.</span>
                       </div>

@@ -166,7 +166,7 @@ export default function GettingStarted() {
             {doneCount} of {steps.length} done — a couple more steps to light up the dashboard.
           </p>
         </div>
-        <button type="button" onClick={hide} className="ml-auto text-[11px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline">
+        <button type="button" onClick={hide} className="tap-target ml-auto text-[11px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline">
           Hide
         </button>
       </div>

@@ -28,8 +28,8 @@ const HORMONE_PHASES = {
   follicular: {
     label: 'Follicular Phase',
     icon: Flower2,
-    color: 'text-pink-600',
-    bgColor: 'bg-pink-50 dark:bg-pink-900/20 border-pink-200 dark:border-pink-800',
+    color: 'text-primary',
+    bgColor: 'bg-primary/5 border-primary/20',
     description: 'Your body is preparing an egg for release. Energy typically rises during this phase.',
     estradiol: { low: 30, high: 120 },
     progesterone: { low: 0.1, high: 0.9 },
@@ -39,8 +39,8 @@ const HORMONE_PHASES = {
   ovulatory: {
     label: 'Ovulation Window',
     icon: Egg,
-    color: 'text-violet-600',
-    bgColor: 'bg-violet-50 dark:bg-violet-900/20 border-violet-200 dark:border-violet-800',
+    color: 'text-primary',
+    bgColor: 'bg-primary/5 border-primary/20',
     description: 'An egg is being released — this is your most fertile time.',
     estradiol: { low: 100, high: 400 },
     progesterone: { low: 0.1, high: 1.5 },
@@ -50,8 +50,8 @@ const HORMONE_PHASES = {
   luteal: {
     label: 'Luteal Phase',
     icon: Moon,
-    color: 'text-indigo-600',
-    bgColor: 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800',
+    color: 'text-primary',
+    bgColor: 'bg-primary/5 border-primary/20',
     description: 'Your body is preparing for a possible pregnancy. PMS symptoms may appear.',
     estradiol: { low: 50, high: 250 },
     progesterone: { low: 1.8, high: 24 },
@@ -61,8 +61,8 @@ const HORMONE_PHASES = {
   menstrual: {
     label: 'Menstrual Phase',
     icon: Sun,
-    color: 'text-rose-600',
-    bgColor: 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800',
+    color: 'text-primary',
+    bgColor: 'bg-primary/5 border-primary/20',
     description: 'Hormone levels are at their lowest. A new cycle is beginning.',
     estradiol: { low: 12, high: 50 },
     progesterone: { low: 0.1, high: 0.8 },
@@ -383,10 +383,10 @@ function generateHormoneInsights(labResults: LabResult[], lifeStage?: string | n
 }
 
 const severityConfig = {
-  good: { bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-green-200 dark:border-green-800', text: 'text-green-700 dark:text-green-400', icon: '✅' },
-  info: { bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-800', text: 'text-blue-700 dark:text-blue-400', icon: 'ℹ️' },
-  caution: { bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-200 dark:border-amber-800', text: 'text-amber-700 dark:text-amber-400', icon: '⚠️' },
-  warning: { bg: 'bg-red-50 dark:bg-red-900/20', border: 'border-red-200 dark:border-red-800', text: 'text-red-700 dark:text-red-400', icon: '🔴' },
+  good: { bg: 'bg-muted/60', border: 'border-border', text: 'text-muted-foreground', icon: '✅', dot: 'bg-foreground/25' },
+  info: { bg: 'bg-primary/5', border: 'border-primary/20', text: 'text-primary', icon: 'ℹ️', dot: 'bg-primary/60' },
+  caution: { bg: 'bg-destructive/5', border: 'border-destructive/20', text: 'text-destructive/80', icon: '⚠️', dot: 'bg-destructive/60' },
+  warning: { bg: 'bg-destructive/10', border: 'border-destructive/30', text: 'text-destructive', icon: '🔴', dot: 'bg-destructive' },
 };
 
 export default function CycleImpactSection({ labResults, lifeStage }: CycleImpactProps) {
@@ -421,7 +421,7 @@ export default function CycleImpactSection({ labResults, lifeStage }: CycleImpac
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-bold flex items-center gap-2">
+      <h3 className="text-sm font-medium flex items-center gap-2">
         <HeartPulse className="h-4 w-4 text-primary" />
         What Your Hormones Mean for Your Cycle
       </h3>
@@ -436,7 +436,7 @@ export default function CycleImpactSection({ labResults, lifeStage }: CycleImpac
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <h4 className={`text-base font-bold ${phaseInfo.color}`}>{phaseInfo.label}</h4>
+                  <h4 className={`font-display text-lg font-medium ${phaseInfo.color}`}>{phaseInfo.label}</h4>
                   <Badge variant="outline" className={`text-[10px] ${phaseInfo.color} border-current/20`}>
                     {phase.confidence} confidence
                   </Badge>
@@ -457,11 +457,11 @@ export default function CycleImpactSection({ labResults, lifeStage }: CycleImpac
             return (
               <div key={idx} className={`rounded-xl p-4 border ${config.bg} ${config.border}`}>
                 <div className="flex items-start gap-3">
-                  <span className="text-lg flex-shrink-0">{config.icon}</span>
+                  <span aria-hidden="true" className={`mt-2 inline-block h-2.5 w-2.5 rounded-full flex-shrink-0 ${config.dot}`} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2 flex-wrap mb-1">
-                      <span className="text-sm font-semibold">{insight.hormone}</span>
-                      <span className={`text-xs font-mono font-bold ${config.text}`}>
+                      <span className="text-sm font-medium">{insight.hormone}</span>
+                      <span className={`text-xs font-mono font-medium ${config.text}`}>
                         {insight.value} {insight.unit}
                       </span>
                     </div>

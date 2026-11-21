@@ -81,7 +81,7 @@ export default function CyclePredictionInsights({ mode }: CyclePredictionInsight
       <div className="flex justify-end mt-2">
         <button
           type="button"
-          className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5"
+          className="tap-target inline-flex items-center gap-1 text-[11px] text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5"
           onClick={() => {
             const factorList = items.slice(0, 3).join('; ');
             const q = `My cycle prediction has some uncertainty because of: ${factorList}. What does each of these mean for my cycle, and what would be worth doing about them?`;

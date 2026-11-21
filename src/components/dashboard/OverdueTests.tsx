@@ -119,7 +119,7 @@ export default function OverdueTests() {
           <Clock className="h-4 w-4 text-secondary" />
         </div>
         <div>
-          <p className="text-sm font-semibold">Tests you haven't seen in a while</p>
+          <p className="font-display text-base font-medium">Tests you haven't seen in a while</p>
           <p className="text-[11px] text-muted-foreground">
             {overdue.length} {overdue.length === 1 ? 'test' : 'tests'} you've tracked before but not in 12+ months — worth bringing up at your next appointment.
           </p>

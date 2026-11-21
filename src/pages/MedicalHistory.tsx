@@ -335,7 +335,7 @@ function ValueGauge({ value, unit, refRange, status }: { value: string | null; u
   return (
     <div className="space-y-1">
       <div className="flex items-baseline gap-1.5">
-        <span className={`text-lg font-bold tabular-nums ${statusInfo.color}`}>
+        <span className={`text-lg font-medium tabular-nums ${statusInfo.color}`}>
           {value}
         </span>
         {unit && <span className="text-xs text-muted-foreground">{unit}</span>}
@@ -344,22 +344,22 @@ function ValueGauge({ value, unit, refRange, status }: { value: string | null; u
         <div className="space-y-0.5 min-w-[140px]">
           <div className="h-2 rounded-full overflow-hidden relative bg-muted">
             <div
-              className="absolute inset-y-0 left-0 bg-red-200 dark:bg-red-900/30"
+              className="absolute inset-y-0 left-0 bg-destructive/10"
               style={{ width: '20%' }}
             />
             <div
-              className="absolute inset-y-0 bg-green-200 dark:bg-green-900/40"
+              className="absolute inset-y-0 bg-muted/60"
               style={{ left: '20%', width: '60%' }}
             />
             <div
-              className="absolute inset-y-0 right-0 bg-red-200 dark:bg-red-900/30"
+              className="absolute inset-y-0 right-0 bg-destructive/10"
               style={{ width: '20%' }}
             />
             <div
               className={`absolute top-0 h-full w-1.5 rounded-full ${
-                status === 'critical' ? 'bg-red-600' :
-                status === 'abnormal' ? 'bg-amber-500' :
-                'bg-green-600'
+                status === 'critical' ? 'bg-destructive' :
+                status === 'abnormal' ? 'bg-destructive/70' :
+                'bg-foreground/35'
               }`}
               style={{ left: `calc(${markerPct}% - 3px)` }}
             />
@@ -368,8 +368,8 @@ function ValueGauge({ value, unit, refRange, status }: { value: string | null; u
             {deviationLabel ? (
               <>
                 <span className={
-                  status === 'critical' ? 'text-red-600 font-semibold' :
-                  status === 'abnormal' ? 'text-amber-600 font-semibold' :
+                  status === 'critical' ? 'text-destructive font-medium' :
+                  status === 'abnormal' ? 'text-destructive/80 font-medium' :
                   ''
                 }>
                   {deviationLabel}
@@ -408,7 +408,7 @@ function renderEnhancedSummary(summary: string) {
             <div key={i} className="bg-primary/5 rounded-xl p-4 border border-primary/10">
               <div className="flex items-center gap-2 mb-2">
                 <Lightbulb className="h-4 w-4 text-primary" />
-                <span className="text-xs font-bold text-primary uppercase tracking-wide">What you should know</span>
+                <span className="label-mono !text-primary">What you should know</span>
               </div>
               <ul className="space-y-2">
                 {items.map((item, j) => (
@@ -425,15 +425,15 @@ function renderEnhancedSummary(summary: string) {
         if (trimmed.startsWith('⚡ Action Items:')) {
           const items = trimmed.replace('⚡ Action Items:', '').trim().split('\n').filter(l => l.trim());
           return (
-            <div key={i} className="bg-amber-50 dark:bg-amber-900/10 rounded-xl p-4 border border-amber-200 dark:border-amber-900/30">
+            <div key={i} className="bg-muted/40 rounded-xl p-4 border border-border">
               <div className="flex items-center gap-2 mb-2">
-                <ArrowRight className="h-4 w-4 text-amber-600" />
-                <span className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide">What to do next</span>
+                <ArrowRight className="h-4 w-4 text-primary" />
+                <span className="label-mono">What to do next</span>
               </div>
               <ul className="space-y-2">
                 {items.map((item, j) => (
                   <li key={j} className="text-sm leading-relaxed flex items-start gap-2">
-                    <span className="text-amber-600 mt-0.5 flex-shrink-0">→</span>
+                    <span className="text-destructive/80 mt-0.5 flex-shrink-0">→</span>
                     <span>{item.replace(/^[•-]\s*/, '')}</span>
                   </li>
                 ))}
@@ -445,10 +445,10 @@ function renderEnhancedSummary(summary: string) {
         if (trimmed.startsWith('🔗 Cross-Referenced Patterns:')) {
           const items = trimmed.replace('🔗 Cross-Referenced Patterns:', '').trim().split('\n').filter(l => l.trim());
           return (
-            <div key={i} className="bg-violet-50 dark:bg-violet-900/10 rounded-xl p-4 border border-violet-200 dark:border-violet-900/30">
+            <div key={i} className="bg-primary/5 rounded-xl p-4 border border-primary/20">
               <div className="flex items-center gap-2 mb-2">
-                <Link2 className="h-4 w-4 text-violet-600" />
-                <span className="text-xs font-bold text-violet-700 dark:text-violet-400 uppercase tracking-wide">Cross-Referenced Patterns</span>
+                <Link2 className="h-4 w-4 text-primary" />
+                <span className="label-mono !text-primary">Cross-Referenced Patterns</span>
               </div>
               <ul className="space-y-2">
                 {items.map((item, j) => (
@@ -500,8 +500,8 @@ function ResultCard({ item, history = [] }: { item: MedicalDataItem; history?: M
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className="text-base">{statusInfo.emoji}</span>
-            <span className="text-sm font-semibold">{getFriendlyName(item.title)}</span>
+            <span aria-hidden="true" className={`inline-block h-2 w-2 rounded-full flex-shrink-0 ${statusInfo.dot}`} />
+            <span className="text-sm font-medium">{getFriendlyName(item.title)}</span>
           </div>
           <Badge variant="outline" className={`text-[10px] px-2 py-0.5 ${statusInfo.color} border-current/20`}>
             {statusInfo.label}
@@ -530,7 +530,7 @@ function ResultCard({ item, history = [] }: { item: MedicalDataItem; history?: M
       {(item.status === 'abnormal' || item.status === 'critical') &&
         (item.raw_data?.possible_conditions?.length ?? 0) > 0 && (
         <div className="mt-2.5 bg-background/80 rounded-lg px-3 py-2.5 border border-border/40">
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5 flex items-center gap-1">
+          <p className="label-mono mb-1.5 flex items-center gap-1">
             <HelpCircle className="h-3 w-3" />
             What this could mean
           </p>
@@ -538,8 +538,8 @@ function ResultCard({ item, history = [] }: { item: MedicalDataItem; history?: M
             {(item.raw_data?.possible_conditions ?? []).map((condition: string, idx: number) => (
               <span key={idx} className={`text-xs px-2.5 py-1 rounded-full border ${
                 item.status === 'critical'
-                  ? 'bg-red-50 dark:bg-red-900/15 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800'
-                  : 'bg-amber-50 dark:bg-amber-900/15 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800'
+                  ? 'bg-destructive/10 text-destructive border-destructive/30'
+                  : 'bg-destructive/5 text-destructive/80 border-destructive/20'
               }`}>
                 {condition}
               </span>
@@ -1016,10 +1016,10 @@ export default function MedicalHistory() {
 
     // Status pie
     const labStatusPie = [
-      { name: 'All good', value: normalLabs - expectedLabs, color: '#22c55e' },
-      { name: 'Normal for you', value: expectedLabs, color: '#3b82f6' },
-      { name: 'Worth discussing', value: abnormalLabs, color: '#f59e0b' },
-      { name: 'Needs attention', value: criticalLabs, color: '#ef4444' },
+      { name: 'All good', value: normalLabs - expectedLabs, color: 'hsl(var(--muted-foreground) / 0.35)' },
+      { name: 'Normal for you', value: expectedLabs, color: 'hsl(var(--muted-foreground) / 0.7)' },
+      { name: 'Worth discussing', value: abnormalLabs, color: 'hsl(var(--destructive) / 0.7)' },
+      { name: 'Needs attention', value: criticalLabs, color: 'hsl(var(--destructive))' },
     ].filter(d => d.value > 0);
 
     return {
@@ -1060,7 +1060,7 @@ export default function MedicalHistory() {
             <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
           <div className="flex-1 min-w-0">
-            <h1 className="text-base sm:text-xl font-bold truncate">My Health Records</h1>
+            <h1 className="text-base sm:font-display text-xl font-medium truncate">My Health Records</h1>
             <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Your results explained in plain language</p>
           </div>
           <div className="hidden sm:block">
@@ -1073,7 +1073,7 @@ export default function MedicalHistory() {
           <Button variant="outline" size="sm" className="hidden sm:flex" onClick={() => navigate('/dashboard')}>
             Dashboard
           </Button>
-          <button type="button" onClick={() => { window.location.href = '/'; }} className="text-base sm:text-lg font-bold text-primary hover:opacity-80 transition-opacity">
+          <button type="button" onClick={() => { window.location.href = '/'; }} className="text-base sm:text-lg font-medium text-primary hover:opacity-80 transition-opacity">
             Womanie
           </button>
           <UserMenu />
@@ -1088,7 +1088,7 @@ export default function MedicalHistory() {
         {hasDocuments && (
           <Card className="overflow-hidden">
             <div className="p-4 pb-3 flex items-center justify-between">
-              <h3 className="text-sm font-bold">My Documents ({documents.length})</h3>
+              <h3 className="text-sm font-medium">My Documents ({documents.length})</h3>
               <Button
                 variant="outline"
                 size="sm"
@@ -1103,7 +1103,7 @@ export default function MedicalHistory() {
               </Button>
             </div>
             {reanalyzing && (
-              <div className="px-4"><Progress value={reanalyzeProgress.total > 0 ? (reanalyzeProgress.done / reanalyzeProgress.total) * 100 : 0} className="h-1.5" /></div>
+              <div className="px-4"><Progress value={reanalyzeProgress.total > 0 ? (reanalyzeProgress.done / reanalyzeProgress.total) * 100 : 0} className="h-1.5 bg-muted" /></div>
             )}
             {/* Filter chips — quick scoping when the doc list grows
                 past a screenful. Counts show inline so the user
@@ -1132,9 +1132,9 @@ export default function MedicalHistory() {
                       key={c.key}
                       type="button"
                       onClick={() => setDocFilter(c.key)}
-                      className={`flex-shrink-0 text-xs px-3 py-1 rounded-full whitespace-nowrap transition-colors ${
+                      className={`tap-target flex-shrink-0 text-xs px-3 py-1 rounded-full whitespace-nowrap transition-colors ${
                         docFilter === c.key
-                          ? 'bg-primary text-primary-foreground font-semibold'
+                          ? 'bg-primary text-primary-foreground font-medium'
                           : 'bg-muted hover:bg-muted/70 text-muted-foreground'
                       }`}
                     >
@@ -1202,7 +1202,7 @@ export default function MedicalHistory() {
                       className="w-full flex items-center gap-3 py-3 px-4 hover:bg-muted/30 transition-colors text-left"
                     >
                       <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
-                        abnormals > 0 ? 'bg-amber-500' : docResults.length > 0 ? 'bg-green-500' : 'bg-muted-foreground/40'
+                        abnormals > 0 ? 'bg-destructive/70' : docResults.length > 0 ? 'bg-foreground/35' : 'bg-muted-foreground/40'
                       }`} />
                       <span className="text-base flex-shrink-0">{categoryIcon}</span>
                       <div className="flex-1 min-w-0">
@@ -1365,10 +1365,10 @@ export default function MedicalHistory() {
                             .slice(0, 3);
                           if (flagged.length === 0) return null;
                           return (
-                            <div className="bg-gradient-to-br from-destructive/5 via-amber-50/50 to-amber-50/0 dark:from-destructive/10 dark:via-amber-900/10 dark:to-transparent rounded-xl p-4 border border-amber-200/60 dark:border-amber-900/30 mb-3">
+                            <div className="bg-gradient-to-br from-destructive/5 via-destructive/5 to-destructive/5 dark:from-destructive/10 dark:to-transparent rounded-xl p-4 border border-destructive/20 mb-3">
                               <div className="flex items-center gap-2 mb-2">
-                                <AlertTriangle className="h-4 w-4 text-amber-600" />
-                                <p className="text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide">
+                                <AlertTriangle className="h-4 w-4 text-destructive/80" />
+                                <p className="label-mono !text-destructive/80">
                                   Read this first — top {flagged.length} {flagged.length === 1 ? 'finding' : 'findings'}
                                 </p>
                               </div>
@@ -1384,11 +1384,11 @@ export default function MedicalHistory() {
                                       </span>
                                       <div className="flex-1 min-w-0">
                                         <div className="flex items-baseline gap-2 flex-wrap">
-                                          <span className="font-semibold">{getFriendlyName(f.title)}</span>
+                                          <span className="font-medium">{getFriendlyName(f.title)}</span>
                                           {valueBit && (
                                             <span className={`text-xs font-mono ${
-                                              f.status === 'critical' ? 'text-red-700 dark:text-red-300' :
-                                              'text-amber-700 dark:text-amber-300'
+                                              f.status === 'critical' ? 'text-destructive' :
+                                              'text-destructive/80'
                                             }`}>
                                               {valueBit}
                                             </span>
@@ -1407,7 +1407,7 @@ export default function MedicalHistory() {
                                       </div>
                                       <button
                                         type="button"
-                                        className="flex-shrink-0 inline-flex items-center gap-1 text-[11px] text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1"
+                                        className="tap-target flex-shrink-0 inline-flex items-center gap-1 text-[11px] text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           const q = valueBit
@@ -1437,7 +1437,7 @@ export default function MedicalHistory() {
                         {/* Per-document results */}
                         {docResults.length > 0 && (
                           <div className="space-y-2">
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">{docResults.length} extracted results</p>
+                            <p className="label-mono">{docResults.length} extracted results</p>
                             {docResults
                               .filter(r => r.status === 'abnormal' || r.status === 'critical')
                               .map(item => {
@@ -1488,13 +1488,13 @@ export default function MedicalHistory() {
                                     return (
                                       <div key={panel} className="bg-background rounded-lg border border-border/30 overflow-hidden">
                                         <div className="flex items-center justify-between px-3 py-1.5 bg-muted/40">
-                                          <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                                          <p className="label-mono">
                                             {panel} · {labs.length}
                                           </p>
                                           {panel !== 'Other' && (
                                             <button
                                               type="button"
-                                              className="text-[10px] text-primary hover:underline"
+                                              className="tap-target text-[10px] text-primary hover:underline"
                                               onClick={(e) => {
                                                 e.stopPropagation();
                                                 navigate(`/dashboard/panel/${slug}`);
@@ -1509,9 +1509,9 @@ export default function MedicalHistory() {
                                             const si = getStatusInfo(lab.status);
                                             return (
                                               <div key={lab.id} className="flex items-center gap-2 py-1.5 px-3">
-                                                <span className="text-xs">{si.emoji}</span>
+                                                <span aria-hidden="true" className={`inline-block h-2 w-2 rounded-full flex-shrink-0 ${si.dot}`} />
                                                 <span className="text-xs flex-1 min-w-0 truncate">{lab.title}</span>
-                                                <span className="text-xs font-mono font-bold text-foreground">{lab.value}{lab.unit ? ` ${lab.unit}` : ''}</span>
+                                                <span className="text-xs font-mono font-medium text-foreground">{lab.value}{lab.unit ? ` ${lab.unit}` : ''}</span>
                                                 {lab.reference_range && (
                                                   <span className="text-[9px] text-muted-foreground hidden sm:inline">({lab.reference_range})</span>
                                                 )}
@@ -1571,7 +1571,7 @@ export default function MedicalHistory() {
                   <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
                     <FileText className="h-8 w-8 text-primary" />
                   </div>
-                  <p className="text-foreground text-center mb-2 font-semibold text-lg">Upload your first document</p>
+                  <p className="text-foreground text-center mb-2 font-medium text-lg">Upload your first document</p>
                   <p className="text-sm text-muted-foreground text-center max-w-sm">
                     Upload lab results, prescriptions, or medical reports. We'll analyze them and explain everything in plain language.
                   </p>
@@ -1588,46 +1588,46 @@ export default function MedicalHistory() {
                           <Heart className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <h2 className="font-bold text-base">Your Health Snapshot</h2>
+                          <h2 className="font-medium text-base">Your Health Snapshot</h2>
                           <p className="text-xs text-muted-foreground">Based on {stats.labResults.length} test results</p>
                         </div>
                       </div>
 
                       {/* Traffic light summary */}
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 border border-green-200 dark:border-green-800">
+                        <div className="bg-muted/60 rounded-xl p-3 border border-border">
                           <div className="flex items-center gap-1.5 mb-1">
-                            <span className="text-base">✅</span>
-                            <span className="text-xs font-medium text-green-700 dark:text-green-400">All good</span>
+                            <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full flex-shrink-0 bg-foreground/25" />
+                            <span className="text-xs font-medium text-muted-foreground">All good</span>
                           </div>
-                          <p className="text-2xl font-bold text-green-700 dark:text-green-400">{stats.normalLabs}</p>
-                          <p className="text-[10px] text-green-600/70 dark:text-green-500/70">results look healthy</p>
+                          <p className="font-display text-2xl font-medium text-muted-foreground">{stats.normalLabs}</p>
+                          <p className="text-[10px] text-muted-foreground">results look healthy</p>
                         </div>
                         {stats.expectedLabs > 0 && (
-                          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 border border-blue-200 dark:border-blue-800">
+                          <div className="bg-muted/40 rounded-xl p-3 border border-border">
                             <div className="flex items-center gap-1.5 mb-1">
-                              <span className="text-base">💙</span>
-                              <span className="text-xs font-medium text-blue-700 dark:text-blue-400">Normal for you</span>
+                              <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full flex-shrink-0 bg-foreground/50" />
+                              <span className="text-xs font-medium text-foreground/75">Normal for you</span>
                             </div>
-                            <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">{stats.expectedLabs}</p>
-                            <p className="text-[10px] text-blue-600/70 dark:text-blue-500/70">expected for your stage</p>
+                            <p className="font-display text-2xl font-medium text-foreground/75">{stats.expectedLabs}</p>
+                            <p className="text-[10px] text-muted-foreground">expected for your stage</p>
                           </div>
                         )}
-                        <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-3 border border-amber-200 dark:border-amber-800">
+                        <div className="bg-destructive/5 rounded-xl p-3 border border-destructive/20">
                           <div className="flex items-center gap-1.5 mb-1">
-                            <span className="text-base">⚠️</span>
-                            <span className="text-xs font-medium text-amber-700 dark:text-amber-400">Worth discussing</span>
+                            <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full flex-shrink-0 bg-destructive/60" />
+                            <span className="text-xs font-medium text-destructive/80">Worth discussing</span>
                           </div>
-                          <p className="text-2xl font-bold text-amber-700 dark:text-amber-400">{stats.abnormalLabs}</p>
-                          <p className="text-[10px] text-amber-600/70 dark:text-amber-500/70">ask your doctor</p>
+                          <p className="font-display text-2xl font-medium text-destructive/80">{stats.abnormalLabs}</p>
+                          <p className="text-[10px] text-destructive/80">ask your doctor</p>
                         </div>
-                        <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-3 border border-red-200 dark:border-red-800">
+                        <div className="bg-destructive/10 rounded-xl p-3 border border-destructive/30">
                           <div className="flex items-center gap-1.5 mb-1">
-                            <span className="text-base">🔴</span>
-                            <span className="text-xs font-medium text-red-700 dark:text-red-400">Needs attention</span>
+                            <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full flex-shrink-0 bg-destructive" />
+                            <span className="text-xs font-medium text-destructive">Needs attention</span>
                           </div>
-                          <p className="text-2xl font-bold text-red-700 dark:text-red-400">{stats.criticalLabs}</p>
-                          <p className="text-[10px] text-red-600/70 dark:text-red-500/70">talk to doctor soon</p>
+                          <p className="font-display text-2xl font-medium text-destructive">{stats.criticalLabs}</p>
+                          <p className="text-[10px] text-destructive">talk to doctor soon</p>
                         </div>
                       </div>
 
@@ -1636,11 +1636,11 @@ export default function MedicalHistory() {
                         <div className="mt-4 bg-muted/30 rounded-xl p-3">
                           <div className="flex items-center justify-between mb-1.5">
                             <span className="text-xs font-medium text-muted-foreground">Results in normal range</span>
-                            <span className={`text-sm font-bold ${
-                              stats.overallHealthScore >= 80 ? 'text-green-600' : stats.overallHealthScore >= 50 ? 'text-amber-600' : 'text-red-600'
+                            <span className={`text-sm font-medium ${
+                              stats.overallHealthScore >= 80 ? 'text-muted-foreground' : stats.overallHealthScore >= 50 ? 'text-destructive/80' : 'text-destructive'
                             }`}>{stats.normalLabs} of {stats.labResults.length}</span>
                           </div>
-                          <Progress value={stats.overallHealthScore} className="h-2.5 bg-muted" indicatorClassName={stats.overallHealthScore >= 80 ? 'bg-green-500' : stats.overallHealthScore >= 50 ? 'bg-amber-500' : 'bg-red-500'} />
+                          <Progress value={stats.overallHealthScore} className="h-2.5 bg-muted" indicatorClassName={stats.overallHealthScore >= 80 ? 'bg-foreground/35' : stats.overallHealthScore >= 50 ? 'bg-destructive/70' : 'bg-destructive'} />
                           <p className="text-[10px] text-muted-foreground mt-1.5">
                             {stats.overallHealthScore >= 80 ? '🌟 Most of your results look great!' :
                              stats.overallHealthScore >= 50 ? '💬 Some results need a conversation with your doctor.' :
@@ -1712,14 +1712,14 @@ export default function MedicalHistory() {
                   const riskItems = medicalData.filter(d => d.data_type === 'risk_screening' && d.value);
                   if (riskItems.length === 0) return null;
                   const riskColor = (status: string | null) => {
-                    if (status === 'critical') return 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800';
-                    if (status === 'abnormal') return 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800';
-                    return 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800';
+                    if (status === 'critical') return 'bg-destructive/10 text-destructive border-destructive/30';
+                    if (status === 'abnormal') return 'bg-destructive/5 text-destructive/80 border-destructive/20';
+                    return 'bg-muted/60 text-muted-foreground border-border';
                   };
                   return (
                     <Card className="overflow-hidden">
                       <CardContent className="p-5">
-                        <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
+                        <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
                           <ShieldAlert className="h-4 w-4 text-primary" />
                           AI Risk Screening
                         </h3>
@@ -1727,8 +1727,8 @@ export default function MedicalHistory() {
                         <div className="grid grid-cols-2 gap-2">
                           {riskItems.map((item, i) => (
                             <div key={i} className={`rounded-lg border px-3 py-2 ${riskColor(item.status)}`}>
-                              <div className="text-[10px] font-bold uppercase tracking-wide opacity-70">{item.title}</div>
-                              <div className="text-sm font-bold capitalize">{item.value}</div>
+                              <div className="label-mono !text-current opacity-70">{item.title}</div>
+                              <div className="text-sm font-medium capitalize">{item.value}</div>
                             </div>
                           ))}
                         </div>
@@ -1746,8 +1746,8 @@ export default function MedicalHistory() {
                 {/* ⚠️ Things that need attention — front and center */}
                 {flaggedItems.length > 0 && (
                   <div id="attention" className="scroll-mt-20">
-                    <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
-                      <Eye className="h-4 w-4 text-amber-600" />
+                    <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+                      <Eye className="h-4 w-4 text-destructive/80" />
                       Things to discuss with your doctor
                     </h3>
                     <div className="space-y-3">
@@ -1766,7 +1766,7 @@ export default function MedicalHistory() {
                         <CardContent className="p-4">
                           <div className="flex items-center gap-2 mb-3">
                             <Stethoscope className="h-4 w-4 text-primary" />
-                            <span className="text-sm font-bold">Current Conditions</span>
+                            <span className="text-sm font-medium">Current Conditions</span>
                           </div>
                           <div className="space-y-2">
                             {stats.activeConditions.map(item => (
@@ -1784,7 +1784,7 @@ export default function MedicalHistory() {
                         <CardContent className="p-4">
                           <div className="flex items-center gap-2 mb-3">
                             <Pill className="h-4 w-4 text-primary" />
-                            <span className="text-sm font-bold">Your Medications</span>
+                            <span className="text-sm font-medium">Your Medications</span>
                           </div>
                           <div className="space-y-2">
                             {stats.activeMedications.map(item => (
@@ -1806,7 +1806,7 @@ export default function MedicalHistory() {
                   <div id="results" className="scroll-mt-20">
                     <div className="flex items-center gap-2 mb-3">
                       <FlaskConical className="h-4 w-4 text-primary flex-shrink-0" />
-                      <h3 className="text-sm font-bold flex-shrink-0">All Your Test Results</h3>
+                      <h3 className="text-sm font-medium flex-shrink-0">All Your Test Results</h3>
                       {/* Shrinks instead of pushing the page wider than a phone. */}
                       <div className="relative ml-auto min-w-0 w-40 sm:w-52">
                         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -1831,17 +1831,15 @@ export default function MedicalHistory() {
                         const isExpanded = expandedPanels.has(panelName) || !!searchQuery;
 
                         return (
-                          <Card key={panelName} className={`overflow-hidden ${hasIssues ? 'border-amber-200 dark:border-amber-900/30' : ''}`}>
+                          <Card key={panelName} className={`overflow-hidden ${hasIssues ? 'border-destructive/20' : ''}`}>
                             <button
                               onClick={() => togglePanel(panelName)}
                               className="w-full p-4 flex items-center justify-between gap-3 hover:bg-muted/30 transition-colors text-left"
                             >
                               <div className="flex items-center gap-3 min-w-0">
-                                <span className="text-lg">
-                                  {hasIssues ? '⚠️' : allGood ? '✅' : 'ℹ️'}
-                                </span>
+                                <span aria-hidden="true" className={`inline-block h-2.5 w-2.5 rounded-full flex-shrink-0 ${hasIssues ? 'bg-destructive/60' : allGood ? 'bg-foreground/25' : 'bg-muted-foreground/40'}`} />
                                 <div>
-                                  <span className="text-sm font-semibold">{panelName}</span>
+                                  <span className="text-sm font-medium">{panelName}</span>
                                   <p className="text-[11px] text-muted-foreground">
                                     {filteredLabs.length}{searchQuery ? `/${labs.length}` : ''} test{filteredLabs.length !== 1 ? 's' : ''} — {
                                       hasIssues
@@ -1873,7 +1871,7 @@ export default function MedicalHistory() {
                                   {normals.length > 0 && (
                                     <div>
                                       {abnormals.length > 0 && (
-                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-2">
+                                        <p className="label-mono mb-2">
                                           {normals.length} healthy results
                                         </p>
                                       )}
@@ -1882,9 +1880,9 @@ export default function MedicalHistory() {
                                           const si = getStatusInfo(lab.status);
                                           return (
                                             <div key={lab.id} className="flex items-center gap-2 py-1 px-2 rounded hover:bg-muted/30">
-                                              <span className="text-xs">{si.emoji}</span>
+                                              <span aria-hidden="true" className={`inline-block h-2 w-2 rounded-full flex-shrink-0 ${si.dot}`} />
                                               <span className="text-xs flex-1 min-w-0 truncate">{lab.title}</span>
-                                              <span className="text-xs font-mono font-bold text-foreground">{lab.value}{lab.unit ? ` ${lab.unit}` : ''}</span>
+                                              <span className="text-xs font-mono font-medium text-foreground">{lab.value}{lab.unit ? ` ${lab.unit}` : ''}</span>
                                               {lab.reference_range && (
                                                 <span className="text-[9px] text-muted-foreground hidden sm:inline">({lab.reference_range})</span>
                                               )}
@@ -1910,7 +1908,7 @@ export default function MedicalHistory() {
                 {stats.labStatusPie.length > 0 && (
                   <Card className="overflow-hidden">
                     <CardContent className="p-5">
-                      <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
+                      <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
                         <BarChart3 className="h-4 w-4 text-primary" />
                         Results Breakdown
                       </h3>
@@ -1929,7 +1927,7 @@ export default function MedicalHistory() {
                             <div key={i} className="flex items-center gap-2">
                               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
                               <span className="text-xs text-muted-foreground flex-1">{entry.name}</span>
-                              <span className="text-xs font-bold">{entry.value}</span>
+                              <span className="text-xs font-medium">{entry.value}</span>
                             </div>
                           ))}
                         </div>
@@ -1949,27 +1947,27 @@ export default function MedicalHistory() {
                 {/* Predictions — friendly language */}
                 {stats.predictions.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
+                    <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
                       <Activity className="h-4 w-4 text-primary" />
                       How your results are changing
                     </h3>
                     <div className="space-y-2">
                       {stats.predictions.map(p => (
                         <Card key={p.title} className={`overflow-hidden ${
-                          p.trend === 'worsening' ? 'border-amber-200 dark:border-amber-900/30' :
-                          p.trend === 'improving' ? 'border-green-200 dark:border-green-900/30' : ''
+                          p.trend === 'worsening' ? 'border-destructive/20' :
+                          p.trend === 'improving' ? 'border-border' : ''
                         }`}>
                           <CardContent className="p-3.5 flex items-center gap-3">
                             <span className="text-xl">
                               {p.trend === 'improving' ? '📈' : p.trend === 'worsening' ? '📉' : '➡️'}
                             </span>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-semibold">{getFriendlyName(p.title)}</p>
+                              <p className="text-sm font-medium">{getFriendlyName(p.title)}</p>
                               <p className="text-xs text-muted-foreground">{p.detail}</p>
                             </div>
                             <Badge variant="outline" className={`text-[10px] ${
-                              p.trend === 'improving' ? 'text-green-600 border-green-300' :
-                              p.trend === 'worsening' ? 'text-amber-600 border-amber-300' :
+                              p.trend === 'improving' ? 'text-muted-foreground border-border' :
+                              p.trend === 'worsening' ? 'text-destructive/80 border-destructive/20' :
                               'text-muted-foreground'
                             }`}>
                               {p.trend === 'improving' ? 'Getting better' : p.trend === 'worsening' ? 'Getting worse' : 'Stable'}
@@ -1984,12 +1982,12 @@ export default function MedicalHistory() {
                 {/* Timeline charts — for repeated tests with trend lines */}
                 {stats.repeatedTests.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-bold mb-1 flex items-center gap-2">
+                    <h3 className="text-sm font-medium mb-1 flex items-center gap-2">
                       <BarChart3 className="h-4 w-4 text-primary" />
                       Test Trends Over Time
                     </h3>
                     <p className="text-xs text-muted-foreground mb-4">
-                      Tests with multiple readings. Green area = healthy range. Dashed dot = predicted next value.
+                      Tests with multiple readings. Shaded area = healthy range. Dashed dot = predicted next value.
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {stats.repeatedTests.map(([title, info]) => {
@@ -2014,7 +2012,7 @@ export default function MedicalHistory() {
                             <CardHeader className="pb-1">
                               <CardTitle className="text-xs flex items-center justify-between">
                                 <span className="truncate min-w-0">{getFriendlyName(title)}</span>
-                                <span className={`font-mono text-sm font-bold whitespace-nowrap shrink-0 ml-2 ${statusInfo.color}`}>
+                                <span className={`font-mono text-sm font-medium whitespace-nowrap shrink-0 ml-2 ${statusInfo.color}`}>
                                   {latestVal}{info.unit ? ` ${info.unit}` : ''}
                                 </span>
                               </CardTitle>
@@ -2032,7 +2030,7 @@ export default function MedicalHistory() {
                                   <XAxis dataKey="date" tick={{ fontSize: 9 }} />
                                   <YAxis tick={{ fontSize: 9 }} domain={['auto', 'auto']} />
                                   {hasRefRange && refLow !== undefined && refHigh !== undefined && (
-                                    <ReferenceArea y1={refLow} y2={refHigh} fill="#22c55e" fillOpacity={0.08} label={{ value: "Healthy", position: "insideTopLeft", fontSize: 8, fill: "#22c55e" }} />
+                                    <ReferenceArea y1={refLow} y2={refHigh} fill="hsl(var(--muted-foreground))" fillOpacity={0.08} label={{ value: "Healthy", position: "insideTopLeft", fontSize: 8, fill: "hsl(var(--muted-foreground))" }} />
                                   )}
                                   <Tooltip
                                     content={({ active, payload }) => {
@@ -2042,7 +2040,7 @@ export default function MedicalHistory() {
                                       return (
                                         <div className="bg-background border border-border rounded-xl px-3 py-2 shadow-lg text-xs">
                                           <p className={isPredicted ? 'text-primary font-medium' : ''}>
-                                            {isPredicted ? '🔮 Predicted' : d.date}: <span className="font-bold">{d.value}{info.unit ? ` ${info.unit}` : ''}</span>
+                                            {isPredicted ? '🔮 Predicted' : d.date}: <span className="font-medium">{d.value}{info.unit ? ` ${info.unit}` : ''}</span>
                                           </p>
                                           {d.refLow !== null && <p className="text-muted-foreground">Healthy range: {d.refLow}–{d.refHigh}</p>}
                                         </div>
@@ -2066,9 +2064,9 @@ export default function MedicalHistory() {
                               </ResponsiveContainer>
                               {predictedNext !== null && (
                                 <p className="text-[10px] text-muted-foreground mt-1">
-                                  <span className="text-primary">🔮</span> We predict your next result could be around <span className="font-bold whitespace-nowrap">{predictedNext}{info.unit ? ` ${info.unit}` : ''}</span>{' '}
+                                  <span className="text-primary">🔮</span> We predict your next result could be around <span className="font-medium whitespace-nowrap">{predictedNext}{info.unit ? ` ${info.unit}` : ''}</span>{' '}
                                   {hasRefRange && refLow !== undefined && refHigh !== undefined && (
-                                    <span className={predictedNext >= refLow && predictedNext <= refHigh ? 'text-green-600' : 'text-amber-600'}>
+                                    <span className={predictedNext >= refLow && predictedNext <= refHigh ? 'text-muted-foreground' : 'text-destructive/80'}>
                                       ({predictedNext >= refLow && predictedNext <= refHigh ? 'in the healthy range' : 'outside healthy range'})
                                     </span>
                                   )}
@@ -2090,24 +2088,24 @@ export default function MedicalHistory() {
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-3">
                         <Clock className="h-4 w-4 text-primary" />
-                        <span className="text-sm font-bold">Your Checkup Pattern</span>
+                        <span className="font-display text-base font-medium">Your Checkup Pattern</span>
                       </div>
                       <div className="space-y-2">
                         {stats.avgDaysBetweenDocs !== null && (
                           <p className="text-sm text-muted-foreground">
-                            📊 You typically get checked every <span className="font-semibold text-foreground">{stats.avgDaysBetweenDocs} days</span>
+                            📊 You typically get checked every <span className="font-medium text-foreground">{stats.avgDaysBetweenDocs} days</span>
                           </p>
                         )}
                         {stats.daysSinceLastDoc !== null && (
                           <p className="text-sm text-muted-foreground">
-                            📅 Your last document was <span className="font-semibold text-foreground">{stats.daysSinceLastDoc} days ago</span>
+                            📅 Your last document was <span className="font-medium text-foreground">{stats.daysSinceLastDoc} days ago</span>
                           </p>
                         )}
                         {stats.nextCheckupEstimate && (
                           <p className="text-sm">
                             {differenceInDays(stats.nextCheckupEstimate, new Date()) > 0
-                              ? <>🗓️ Your next checkup might be around <span className="font-semibold text-primary">{format(stats.nextCheckupEstimate, 'MMMM d, yyyy')}</span></>
-                              : <>⏰ You might be <span className="font-semibold text-amber-600">{Math.abs(differenceInDays(stats.nextCheckupEstimate, new Date()))} days overdue</span> for a checkup</>
+                              ? <>🗓️ Your next checkup might be around <span className="font-medium text-primary">{format(stats.nextCheckupEstimate, 'MMMM d, yyyy')}</span></>
+                              : <>⏰ You might be <span className="font-medium text-destructive/80">{Math.abs(differenceInDays(stats.nextCheckupEstimate, new Date()))} days overdue</span> for a checkup</>
                             }
                           </p>
                         )}

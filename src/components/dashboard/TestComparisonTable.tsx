@@ -34,9 +34,9 @@ interface ComparisonRow {
 
 const statusDot = (status: string | null) => {
   switch (status) {
-    case 'normal': case 'expected': return 'bg-green-500';
-    case 'abnormal': return 'bg-amber-500';
-    case 'critical': return 'bg-red-500';
+    case 'normal': case 'expected': return 'bg-foreground/35';
+    case 'abnormal': return 'bg-destructive/70';
+    case 'critical': return 'bg-destructive';
     default: return 'bg-muted-foreground';
   }
 };
@@ -117,7 +117,7 @@ export default function TestComparisonTable({ medicalData }: TestComparisonTable
 
   return (
     <div>
-      <h3 className="text-sm font-bold mb-1 flex items-center gap-2">
+      <h3 className="text-sm font-medium mb-1 flex items-center gap-2">
         <ArrowRight className="h-4 w-4 text-primary" aria-hidden="true" />
         Test Comparison Over Time
       </h3>
@@ -131,13 +131,13 @@ export default function TestComparisonTable({ medicalData }: TestComparisonTable
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground">Test</th>
+                  <th className="text-left p-3 text-xs font-medium text-muted-foreground">Test</th>
                   {comparisons.length > 0 && comparisons[0].readings.map((r, i) => (
                     <th key={i} className="text-center p-3 text-[10px] font-medium text-muted-foreground whitespace-nowrap">
                       {r.date}
                     </th>
                   ))}
-                  <th className="text-center p-3 text-xs font-semibold text-muted-foreground">Change</th>
+                  <th className="text-center p-3 text-xs font-medium text-muted-foreground">Change</th>
                 </tr>
               </thead>
               <tbody>
@@ -160,9 +160,9 @@ export default function TestComparisonTable({ medicalData }: TestComparisonTable
                         <td key={i} className="text-center p-3">
                           <div className="flex items-center justify-center gap-1">
                             <div className={`w-1.5 h-1.5 rounded-full ${statusDot(reading.status)}`} />
-                            <span className={`text-sm font-mono font-bold ${
-                              reading.status === 'critical' ? 'text-red-600' :
-                              reading.status === 'abnormal' ? 'text-amber-600' :
+                            <span className={`text-sm font-mono font-medium ${
+                              reading.status === 'critical' ? 'text-destructive' :
+                              reading.status === 'abnormal' ? 'text-destructive/80' :
                               'text-foreground'
                             }`}>
                               {reading.value}
@@ -179,15 +179,15 @@ export default function TestComparisonTable({ medicalData }: TestComparisonTable
                       <td className="text-center p-3">
                         <div className="flex items-center justify-center gap-1">
                           {row.trend === 'improving' ? (
-                            <TrendingUp className="h-3.5 w-3.5 text-green-600" />
+                            <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
                           ) : row.trend === 'worsening' ? (
-                            <TrendingDown className="h-3.5 w-3.5 text-amber-600" />
+                            <TrendingDown className="h-3.5 w-3.5 text-destructive/80" />
                           ) : (
                             <Minus className="h-3.5 w-3.5 text-muted-foreground" />
                           )}
-                          <span className={`text-xs font-semibold ${
-                            row.trend === 'improving' ? 'text-green-600' :
-                            row.trend === 'worsening' ? 'text-amber-600' :
+                          <span className={`text-xs font-medium ${
+                            row.trend === 'improving' ? 'text-muted-foreground' :
+                            row.trend === 'worsening' ? 'text-destructive/80' :
                             'text-muted-foreground'
                           }`}>
                             {row.changePercent > 0 ? '+' : ''}{row.changePercent}%
