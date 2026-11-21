@@ -8,6 +8,16 @@ interface TestDef {
   names: string[];
   label: string;
   note: string;
+  /** Titles containing any of these belong to another row (e.g. "LDL cholesterol" is not total cholesterol). */
+  exclude?: string[];
+}
+
+const CHOLESTEROL_FRACTIONS = ['ldl', 'hdl', 'vldl'];
+
+export function matchesTest(title: string, test: Pick<TestDef, 'names' | 'exclude'>): boolean {
+  const t = title.toLowerCase();
+  if (test.exclude?.some(x => t.includes(x))) return false;
+  return test.names.some(n => t.includes(n));
 }
 
 const IVF_TESTS: TestDef[] = [
@@ -29,7 +39,7 @@ const MENOPAUSE_TESTS: TestDef[] = [
   { names: ['tsh'], label: 'Thyroid (TSH)', note: 'Thyroid issues common in menopause' },
   { names: ['vitamin d', '25-oh'], label: 'Vitamin D', note: 'Critical for bone density' },
   { names: ['calcium'], label: 'Calcium', note: 'Bone health — need 1200mg/day' },
-  { names: ['cholesterol', 'total cholesterol'], label: 'Cholesterol', note: 'Heart risk rises after menopause' },
+  { names: ['cholesterol', 'total cholesterol'], label: 'Cholesterol', note: 'Heart risk rises after menopause', exclude: CHOLESTEROL_FRACTIONS },
   { names: ['ldl'], label: 'LDL', note: '"Bad" cholesterol — watch closely' },
   { names: ['hdl'], label: 'HDL', note: '"Good" cholesterol — keep high' },
   { names: ['glucose', 'fasting glucose'], label: 'Blood Sugar', note: 'Insulin resistance increases' },
@@ -42,7 +52,7 @@ const CONTRACEPTION_TESTS: TestDef[] = [
   { names: ['hemoglobin', 'hb'], label: 'Hemoglobin', note: 'Blood health' },
   { names: ['tsh'], label: 'Thyroid', note: 'Affects hormone balance' },
   { names: ['vitamin d', '25-oh'], label: 'Vitamin D', note: 'Overall health' },
-  { names: ['cholesterol', 'total cholesterol'], label: 'Cholesterol', note: 'Some pills affect lipids' },
+  { names: ['cholesterol', 'total cholesterol'], label: 'Cholesterol', note: 'Some pills affect lipids', exclude: CHOLESTEROL_FRACTIONS },
   { names: ['glucose'], label: 'Blood Sugar', note: 'Monitor with hormonal methods' },
 ];
 
@@ -93,7 +103,7 @@ export default function ModeLabInsights({ mode }: ModeLabInsightsProps) {
   if (loading) return null;
 
   const matched = tests.map(test => {
-    const found = labs.find(l => test.names.some(n => l.title.toLowerCase().includes(n)));
+    const found = labs.find(l => matchesTest(l.title, test));
     return { ...test, result: found || null };
   });
 
