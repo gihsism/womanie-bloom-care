@@ -96,22 +96,22 @@ const Install = () => {
                 <li className="flex gap-4">
                   <span className="flex-shrink-0 w-8 h-8 bg-primary/20 text-primary rounded-full flex items-center justify-center font-bold">1</span>
                   <div>
-                    <p className="font-medium">Tap the Share button</p>
-                    <p className="text-sm text-muted-foreground">It's the square with an arrow pointing up at the bottom of Safari.</p>
+                    <p className="font-medium">Tap ··· then Share</p>
+                    <p className="text-sm text-muted-foreground">The ··· button is at the bottom right of Safari. On older iPhones, tap the Share button instead: the square with an arrow pointing up.</p>
                   </div>
                 </li>
                 <li className="flex gap-4">
                   <span className="flex-shrink-0 w-8 h-8 bg-primary/20 text-primary rounded-full flex items-center justify-center font-bold">2</span>
                   <div>
-                    <p className="font-medium">Scroll and tap "Add to Home Screen"</p>
-                    <p className="text-sm text-muted-foreground">You may need to scroll down to find this option.</p>
+                    <p className="font-medium">Tap "Add to Home Screen"</p>
+                    <p className="text-sm text-muted-foreground">If you don't see it, tap "View More" or scroll down the list.</p>
                   </div>
                 </li>
                 <li className="flex gap-4">
                   <span className="flex-shrink-0 w-8 h-8 bg-primary/20 text-primary rounded-full flex items-center justify-center font-bold">3</span>
                   <div>
                     <p className="font-medium">Tap "Add"</p>
-                    <p className="text-sm text-muted-foreground">Womanie will appear on your home screen like a regular app.</p>
+                    <p className="text-sm text-muted-foreground">Leave "Open as Web App" switched on if you see it. Womanie will appear on your home screen like a regular app.</p>
                   </div>
                 </li>
               </ol>
@@ -150,7 +150,7 @@ const Install = () => {
                   <span className="flex-shrink-0 w-8 h-8 bg-primary/20 text-primary rounded-full flex items-center justify-center font-bold">3</span>
                   <div>
                     <p className="font-medium">Confirm installation</p>
-                    <p className="text-sm text-muted-foreground">Womanie will appear on your home screen like a regular app.</p>
+                    <p className="text-sm text-muted-foreground">Leave "Open as Web App" switched on if you see it. Womanie will appear on your home screen like a regular app.</p>
                   </div>
                 </li>
               </ol>
