@@ -49,9 +49,12 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
   });
 }
 
-// A chunk from the previous deploy is gone: reload once to get the new version.
-window.addEventListener("vite:preloadError", (event) => {
-  if (reloadOnceForStaleChunk()) event.preventDefault();
+// A chunk from the previous deploy is gone: recover once (drop the offline
+// cache, reload) to get the new version. Never call event.preventDefault()
+// here: Vite then resolves the import with `undefined`, and React.lazy
+// crashes with "_result.default" on Safari instead of reloading.
+window.addEventListener("vite:preloadError", () => {
+  reloadOnceForStaleChunk();
 });
 
 createRoot(document.getElementById("root")!).render(

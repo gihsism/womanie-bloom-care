@@ -1,9 +1,15 @@
 {
   "rewrites": [
     { "source": "/api/:path((?!router$).*)", "destination": "/api/router?__route=:path" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { "source": "/((?!api/|assets/).*)", "destination": "/index.html" }
   ],
   "headers": [
+    {
+      "source": "/((?!api/|assets/).*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
+      ]
+    },
     {
       "source": "/",
       "headers": [
