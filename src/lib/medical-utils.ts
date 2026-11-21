@@ -49,6 +49,20 @@ export function getStatusInfo(status: string | null) {
   return friendlyStatus[status || ''] || friendlyStatus.informational;
 }
 
+// Tones for health values shown outside Health Records (Home cards):
+// the same muted-ink / burnt-orange language as friendlyStatus, never
+// green or yellow. ok = in range, watch = worth discussing, alert =
+// needs attention.
+export type HealthTone = 'ok' | 'watch' | 'alert';
+export const healthTone: Record<HealthTone, { text: string; badge: string; dot: string; tint: string }> = {
+  ok: { text: 'text-foreground/75', badge: 'bg-muted/60 text-muted-foreground border-border', dot: 'bg-foreground/25', tint: 'bg-muted/40 border-border' },
+  watch: { text: 'text-destructive/80', badge: 'bg-destructive/5 text-destructive/80 border-destructive/20', dot: 'bg-destructive/60', tint: 'bg-destructive/5 border-destructive/20' },
+  alert: { text: 'text-destructive', badge: 'bg-destructive/10 text-destructive border-destructive/30', dot: 'bg-destructive', tint: 'bg-destructive/10 border-destructive/30' },
+};
+
+// Soft burnt-orange "attention" banner (replaces the old yellow ones).
+export const attentionBanner = 'flex items-start gap-2 p-2.5 rounded-lg border bg-destructive/5 border-destructive/20 text-foreground/80';
+
 // Friendly test name lookup
 export const friendlyTestNames: Record<string, string> = {
   'Hemoglobin': 'Hemoglobin — carries oxygen in your blood',

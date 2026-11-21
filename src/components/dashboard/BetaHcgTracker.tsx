@@ -6,8 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Droplet, Plus, X, TrendingUp, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Droplet, Plus, X, TrendingUp, AlertCircle } from 'lucide-react';
 import { format, parseISO, differenceInHours } from 'date-fns';
+import { healthTone } from '@/lib/medical-utils';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 // Beta hCG tracker for IVF mode. After embryo transfer the clinic
@@ -255,16 +256,16 @@ const BetaHcgTracker = ({ ivfPhase }: BetaHcgTrackerProps) => {
         <div
           className={`flex items-start gap-2 p-3 rounded-lg border ${
             interpretation.tone === 'positive'
-              ? 'border-green-300/60 bg-green-50/60 dark:bg-green-900/20 dark:border-green-700/40'
+              ? healthTone.ok.tint
               : interpretation.tone === 'caution'
-              ? 'border-amber-300/60 bg-amber-50/60 dark:bg-amber-900/20 dark:border-amber-700/40'
+              ? healthTone.watch.tint
               : 'border-destructive/30 bg-destructive/5'
           }`}
         >
           {interpretation.tone === 'positive' ? (
-            <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0 text-green-600" />
+            <span aria-hidden="true" className={`inline-block h-2 w-2 rounded-full flex-shrink-0 mt-1.5 ${healthTone.ok.dot}`} />
           ) : interpretation.tone === 'caution' ? (
-            <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0 text-amber-600" />
+            <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0 text-destructive/80" />
           ) : (
             <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0 text-destructive" />
           )}

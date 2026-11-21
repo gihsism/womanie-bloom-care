@@ -1,46 +1,25 @@
-import { useNavigate } from 'react-router-dom';
 import { withinWindow } from '@/lib/labWindow';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useLabResults } from '@/hooks/useLabResults';
 import EvidenceNote from '@/components/research/EvidenceNote';
 import { specsForLabs } from '@/lib/evidenceTopics';
-import { ArrowRight, FlaskConical, AlertTriangle, CheckCircle2, Upload } from 'lucide-react';
+import { LabAttentionBanner, LabCardHeader, LabEmptyCard, LabMissingTests, LabRow } from './LabInsightParts';
 
 // Key tests to highlight during pregnancy
 const PREGNANCY_TESTS = [
-  { names: ['ferritin'], label: 'Iron Stores', emoji: '🩸', criticalBelow: 30, idealLabel: '≥30 ng/mL' },
-  { names: ['hemoglobin', 'hb', 'hgb'], label: 'Hemoglobin', emoji: '🔴', criticalBelow: 11, idealLabel: '≥11 g/dL' },
-  { names: ['tsh'], label: 'Thyroid', emoji: '🦋', idealLabel: '0.1-2.5 mIU/L' },
-  { names: ['vitamin d', '25-oh'], label: 'Vitamin D', emoji: '☀️', criticalBelow: 30, idealLabel: '≥30 ng/mL' },
-  { names: ['glucose', 'fasting glucose'], label: 'Blood Sugar', emoji: '🍬', idealLabel: '<95 mg/dL' },
-  { names: ['hcg', 'beta-hcg', 'beta hcg'], label: 'HCG', emoji: '🤰', idealLabel: 'Rising' },
-  { names: ['folate', 'folic acid'], label: 'Folate', emoji: '🥬', criticalBelow: 5, idealLabel: '≥5 ng/mL' },
-  { names: ['vitamin b12', 'b12'], label: 'Vitamin B12', emoji: '💊', criticalBelow: 200, idealLabel: '≥200 pg/mL' },
-  { names: ['platelets'], label: 'Platelets', emoji: '🩹', criticalBelow: 150, idealLabel: '≥150 k/µL' },
-  { names: ['calcium'], label: 'Calcium', emoji: '🦴', idealLabel: '8.5-10.5 mg/dL' },
+  { names: ['ferritin'], label: 'Iron Stores', criticalBelow: 30, idealLabel: '≥30 ng/mL' },
+  { names: ['hemoglobin', 'hb', 'hgb'], label: 'Hemoglobin', criticalBelow: 11, idealLabel: '≥11 g/dL' },
+  { names: ['tsh'], label: 'Thyroid', idealLabel: '0.1-2.5 mIU/L' },
+  { names: ['vitamin d', '25-oh'], label: 'Vitamin D', criticalBelow: 30, idealLabel: '≥30 ng/mL' },
+  { names: ['glucose', 'fasting glucose'], label: 'Blood Sugar', idealLabel: '<95 mg/dL' },
+  { names: ['hcg', 'beta-hcg', 'beta hcg'], label: 'HCG', idealLabel: 'Rising' },
+  { names: ['folate', 'folic acid'], label: 'Folate', criticalBelow: 5, idealLabel: '≥5 ng/mL' },
+  { names: ['vitamin b12', 'b12'], label: 'Vitamin B12', criticalBelow: 200, idealLabel: '≥200 pg/mL' },
+  { names: ['platelets'], label: 'Platelets', criticalBelow: 150, idealLabel: '≥150 k/µL' },
+  { names: ['calcium'], label: 'Calcium', idealLabel: '8.5-10.5 mg/dL' },
 ];
 
-const statusColor = (status: string | null) => {
-  switch (status) {
-    case 'normal': case 'expected': return 'text-green-600';
-    case 'abnormal': return 'text-amber-600';
-    case 'critical': return 'text-red-600';
-    default: return 'text-muted-foreground';
-  }
-};
-
-const statusBg = (status: string | null) => {
-  switch (status) {
-    case 'abnormal': return 'bg-amber-50 dark:bg-amber-900/10';
-    case 'critical': return 'bg-red-50 dark:bg-red-900/10';
-    default: return '';
-  }
-};
-
 export default function PregnancyLabInsights({ since = null }: { since?: Date | null } = {}) {
-  const navigate = useNavigate();
   const { labs: allLabs, loading } = useLabResults();
   // Only results from this pregnancy (older ones stay in Health Records).
   const labs = withinWindow(allLabs, since);
@@ -61,74 +40,35 @@ export default function PregnancyLabInsights({ since = null }: { since?: Date | 
 
   if (labs.length === 0) {
     return (
-      <Card className="p-4 border-dashed">
-        <div className="text-center space-y-2">
-          <Upload className="h-6 w-6 text-primary mx-auto" />
-          <p className="text-sm font-semibold">{allLabs.length > 0 ? 'No blood tests from this pregnancy yet' : 'Upload your blood tests'}</p>
-          <p className="text-[10px] text-muted-foreground">Get personalized pregnancy health insights from your lab results</p>
-          <Button size="sm" variant="outline" onClick={() => navigate('/dashboard/medical-history')}>
-            Upload documents
-          </Button>
-        </div>
-      </Card>
+      <LabEmptyCard
+        title={allLabs.length > 0 ? 'No blood tests from this pregnancy yet' : 'Upload your blood tests'}
+        text="Get personalized pregnancy health insights from your lab results"
+      />
     );
   }
 
   return (
     <Card className="p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold flex items-center gap-2">
-          <FlaskConical className="h-4 w-4 text-primary" aria-hidden="true" />
-          Your Lab Results
-        </h3>
-        <Button variant="ghost" size="sm" className="h-6 text-[10px] gap-1" onClick={() => navigate('/dashboard/medical-history')}>
-          View all <ArrowRight className="h-3 w-3" />
-        </Button>
-      </div>
+      <LabCardHeader />
 
       {/* Flagged items alert */}
       {flagged.length > 0 && (
-        <div className="flex items-center gap-2 p-2 rounded-lg bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800">
-          <AlertTriangle className="h-3.5 w-3.5 text-amber-600 flex-shrink-0" />
-          <p className="text-[10px] text-amber-700 dark:text-amber-400">
-            {flagged.length} result{flagged.length !== 1 ? 's' : ''} need{flagged.length === 1 ? 's' : ''} attention for pregnancy
-          </p>
-        </div>
+        <LabAttentionBanner>
+          {flagged.length} result{flagged.length !== 1 ? 's' : ''} need{flagged.length === 1 ? 's' : ''} attention for pregnancy
+        </LabAttentionBanner>
       )}
 
       {/* Tested results */}
-      <div className="space-y-1.5">
+      <ul>
         {tested.map(item => {
           const r = item.result!;
-          return (
-            <div key={item.label} className={`flex items-center gap-2 py-1.5 px-2 rounded-lg ${statusBg(r.status)}`}>
-              <span className="text-sm flex-shrink-0">{item.emoji}</span>
-              <span className="text-xs font-medium flex-1 min-w-0 truncate">{item.label}</span>
-              <span className={`text-xs font-mono font-bold ${statusColor(r.status)}`}>
-                {r.value}{r.unit ? ` ${r.unit}` : ''}
-              </span>
-              {r.status === 'normal' || r.status === 'expected' ? (
-                <CheckCircle2 className="h-3 w-3 text-green-500 flex-shrink-0" />
-              ) : r.status === 'abnormal' || r.status === 'critical' ? (
-                <AlertTriangle className="h-3 w-3 text-amber-500 flex-shrink-0" />
-              ) : null}
-            </div>
-          );
+          return <LabRow key={item.label} label={item.label} value={r.value} unit={r.unit} status={r.status} />;
         })}
-      </div>
+      </ul>
 
       {/* Missing important tests */}
       {missing.length > 0 && missing.length <= 5 && (
-        <div className="pt-2 border-t border-border/50">
-          <p className="text-[10px] font-semibold text-muted-foreground mb-1.5">Not yet tested:</p>
-          <div className="flex flex-wrap gap-1">
-            {missing.map(m => (
-              <Badge key={m.label} variant="outline" className="text-[9px] px-1.5 py-0">
-                {m.emoji} {m.label}
-              </Badge>
-            ))}
-          </div>
-        </div>
+        <LabMissingTests title="Not yet tested" labels={missing.map(m => m.label)} />
       )}
       {/* What the research says about her own tested markers (flagged first). */}
       <EvidenceNote

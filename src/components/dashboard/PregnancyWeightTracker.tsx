@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 import EvidenceNote from '@/components/research/EvidenceNote';
 import { evidenceSpec } from '@/lib/evidenceTopics';
+import { healthTone } from '@/lib/medical-utils';
 
 // Pregnancy weight-gain tracker against IOM 2009 guidelines.
 //
@@ -201,12 +202,12 @@ export default function PregnancyWeightTracker({ dueDate }: PregnancyWeightTrack
   const statusInfo = useMemo(() => {
     if (actualGainKg === null || !expectedGain) return null;
     if (actualGainKg < expectedGain.lowKg - 1) {
-      return { color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200', label: 'Below range' };
+      return { color: healthTone.watch.badge, label: 'Below range' };
     }
     if (actualGainKg > expectedGain.highKg + 1) {
-      return { color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200', label: 'Above range' };
+      return { color: healthTone.watch.badge, label: 'Above range' };
     }
-    return { color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200', label: 'On target' };
+    return { color: healthTone.ok.badge, label: 'On target' };
   }, [actualGainKg, expectedGain]);
 
   const fmtWeight = (kg: number): string => setup.unit === 'us' ? `${kgToLb(kg).toFixed(1)} lb` : `${kg.toFixed(1)} kg`;
@@ -367,13 +368,13 @@ export default function PregnancyWeightTracker({ dueDate }: PregnancyWeightTrack
               <div className="flex items-baseline justify-between mb-1.5">
                 <span className="text-[11px] text-muted-foreground">Week {gestWeek} gain so far</span>
                 {statusInfo && (
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full ${statusInfo.color}`}>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full border ${statusInfo.color}`}>
                     {statusInfo.label}
                   </span>
                 )}
               </div>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold">{fmtGain(actualGainKg)}</span>
+                <span className="font-display text-[26px] leading-none tabular-nums font-medium">{fmtGain(actualGainKg)}</span>
                 <span className="text-[11px] text-muted-foreground">
                   expected {fmtGain(expectedGain.lowKg)} to {fmtGain(expectedGain.highKg)}
                 </span>

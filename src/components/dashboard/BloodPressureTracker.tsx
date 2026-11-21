@@ -10,6 +10,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 import EvidenceNote from '@/components/research/EvidenceNote';
 import { evidenceSpec } from '@/lib/evidenceTopics';
+import { healthTone } from '@/lib/medical-utils';
 
 // Blood pressure log + preeclampsia / hypertension screen for
 // pregnancy mode. ACOG 2020:
@@ -54,7 +55,7 @@ function classify(sys: number, dia: number, isPregnancy: boolean):
     return {
       band: 'severe',
       label: isPregnancy ? 'Severe — call your OB now' : 'Hypertensive crisis range',
-      color: 'bg-red-200 text-red-900 dark:bg-red-900/50 dark:text-red-100 border-red-400',
+      color: `${healthTone.alert.badge} font-medium`,
       urgent: true,
     };
   }
@@ -62,7 +63,7 @@ function classify(sys: number, dia: number, isPregnancy: boolean):
     return {
       band: 'stage2',
       label: isPregnancy ? 'Gestational hypertension range' : 'Stage 2 hypertension',
-      color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200 border-red-300',
+      color: healthTone.alert.badge,
       urgent: false,
     };
   }
@@ -70,7 +71,7 @@ function classify(sys: number, dia: number, isPregnancy: boolean):
     return {
       band: 'stage1',
       label: 'Stage 1 hypertension',
-      color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200 border-amber-300',
+      color: healthTone.watch.badge,
       urgent: false,
     };
   }
@@ -78,14 +79,14 @@ function classify(sys: number, dia: number, isPregnancy: boolean):
     return {
       band: 'elevated',
       label: 'Elevated',
-      color: 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300 border-amber-200',
+      color: healthTone.watch.badge,
       urgent: false,
     };
   }
   return {
     band: 'normal',
     label: 'Normal',
-    color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200 border-green-300',
+    color: healthTone.ok.badge,
     urgent: false,
   };
 }
@@ -266,11 +267,11 @@ export default function BloodPressureTracker({ mode }: BloodPressureTrackerProps
       {latest && latestClass && (
         <div className={`rounded-lg border p-3 mb-3 ${latestClass.color}`}>
           <div className="flex items-baseline justify-between mb-1.5">
-            <span className="text-[11px] uppercase tracking-wide opacity-80">Latest reading</span>
+            <span className="label-mono !text-current opacity-80">Latest reading</span>
             {latestClass.urgent && <AlertTriangle className="h-4 w-4" />}
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold font-mono">{latest.systolic}/{latest.diastolic}</span>
+            <span className="font-display text-[28px] leading-none tabular-nums font-medium">{latest.systolic}/{latest.diastolic}</span>
             <span className="text-[11px] opacity-80">mmHg</span>
             <span className="ml-auto text-[10px] font-medium">{latestClass.label}</span>
           </div>
@@ -307,7 +308,7 @@ export default function BloodPressureTracker({ mode }: BloodPressureTrackerProps
                       {format(parseISO(e.date), 'MMM d')}{e.time ? ` ${e.time}` : ''}
                     </span>
                     <span className="font-mono">{e.systolic}/{e.diastolic}</span>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${c.color}`}>{c.band}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded border ${c.color}`}>{c.band}</span>
                     {e.pulse && <span className="text-muted-foreground">·{e.pulse}bpm</span>}
                     <button
                       type="button"

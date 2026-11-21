@@ -330,17 +330,17 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
           stageName = 'Menopause reached';
           stageDescription =
             'Twelve consecutive months without a period — the clinical definition of menopause. You may want to update your life-stage mode to Post-Menopause.';
-          stageTone = 'border-green-300/60 bg-green-50/60 dark:bg-green-900/20 dark:border-green-700/40';
+          stageTone = 'border-border bg-muted/40';
         } else if (daysSince >= 180) {
           stageName = 'Late perimenopause';
           stageDescription =
             'Six months or more since your last period — within sight of the 12-month menopause threshold. Hormonal symptoms often peak in this window.';
-          stageTone = 'border-amber-300/60 bg-amber-50/60 dark:bg-amber-900/20 dark:border-amber-700/40';
+          stageTone = 'border-primary/25 bg-primary/5';
         } else if (daysSince >= 60) {
           stageName = 'Perimenopause';
           stageDescription =
             'Irregular cycles with longer gaps between periods. Symptoms (hot flashes, sleep changes, mood shifts) often start here.';
-          stageTone = 'border-amber-200/60 bg-amber-50/40 dark:bg-amber-900/10 dark:border-amber-800/30';
+          stageTone = 'border-primary/15 bg-primary/[0.03]';
         } else {
           stageName = 'Cycling';
           stageDescription =
@@ -410,7 +410,7 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
         <Card className="p-4">
           <div className="flex items-center justify-between mb-2">
             <h4 className="text-sm font-semibold flex items-center gap-2">
-              <ThermometerSun className="h-4 w-4 text-amber-500" />
+              <ThermometerSun className="h-4 w-4 text-primary" aria-hidden="true" />
               Hot flashes — recent trend
             </h4>
             {hotFlashStats.trend !== 0 && (
@@ -421,7 +421,7 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
           </div>
           <div className="grid grid-cols-3 gap-2 text-center">
             <div className="p-2 rounded-lg bg-muted/50">
-              <p className="text-lg font-bold text-amber-600">{hotFlashStats.total7}</p>
+              <p className="font-display text-lg tabular-nums font-medium">{hotFlashStats.total7}</p>
               <p className="text-[10px] text-muted-foreground">last 7 days</p>
             </div>
             <div className="p-2 rounded-lg bg-muted/50">

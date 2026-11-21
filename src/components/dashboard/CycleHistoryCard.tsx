@@ -16,6 +16,7 @@ import {
   ReferenceLine,
   Cell,
 } from 'recharts';
+import { attentionBanner, healthTone } from '@/lib/medical-utils';
 import { Activity, AlertCircle } from 'lucide-react';
 
 // Cycle-length history chart for menstrual / conception / contraception
@@ -115,13 +116,13 @@ const CycleHistoryCard = ({ enabled = true }: CycleHistoryCardProps) => {
       regularityTone = 'text-muted-foreground';
     } else if (stdDev <= 2) {
       regularity = 'Very regular';
-      regularityTone = 'text-green-600 dark:text-green-400';
+      regularityTone = healthTone.ok.text;
     } else if (stdDev <= 5) {
       regularity = 'Mostly regular';
-      regularityTone = 'text-emerald-600 dark:text-emerald-400';
+      regularityTone = healthTone.ok.text;
     } else if (stdDev <= 8) {
       regularity = 'Somewhat irregular';
-      regularityTone = 'text-amber-600 dark:text-amber-400';
+      regularityTone = healthTone.watch.text;
     } else {
       regularity = 'Irregular';
       regularityTone = 'text-destructive';
@@ -239,9 +240,9 @@ const CycleHistoryCard = ({ enabled = true }: CycleHistoryCardProps) => {
       </div>
 
       {stats.regularity === 'Irregular' && (
-        <div className="flex items-start gap-2 p-2.5 rounded-lg bg-amber-50/60 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-800/40">
-          <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-amber-600" />
-          <p className="text-xs text-amber-800 dark:text-amber-200">
+        <div className={attentionBanner}>
+          <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-destructive/80" />
+          <p className="text-xs">
             Cycles vary by more than ±8 days. Conditions like PCOS, thyroid issues, or stress
             can drive irregularity — worth flagging at your next visit.
           </p>

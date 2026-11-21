@@ -6,6 +6,7 @@ import { onHealthDataChange } from '@/lib/data-events';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { differenceInDays, parseISO } from 'date-fns';
+import { healthTone } from '@/lib/medical-utils';
 import { Heart, Info, MessageCircle } from 'lucide-react';
 
 // Fertility-outlook synthesis for conception mode.
@@ -40,9 +41,10 @@ interface Signal {
 }
 
 const COLOR_BG: Record<SignalColor, string> = {
-  green: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200',
-  amber: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200',
-  red: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200',
+  // Keys are the signal's meaning; the look is the house tone (no green/yellow).
+  green: healthTone.ok.badge,
+  amber: healthTone.watch.badge,
+  red: healthTone.alert.badge,
   muted: 'bg-muted text-muted-foreground',
 };
 
@@ -180,7 +182,7 @@ export default function FertilityOutlookCard({ mode }: FertilityOutlookCardProps
           <div key={s.label} className="p-2.5 rounded-lg border bg-card">
             <div className="flex items-center justify-between mb-1">
               <span className="text-[11px] text-muted-foreground">{s.label}</span>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full ${COLOR_BG[s.color]}`}>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full border ${COLOR_BG[s.color]}`}>
                 {s.value}
               </span>
             </div>

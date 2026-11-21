@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Activity, RotateCcw, AlertCircle, History } from 'lucide-react';
 import { format, formatDistanceToNowStrict } from 'date-fns';
+import { attentionBanner, healthTone } from '@/lib/medical-utils';
 import { useLifeEvents, importLocalOnce } from '@/hooks/useLifeEvents';
 
 // Kick counter for late pregnancy. Standard methodology (ACOG):
@@ -235,14 +236,14 @@ const KickCounter = () => {
       ) : (
         <div className="space-y-4">
           <div className="text-center">
-            <div className="text-6xl font-bold text-primary">{current.count}</div>
+            <div className="font-display text-6xl leading-none text-primary tabular-nums font-medium">{current.count}</div>
             <div className="text-xs text-muted-foreground mt-1">
               of {TARGET_KICKS} movements
             </div>
             <div className="text-xs text-muted-foreground mt-2">
               Started {formatDistanceToNowStrict(new Date(current.startedAt))} ago
               {' · '}
-              <span className={reassuring ? '' : 'text-amber-600 font-medium'}>
+              <span className={reassuring ? '' : 'text-destructive/80 font-medium'}>
                 {formatDuration(elapsedMs)} elapsed
               </span>
             </div>
@@ -258,9 +259,9 @@ const KickCounter = () => {
           </Button>
 
           {!reassuring && current.count < TARGET_KICKS && (
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-              <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-              <p className="text-xs text-amber-800 dark:text-amber-200">
+            <div className={attentionBanner}>
+              <AlertCircle className="h-4 w-4 text-destructive/80 mt-0.5 flex-shrink-0" />
+              <p className="text-xs">
                 Fewer than {TARGET_KICKS} movements in 2 hours. If movement feels reduced
                 compared to your baby's usual pattern, call your provider — they may want
                 to monitor.
@@ -304,10 +305,10 @@ const KickCounter = () => {
                   <span className="font-medium flex items-center gap-1.5">
                     {s.count}/{TARGET_KICKS} in {formatDuration(dur)}
                     {onTime && (
-                      <span className="text-[10px] text-green-600 dark:text-green-400">✓</span>
+                      <span aria-label="within 2 hours" className={`inline-block h-1.5 w-1.5 rounded-full ${healthTone.ok.dot}`} />
                     )}
                     {reachedTarget && !onTime && (
-                      <span className="text-[10px] text-amber-600">!</span>
+                      <span aria-label="took longer than 2 hours" className={`inline-block h-1.5 w-1.5 rounded-full ${healthTone.watch.dot}`} />
                     )}
                   </span>
                 </li>

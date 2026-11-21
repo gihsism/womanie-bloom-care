@@ -4,6 +4,7 @@ import { Droplet, AlertCircle } from 'lucide-react';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
+import { attentionBanner } from '@/lib/medical-utils';
 import { differenceInDays, format, parseISO } from 'date-fns';
 
 // Visualizes the lochia entries DailyLogging captures, mapped to the
@@ -180,9 +181,9 @@ export default function PostpartumLochiaCard({ birthDate }: Props) {
       </div>
 
       {(reBleed || persistentRed) && (
-        <div className="flex items-start gap-2 p-2.5 rounded-lg bg-amber-50/60 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-800/40">
-          <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-amber-600" />
-          <div className="text-xs text-amber-800 dark:text-amber-200">
+        <div className={attentionBanner}>
+          <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-destructive/80" />
+          <div className="text-xs">
             {persistentRed && (
               <p className="leading-snug">
                 Bleeding is still bright red past week 2 — this is later than the typical

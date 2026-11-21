@@ -8,6 +8,7 @@ import { Egg, Info, TrendingDown, TrendingUp, Minus, MessageCircle } from 'lucid
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { healthTone } from '@/lib/medical-utils';
 
 // "Your AMH vs typical for your age" card. Anti-Müllerian Hormone is
 // the cleanest single signal of ovarian reserve and it declines with
@@ -32,11 +33,11 @@ interface AmhAgeContextProps {
 const SHOW_FOR: Mode[] = ['conception', 'ivf', 'menstrual-cycle'];
 
 const BUCKET_COLOR: Record<string, string> = {
-  very_low: 'bg-red-500',
-  low: 'bg-amber-500',
-  average: 'bg-green-500',
-  high: 'bg-blue-500',
-  very_high: 'bg-purple-500',
+  very_low: healthTone.alert.badge,
+  low: healthTone.watch.badge,
+  average: healthTone.ok.badge,
+  high: healthTone.ok.badge,
+  very_high: healthTone.watch.badge,
 };
 
 const BUCKET_LABEL: Record<string, string> = {
@@ -147,9 +148,9 @@ export default function AmhAgeContext({ mode }: AmhAgeContextProps) {
       )}
 
       <div className="flex items-baseline gap-2 mb-2">
-        <span className="text-2xl font-bold">{fmt(lab.value)}</span>
+        <span className="font-display text-[26px] leading-none tabular-nums font-medium">{fmt(lab.value)}</span>
         <span className="text-xs text-muted-foreground">{lab.unit || 'ng/mL'}</span>
-        <span className={`ml-auto text-[10px] px-2 py-0.5 rounded-full text-white ${BUCKET_COLOR[a.percentileBucket]}`}>
+        <span className={`ml-auto text-[10px] px-2 py-0.5 rounded-full border ${BUCKET_COLOR[a.percentileBucket]}`}>
           {BUCKET_LABEL[a.percentileBucket]}
         </span>
       </div>
@@ -157,7 +158,7 @@ export default function AmhAgeContext({ mode }: AmhAgeContextProps) {
       {/* Visual bar: p5 — median — p95 range for the user's bracket. */}
       <div className="relative h-2 rounded-full bg-muted mb-1 overflow-visible">
         <div
-          className="absolute inset-y-0 bg-gradient-to-r from-amber-400 via-green-400 to-blue-400 rounded-full"
+          className="absolute inset-y-0 bg-gradient-to-r from-destructive/30 via-foreground/15 to-foreground/25 rounded-full"
           style={{ left: '0%', right: '0%' }}
         />
         {pinPercent !== null && (
@@ -189,11 +190,11 @@ export default function AmhAgeContext({ mode }: AmhAgeContextProps) {
       {trend && (
         <div className="mt-3 pt-3 border-t border-border/40 flex items-start gap-2">
           {trend.annualizedPct < -25 ? (
-            <TrendingDown className="h-3.5 w-3.5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+            <TrendingDown className="h-3.5 w-3.5 text-destructive mt-0.5 flex-shrink-0" />
           ) : trend.annualizedPct < -5 ? (
-            <TrendingDown className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+            <TrendingDown className="h-3.5 w-3.5 text-destructive/70 mt-0.5 flex-shrink-0" />
           ) : trend.annualizedPct > 25 ? (
-            <TrendingUp className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <TrendingUp className="h-3.5 w-3.5 text-foreground/60 mt-0.5 flex-shrink-0" />
           ) : (
             <Minus className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
           )}

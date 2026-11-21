@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/integrations/db/client';
 import { onHealthDataChange } from '@/lib/data-events';
 import { Droplet, AlertCircle } from 'lucide-react';
+import { attentionBanner } from '@/lib/medical-utils';
 import { format, parseISO, subMonths, differenceInDays } from 'date-fns';
 
 // Period flow visualization for menstrual / conception modes. The
@@ -219,9 +220,9 @@ const PeriodFlowCard = ({ lastPeriodStart }: PeriodFlowCardProps) => {
       </div>
 
       {latestStats && latestStats.heavyDays > 3 && (
-        <div className="flex items-start gap-2 p-2.5 rounded-lg bg-amber-50/60 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-800/40">
-          <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-amber-600" />
-          <p className="text-xs text-amber-800 dark:text-amber-200">
+        <div className={attentionBanner}>
+          <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-destructive/80" />
+          <p className="text-xs">
             {latestStats.heavyDays} heavy-flow days this period. Persistent heavy bleeding
             (menorrhagia) can lead to iron deficiency — worth raising at your next visit if
             this is unusual for you.

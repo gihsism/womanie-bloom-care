@@ -7,6 +7,7 @@ import { Brain, RotateCcw, ChevronRight } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 import EvidenceNote from '@/components/research/EvidenceNote';
+import { healthTone } from '@/lib/medical-utils';
 import { evidenceSpec } from '@/lib/evidenceTopics';
 
 // Edinburgh Postnatal Depression Scale (EPDS) — a 10-item validated
@@ -114,7 +115,7 @@ function interpretation(total: number, item10Flag: boolean): {
       band: 'likely',
       label: 'Item 10 flagged · urgent',
       message: 'Any answer above "Never" on item 10 (thoughts of self-harm) is taken seriously regardless of total. Please reach out to a clinician today — your OB, midwife, or a crisis line.',
-      color: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-100 border-red-300',
+      color: `${healthTone.alert.badge} font-medium`,
     };
   }
   if (total < 10) {
@@ -122,7 +123,7 @@ function interpretation(total: number, item10Flag: boolean): {
       band: 'low',
       label: `${total}/30 — low likelihood`,
       message: 'Score below the EPDS screening threshold (≥10). Doesn\'t rule out distress; check in again in 2 weeks if you have concerns.',
-      color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200',
+      color: healthTone.ok.badge,
     };
   }
   if (total < 13) {
@@ -130,14 +131,14 @@ function interpretation(total: number, item10Flag: boolean): {
       band: 'possible',
       label: `${total}/30 — possible depression`,
       message: 'EPDS ≥10 is the standard cutoff for "possible postnatal depression." A conversation with your OB or GP is the right next step.',
-      color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200',
+      color: healthTone.watch.badge,
     };
   }
   return {
     band: 'likely',
     label: `${total}/30 — likely depression`,
     message: 'EPDS ≥13 strongly suggests postnatal depression. Please contact your OB, GP, or a mental health clinician this week.',
-    color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-100',
+    color: healthTone.alert.badge,
   };
 }
 
@@ -286,7 +287,7 @@ export default function EpdsScreener({ mode }: EpdsScreenerProps) {
               <li key={i} className="text-[11px] flex items-center gap-2">
                 <span className="text-muted-foreground w-24">{format(parseISO(h.date), 'MMM d, yyyy')}</span>
                 <span className="font-mono">{h.total}/30</span>
-                {h.flaggedItem10 && <span className="text-red-600">· item 10 flagged</span>}
+                {h.flaggedItem10 && <span className="text-destructive">· item 10 flagged</span>}
               </li>
             ))}
           </ul>
