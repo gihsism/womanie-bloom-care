@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { ChatSources } from '@/components/chat/ChatSources';
-import { citedSources, linkCitations, splitSourcesFooter, stripSourcesFooter, type ChatSource } from '@/lib/research-sources';
+import { citedSources, linkCitations, splitSourcesFooter, stripSourcesFooter, stripUnknownCitations, type ChatSource } from '@/lib/research-sources';
 
 type ChatMode = 'ai' | 'real';
 // `sources`: research-library items the server gave the model for this
@@ -892,9 +892,11 @@ export default function AIDoctorChat() {
                   {msg.role === 'assistant' ? (
                     <>
                       {(() => {
-                        const { body, sources } = msg.sources
+                        const { body: rawBody, sources } = msg.sources
                           ? { body: msg.content, sources: msg.sources }
                           : splitSourcesFooter(msg.content);
+                        // Hide [n] markers that point at no source we were given.
+                        const body = stripUnknownCitations(rawBody, sources.map((s) => s.n));
                         const cited = citedSources(body, sources);
                         return (
                           <>

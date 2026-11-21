@@ -4,7 +4,7 @@ import { getAuthUser } from './_lib/auth.js';
 import { checkAndConsume } from './_lib/ratelimit.js';
 import { withSentry } from './_lib/sentry.js';
 import { buildLifeContext } from './_lib/life-context.js';
-import { SOURCES_FOOTER_MARK, buildSourcesPrompt, formatSourcesFooter, selectChatSources, toChatSources, type ResearchItem } from './_lib/research/library.js';
+import { SOURCES_FOOTER_MARK, buildSourcesPrompt, formatSourcesFooter, selectChatSources, stripUnknownCitations, toChatSources, type ResearchItem } from './_lib/research/library.js';
 
 export const config = {
   maxDuration: 60,
@@ -355,7 +355,10 @@ ${medicalContext || 'No medical records available yet. Encourage the patient to 
     // text we also skip the user message — keeps chat history
     // internally consistent instead of half-logged conversations.
     if (assistantText) {
-      const storedText = assistantText + formatSourcesFooter(chatSources, assistantText);
+      // Drop any [n] that is not one of the sources we gave the model, so
+      // the saved reply never points at a source that does not exist.
+      const cleanText = stripUnknownCitations(assistantText, chatSources.map((s) => s.n));
+      const storedText = cleanText + formatSourcesFooter(chatSources, cleanText);
       try {
         if (userTurnContent) {
           await sql.transaction([

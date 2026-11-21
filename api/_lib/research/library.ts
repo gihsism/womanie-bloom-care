@@ -413,19 +413,35 @@ export function buildSourcesPrompt(items: ResearchItem[]): string {
   const blocks = items.map((it, i) => {
     const certainty = it.certainty && it.certainty !== 'not stated' ? `; certainty of evidence: ${it.certainty}` : '';
     return `[${i + 1}] ${it.title} — ${it.source}, ${it.year} (${it.evidenceLevel}${certainty})
-Summary: ${it.summary}
+Finding: ${it.summary}
 Key points: ${it.keyPoints.join(' | ')}`;
   });
   return `\n\n## Research sources
-These are summaries of published research from the Womanie research library (clinical guidelines and systematic reviews from PubMed), chosen for this question:
+These are summaries of published research from the Womanie research library (clinical guidelines and systematic reviews from PubMed), chosen for this question. Each one lists what the research actually found; check that text before citing it:
 
 ${blocks.join('\n\n')}
 
 Rules for using these sources:
-- When a sentence relies on one of these sources, cite it with its number in square brackets, e.g. [1] or [1][3]. Cite only sources you actually used, and only for what that source's summary or key points actually say; do not attach a number to facts the source does not state.
-- Never cite anything that is not in this list, never invent studies, numbers or guidelines, and never use bracketed numbers for anything else.
+- Cite only sources you actually used: put a source's number in square brackets, e.g. [1] or [1][3], only after a sentence that its Finding or Key points directly support. The source must say the specific thing your sentence says, not just be about the same topic.
+- Before each citation, check the sentence against that source's text. Never carry a dose, amount, percentage, risk figure, duration, age or population over from a source unless it matches exactly what the source states (for example, do not cite a source that studied 300 mg next to a sentence about 200 mg). If the numbers differ, either use the source's own figure or drop the citation.
+- If no source above supports a claim, state it without a citation as general information, or say the evidence here is limited. Never attach a nearby source just to give a sentence a number.
+- Fewer, accurate citations are better than many loose ones. It is fine to cite only one or two sources, or none.
+- Never cite anything that is not in this list, never use a number that is not listed above, never invent studies, numbers or guidelines, and never use bracketed numbers for anything else.
 - If the sources are uncertain, low-certainty, conflicting or do not quite answer the question, say so plainly.
 - Do not add your own "Sources" or reference list at the end; the app shows the cited sources under your answer.`;
+}
+
+/**
+ * Removes citation markers whose number is not one of the given sources
+ * ([7] when only [1]-[3] exist), keeping valid numbers inside a group
+ * ([1, 7] -> [1]). A safety net for numbers the model invented.
+ */
+export function stripUnknownCitations(text: string, valid: readonly number[]): string {
+  const ok = new Set(valid);
+  return text.replace(/([ \t]*)\[(\d{1,2}(?:\s*,\s*\d{1,2})*)\](?!\()/g, (_whole, ws: string, list: string) => {
+    const keep = list.split(',').map((x) => Number(x.trim())).filter((n) => ok.has(n));
+    return keep.length === 0 ? '' : `${ws}[${keep.join(', ')}]`;
+  });
 }
 
 /** Numbers like [2] or [1][3] or [1, 3] that the answer actually cites. */

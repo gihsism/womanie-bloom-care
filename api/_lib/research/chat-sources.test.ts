@@ -98,6 +98,9 @@ describe('ai-doctor-chat research sources', () => {
     expected.forEach((it, i) => expect(body.system).toContain(`[${i + 1}] ${it.title}`));
     expect(body.system).not.toContain(`[${expected.length + 1}] `);
     expect(body.system).toMatch(/Cite only sources you actually used/);
+    expect(body.system).toMatch(/Never carry a dose/);
+    expect(body.system).toMatch(/Fewer, accurate citations/);
+    expected.forEach((it) => expect(body.system).toContain(`Finding: ${it.summary}`));
 
     // What the page receives: the first SSE event carries the same list
     const first = JSON.parse(res.written[0].replace(/^data: /, ''));
@@ -136,5 +139,18 @@ describe('ai-doctor-chat research sources', () => {
     await handler(r, res as unknown as VercelResponse);
     const body = JSON.parse(fetchMock.mock.calls[0][1].body as string);
     expect(body.messages[1].content).toBe('Moderate is fine [1].');
+  });
+
+  it('drops invented citation numbers from the stored reply', async () => {
+    const question = 'Is coffee OK in pregnancy?';
+    const n = selectChatSources(question, 'pregnancy').length;
+    answer = `Keep caffeine moderate [1]. Some say more is fine [${n + 3}].`;
+    const res = mockRes();
+    await handler(req(question), res as unknown as VercelResponse);
+    const stored = inserts.find((v) => typeof v[1] === 'string' && (v[1] as string).startsWith('Keep caffeine'));
+    expect(stored).toBeDefined();
+    const text = stored![1] as string;
+    expect(text.split('\n\n---')[0]).toBe('Keep caffeine moderate [1]. Some say more is fine.');
+    expect(text).not.toContain(`[${n + 3}]`);
   });
 });

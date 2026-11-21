@@ -64,6 +64,19 @@ export function citedNumbers(text: string, max: number): number[] {
   return [...found].sort((a, b) => a - b);
 }
 
+/**
+ * Removes citation markers whose number is not one of the given sources
+ * ([7] when only [1]-[3] exist), keeping valid numbers inside a group
+ * ([1, 7] -> [1]). Must match stripUnknownCitations on the server.
+ */
+export function stripUnknownCitations(text: string, valid: readonly number[]): string {
+  const ok = new Set(valid);
+  return text.replace(/([ \t]*)\[(\d{1,2}(?:\s*,\s*\d{1,2})*)\](?!\()/g, (_whole, ws: string, list: string) => {
+    const keep = list.split(',').map((x) => Number(x.trim())).filter((n) => ok.has(n));
+    return keep.length === 0 ? '' : `${ws}[${keep.join(', ')}]`;
+  });
+}
+
 /** Only the sources the answer actually cites, in number order. */
 export function citedSources(text: string, sources: ChatSource[]): ChatSource[] {
   const max = Math.max(0, ...sources.map((s) => s.n));
