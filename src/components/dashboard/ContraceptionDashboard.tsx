@@ -416,8 +416,8 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
             const missed = days.filter(d => d.status === 'missed').length;
             const unlogged = 30 - onTime - late - missed;
             const dotFor = (status: PillStatus | null): string => {
-              if (status === 'on-time') return 'bg-green-500';
-              if (status === 'late') return 'bg-amber-500';
+              if (status === 'on-time') return 'bg-foreground/70';
+              if (status === 'late') return 'bg-primary/50';
               if (status === 'missed') return 'bg-destructive';
               return 'bg-muted-foreground/20';
             };
@@ -426,9 +426,9 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-medium">Last 30 days</span>
                   <span className="text-muted-foreground">
-                    <span className="text-green-600 font-medium">{onTime}</span>
+                    <span className="text-foreground font-medium">{onTime}</span>
                     {' on-time · '}
-                    <span className="text-amber-600 font-medium">{late}</span>
+                    <span className="text-primary font-medium">{late}</span>
                     {' late · '}
                     <span className="text-destructive font-medium">{missed}</span>
                     {' missed'}

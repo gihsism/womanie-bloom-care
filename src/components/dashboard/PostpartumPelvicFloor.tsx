@@ -112,7 +112,7 @@ const PostpartumPelvicFloor = () => {
         </Button>
         <div className="flex-1 text-right">
           <p className="text-xs text-muted-foreground">Today</p>
-          <p className={`text-lg font-semibold ${todayCount >= TARGET_PER_DAY ? 'text-emerald-600' : ''}`}>
+          <p className={`text-lg font-semibold ${todayCount >= TARGET_PER_DAY ? 'text-primary' : ''}`}>
             {todayCount} / {TARGET_PER_DAY}
           </p>
         </div>

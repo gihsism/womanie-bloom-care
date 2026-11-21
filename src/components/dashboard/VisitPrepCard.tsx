@@ -311,7 +311,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
       </div>
 
       {allChecked && (
-        <p className="text-[11px] text-emerald-700 dark:text-emerald-300 mt-3">
+        <p className="text-[11px] text-primary mt-3">
           All questions asked — great visit prep!
         </p>
       )}

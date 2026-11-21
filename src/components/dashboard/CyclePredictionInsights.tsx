@@ -54,10 +54,10 @@ export default function CyclePredictionInsights({ mode }: CyclePredictionInsight
   if (items.length === 0) return null;
 
   return (
-    <Card className="p-4 mb-4 border-l-4 border-l-amber-500 bg-amber-50/40 dark:bg-amber-900/10">
+    <Card className="p-4 mb-4 border-l-4 border-l-primary/60 bg-primary/5">
       <div className="flex items-center gap-2 mb-2">
-        <div className="w-8 h-8 rounded-xl bg-amber-500/15 flex items-center justify-center">
-          <FlaskConical className="h-4 w-4 text-amber-700 dark:text-amber-300" />
+        <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+          <FlaskConical className="h-4 w-4 text-primary" />
         </div>
         <div>
           <p className="text-sm font-semibold">Cycle prediction context</p>
@@ -69,7 +69,7 @@ export default function CyclePredictionInsights({ mode }: CyclePredictionInsight
       <ul className="space-y-1.5">
         {items.map((line, i) => (
           <li key={i} className="flex items-start gap-2 text-xs text-foreground/90">
-            <Info className="h-3.5 w-3.5 text-amber-700 dark:text-amber-300 flex-shrink-0 mt-0.5" />
+            <Info className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
             <span>{line}</span>
           </li>
         ))}

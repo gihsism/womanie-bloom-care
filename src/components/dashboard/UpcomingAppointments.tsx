@@ -157,7 +157,7 @@ export default function UpcomingAppointments() {
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-sm font-medium truncate">{name}</span>
                   {apt.doctor_verified && (
-                    <span className="inline-flex items-center gap-1 text-[10px] text-green-700 dark:text-green-300">
+                    <span className="inline-flex items-center gap-1 text-[10px] text-primary">
                       <ShieldCheck className="h-3 w-3" />
                       Verified
                     </span>

@@ -30,7 +30,7 @@ const PHASE_INFO: Record<Phase, PhaseInfo> = {
   follicular: {
     label: 'Follicular phase',
     description: 'After your period, before ovulation',
-    tone: 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800',
+    tone: 'bg-foreground/5 text-foreground/80 border-foreground/15',
   },
   fertile: {
     label: 'Fertile window',
@@ -40,7 +40,7 @@ const PHASE_INFO: Record<Phase, PhaseInfo> = {
   late_luteal: {
     label: 'Late luteal · PMS window',
     description: 'Last ~5 days before your period',
-    tone: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800',
+    tone: 'bg-primary/5 text-primary/90 border-primary/25',
   },
   luteal: {
     label: 'Luteal phase',

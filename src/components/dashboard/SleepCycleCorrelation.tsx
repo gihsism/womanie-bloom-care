@@ -38,10 +38,10 @@ const PHASE_LABEL: Record<Phase, string> = {
 
 const PHASE_TONE: Record<Phase, string> = {
   menstrual: 'bg-primary/15 text-primary',
-  follicular: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200',
+  follicular: 'bg-foreground/5 text-foreground/80',
   fertile: 'bg-secondary/20 text-secondary-foreground',
   luteal: 'bg-muted text-foreground/80',
-  late_luteal: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200',
+  late_luteal: 'bg-primary/5 text-primary/90',
 };
 
 const RELEVANT_MODES: LifeStage[] = [

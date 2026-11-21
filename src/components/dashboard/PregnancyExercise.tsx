@@ -103,21 +103,21 @@ export default function PregnancyExercise({ weeksPregnant }: Props) {
       </div>
       <p className="text-xs text-muted-foreground mb-3">{tips.description}</p>
 
-      <p className="text-[11px] uppercase tracking-wide text-emerald-700 dark:text-emerald-400 mb-1.5">Generally fine</p>
+      <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5">Generally fine</p>
       <ul className="space-y-1 mb-3">
         {tips.yes.map((line, i) => (
           <li key={i} className="text-xs text-foreground/90 flex items-start gap-1.5">
-            <span className="text-emerald-600 mt-0.5">·</span>
+            <span className="text-muted-foreground mt-0.5">·</span>
             <span className="leading-snug">{line}</span>
           </li>
         ))}
       </ul>
 
-      <p className="text-[11px] uppercase tracking-wide text-amber-700 dark:text-amber-400 mb-1.5">Pause or modify</p>
+      <p className="text-[11px] uppercase tracking-wide text-destructive/80 mb-1.5">Pause or modify</p>
       <ul className="space-y-1 mb-3">
         {tips.caution.map((line, i) => (
           <li key={i} className="text-xs text-foreground/90 flex items-start gap-1.5">
-            <span className="text-amber-600 mt-0.5">·</span>
+            <span className="text-destructive/70 mt-0.5">·</span>
             <span className="leading-snug">{line}</span>
           </li>
         ))}

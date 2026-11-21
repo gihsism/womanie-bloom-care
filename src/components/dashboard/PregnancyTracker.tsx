@@ -389,8 +389,8 @@ function getRelevantMilestones(week: number) {
 const MILESTONE_CATEGORY_TONE: Record<PregnancyMilestone['category'], { dot: string; label: string }> = {
   visit: { dot: 'bg-primary', label: 'Visit' },
   scan: { dot: 'bg-secondary', label: 'Scan' },
-  lab: { dot: 'bg-amber-500', label: 'Lab' },
-  class: { dot: 'bg-emerald-500', label: 'Class' },
+  lab: { dot: 'bg-primary/50', label: 'Lab' },
+  class: { dot: 'bg-foreground/60', label: 'Class' },
   decision: { dot: 'bg-violet-500', label: 'Decision' },
 };
 

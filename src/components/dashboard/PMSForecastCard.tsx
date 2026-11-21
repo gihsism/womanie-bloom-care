@@ -176,9 +176,9 @@ export default function PMSForecastCard({ mode }: Props) {
   const inPmsNow = forecast.phase === 'pms';
 
   return (
-    <Card className="p-4 border-l-4 border-l-amber-400 bg-amber-50/40 dark:bg-amber-900/10">
+    <Card className="p-4 border-l-4 border-l-primary/60 bg-primary/5">
       <div className="flex items-center gap-2 mb-2">
-        <CloudRain className="h-4 w-4 text-amber-700 dark:text-amber-300" />
+        <CloudRain className="h-4 w-4 text-primary" />
         <h3 className="text-sm font-semibold">
           {inPmsNow ? 'You are in the PMS window' : 'PMS window approaching'}
         </h3>
@@ -216,7 +216,7 @@ export default function PMSForecastCard({ mode }: Props) {
       <ul className="space-y-1">
         {PREP_TIPS.map((t, i) => (
           <li key={i} className="text-xs text-foreground/90 flex items-start gap-1.5">
-            <span className="text-amber-600 mt-0.5">·</span>
+            <span className="text-primary mt-0.5">·</span>
             <span className="leading-snug">{t}</span>
           </li>
         ))}

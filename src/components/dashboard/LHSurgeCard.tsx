@@ -122,7 +122,7 @@ const LHSurgeCard = () => {
   if (readings.length === 0) return null;
 
   const dotFor = (value: LHValue | null): string => {
-    if (value === 'positive') return 'bg-amber-500';
+    if (value === 'positive') return 'bg-primary';
     if (value === 'negative') return 'bg-muted-foreground/40';
     return 'bg-muted/40';
   };
@@ -131,7 +131,7 @@ const LHSurgeCard = () => {
     <Card className="p-4 space-y-3">
       <div className="flex items-center justify-between">
         <h4 className="font-semibold flex items-center gap-2">
-          <Zap className="h-4 w-4 text-amber-600" />
+          <Zap className="h-4 w-4 text-primary" />
           LH surge tracker
         </h4>
         <Badge variant="outline" className="text-[10px]">
@@ -143,14 +143,14 @@ const LHSurgeCard = () => {
         <div
           className={`rounded-lg p-3 border ${
             surgeIsFresh
-              ? 'border-amber-300/60 bg-amber-50/60 dark:bg-amber-900/20 dark:border-amber-700/40'
+              ? 'border-primary/25 bg-primary/5'
               : 'border-border bg-muted/30'
           }`}
         >
           <div className="flex items-start gap-2">
             <CheckCircle2
               className={`h-4 w-4 mt-0.5 flex-shrink-0 ${
-                surgeIsFresh ? 'text-amber-600' : 'text-muted-foreground'
+                surgeIsFresh ? 'text-primary' : 'text-muted-foreground'
               }`}
             />
             <div className="flex-1">
@@ -186,7 +186,7 @@ const LHSurgeCard = () => {
         <div className="flex items-center justify-between text-xs">
           <span className="font-medium">Last 30 days</span>
           <span className="text-muted-foreground">
-            <span className="text-amber-600 font-medium">{positiveCount}</span> positive ·{' '}
+            <span className="text-primary font-medium">{positiveCount}</span> positive ·{' '}
             <span className="font-medium">{negativeCount}</span> negative
           </span>
         </div>
@@ -203,7 +203,7 @@ const LHSurgeCard = () => {
         </div>
         <div className="flex items-center gap-3 text-[10px] text-muted-foreground pt-1">
           <span className="inline-flex items-center gap-1">
-            <span className="w-2 h-2 rounded-sm bg-amber-500" /> positive
+            <span className="w-2 h-2 rounded-sm bg-primary" /> positive
           </span>
           <span className="inline-flex items-center gap-1">
             <span className="w-2 h-2 rounded-sm bg-muted-foreground/40" /> negative

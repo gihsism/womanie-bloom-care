@@ -30,12 +30,12 @@ const bodyChangesData = [
 ];
 
 const wellnessTips = [
-  { icon: Apple, title: 'Nutrition', tip: 'Eat iron-rich foods like leafy greens, lean meat, and beans to prepare your body.', color: 'text-green-600' },
+  { icon: Apple, title: 'Nutrition', tip: 'Eat iron-rich foods like leafy greens, lean meat, and beans to prepare your body.', color: 'text-primary' },
   { icon: Moon, title: 'Sleep', tip: 'Aim for 9–11 hours of sleep. Your body is growing and needs plenty of rest.', color: 'text-indigo-500' },
   { icon: Activity, title: 'Exercise', tip: 'Stay active with activities you enjoy — dance, swimming, cycling, or yoga.', color: 'text-primary' },
   { icon: Heart, title: 'Emotional Health', tip: 'Journaling and talking to trusted friends or family can help with big emotions.', color: 'text-pink-500' },
   { icon: Shield, title: 'Hygiene', tip: 'Use gentle unscented products. Learn about period products so you feel prepared.', color: 'text-blue-500' },
-  { icon: Sun, title: 'Self-Care', tip: 'Take time for things that make you happy. Your mental health matters just as much.', color: 'text-amber-500' },
+  { icon: Sun, title: 'Self-Care', tip: 'Take time for things that make you happy. Your mental health matters just as much.', color: 'text-primary' },
 ];
 
 const periodPrepChecklist = [
@@ -132,11 +132,11 @@ export default function PreMenstrualDashboard() {
       </Card>
 
       {/* Fun Fact Card */}
-      <Card className="p-4 border-amber-200/60 dark:border-amber-800/30 bg-amber-50/50 dark:bg-amber-950/20">
+      <Card className="p-4 border-primary/20 bg-primary/5">
         <div className="flex items-start gap-3">
-          <Lightbulb className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+          <Lightbulb className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wide mb-1">Did you know?</p>
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-1">Did you know?</p>
             <p className="text-sm">{funFacts[currentFactIndex]}</p>
           </div>
           <Button
@@ -324,8 +324,8 @@ export default function PreMenstrualDashboard() {
             </div>
 
             {readinessPercent === 100 && (
-              <div className="mt-4 p-3 rounded-xl bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800/40 text-center">
-                <p className="text-sm font-semibold text-green-700 dark:text-green-400">
+              <div className="mt-4 p-3 rounded-xl bg-primary/5 border border-primary/20 text-center">
+                <p className="text-sm font-semibold text-primary">
                   🎉 You're prepared! You've got this!
                 </p>
               </div>

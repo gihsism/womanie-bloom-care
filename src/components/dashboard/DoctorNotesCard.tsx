@@ -38,7 +38,7 @@ function noteTypeBadgeClass(type: string | null): string {
     case 'treatment':
       return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200';
     case 'recommendation':
-      return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200';
+      return 'bg-primary/10 text-primary';
     case 'observation':
     default:
       return 'bg-muted text-muted-foreground';
@@ -126,7 +126,7 @@ export default function DoctorNotesCard() {
                   <div className="flex items-center gap-1.5 flex-wrap text-[11px] text-muted-foreground mt-0.5">
                     <span className="truncate">{doctorLabel}</span>
                     {note.doctor_verified && (
-                      <span className="inline-flex items-center gap-0.5 text-green-700 dark:text-green-300">
+                      <span className="inline-flex items-center gap-0.5 text-primary">
                         <ShieldCheck className="h-3 w-3" />
                       </span>
                     )}

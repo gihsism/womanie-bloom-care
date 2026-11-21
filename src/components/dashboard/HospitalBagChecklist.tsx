@@ -158,11 +158,11 @@ const HospitalBagChecklist = ({ weeksPregnant }: HospitalBagChecklistProps) => {
           Hospital bag
         </h4>
         {isComplete ? (
-          <Badge variant="outline" className="text-[10px] border-emerald-400 text-emerald-700 dark:text-emerald-300">
+          <Badge variant="outline" className="text-[10px] border-primary/40 text-primary">
             All packed ✓
           </Badge>
         ) : overdue ? (
-          <Badge variant="outline" className="text-[10px] border-amber-400 text-amber-700 dark:text-amber-300">
+          <Badge variant="outline" className="text-[10px] border-foreground/30 text-foreground/80">
             Pack by week 36
           </Badge>
         ) : (
@@ -209,12 +209,12 @@ const HospitalBagChecklist = ({ weeksPregnant }: HospitalBagChecklistProps) => {
                       onClick={() => toggle(item.id)}
                       className={`w-full flex items-start gap-2 p-2 rounded-lg text-left transition-colors ${
                         isPacked
-                          ? 'bg-emerald-50/40 dark:bg-emerald-900/10'
+                          ? 'bg-primary/5'
                           : 'hover:bg-muted/40'
                       }`}
                     >
                       {isPacked ? (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                       ) : (
                         <Circle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                       )}

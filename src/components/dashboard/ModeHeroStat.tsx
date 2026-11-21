@@ -281,40 +281,40 @@ const ModeHeroStat = ({
       case 'menopause': {
         if (hotFlashes7d === null) {
           return {
-            icon: <ThermometerSun className="h-5 w-5 text-amber-600" />,
+            icon: <ThermometerSun className="h-5 w-5 text-primary" />,
             headline: 'Your menopause journey',
             detail: 'Log symptoms daily to surface trends here.',
-            tone: 'bg-amber-50/70 dark:bg-amber-950/20 border-amber-200/60 dark:border-amber-800/40',
+            tone: 'bg-primary/5 border-primary/20',
           };
         }
         if (periodData) {
           const daysSince = differenceInDays(today, periodData.lastPeriodStart);
           return {
-            icon: <ThermometerSun className="h-5 w-5 text-amber-600" />,
+            icon: <ThermometerSun className="h-5 w-5 text-primary" />,
             headline: `${daysSince} ${daysSince === 1 ? 'day' : 'days'} since your last period`,
             detail:
               hotFlashes7d === 0
                 ? 'No hot flashes logged this week'
                 : `${hotFlashes7d} hot flash${hotFlashes7d === 1 ? '' : 'es'} logged in the last 7 days`,
-            tone: 'bg-amber-50/70 dark:bg-amber-950/20 border-amber-200/60 dark:border-amber-800/40',
+            tone: 'bg-primary/5 border-primary/20',
           };
         }
         return {
-          icon: <ThermometerSun className="h-5 w-5 text-amber-600" />,
+          icon: <ThermometerSun className="h-5 w-5 text-primary" />,
           headline:
             hotFlashes7d === 0
               ? 'No hot flashes logged this week'
               : `${hotFlashes7d} hot flash${hotFlashes7d === 1 ? '' : 'es'} this week`,
           detail: 'Track your daily count from the daily-log form.',
-          tone: 'bg-amber-50/70 dark:bg-amber-950/20 border-amber-200/60 dark:border-amber-800/40',
+          tone: 'bg-primary/5 border-primary/20',
         };
       }
       case 'post-menopause': {
         return {
-          icon: <Sunset className="h-5 w-5 text-green-600" />,
+          icon: <Sunset className="h-5 w-5 text-primary" />,
           headline: 'Post-menopause wellness',
           detail: 'Focus areas: bones, heart, cognition. Screening guides below.',
-          tone: 'bg-green-50/70 dark:bg-green-950/20 border-green-200/60 dark:border-green-800/40',
+          tone: 'bg-primary/5 border-primary/20',
         };
       }
       default:

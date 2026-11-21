@@ -261,14 +261,14 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
       {/* Welcome Card */}
       {!withHero && <Card className={`p-5 border ${
         isPostMenopause
-          ? 'bg-gradient-to-br from-green-50 via-teal-50 to-blue-50 dark:from-green-950/30 dark:via-teal-950/30 dark:to-blue-950/30 border-green-200/50 dark:border-green-800/30'
-          : 'bg-gradient-to-br from-amber-50 via-rose-50 to-purple-50 dark:from-amber-950/30 dark:via-rose-950/30 dark:to-purple-950/30 border-amber-200/50 dark:border-amber-800/30'
+          ? 'bg-gradient-to-br from-muted/60 via-card to-primary/5 border-border'
+          : 'bg-gradient-to-br from-primary/10 via-card to-muted/50 border-primary/20'
       }`}>
         <div className="flex items-start gap-4">
           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${
-            isPostMenopause ? 'bg-green-100 dark:bg-green-900/40' : 'bg-amber-100 dark:bg-amber-900/40'
+            'bg-primary/10'
           }`}>
-            {isPostMenopause ? <Flower2 className="h-6 w-6 text-green-600" /> : <Sparkles className="h-6 w-6 text-amber-600" />}
+            {isPostMenopause ? <Flower2 className="h-6 w-6 text-primary" /> : <Sparkles className="h-6 w-6 text-primary" />}
           </div>
           <div className="flex-1">
             <h2 className="text-lg font-bold mb-1">

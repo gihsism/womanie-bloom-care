@@ -97,9 +97,9 @@ export default function CyclePredictionAccuracyCard({ mode }: Props) {
           const sign = p.deltaDays > 0 ? '+' : p.deltaDays < 0 ? '−' : '±';
           const abs = Math.abs(p.deltaDays);
           const tone =
-            abs <= 1 ? 'text-green-700 dark:text-green-300'
-            : abs <= 3 ? 'text-amber-700 dark:text-amber-300'
-            : 'text-red-700 dark:text-red-300';
+            abs <= 1 ? 'text-primary'
+            : abs <= 3 ? 'text-foreground/80'
+            : 'text-muted-foreground';
           const lineNote =
             abs === 0 ? 'spot on'
             : p.deltaDays > 0 ? `${abs} ${abs === 1 ? 'day' : 'days'} later than predicted`

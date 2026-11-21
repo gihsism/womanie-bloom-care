@@ -146,7 +146,7 @@ export default function CyclePhaseNutrition({ mode }: Props) {
   return (
     <Card className="p-4">
       <div className="flex items-center gap-2 mb-2">
-        <Apple className="h-4 w-4 text-emerald-600" />
+        <Apple className="h-4 w-4 text-primary" />
         <h3 className="text-sm font-semibold">Nutrition for your phase</h3>
         <Badge variant="outline" className="text-[10px] ml-auto">
           Day {current.dayOfCycle}
@@ -159,7 +159,7 @@ export default function CyclePhaseNutrition({ mode }: Props) {
       <ul className="space-y-1.5 mb-3">
         {g.focus.map((line, i) => (
           <li key={i} className="text-xs text-foreground/90 flex items-start gap-1.5">
-            <span className="text-emerald-600 mt-0.5">·</span>
+            <span className="text-primary mt-0.5">·</span>
             <span className="leading-snug">{line}</span>
           </li>
         ))}

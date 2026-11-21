@@ -18,8 +18,8 @@ import { format, subDays } from 'date-fns';
 type MedStatus = 'all-on-time' | 'late' | 'missed';
 
 const KEY_MAP: Record<MedStatus, { color: string; label: string }> = {
-  'all-on-time': { color: 'bg-emerald-500', label: 'all on time' },
-  late:          { color: 'bg-amber-500',   label: 'late' },
+  'all-on-time': { color: 'bg-foreground/70', label: 'all on time' },
+  late:          { color: 'bg-primary/50',   label: 'late' },
   missed:        { color: 'bg-destructive', label: 'missed' },
 };
 
@@ -124,13 +124,13 @@ const IVFMedicationAdherence = () => {
       </p>
 
       <div className="grid grid-cols-3 gap-2 text-center text-xs">
-        <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-2">
+        <div className="bg-muted/50 rounded-lg p-2">
           <div className="text-[10px] text-muted-foreground">All on time</div>
-          <div className="font-semibold text-emerald-700 dark:text-emerald-300">{counts.onTime}</div>
+          <div className="font-semibold text-foreground">{counts.onTime}</div>
         </div>
-        <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-2">
+        <div className="bg-primary/5 rounded-lg p-2">
           <div className="text-[10px] text-muted-foreground">Late</div>
-          <div className="font-semibold text-amber-700 dark:text-amber-300">{counts.late}</div>
+          <div className="font-semibold text-primary">{counts.late}</div>
         </div>
         <div className="bg-destructive/10 rounded-lg p-2">
           <div className="text-[10px] text-muted-foreground">Missed</div>
@@ -153,10 +153,10 @@ const IVFMedicationAdherence = () => {
       <div className="flex items-center justify-between text-[10px] text-muted-foreground">
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1">
-            <span className="w-2 h-2 rounded-sm bg-emerald-500" /> on time
+            <span className="w-2 h-2 rounded-sm bg-foreground/70" /> on time
           </span>
           <span className="inline-flex items-center gap-1">
-            <span className="w-2 h-2 rounded-sm bg-amber-500" /> late
+            <span className="w-2 h-2 rounded-sm bg-primary/50" /> late
           </span>
           <span className="inline-flex items-center gap-1">
             <span className="w-2 h-2 rounded-sm bg-destructive" /> missed

@@ -282,7 +282,7 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
           <p className="text-xs text-muted-foreground">{format(new Date(), 'EEEE, MMMM d')}</p>
         </div>
         {saved && (
-          <Badge variant="outline" className="text-green-600 border-green-300 gap-1">
+          <Badge variant="outline" className="text-primary border-primary/30 gap-1">
             <Check className="h-3 w-3" /> Saved
           </Badge>
         )}
@@ -393,8 +393,8 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
                 onClick={() => toggleSymptom(s)}
                 className={`px-3 py-1.5 rounded-full text-xs border transition-all ${
                   data.symptoms.includes(s)
-                    ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20 font-semibold text-amber-700 dark:text-amber-400'
-                    : 'border-border hover:border-amber-200'
+                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                    : 'border-border hover:border-primary/40'
                 }`}
               >
                 {s}

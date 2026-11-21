@@ -176,11 +176,11 @@ export default function GettingStarted() {
           <li
             key={step.key}
             className={`flex items-center gap-3 p-2 rounded-lg ${
-              step.done ? 'bg-green-50/60 dark:bg-green-900/10' : 'bg-muted/30'
+              step.done ? 'bg-primary/5' : 'bg-muted/30'
             }`}
           >
             {step.done ? (
-              <Check className="h-4 w-4 text-green-700 dark:text-green-300 flex-shrink-0" />
+              <Check className="h-4 w-4 text-primary flex-shrink-0" />
             ) : (
               <CircleDashed className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             )}

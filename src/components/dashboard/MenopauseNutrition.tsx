@@ -74,7 +74,7 @@ export default function MenopauseNutrition({ postmenopausal }: Props) {
   return (
     <Card className="p-4">
       <div className="flex items-center gap-2 mb-2">
-        <Apple className="h-4 w-4 text-emerald-600" />
+        <Apple className="h-4 w-4 text-primary" />
         <h3 className="text-sm font-semibold">Nutrition through menopause</h3>
         <Badge variant="outline" className="text-[10px] ml-auto">
           {postmenopausal ? 'Post-menopause' : 'Transition'}

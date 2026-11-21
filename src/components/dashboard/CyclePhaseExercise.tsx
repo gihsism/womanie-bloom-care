@@ -49,7 +49,7 @@ const GUIDANCE: Record<Phase, PhaseGuidance> = {
       'HIIT and intensity-focused conditioning',
       'Recovery is faster — you can tolerate more frequency',
     ],
-    tone: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200',
+    tone: 'bg-foreground/5 text-foreground/80',
     rationale: 'Estrogen rises through this phase. Multiple studies show greater training response, faster recovery, and higher pain tolerance compared to the late luteal phase.',
   },
   ovulation: {
@@ -74,7 +74,7 @@ const GUIDANCE: Record<Phase, PhaseGuidance> = {
       'Hot environment + intensity is harder — body temperature is already elevated by ~0.3 °C',
       'Stretching + mobility work pays off here; tissues are slightly stiffer',
     ],
-    tone: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200',
+    tone: 'bg-primary/5 text-primary/90',
     rationale: 'Progesterone elevates core body temperature and resting heart rate; perceived effort at the same intensity is higher. Strength stays mostly intact but high-end conditioning often suffers in the last week.',
   },
 };

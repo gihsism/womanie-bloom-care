@@ -51,16 +51,16 @@ function parseHotFlashCount(notes: string | null): number {
 // gradient is hard to read at this size.
 function bgForHotFlashes(n: number): string {
   if (n === 0) return 'bg-muted/40';
-  if (n <= 2) return 'bg-amber-200/70 dark:bg-amber-900/30';
-  if (n <= 5) return 'bg-orange-300 dark:bg-orange-800/60';
-  if (n <= 9) return 'bg-orange-400 dark:bg-orange-700/70';
-  return 'bg-red-500 dark:bg-red-700';
+  if (n <= 2) return 'bg-primary/15';
+  if (n <= 5) return 'bg-primary/35';
+  if (n <= 9) return 'bg-primary/65';
+  return 'bg-primary';
 }
 
 function textForHotFlashes(n: number): string {
   if (n === 0) return 'text-muted-foreground';
   if (n <= 5) return 'text-foreground';
-  return 'text-white';
+  return 'text-primary-foreground';
 }
 
 export default function MenopauseSymptomCalendar({ mode }: MenopauseSymptomCalendarProps) {
@@ -161,7 +161,7 @@ export default function MenopauseSymptomCalendar({ mode }: MenopauseSymptomCalen
             <p className="text-xs font-medium">{summary.daysLogged}/{WINDOW_DAYS} logged</p>
             {summary.totalHotFlashes > 0 && (
               <p className="text-[10px] text-muted-foreground inline-flex items-center gap-1 justify-end">
-                <Flame className="h-3 w-3 text-orange-500" />
+                <Flame className="h-3 w-3 text-primary" />
                 {summary.totalHotFlashes} total · trend {summary.trendLabel}
               </p>
             )}
@@ -191,16 +191,16 @@ export default function MenopauseSymptomCalendar({ mode }: MenopauseSymptomCalen
           <span className="w-3 h-3 rounded bg-muted/40" /> none
         </span>
         <span className="inline-flex items-center gap-1">
-          <span className="w-3 h-3 rounded bg-amber-200/70 dark:bg-amber-900/30" /> 1–2
+          <span className="w-3 h-3 rounded bg-primary/15" /> 1–2
         </span>
         <span className="inline-flex items-center gap-1">
-          <span className="w-3 h-3 rounded bg-orange-300 dark:bg-orange-800/60" /> 3–5
+          <span className="w-3 h-3 rounded bg-primary/35" /> 3–5
         </span>
         <span className="inline-flex items-center gap-1">
-          <span className="w-3 h-3 rounded bg-orange-400 dark:bg-orange-700/70" /> 6–9
+          <span className="w-3 h-3 rounded bg-primary/65" /> 6–9
         </span>
         <span className="inline-flex items-center gap-1">
-          <span className="w-3 h-3 rounded bg-red-500 dark:bg-red-700" /> 10+
+          <span className="w-3 h-3 rounded bg-primary" /> 10+
         </span>
         <span className="inline-flex items-center gap-1 ml-auto">
           <Activity className="h-3 w-3" /> dot = other signal logged
