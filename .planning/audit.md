@@ -189,6 +189,35 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-21 — Test coverage: added security-invariant tests for admin/docs
+admin/docs.ts is the admin endpoint that lets an admin diagnose document
+groupings (GET) and claim orphaned medical records onto their own account (POST).
+It was the last untested admin endpoint. Its most critical invariant is the
+cross-account protection guard: if oldUserId belongs to an existing auth_users row
+with a different email, the claim must be refused — without this check, any admin
+could move another active user's entire health_documents, medical_extracted_data,
+and document_analyses history onto their own account. The endpoint also requires
+that all three tables move in a single sql.transaction(), because a mid-flight
+failure with sequential queries would leave health_documents under the new user
+while the other two tables stayed under the old id, permanently orphaning them
+(a second claim attempt would find no health_documents to move and return zero
+rows with no recovery path). Added api/_routes/admin/docs.test.ts with 9 tests
+covering: 403 when getAdminUser returns null for GET; 403 when getAdminUser
+returns null for POST (the admin gate is the only access control — a regression
+would let any authenticated user enumerate all users' ids + emails + doc counts
+or move records); 405 for unsupported HTTP methods; GET returns current_user,
+total_groups, and a groups array; POST 400 when oldUserId is missing; POST 400
+when oldUserId equals the caller's own id (self-claim guard); POST 403 when
+oldUserId belongs to a different email account (cross-account protection — the
+most important guard: a refactor dropping the email check would enable admin-
+credential data theft); an atomicity invariant confirming sql.transaction is called
+once with exactly 3 query arguments (all three tables in one commit); and a
+response-completeness guard confirming the payload reports claimed_documents,
+claimed_extracted_data, and claimed_analyses so the admin can verify the full
+migration succeeded.
+Verified: tsc 0, eslint 0, 689/691 tests pass (2 pre-existing staleChunk failures
+unrelated to this change — sessionStorage not defined in Node), vite build clean.
+
 ### 2026-11-20 — Test coverage: added security-invariant tests for chat/messages
 chat/messages.ts serves the AI-doctor chat history with GET, POST (one-time
 localStorage-to-server migration), and DELETE (clear all messages). All three
