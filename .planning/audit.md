@@ -189,6 +189,28 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-22 — Test coverage: added security-invariant tests for auth/doctor-signup
+auth/doctor-signup.ts is the entry point through which doctors create accounts. It
+was hardened for atomic user creation (2026-11-01 pattern) and TOCTOU duplicate-email
+handling (2026-10-28), but had no tests despite carrying two unique critical invariants
+not present in the regular auth/signup path. Added
+api/_routes/auth/doctor-signup.test.ts with 14 tests covering: 405 for non-POST
+methods; 400 when any required field (email, password, fullName, licenseNumber) is
+missing; 400 when password is shorter than 8 characters; 429 when the IP rate limit
+fires; a no-DB-query guard confirming the rate limit fires before any database access
+(prevents email enumeration on the first attempt); 409 when the pre-check finds an
+existing email; 409 on a 23505 unique-constraint error (TOCTOU race); an atomicity
+guard confirming sql.transaction is called with exactly 2 queries (auth_users +
+doctor_profiles, without an auth_sessions row — deliberate); a critical invariant
+confirming user_roles is never referenced in any SQL call (the admin approval gate: a
+regression inserting the 'doctor' role here would let any self-described doctor bypass
+license review and read patient chart data via /api/doctors/patient); a critical
+invariant confirming no Set-Cookie header is emitted on success (an unverified doctor
+must not receive a session token — a regression issuing one would let a pending or
+rejected applicant authenticate before admin review); and 200 with success: true and
+pending: true on success.
+Verified: tsc 0, eslint 0, 796/796 tests pass, vite build clean.
+
 ### 2026-11-21 — Test coverage: added security-invariant tests for admin/docs
 admin/docs.ts is the admin endpoint that lets an admin diagnose document
 groupings (GET) and claim orphaned medical records onto their own account (POST).
