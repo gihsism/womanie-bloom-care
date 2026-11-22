@@ -50,6 +50,10 @@ const limitIdx = args.indexOf('--limit');
 const LIMIT = limitIdx >= 0 ? Number(args[limitIdx + 1]) : Infinity;
 const MODEL = process.env.RESEARCH_MODEL || 'claude-sonnet-5-5';
 const MIN_YEAR = 2015;
+// Multiplies every topic's `max` (TOPIC_SCALE=6 grows the library ~6x).
+const SCALE = Number(process.env.TOPIC_SCALE || 1);
+// Stop summarising once this run's estimated Claude spend reaches the cap.
+const BUDGET_USD = Number(process.env.BUDGET_USD || 28);
 
 fs.mkdirSync(cacheDir, { recursive: true });
 const readJson = (f, d) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return d; } };
@@ -68,7 +72,13 @@ async function eutils(endpoint, params) {
   lastCall = Date.now();
   const qs = new URLSearchParams({ ...params, tool: 'womanie', ...(NCBI_KEY ? { api_key: NCBI_KEY } : {}) });
   for (let attempt = 0; attempt < 4; attempt++) {
-    const resp = await fetch(`${EUTILS}/${endpoint}?${qs}`);
+    let resp;
+    try {
+      resp = await fetch(`${EUTILS}/${endpoint}?${qs}`, { signal: AbortSignal.timeout(60_000) });
+    } catch {
+      await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
+      continue;
+    }
     if (resp.ok) return resp.text();
     if (resp.status === 429 || resp.status >= 500) {
       await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
@@ -147,7 +157,7 @@ async function fetchAll() {
   /** pmid -> { topics:Set, stages:Set, pass } */
   const assigned = new Map();
   for (const topic of TOPICS) {
-    const max = topic.max ?? 4;
+    const max = Math.max(1, Math.round((topic.max ?? 4) * SCALE));
     const quota = { guideline: Math.ceil(max / 3), cochrane: Math.ceil(max / 3) };
     const picked = [];
     for (const pass of PASSES) {
@@ -245,6 +255,8 @@ const SCHEMA = {
 };
 
 const usage = { input: 0, output: 0 };
+const PRICE = MODEL.includes('haiku') ? [0.1, 0.5] : MODEL.includes('opus') ? [4, 20] : [2, 10];
+const spend = () => (usage.input * PRICE[0] + usage.output * PRICE[1]) / 1e6;
 
 async function summarise(client, rec) {
   const user = [
@@ -285,15 +297,20 @@ async function summariseAll(records, cache) {
   const todo = records.filter((r) => !cache[r.pmid] && !r.retracted && r.abstract.length > 200).slice(0, LIMIT);
   if (todo.length === 0) return;
   console.log(`Summarising ${todo.length} records with ${MODEL}…`);
-  const client = new Anthropic({ apiKey: loadApiKey() });
+  const client = new Anthropic({ apiKey: loadApiKey(), timeout: 120_000, maxRetries: 2 });
   let done = 0;
   const queue = [...todo];
   const worker = async () => {
     while (queue.length) {
+      if (spend() >= BUDGET_USD) {
+        if (queue.length) console.warn(`  budget $${BUDGET_USD} reached; ${queue.length} records left unsummarised`);
+        queue.length = 0;
+        break;
+      }
       const rec = queue.shift();
       const s = await summarise(client, rec);
       if (s) cache[rec.pmid] = { ...s, model: MODEL };
-      if (++done % 20 === 0) { console.log(`  ${done}/${todo.length}`); writeJson(SUMMARIES, cache); }
+      if (++done % 20 === 0) { console.log(`  ${done}/${todo.length}  ~$${spend().toFixed(2)}`); writeJson(SUMMARIES, cache); }
     }
   };
   await Promise.all(Array.from({ length: 6 }, worker));
@@ -385,7 +402,15 @@ function assemble(records, cache) {
     rejected.superseded = (rejected.superseded || 0) + 1;
   }
   items.length = 0;
-  items.push(...byTitle.values());
+  const byDoi = new Map();
+  for (const it of byTitle.values()) {
+    const doi = (it.doi || '').toLowerCase();
+    const kept = doi && byDoi.get(doi);
+    if (!kept) { items.push(it); if (doi) byDoi.set(doi, it); continue; }
+    kept.topics = [...new Set([...kept.topics, ...it.topics])];
+    kept.lifeStages = STAGES.filter((s) => kept.lifeStages.includes(s) || it.lifeStages.includes(s));
+    rejected.superseded = (rejected.superseded || 0) + 1;
+  }
   items.sort((a, b) => a.topics[0].localeCompare(b.topics[0]) || b.year - a.year || a.pmid.localeCompare(b.pmid));
   return { items, rejected };
 }
@@ -397,10 +422,32 @@ async function main() {
     records = await fetchAll();
     writeJson(RECORDS, records);
   }
+  // Keep every item already in the library: fetch any record the new
+  // searches did not return, and reuse its existing summary (never pay twice).
+  const previous = readJson(outFile, { items: [] }).items || [];
+  const have = new Set(records.map((r) => r.pmid));
+  const missing = previous.filter((it) => !have.has(it.pmid));
+  if (missing.length) {
+    console.log(`Re-fetching ${missing.length} existing library records…`);
+    const byPmid = new Map(missing.map((it) => [it.pmid, it]));
+    for (const rec of await efetch([...byPmid.keys()])) {
+      const it = byPmid.get(rec.pmid);
+      if (it) records.push({ ...rec, topics: it.topics, stages: it.lifeStages, landmark: Boolean(it.landmark) });
+    }
+    writeJson(RECORDS, records);
+  }
   console.log(`${records.length} records`);
   if (flag('--fetch-only')) return;
 
   const cache = flag('--refresh') ? {} : readJson(SUMMARIES, {});
+  for (const it of previous) {
+    if (cache[it.pmid]) continue;
+    cache[it.pmid] = {
+      include: true, exclude_reason: '', summary: it.summary, key_points: it.keyPoints,
+      certainty: it.certainty, life_stages: it.lifeStages, tags: it.tags, keywords: it.keywords,
+      organisation: it.organisation || '', model: 'seeded-from-library',
+    };
+  }
   await summariseAll(records, cache);
 
   const { items, rejected } = assemble(records, cache);
@@ -423,9 +470,7 @@ async function main() {
   console.log('By life stage:', byStage);
   console.log('By evidence level:', byLevel);
   if (usage.input) {
-    const price = MODEL.includes('haiku') ? [0.1, 0.5] : MODEL.includes('opus') ? [4, 20] : [2, 10];
-    const cost = (usage.input * price[0] + usage.output * price[1]) / 1e6;
-    console.log(`Claude usage this run: ${usage.input} in / ${usage.output} out tokens ≈ $${cost.toFixed(2)}`);
+    console.log(`Claude usage this run: ${usage.input} in / ${usage.output} out tokens ~$${spend().toFixed(2)}`);
   }
 }
 

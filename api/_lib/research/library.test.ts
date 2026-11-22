@@ -173,9 +173,9 @@ describe('library.json data file', () => {
   const lib = getLibrary();
 
   it('has a reasonable number of items and stays small', () => {
-    expect(lib.items.length).toBeGreaterThanOrEqual(150);
-    expect(lib.items.length).toBeLessThanOrEqual(400);
-    expect(JSON.stringify(lib).length).toBeLessThan(1.5 * 1024 * 1024);
+    expect(lib.items.length).toBeGreaterThanOrEqual(1500);
+    expect(lib.items.length).toBeLessThanOrEqual(3000);
+    expect(JSON.stringify(lib).length).toBeLessThan(6 * 1024 * 1024);
   });
 
   it('every item has a PMID, PubMed URL, and non-empty summary, key points and tags', () => {

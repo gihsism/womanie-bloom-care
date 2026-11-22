@@ -18,6 +18,8 @@ export interface ChatSource {
   /** Present on live replies; not stored in the saved footer. */
   evidenceLevel?: EvidenceLevel;
   url: string;
+  /** Licence of the open-access full text the AI also read, e.g. "CC BY". */
+  fulltext?: string;
 }
 
 /** Must match SOURCES_FOOTER_MARK in api/_lib/research/library.ts. */
@@ -26,7 +28,7 @@ export const SOURCES_FOOTER_MARK = '\n\n---\n**Sources**\n';
 export const RESEARCH_DISCLAIMER =
   'General information from published research, not medical advice. Talk to your doctor or midwife about your situation.';
 
-const FOOTER_LINE = /^- \[(\d+)\] \[(.+)\]\((https:\/\/pubmed\.ncbi\.nlm\.nih\.gov\/(\d+)\/)\) — (.+), (\d{4})$/;
+const FOOTER_LINE = /^- \[(\d+)\] \[(.+)\]\((https:\/\/pubmed\.ncbi\.nlm\.nih\.gov\/(\d+)\/)\) — (.+), (\d{4})(?: · Full text, (.+))?$/;
 
 /** Splits a stored assistant message into its text and its saved sources. */
 export function splitSourcesFooter(content: string): { body: string; sources: ChatSource[] } {
@@ -44,6 +46,7 @@ export function splitSourcesFooter(content: string): { body: string; sources: Ch
       source: m[5],
       year: Number(m[6]),
       url: m[3],
+      ...(m[7] ? { fulltext: m[7] } : {}),
     });
   }
   // Not our footer after all (e.g. the model wrote one): leave text alone.

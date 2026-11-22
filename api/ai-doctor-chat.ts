@@ -6,6 +6,7 @@ import { withSentry } from './_lib/sentry.js';
 import { buildLifeContext } from './_lib/life-context.js';
 import { SOURCES_FOOTER_MARK, buildSourcesPrompt, formatSourcesFooter, stripUnknownCitations, toChatSources, type ResearchItem } from './_lib/research/library.js';
 import { selectChatSourcesHybrid } from './_lib/research/hybrid.js';
+import { bestPassages, formatPassagesForPrompt, fulltextAttribution, type Passage } from './_lib/research/fulltext.js';
 
 export const config = {
   maxDuration: 60,
@@ -252,6 +253,22 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
   const chatSources = toChatSources(researchItems);
 
+  // Open-access full text (CC0 / CC BY / CC BY-SA only) for the chosen
+  // studies: the 3 passages that best match the question go into the
+  // prompt under the same [n] as their study. Never allowed to break the chat.
+  let passages: Passage[] = [];
+  try {
+    passages = bestPassages(userTurnContent ?? "", researchItems.map((it) => it.pmid), 3);
+    for (const s of chatSources) {
+      const a = fulltextAttribution(s.pmid);
+      if (a) s.fulltext = a.licence;
+    }
+  } catch (err) {
+    console.error('Full-text passages unavailable:', err);
+  }
+  const sourceNumber = (pmid: string) => chatSources.find((s) => s.pmid === pmid)?.n;
+  const passagesBlock = passages.length ? `\n\n${formatPassagesForPrompt(passages, sourceNumber)}` : '';
+
   const systemPrompt = `You are an AI medical assistant for a women's health platform called Womanie. You have access to the patient's uploaded health documents and extracted medical data shown below. Use this information to provide personalized, empathetic health guidance.
 
 IMPORTANT RULES:
@@ -267,7 +284,7 @@ IMPORTANT RULES:
 - When discussing lab results, explain what values mean in plain language.
 
 ## Patient Medical Records
-${medicalContext || 'No medical records available yet. Encourage the patient to upload their health documents for personalized advice.'}${buildSourcesPrompt(researchItems)}`;
+${medicalContext || 'No medical records available yet. Encourage the patient to upload their health documents for personalized advice.'}${buildSourcesPrompt(researchItems)}${passagesBlock}`;
 
   const anthropicMessages = messages.map((m: { role: string; content: string }) => ({
     role: m.role === 'system' ? 'user' : m.role,

@@ -21,6 +21,7 @@ export function ChatSources({ sources, onBrowse }: { sources: ChatSource[]; onBr
               <span className="line-clamp-2 break-words">{s.title}</span>
               <span className="block text-[11px] text-muted-foreground">
                 {s.source} · {s.year}
+                {s.fulltext && <> · Full text, {s.fulltext}</>}
                 <ExternalLink className="inline h-2.5 w-2.5 ml-1 -mt-0.5 opacity-70" aria-hidden />
               </span>
             </a>

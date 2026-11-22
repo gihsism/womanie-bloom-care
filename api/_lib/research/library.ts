@@ -439,6 +439,8 @@ export interface ChatSource {
   year: number;
   evidenceLevel: EvidenceLevel;
   url: string;
+  /** Licence of the open-access full text the model also read (e.g. "CC BY"), if any. */
+  fulltext?: string;
 }
 
 /**
@@ -536,5 +538,5 @@ export function formatSourcesFooter(sources: ChatSource[], answer: string): stri
   const used = sources.filter((s) => cited.has(s.n));
   if (used.length === 0) return '';
   const esc = (s: string) => s.replace(/[[\]]/g, '');
-  return SOURCES_FOOTER_MARK + used.map((s) => `- [${s.n}] [${esc(s.title)}](${s.url}) — ${esc(s.source)}, ${s.year}`).join('\n');
+  return SOURCES_FOOTER_MARK + used.map((s) => `- [${s.n}] [${esc(s.title)}](${s.url}) — ${esc(s.source)}, ${s.year}${s.fulltext ? ` · Full text, ${esc(s.fulltext)}` : ''}`).join('\n');
 }

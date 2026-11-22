@@ -103,3 +103,19 @@ describe('research sources (chat page)', () => {
     });
   });
 });
+
+describe('full-text marker in the saved footer', () => {
+  it('round-trips the licence of sources the AI read in full text', async () => {
+    const { formatSourcesFooter } = await import('../../api/_lib/research/library');
+    const src = [
+      { n: 1, id: 'pmid-1', pmid: '1', title: 'Iron in pregnancy', source: 'Cochrane', year: 2024, evidenceLevel: 'systematic review' as const, url: 'https://pubmed.ncbi.nlm.nih.gov/1/', fulltext: 'CC BY' },
+      { n: 2, id: 'pmid-2', pmid: '2', title: 'Folic acid', source: 'NICE, UK', year: 2021, evidenceLevel: 'guideline' as const, url: 'https://pubmed.ncbi.nlm.nih.gov/2/' },
+    ];
+    const answer = 'Iron helps [1]. Folic acid too [2].';
+    const { body, sources } = splitSourcesFooter(answer + formatSourcesFooter(src, answer));
+    expect(body).toBe(answer);
+    expect(sources[0]).toMatchObject({ n: 1, source: 'Cochrane', year: 2024, fulltext: 'CC BY' });
+    expect(sources[1]).toMatchObject({ n: 2, source: 'NICE, UK', year: 2021 });
+    expect(sources[1].fulltext).toBeUndefined();
+  });
+});
