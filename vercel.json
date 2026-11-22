@@ -2,7 +2,7 @@
   "functions": {
     "api/ai-doctor-chat.ts": {
       "maxDuration": 60,
-      "includeFiles": "{api/_lib/research/model/**,api/_lib/research/library-embeddings.json,api/_lib/research/fulltext-chunks.json,api/_lib/research/fulltext-index.json,node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.mjs,node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm}",
+      "includeFiles": "{api/_lib/research/{model/**,library-embeddings.json,fulltext-chunks.json,fulltext-index.json},node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.{mjs,wasm}}",
       "excludeFiles": "node_modules/onnxruntime-web/dist/{*.map,ort.all*,ort.webgl*,ort.webgpu*,ort.jspi*,ort.wasm*,ort.bundle*,ort.min.*,ort.js,ort.mjs,*.jsep.*,*.asyncify.*,*.jspi.*}"
     },
     "api/router.ts": {
