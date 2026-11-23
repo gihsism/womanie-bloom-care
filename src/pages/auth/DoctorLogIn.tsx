@@ -78,10 +78,7 @@ const DoctorLogIn = () => {
 
       // Happy path: an approved doctor with the role row in place.
       if (roleData && profileData?.is_verified) {
-        toast({
-          title: 'Welcome back, Doctor!',
-          description: 'You have successfully logged in.',
-        });
+        toast({ title: 'Welcome back' });
         // Full reload so AuthContext picks up the new session cookie
         // before routing into the doctor dashboard.
         window.location.href = '/doctor/dashboard';
@@ -93,17 +90,17 @@ const DoctorLogIn = () => {
       // the user isn't left half-authenticated in the doctor URL.
       const status = profileData?.verification_status as string | undefined;
 
-      let title = 'Access denied';
-      let description = 'This account is not registered as a doctor. Use patient login, or register as a doctor.';
+      let title = 'Not a doctor account';
+      let description = 'This account is not registered as a doctor. Log in as a patient, or register as a doctor.';
       if (profileData && (status === 'pending' || !status)) {
-        title = 'Verification pending';
-        description = 'Your doctor signup is in the queue for admin review. License verification typically takes 1–3 business days. Try logging in again once you\'ve been approved.';
+        title = 'We are still checking your licence';
+        description = 'This takes 1–3 working days. You can log in once it is approved.';
       } else if (profileData && status === 'rejected') {
-        title = 'Verification not approved';
-        description = 'We weren\'t able to verify the credentials on file. Email support@womanie.info with updated license details and we\'ll re-review.';
+        title = 'Licence not verified';
+        description = 'Email support@womanie.info with updated licence details and we will check again.';
       } else if (profileData && status === 'revoked') {
         title = 'Verification revoked';
-        description = 'Your doctor verification has been revoked. Email support@womanie.info to discuss reinstating.';
+        description = 'Email support@womanie.info to discuss reinstating your account.';
       } else if (profileData && profileData.is_verified && !roleData) {
         // Defensive: should be unreachable in normal flows (admin
         // approve always inserts the user_roles row), but if it ever
@@ -155,8 +152,8 @@ const DoctorLogIn = () => {
 
           {/* Heading */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl lg:text-4xl font-bold mb-3">Doctor Portal</h1>
-            <p className="text-muted-foreground">Log in to access your professional dashboard</p>
+            <h1 className="text-3xl lg:text-4xl font-bold mb-3">Doctor log in</h1>
+            <p className="text-muted-foreground">See your patients and today's visits</p>
           </div>
 
           {/* Form */}
@@ -164,14 +161,14 @@ const DoctorLogIn = () => {
             {/* Email Input */}
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
-                Professional Email
+                Email
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Enter your email"
+                  autoComplete="email"
                   className="pl-10"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
@@ -198,7 +195,7 @@ const DoctorLogIn = () => {
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
+                  autoComplete="current-password"
                   className="pl-10 pr-10"
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
@@ -221,29 +218,25 @@ const DoctorLogIn = () => {
               className="w-full bg-secondary hover:bg-secondary/90"
               disabled={!isFormValid() || isLoading}
             >
-              {isLoading ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Logging in...</>) : 'Log In as Doctor'}
+              {isLoading ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Logging in...</>) : 'Log in'}
             </Button>
 
-            {/* Bottom Link */}
             <p className="text-center text-sm text-muted-foreground">
-              Not registered as a doctor?{' '}
+              New here?{' '}
               <button
                 type="button"
                 onClick={() => navigate('/auth/doctor-signup')}
                 className="text-secondary hover:underline font-medium"
               >
-                Register Now
+                Register as a doctor
               </button>
-            </p>
-
-            <p className="text-center text-sm text-muted-foreground">
-              Are you a patient?{' '}
+              {' · '}
               <button
                 type="button"
                 onClick={() => navigate('/auth/login')}
                 className="text-primary hover:underline font-medium"
               >
-                Patient Login
+                I'm a patient
               </button>
             </p>
           </form>

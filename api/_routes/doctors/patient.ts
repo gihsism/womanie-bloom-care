@@ -66,8 +66,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
            ORDER BY signal_date DESC`,
         [patientId, signalCutoff]
       ),
+      // file_path (the Blob URL) is needed for the chart's "Open" button;
+      // without it every click failed with "No file URL". Still behind
+      // the approved-connection gate above.
       sql.query(
-        `SELECT id, file_name, mime_type, ai_suggested_name, ai_summary,
+        `SELECT id, file_name, file_path, mime_type, ai_suggested_name, ai_summary,
                 ai_suggested_category, uploaded_at, document_type
            FROM health_documents
           WHERE user_id = $1
