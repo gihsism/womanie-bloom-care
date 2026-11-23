@@ -167,6 +167,27 @@
   body.has-install-banner .min-h-screen {
     min-height: calc(100vh - var(--install-banner-h, 6rem));
   }
+
+  /* iOS Safari shows today's date inside an EMPTY date field, so it reads
+     as filled in. The shared <Input> marks empty date fields with
+     data-empty="true"; on iOS only (-webkit-touch-callout is iOS-only)
+     hide that phantom date and show the placeholder ("Not set · tap to
+     choose") instead. Desktop browsers already show an empty mask. */
+  @supports (-webkit-touch-callout: none) {
+    input[data-empty="true"] {
+      color: transparent;
+      position: relative;
+    }
+    input[data-empty="true"]::before {
+      content: attr(placeholder);
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: hsl(var(--muted-foreground));
+      pointer-events: none;
+    }
+  }
 }
 
 @layer utilities {
