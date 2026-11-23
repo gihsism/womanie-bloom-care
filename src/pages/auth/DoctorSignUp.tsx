@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { scorePassword } from '@/lib/password-strength';
 
@@ -140,33 +139,16 @@ const DoctorSignUp = () => {
 
           {/* Heading */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl lg:text-4xl font-bold mb-3">Doctor Registration</h1>
-            <p className="text-muted-foreground">Join our network of healthcare professionals</p>
+            <h1 className="text-3xl lg:text-4xl font-bold mb-3">Register as a doctor</h1>
+            <p className="text-muted-foreground">
+              Step {step} of 2 · {step === 1 ? 'Your login' : 'Your licence'}
+            </p>
           </div>
 
-          {/* Progress Steps */}
-          <div className="flex justify-center mb-8">
-            <div className="flex items-center gap-4">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 1 ? 'bg-secondary text-secondary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                1
-              </div>
-              <div className={`w-12 h-1 ${step >= 2 ? 'bg-secondary' : 'bg-muted'}`} />
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 2 ? 'bg-secondary text-secondary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                2
-              </div>
-            </div>
-          </div>
-
-          {/* Verification Notice */}
-          <Card className="mb-6 border-secondary/30 bg-secondary/5">
-            <CardContent className="p-4 flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
-              <div className="text-sm">
-                <p className="font-medium text-secondary">Verification Required</p>
-                <p className="text-muted-foreground">All doctor registrations require license verification before access is granted.</p>
-              </div>
-            </CardContent>
-          </Card>
+          <p className="mb-6 text-sm text-muted-foreground flex items-start gap-2">
+            <AlertCircle className="h-4 w-4 text-secondary shrink-0 mt-0.5" aria-hidden="true" />
+            We check your licence before you can log in (1–3 working days).
+          </p>
 
           {/* Form */}
           <form onSubmit={step === 1 ? (e) => { e.preventDefault(); setStep(2); } : handleSignUp} className="space-y-6">
@@ -175,14 +157,14 @@ const DoctorSignUp = () => {
                 {/* Email Input */}
                 <div className="space-y-2">
                   <label htmlFor="email" className="text-sm font-medium">
-                    Professional Email
+                    Work email
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                     <Input
                       id="email"
                       type="email"
-                      placeholder="Enter your professional email"
+                      autoComplete="email"
                       className="pl-10"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
@@ -212,6 +194,7 @@ const DoctorSignUp = () => {
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
@@ -242,14 +225,13 @@ const DoctorSignUp = () => {
                 {/* Confirm Password */}
                 <div className="space-y-2">
                   <label htmlFor="confirmPassword" className="text-sm font-medium">
-                    Confirm Password
+                    Password again
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                     <Input
                       id="confirmPassword"
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="Confirm your password"
                       className="pl-10"
                       value={formData.confirmPassword}
                       onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
@@ -276,7 +258,7 @@ const DoctorSignUp = () => {
                 {/* Full Name */}
                 <div className="space-y-2">
                   <label htmlFor="fullName" className="text-sm font-medium">
-                    Full Name (as on license)
+                    Full name (as on your licence)
                   </label>
                   <div className="relative">
                     <User className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
@@ -295,7 +277,7 @@ const DoctorSignUp = () => {
                 {/* Specialty */}
                 <div className="space-y-2">
                   <label htmlFor="specialty" className="text-sm font-medium">
-                    Medical Specialty
+                    Specialty
                   </label>
                   <Select value={formData.specialty} onValueChange={(value) => handleInputChange('specialty', value)}>
                     <SelectTrigger>
@@ -314,14 +296,13 @@ const DoctorSignUp = () => {
                 {/* License Number */}
                 <div className="space-y-2">
                   <label htmlFor="licenseNumber" className="text-sm font-medium">
-                    Medical License Number
+                    Licence number
                   </label>
                   <div className="relative">
                     <FileText className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                     <Input
                       id="licenseNumber"
                       type="text"
-                      placeholder="Enter your license number"
                       className="pl-10"
                       value={formData.licenseNumber}
                       onChange={(e) => handleInputChange('licenseNumber', e.target.value)}
@@ -333,11 +314,11 @@ const DoctorSignUp = () => {
                 {/* Bio */}
                 <div className="space-y-2">
                   <label htmlFor="bio" className="text-sm font-medium">
-                    Professional Bio (optional)
+                    Short bio (optional)
                   </label>
                   <Textarea
                     id="bio"
-                    placeholder="Brief description of your expertise and experience..."
+                    placeholder="What patients should know about you"
                     value={formData.bio}
                     onChange={(e) => handleInputChange('bio', e.target.value)}
                     rows={3}
@@ -349,7 +330,7 @@ const DoctorSignUp = () => {
                   className="w-full bg-secondary hover:bg-secondary/90"
                   disabled={!isStep2Valid() || isLoading}
                 >
-                  {isLoading ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Submitting...</>) : 'Submit for Verification'}
+                  {isLoading ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Submitting...</>) : 'Register'}
                 </Button>
               </>
             )}
@@ -362,7 +343,7 @@ const DoctorSignUp = () => {
                 onClick={() => navigate('/auth/doctor-login')}
                 className="text-secondary hover:underline font-medium"
               >
-                Log In
+                Log in
               </button>
             </p>
           </form>
