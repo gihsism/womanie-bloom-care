@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Baby, Flame, HeartPulse } from 'lucide-react';
+import { lifeStageLabel } from '@/lib/lifeStageLabels';
 
 interface LabResult {
   title: string;
@@ -40,8 +41,8 @@ export default function DocumentCycleAlert({ medicalData, lifeStage, onSwitchMod
         color: 'bg-primary/5 border-primary/20',
         iconColor: 'text-primary',
         title: 'Your documents indicate pregnancy',
-        description: `Your HCG level (${hcg} mIU/mL) indicates pregnancy, but your app is set to "${lifeStage?.replace('-', ' ') || 'menstrual cycle'}" mode. Switch to pregnancy mode for week-by-week tracking, prenatal tips, and pregnancy-specific health analysis.`,
-        action: 'Switch to Pregnancy Mode',
+        description: `Your HCG level (${hcg} mIU/mL) indicates pregnancy, but your app is set to "${lifeStageLabel(lifeStage) || 'Period tracking'}". Switch to Pregnancy for week-by-week tracking, prenatal tips, and pregnancy-specific health analysis.`,
+        action: 'Switch to Pregnancy',
         mode: 'pregnancy',
       };
     }
@@ -53,8 +54,8 @@ export default function DocumentCycleAlert({ medicalData, lifeStage, onSwitchMod
         color: 'bg-destructive/5 border-destructive/20',
         iconColor: 'text-destructive/80',
         title: 'Your hormones suggest perimenopause',
-        description: `Your FSH (${fsh}) is elevated and estradiol (${estradiol}) is low — this pattern indicates perimenopause. Switch to menopause mode for symptom tracking, hot flash logging, and menopause-specific health insights.`,
-        action: 'Switch to Menopause Mode',
+        description: `Your FSH (${fsh}) is elevated and estradiol (${estradiol}) is low — this pattern indicates perimenopause. Switch to Menopause for symptom tracking, hot flash logging, and menopause-specific health insights.`,
+        action: 'Switch to Menopause',
         mode: 'menopause',
       };
     }

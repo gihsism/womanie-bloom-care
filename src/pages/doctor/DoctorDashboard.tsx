@@ -1,3 +1,4 @@
+import { lifeStageLabel } from '@/lib/lifeStageLabels';
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -635,7 +636,7 @@ const PatientManagement = ({ patients, onRefresh }: { patients: PatientConnectio
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {patient.patient_life_stage ? `${patient.patient_life_stage.replace(/-/g, ' ')} · ` : ''}
+                        {patient.patient_life_stage ? `${lifeStageLabel(patient.patient_life_stage)} · ` : ''}
                         {lastUpload && patient.status === 'approved'
                           ? `Last upload ${formatDistanceToNow(lastUpload, { addSuffix: true })}`
                           : `Connected via ${patient.connection_type || 'request'}`}

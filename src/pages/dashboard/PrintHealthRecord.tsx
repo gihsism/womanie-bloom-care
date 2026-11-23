@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { differenceInDays, differenceInMonths, format, parseISO, subDays } from 'date-fns';
 import { getFriendlyName } from '@/lib/medical-utils';
+import { lifeStageLabel } from '@/lib/lifeStageLabels';
 
 // Bring-to-the-doctor printout — everything Womanie has on the patient
 // in one paper-friendly, A4-shaped layout.
@@ -283,7 +284,7 @@ export default function PrintHealthRecord() {
           <h1 className="text-2xl font-bold mb-1">{profile?.full_name || user?.name || 'Patient'}</h1>
           <div className="text-sm text-gray-600 flex flex-wrap gap-x-3 gap-y-1">
             {user?.email && <span>{user.email}</span>}
-            {profile?.life_stage && <span>· {profile.life_stage.replace(/-/g, ' ')}</span>}
+            {profile?.life_stage && <span>· {lifeStageLabel(profile.life_stage)}</span>}
             {profile?.pregnancy_due_date && <span>· pregnancy due {format(new Date(profile.pregnancy_due_date), 'MMM d, yyyy')}</span>}
             {profile?.ivf_phase && <span>· IVF {profile.ivf_phase}</span>}
             <span>· printed {today}</span>

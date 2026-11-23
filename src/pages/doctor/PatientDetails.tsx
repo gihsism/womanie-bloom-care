@@ -27,6 +27,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import DoctorPatientTrackingSummary from '@/components/dashboard/DoctorPatientTrackingSummary';
+import { lifeStageLabel } from '@/lib/lifeStageLabels';
 
 interface PatientProfile {
   id: string;
@@ -364,7 +365,7 @@ const PatientDetails = () => {
               <h1 className="text-xl font-bold">{patient?.full_name || 'Patient'}</h1>
               <p className="text-sm text-muted-foreground">
                 Life stage: {patient?.life_stage
-                  ? patient.life_stage.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+                  ? lifeStageLabel(patient.life_stage)
                   : 'Not specified'}
                 {/* Mode-specific anchor data, surfaced inline so the
                     doctor sees "where she is" without opening another
