@@ -13,13 +13,13 @@ export interface StoredChatMessage {
   created_at?: string | null;
 }
 
-export interface PastChat {
+export interface PastChat<T extends StoredChatMessage = StoredChatMessage> {
   /** created_at of the chat's first message (stable key). */
   id: string;
   startedAt: Date | null;
   /** First question, trimmed to one line. */
   title: string;
-  messages: StoredChatMessage[];
+  messages: T[];
 }
 
 const TITLE_MAX = 60;
@@ -41,8 +41,8 @@ function time(m: StoredChatMessage): number | null {
  * Group an oldest-first message list into chats, newest chat first.
  * Messages without a timestamp stay in the chat they follow.
  */
-export function groupIntoChats(messages: StoredChatMessage[], gapMs = CHAT_GAP_MS): PastChat[] {
-  const groups: StoredChatMessage[][] = [];
+export function groupIntoChats<T extends StoredChatMessage>(messages: T[], gapMs = CHAT_GAP_MS): PastChat<T>[] {
+  const groups: T[][] = [];
   let lastTime: number | null = null;
   for (const m of messages) {
     const t = time(m);
