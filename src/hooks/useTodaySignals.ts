@@ -58,25 +58,28 @@ export function useTodaySignals(period: PeriodData | null, profileName: string |
       const notes = (Array.isArray(notesResp?.notes) ? notesResp.notes : []) as Array<{ created_at: string | null }>;
       const hasDoc = Array.isArray(docsRes.data) && docsRes.data.length > 0;
       const hasLog = Array.isArray(signalsRes.data) && signalsRes.data.length > 0;
-      const hasName = !!profileName?.trim();
-      const done = Number(hasName) + Number(hasDoc) + Number(hasLog);
       setS({
         appointmentToday: today ? new Date(today.scheduled_at) : null,
         nextVisit: next ? new Date(next.scheduled_at) : null,
         newDoctorNotes: notes.filter(n => n.created_at && Date.parse(n.created_at) >= now - NOTE_WINDOW_MS).length,
         flaggedResults: Array.isArray(critRes.data) ? critRes.data.length : 0,
-        setup: setupHidden(user.id) ? null : { done, total: 3, nameMissing: !hasName, nextTarget: !hasDoc ? RECORDS : 'sheet:log' },
+        // The name part is added at render time from the CURRENT profile
+        // name: an earlier load (before the profile arrived) finishing last
+        // must not show "Add your name" to someone who has one.
+        setup: setupHidden(user.id) ? null : { done: Number(hasDoc) + Number(hasLog), total: 3, nextTarget: !hasDoc ? RECORDS : 'sheet:log' },
       });
     } catch {
       // Today rows are a convenience; keep the last known state.
     }
-  }, [user, profileName]);
+  }, [user]);
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => onHealthDataChange(load), [load]);
 
+  const hasName = !!profileName?.trim();
   return {
     ...s,
+    setup: s.setup ? { ...s.setup, done: s.setup.done + Number(hasName), nameMissing: !hasName } : s.setup,
     // The day-of and upcoming visit rows follow the appointment-reminder toggle, as the old cards did.
     appointmentToday: prefs.appointmentReminders ? s.appointmentToday : null,
     periodDaysUntil: periodDaysUntil(period),
