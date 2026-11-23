@@ -23,9 +23,18 @@ import {
   History,
   CalendarPlus,
   CalendarCog,
+  ChevronDown,
+  Users,
 } from 'lucide-react';
 import { downloadIcs } from '@/lib/ics';
 import RescheduleDialog from '@/components/dashboard/RescheduleDialog';
+import VisitPrepCard from '@/components/dashboard/VisitPrepCard';
+import DoctorNotesCard from '@/components/dashboard/DoctorNotesCard';
+import PendingConnections from '@/components/dashboard/PendingConnections';
+import ConnectedDoctors from '@/components/dashboard/ConnectedDoctors';
+import ChartAccessLog from '@/components/dashboard/ChartAccessLog';
+import type { LifeStage } from '@/components/dashboard/DashboardHeader';
+import { normalizeLifeStage } from '@/lib/lifeStage';
 
 // Patient-side full appointments view: upcoming + past in one page.
 // Backed by the same /api/me/appointments endpoint the dashboard widget
@@ -75,7 +84,7 @@ type PastFilter = 'all' | 'completed' | 'no_show' | 'cancelled' | 'unresolved';
 
 const Appointments = () => {
   const navigate = useNavigate();
-  usePageTitle('My Appointments');
+  usePageTitle('Visits');
   const { user } = useAuth();
   const { toast } = useToast();
   const [rows, setRows] = useState<AppointmentRow[]>([]);
@@ -83,6 +92,21 @@ const Appointments = () => {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rescheduling, setRescheduling] = useState<AppointmentRow | null>(null);
   const [pastFilter, setPastFilter] = useState<PastFilter>('all');
+  const [mode, setMode] = useState<LifeStage | null>(null);
+
+  // The life stage tunes "Questions to bring". Read-only here; the stage
+  // is changed in Me.
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await db.from('profiles').select('life_stage').eq('id', user.id).maybeSingle();
+        if (!cancelled) setMode(normalizeLifeStage(data?.life_stage));
+      } catch { /* non-fatal: the questions card just stays hidden */ }
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
 
   const load = async () => {
     if (!user) return;
@@ -323,6 +347,9 @@ const Appointments = () => {
     );
   };
 
+  const [nextVisit, ...laterVisits] = upcoming;
+  const bookVisit = () => navigate('/find-doctor');
+
   return (
     <div className="min-h-screen bg-background">
       <div className="border-b border-border bg-card sticky top-0 z-10">
@@ -336,106 +363,138 @@ const Appointments = () => {
               <div className="h-6 w-px bg-border" />
               <h1 className="font-display text-xl font-medium whitespace-nowrap">Visits</h1>
             </div>
-            <Button
-              variant="default"
-              size="sm"
-              className="gap-2"
-              onClick={() => navigate('/find-doctor')}
-            >
-              <Search className="h-4 w-4" />
-              Book new
-            </Button>
+            {/* The one primary action. With no visits it sits in the empty
+                state instead, so the page never shows two. */}
+            {loaded && nextVisit && (
+              <Button variant="default" size="sm" className="gap-2" onClick={bookVisit}>
+                <Search className="h-4 w-4" />
+                Book a visit
+              </Button>
+            )}
           </div>
         </div>
       </div>
 
       <div className="w-full max-w-3xl mx-auto px-4 py-8 space-y-8">
-        {/* Upcoming */}
-        <section>
+        {/* Next visit, with the questions to bring attached to it */}
+        <section aria-labelledby="next-visit-heading">
           <div className="flex items-center gap-2 mb-3">
             <CalendarClock className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              Upcoming
+            <h2 id="next-visit-heading" className="text-sm font-semibold text-muted-foreground">
+              Your next visit
             </h2>
-            {loaded && <span className="text-xs text-muted-foreground">({upcoming.length})</span>}
           </div>
           {!loaded ? (
-            <div className="space-y-2">
-              <Skeleton className="h-20 w-full" />
-              <Skeleton className="h-20 w-full" />
-            </div>
-          ) : upcoming.length === 0 ? (
+            <Skeleton className="h-20 w-full" />
+          ) : nextVisit ? (
+            <ul className="space-y-2">{renderAppointment(nextVisit, 'upcoming')}</ul>
+          ) : (
             <Card className="p-6 text-center">
-              <CalendarClock className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-              <p className="text-sm font-medium">No upcoming appointments</p>
-              <p className="text-xs text-muted-foreground mt-1 mb-3">
-                Book a consultation with one of our verified doctors.
-              </p>
-              <Button size="sm" onClick={() => navigate('/find-doctor')}>
-                Browse doctors
+              <p className="text-sm text-muted-foreground mb-3">No visits yet.</p>
+              <Button size="sm" className="gap-2" onClick={bookVisit}>
+                <Search className="h-4 w-4" />
+                Book a visit
               </Button>
             </Card>
-          ) : (
-            <ul className="space-y-2">
-              {upcoming.map(apt => renderAppointment(apt, 'upcoming'))}
-            </ul>
+          )}
+          {/* Questions to bring: hides itself when there is nothing to ask. */}
+          {mode && (
+            <div className="mt-3 [&>*]:!mb-0">
+              <VisitPrepCard mode={mode} />
+            </div>
           )}
         </section>
 
-        {/* Past */}
-        <section>
-          <div className="flex items-center gap-2 mb-3">
-            <History className="h-4 w-4 text-muted-foreground" />
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              Past
+        {/* Notes from your doctor: hides itself when there are none. */}
+        <div className="empty:hidden [&>*]:!mb-0">
+          <DoctorNotesCard />
+        </div>
+
+        {/* A doctor asking to see your records needs an answer, so this
+            stays in view. Hides itself when nothing is pending. */}
+        <div className="empty:hidden [&>*]:!mb-0">
+          <PendingConnections />
+        </div>
+
+        {/* Later visits */}
+        {loaded && laterVisits.length > 0 && (
+          <section aria-labelledby="later-visits-heading">
+            <h2 id="later-visits-heading" className="text-sm font-semibold text-muted-foreground mb-3">
+              Later visits ({laterVisits.length})
             </h2>
-            {loaded && <span className="text-xs text-muted-foreground">({past.length})</span>}
-          </div>
-          {loaded && past.length > 3 && (
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {([
-                ['all', 'All', pastCounts.all],
-                ['completed', 'Completed', pastCounts.completed],
-                ['no_show', 'No-show', pastCounts.no_show],
-                ['cancelled', 'Cancelled', pastCounts.cancelled],
-                ['unresolved', 'Unresolved', pastCounts.unresolved],
-              ] as const).map(([key, label, count]) => {
-                if (count === 0 && key !== 'all') return null;
-                const active = pastFilter === key;
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setPastFilter(key)}
-                    className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
-                      active
-                        ? 'bg-primary text-primary-foreground border-primary'
-                        : 'bg-muted/40 hover:bg-muted text-foreground border-transparent'
-                    }`}
-                    aria-pressed={active}
-                  >
-                    {label} <span className="opacity-70">· {count}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-          {!loaded ? (
-            <Skeleton className="h-20 w-full" />
-          ) : past.length === 0 ? (
-            <p className="text-xs text-muted-foreground py-4 text-center">
-              Past appointments will appear here.
-            </p>
-          ) : filteredPast.length === 0 ? (
-            <p className="text-xs text-muted-foreground py-4 text-center">
-              No past appointments match this filter.
-            </p>
-          ) : (
             <ul className="space-y-2">
-              {filteredPast.slice(0, 50).map(apt => renderAppointment(apt, 'past'))}
+              {laterVisits.map(apt => renderAppointment(apt, 'upcoming'))}
             </ul>
-          )}
-        </section>
+          </section>
+        )}
+
+        {/* Your doctors: who can see your records, and when they looked */}
+        <details className="group rounded-lg border border-border bg-card">
+          <summary className="flex cursor-pointer list-none items-center gap-2 p-4 text-sm font-medium">
+            <Users className="h-4 w-4 text-primary" />
+            <span className="flex-1">Your doctors</span>
+            <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden="true" />
+          </summary>
+          <div className="space-y-4 border-t border-border p-4">
+            <ConnectedDoctors />
+            <ChartAccessLog />
+          </div>
+        </details>
+
+        {/* Past visits */}
+        <details className="group rounded-lg border border-border bg-card">
+          <summary className="flex cursor-pointer list-none items-center gap-2 p-4 text-sm font-medium">
+            <History className="h-4 w-4 text-muted-foreground" />
+            <span className="flex-1">Past visits{loaded ? ` (${past.length})` : ''}</span>
+            <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden="true" />
+          </summary>
+          <div className="border-t border-border p-4">
+              {loaded && past.length > 3 && (
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  {([
+                    ['all', 'All', pastCounts.all],
+                    ['completed', 'Completed', pastCounts.completed],
+                    ['no_show', 'No-show', pastCounts.no_show],
+                    ['cancelled', 'Cancelled', pastCounts.cancelled],
+                    ['unresolved', 'Unresolved', pastCounts.unresolved],
+                  ] as const).map(([key, label, count]) => {
+                    if (count === 0 && key !== 'all') return null;
+                    const active = pastFilter === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setPastFilter(key)}
+                        className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
+                          active
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-muted/40 hover:bg-muted text-foreground border-transparent'
+                        }`}
+                        aria-pressed={active}
+                      >
+                        {label} <span className="opacity-70">· {count}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {!loaded ? (
+                <Skeleton className="h-20 w-full" />
+              ) : past.length === 0 ? (
+                <p className="text-xs text-muted-foreground py-4 text-center">
+                  Past appointments will appear here.
+                </p>
+              ) : filteredPast.length === 0 ? (
+                <p className="text-xs text-muted-foreground py-4 text-center">
+                  No past appointments match this filter.
+                </p>
+              ) : (
+                <ul className="space-y-2">
+                  {filteredPast.slice(0, 50).map(apt => renderAppointment(apt, 'past'))}
+                </ul>
+              )}
+          </div>
+        </details>
       </div>
 
       <RescheduleDialog
