@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
@@ -14,8 +15,12 @@ import DocumentUpload from '@/components/dashboard/DocumentUpload';
 import ResultSparkline from '@/components/dashboard/ResultSparkline';
 import NewDocInsights from '@/components/dashboard/NewDocInsights';
 import ShareWithDoctor from '@/components/dashboard/ShareWithDoctor';
-import PendingConnections from '@/components/dashboard/PendingConnections';
-import ConnectedDoctors from '@/components/dashboard/ConnectedDoctors';
+import StageLabCards from '@/components/records/StageLabCards';
+import MyCharts from '@/components/records/MyCharts';
+import TestTrend from '@/components/records/TestTrend';
+import type { LifeStage } from '@/components/dashboard/DashboardHeader';
+import { normalizeLifeStage } from '@/lib/lifeStage';
+import { pregnancyStart } from '@/lib/labWindow';
 // IMPORTANT: These custom components provide AI-powered health analysis.
 // Do NOT remove these imports — they are used in the health records page below.
 import CycleImpactSection from '@/components/dashboard/CycleImpactSection';
@@ -33,17 +38,14 @@ import OverdueTests from '@/components/dashboard/OverdueTests';
 import HealthTrends from '@/components/dashboard/HealthTrends';
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import { useToast } from '@/hooks/use-toast';
-import UserMenu from '@/components/UserMenu';
 import {
   ArrowLeft,
   FileText,
   Pill,
-  Activity,
   FlaskConical,
   AlertTriangle,
   Stethoscope,
   ShieldAlert,
-  BarChart3,
   Clock,
   Lightbulb,
   ArrowRight,
@@ -61,21 +63,10 @@ import {
   Printer,
   MessageCircle,
   ArrowUpDown,
+  MoreHorizontal,
+  Upload,
 } from 'lucide-react';
 import { format, differenceInDays, addDays } from 'date-fns';
-import {
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Line,
-  ComposedChart,
-  ReferenceArea,
-  PieChart as RechartsPie,
-  Pie,
-} from 'recharts';
 import {
   type MedicalDataItem,
   type DocumentInfo,
@@ -559,9 +550,15 @@ function ResultCard({ item, history = [] }: { item: MedicalDataItem; history?: M
   );
 }
 
+const riskColor = (status: string | null) => {
+  if (status === 'critical') return 'bg-destructive/10 text-destructive border-destructive/30';
+  if (status === 'abnormal') return 'bg-destructive/5 text-destructive/80 border-destructive/20';
+  return 'bg-muted/60 text-muted-foreground border-border';
+};
+
 export default function MedicalHistory() {
   const navigate = useNavigate();
-  usePageTitle('Health Records');
+  usePageTitle('Records');
   const { user, loading: authLoading } = useAuth();
   const [medicalData, setMedicalData] = useState<MedicalDataItem[]>([]);
   const [documents, setDocuments] = useState<DocumentInfo[]>([]);
@@ -577,6 +574,18 @@ export default function MedicalHistory() {
   const [docSearch, setDocSearch] = useState('');
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
+  // Three segments: Results (default) | Documents | My charts.
+  // ?tab=documents|charts opens one directly; ?doc=<id> opens Documents.
+  type Segment = 'results' | 'documents' | 'charts';
+  const [segment, setSegment] = useState<Segment>(() => {
+    const t = searchParams.get('tab');
+    if (searchParams.get('doc') || t === 'documents') return 'documents';
+    return t === 'charts' ? 'charts' : 'results';
+  });
+  const [pregnancyDueDate, setPregnancyDueDate] = useState<Date | null>(null);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [justUploaded, setJustUploaded] = useState(false);
+  const [openTrend, setOpenTrend] = useState<string | null>(null);
 
   // Deep-link support: when arriving with ?doc=<id>, auto-expand that
   // doc and scroll it into view. Fired once per distinct ?doc= value
@@ -586,6 +595,7 @@ export default function MedicalHistory() {
     const target = searchParams.get('doc');
     if (!target || documents.length === 0) return;
     if (!documents.some(d => d.id === target)) return;
+    setSegment('documents');
     setExpandedDocId(target);
     // Defer to next paint so the expanded content is in the DOM before
     // we try to scroll it into view.
@@ -655,11 +665,14 @@ export default function MedicalHistory() {
       const [medRes, docRes, profileRes] = await Promise.all([
         db.from('current_extracted_data').select('*').eq('user_id', user!.id).order('date_recorded', { ascending: false, nullsFirst: false }),
         db.from('health_documents').select('id, file_name, file_path, mime_type, ai_suggested_name, ai_summary, ai_suggested_category, uploaded_at, document_type').eq('user_id', user!.id).order('uploaded_at', { ascending: false }),
-        db.from('profiles').select('life_stage').eq('id', user!.id).single(),
+        db.from('profiles').select('life_stage, pregnancy_due_date').eq('id', user!.id).single(),
       ]);
       if (medRes.data) setMedicalData(medRes.data as MedicalDataItem[]);
       if (docRes.data) setDocuments(docRes.data);
-      if (profileRes.data) setLifeStage(profileRes.data.life_stage);
+      if (profileRes.data) {
+        setLifeStage(profileRes.data.life_stage);
+        setPregnancyDueDate(profileRes.data.pregnancy_due_date ? new Date(profileRes.data.pregnancy_due_date) : null);
+      }
     } catch (error) {
       console.error('Error fetching medical history:', error);
     } finally {
@@ -1014,20 +1027,12 @@ export default function MedicalHistory() {
     }
     const daysSinceLastDoc = sortedDates.length > 0 ? differenceInDays(new Date(), sortedDates[sortedDates.length - 1]) : null;
 
-    // Status pie
-    const labStatusPie = [
-      { name: 'All good', value: normalLabs - expectedLabs, color: 'hsl(var(--muted-foreground) / 0.35)' },
-      { name: 'Normal for you', value: expectedLabs, color: 'hsl(var(--muted-foreground) / 0.7)' },
-      { name: 'Worth discussing', value: abnormalLabs, color: 'hsl(var(--destructive) / 0.7)' },
-      { name: 'Needs attention', value: criticalLabs, color: 'hsl(var(--destructive))' },
-    ].filter(d => d.value > 0);
-
     return {
       labResults, normalLabs, abnormalLabs, criticalLabs, expectedLabs,
       activeConditions, activeMedications,
       labsByPanel: sortedPanels,
       labTrendData, repeatedTests, predictions,
-      overallHealthScore, labStatusPie,
+      overallHealthScore,
       avgDaysBetweenDocs, nextCheckupEstimate, daysSinceLastDoc,
     };
   }, [medicalData, documents]);
@@ -1038,6 +1043,54 @@ export default function MedicalHistory() {
       .sort((a, b) => (priorityOrder[a.raw_data?.priority || 'low'] ?? 2) - (priorityOrder[b.raw_data?.priority || 'low'] ?? 2)),
     [medicalData]
   );
+
+  const riskItems = useMemo(
+    () => medicalData.filter(d => d.data_type === 'risk_screening' && d.value),
+    [medicalData],
+  );
+
+  // The user's life stage picks the lab cards and charts shown here.
+  const mode: LifeStage = normalizeLifeStage(lifeStage);
+  // Pregnancy shows only lab results from this pregnancy (due date − 280
+  // days), the same window Home used. Memoised so the card doesn't reload.
+  const labSince = useMemo(
+    () => (mode === 'pregnancy' ? pregnancyStart(pregnancyDueDate) : null),
+    [mode, pregnancyDueDate],
+  );
+
+  // Each test's history opens inside its own row. This replaces the old
+  // page-wide change list, trend-chart grid and status pie.
+  const trendSummaries = new Map(stats.predictions.map(p => [p.title, p]));
+  const trendInfoFor = (lab: MedicalDataItem) => {
+    const info = stats.labTrendData[lab.title];
+    return info && info.data.length >= 2 ? info : null;
+  };
+  const trendButton = (lab: MedicalDataItem) => {
+    const info = trendInfoFor(lab);
+    if (!info) return null;
+    const open = openTrend === lab.id;
+    return (
+      <button
+        type="button"
+        onClick={() => setOpenTrend(open ? null : lab.id)}
+        aria-expanded={open}
+        className="inline-flex flex-shrink-0 items-center gap-1 text-[11px] font-medium text-primary hover:underline"
+      >
+        {open ? <ChevronUp className="h-3 w-3" aria-hidden="true" /> : <ChevronDown className="h-3 w-3" aria-hidden="true" />}
+        {open ? 'Hide trend' : `Trend (${info.data.length})`}
+      </button>
+    );
+  };
+  const trendPanel = (lab: MedicalDataItem) => {
+    const info = trendInfoFor(lab);
+    if (!info || openTrend !== lab.id) return null;
+    return <div className="mt-2"><TestTrend info={info} summary={trendSummaries.get(lab.title)} /></div>;
+  };
+
+  const handleUploaded = () => {
+    setJustUploaded(true);
+    fetchData();
+  };
 
   if (authLoading || loading) {
     return (
@@ -1060,51 +1113,100 @@ export default function MedicalHistory() {
             <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
           <div className="flex-1 min-w-0">
-            <h1 className="text-base sm:font-display text-xl font-medium truncate">My Health Records</h1>
+            <h1 className="text-base sm:font-display text-xl font-medium truncate">Records</h1>
             <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Your results explained in plain language</p>
           </div>
           <div className="hidden sm:block">
             <ShareWithDoctor />
           </div>
-          <Button variant="outline" size="sm" className="hidden sm:flex gap-1.5" onClick={() => window.open('/dashboard/health-record/print', '_blank', 'noopener,noreferrer')}>
-            <Printer className="h-3.5 w-3.5" />
-            Print
-          </Button>
-          <Button variant="outline" size="sm" className="hidden sm:flex" onClick={() => navigate('/dashboard')}>
-            Dashboard
-          </Button>
-          <button type="button" onClick={() => { window.location.href = '/'; }} className="text-base sm:text-lg font-medium text-primary hover:opacity-80 transition-opacity">
-            Womanie
-          </button>
-          <UserMenu />
+          {/* Less-used actions live behind "⋯". Log out lives only in Me. */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9" aria-label="More actions">
+                <MoreHorizontal className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-card z-50">
+              {hasDocuments && (
+                <DropdownMenuItem onClick={reanalyzeAll} disabled={reanalyzing}>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  {reanalyzing ? `Analyzing ${reanalyzeProgress.done}/${reanalyzeProgress.total}…` : 'Re-analyze all documents'}
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={() => window.open('/dashboard/health-record/print', '_blank', 'noopener,noreferrer')}>
+                <Printer className="mr-2 h-4 w-4" />
+                Print my record
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
       <div className="px-4 py-6 max-w-4xl mx-auto space-y-6">
-        <PendingConnections />
-        <ConnectedDoctors />
-        {hasDocuments && <NewDocInsights documents={documents} medicalData={medicalData} />}
+        {/* Segments + the one primary action. With no documents yet the
+            upload button sits in the empty state instead, so there is
+            never a second upload banner. */}
+        <div className="flex items-center gap-2">
+          <div role="tablist" aria-label="Records sections" className="flex flex-1 min-w-0 gap-1 rounded-full bg-muted p-1">
+            {([
+              ['results', 'Results'],
+              ['documents', 'Documents'],
+              ['charts', 'My charts'],
+            ] as const).map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                role="tab"
+                aria-selected={segment === key}
+                onClick={() => setSegment(key)}
+                className={`flex-1 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                  segment === key ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {hasDocuments && (
+            <Button size="sm" className="gap-1.5 flex-shrink-0" onClick={() => setUploadOpen(true)}>
+              <Upload className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Upload a document</span>
+              <span className="sm:hidden">Upload</span>
+            </Button>
+          )}
+        </div>
+        {reanalyzing && (
+          <Progress value={reanalyzeProgress.total > 0 ? (reanalyzeProgress.done / reanalyzeProgress.total) * 100 : 0} className="h-1.5 bg-muted" />
+        )}
 
-        {hasDocuments && (
+        {/* What changed with the document just uploaded */}
+        {justUploaded && hasDocuments && <NewDocInsights documents={documents} medicalData={medicalData} />}
+
+        {/* Empty state: one sentence, one button (Results + Documents) */}
+        {!hasDocuments && segment !== 'charts' && (
+          <Card className="border-dashed">
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                <FileText className="h-8 w-8 text-primary" />
+              </div>
+              <p className="text-sm text-muted-foreground text-center max-w-sm mb-4">
+                No documents yet. Upload a lab result, prescription or report and we'll explain it in plain language.
+              </p>
+              <Button className="gap-1.5" onClick={() => setUploadOpen(true)}>
+                <Upload className="h-4 w-4" />
+                Upload a document
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {segment === 'charts' && <MyCharts mode={mode} />}
+
+        {segment === 'documents' && hasDocuments && (
           <Card className="overflow-hidden">
             <div className="p-4 pb-3 flex items-center justify-between">
               <h3 className="text-sm font-medium">My Documents ({documents.length})</h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={reanalyzeAll}
-                disabled={reanalyzing}
-              >
-                {reanalyzing ? (
-                  <>Analyzing {reanalyzeProgress.done}/{reanalyzeProgress.total}…</>
-                ) : (
-                  <>🔄 Re-analyze all</>
-                )}
-              </Button>
             </div>
-            {reanalyzing && (
-              <div className="px-4"><Progress value={reanalyzeProgress.total > 0 ? (reanalyzeProgress.done / reanalyzeProgress.total) * 100 : 0} className="h-1.5 bg-muted" /></div>
-            )}
             {/* Filter chips — quick scoping when the doc list grows
                 past a screenful. Counts show inline so the user
                 knows what's behind each chip before clicking. */}
@@ -1538,119 +1640,76 @@ export default function MedicalHistory() {
             </div>
           </Card>
         )}
-        <DocumentUpload onUploaded={fetchData} />
-
-        {/* Section quick nav — only show when there's data */}
-        {hasData && (
-          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-            {[
-              { id: 'snapshot', label: 'Snapshot' },
-              { id: 'categories', label: 'Categories' },
-              { id: 'insights', label: 'Insights' },
-              ...(flaggedItems.length > 0 ? [{ id: 'attention', label: 'Attention' }] : []),
-              ...(stats.labsByPanel.length > 0 ? [{ id: 'results', label: 'Results' }] : []),
-              ...(stats.repeatedTests.length > 0 ? [{ id: 'trends', label: 'Trends' }] : []),
-              { id: 'documents', label: 'Timeline' },
-            ].map(section => (
-              <button
-                key={section.id}
-                onClick={() => document.getElementById(section.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                className="text-xs px-3 py-1.5 rounded-full bg-muted hover:bg-primary/10 hover:text-primary transition-colors whitespace-nowrap font-medium text-muted-foreground"
-              >
-                {section.label}
-              </button>
-            ))}
+        {segment === 'documents' && hasDocuments && (
+          <div id="documents" className="scroll-mt-20">
+            <HealthTimeline documents={documents} medicalData={medicalData} />
           </div>
         )}
 
-        <div className="space-y-6">
-          {/* ============ MAIN CONTENT — SINGLE SCROLLABLE PAGE ============ */}
-            {!hasDocuments ? (
-              <Card className="border-dashed">
-                <CardContent className="flex flex-col items-center justify-center py-16">
-                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                    <FileText className="h-8 w-8 text-primary" />
-                  </div>
-                  <p className="text-foreground text-center mb-2 font-medium text-lg">Upload your first document</p>
-                  <p className="text-sm text-muted-foreground text-center max-w-sm">
-                    Upload lab results, prescriptions, or medical reports. We'll analyze them and explain everything in plain language.
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
+        {segment === 'results' && hasDocuments && (
+          <div className="space-y-6">
               <>
-                {/* Quick Summary — friendly language */}
+                {/* Your health snapshot, in one line */}
                 {hasData && stats.labResults.length > 0 && (
-                  <Card id="snapshot" className="overflow-hidden scroll-mt-20">
-                    <div className="p-5">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                          <Heart className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <h2 className="font-medium text-base">Your Health Snapshot</h2>
-                          <p className="text-xs text-muted-foreground">Based on {stats.labResults.length} test results</p>
-                        </div>
-                      </div>
-
-                      {/* Traffic light summary */}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div className="bg-muted/60 rounded-xl p-3 border border-border">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full flex-shrink-0 bg-foreground/25" />
-                            <span className="text-xs font-medium text-muted-foreground">All good</span>
-                          </div>
-                          <p className="font-display text-2xl font-medium text-muted-foreground">{stats.normalLabs}</p>
-                          <p className="text-[10px] text-muted-foreground">results look healthy</p>
-                        </div>
-                        {stats.expectedLabs > 0 && (
-                          <div className="bg-muted/40 rounded-xl p-3 border border-border">
-                            <div className="flex items-center gap-1.5 mb-1">
-                              <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full flex-shrink-0 bg-foreground/50" />
-                              <span className="text-xs font-medium text-foreground/75">Normal for you</span>
-                            </div>
-                            <p className="font-display text-2xl font-medium text-foreground/75">{stats.expectedLabs}</p>
-                            <p className="text-[10px] text-muted-foreground">expected for your stage</p>
-                          </div>
-                        )}
-                        <div className="bg-destructive/5 rounded-xl p-3 border border-destructive/20">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full flex-shrink-0 bg-destructive/60" />
-                            <span className="text-xs font-medium text-destructive/80">Worth discussing</span>
-                          </div>
-                          <p className="font-display text-2xl font-medium text-destructive/80">{stats.abnormalLabs}</p>
-                          <p className="text-[10px] text-destructive/80">ask your doctor</p>
-                        </div>
-                        <div className="bg-destructive/10 rounded-xl p-3 border border-destructive/30">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full flex-shrink-0 bg-destructive" />
-                            <span className="text-xs font-medium text-destructive">Needs attention</span>
-                          </div>
-                          <p className="font-display text-2xl font-medium text-destructive">{stats.criticalLabs}</p>
-                          <p className="text-[10px] text-destructive">talk to doctor soon</p>
-                        </div>
-                      </div>
-
-                      {/* Health score bar */}
-                      {stats.overallHealthScore !== null && (
-                        <div className="mt-4 bg-muted/30 rounded-xl p-3">
-                          <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-xs font-medium text-muted-foreground">Results in normal range</span>
-                            <span className={`text-sm font-medium ${
-                              stats.overallHealthScore >= 80 ? 'text-muted-foreground' : stats.overallHealthScore >= 50 ? 'text-destructive/80' : 'text-destructive'
-                            }`}>{stats.normalLabs} of {stats.labResults.length}</span>
-                          </div>
-                          <Progress value={stats.overallHealthScore} className="h-2.5 bg-muted" indicatorClassName={stats.overallHealthScore >= 80 ? 'bg-foreground/35' : stats.overallHealthScore >= 50 ? 'bg-destructive/70' : 'bg-destructive'} />
-                          <p className="text-[10px] text-muted-foreground mt-1.5">
-                            {stats.overallHealthScore >= 80 ? '🌟 Most of your results look great!' :
-                             stats.overallHealthScore >= 50 ? '💬 Some results need a conversation with your doctor.' :
-                             '⚕️ Several results need medical attention. Please consult your doctor.'}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </Card>
+                  <div id="snapshot" className="flex items-center gap-2 text-sm scroll-mt-20">
+                    <Heart className="h-4 w-4 text-primary flex-shrink-0" aria-hidden="true" />
+                    <p className="text-muted-foreground">
+                      <span className="font-medium text-foreground">{stats.labResults.length} result{stats.labResults.length !== 1 ? 's' : ''}</span>
+                      {stats.abnormalLabs + stats.criticalLabs > 0
+                        ? <> · <span className="font-medium text-destructive/80">{stats.abnormalLabs + stats.criticalLabs} to talk about with your doctor</span></>
+                        : ' · nothing flagged'}
+                    </p>
+                  </div>
                 )}
+
+                {/* ⚠️ Things that need attention — front and center */}
+                {flaggedItems.length > 0 && (
+                  <div id="attention" className="scroll-mt-20">
+                    <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+                      <Eye className="h-4 w-4 text-destructive/80" />
+                      Talk to your doctor about
+                    </h3>
+                    <div className="space-y-3">
+                      {flaggedItems.map(item => (
+                        <ResultCard key={item.id} item={item} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* AI risk screening: one row; the detail opens on tap */}
+                {riskItems.length > 0 && (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <button
+                        type="button"
+                        className="w-full flex items-center gap-3 rounded-lg border border-border bg-card p-4 text-left hover:bg-muted/30 transition-colors"
+                      >
+                        <ShieldAlert className="h-4 w-4 text-primary flex-shrink-0" aria-hidden="true" />
+                        <span className="flex-1 text-sm font-medium">Possible risks to ask about ({riskItems.length})</span>
+                        <ArrowRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="max-h-[85vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Possible risks to ask about</DialogTitle>
+                        <DialogDescription>Based on cross-referencing your test results against clinical guidelines.</DialogDescription>
+                      </DialogHeader>
+                      <div className="grid grid-cols-2 gap-2">
+                        {riskItems.map((item, i) => (
+                          <div key={i} className={`rounded-lg border px-3 py-2 ${riskColor(item.status)}`}>
+                            <div className="label-mono !text-current opacity-70">{item.title}</div>
+                            <div className="text-sm font-medium capitalize">{item.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-[10px] text-muted-foreground italic">AI-assessed risk levels. Always confirm with your healthcare provider.</p>
+                    </DialogContent>
+                  </Dialog>
+                )}
+
+                {/* Lab cards for your life stage (moved here from Home) */}
+                <StageLabCards mode={mode} labSince={labSince} />
 
                 {/* ============ LAB SUMMARY CARDS (moved here from Home) ============ */}
                 {/* Each card hides itself when it has nothing to show. Order: the */}
@@ -1682,131 +1741,15 @@ export default function MedicalHistory() {
                   }}
                 />
 
-                {/* ============ VISUAL RANGE CHART ============ */}
-                <ResultsRangeChart medicalData={medicalData} />
-
-                {/* ============ CUSTOM HEALTH ANALYSIS COMPONENTS ============ */}
-                {/* IMPORTANT: Do NOT remove these components. They are custom-built   */}
-                {/* and live in src/components/dashboard/. They provide health category */}
-                {/* scoring, cycle analysis, cross-referenced insights, smart           */}
-                {/* recommendations, and test comparison tables.                        */}
-
-                {/* Health by body system category with per-category scores */}
-                <div id="categories" className="scroll-mt-20">
-                <HealthCategories medicalData={medicalData} />
-                </div>
-
                 {/* Suggests cycle tracker updates based on hormone lab results */}
                 <CycleUpdateSuggestions labResults={stats.labResults} lifeStage={lifeStage} onUpdateCycle={handleCycleUpdate} />
-
-                {/* Detects cycle phase from hormones and explains what each means */}
-                <CycleImpactSection labResults={stats.labResults} lifeStage={lifeStage} />
-
-                {/* Cross-references multiple test results to surface health patterns */}
-                <div id="insights" className="scroll-mt-20">
-                <PersonalizedInsights medicalData={medicalData} lifeStage={lifeStage} />
-                </div>
-
-                {/* AI Risk Screening results */}
-                {(() => {
-                  const riskItems = medicalData.filter(d => d.data_type === 'risk_screening' && d.value);
-                  if (riskItems.length === 0) return null;
-                  const riskColor = (status: string | null) => {
-                    if (status === 'critical') return 'bg-destructive/10 text-destructive border-destructive/30';
-                    if (status === 'abnormal') return 'bg-destructive/5 text-destructive/80 border-destructive/20';
-                    return 'bg-muted/60 text-muted-foreground border-border';
-                  };
-                  return (
-                    <Card className="overflow-hidden">
-                      <CardContent className="p-5">
-                        <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-                          <ShieldAlert className="h-4 w-4 text-primary" />
-                          AI Risk Screening
-                        </h3>
-                        <p className="text-xs text-muted-foreground mb-3">Based on cross-referencing your test results against clinical guidelines.</p>
-                        <div className="grid grid-cols-2 gap-2">
-                          {riskItems.map((item, i) => (
-                            <div key={i} className={`rounded-lg border px-3 py-2 ${riskColor(item.status)}`}>
-                              <div className="label-mono !text-current opacity-70">{item.title}</div>
-                              <div className="text-sm font-medium capitalize">{item.value}</div>
-                            </div>
-                          ))}
-                        </div>
-                        <p className="text-[10px] text-muted-foreground italic mt-2">AI-assessed risk levels. Always confirm with your healthcare provider.</p>
-                      </CardContent>
-                    </Card>
-                  );
-                })()}
-
-                {/* Smart recommendations: missing tests, stale results, retests needed */}
-                <SmartRecommendations medicalData={medicalData} lifeStage={lifeStage} />
-
-                {/* ============ END CUSTOM HEALTH ANALYSIS ============ */}
-
-                {/* ⚠️ Things that need attention — front and center */}
-                {flaggedItems.length > 0 && (
-                  <div id="attention" className="scroll-mt-20">
-                    <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-                      <Eye className="h-4 w-4 text-destructive/80" />
-                      Things to discuss with your doctor
-                    </h3>
-                    <div className="space-y-3">
-                      {flaggedItems.map(item => (
-                        <ResultCard key={item.id} item={item} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Active conditions & medications — friendly */}
-                {(stats.activeConditions.length > 0 || stats.activeMedications.length > 0) && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {stats.activeConditions.length > 0 && (
-                      <Card>
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-2 mb-3">
-                            <Stethoscope className="h-4 w-4 text-primary" />
-                            <span className="text-sm font-medium">Current Conditions</span>
-                          </div>
-                          <div className="space-y-2">
-                            {stats.activeConditions.map(item => (
-                              <div key={item.id} className="bg-primary/5 rounded-xl px-3 py-2.5 border border-primary/10">
-                                <span className="text-sm font-medium">📌 {item.title}</span>
-                                {item.notes && <p className="text-xs text-muted-foreground mt-1">{item.notes}</p>}
-                              </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
-                    {stats.activeMedications.length > 0 && (
-                      <Card>
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-2 mb-3">
-                            <Pill className="h-4 w-4 text-primary" />
-                            <span className="text-sm font-medium">Your Medications</span>
-                          </div>
-                          <div className="space-y-2">
-                            {stats.activeMedications.map(item => (
-                              <div key={item.id} className="bg-primary/5 rounded-xl px-3 py-2.5 border border-primary/10">
-                                <span className="text-sm font-medium">💊 {item.title}</span>
-                                {item.value && <span className="text-xs text-muted-foreground ml-2">{item.value}</span>}
-                                {item.notes && <p className="text-xs text-muted-foreground mt-1">{item.notes}</p>}
-                              </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </div>
-                )}
 
                 {/* All results grouped by panel — collapsible, friendly */}
                 {stats.labsByPanel.length > 0 && (
                   <div id="results" className="scroll-mt-20">
                     <div className="flex items-center gap-2 mb-3">
                       <FlaskConical className="h-4 w-4 text-primary flex-shrink-0" />
-                      <h3 className="text-sm font-medium flex-shrink-0">All Your Test Results</h3>
+                      <h3 className="text-sm font-medium flex-shrink-0">All results</h3>
                       {/* Shrinks instead of pushing the page wider than a phone. */}
                       <div className="relative ml-auto min-w-0 w-40 sm:w-52">
                         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -1864,7 +1807,11 @@ export default function MedicalHistory() {
                                 <div className="px-4 pb-4 border-t border-border/50 pt-3 space-y-3">
                                   {/* Abnormal results — full cards */}
                                   {abnormals.map(lab => (
-                                    <ResultCard key={lab.id} item={lab} />
+                                    <div key={lab.id} className="space-y-2">
+                                      <ResultCard item={lab} />
+                                      {trendButton(lab)}
+                                      {trendPanel(lab)}
+                                    </div>
                                   ))}
 
                                   {/* Normal results — compact table */}
@@ -1879,13 +1826,17 @@ export default function MedicalHistory() {
                                         {normals.map(lab => {
                                           const si = getStatusInfo(lab.status);
                                           return (
-                                            <div key={lab.id} className="flex items-center gap-2 py-1 px-2 rounded hover:bg-muted/30">
-                                              <span aria-hidden="true" className={`inline-block h-2 w-2 rounded-full flex-shrink-0 ${si.dot}`} />
-                                              <span className="text-xs flex-1 min-w-0 truncate">{lab.title}</span>
-                                              <span className="text-xs font-mono font-medium text-foreground">{lab.value}{lab.unit ? ` ${lab.unit}` : ''}</span>
-                                              {lab.reference_range && (
-                                                <span className="text-[9px] text-muted-foreground hidden sm:inline">({lab.reference_range})</span>
-                                              )}
+                                            <div key={lab.id}>
+                                              <div className="flex items-center gap-2 py-1 px-2 rounded hover:bg-muted/30">
+                                                <span aria-hidden="true" className={`inline-block h-2 w-2 rounded-full flex-shrink-0 ${si.dot}`} />
+                                                <span className="text-xs flex-1 min-w-0 truncate">{lab.title}</span>
+                                                <span className="text-xs font-mono font-medium text-foreground">{lab.value}{lab.unit ? ` ${lab.unit}` : ''}</span>
+                                                {lab.reference_range && (
+                                                  <span className="text-[9px] text-muted-foreground hidden sm:inline">({lab.reference_range})</span>
+                                                )}
+                                                {trendButton(lab)}
+                                              </div>
+                                              {trendPanel(lab)}
                                             </div>
                                           );
                                         })}
@@ -1902,185 +1853,82 @@ export default function MedicalHistory() {
                   </div>
                 )}
 
-                {/* AI Summaries are now shown inline in expanded document cards above */}
-
-                {/* ============ RESULTS BREAKDOWN PIE CHART ============ */}
-                {stats.labStatusPie.length > 0 && (
-                  <Card className="overflow-hidden">
-                    <CardContent className="p-5">
-                      <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
-                        <BarChart3 className="h-4 w-4 text-primary" />
-                        Results Breakdown
-                      </h3>
-                      <div className="flex items-center gap-6">
-                        <ResponsiveContainer width={120} height={120}>
-                          <RechartsPie>
-                            <Pie data={stats.labStatusPie} dataKey="value" cx="50%" cy="50%" innerRadius={30} outerRadius={55} paddingAngle={2}>
-                              {stats.labStatusPie.map((entry, i) => (
-                                <Cell key={i} fill={entry.color} />
-                              ))}
-                            </Pie>
-                          </RechartsPie>
-                        </ResponsiveContainer>
-                        <div className="flex-1 space-y-2">
-                          {stats.labStatusPie.map((entry, i) => (
-                            <div key={i} className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                              <span className="text-xs text-muted-foreground flex-1">{entry.name}</span>
-                              <span className="text-xs font-medium">{entry.value}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                {/* Active conditions & medications — friendly */}
+                {(stats.activeConditions.length > 0 || stats.activeMedications.length > 0) && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {stats.activeConditions.length > 0 && (
+                      <Card>
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Stethoscope className="h-4 w-4 text-primary" />
+                            <span className="text-sm font-medium">Current Conditions</span>
+                          </div>
+                          <div className="space-y-2">
+                            {stats.activeConditions.map(item => (
+                              <div key={item.id} className="bg-primary/5 rounded-xl px-3 py-2.5 border border-primary/10">
+                                <span className="text-sm font-medium">📌 {item.title}</span>
+                                {item.notes && <p className="text-xs text-muted-foreground mt-1">{item.notes}</p>}
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                    {stats.activeMedications.length > 0 && (
+                      <Card>
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Pill className="h-4 w-4 text-primary" />
+                            <span className="text-sm font-medium">Your Medications</span>
+                          </div>
+                          <div className="space-y-2">
+                            {stats.activeMedications.map(item => (
+                              <div key={item.id} className="bg-primary/5 rounded-xl px-3 py-2.5 border border-primary/10">
+                                <span className="text-sm font-medium">💊 {item.title}</span>
+                                {item.value && <span className="text-xs text-muted-foreground ml-2">{item.value}</span>}
+                                {item.notes && <p className="text-xs text-muted-foreground mt-1">{item.notes}</p>}
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
                 )}
+
+                {/* More about your results: the deeper analysis, one tap away. */}
+                {/* IMPORTANT: Do NOT remove these components. They are custom-built */}
+                {/* and live in src/components/dashboard/.                          */}
+                <details className="group rounded-lg border border-border bg-card">
+                  <summary className="flex cursor-pointer list-none items-center gap-2 p-4 text-sm font-medium">
+                    <Lightbulb className="h-4 w-4 text-primary" />
+                    <span className="flex-1">More about your results</span>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden="true" />
+                  </summary>
+                  <div className="space-y-6 border-t border-border p-4">
+                {/* ============ VISUAL RANGE CHART ============ */}
+                <ResultsRangeChart medicalData={medicalData} />
+
+                {/* Health by body system category with per-category scores */}
+                <div id="categories" className="scroll-mt-20">
+                <HealthCategories medicalData={medicalData} />
+                </div>
+
+                {/* Detects cycle phase from hormones and explains what each means */}
+                <CycleImpactSection labResults={stats.labResults} lifeStage={lifeStage} />
+
+                {/* Cross-references multiple test results to surface health patterns */}
+                <div id="insights" className="scroll-mt-20">
+                <PersonalizedInsights medicalData={medicalData} lifeStage={lifeStage} />
+                </div>
+
+                {/* Smart recommendations: missing tests, stale results, retests needed */}
+                <SmartRecommendations medicalData={medicalData} lifeStage={lifeStage} />
 
                 {/* ============ TEST COMPARISON & TRENDS ============ */}
                 <div id="trends" className="scroll-mt-20">
                 <TestComparisonTable medicalData={medicalData} />
                 </div>
-
-                {/* ============ TRENDS & PREDICTIONS (INLINE) ============ */}
-                {stats.repeatedTests.length > 0 && (
-                  <>
-                {/* Predictions — friendly language */}
-                {stats.predictions.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-                      <Activity className="h-4 w-4 text-primary" />
-                      How your results are changing
-                    </h3>
-                    <div className="space-y-2">
-                      {stats.predictions.map(p => (
-                        <Card key={p.title} className={`overflow-hidden ${
-                          p.trend === 'worsening' ? 'border-destructive/20' :
-                          p.trend === 'improving' ? 'border-border' : ''
-                        }`}>
-                          <CardContent className="p-3.5 flex items-center gap-3">
-                            <span className="text-xl">
-                              {p.trend === 'improving' ? '📈' : p.trend === 'worsening' ? '📉' : '➡️'}
-                            </span>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium">{getFriendlyName(p.title)}</p>
-                              <p className="text-xs text-muted-foreground">{p.detail}</p>
-                            </div>
-                            <Badge variant="outline" className={`text-[10px] ${
-                              p.trend === 'improving' ? 'text-muted-foreground border-border' :
-                              p.trend === 'worsening' ? 'text-destructive/80 border-destructive/20' :
-                              'text-muted-foreground'
-                            }`}>
-                              {p.trend === 'improving' ? 'Getting better' : p.trend === 'worsening' ? 'Getting worse' : 'Stable'}
-                            </Badge>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Timeline charts — for repeated tests with trend lines */}
-                {stats.repeatedTests.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-medium mb-1 flex items-center gap-2">
-                      <BarChart3 className="h-4 w-4 text-primary" />
-                      Test Trends Over Time
-                    </h3>
-                    <p className="text-xs text-muted-foreground mb-4">
-                      Tests with multiple readings. Shaded area = healthy range. Dashed dot = predicted next value.
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {stats.repeatedTests.map(([title, info]) => {
-                        const hasRefRange = info.data.some(d => d.refLow !== null && d.refHigh !== null);
-                        const refLow = info.data.find(d => d.refLow !== null)?.refLow ?? undefined;
-                        const refHigh = info.data.find(d => d.refHigh !== null)?.refHigh ?? undefined;
-                        const latestVal = info.data[info.data.length - 1].value;
-                        const firstVal = info.data[0].value;
-                        const changePct = firstVal > 0 ? Math.round(((latestVal - firstVal) / firstVal) * 100) : 0;
-                        const statusInfo = getStatusInfo(info.latestStatus);
-
-                        // Prediction
-                        let predictedNext: number | null = null;
-                        if (info.data.length >= 3) {
-                          const vals = info.data.map(d => d.value);
-                          const avgChange = (vals[vals.length - 1] - vals[0]) / (vals.length - 1);
-                          predictedNext = Math.round((vals[vals.length - 1] + avgChange) * 100) / 100;
-                        }
-
-                        return (
-                          <Card key={title}>
-                            <CardHeader className="pb-1">
-                              <CardTitle className="text-xs flex items-center justify-between">
-                                <span className="truncate min-w-0">{getFriendlyName(title)}</span>
-                                <span className={`font-mono text-sm font-medium whitespace-nowrap shrink-0 ml-2 ${statusInfo.color}`}>
-                                  {latestVal}{info.unit ? ` ${info.unit}` : ''}
-                                </span>
-                              </CardTitle>
-                              <p className="text-[10px] text-muted-foreground">
-                                {info.data.length} readings • {changePct > 0 ? '+' : ''}{changePct}% change
-                              </p>
-                            </CardHeader>
-                            <CardContent className="pt-0">
-                              <ResponsiveContainer width="100%" height={140}>
-                                <ComposedChart data={[
-                                  ...info.data,
-                                  ...(predictedNext !== null ? [{ date: 'Next?', value: predictedNext, refLow: refLow ?? null, refHigh: refHigh ?? null }] : [])
-                                ]} margin={{ left: 0, right: 5, top: 5, bottom: 0 }}>
-                                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                  <XAxis dataKey="date" tick={{ fontSize: 9 }} />
-                                  <YAxis tick={{ fontSize: 9 }} domain={['auto', 'auto']} />
-                                  {hasRefRange && refLow !== undefined && refHigh !== undefined && (
-                                    <ReferenceArea y1={refLow} y2={refHigh} fill="hsl(var(--muted-foreground))" fillOpacity={0.08} label={{ value: "Healthy", position: "insideTopLeft", fontSize: 8, fill: "hsl(var(--muted-foreground))" }} />
-                                  )}
-                                  <Tooltip
-                                    content={({ active, payload }) => {
-                                      if (!active || !payload?.length) return null;
-                                      const d = payload[0].payload;
-                                      const isPredicted = d.date === 'Next?';
-                                      return (
-                                        <div className="bg-background border border-border rounded-xl px-3 py-2 shadow-lg text-xs">
-                                          <p className={isPredicted ? 'text-primary font-medium' : ''}>
-                                            {isPredicted ? '🔮 Predicted' : d.date}: <span className="font-medium">{d.value}{info.unit ? ` ${info.unit}` : ''}</span>
-                                          </p>
-                                          {d.refLow !== null && <p className="text-muted-foreground">Healthy range: {d.refLow}–{d.refHigh}</p>}
-                                        </div>
-                                      );
-                                    }}
-                                  />
-                                  <Line
-                                    type="monotone"
-                                    dataKey="value"
-                                    stroke="hsl(var(--primary))"
-                                    strokeWidth={2}
-                                    dot={(props: { cx?: number; cy?: number; payload?: { date?: string } }) => {
-                                      const { cx, cy, payload } = props;
-                                      if (payload?.date === 'Next?') {
-                                        return <circle key="predicted" cx={cx} cy={cy} r={4} fill="hsl(var(--primary))" stroke="hsl(var(--primary))" strokeWidth={2} strokeDasharray="4 2" opacity={0.4} />;
-                                      }
-                                      return <circle key={payload?.date} cx={cx} cy={cy} r={3} fill="hsl(var(--primary))" />;
-                                    }}
-                                  />
-                                </ComposedChart>
-                              </ResponsiveContainer>
-                              {predictedNext !== null && (
-                                <p className="text-[10px] text-muted-foreground mt-1">
-                                  <span className="text-primary">🔮</span> We predict your next result could be around <span className="font-medium whitespace-nowrap">{predictedNext}{info.unit ? ` ${info.unit}` : ''}</span>{' '}
-                                  {hasRefRange && refLow !== undefined && refHigh !== undefined && (
-                                    <span className={predictedNext >= refLow && predictedNext <= refHigh ? 'text-muted-foreground' : 'text-destructive/80'}>
-                                      ({predictedNext >= refLow && predictedNext <= refHigh ? 'in the healthy range' : 'outside healthy range'})
-                                    </span>
-                                  )}
-                                </p>
-                              )}
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Single readings removed — already shown in panel view and ResultsRangeChart */}
 
                 {/* Checkup timing */}
                 {documents.length >= 2 && (
@@ -2113,20 +1961,17 @@ export default function MedicalHistory() {
                     </CardContent>
                   </Card>
                 )}
-                  </>
-                )}
 
-                {/* ============ HEALTH TIMELINE ============ */}
-                <div id="documents" className="scroll-mt-20">
-                  <HealthTimeline documents={documents} medicalData={medicalData} />
-                </div>
+                  </div>
+                </details>
 
-                {/* Document Details section removed — info is in document list,
-                     timeline, AI summaries, and health categories above */}
+
               </>
-            )}
-        </div>
+          </div>
+        )}
       </div>
+
+      <DocumentUpload open={uploadOpen} onOpenChange={setUploadOpen} showTrigger={false} onUploaded={handleUploaded} />
     </div>
   );
 }
