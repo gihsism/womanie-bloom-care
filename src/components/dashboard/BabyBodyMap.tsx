@@ -1,42 +1,34 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLifeEvents } from '@/hooks/useLifeEvents';
 import { onHealthDataChange } from '@/lib/data-events';
-import { lastFeed, countToday, nappiesToday, sleepTodayMin, fmtAgo, dayOfLife, fmtGrams, weekWord } from '@/lib/bodyMap';
+import { lastFeed, countToday, nappiesToday, sleepTodayMin, fmtAgo, dayOfLife } from '@/lib/bodyMap';
+import { DetailsLink } from '@/components/dashboard/HomeBlocks';
 
-// Version 8 "body map" hero for after birth: a sculpted swaddled baby,
-// hotspots labelled with the live baby log (last feed + which side next,
-// sleep, nappies today, latest weight). Labels open the baby tracker on
-// the matching tab. Same 320 x 520 coordinate box as PregnancyBodyMap.
+// Version 8 "body map" hero for after birth: a sculpted swaddled baby.
+// Home keeps it to one fact (last feed), one sentence (feeds, nappies and
+// sleep today) and one link, "Baby tracker"; logging and growth live on
+// /dashboard/baby. Same coordinate box as PregnancyBodyMap.
 
 const W = 320;
 const H = 536;
-const pct = (x: number, y: number) => ({ left: `${(x / W) * 100}%`, top: `${(y / H) * 100}%` });
 
 interface Baby { id: string; name: string | null; birth_date: string | null }
 
 const SLEEP_ACTIVE_KEY = (babyId: string) => `womanie_baby_sleep_active_${babyId}`;
 
 export default function BabyBodyMap() {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [baby, setBaby] = useState<Baby | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const [birthWeight, setBirthWeight] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     if (!user) return;
     const { data } = await db.from('babies').select('id, name, birth_date').eq('user_id', user.id).order('created_at', { ascending: true });
     const b = ((data as Baby[] | null) ?? [])[0] ?? null;
     setBaby(b);
-    if (b) {
-      const { data: br } = await db.from('birth_records').select('birth_weight_g').eq('user_id', user.id).eq('baby_id', b.id);
-      const g = Number((br as { birth_weight_g: number | null }[] | null)?.[0]?.birth_weight_g);
-      setBirthWeight(Number.isFinite(g) && g > 0 ? g : null);
-    }
     setLoaded(true);
   }, [user]);
   useEffect(() => { load(); return onHealthDataChange(load); }, [load]);
@@ -45,14 +37,11 @@ export default function BabyBodyMap() {
   const feeds = useLifeEvents('feed', { babyId, limit: 60 });
   const nappies = useLifeEvents('nappy', { babyId, limit: 60 });
   const sleeps = useLifeEvents('baby_sleep', { babyId, limit: 40 });
-  const growth = useLifeEvents<{ weight_g?: number }>('baby_growth', { babyId, limit: 20 });
 
   const [, tick] = useState(0);
   useEffect(() => { const t = window.setInterval(() => tick(n => n + 1), 60000); return () => window.clearInterval(t); }, []);
 
   if (!loaded) return null;
-  // "+ Feed" opens the add-a-feed form directly.
-  const open = (tab: string) => navigate(`/dashboard/baby?tab=${tab}${tab === 'feed' ? '&add=1' : ''}`);
 
   if (!baby) {
     return (
@@ -60,7 +49,7 @@ export default function BabyBodyMap() {
         <p className="label-mono">After birth</p>
         <h2 className="font-display text-[34px] leading-[1.05] font-normal mt-1">Your baby<br /><span className="text-muted-foreground">starts here</span></h2>
         <p className="text-[13px] text-muted-foreground mt-2 max-w-[34ch]">Add your baby to log feeds, sleep, nappies and growth — the figure fills in as you go.</p>
-        <button type="button" onClick={() => open('feed')} className="mt-3 rounded-full bg-foreground text-background px-4 py-2 text-[13px] font-medium">Add your baby</button>
+        <DetailsLink to="/dashboard/baby?tab=feed&add=1" label="Add your baby" />
       </section>
     );
   }
@@ -75,20 +64,26 @@ export default function BabyBodyMap() {
   let asleepSince: number | null = null;
   try { const v = localStorage.getItem(SLEEP_ACTIVE_KEY(baby.id)); asleepSince = v ? Number(v) : null; } catch { /* private mode */ }
   const asleepMin = asleepSince ? Math.max(0, Math.round((now.getTime() - asleepSince) / 60000)) : null;
-  const latestG = Number(growth.events[0]?.data?.weight_g);
-  const weight = Number.isFinite(latestG) && latestG > 0 ? latestG : birthWeight;
-  const gain = weight && birthWeight && weight !== birthWeight ? weight - birthWeight : null;
   const ago = lf ? fmtAgo(lf.minutesAgo) : null;
-  const side = (m: string) => (m === 'breast_l' ? 'Left side' : m === 'breast_r' ? 'Right side' : m === 'bottle' ? 'Bottle' : 'Feed');
+  const nappyCount = np.wet + np.dirty;
+  const sleepText = asleepMin != null ? 'asleep now' : sleptMin ? `slept ${fmtAgo(sleptMin).value}${fmtAgo(sleptMin).unit ? ' min' : ''} today` : null;
+  const facts = [
+    `${feedsToday} feed${feedsToday === 1 ? '' : 's'} today`,
+    `${nappyCount} napp${nappyCount === 1 ? 'y' : 'ies'}`,
+    sleepText,
+  ].filter(Boolean).join(', ');
 
   return (
     <section className="mb-6" aria-label="Your baby at a glance">
       <p className="label-mono">{name} · {format(now, 'EEE d MMM')}</p>
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
-        {day && day > 0 && day < 50 ? <>Day {weekWord(day)}</> : <>{name}</>}<br /><span className="text-muted-foreground">{day && day > 0 && day < 50 ? 'of life' : 'today'}</span>
+        {ago ? <>Last feed <span className="text-muted-foreground">{ago.value}{ago.unit ? ` ${ago.unit}` : ''} ago</span></> : <>No feeds yet</>}
       </h2>
+      <p className="mt-1 text-[15px]">
+        {facts}.{lf?.nextSide ? ` Next: ${lf.nextSide}.` : ''}{day && day > 0 && day < 50 ? ` Day ${day} of life.` : ''}
+      </p>
 
-      <div className="relative mx-auto mt-3 w-full max-w-[380px]" style={{ aspectRatio: `${W} / ${H}` }}>
+      <div className="relative mx-auto mt-3 w-full max-w-[180px]" style={{ aspectRatio: `${W} / ${H}` }}>
         <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" aria-hidden="true">
           <defs>
             <linearGradient id="bb-stone" x1="0" y1="0" x2="1" y2="1">
@@ -118,91 +113,11 @@ export default function BabyBodyMap() {
             <path d="M227,268 q5,3 10,0" fill="none" strokeWidth="1.2" strokeLinecap="round" />
             <circle cx="236" cy="452" r="62" fill="url(#bb-glow)" stroke="none" />
           </g>
-          {/* leaders (box coordinates) */}
-          <g fill="none" strokeWidth="1">
-            <path d="M184,136 H116 M116,131 v10" stroke="hsl(var(--primary))" />
-            <path d="M206,110 H254 V64 M249,64 h10" stroke="#1A1A19" />
-            <path d="M188,426 H116 M116,421 v10" stroke="#1A1A19" />
-            <path d="M238,318 H272 V372 M267,372 h10" stroke="#1A1A19" />
-          </g>
-          <g>
-            <circle cx="184" cy="136" r="4.5" fill="hsl(var(--primary))" />
-            <circle cx="184" cy="136" r="10" fill="none" stroke="hsl(var(--primary))" strokeWidth=".9" />
-            <circle cx="184" cy="136" r="16" fill="none" stroke="hsl(var(--primary))" strokeWidth=".6" opacity=".45" />
-            <circle cx="206" cy="110" r="3.5" fill="#1A1A19" /><circle cx="206" cy="110" r="8" fill="none" stroke="#1A1A19" strokeWidth=".8" />
-            <circle cx="188" cy="426" r="3.5" fill="#1A1A19" /><circle cx="188" cy="426" r="8" fill="none" stroke="#1A1A19" strokeWidth=".8" />
-            <circle cx="238" cy="318" r="3.5" fill="#1A1A19" /><circle cx="238" cy="318" r="8" fill="none" stroke="#1A1A19" strokeWidth=".8" />
-          </g>
         </svg>
 
-        {/* Mouth · feed */}
-        <button type="button" onClick={() => open('feed')} className="absolute w-[35%] text-right leading-tight" style={pct(0, 102)}>
-          <span className="label-mono block !text-primary">Mouth · feed</span>
-          {lf && ago ? (
-            <>
-              <span className="block font-display text-[30px] leading-none mt-1 text-primary">
-                {ago.value}<small className="font-sans text-xs text-muted-foreground ml-1">{ago.unit ? `${ago.unit} ago` : 'ago'}</small>
-              </span>
-              <span className="block text-[13px] text-muted-foreground mt-1">
-                {side(lf.method)}{lf.durationMin ? `, ${lf.durationMin} min` : lf.ml ? `, ${lf.ml} ml` : ''}.
-                {lf.nextSide && <><br /><b className="font-medium text-foreground">Next: {lf.nextSide}.</b></>}
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="block text-[15px] font-medium mt-1">No feeds yet</span>
-              <span className="block text-[13px] text-primary mt-0.5">Log a feed →</span>
-            </>
-          )}
-        </button>
-
-        {/* Eyes · sleep */}
-        <button type="button" onClick={() => open('sleep')} className="absolute w-[33%] text-left leading-tight" style={pct(214, 0)}>
-          <span className="label-mono block">Eyes · sleep</span>
-          <span className="block text-[15px] font-medium mt-1">{asleepMin != null ? `Asleep ${fmtAgo(asleepMin).value}${fmtAgo(asleepMin).unit ? ' min' : ''}` : sleptMin ? 'Awake' : 'Log sleep'}</span>
-          <span className="block text-[13px] text-muted-foreground mt-0.5">{sleptMin ? `${fmtAgo(sleptMin).value}${fmtAgo(sleptMin).unit ? ' min' : ''} today` : 'nothing yet today'}</span>
-        </button>
-
-        {/* Nappy · today */}
-        <button type="button" onClick={() => open('nappy')} className="absolute w-[35%] text-right leading-tight" style={pct(0, 388)}>
-          <span className="label-mono block">Nappy · today</span>
-          <span className="flex justify-end items-baseline gap-3 mt-1">
-            <span><span className="font-display text-[28px] leading-none">{np.wet}</span> <span className="text-[12px] text-muted-foreground">wet</span></span>
-            <span><span className="font-display text-[28px] leading-none">{np.dirty}</span> <span className="text-[12px] text-muted-foreground">dirty</span></span>
-          </span>
-          <span className="block text-[13px] text-primary mt-1">Log a nappy →</span>
-        </button>
-
-        {/* Growth */}
-        <button type="button" onClick={() => open('growth')} className="absolute w-[26%] text-left leading-tight" style={pct(240, 382)}>
-          <span className="label-mono block">Growth</span>
-          {weight ? (
-            <>
-              <span className="block font-display text-[28px] leading-none mt-1">{fmtGrams(weight).value}<small className="font-sans text-xs text-muted-foreground ml-1">{fmtGrams(weight).unit}</small></span>
-              {gain != null && <span className="block text-[12.5px] text-muted-foreground mt-1">{gain > 0 ? '+' : ''}{gain} g since birth</span>}
-            </>
-          ) : (
-            <span className="block text-[13px] text-primary mt-1">Add weight →</span>
-          )}
-        </button>
       </div>
 
-      <div className="mt-1 grid grid-cols-4 gap-1.5">
-        {[['feed', '+ Feed'], ['nappy', '+ Nappy'], ['sleep', '+ Sleep'], ['stats', 'Stats']].map(([tab, label], i) => (
-          <button key={tab} type="button" onClick={() => open(tab)}
-            className={`rounded-full border border-foreground py-2 text-[12.5px] font-medium ${i === 0 ? 'bg-foreground text-background' : ''}`}>
-            {label}
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-3 flex items-start justify-between border-t border-foreground pt-2.5">
-        <p className="text-[13px] leading-snug">
-          {feedsToday ? <>{feedsToday} feed{feedsToday === 1 ? '' : 's'} today.</> : <>No feeds logged today.</>}
-          <br /><span className="text-muted-foreground">Touch any label to log or look back.</span>
-        </p>
-        <p className="label-mono text-right leading-relaxed pl-3">{day ? <>No. {day}<br /></> : null}{name}</p>
-      </div>
+      <DetailsLink to="/dashboard/baby" label="Baby tracker" />
     </section>
   );
 }

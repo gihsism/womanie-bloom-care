@@ -4,13 +4,16 @@ import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
 import { pillRing, pillFromNotes } from '@/lib/bodyMap';
+import { DetailsLink } from '@/components/dashboard/HomeBlocks';
 
 // Version 8 hero for contraception: the pill pack as a ring of 28 pills.
 // Solid ink = taken, ink with a halo = taken late, red cross = missed,
 // open = not logged, faint = still to come; the last 7 are the break
 // week when the pack start is known. Reads the same daily-signal notes
-// ("Pill: on-time|late|missed") and pack start as ContraceptionDashboard;
-// logging stays in that card (the button scrolls there).
+// ("Pill: on-time|late|missed") and pack start as ContraceptionDashboard.
+// Home keeps it to one fact (pill day), one sentence (taken today?) and
+// one Details link; logging is Home's primary button and the method card
+// on the stage page.
 
 const CX = 160; const CY = 135; const R = 104;
 const lsKey = (userId: string, key: string) => `contraception:${userId}:${key}`;
@@ -45,28 +48,24 @@ export default function PillRingHero({ name }: { name?: string | null }) {
   const packStart = readLS(user.id, 'packStartDate');
   const method = readLS(user.id, 'method') ?? 'pill';
   const reminder = readLS(user.id, 'reminderTime') ?? '21:00';
+  const isPill = method === 'pill';
   const ring = pillRing(byDate, packStart, now);
   const first = name?.trim().split(/\s+/)[0];
   const takenToday = ring.todayMark === 'taken' || ring.todayMark === 'late';
-
-  const toCard = () => {
-    const el = document.getElementById('contraception');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      el.classList.add('ring-2', 'ring-primary/40', 'rounded-xl');
-      window.setTimeout(() => el.classList.remove('ring-2', 'ring-primary/40', 'rounded-xl'), 1600);
-    }
-  };
 
   return (
     <section className="mb-6" aria-label="Your pill pack at a glance">
       <p className="label-mono">{first ? `${first} · ` : ''}{format(now, 'EEE d MMM')}</p>
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
-        {ring.packDay ? <>Pill {ring.packDay}</> : <>Your pill</>}<br />
-        <span className="text-muted-foreground">{ring.packDay ? 'of twenty-eight' : 'last 28 days'}</span>
+        {ring.packDay ? <>Pill {ring.packDay} <span className="text-muted-foreground">of 28</span></> : <>Your pill <span className="text-muted-foreground">last 28 days</span></>}
       </h2>
+      <p className="mt-1 text-[15px]">
+        {!isPill ? 'Your method needs no daily pill.'
+          : takenToday ? (ring.todayMark === 'late' ? "Today's pill is taken, a little late." : "Today's pill is taken.")
+          : `Not logged yet today. Reminder at ${reminder}.`}
+      </p>
 
-      <div className="relative mx-auto mt-2 w-full max-w-[360px]" style={{ aspectRatio: '320 / 270' }}>
+      <div className="relative mx-auto mt-2 w-full max-w-[240px]" style={{ aspectRatio: '320 / 270' }}>
         <svg viewBox="0 0 320 270" className="absolute inset-0 h-full w-full" role="img"
           aria-label={`${takenToday ? "Today's pill taken" : "Today's pill not logged yet"}. ${ring.streak}-day streak.`}>
           <circle cx={CX} cy={CY} r={R} fill="none" stroke="hsl(var(--border))" strokeWidth=".8" strokeDasharray="1 5" />
@@ -92,26 +91,7 @@ export default function PillRingHero({ name }: { name?: string | null }) {
         </svg>
       </div>
 
-      <div className="grid grid-cols-2 gap-x-5 gap-y-4 mt-1">
-        <button type="button" onClick={toCard} className={`text-left border-t pt-2 ${takenToday ? 'border-foreground' : 'border-primary'}`}>
-          <span className={`label-mono block ${takenToday ? '' : '!text-primary'}`}>Today</span>
-          <span className="block text-[15px] font-medium mt-1.5">{takenToday ? (ring.todayMark === 'late' ? 'Taken, late ✓' : 'Taken ✓') : 'Not logged yet'}</span>
-          <span className={`block text-[13px] mt-0.5 ${takenToday ? 'text-muted-foreground' : 'text-primary'}`}>{takenToday ? 'See you tomorrow' : 'Log today’s pill →'}</span>
-        </button>
-        <div className="text-left border-t border-border pt-2">
-          <span className="label-mono block">Reminder</span>
-          <span className="block font-display text-[26px] leading-none mt-1">{reminder}</span>
-          <span className="block text-[13px] text-muted-foreground mt-1 capitalize">{method === 'pill' ? 'Pill' : method}</span>
-        </div>
-      </div>
-
-      <div className="mt-4 flex items-start justify-between border-t border-foreground pt-2.5">
-        <p className="text-[13px] leading-snug">
-          {ring.packDay ? (ring.packDay > 21 ? 'Break week.' : `${21 - ring.packDay} active pills left in this pack.`) : 'Set your pack start to see the pack.'}
-          <br /><span className="text-muted-foreground">Solid = taken · cross = missed.</span>
-        </p>
-        <p className="label-mono text-right leading-relaxed">{ring.packDay ? `No. ${ring.packDay} / 28` : '28 days'}{first ? <><br />{first}</> : null}</p>
-      </div>
+      <DetailsLink to="/dashboard/stage#contraception" />
     </section>
   );
 }
