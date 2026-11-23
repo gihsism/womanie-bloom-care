@@ -3,7 +3,9 @@ import {
   canOpenChart,
   doctorTodayItems,
   filterPatients,
+  isAccessCodeComplete,
   needsCloseout,
+  normalizeAccessCode,
   pastAppointments,
   patientName,
   recentDocCount,
@@ -58,6 +60,16 @@ describe('consent: doctor only reaches approved patients', () => {
       now: NOW,
     });
     expect(items).toEqual([]);
+  });
+});
+
+describe('access code entry (regression: field capped at 6, real codes are 8)', () => {
+  it('accepts a full 8-character code and strips separators', () => {
+    expect(normalizeAccessCode('abcd-ef23')).toBe('ABCDEF23');
+    expect(normalizeAccessCode(' ab cd ef 23 99')).toBe('ABCDEF23');
+    expect(isAccessCodeComplete('ABCDEF23')).toBe(true);
+    expect(isAccessCodeComplete('ABCDEF')).toBe(true);
+    expect(isAccessCodeComplete('ABCDE')).toBe(false);
   });
 });
 

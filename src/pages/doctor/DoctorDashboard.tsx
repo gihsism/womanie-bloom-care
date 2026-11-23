@@ -1,36 +1,32 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { formatDistanceToNow } from 'date-fns';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 import { useRequireRole } from '@/hooks/useRequireRole';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Switch } from '@/components/ui/switch';
-import { Loader2 } from 'lucide-react';
-import DoctorTodayBanner from '@/components/doctor/DoctorTodayBanner';
-import DoctorCancellationsBanner from '@/components/doctor/DoctorCancellationsBanner';
+import { AlertCircle, ArrowRightLeft, LogOut, Menu, UserPlus } from 'lucide-react';
+import DoctorTodayList from '@/components/doctor/DoctorTodayList';
+import DoctorPatientList from '@/components/doctor/DoctorPatientList';
+import AddPatientForm from '@/components/doctor/AddPatientForm';
+import DoctorAppointments from '@/components/doctor/DoctorAppointments';
 import DoctorProfileEditor from '@/components/doctor/DoctorProfileEditor';
-import {
-  Users,
-  Calendar,
-  Settings,
-  Stethoscope,
-  LogOut,
-  UserPlus,
-  Clock,
-  Video,
-  DollarSign,
-  ArrowRightLeft,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-} from 'lucide-react';
+import ConsultationSettings from '@/components/doctor/ConsultationSettings';
+import type { DoctorAppointment, DoctorPatientConnection } from '@/lib/doctorDashboard';
+
+// Doctor home. Above the fold: name, "Today" (max 3 rows of things that
+// need her), ONE primary action ("Add a patient") and the patient list
+// with search. Appointments and Profile & settings sit behind tabs; log
+// out and patient view sit in the Menu.
 
 interface DoctorProfile {
   id: string;
@@ -40,26 +36,7 @@ interface DoctorProfile {
   verification_status: string | null;
 }
 
-interface PatientConnection {
-  id: string;
-  patient_id: string;
-  status: string | null;
-  created_at: string;
-  connection_type: string | null;
-  patient_full_name?: string | null;
-  patient_life_stage?: string | null;
-  last_upload_at?: string | null;
-  recent_doc_count?: number | string | null;
-}
-
-interface Appointment {
-  id: string;
-  patient_id: string;
-  scheduled_at: string;
-  status: string | null;
-  consultation_type: string | null;
-  duration: number | null;
-}
+type View = 'home' | 'appointments' | 'settings';
 
 const DoctorDashboard = () => {
   const navigate = useNavigate();
@@ -67,38 +44,34 @@ const DoctorDashboard = () => {
   const { loading } = useRequireRole('doctor', '/auth/doctor-login');
   const { user } = useAuth();
   const [doctorProfile, setDoctorProfile] = useState<DoctorProfile | null>(null);
-  const [patients, setPatients] = useState<PatientConnection[]>([]);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
-  const [consultationPrice, setConsultationPrice] = useState<{ price: number; currency: string } | null>(null);
+  const [patients, setPatients] = useState<DoctorPatientConnection[]>([]);
+  const [appointments, setAppointments] = useState<DoctorAppointment[]>([]);
+  // Skeleton only on the first load; refreshes after an action keep the
+  // page (and the open tab's state) in place instead of flashing.
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const [view, setView] = useState<View>('home');
+  const [addingPatient, setAddingPatient] = useState(false);
 
   const loadDoctorData = useCallback(async () => {
     if (!user) return;
-    setIsLoadingData(true);
-
     try {
-      // Load doctor profile
       const { data: profile } = await db
         .from('doctor_profiles')
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
-
       setDoctorProfile(profile);
 
-      // Load patient connections via the consent-gated endpoint so we get
-      // the joined patient_full_name + life_stage (the generic /api/db
-      // router can't join across tables, and the doctor is not the owner
-      // of `profiles` rows so it can't read them directly).
+      // Consent-gated endpoint: joins the patient's name, and her life
+      // stage + upload activity only for APPROVED connections.
       try {
         const resp = await fetch('/api/doctors/connections', { credentials: 'include' });
         if (resp.ok) {
-          const { connections } = (await resp.json()) as { connections: PatientConnection[] };
+          const { connections } = (await resp.json()) as { connections: DoctorPatientConnection[] };
           setPatients(connections || []);
         } else {
-          // Fall back to the unjoined view so the list still renders if the
-          // endpoint is unavailable — names will degrade to "Patient #..."
+          // Unjoined fallback so the list still renders; names degrade
+          // to "Patient #...".
           const { data: connections } = await db
             .from('doctor_patient_connections')
             .select('*')
@@ -110,101 +83,34 @@ const DoctorDashboard = () => {
         setPatients([]);
       }
 
-      // Load appointments
       const { data: appts } = await db
         .from('appointments')
         .select('*')
         .eq('doctor_id', user.id)
         .order('scheduled_at', { ascending: true });
-
       setAppointments(appts || []);
-
-      // Load consultation price
-      const { data: consultSettings } = await db
-        .from('consultation_settings')
-        .select('consultation_price, currency')
-        .eq('doctor_id', user.id)
-        .maybeSingle();
-
-      if (consultSettings?.consultation_price) {
-        setConsultationPrice({
-          price: consultSettings.consultation_price,
-          currency: consultSettings.currency || 'CHF',
-        });
-      }
     } catch (error) {
       console.error('Error loading doctor data:', error);
     } finally {
-      setIsLoadingData(false);
+      setHasLoaded(true);
     }
-     
   }, [user]);
 
   useEffect(() => {
     loadDoctorData();
   }, [loadDoctorData]);
 
-  const handleLogout = async () => {
-    window.location.href = '/api/auth/logout';
-  };
-
-  const handleSwitchToPatient = () => {
-    navigate('/dashboard');
-  };
-
-  const getVerificationBadge = () => {
-    if (!doctorProfile) return null;
-    
-    switch (doctorProfile.verification_status) {
-      case 'approved':
-        return <Badge className="bg-secondary text-secondary-foreground"><CheckCircle className="h-3 w-3 mr-1" /> Verified</Badge>;
-      case 'rejected':
-        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" /> Rejected</Badge>;
-      default:
-        return <Badge variant="outline" className="border-yellow-500 text-yellow-600"><AlertCircle className="h-3 w-3 mr-1" /> Pending Verification</Badge>;
-    }
-  };
-
-  const upcomingAppointments = appointments.filter(
-    apt => new Date(apt.scheduled_at) > new Date() && apt.status !== 'cancelled'
-  );
-
-  const approvedPatients = patients.filter(p => p.status === 'approved');
-
-  // Calendar-month visit counts for the overview stat cards. Computed
-  // from the already-loaded appointments[] so no extra query.
-  const monthStart = (() => {
-    const d = new Date();
-    return new Date(d.getFullYear(), d.getMonth(), 1).getTime();
-  })();
-  const thisMonthApts = appointments.filter(a => Date.parse(a.scheduled_at) >= monthStart);
-  const completedThisMonth = thisMonthApts.filter(a => a.status === 'completed').length;
-  const noShowThisMonth = thisMonthApts.filter(a => a.status === 'no_show').length;
-
-  // patient_id → friendly name (or UUID short-id fallback). Used by every
-  // appointment list so we don't have to repeat the lookup.
-  const patientNameFor = (patientId: string): string => {
-    const p = patients.find(c => c.patient_id === patientId);
-    return p?.patient_full_name?.trim() || `Patient #${patientId.slice(0, 8)}`;
-  };
-
-  if (loading || isLoadingData) {
+  if (loading || !hasLoaded) {
     return (
       <div className="min-h-screen bg-background">
         <div className="border-b border-border bg-card p-4">
-          <div className="flex items-center gap-4">
-            <Skeleton className="h-10 w-10 rounded-full" />
-            <div className="space-y-2">
-              <Skeleton className="h-5 w-32" />
-              <Skeleton className="h-4 w-24" />
-            </div>
-          </div>
+          <Skeleton className="h-6 w-48" />
         </div>
-        <div className="p-6 max-w-7xl mx-auto space-y-6">
-          <Skeleton className="h-10 w-[500px]" />
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 rounded-xl" />)}
-          </div>
+        <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-4">
+          <Skeleton className="h-10 w-full max-w-sm" />
+          <Skeleton className="h-40 rounded-xl" />
+          <Skeleton className="h-11 rounded-xl" />
+          <Skeleton className="h-48 rounded-xl" />
         </div>
       </div>
     );
@@ -212,1089 +118,106 @@ const DoctorDashboard = () => {
 
   if (!user) return null;
 
+  const status = doctorProfile?.verification_status;
+  const verification =
+    status === 'approved'
+      ? null
+      : status === 'rejected'
+      ? { tone: 'bad', text: 'Your licence was not verified. Email support@womanie.info with updated details.' }
+      : status === 'revoked'
+      ? { tone: 'bad', text: 'Your verification was revoked, so patients cannot find you. Email support@womanie.info.' }
+      : { tone: 'wait', text: 'We are checking your licence (1–3 working days). Patients can find you once it is approved.' };
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
+      {/* Header: who you are + one Menu. No logo link out of the app. */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="w-full px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="bg-secondary/10 p-2 rounded-full">
-                <Stethoscope className="h-6 w-6 text-secondary" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold">Doctor Portal</h1>
-                <p className="text-sm text-muted-foreground">
-                  {doctorProfile?.full_name || 'Doctor'} • {doctorProfile?.specialty || 'Specialist'}
-                </p>
-              </div>
-              {getVerificationBadge()}
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleSwitchToPatient}>
-                <ArrowRightLeft className="h-4 w-4 mr-2" />
-                Patient Mode
-              </Button>
-              <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
-                Womanie
-              </a>
-              <Button variant="ghost" size="sm" onClick={handleLogout}>
-                <LogOut className="h-4 w-4" />
-              </Button>
-            </div>
+        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-lg font-bold truncate">{doctorProfile?.full_name || 'Doctor'}</h1>
+            {doctorProfile?.specialty && (
+              <p className="text-sm text-muted-foreground truncate">{doctorProfile.specialty}</p>
+            )}
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2 shrink-0">
+                <Menu className="h-4 w-4" aria-hidden="true" />
+                Menu
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => navigate('/dashboard')}>
+                <ArrowRightLeft className="h-4 w-4 mr-2" aria-hidden="true" />
+                Switch to patient view
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={() => { window.location.href = '/api/auth/logout'; }}>
+                <LogOut className="h-4 w-4 mr-2" aria-hidden="true" />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
-      {/* Verification banner — branches on the actual status instead of
-          claiming everyone is "pending". 'rejected' and 'revoked'
-          surface their own copy with a route to support. */}
-      {doctorProfile?.verification_status !== 'approved' && (() => {
-        const status = doctorProfile?.verification_status;
-        const isRejected = status === 'rejected';
-        const isRevoked = status === 'revoked';
-        const palette = isRejected || isRevoked
-          ? 'bg-destructive/10 border-destructive/30 text-destructive'
-          : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200';
+      {verification && (
+        <div
+          role="status"
+          className={`border-b px-4 py-2 ${
+            verification.tone === 'bad'
+              ? 'bg-destructive/10 border-destructive/30 text-destructive'
+              : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200'
+          }`}
+        >
+          <p className="max-w-3xl mx-auto text-sm flex items-start gap-2">
+            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
+            {verification.text}
+          </p>
+        </div>
+      )}
 
-        let heading = 'Your account is pending verification';
-        let body =
-          'Verification typically takes 1–3 business days. You can keep editing your profile and schedule, but patients won\'t see you in the directory until we approve your license.';
-        if (isRejected) {
-          heading = 'Verification was not approved';
-          body =
-            'We weren\'t able to verify the credentials on file. Email support@womanie.info with your updated license details and we\'ll re-review.';
-        } else if (isRevoked) {
-          heading = 'Verification has been revoked';
-          body =
-            'Your verification was revoked, so you\'re no longer listed in the directory. Email support@womanie.info to reinstate.';
-        }
-
-        return (
-          <div className={`border-b px-4 py-3 ${palette}`}>
-            <div className="flex items-start gap-2">
-              <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-sm font-semibold">{heading}</p>
-                <p className="text-xs mt-0.5 opacity-90 leading-relaxed">{body}</p>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* Main Content */}
-      <div className="p-4 md:p-6 max-w-7xl mx-auto">
-        {/* Day-of consultations — symmetric to the patient-side
-            AppointmentTodayBanner. Hides itself when there's nothing
-            scheduled today. */}
-        <DoctorTodayBanner appointments={appointments} patients={patients} />
-
-        {/* Patient-initiated cancellations from the last 7 days. Doctor-
-            initiated cancellations are filtered out (the doctor already
-            knows). Hides itself when there are none, dismissible per-row. */}
-        <DoctorCancellationsBanner appointments={appointments} patients={patients} />
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-4 lg:w-[500px]">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="patients">Patients</TabsTrigger>
+      <div className="p-4 md:p-6 max-w-3xl mx-auto">
+        <Tabs value={view} onValueChange={v => setView(v as View)} className="space-y-6">
+          <TabsList className="grid grid-cols-3 w-full max-w-md">
+            <TabsTrigger value="home">Home</TabsTrigger>
             <TabsTrigger value="appointments">Appointments</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="settings">Profile & settings</TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('patients')}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{approvedPatients.length}</div>
-                  <p className="text-xs text-muted-foreground">Active connections</p>
-                </CardContent>
-              </Card>
-
-              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('appointments')}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Upcoming</CardTitle>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{upcomingAppointments.length}</div>
-                  <p className="text-xs text-muted-foreground">Scheduled appointments</p>
-                </CardContent>
-              </Card>
-
-              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('appointments')}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">This Month</CardTitle>
-                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{completedThisMonth}</div>
-                  <p className="text-xs text-muted-foreground">
-                    completed
-                    {noShowThisMonth > 0 && ` · ${noShowThisMonth} no-show${noShowThisMonth === 1 ? '' : 's'}`}
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('patients')}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{patients.filter(p => p.status === 'pending').length}</div>
-                  <p className="text-xs text-muted-foreground">Awaiting response</p>
-                </CardContent>
-              </Card>
-
-              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('settings')}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Consultation</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {consultationPrice ? `${consultationPrice.currency} ${consultationPrice.price}` : 'Not set'}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {consultationPrice ? 'Per session' : 'Set in Settings'}
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('patients')}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <UserPlus className="h-5 w-5 text-secondary" />
-                    Connect with Patient
-                  </CardTitle>
-                  <CardDescription>Enter a patient code or send a connection request</CardDescription>
-                </CardHeader>
-              </Card>
-
-              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('appointments')}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-primary" />
-                    Appointments
-                  </CardTitle>
-                  <CardDescription>Review upcoming and past consultations</CardDescription>
-                </CardHeader>
-              </Card>
-
-              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('settings')}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5 text-muted-foreground" />
-                    Consultation Settings
-                  </CardTitle>
-                  <CardDescription>Set prices, schedule, and availability</CardDescription>
-                </CardHeader>
-              </Card>
-            </div>
-
-            {/* Recent Activity */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {upcomingAppointments.length > 0 ? (
-                  <div className="space-y-4">
-                    {upcomingAppointments.slice(0, 5).map((apt) => (
-                      <button
-                        key={apt.id}
-                        type="button"
-                        onClick={() => navigate(`/doctor/patient/${apt.patient_id}`)}
-                        className="flex w-full items-center justify-between border-b pb-4 last:border-0 text-left hover:bg-muted/40 -mx-2 px-2 py-1 rounded transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="bg-primary/10 p-2 rounded-full">
-                            <Calendar className="h-4 w-4 text-primary" />
-                          </div>
-                          <div>
-                            <p className="font-medium">{patientNameFor(apt.patient_id)}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {new Date(apt.scheduled_at).toLocaleDateString()} at{' '}
-                              {new Date(apt.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </p>
-                          </div>
-                        </div>
-                        <Badge variant={apt.consultation_type === 'video' ? 'default' : 'outline'}>
-                          {apt.consultation_type || 'consultation'}
-                        </Badge>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground text-center py-8">No upcoming appointments</p>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Patients Tab */}
-          <TabsContent value="patients">
-            <PatientManagement 
-              patients={patients} 
-              onRefresh={loadDoctorData}
+          <TabsContent value="home" className="space-y-6">
+            <DoctorTodayList
+              appointments={appointments}
+              patients={patients}
+              onOpenAppointments={() => setView('appointments')}
             />
+
+            {addingPatient ? (
+              <AddPatientForm onAdded={loadDoctorData} onClose={() => setAddingPatient(false)} />
+            ) : (
+              <Button
+                size="lg"
+                className="w-full gap-2 bg-secondary hover:bg-secondary/90"
+                onClick={() => setAddingPatient(true)}
+              >
+                <UserPlus className="h-5 w-5" aria-hidden="true" />
+                Add a patient
+              </Button>
+            )}
+
+            <DoctorPatientList patients={patients} />
           </TabsContent>
 
-          {/* Appointments Tab */}
           <TabsContent value="appointments">
-            <AppointmentsView appointments={appointments} patients={patients} onChange={loadDoctorData} />
+            <DoctorAppointments appointments={appointments} patients={patients} onChange={loadDoctorData} />
           </TabsContent>
 
-          {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
             <DoctorProfileEditor doctorId={user.id} />
             <ConsultationSettings doctorId={user.id} />
           </TabsContent>
         </Tabs>
       </div>
-    </div>
-  );
-};
-
-// Sub-components
-const PatientManagement = ({ patients, onRefresh }: { patients: PatientConnection[], onRefresh: () => void }) => {
-  const [accessCode, setAccessCode] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const { toast } = useToast();
-  const navigate = useNavigate();
-
-  // Sort: approved patients with new uploads first (by recent_doc_count
-  // desc), then approved by last_upload_at desc, then everyone else by
-  // created_at desc. Pending/rejected stay at the bottom.
-  const sortedPatients = useMemo(() => {
-    const score = (p: PatientConnection): [number, number] => {
-      const approved = p.status === 'approved' ? 1 : 0;
-      const recent = Number(p.recent_doc_count ?? 0);
-      const lastUpload = p.last_upload_at ? Date.parse(p.last_upload_at) : 0;
-      const created = Date.parse(p.created_at) || 0;
-      const primary = approved * 10_000_000_000 + recent * 1_000_000_000 + lastUpload / 1000;
-      return [primary, created];
-    };
-    return [...patients].sort((a, b) => {
-      const [pa, ca] = score(a);
-      const [pb, cb] = score(b);
-      if (pb !== pa) return pb - pa;
-      return cb - ca;
-    });
-  }, [patients]);
-
-  // Search filter — name, life stage, and the patient_id short-prefix
-  // so a doctor can paste a recent reference like "Patient #a1b2c3d4".
-  const visiblePatients = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return sortedPatients;
-    return sortedPatients.filter(p => {
-      const name = (p.patient_full_name ?? '').toLowerCase();
-      const stage = (p.patient_life_stage ?? '').toLowerCase();
-      const shortId = p.patient_id.slice(0, 8).toLowerCase();
-      return name.includes(q) || stage.includes(q) || shortId.includes(q);
-    });
-  }, [sortedPatients, searchQuery]);
-
-  const handleSubmitCode = async () => {
-    if (!accessCode.trim()) return;
-    setIsSubmitting(true);
-
-    try {
-      // Delegate to the server. The doctor can't run this through the
-      // generic /api/db router because the patient_access_codes row is
-      // owned by the patient; redeem-code runs the whole cascade
-      // server-side under the doctor's session.
-      const resp = await fetch('/api/connections/redeem-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: accessCode.trim() }),
-      });
-      const data = await resp.json().catch(() => ({}));
-      if (!resp.ok) {
-        const msg: string = data.error || 'Failed to process the access code.';
-        if (resp.status === 404) {
-          toast({ variant: 'destructive', title: 'Invalid code', description: msg });
-        } else if (resp.status === 409) {
-          toast({ variant: 'destructive', title: 'Already connected', description: msg });
-        } else if (resp.status === 403) {
-          toast({ variant: 'destructive', title: 'Not allowed', description: msg });
-        } else {
-          toast({ variant: 'destructive', title: 'Error', description: msg });
-        }
-        return;
-      }
-
-      toast({
-        title: 'Connection request sent',
-        description: 'The patient will need to approve your connection request.',
-      });
-
-      setAccessCode('');
-      onRefresh();
-    } catch (error) {
-      console.error('Error submitting code:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to process the access code.',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Enter Access Code */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" />
-            Connect with Patient
-          </CardTitle>
-          <CardDescription>Enter a patient's access code to send a connection request</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <input
-              type="text"
-              placeholder="Enter 6-digit code"
-              value={accessCode}
-              onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
-              className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary bg-background"
-              maxLength={6}
-            />
-            <Button 
-              onClick={handleSubmitCode} 
-              disabled={accessCode.length < 6 || isSubmitting}
-              className="bg-secondary hover:bg-secondary/90"
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit Code'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Patient List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Connected Patients</CardTitle>
-          <CardDescription>{patients.filter(p => p.status === 'approved').length} approved connections</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {patients.length > 5 && (
-            <div className="mb-3">
-              <input
-                type="text"
-                placeholder="Search by name, life stage, or patient #..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-secondary bg-background"
-              />
-            </div>
-          )}
-          {patients.length > 0 ? (
-            visiblePatients.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8 text-sm">No patients match "{searchQuery}".</p>
-            ) : (
-            <div className="space-y-4">
-              {visiblePatients.map((patient) => {
-                const recentCount = Number(patient.recent_doc_count ?? 0);
-                const lastUpload = patient.last_upload_at ? new Date(patient.last_upload_at) : null;
-                return (
-                <div key={patient.id} className="flex items-center justify-between border-b pb-4 last:border-0">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-muted p-2 rounded-full">
-                      <Users className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-medium">
-                          {patient.patient_full_name?.trim() || `Patient #${patient.patient_id.slice(0, 8)}`}
-                        </p>
-                        {recentCount > 0 && patient.status === 'approved' && (
-                          <button
-                            type="button"
-                            onClick={() => navigate(`/doctor/patient/${patient.patient_id}?tab=documents`)}
-                            className="h-4 px-1.5 text-[9px] inline-flex items-center rounded-md bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors"
-                            title="Open the patient's documents tab"
-                          >
-                            {recentCount} new
-                          </button>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {patient.patient_life_stage ? `${patient.patient_life_stage.replace(/-/g, ' ')} · ` : ''}
-                        {lastUpload && patient.status === 'approved'
-                          ? `Last upload ${formatDistanceToNow(lastUpload, { addSuffix: true })}`
-                          : `Connected via ${patient.connection_type || 'request'}`}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={patient.status === 'approved' ? 'default' : 'outline'}>
-                      {patient.status}
-                    </Badge>
-                    {patient.status === 'approved' && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate(`/doctor/patient/${patient.patient_id}`)}
-                      >
-                        View Details
-                      </Button>
-                    )}
-                  </div>
-                </div>
-                );
-              })}
-            </div>
-            )
-          ) : (
-            <p className="text-muted-foreground text-center py-8">No patient connections yet</p>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
-
-const AppointmentsView = ({ appointments, patients, onChange }: { appointments: Appointment[]; patients: PatientConnection[]; onChange: () => void }) => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [busyId, setBusyId] = useState<string | null>(null);
-  const patientNameFor = (patientId: string): string => {
-    const p = patients.find(c => c.patient_id === patientId);
-    return p?.patient_full_name?.trim() || `Patient #${patientId.slice(0, 8)}`;
-  };
-  const upcomingAppointments = appointments.filter(
-    apt => new Date(apt.scheduled_at) > new Date() && apt.status !== 'cancelled'
-  );
-
-  const pastAppointments = appointments.filter(
-    apt => new Date(apt.scheduled_at) <= new Date() || apt.status === 'cancelled'
-  );
-
-  // Doctor-initiated cancellation. The patient-side flow already
-  // handles cancelling their own appointment; this lets the doctor
-  // call off a visit they can't make and tell the patient why.
-  // Reason is stamped into appointments.notes (no other surface writes
-  // there) with a "Cancelled by doctor: <reason>" prefix so the patient
-  // Appointments page can render the reason cleanly.
-  const cancelByDoctor = async (apt: Appointment) => {
-    const patientLabel = patientNameFor(apt.patient_id);
-    const when = new Date(apt.scheduled_at).toLocaleString();
-    const reason = window.prompt(
-      `Cancel the appointment with ${patientLabel} on ${when}?\n\nReason (the patient will see this):`,
-      ''
-    );
-    if (reason === null) return; // user cancelled the dialog
-    const trimmed = reason.trim();
-    if (!trimmed) {
-      toast({
-        variant: 'destructive',
-        title: 'Reason required',
-        description: 'Add a short reason so the patient understands why.',
-      });
-      return;
-    }
-    setBusyId(apt.id);
-    try {
-      const { error } = await db
-        .from('appointments')
-        .update({ status: 'cancelled', notes: `Cancelled by doctor: ${trimmed}` })
-        .eq('id', apt.id);
-      if (error) throw error;
-      toast({
-        title: 'Appointment cancelled',
-        description: `${patientLabel} will see the cancellation and reason in their Appointments view.`,
-      });
-      onChange();
-    } catch (e) {
-      console.error('Doctor cancel failed:', e);
-      toast({ variant: 'destructive', title: 'Could not cancel', description: 'Please try again.' });
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  // Visit closeout. After a scheduled appointment is in the past, the
-  // doctor is the only one who knows whether the patient turned up —
-  // these actions stamp the row so it stops looking ambiguous on both
-  // dashboards (and the patient's past-appointments view).
-  const setStatus = async (apt: Appointment, next: 'completed' | 'no_show' | 'scheduled') => {
-    setBusyId(apt.id);
-    try {
-      const { error } = await db
-        .from('appointments')
-        .update({ status: next })
-        .eq('id', apt.id);
-      if (error) throw error;
-      const label = next === 'completed' ? 'Marked completed'
-        : next === 'no_show' ? 'Marked no-show'
-        : 'Reopened';
-      // After marking a visit completed, offer a one-click jump into the
-      // patient's chart with the notes form pre-opened and the title
-      // pre-filled with "Visit on <date>". Keeps the doctor's after-visit
-      // documentation flow tight: complete the row, write a quick note,
-      // done.
-      if (next === 'completed') {
-        const isoDate = apt.scheduled_at.split('T')[0];
-        const visitUrl = `/doctor/patient/${apt.patient_id}?addNote=visit&date=${isoDate}`;
-        toast({
-          title: label,
-          description: `${patientNameFor(apt.patient_id)} · ${new Date(apt.scheduled_at).toLocaleDateString()}`,
-          action: (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => navigate(visitUrl)}
-            >
-              Add visit note
-            </Button>
-          ),
-        });
-      } else {
-        toast({ title: label, description: `${patientNameFor(apt.patient_id)} · ${new Date(apt.scheduled_at).toLocaleDateString()}` });
-      }
-      onChange();
-    } catch (e) {
-      console.error('Failed to update appointment status:', e);
-      toast({ variant: 'destructive', title: 'Could not update', description: 'Please try again.' });
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Upcoming Appointments</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {upcomingAppointments.length > 0 ? (
-            <div className="space-y-4">
-              {upcomingAppointments.map((apt) => (
-                <div key={apt.id} className="flex items-center justify-between border-b pb-4 last:border-0">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-primary/10 p-2 rounded-full">
-                      {apt.consultation_type === 'video' ? (
-                        <Video className="h-4 w-4 text-primary" />
-                      ) : (
-                        <Calendar className="h-4 w-4 text-primary" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-medium">{patientNameFor(apt.patient_id)}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(apt.scheduled_at).toLocaleDateString('en-US', {
-                          weekday: 'long',
-                          month: 'short',
-                          day: 'numeric',
-                        })}{' '}
-                        at {new Date(apt.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} •{' '}
-                        {apt.duration} min
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge>{apt.consultation_type || 'consultation'}</Badge>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => navigate(`/doctor/patient/${apt.patient_id}`)}
-                    >
-                      Open chart
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-muted-foreground hover:text-destructive"
-                      onClick={() => cancelByDoctor(apt)}
-                      disabled={busyId === apt.id}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-center py-8">No upcoming appointments</p>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Past Appointments</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {pastAppointments.length > 0 ? (
-            <div className="space-y-4">
-              {pastAppointments.slice(0, 10).map((apt) => {
-                const needsCloseout =
-                  apt.status !== 'completed' &&
-                  apt.status !== 'no_show' &&
-                  apt.status !== 'cancelled' &&
-                  new Date(apt.scheduled_at) <= new Date();
-                const wasResolved = apt.status === 'completed' || apt.status === 'no_show';
-                return (
-                  <div
-                    key={apt.id}
-                    className={`flex flex-wrap items-center justify-between gap-2 border-b pb-4 last:border-0 ${
-                      apt.status === 'cancelled' ? 'opacity-60' : ''
-                    }`}
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium">{patientNameFor(apt.patient_id)}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(apt.scheduled_at).toLocaleDateString()} • {apt.duration} min • {apt.status || 'scheduled'}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {needsCloseout && (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7 text-xs"
-                            disabled={busyId === apt.id}
-                            onClick={() => setStatus(apt, 'completed')}
-                          >
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Mark completed
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-7 text-xs text-muted-foreground"
-                            disabled={busyId === apt.id}
-                            onClick={() => setStatus(apt, 'no_show')}
-                          >
-                            <XCircle className="h-3 w-3 mr-1" />
-                            No-show
-                          </Button>
-                        </>
-                      )}
-                      {wasResolved && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-7 text-xs text-muted-foreground"
-                          disabled={busyId === apt.id}
-                          onClick={() => setStatus(apt, 'scheduled')}
-                          title="Reopen this appointment"
-                        >
-                          Undo
-                        </Button>
-                      )}
-                      <Badge
-                        variant="outline"
-                        className={
-                          apt.status === 'completed'
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200'
-                            : apt.status === 'no_show'
-                            ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200'
-                            : apt.status === 'cancelled'
-                            ? 'bg-muted text-muted-foreground'
-                            : ''
-                        }
-                      >
-                        {apt.status || 'scheduled'}
-                      </Badge>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-center py-8">No past appointments</p>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
-
-const ConsultationSettings = ({ doctorId }: { doctorId: string }) => {
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [settings, setSettings] = useState({
-    is_available: false,
-    consultation_price: 80,
-    currency: 'CHF',
-    consultation_duration: 30,
-    video_enabled: true,
-  });
-
-  const loadSettings = useCallback(async () => {
-    try {
-      const { data } = await db
-        .from('consultation_settings')
-        .select('*')
-        .eq('doctor_id', doctorId)
-        .maybeSingle();
-
-      if (data) {
-        setSettings({
-          is_available: data.is_available || false,
-          consultation_price: data.consultation_price || 80,
-          currency: data.currency || 'CHF',
-          consultation_duration: data.consultation_duration || 30,
-          video_enabled: data.video_enabled ?? true,
-        });
-      }
-    } catch (error) {
-      console.error('Error loading settings:', error);
-    } finally {
-      setIsLoading(false);
-    }
-     
-  }, [doctorId]);
-
-  useEffect(() => {
-    loadSettings();
-  }, [loadSettings]);
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      const { error } = await db
-        .from('consultation_settings')
-        .upsert({
-          doctor_id: doctorId,
-          ...settings,
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: 'Settings saved',
-        description: 'Your consultation settings have been updated.',
-      });
-    } catch (error) {
-      console.error('Error saving settings:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to save settings.',
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <Skeleton className="h-48 w-full rounded-xl" />
-        <Skeleton className="h-32 w-full rounded-xl" />
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            Consultation Settings
-          </CardTitle>
-          <CardDescription>Configure your consultation availability and pricing</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Availability Toggle */}
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div>
-              <p className="font-medium">Available for Consultations</p>
-              <p className="text-sm text-muted-foreground">Turn on to accept new appointments</p>
-            </div>
-            <Switch
-              checked={settings.is_available}
-              onCheckedChange={(checked) => setSettings(s => ({ ...s, is_available: checked }))}
-              aria-label="Toggle consultation availability"
-            />
-          </div>
-
-          {/* Pricing */}
-          <div className="space-y-4">
-            <h3 className="font-medium flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
-              Pricing
-            </h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Consultation Price</label>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    value={settings.consultation_price}
-                    onChange={(e) => setSettings(s => ({ ...s, consultation_price: Number(e.target.value) }))}
-                    className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary bg-background"
-                    min={0}
-                  />
-                  <select
-                    value={settings.currency}
-                    onChange={(e) => setSettings(s => ({ ...s, currency: e.target.value }))}
-                    className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary bg-background"
-                  >
-                    <option value="CHF">CHF</option>
-                    <option value="EUR">EUR</option>
-                    <option value="USD">USD</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Session Duration (minutes)</label>
-                <select
-                  value={settings.consultation_duration}
-                  onChange={(e) => setSettings(s => ({ ...s, consultation_duration: Number(e.target.value) }))}
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary bg-background"
-                >
-                  <option value={15}>15 minutes</option>
-                  <option value={30}>30 minutes</option>
-                  <option value={45}>45 minutes</option>
-                  <option value={60}>60 minutes</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Video Consultations */}
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div>
-              <p className="font-medium flex items-center gap-2">
-                <Video className="h-4 w-4" aria-hidden="true" />
-                Video Consultations
-              </p>
-              <p className="text-sm text-muted-foreground">Enable video call appointments</p>
-            </div>
-            <Switch
-              checked={settings.video_enabled}
-              onCheckedChange={(checked) => setSettings(s => ({ ...s, video_enabled: checked }))}
-              aria-label="Toggle video consultations"
-            />
-          </div>
-
-          {/* Payment Info */}
-          <div className="p-4 border rounded-lg bg-muted/50">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium">Payment Processing</p>
-                <p className="text-sm text-muted-foreground">
-                  Payment processing will be enabled soon. Patients will be able to pay for consultations directly through the platform.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <Button onClick={handleSave} disabled={isSaving} className="w-full bg-secondary hover:bg-secondary/90">
-            {isSaving ? 'Saving...' : 'Save Settings'}
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Schedule Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Weekly Schedule
-          </CardTitle>
-          <CardDescription>Set your available hours for each day</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ScheduleEditor doctorId={doctorId} />
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
-
-const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
-  const { toast } = useToast();
-  const [isSaving, setIsSaving] = useState(false);
-  const [schedule, setSchedule] = useState<Record<number, { start: string; end: string; active: boolean }>>({
-    0: { start: '09:00', end: '17:00', active: false },
-    1: { start: '09:00', end: '17:00', active: true },
-    2: { start: '09:00', end: '17:00', active: true },
-    3: { start: '09:00', end: '17:00', active: true },
-    4: { start: '09:00', end: '17:00', active: true },
-    5: { start: '09:00', end: '17:00', active: true },
-    6: { start: '09:00', end: '17:00', active: false },
-  });
-
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-  // Load existing schedule
-  useEffect(() => {
-    const loadSchedule = async () => {
-      const { data } = await db
-        .from('doctor_schedule')
-        .select('*')
-        .eq('doctor_id', doctorId);
-
-      if (data && data.length > 0) {
-        setSchedule(prev => {
-          const loaded = { ...prev };
-          data.forEach((s: { day_of_week: number | null; start_time: string; end_time: string; is_active: boolean | null }) => {
-            if (s.day_of_week !== null) {
-              loaded[s.day_of_week] = {
-                start: s.start_time,
-                end: s.end_time,
-                active: s.is_active ?? true,
-              };
-            }
-          });
-          return loaded;
-        });
-      }
-    };
-    loadSchedule();
-  }, [doctorId]);
-
-  // Identify any active day whose end_time isn't strictly after start_time.
-  // A 0- or negative-length window would otherwise sit in the schedule
-  // table and silently produce zero bookable slots for that day.
-  const invalidDays = Object.entries(schedule)
-    .filter(([, s]) => s.active && s.start >= s.end)
-    .map(([day]) => Number(day));
-
-  const handleSaveSchedule = async () => {
-    if (invalidDays.length > 0) {
-      const dayList = invalidDays.map((d) => days[d]).join(', ');
-      toast({
-        variant: 'destructive',
-        title: 'Fix the highlighted days',
-        description: `End time must be after start time on ${dayList}.`,
-      });
-      return;
-    }
-    setIsSaving(true);
-    try {
-      // Replace the whole schedule atomically server-side. A previous
-      // delete-then-insert via /api/db could wipe the schedule and then
-      // fail the insert, leaving the doctor unbookable.
-      const days = Object.entries(schedule)
-        .filter(([, s]) => s.active)
-        .map(([day, s]) => ({
-          day_of_week: Number(day),
-          start_time: s.start,
-          end_time: s.end,
-        }));
-
-      const resp = await fetch('/api/doctors/schedule', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ days }),
-      });
-      if (!resp.ok) {
-        const { error } = await resp.json().catch(() => ({ error: 'Failed to save schedule' }));
-        throw new Error(error || 'Failed to save schedule');
-      }
-
-      toast({ title: 'Schedule saved', description: 'Your weekly schedule has been updated.' });
-    } catch (error) {
-      console.error('Error saving schedule:', error);
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to save schedule.' });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const toggleDay = (day: number) => {
-    setSchedule(s => ({
-      ...s,
-      [day]: { ...s[day], active: !s[day].active }
-    }));
-  };
-
-  const updateTime = (day: number, field: 'start' | 'end', value: string) => {
-    setSchedule(s => ({
-      ...s,
-      [day]: { ...s[day], [field]: value }
-    }));
-  };
-
-  return (
-    <div className="space-y-3">
-      {days.map((dayName, index) => {
-        const invalid = invalidDays.includes(index);
-        return (
-          <div
-            key={index}
-            className={`flex items-center gap-4 p-3 border rounded-lg ${
-              invalid ? 'border-destructive bg-destructive/5' : ''
-            }`}
-          >
-            <button
-              onClick={() => toggleDay(index)}
-              className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
-                schedule[index].active
-                  ? 'bg-secondary border-secondary text-secondary-foreground'
-                  : 'border-muted-foreground'
-              }`}
-            >
-              {schedule[index].active && <CheckCircle className="h-4 w-4" />}
-            </button>
-            <span className="w-24 font-medium">{dayName}</span>
-            {schedule[index].active ? (
-              <div className="flex items-center gap-2 flex-1">
-                <input
-                  type="time"
-                  value={schedule[index].start}
-                  onChange={(e) => updateTime(index, 'start', e.target.value)}
-                  className={`px-3 py-1 border rounded bg-background ${invalid ? 'border-destructive' : ''}`}
-                />
-                <span className="text-muted-foreground">to</span>
-                <input
-                  type="time"
-                  value={schedule[index].end}
-                  onChange={(e) => updateTime(index, 'end', e.target.value)}
-                  className={`px-3 py-1 border rounded bg-background ${invalid ? 'border-destructive' : ''}`}
-                />
-                {invalid && (
-                  <span className="text-xs text-destructive ml-2">End must be after start</span>
-                )}
-              </div>
-            ) : (
-              <span className="text-muted-foreground">Unavailable</span>
-            )}
-          </div>
-        );
-      })}
-      <Button
-        className="w-full mt-4 bg-secondary hover:bg-secondary/90"
-        onClick={handleSaveSchedule}
-        disabled={isSaving || invalidDays.length > 0}
-      >
-        {isSaving ? (
-          <>
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            Saving...
-          </>
-        ) : (
-          'Save Schedule'
-        )}
-      </Button>
     </div>
   );
 };

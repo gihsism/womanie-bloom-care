@@ -55,6 +55,19 @@ export function patientName(
   return p?.patient_full_name?.trim() || `Patient #${patientId.slice(0, 8)}`;
 }
 
+// Patient access codes (ShareWithDoctor) are 8 uppercase characters. The
+// old doctor field capped input at 6, so no real code could be entered.
+// Accept 6-8 (older codes) and drop spaces/dashes people type when
+// reading a code aloud.
+export const ACCESS_CODE_MIN = 6;
+export const ACCESS_CODE_MAX = 8;
+export function normalizeAccessCode(raw: string): string {
+  return raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, ACCESS_CODE_MAX);
+}
+export function isAccessCodeComplete(code: string): boolean {
+  return code.length >= ACCESS_CODE_MIN && code.length <= ACCESS_CODE_MAX;
+}
+
 // Consent rule mirrored from /api/doctors/patient: a chart opens only
 // for an approved connection. Pending rows show the name and nothing else.
 export function canOpenChart(conn: Pick<DoctorPatientConnection, 'status'>): boolean {
