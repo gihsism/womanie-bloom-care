@@ -107,6 +107,26 @@ describe('doctors/patient security invariants', () => {
     expect(auditCalls.length).toBeGreaterThanOrEqual(1);
   });
 
+  // Regression: the doctor's "Open document" button needs file_path; the
+  // select used to omit it, so every click failed. It must be scoped to
+  // the patient id that passed the consent gate.
+  it('documents query returns file_path, scoped to the consented patient', async () => {
+    const res = mockRes();
+    await handler(mockReq(PATIENT_ID), res);
+    const docCall = query.mock.calls.find(([sql]: [string]) => /FROM health_documents/i.test(sql)) as [string, unknown[]];
+    expect(docCall[0]).toMatch(/file_path/);
+    expect(docCall[1]).toEqual([PATIENT_ID]);
+  });
+
+  it('returns no chart data at all when consent is missing', async () => {
+    query.mockReset();
+    query.mockResolvedValue([]);
+    const res = mockRes();
+    await handler(mockReq(PATIENT_ID), res);
+    expect(res._status).toBe(403);
+    expect(query.mock.calls.some(([sql]: [string]) => /health_documents|daily_health_signals|doctor_notes/i.test(sql))).toBe(false);
+  });
+
   it('returns 200 with the full patient data shape on success', async () => {
     const res = mockRes();
     await handler(mockReq(PATIENT_ID), res);
