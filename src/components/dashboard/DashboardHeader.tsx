@@ -1,25 +1,14 @@
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { 
-  MessageSquare, 
-  Activity, 
-  Smartphone, 
-  Users,
+  Activity,
   Calendar as CalendarIcon,
   Heart,
   Pill,
   TrendingUp,
   Baby,
   Flame,
-  Upload,
 } from 'lucide-react';
+import { stageLabel } from '@/lib/stageLabels';
 
 export type LifeStage =
   | 'pre-menstrual'
@@ -35,14 +24,13 @@ export type LifeStage =
 interface DashboardHeaderProps {
   userName: string;
   selectedMode: LifeStage;
-  onModeChange: (mode: LifeStage) => void;
-  onUploadClick?: () => void;
-  onDoctorChatClick?: () => void;
 }
 
-const DashboardHeader = ({ userName, selectedMode, onModeChange, onUploadClick, onDoctorChatClick }: DashboardHeaderProps) => {
-  const navigate = useNavigate();
-
+// Home's header: the greeting, and under it the life stage as a quiet
+// "· change" link. The stage is changed in one place only (Me -> Life
+// stage), so this links there instead of offering its own dropdown.
+// No Back arrow, logo, menu or action pills: the tab bar covers those.
+const DashboardHeader = ({ userName, selectedMode }: DashboardHeaderProps) => {
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
@@ -50,90 +38,18 @@ const DashboardHeader = ({ userName, selectedMode, onModeChange, onUploadClick, 
     return 'Good evening';
   };
 
-  const quickActions = [
-    // Phones already have Records in the bottom tab bar, so this one is desktop-only.
-    { id: 'B3', icon: TrendingUp, label: 'Med Records', color: 'text-accent', action: () => navigate('/dashboard/medical-history'), desktopOnly: true },
-    { id: 'B4', icon: Smartphone, label: 'Devices', color: 'text-muted-foreground', action: () => navigate('/dashboard/devices') },
-    { id: 'B5', icon: Users, label: 'Community', color: 'text-primary', action: () => navigate('/community') },
-  ];
-
-  const modeOptions = [
-    { value: 'pre-menstrual', label: 'Pre-Menstrual' },
-    { value: 'menstrual-cycle', label: 'Menstrual Cycle' },
-    { value: 'contraception', label: 'Contraception Mode' },
-    { value: 'conception', label: 'Conception Mode' },
-    { value: 'ivf', label: 'IVF Mode' },
-    { value: 'pregnancy', label: 'Pregnancy Mode' },
-    { value: 'postpartum', label: 'Postpartum Mode' },
-    { value: 'menopause', label: 'Menopause Mode' },
-    { value: 'post-menopause', label: 'Post-Menopause Mode' },
-  ];
-
-  const getModeLabel = (mode: LifeStage) => {
-    const option = modeOptions.find(o => o.value === mode);
-    return option?.label || 'Select Mode';
-  };
-
   return (
-    <div className="space-y-3">
-      {/* Greeting + life-stage switch (version 8: quiet serif line, mono label) */}
-      <div>
-        <h1 className="font-display text-[26px] font-normal leading-tight">
-          {getGreeting()}, {userName}
-        </h1>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="tap-target label-mono !text-primary inline-flex items-center gap-1 mt-1 hover:underline focus:outline-none" aria-label="Switch life stage">
-              {getModeLabel(selectedMode)}
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M3 5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-52">
-            <DropdownMenuLabel className="text-xs text-muted-foreground">Switch mode</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {modeOptions.map((option) => (
-              <DropdownMenuItem
-                key={option.value}
-                onClick={() => onModeChange(option.value as LifeStage)}
-                className={selectedMode === option.value ? 'bg-primary/10 font-medium' : ''}
-              >
-                {option.label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
-      {/* Quick actions as pills */}
-      <div className="flex flex-wrap items-center gap-2 pb-1">
-        <button
-          onClick={onUploadClick}
-          className="inline-flex items-center gap-1.5 rounded-full bg-foreground text-background px-3.5 py-1.5 text-[13px] font-medium"
-          aria-label="Upload health document"
-        >
-          <Upload className="h-3.5 w-3.5" aria-hidden="true" /> Upload
-        </button>
-        <button
-          onClick={onDoctorChatClick}
-          className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-primary text-primary px-3.5 py-1.5 text-[13px] font-medium"
-          aria-label="Open AI Health Assistant"
-        >
-          <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" /> Health Chat
-        </button>
-        {quickActions.map((action) => {
-          const IconComponent = action.icon;
-          return (
-            <button
-              key={action.id}
-              onClick={action.action}
-              className={`${action.desktopOnly ? 'hidden md:inline-flex' : 'inline-flex'} items-center gap-1.5 rounded-full border border-foreground/70 px-3.5 py-1.5 text-[13px] font-medium`}
-              aria-label={action.label}
-            >
-              <IconComponent className="h-3.5 w-3.5" aria-hidden="true" /> {action.label}
-            </button>
-          );
-        })}
-      </div>
+    <div>
+      <h1 className="font-display text-[26px] font-normal leading-tight">
+        {getGreeting()}, {userName}
+      </h1>
+      <p className="mt-1 text-sm text-muted-foreground">
+        {stageLabel(selectedMode)}
+        {' · '}
+        <Link to="/dashboard/settings" className="text-primary hover:underline" aria-label={`Change life stage (now ${stageLabel(selectedMode)})`}>
+          change
+        </Link>
+      </p>
     </div>
   );
 };

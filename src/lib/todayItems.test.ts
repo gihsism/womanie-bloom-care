@@ -58,6 +58,7 @@ describe('todayItems', () => {
     expect(ids('conception', { periodDaysUntil: 3 })).toEqual([]); // no PMS row when trying to conceive
     expect(ids('menstrual-cycle', { periodDaysUntil: 0 })).toEqual(['period-soon']);
     expect(todayItems('menstrual-cycle', { now: NOW, periodDaysUntil: -1 })[0].label).toBe('Period 1 day late? Log it if it started');
+    expect(ids('menstrual-cycle', { periodDaysUntil: -15 })).toEqual([]); // a stale log, not a late period
   });
 
   it('visits further than 7 days out are not a Today row', () => {

@@ -42,6 +42,7 @@ export interface TodaySignals {
 export const MAX_TODAY = 3;
 export const MAX_MORE = 4;
 const DAY = 86_400_000;
+export const MAX_LATE_DAYS = 14;
 
 const WEEKDAY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const hhmm = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -83,10 +84,11 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
   // 4. A due stage task: period due in the next 2 days, or late
   const pd = s.periodDaysUntil;
   if (CYCLE_STAGES.includes(mode) && pd != null) {
-    if (pd < 0) {
+    // Late by up to two weeks; beyond that the log is likely just stale.
+    if (pd < 0 && pd >= -MAX_LATE_DAYS) {
       const late = -pd;
       items.push({ id: 'period-late', label: `Period ${late} day${late === 1 ? '' : 's'} late? Log it if it started`, target: 'sheet:log' });
-    } else if (pd <= 2) {
+    } else if (pd >= 0 && pd <= 2) {
       const when = pd === 0 ? 'today' : pd === 1 ? 'tomorrow' : 'in 2 days';
       items.push({ id: 'period-soon', label: `Period likely ${when}`, target: 'sheet:log' });
     }
