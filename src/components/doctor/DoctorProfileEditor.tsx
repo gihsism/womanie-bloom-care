@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -55,6 +55,7 @@ const DoctorProfileEditor = ({ doctorId }: DoctorProfileEditorProps) => {
   const [languagesText, setLanguagesText] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -222,8 +223,7 @@ const DoctorProfileEditor = ({ doctorId }: DoctorProfileEditorProps) => {
           Public profile
         </CardTitle>
         <CardDescription>
-          What patients see when they find you in the directory. Fields are stored on
-          doctor_profiles.
+          What patients see when they find you in the doctor directory.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -248,11 +248,16 @@ const DoctorProfileEditor = ({ doctorId }: DoctorProfileEditorProps) => {
               JPG / PNG / WebP, up to 5 MB. Shown on every directory card and patient view.
             </p>
             <div className="flex flex-wrap gap-2">
-              <label className="inline-flex">
+              {/* A real button (was a <span> inside a <label>, which a
+                  keyboard could not reach) that opens the hidden picker. */}
+              <span className="inline-flex">
                 <input
+                  ref={avatarInputRef}
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   className="hidden"
+                  tabIndex={-1}
+                  aria-hidden="true"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
                     if (f) {
@@ -263,16 +268,20 @@ const DoctorProfileEditor = ({ doctorId }: DoctorProfileEditorProps) => {
                     }
                   }}
                 />
-                <Button asChild size="sm" variant="outline" disabled={uploadingAvatar}>
-                  <span>
-                    {uploadingAvatar ? (
-                      <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />Uploading…</>
-                    ) : (
-                      <><Upload className="h-3.5 w-3.5 mr-1.5" />{avatarUrl ? 'Replace' : 'Upload'}</>
-                    )}
-                  </span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={uploadingAvatar}
+                  onClick={() => avatarInputRef.current?.click()}
+                >
+                  {uploadingAvatar ? (
+                    <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />Uploading…</>
+                  ) : (
+                    <><Upload className="h-3.5 w-3.5 mr-1.5" aria-hidden="true" />{avatarUrl ? 'Replace photo' : 'Upload photo'}</>
+                  )}
                 </Button>
-              </label>
+              </span>
               {avatarUrl && (
                 <Button
                   size="sm"
