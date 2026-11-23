@@ -1,0 +1,199 @@
+import type { LifeStage } from '@/components/dashboard/DashboardHeader';
+
+// Home's three answers to "what do I do now?", as pure functions so they
+// can be unit-tested without a browser or database:
+//   todayItems()        — the ranked "Today" list (max 3 one-line rows)
+//   primaryActionFor()  — the single filled button for the stage
+//   moreFor()           — the "More for <stage>" links (max 4)
+//
+// A target is either a route ('/path' or '/path#anchor') or one of the Log
+// sheet targets ('sheet:log' opens today's log, 'sheet:medicines' opens the
+// sheet on the medicine ticks).
+
+export type Target = string;
+
+export const STAGE_PAGE = '/dashboard/stage';
+export const RECORDS = '/dashboard/medical-history';
+export const VISITS = '/dashboard/appointments';
+export const ME = '/dashboard/settings';
+
+export interface TodayItem {
+  id: string;
+  label: string; // one line, ≤ 60 characters
+  target: Target;
+}
+
+export interface TodaySignals {
+  now?: Date;
+  /** Start time of a (not yet finished) visit today. */
+  appointmentToday?: Date | null;
+  /** Doctor notes written in the last 14 days. */
+  newDoctorNotes?: number;
+  /** Results marked "talk to your doctor". */
+  flaggedResults?: number;
+  /** Days until the next predicted period; negative = late. Cycle stages only. */
+  periodDaysUntil?: number | null;
+  /** Start of the next upcoming visit (after today). */
+  nextVisit?: Date | null;
+  /** Getting-started progress; omitted or done === total hides the row. */
+  setup?: { done: number; total: number; nameMissing?: boolean; nextTarget?: Target } | null;
+}
+
+export const MAX_TODAY = 3;
+export const MAX_MORE = 4;
+const DAY = 86_400_000;
+
+const WEEKDAY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const hhmm = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+const daysBetween = (a: Date, b: Date) => Math.round((startOfDay(b) - startOfDay(a)) / DAY);
+
+/** "today", "tomorrow" or the weekday name (callers stay within a week). */
+function dayName(now: Date, d: Date): string {
+  const n = daysBetween(now, d);
+  if (n <= 0) return 'today';
+  if (n === 1) return 'tomorrow';
+  return WEEKDAY[d.getDay()];
+}
+const onDay = (now: Date, d: Date) => {
+  const n = dayName(now, d);
+  return n === 'today' || n === 'tomorrow' ? n : `on ${n}`;
+};
+
+const CYCLE_STAGES: readonly string[] = ['menstrual-cycle', 'conception'];
+
+export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
+  const now = s.now ?? new Date();
+  const items: TodayItem[] = [];
+
+  // 1. A visit today
+  if (s.appointmentToday) {
+    items.push({ id: 'visit-today', label: `Visit today at ${hhmm(s.appointmentToday)}`, target: VISITS });
+  }
+  // 2. A new note from the doctor
+  if ((s.newDoctorNotes ?? 0) > 0) {
+    const n = s.newDoctorNotes!;
+    items.push({ id: 'doctor-note', label: n === 1 ? 'New note from your doctor' : `${n} new notes from your doctor`, target: VISITS });
+  }
+  // 3. Results to talk about
+  if ((s.flaggedResults ?? 0) > 0) {
+    const n = s.flaggedResults!;
+    items.push({ id: 'flagged-results', label: n === 1 ? '1 result to talk to your doctor about' : `${n} results to talk to your doctor about`, target: RECORDS });
+  }
+  // 4. A due stage task: period due in the next 2 days, or late
+  const pd = s.periodDaysUntil;
+  if (CYCLE_STAGES.includes(mode) && pd != null) {
+    if (pd < 0) {
+      const late = -pd;
+      items.push({ id: 'period-late', label: `Period ${late} day${late === 1 ? '' : 's'} late? Log it if it started`, target: 'sheet:log' });
+    } else if (pd <= 2) {
+      const when = pd === 0 ? 'today' : pd === 1 ? 'tomorrow' : 'in 2 days';
+      items.push({ id: 'period-soon', label: `Period likely ${when}`, target: 'sheet:log' });
+    }
+  }
+  // 5. Time-limited heads-ups: PMS in the next few days, a visit within 7 days
+  if (mode === 'menstrual-cycle' && pd != null && pd >= 3 && pd <= 7) {
+    const pmsFrom = new Date(startOfDay(now) + (pd - 2) * DAY);
+    items.push({ id: 'pms-soon', label: `PMS likely from ${dayName(now, pmsFrom)}`, target: `${STAGE_PAGE}#pms` });
+  }
+  if (s.nextVisit) {
+    const n = daysBetween(now, s.nextVisit);
+    if (n >= 1 && n <= 7) {
+      items.push({ id: 'visit-soon', label: `Visit ${onDay(now, s.nextVisit)} at ${hhmm(s.nextVisit)}`, target: VISITS });
+    }
+  }
+  // 6. Unfinished setup, as one row
+  if (s.setup && s.setup.done < s.setup.total) {
+    items.push(
+      s.setup.nameMissing
+        ? { id: 'setup', label: 'Add your name', target: ME }
+        : { id: 'setup', label: `Finish setting up (${s.setup.done} of ${s.setup.total} done)`, target: s.setup.nextTarget ?? RECORDS },
+    );
+  }
+
+  return items.slice(0, MAX_TODAY);
+}
+
+export const NOTHING_TODAY = 'Nothing needs you today';
+
+export interface PrimaryAction {
+  label: string;
+  target: Target;
+}
+
+export function primaryActionFor(
+  mode: LifeStage,
+  opts: { weeksPregnant?: number | null; dailyPill?: boolean } = {},
+): PrimaryAction {
+  const log: PrimaryAction = { label: 'Log today', target: 'sheet:log' };
+  switch (mode) {
+    case 'contraception':
+      return opts.dailyPill === false ? log : { label: "Mark today's pill taken", target: `${STAGE_PAGE}#contraception` };
+    case 'ivf':
+      return { label: 'Log medication', target: 'sheet:medicines' };
+    case 'pregnancy': {
+      const w = opts.weeksPregnant ?? 0;
+      if (w >= 37) return { label: 'Time contractions', target: `${STAGE_PAGE}#contraction-timer` };
+      if (w >= 28) return { label: 'Count kicks', target: `${STAGE_PAGE}#kick-counter` };
+      return log;
+    }
+    case 'postpartum':
+      return { label: 'Log a feed', target: '/dashboard/baby?tab=feed' };
+    case 'menopause':
+    case 'post-menopause':
+      return { label: 'Log symptoms', target: 'sheet:log' };
+    default:
+      return log;
+  }
+}
+
+export interface MoreRow {
+  label: string;
+  target: Target;
+}
+
+export function moreFor(mode: LifeStage, opts: { weeksPregnant?: number | null } = {}): MoreRow[] {
+  const guides: MoreRow = { label: 'Guides', target: `${STAGE_PAGE}#guides` };
+  const meds: MoreRow = { label: 'Medicines', target: `${STAGE_PAGE}#medicines` };
+  const rows: MoreRow[] = (() => {
+    switch (mode) {
+      case 'pre-menstrual':
+        return [{ label: 'What to expect', target: STAGE_PAGE }, { label: 'Your results', target: RECORDS }, meds];
+      case 'menstrual-cycle':
+        return [{ label: 'Calendar', target: `${STAGE_PAGE}#cycle-calendar` }, { label: 'Charts & history', target: RECORDS }, guides, meds];
+      case 'conception':
+        return [{ label: 'Calendar', target: `${STAGE_PAGE}#cycle-calendar` }, { label: 'Ovulation & charts', target: RECORDS }, guides, meds];
+      case 'contraception':
+        return [{ label: 'Your method', target: `${STAGE_PAGE}#contraception` }, { label: 'Your results', target: RECORDS }, guides, meds];
+      case 'ivf':
+        return [{ label: 'Your IVF timeline', target: `${STAGE_PAGE}#ivf-tracker` }, { label: 'Your results', target: RECORDS }, guides, meds];
+      case 'pregnancy': {
+        const late = (opts.weeksPregnant ?? 0) >= 32;
+        return [
+          { label: 'Weight & blood pressure', target: `${STAGE_PAGE}#weight` },
+          { label: 'Vaccinations', target: `${STAGE_PAGE}#vaccinations` },
+          late ? { label: 'Labour & birth', target: '/dashboard/birth' } : { label: 'Mood check', target: `${STAGE_PAGE}#mood-check` },
+          guides,
+        ];
+      }
+      case 'postpartum':
+        return [
+          { label: 'Baby tracker', target: '/dashboard/baby' },
+          { label: 'Your recovery', target: `${STAGE_PAGE}#recovery` },
+          { label: 'Mood check', target: `${STAGE_PAGE}#mood-check` },
+          { label: 'Birth details', target: '/dashboard/birth' },
+        ];
+      case 'menopause':
+      case 'post-menopause':
+        return [
+          { label: 'Symptom calendar', target: `${STAGE_PAGE}#symptoms` },
+          { label: 'Blood pressure', target: `${STAGE_PAGE}#blood-pressure` },
+          guides,
+          meds,
+        ];
+      default:
+        return [guides, meds];
+    }
+  })();
+  return rows.slice(0, MAX_MORE);
+}
