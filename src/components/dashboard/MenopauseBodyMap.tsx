@@ -16,7 +16,7 @@ import { DetailsLink } from '@/components/dashboard/HomeBlocks';
 const W = 320;
 const H = 520;
 
-export default function MenopauseBodyMap({ name, mode }: { name?: string | null; mode: string }) {
+export default function MenopauseBodyMap({ mode }: { name?: string | null; mode: string }) {
   const { user } = useAuth();
   const [signals, setSignals] = useState<{ signal_date: string; notes: string | null; mood: string | null }[]>([]);
   const [lastPeriod, setLastPeriod] = useState<Date | null>(null);

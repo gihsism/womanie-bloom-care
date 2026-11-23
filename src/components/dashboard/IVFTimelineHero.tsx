@@ -8,7 +8,7 @@ import { DetailsLink } from '@/components/dashboard/HomeBlocks';
 // day), one sentence (what comes next) and one Details link; the phase
 // picker and medicines live on the stage page and the Log sheet.
 
-export default function IVFTimelineHero({ startDate, phase, name }: { startDate: Date | null; phase: string | null; name?: string | null }) {
+export default function IVFTimelineHero({ startDate, phase }: { startDate: Date | null; phase: string | null; name?: string | null }) {
   const now = new Date();
   const idx = Math.max(0, IVF_PHASES.findIndex(p => p.key === phase));
   const current = IVF_PHASES[idx];

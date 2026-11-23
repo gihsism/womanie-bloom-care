@@ -33,7 +33,7 @@ const PHASE_TEXT: Record<string, { name: string; note: string }> = {
 };
 
 export default function CycleDialHero({
-  lastPeriodStart, cycleLength, name, mode,
+  lastPeriodStart, cycleLength, mode,
 }: { lastPeriodStart: Date; cycleLength: number; name?: string | null; mode: string }) {
   const now = new Date();
   // Full personal prediction (her logged periods, LH / temperature /

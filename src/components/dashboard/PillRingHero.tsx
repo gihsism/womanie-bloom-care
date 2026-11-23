@@ -21,7 +21,7 @@ const readLS = (userId: string, key: string): string | null => {
   try { const v = localStorage.getItem(lsKey(userId, key)); return v ? JSON.parse(v) : null; } catch { return null; }
 };
 
-export default function PillRingHero({ name }: { name?: string | null }) {
+export default function PillRingHero(_props: { name?: string | null }) {
   const { user } = useAuth();
   const [byDate, setByDate] = useState<Map<string, 'taken' | 'late' | 'missed'>>(new Map());
   const [loaded, setLoaded] = useState(false);

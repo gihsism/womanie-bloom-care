@@ -14,7 +14,7 @@ import { DetailsLink } from '@/components/dashboard/HomeBlocks';
 const W = 320;
 const H = 520;
 
-export default function PregnancyBodyMap({ dueDate, name }: { dueDate: Date; name?: string | null }) {
+export default function PregnancyBodyMap({ dueDate }: { dueDate: Date; name?: string | null }) {
   const now = new Date();
   const conception = dueDate.getTime() - 280 * 86400000;
   const week = Math.min(42, Math.max(0, Math.floor((now.getTime() - conception) / (7 * 86400000))));
