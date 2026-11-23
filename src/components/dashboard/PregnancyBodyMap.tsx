@@ -22,12 +22,11 @@ export default function PregnancyBodyMap({ dueDate, name }: { dueDate: Date; nam
   const wk = getWeekData(Math.max(4, Math.min(40, week)));
   const grams = wk.weightG?.median ?? null;
   const size = grams != null ? fmtGrams(grams) : null;
-  const first = name?.trim().split(/\s+/)[0];
   const scaleY = (w: number) => 30 + (Math.min(40, w) / 40) * 260;
 
   return (
     <section className="mb-6" aria-label="Your pregnancy at a glance">
-      <p className="label-mono">{first ? `${first} · ` : ''}{format(now, 'EEE d MMM')}</p>
+      <p className="label-mono">{format(now, 'EEE d MMM')}</p>
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
         Week {week} <span className="text-muted-foreground">of 40</span>
       </h2>
@@ -36,7 +35,7 @@ export default function PregnancyBodyMap({ dueDate, name }: { dueDate: Date; nam
         {daysLeft > 0 ? `${daysLeft} days to go, due ${format(dueDate, 'd MMMM')}.` : 'Due date reached: any day now.'}
       </p>
 
-      <div className="relative mx-auto mt-3 w-full max-w-[200px]" style={{ aspectRatio: `${W} / ${H}` }}>
+      <div className="relative mx-auto mt-3 w-full max-w-[120px]" style={{ aspectRatio: `${W} / ${H}` }}>
         <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" aria-hidden="true">
           <defs>
             <linearGradient id="bm-stone" x1="0" y1="0" x2="1" y2="1">

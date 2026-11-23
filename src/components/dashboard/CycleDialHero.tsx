@@ -49,7 +49,6 @@ export default function CycleDialHero({
   const t = (day: number) => (day - 1) / L; // start of a day on the ring
   const today = point((d.day - 0.5) / L);
   const ovu = point((d.ovulationDay - 0.5) / L, R + 12);
-  const first = name?.trim().split(/\s+/)[0];
   const ttc = mode === 'conception';
   const phase = PHASE_TEXT[d.phase];
 
@@ -63,13 +62,13 @@ export default function CycleDialHero({
 
   return (
     <section className="mb-6" aria-label="Your cycle at a glance">
-      <p className="label-mono">{first ? `${first} · ` : ''}{format(now, 'EEE d MMM')}</p>
+      <p className="label-mono">{format(now, 'EEE d MMM')}</p>
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
         Day {d.day} <span className="text-muted-foreground">of {L}</span>
       </h2>
       <p className="mt-1 text-[15px]">{sentence}</p>
 
-      <div className="relative mx-auto mt-2 w-full max-w-[360px]" style={{ aspectRatio: '320 / 285' }}>
+      <div className="relative mx-auto mt-2 w-full max-w-[240px]" style={{ aspectRatio: '320 / 285' }}>
         <svg viewBox="0 0 320 285" className="absolute inset-0 h-full w-full" role="img"
           aria-label={`Cycle day ${d.day} of ${L}. ${phase.name}. Next period in ${d.daysToPeriod} days.`}>
           <defs>

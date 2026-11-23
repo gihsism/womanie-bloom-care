@@ -46,7 +46,6 @@ export default function MenopauseBodyMap({ name, mode }: { name?: string | null;
   const now = new Date();
   const hf = hotFlushes(signals, now);
   const months = monthsSince(lastPeriod, now);
-  const first = name?.trim().split(/\s+/)[0];
   const reached = months != null && months >= 12;
   const scaleY = (m: number) => 30 + (Math.min(12, m) / 12) * 260;
 
@@ -60,7 +59,7 @@ export default function MenopauseBodyMap({ name, mode }: { name?: string | null;
 
   return (
     <section className="mb-6" aria-label="Your body at a glance">
-      <p className="label-mono">{first ? `${first} · ` : ''}{format(now, 'EEE d MMM')}</p>
+      <p className="label-mono">{format(now, 'EEE d MMM')}</p>
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
         {hf.daysLogged7
           ? <>Hot flushes <span className="text-muted-foreground">this week: {hf.total7}</span></>
@@ -75,7 +74,7 @@ export default function MenopauseBodyMap({ name, mode }: { name?: string | null;
           : '12 months in a row without a period marks menopause.'}
       </p>
 
-      <div className="relative mx-auto mt-3 w-full max-w-[200px]" style={{ aspectRatio: `${W} / ${H}` }}>
+      <div className="relative mx-auto mt-3 w-full max-w-[120px]" style={{ aspectRatio: `${W} / ${H}` }}>
         <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" aria-hidden="true">
           <defs>
             <linearGradient id="mb-stone" x1="0" y1="0" x2="1" y2="1">

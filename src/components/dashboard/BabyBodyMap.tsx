@@ -83,7 +83,7 @@ export default function BabyBodyMap() {
         {facts}.{lf?.nextSide ? ` Next: ${lf.nextSide}.` : ''}{day && day > 0 && day < 50 ? ` Day ${day} of life.` : ''}
       </p>
 
-      <div className="relative mx-auto mt-3 w-full max-w-[180px]" style={{ aspectRatio: `${W} / ${H}` }}>
+      <div className="relative mx-auto mt-3 w-full max-w-[110px]" style={{ aspectRatio: `${W} / ${H}` }}>
         <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" aria-hidden="true">
           <defs>
             <linearGradient id="bb-stone" x1="0" y1="0" x2="1" y2="1">

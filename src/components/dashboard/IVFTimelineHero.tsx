@@ -13,7 +13,6 @@ export default function IVFTimelineHero({ startDate, phase, name }: { startDate:
   const idx = Math.max(0, IVF_PHASES.findIndex(p => p.key === phase));
   const current = IVF_PHASES[idx];
   const day = startDate ? Math.max(0, differenceInDays(now, startDate)) + 1 : null;
-  const first = name?.trim().split(/\s+/)[0];
   if (!phase || !startDate) {
     return (
       <section className="mb-6 border-t border-foreground pt-4" aria-label="Your IVF cycle">
@@ -30,7 +29,7 @@ export default function IVFTimelineHero({ startDate, phase, name }: { startDate:
   const next = idx < IVF_PHASES.length - 1 ? `This phase usually lasts ${current.duration}. Next: ${label(idx + 1)}.` : 'The last step of this cycle.';
   return (
     <section className="mb-6" aria-label="Your IVF cycle at a glance">
-      <p className="label-mono">{first ? `${first} · ` : ''}{format(now, 'EEE d MMM')}</p>
+      <p className="label-mono">{format(now, 'EEE d MMM')}</p>
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
         {label(idx)} <span className="text-muted-foreground">· day {day}</span>
       </h2>

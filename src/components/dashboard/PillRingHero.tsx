@@ -50,12 +50,11 @@ export default function PillRingHero({ name }: { name?: string | null }) {
   const reminder = readLS(user.id, 'reminderTime') ?? '21:00';
   const isPill = method === 'pill';
   const ring = pillRing(byDate, packStart, now);
-  const first = name?.trim().split(/\s+/)[0];
   const takenToday = ring.todayMark === 'taken' || ring.todayMark === 'late';
 
   return (
     <section className="mb-6" aria-label="Your pill pack at a glance">
-      <p className="label-mono">{first ? `${first} · ` : ''}{format(now, 'EEE d MMM')}</p>
+      <p className="label-mono">{format(now, 'EEE d MMM')}</p>
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
         {ring.packDay ? <>Pill {ring.packDay} <span className="text-muted-foreground">of 28</span></> : <>Your pill <span className="text-muted-foreground">last 28 days</span></>}
       </h2>
@@ -65,7 +64,7 @@ export default function PillRingHero({ name }: { name?: string | null }) {
           : `Not logged yet today. Reminder at ${reminder}.`}
       </p>
 
-      <div className="relative mx-auto mt-2 w-full max-w-[240px]" style={{ aspectRatio: '320 / 270' }}>
+      <div className="relative mx-auto mt-2 w-full max-w-[190px]" style={{ aspectRatio: '320 / 270' }}>
         <svg viewBox="0 0 320 270" className="absolute inset-0 h-full w-full" role="img"
           aria-label={`${takenToday ? "Today's pill taken" : "Today's pill not logged yet"}. ${ring.streak}-day streak.`}>
           <circle cx={CX} cy={CY} r={R} fill="none" stroke="hsl(var(--border))" strokeWidth=".8" strokeDasharray="1 5" />
