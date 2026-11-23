@@ -1,27 +1,23 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { format, subDays } from 'date-fns';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLifeEvents } from '@/hooks/useLifeEvents';
 import { onHealthDataChange } from '@/lib/data-events';
-import { hotFlushes, monthsSince, medsToday, weekWord } from '@/lib/bodyMap';
+import { hotFlushes, monthsSince } from '@/lib/bodyMap';
+import { DetailsLink } from '@/components/dashboard/HomeBlocks';
 
 // Version 8 "body map" hero for menopause and after: the same sculpted
-// figure as pregnancy without the bump. Hotspots: mind (latest mood),
-// chest (hot flushes today / this week), an unpinned HRT & medicines caption,
-// pelvis (months since the last period — 12 in a row means menopause).
-// The scale on the right counts those 12 months.
+// figure as pregnancy without the bump, with a scale counting the 12
+// months without a period that mark menopause. Home keeps it to one fact
+// (hot flushes this week, or months without a period), one sentence and
+// one Details link; mood, medicines and the symptom calendar live on the
+// Log sheet and the stage page.
 
 const W = 320;
 const H = 520;
-const pct = (x: number, y: number) => ({ left: `${(x / W) * 100}%`, top: `${(y / H) * 100}%` });
 
 export default function MenopauseBodyMap({ name, mode }: { name?: string | null; mode: string }) {
-  const navigate = useNavigate();
   const { user } = useAuth();
-  const doses = useLifeEvents<{ medication_id?: string; name?: string }>('med_dose', { limit: 60 });
-  const [meds, setMeds] = useState<{ id: string; name: string }[]>([]);
   const [signals, setSignals] = useState<{ signal_date: string; notes: string | null; mood: string | null }[]>([]);
   const [lastPeriod, setLastPeriod] = useState<Date | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -30,17 +26,15 @@ export default function MenopauseBodyMap({ name, mode }: { name?: string | null;
     if (!user) return;
     let alive = true;
     const load = async () => {
-      const [sig, per, med] = await Promise.all([
+      const [sig, per] = await Promise.all([
         db.from('daily_health_signals').select('signal_date, notes, mood').eq('user_id', user.id)
           .gte('signal_date', format(subDays(new Date(), 7), 'yyyy-MM-dd')).order('signal_date', { ascending: false }),
         db.from('period_tracking').select('period_start_date').eq('user_id', user.id).order('period_start_date', { ascending: false }).limit(1),
-        db.from('medications').select('id, name').eq('user_id', user.id).eq('active', true),
       ]);
       if (!alive) return;
       setSignals((sig.data as typeof signals | null) ?? []);
       const p = (per.data as { period_start_date: string }[] | null)?.[0]?.period_start_date;
       setLastPeriod(p ? new Date(p) : null);
-      setMeds((med.data as { id: string; name: string }[] | null) ?? []);
       setLoaded(true);
     };
     load();
@@ -52,33 +46,36 @@ export default function MenopauseBodyMap({ name, mode }: { name?: string | null;
   const now = new Date();
   const hf = hotFlushes(signals, now);
   const months = monthsSince(lastPeriod, now);
-  const med = medsToday(meds, doses.events, now);
-  const mood = signals.find(s => s.mood)?.mood ?? null;
   const first = name?.trim().split(/\s+/)[0];
   const reached = months != null && months >= 12;
   const scaleY = (m: number) => 30 + (Math.min(12, m) / 12) * 260;
 
-  const go = (target: string) => {
-    if (target.startsWith('/')) { navigate(target); return; }
-    const el = document.getElementById(target.slice(1));
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      el.classList.add('ring-2', 'ring-primary/40', 'rounded-xl');
-      window.setTimeout(() => el.classList.remove('ring-2', 'ring-primary/40', 'rounded-xl'), 1600);
-    }
-  };
+  const monthsText = months == null
+    ? 'Log your last period to count the months.'
+    : reached
+      ? `${months} months without a period: menopause is reached.`
+      : months === 0
+        ? 'You had a period this month. 12 months in a row without one marks menopause.'
+        : `${months} month${months === 1 ? '' : 's'} without a period; 12 in a row marks menopause.`;
 
   return (
     <section className="mb-6" aria-label="Your body at a glance">
       <p className="label-mono">{first ? `${first} · ` : ''}{format(now, 'EEE d MMM')}</p>
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
-        {months == null ? <>Your body<br /><span className="text-muted-foreground">this week</span></>
-          : reached ? <>{mode === 'post-menopause' ? 'After' : 'Menopause'}<br /><span className="text-muted-foreground">{mode === 'post-menopause' ? 'menopause' : 'reached'}</span></>
-          : months === 0 ? <>A period<br /><span className="text-muted-foreground">this month</span></>
-          : <>{weekWord(months).replace(/^./, c => c.toUpperCase())} month{months === 1 ? '' : 's'}<br /><span className="text-muted-foreground">without a period</span></>}
+        {hf.daysLogged7
+          ? <>Hot flushes <span className="text-muted-foreground">this week: {hf.total7}</span></>
+          : months == null ? <>Your body <span className="text-muted-foreground">this week</span></>
+          : reached ? <>{mode === 'post-menopause' ? 'After menopause' : 'Menopause reached'}</>
+          : <>{months} month{months === 1 ? '' : 's'} <span className="text-muted-foreground">without a period</span></>}
       </h2>
+      {/* Show a number once: when the heading already is the month count, the sentence explains it instead. */}
+      <p className="mt-1 text-[15px]">
+        {hf.daysLogged7 ? monthsText
+          : months == null ? 'Log hot flushes and your last period to see how this week went.'
+          : '12 months in a row without a period marks menopause.'}
+      </p>
 
-      <div className="relative mx-auto mt-3 w-full max-w-[380px]" style={{ aspectRatio: `${W} / ${H}` }}>
+      <div className="relative mx-auto mt-3 w-full max-w-[200px]" style={{ aspectRatio: `${W} / ${H}` }}>
         <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" aria-hidden="true">
           <defs>
             <linearGradient id="mb-stone" x1="0" y1="0" x2="1" y2="1">
@@ -102,18 +99,6 @@ export default function MenopauseBodyMap({ name, mode }: { name?: string | null;
             <path d="M140,290 C150,330 166,360 186,376 C192,380 198,381 204,378" fill="none" strokeWidth="1.2" strokeLinecap="round" />
             <path d="M150,452 C146,520 146,580 150,640" fill="none" strokeWidth=".9" opacity=".35" />
           </g>
-          <g fill="none" strokeWidth="1">
-            <path d="M171,22 H116 M116,17 v10" stroke="#1A1A19" />
-            <path d="M186,118 H116 M116,113 v10" stroke="hsl(var(--primary))" />
-            <path d="M206,300 L262,300 V330 M257,330 h10" stroke="#1A1A19" />
-          </g>
-          <g>
-            <circle cx="171" cy="22" r="3.5" fill="#1A1A19" /><circle cx="171" cy="22" r="8" fill="none" stroke="#1A1A19" strokeWidth=".8" />
-            <circle cx="186" cy="118" r="4.5" fill="hsl(var(--primary))" />
-            <circle cx="186" cy="118" r="10" fill="none" stroke="hsl(var(--primary))" strokeWidth=".9" />
-            <circle cx="186" cy="118" r="16" fill="none" stroke="hsl(var(--primary))" strokeWidth=".6" opacity=".45" />
-            <circle cx="206" cy="300" r="3.5" fill="#1A1A19" /><circle cx="206" cy="300" r="8" fill="none" stroke="#1A1A19" strokeWidth=".8" />
-          </g>
           {months != null && (
             <g>
               <line x1="310" y1="30" x2="310" y2="290" stroke="hsl(var(--border))" strokeWidth=".8" />
@@ -122,62 +107,15 @@ export default function MenopauseBodyMap({ name, mode }: { name?: string | null;
               ))}
               <line x1="310" y1="30" x2="310" y2={scaleY(months)} stroke="hsl(var(--primary))" strokeWidth="1.6" />
               <circle cx="310" cy={scaleY(months)} r="3.2" fill="hsl(var(--primary))" />
-              <text x="301" y={scaleY(months) + 4} textAnchor="end" fontFamily="DM Mono, monospace" fontSize="10.5" fill="hsl(var(--primary))">{Math.min(months, 12)}</text>
               <text x="301" y="34" textAnchor="end" fontFamily="DM Mono, monospace" fontSize="9.5" fill="hsl(var(--muted-foreground))">0</text>
               <text x="301" y="294" textAnchor="end" fontFamily="DM Mono, monospace" fontSize="9.5" fill="hsl(var(--muted-foreground))">12</text>
             </g>
           )}
         </svg>
 
-        <button type="button" onClick={() => go('#daily-log')} className="absolute w-[35%] text-right leading-tight" style={pct(0, 0)}>
-          <span className="label-mono block">Mind · mood</span>
-          <span className={`block text-[15px] font-medium mt-1 ${mood ? 'capitalize' : ''}`}>{mood ?? 'Not logged'}</span>
-          <span className="block text-[13px] text-primary mt-0.5">{mood ? 'Update →' : 'Log mood →'}</span>
-        </button>
-
-        <button type="button" onClick={() => go('#symptoms')} className="absolute w-[35%] text-right leading-tight" style={pct(0, 82)}>
-          <span className="label-mono block !text-primary">Hot flushes</span>
-          <span className="block font-display text-[30px] leading-none mt-1">
-            {hf.today ?? '—'}<small className="font-sans text-xs text-muted-foreground ml-1">today</small>
-          </span>
-          <span className="block text-[13px] text-muted-foreground mt-1">
-            {hf.daysLogged7 ? `${hf.total7} this week` : 'Log to see patterns'}
-          </span>
-        </button>
-
-        <button type="button" onClick={() => go('#medicines')} className="absolute w-[35%] text-right leading-tight border-t border-border pt-2" style={pct(0, 245)}>
-          <span className="label-mono block">HRT · today</span>
-          {med.total === 0 ? (
-            <><span className="block text-[15px] font-medium mt-1">No medicines</span><span className="block text-[13px] text-primary mt-0.5">Add HRT →</span></>
-          ) : med.takenToday >= med.total ? (
-            <><span className="block text-[15px] font-medium mt-1">All taken ✓</span><span className="block text-[13px] text-muted-foreground mt-0.5">Today’s doses, done.</span></>
-          ) : (
-            <><span className="block text-[15px] font-medium mt-1">{med.takenToday} of {med.total} taken</span><span className="block text-[13px] text-primary mt-0.5">Log a dose →</span></>
-          )}
-        </button>
-
-        <button type="button" onClick={() => go('#menopause-stage')} className="absolute w-[38%] text-left leading-tight" style={pct(200, 340)}>
-          <span className="label-mono block">Last period</span>
-          {lastPeriod ? (
-            <>
-              <span className="block font-display text-[30px] leading-none mt-1">{format(lastPeriod, 'd MMM')}</span>
-              <span className="block text-[13px] text-muted-foreground mt-1">
-                {reached ? '12+ months — menopause' : months != null ? `${12 - months} month${12 - months === 1 ? '' : 's'} to go` : ''}
-              </span>
-            </>
-          ) : (
-            <span className="block text-[13px] text-primary mt-1">Log your last period →</span>
-          )}
-        </button>
       </div>
 
-      <div className="mt-2 flex items-start justify-between border-t border-foreground pt-2.5">
-        <p className="text-[13px] leading-snug">
-          {reached ? 'Twelve months without a period marks menopause.' : '12 months in a row without a period marks menopause.'}
-          <br /><span className="text-muted-foreground">Touch any label to log or look back.</span>
-        </p>
-        <p className="label-mono text-right leading-relaxed shrink-0 whitespace-nowrap pl-3">{months != null ? `${Math.min(months, 12)} / 12` : '—'}{first ? <><br />{first}</> : null}</p>
-      </div>
+      <DetailsLink to="/dashboard/stage" />
     </section>
   );
 }

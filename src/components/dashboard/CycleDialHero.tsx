@@ -1,14 +1,14 @@
-import { useNavigate } from 'react-router-dom';
 import { differenceInDays, format } from 'date-fns';
-import { cycleDial, weekWord } from '@/lib/bodyMap';
+import { cycleDial } from '@/lib/bodyMap';
 import { useCycleModel } from '@/hooks/useCycleModel';
-import { METHOD_TEXT } from '@/lib/ovulation';
+import { DetailsLink } from '@/components/dashboard/HomeBlocks';
 
 // Version 8 hero for period tracking and trying to conceive: the cycle
 // as a dial. The ring is one cycle, starting at the top; a thick ink
 // arc is the period, a cobalt arc the fertile window, a dashed arc the
-// days before the next period; the cobalt marker is today. Four museum
-// labels underneath open the calendar or today's log.
+// days before the next period; the cobalt marker is today. Home keeps it
+// to one fact ("Day 18 of 28"), one sentence and one Details link; the
+// calendar, ovulation detail and logging live one tap away.
 
 const CX = 160;
 const CY = 140;
@@ -26,16 +26,15 @@ const arc = (t0: number, t1: number, r = R) => {
 
 const PHASE_TEXT: Record<string, { name: string; note: string }> = {
   period: { name: 'Period', note: 'Rest if you need it; iron-rich food helps.' },
-  follicular: { name: 'Follicular', note: 'Energy usually rises this week.' },
+  follicular: { name: 'First half of your cycle', note: 'Energy usually rises this week.' },
   fertile: { name: 'Fertile window', note: 'The days a pregnancy is most likely.' },
-  luteal: { name: 'Luteal', note: 'Progesterone is up; sleep may feel heavier.' },
+  luteal: { name: 'Second half of your cycle', note: 'Progesterone is up; sleep may feel heavier.' },
   pms: { name: 'Before your period', note: 'PMS days for many — be gentle with yourself.' },
 };
 
 export default function CycleDialHero({
   lastPeriodStart, cycleLength, name, mode,
 }: { lastPeriodStart: Date; cycleLength: number; name?: string | null; mode: string }) {
-  const navigate = useNavigate();
   const now = new Date();
   // Full personal prediction (her logged periods, LH / temperature /
   // discharge signs, labs). Falls back to the stored length until loaded.
@@ -46,9 +45,6 @@ export default function CycleDialHero({
   const len = usable && predictedLen >= 15 && predictedLen <= 60 ? predictedLen : (usable ? p.averageCycleLength : cycleLength);
   const ovuDay = usable && predictedLen >= 15 && predictedLen <= 60 ? differenceInDays(p.predictedOvulationDate, start) + 1 : undefined;
   const d = cycleDial(start, len, now, usable ? Math.min(p.averagePeriodLength, 8) : 5, ovuDay);
-  const confirmed = usable && p.currentOvulation && p.currentOvulation.confidence !== 'low' ? p.currentOvulation : null;
-  const roughSign = usable && p.currentOvulation?.confidence === 'low' ? p.currentOvulation : null;
-  const win = usable ? p.confidenceWindow : 0;
   const L = d.length;
   const t = (day: number) => (day - 1) / L; // start of a day on the ring
   const today = point((d.day - 0.5) / L);
@@ -57,28 +53,21 @@ export default function CycleDialHero({
   const ttc = mode === 'conception';
   const phase = PHASE_TEXT[d.phase];
 
-  const go = (target: string) => {
-    if (target.startsWith('/')) { navigate(target); return; }
-    const el = document.getElementById(target.slice(1));
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      el.classList.add('ring-2', 'ring-primary/40', 'rounded-xl');
-      window.setTimeout(() => el.classList.remove('ring-2', 'ring-primary/40', 'rounded-xl'), 1600);
-    }
-  };
-
-  const fertileLine = d.daysToFertile === 0
-    ? (ttc ? 'Best days are now' : 'Now')
-    : d.daysToFertile != null
-      ? `Starts in ${d.daysToFertile} day${d.daysToFertile === 1 ? '' : 's'}`
-      : 'Passed this cycle';
+  const inDays = (n: number) => (n <= 0 ? 'today' : n === 1 ? 'tomorrow' : `in ${n} days`);
+  const toFertileEnd = d.fertileEnd - d.day;
+  const sentence = ttc && d.daysToFertile === 0
+    ? `Your fertile window ends ${inDays(toFertileEnd)}.`
+    : ttc && d.daysToFertile != null
+      ? `Your fertile window starts ${inDays(d.daysToFertile)}.`
+      : `Next period ${inDays(d.daysToPeriod)}, around ${format(d.nextPeriod, 'EEE d MMM')}.`;
 
   return (
     <section className="mb-6" aria-label="Your cycle at a glance">
       <p className="label-mono">{first ? `${first} · ` : ''}{format(now, 'EEE d MMM')}</p>
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
-        Day {weekWord(d.day)}<br /><span className="text-muted-foreground">of {weekWord(L)}</span>
+        Day {d.day} <span className="text-muted-foreground">of {L}</span>
       </h2>
+      <p className="mt-1 text-[15px]">{sentence}</p>
 
       <div className="relative mx-auto mt-2 w-full max-w-[360px]" style={{ aspectRatio: '320 / 285' }}>
         <svg viewBox="0 0 320 285" className="absolute inset-0 h-full w-full" role="img"
@@ -104,57 +93,14 @@ export default function CycleDialHero({
           <circle cx={today.x} cy={today.y} r="6" fill="hsl(var(--primary))" stroke="hsl(var(--background))" strokeWidth="2" />
           <circle cx={today.x} cy={today.y} r="13" fill="none" stroke="hsl(var(--primary))" strokeWidth=".9" />
           <circle cx={today.x} cy={today.y} r="20" fill="none" stroke="hsl(var(--primary))" strokeWidth=".6" opacity=".45" />
-          {/* centre */}
-          <text x={CX} y={CY - 44} textAnchor="middle" fontFamily="DM Mono, monospace" fontSize="10.5" letterSpacing="1.5" fill="hsl(var(--muted-foreground))">{phase.name.toUpperCase()}</text>
-          <text x={CX} y={CY + 22} textAnchor="middle" fontFamily="Fraunces, Georgia, serif" fontSize="62" fill="hsl(var(--foreground))">{d.day}</text>
-          <text x={CX} y={CY + 44} textAnchor="middle" fontFamily="Jost, sans-serif" fontSize="13" fill="hsl(var(--muted-foreground))">of {L} days</text>
-          <text x={CX} y={CY - R - 10} textAnchor="middle" fontFamily="DM Mono, monospace" fontSize="9.5" fill="hsl(var(--muted-foreground))">DAY 1</text>
+          {/* centre: the phase in plain words (the day number is in the heading) */}
+          <foreignObject x={CX - 70} y={CY - 30} width="140" height="60">
+            <p className="h-full flex items-center justify-center text-center text-[13px] leading-snug text-muted-foreground">{phase.name}</p>
+          </foreignObject>
         </svg>
       </div>
 
-      <div className="grid grid-cols-2 gap-x-5 gap-y-4 mt-1">
-        <button type="button" onClick={() => go('#cycle-calendar')} className="text-left border-t border-foreground pt-2">
-          <span className="label-mono block">Next period</span>
-          <span className="block font-display text-[28px] leading-none mt-1">
-            {d.daysToPeriod}<small className="font-sans text-xs text-muted-foreground ml-1">day{d.daysToPeriod === 1 ? '' : 's'}</small>
-          </span>
-          <span className="block text-[13px] text-muted-foreground mt-1">{format(d.nextPeriod, 'EEE d MMM')}{win > 0 ? ` · ±${win} day${win === 1 ? '' : 's'}` : ''}</span>
-        </button>
-        <button type="button" onClick={() => go('#cycle-calendar')} className="text-left border-t border-primary pt-2">
-          <span className="label-mono block !text-primary">{ttc ? 'Best days' : 'Fertile window'}{confirmed ? ' · confirmed' : ''}</span>
-          <span className="block text-[15px] font-medium mt-1.5">Day {d.fertileStart}–{d.fertileEnd}</span>
-          <span className={`block text-[13px] mt-0.5 ${d.daysToFertile === 0 ? 'text-primary font-medium' : 'text-muted-foreground'}`}>{fertileLine}</span>
-        </button>
-        <button type="button" onClick={() => go('#daily-log')} className="text-left border-t border-border pt-2">
-          <span className="label-mono block">Today</span>
-          <span className="block text-[15px] font-medium mt-1.5">Log how you feel</span>
-          <span className="block text-[13px] text-primary mt-0.5">Flow, mood, symptoms →</span>
-        </button>
-        <div className="text-left border-t border-border pt-2">
-          <span className="label-mono block">Phase</span>
-          <span className="block text-[15px] font-medium mt-1.5">{phase.name}</span>
-          <span className="block text-[13px] text-muted-foreground mt-0.5">{phase.note}</span>
-        </div>
-      </div>
-
-      <div className="mt-4 flex items-start justify-between border-t border-foreground pt-2.5">
-        <p className="text-[13px] leading-snug">
-          {confirmed ? (
-            <>You ovulated around {format(confirmed.date, 'd MMM')} ({METHOD_TEXT[confirmed.method]}).<br />
-              <span className="text-muted-foreground">Your period follows {p.lutealSource === 'personal' ? `your own ${p.lutealLength}-day` : 'a typical 14-day'} second half.</span></>
-          ) : usable && p.lutealSource === 'personal' ? (
-            <>Uses your own {p.lutealLength}-day second half,<br />
-              <span className="text-muted-foreground">learned from {p.learnedCycles.filter(c => c.ovulation.confidence !== 'low').length} cycle{p.learnedCycles.length === 1 ? '' : 's'} of LH / temperature logs.</span></>
-          ) : roughSign ? (
-            <>Probably ovulated around {format(roughSign.date, 'd MMM')} ({METHOD_TEXT[roughSign.method]}).<br />
-              <span className="text-muted-foreground">An LH test or morning temperature would confirm it.</span></>
-          ) : (
-            <>Predicted from the periods you logged.<br />
-              <span className="text-muted-foreground">Log LH tests or morning temperature to find your own ovulation day.</span></>
-          )}
-        </p>
-        <p className="label-mono text-right leading-relaxed">Day {d.day} / {L}{first ? <><br />{first}</> : null}</p>
-      </div>
+      <DetailsLink to="/dashboard/stage#cycle-calendar" />
     </section>
   );
 }

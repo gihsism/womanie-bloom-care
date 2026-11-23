@@ -5,7 +5,8 @@ import { cn } from "@/lib/utils";
 
 // Mobile navigation — a standard bottom tab bar: five tabs, each an icon
 // with its label underneath (never rotated, never numbered). Shown only on
-// small screens (md:hidden). Rendered once app-wide and self-hides
+// every screen size: Home no longer has its own menu, so on desktop too
+// this bar is the one way between the five areas. Rendered once app-wide and self-hides
 // outside the patient dashboard area.
 //
 // Content clearance: while visible it adds `has-bottom-nav` to <body>,
@@ -48,10 +49,10 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur pb-[env(safe-area-inset-bottom)] md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur pb-[env(safe-area-inset-bottom)]"
       aria-label="Main"
     >
-      <ul className="flex h-16 items-stretch">
+      <ul className="mx-auto flex h-16 max-w-xl items-stretch">
         {TABS.map(({ to, label, icon: Icon, exact }) => (
           <li key={to} className="flex-1">
             <NavLink

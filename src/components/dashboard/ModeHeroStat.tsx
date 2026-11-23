@@ -15,6 +15,7 @@ import {
   ThermometerSun,
 } from 'lucide-react';
 import { addDays, differenceInDays, subDays, format } from 'date-fns';
+import { DetailsLink } from '@/components/dashboard/HomeBlocks';
 
 // Mode-aware "today at a glance" hero stat. Single row at the top of
 // PatientDashboard that surfaces the one most important fact for the
@@ -166,11 +167,11 @@ const ModeHeroStat = ({
       case 'pre-menstrual': {
         return {
           icon: <Flower2 className="h-5 w-5 text-pink-500" />,
-          headline: 'Learning about your body',
+          headline: 'Getting ready for your first period',
           detail:
             readinessPct !== null && readinessPct > 0
               ? `Readiness checklist: ${readinessPct}% complete`
-              : 'Walk through the period-prep checklist when you\'re ready.',
+              : 'A small kit of pads in your bag means you are ready whenever it comes.',
           tone: 'bg-pink-50/70 dark:bg-pink-950/20 border-pink-200/60 dark:border-pink-800/40',
         };
       }
@@ -180,7 +181,7 @@ const ModeHeroStat = ({
           return {
             icon: <CalendarIcon className="h-5 w-5 text-primary" />,
             headline: 'Log your last period to start tracking',
-            detail: 'Tap a day on the calendar below to mark when it started.',
+            detail: 'Mark the day it started and your predictions start here.',
             tone: 'bg-primary/5 border-primary/20',
           };
         }
@@ -191,21 +192,19 @@ const ModeHeroStat = ({
         const ovulationDay = periodData.cycleLength - 14;
         const fertileStartDay = Math.max(0, ovulationDay - 5);
 
-        let phase = 'Luteal phase';
-        if (cycleDay <= 5) phase = 'Menstrual phase';
-        else if (cycleDay - 1 < fertileStartDay) phase = 'Follicular phase';
-        else if (cycleDay - 1 <= ovulationDay) phase = 'Fertile window';
-        else if (cycleDay >= periodData.cycleLength - 4) phase = 'Late luteal · PMS likely';
+        let phase = 'second half of your cycle';
+        if (cycleDay <= 5) phase = 'period';
+        else if (cycleDay - 1 < fertileStartDay) phase = 'first half of your cycle';
+        else if (cycleDay - 1 <= ovulationDay) phase = 'fertile window';
+        else if (cycleDay >= periodData.cycleLength - 4) phase = 'PMS days likely';
 
         let nextPeriod = addDays(periodData.lastPeriodStart, periodData.cycleLength);
         while (nextPeriod < today) nextPeriod = addDays(nextPeriod, periodData.cycleLength);
         const daysToPeriod = differenceInDays(nextPeriod, today);
 
-        const ord =
-          cycleDay === 1 ? 'st' : cycleDay === 2 ? 'nd' : cycleDay === 3 ? 'rd' : 'th';
         return {
           icon: <Sparkles className="h-5 w-5 text-primary" />,
-          headline: `Day ${cycleDay}${ord} of your cycle · ${phase}`,
+          headline: `Day ${cycleDay} of ${periodData.cycleLength} · ${phase}`,
           detail:
             daysToPeriod === 0
               ? 'Period expected today'
@@ -229,7 +228,7 @@ const ModeHeroStat = ({
             pillStreak === 0
               ? 'Log today\'s pill to start a streak'
               : `${pillStreak}-day pill streak 🔥`,
-          detail: pillStreak > 0 ? 'Tap Daily tracking below to log today.' : undefined,
+          detail: pillStreak > 0 ? 'Keep it going: log today\'s pill.' : undefined,
           tone: 'bg-primary/5 border-primary/20',
         };
       }
@@ -238,7 +237,7 @@ const ModeHeroStat = ({
           return {
             icon: <FlaskConical className="h-5 w-5 text-primary" />,
             headline: 'Set up IVF tracking',
-            detail: 'Pick your current phase below to start logging treatments.',
+            detail: 'Pick your current phase to start logging treatments.',
             tone: 'bg-primary/5 border-primary/20',
           };
         }
@@ -247,7 +246,7 @@ const ModeHeroStat = ({
         return {
           icon: <FlaskConical className="h-5 w-5 text-primary" />,
           headline: `${label} · Tracking day ${day}`,
-          detail: 'Today\'s treatments and reminders are below.',
+          detail: 'Log today\'s medication with the button below.',
           tone: 'bg-primary/5 border-primary/20',
         };
       }
@@ -256,6 +255,7 @@ const ModeHeroStat = ({
           return {
             icon: <Baby className="h-5 w-5 text-pink-500" />,
             headline: 'Add your due date to start tracking',
+            detail: 'Your week, baby\'s size and the days to go show here.',
             tone: 'bg-pink-50/70 dark:bg-pink-950/20 border-pink-200/60 dark:border-pink-800/40',
           };
         }
@@ -305,15 +305,15 @@ const ModeHeroStat = ({
             hotFlashes7d === 0
               ? 'No hot flashes logged this week'
               : `${hotFlashes7d} hot flash${hotFlashes7d === 1 ? '' : 'es'} this week`,
-          detail: 'Track your daily count from the daily-log form.',
+          detail: 'Log your daily count with Log symptoms.',
           tone: 'bg-primary/5 border-primary/20',
         };
       }
       case 'post-menopause': {
         return {
           icon: <Sunset className="h-5 w-5 text-primary" />,
-          headline: 'Post-menopause wellness',
-          detail: 'Focus areas: bones, heart, cognition. Screening guides below.',
+          headline: 'After menopause',
+          detail: 'Focus areas now: bones, heart and memory.',
           tone: 'bg-primary/5 border-primary/20',
         };
       }
@@ -333,11 +333,12 @@ const ModeHeroStat = ({
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold truncate">{hero.headline}</p>
           {hero.detail && (
-            <p className="text-xs text-muted-foreground truncate">{hero.detail}</p>
+            <p className="text-xs text-muted-foreground">{hero.detail}</p>
           )}
         </div>
         <Heart className="h-4 w-4 text-muted-foreground/40 flex-shrink-0" />
       </div>
+      <DetailsLink to="/dashboard/stage" />
     </Card>
   );
 };

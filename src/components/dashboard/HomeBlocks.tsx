@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NOTHING_TODAY, type MoreRow, type PrimaryAction, type Target, type TodayItem } from '@/lib/todayItems';
@@ -65,5 +65,15 @@ export function MoreForStage({ stage, rows, go }: { stage: string; rows: MoreRow
         {rows.map((r) => <Row key={r.label} label={r.label} onClick={() => go(r.target)} />)}
       </ul>
     </section>
+  );
+}
+
+// The one link a Home hero carries: to the stage's detail page.
+export function DetailsLink({ to, label = 'Details' }: { to: string; label?: string }) {
+  return (
+    <Link to={to} className="inline-flex items-center gap-1 mt-2 text-sm font-medium text-primary hover:underline">
+      {label}
+      <ChevronRight className="h-4 w-4" aria-hidden="true" />
+    </Link>
   );
 }
