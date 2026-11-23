@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Shield, Bell, User, Download, Loader2, Trash2, Wand2, KeyRound, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Shield, Bell, User, Download, Loader2, Trash2, Wand2, KeyRound, Eye, EyeOff, Pill, Inbox, Phone, Smartphone, Users, HelpCircle, Info, LogOut, UserCog } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { scorePassword } from '@/lib/password-strength';
 import { Button } from '@/components/ui/button';
@@ -18,67 +18,44 @@ import { useToast } from '@/hooks/use-toast';
 import type { LifeStage } from '@/components/dashboard/DashboardHeader';
 import { normalizeLifeStage } from '@/lib/lifeStage';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
+import { LIFE_STAGE_LABELS, LIFE_STAGE_DESCRIPTIONS } from '@/lib/lifeStageLabels';
+import MedicineLog from '@/components/dashboard/MedicineLog';
+import { useAttentionCount } from '@/hooks/useAttentionCount';
+import { MeRow, MeGroup } from './me/MeRow';
+import { ME_SECTIONS, meSectionFromHash } from './me/sections';
 
-const lifeStageOptions = [
-  {
-    value: 'pre-menstrual',
-    icon: Flower2,
-    title: 'Pre-Menstrual',
-    description: 'Before first period',
-  },
-  {
-    value: 'menstrual-cycle',
-    icon: Calendar,
-    title: 'Regular Menstrual Cycle',
-    description: 'Tracking my cycle',
-  },
-  {
-    value: 'contraception',
-    icon: Shield,
-    title: 'Contraception Mode',
-    description: 'Managing birth control',
-  },
-  {
-    value: 'conception',
-    icon: Heart,
-    title: 'Trying to Conceive',
-    description: 'Planning pregnancy',
-  },
-  {
-    value: 'ivf',
-    icon: Heart,
-    title: 'IVF Mode',
-    description: 'Fertility treatment tracking',
-  },
-  {
-    value: 'pregnancy',
-    icon: Baby,
-    title: 'Pregnancy Mode',
-    description: 'Expecting a baby',
-  },
-  {
-    value: 'postpartum',
-    icon: Baby,
-    title: 'Postpartum',
-    description: 'After giving birth — fourth-trimester and beyond',
-  },
-  {
-    value: 'menopause',
-    icon: Sunset,
-    title: 'Menopause',
-    description: 'Managing menopause transition',
-  },
-  {
-    value: 'post-menopause',
-    icon: Sunset,
-    title: 'Post-Menopause',
-    description: 'After menopause',
-  },
-];
+// Labels come from the one label map (src/lib/lifeStageLabels.ts); the
+// stored values (profiles.life_stage) are unchanged.
+const stageIcons: Record<LifeStage, typeof Calendar> = {
+  'pre-menstrual': Flower2,
+  'menstrual-cycle': Calendar,
+  contraception: Shield,
+  conception: Heart,
+  ivf: Heart,
+  pregnancy: Baby,
+  postpartum: Baby,
+  menopause: Sunset,
+  'post-menopause': Sunset,
+};
+
+const lifeStageOptions = (Object.keys(stageIcons) as LifeStage[]).map((value) => ({
+  value,
+  icon: stageIcons[value],
+  title: LIFE_STAGE_LABELS[value],
+  description: LIFE_STAGE_DESCRIPTIONS[value],
+}));
 
 const Settings = () => {
   const navigate = useNavigate();
-  usePageTitle('Settings');
+  const location = useLocation();
+  // Me is a list of rows; each row opens a sub-page at #<section>.
+  const section = meSectionFromHash(location.hash);
+  usePageTitle(section ? ME_SECTIONS[section] : 'Me');
+  const openSection = (id: keyof typeof ME_SECTIONS) => navigate(`/dashboard/settings#${id}`);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [section]);
+  const attention = useAttentionCount();
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedStage, setSelectedStage] = useState<LifeStage>('menstrual-cycle');
@@ -401,35 +378,70 @@ const Settings = () => {
         <div className="w-full px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/dashboard')}
-                className="gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back
-              </Button>
-              <div className="h-6 w-px bg-border" />
-              <h1 className="font-display text-xl font-medium">Settings</h1>
+              {section && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate('/dashboard/settings')}
+                    className="gap-2"
+                    aria-label="Back to Me"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Me
+                  </Button>
+                  <div className="h-6 w-px bg-border" />
+                </>
+              )}
+              <h1 className="font-display text-xl font-medium">{section ? ME_SECTIONS[section] : 'Me'}</h1>
             </div>
-            <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
-              Womanie
-            </a>
           </div>
         </div>
       </div>
 
+      {!section && (
+        <div className="w-full max-w-3xl mx-auto px-4 py-6 space-y-6" data-testid="me-list">
+          <MeGroup>
+            <MeRow icon={User} label={user?.name || 'Your profile'} value={user?.name ? 'Profile' : user?.email} onClick={() => openSection('profile')} testId="me-row-profile" />
+            <MeRow icon={Calendar} label="Life stage" value={LIFE_STAGE_LABELS[selectedStage]} onClick={() => openSection('life-stage')} testId="me-row-life-stage" />
+          </MeGroup>
+          <MeGroup>
+            <MeRow icon={Pill} label="Medicines & supplements" onClick={() => openSection('medicines')} testId="me-row-medicines" />
+            <MeRow icon={Bell} label="Reminders" onClick={() => openSection('reminders')} testId="me-row-reminders" />
+            <MeRow icon={Inbox} label="Needs your attention" badge={attention.total} onClick={() => navigate('/dashboard/notifications')} testId="me-row-attention" />
+            <MeRow icon={Phone} label="Emergency contacts" onClick={() => navigate('/dashboard/emergency')} testId="me-row-emergency" />
+            <MeRow icon={Smartphone} label="Connected devices" onClick={() => navigate('/dashboard/devices')} testId="me-row-devices" />
+            <MeRow icon={Users} label="Community" onClick={() => navigate('/community')} testId="me-row-community" />
+          </MeGroup>
+          <MeGroup>
+            <MeRow icon={Shield} label="Privacy & your data" onClick={() => openSection('privacy')} testId="me-row-privacy" />
+            <MeRow icon={KeyRound} label="Password & sign-in" onClick={() => openSection('password')} testId="me-row-password" />
+            <MeRow icon={HelpCircle} label="Help" onClick={() => navigate('/dashboard/help')} testId="me-row-help" />
+            <MeRow icon={Info} label="About & terms" onClick={() => navigate('/about')} testId="me-row-about" />
+            {user?.isAdmin && (
+              <MeRow icon={UserCog} label="Doctor approvals (admin)" onClick={() => navigate('/admin/doctors')} testId="me-row-admin" />
+            )}
+          </MeGroup>
+          <Button
+            variant="outline"
+            className="w-full gap-2 text-destructive hover:text-destructive"
+            onClick={() => { window.location.href = '/api/auth/logout'; }}
+            data-testid="me-logout"
+          >
+            <LogOut className="h-4 w-4" aria-hidden="true" />
+            Log out
+          </Button>
+        </div>
+      )}
+
+      {section && (
       <div className="w-full max-w-3xl mx-auto px-4 py-8 space-y-8">
-        {/* Life Stage Mode */}
-        <Card>
+        {/* Life stage: the ONE place the life stage is changed. */}
+        {section === 'life-stage' && (
+        <Card id="life-stage">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Life Stage Mode
-            </CardTitle>
             <CardDescription>
-              Choose your current life stage to personalize your dashboard, tracking features, and health insights.
+              Choose what fits you now. Home, tracking and tips follow your choice.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -473,7 +485,11 @@ const Settings = () => {
             </RadioGroup>
           </CardContent>
         </Card>
+        )}
 
+        {section === 'medicines' && <MedicineLog stage={selectedStage} />}
+
+        {section === 'profile' && (<>
         {/* Account Info */}
         <Card>
           <CardHeader>
@@ -606,16 +622,14 @@ const Settings = () => {
             </p>
           </CardContent>
         </Card>
+        </>)}
 
         {/* Notifications */}
+        {section === 'reminders' && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="h-5 w-5" />
-              Notifications
-            </CardTitle>
             <CardDescription>
-              Manage your notification preferences
+              Choose what Womanie reminds you about
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -662,14 +676,12 @@ const Settings = () => {
             </div>
           </CardContent>
         </Card>
+        )}
 
         {/* Password */}
+        {section === 'password' && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <KeyRound className="h-5 w-5" />
-              Password
-            </CardTitle>
             <CardDescription>
               {settingFirst
                 ? 'Your account uses Google sign-in. Set a password to also sign in with your email address.'
@@ -778,7 +790,9 @@ const Settings = () => {
             )}
           </CardContent>
         </Card>
+        )}
 
+        {section === 'privacy' && (<>
         {/* Chart access transparency */}
         <ChartAccessLog />
 
@@ -849,7 +863,9 @@ const Settings = () => {
             </p>
           </CardContent>
         </Card>
+        </>)}
       </div>
+      )}
     </div>
   );
 };

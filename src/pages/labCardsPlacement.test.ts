@@ -75,6 +75,6 @@ describe('Home stays short', () => {
     for (const t of ['Upload', 'Devices', 'Community', 'Health Chat', 'Med Records', 'DropdownMenu']) {
       expect(header).not.toContain(t);
     }
-    expect(header).toContain('to="/dashboard/settings"');
+    expect(header).toContain('to="/dashboard/settings#life-stage"');
   });
 });

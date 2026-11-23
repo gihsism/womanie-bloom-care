@@ -6,9 +6,9 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const suggestions = [
   { icon: Home, label: 'Homepage', path: '/', description: 'Back to the main site' },
-  { icon: Calendar, label: 'Dashboard', path: '/dashboard', description: 'Your health dashboard', auth: true },
-  { icon: MessageSquare, label: 'AI Health Assistant', path: '/dashboard/ai-doctor', description: 'Chat with AI assistant', auth: true },
-  { icon: FileText, label: 'Medical Records', path: '/dashboard/medical-history', description: 'View your documents', auth: true },
+  { icon: Calendar, label: 'Home', path: '/dashboard', description: 'Your health today', auth: true },
+  { icon: MessageSquare, label: 'Ask AI', path: '/dashboard/ai-doctor', description: 'Ask a health question', auth: true },
+  { icon: FileText, label: 'Records', path: '/dashboard/medical-history', description: 'Your results and documents', auth: true },
 ];
 
 const NotFound = () => {
@@ -18,7 +18,9 @@ const NotFound = () => {
   const visibleSuggestions = suggestions.filter(s => !s.auth || user);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    // data-hide-install-banner: on phones the install banner sat over
+    // "Go back"; this page opts out so the way out is always visible.
+    <div className="min-h-screen bg-background flex flex-col" data-hide-install-banner>
       <div className="p-4 flex justify-center border-b border-border">
         <button type="button" onClick={() => { window.location.href = '/'; }} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
           Womanie
@@ -36,6 +38,15 @@ const NotFound = () => {
             The page you're looking for doesn't exist or has been moved.
           </p>
         </div>
+
+        <Button
+          variant="outline"
+          onClick={() => (window.history.length > 1 ? navigate(-1) : navigate(user ? '/dashboard' : '/'))}
+          className="gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Go back
+        </Button>
 
         <div className="space-y-2">
           {visibleSuggestions.map((s) => (
@@ -55,14 +66,6 @@ const NotFound = () => {
           ))}
         </div>
 
-        <Button
-          variant="outline"
-          onClick={() => navigate(-1)}
-          className="gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Go back
-        </Button>
       </div>
       </div>
     </div>

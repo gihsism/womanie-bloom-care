@@ -12,13 +12,13 @@ const lifeStages = [
   {
     value: 'pre-menstrual',
     icon: Flower2,
-    title: 'Pre-menstrual',
-    description: 'Before first period',
+    title: 'Before first period',
+    description: 'Getting ready for a first period',
   },
   {
     value: 'regular-cycle',
     icon: Calendar,
-    title: 'Regular menstrual cycle',
+    title: 'Period tracking',
     description: 'Tracking my cycle',
   },
   {
@@ -30,19 +30,19 @@ const lifeStages = [
   {
     value: 'pregnant',
     icon: Baby,
-    title: 'Currently pregnant',
+    title: 'Pregnancy',
     description: 'Expecting a baby',
   },
   {
     value: 'postpartum',
     icon: Baby,
-    title: 'Recently gave birth',
-    description: 'Postpartum recovery & care',
+    title: 'After birth',
+    description: 'Your recovery and your baby',
   },
   {
     value: 'menopause',
     icon: Sunset,
-    title: 'Menopause/Post-menopause',
+    title: 'Menopause or after menopause',
     description: 'Managing menopause',
   },
 ];

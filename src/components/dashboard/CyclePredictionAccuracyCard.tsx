@@ -25,9 +25,15 @@ interface PeriodRow {
   period_start_date: string;
 }
 
+// Not 'pre-menstrual': before a first period there is no cycle to
+// predict, so "how accurate were our predictions" makes no sense there.
 const RELEVANT_MODES: LifeStage[] = [
-  'menstrual-cycle', 'conception', 'pre-menstrual', 'contraception',
+  'menstrual-cycle', 'conception', 'contraception',
 ];
+
+export function showsPredictionAccuracy(mode: LifeStage): boolean {
+  return RELEVANT_MODES.includes(mode);
+}
 
 interface Props {
   mode: LifeStage;
@@ -57,7 +63,7 @@ export default function CyclePredictionAccuracyCard({ mode }: Props) {
     [rows]
   );
 
-  if (!RELEVANT_MODES.includes(mode)) return null;
+  if (!showsPredictionAccuracy(mode)) return null;
   if (!loaded) return null;
   if (scored.length < 2) return null;
 

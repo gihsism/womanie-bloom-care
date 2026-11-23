@@ -61,7 +61,7 @@ describe('Home template', () => {
   it.each(STAGES)('%s: five blocks, one primary button, at most 10 tappables', (mode) => {
     const { container } = renderHome(mode, 20);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/, Lena$/);
-    expect(screen.getByRole('link', { name: /change life stage/i })).toHaveAttribute('href', '/dashboard/settings');
+    expect(screen.getByRole('link', { name: /change life stage/i })).toHaveAttribute('href', '/dashboard/settings#life-stage');
     expect(screen.getAllByTestId('hero')).toHaveLength(1);
     expect(screen.getByRole('heading', { name: 'Today' })).toBeInTheDocument();
     expect(screen.getByText('Nothing needs you today')).toBeInTheDocument();

@@ -1,3 +1,4 @@
+import { lifeStageLabel } from './lifeStageLabels';
 // Pure helpers for the doctor's dashboard. Kept free of React so the
 // ranking, sorting and consent rules can be unit-tested.
 
@@ -23,28 +24,9 @@ export interface DoctorAppointment {
   notes?: string | null;
 }
 
-// Plain stage names (SIMPLIFY_PLAN §4.2), shared with the patient side.
-const STAGE_LABELS: Record<string, string> = {
-  'pre-menstrual': 'Before first period',
-  'menstrual-cycle': 'Period tracking',
-  contraception: 'Birth control',
-  conception: 'Trying to conceive',
-  'trying-to-conceive': 'Trying to conceive',
-  ivf: 'IVF',
-  pregnancy: 'Pregnancy',
-  pregnant: 'Pregnancy',
-  postpartum: 'After birth',
-  menopause: 'Menopause',
-  perimenopause: 'Menopause',
-  'post-menopause': 'After menopause',
-};
-
 export function stageLabel(raw: string | null | undefined): string | null {
-  const v = (raw ?? '').trim().toLowerCase();
-  if (!v) return null;
-  if (STAGE_LABELS[v]) return STAGE_LABELS[v];
-  const words = v.replace(/[-_]/g, ' ');
-  return words.charAt(0).toUpperCase() + words.slice(1);
+  // Same plain names as the patient side (incl. old aliases like 'pregnant').
+  return lifeStageLabel(raw) || null;
 }
 
 export function patientName(

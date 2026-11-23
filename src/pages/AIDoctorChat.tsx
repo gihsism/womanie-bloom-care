@@ -3,7 +3,16 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
@@ -12,27 +21,26 @@ import { computeCyclePhase } from '@/lib/cycle-phase';
 import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
 import {
-  ArrowLeft,
   Send,
   Bot,
   User,
   Loader2,
   Trash2,
   Download,
-  Cpu,
-  Stethoscope,
-  MessageCircle,
-  Search,
-  Calendar,
-  Shield,
+  BookOpen,
+  History,
+  MoreHorizontal,
+  Plus,
+  ArrowLeft,
   Copy,
   Check,
 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
 import { ChatSources } from '@/components/chat/ChatSources';
+import { PastChats } from '@/components/chat/PastChats';
+import { groupIntoChats, type PastChat, type StoredChatMessage } from '@/lib/chatSessions';
+import { pickSuggestions } from '@/lib/chatSuggestions';
 import { citedSources, linkCitations, splitSourcesFooter, stripSourcesFooter, stripUnknownCitations, type ChatSource } from '@/lib/research-sources';
 
-type ChatMode = 'ai' | 'real';
 // `sources`: research-library items the server gave the model for this
 // answer (live replies); reloaded replies carry them in a text footer.
 type Msg = { role: 'user' | 'assistant'; content: string; sources?: ChatSource[] };
@@ -141,73 +149,12 @@ async function streamChat({
   onDone();
 }
 
+// A new chat opens with one short line; the full history is under
+// "Past chats". The disclaimer is the single line under the input.
 const WELCOME_MESSAGE: Msg = {
   role: 'assistant',
-  content: `Hi! I'm your **AI Health Assistant** powered by Claude. I can see your uploaded medical documents and help you understand your health.
-
-**What I can do:**
-- 📋 Explain your lab results in plain language
-- 🔗 Find connections between different test results
-- 🤰 Give pregnancy/cycle-specific guidance
-- 💊 Explain medications and supplements
-- ❓ Answer any health questions
-
-*I'm not a replacement for your doctor — always consult a professional for medical decisions.*`,
+  content: 'Ask me anything about your health or your records. I can see the documents you uploaded.',
 };
-
-// ─── Real Doctor Panel ───
-function RealDoctorPanel() {
-  const navigate = useNavigate();
-  usePageTitle('AI Health Assistant');
-
-  const features = [
-    { icon: Search, label: 'Browse verified specialists', description: 'Find gynecologists, fertility experts, and more' },
-    { icon: Calendar, label: 'Book appointments', description: 'Schedule video or in-person consultations' },
-    { icon: MessageCircle, label: 'Secure messaging', description: 'Chat directly with your connected doctor' },
-    { icon: Shield, label: 'Verified professionals', description: 'All doctors are license-verified' },
-  ];
-
-  return (
-    <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
-      {/* Hero */}
-      <div className="text-center space-y-3 pt-4">
-        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
-          <Stethoscope className="h-8 w-8 text-primary" />
-        </div>
-        <h2 className="text-xl font-bold">Consult a Real Doctor</h2>
-        <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-          Connect with verified healthcare professionals for personalized medical advice and consultations.
-        </p>
-      </div>
-
-      {/* Features */}
-      <div className="space-y-3 max-w-md mx-auto">
-        {features.map((f) => (
-          <Card key={f.label} className="p-4 flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <f.icon className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold">{f.label}</p>
-              <p className="text-xs text-muted-foreground">{f.description}</p>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      {/* CTA */}
-      <div className="max-w-md mx-auto space-y-3">
-        <Button className="w-full h-12 text-sm font-semibold rounded-xl" onClick={() => navigate('/find-doctor')}>
-          <Search className="h-4 w-4 mr-2" />
-          Find a Doctor
-        </Button>
-        <p className="text-[10px] text-muted-foreground text-center">
-          All consultations are private and encrypted.
-        </p>
-      </div>
-    </div>
-  );
-}
 
 // ─── Main Component ───
 export default function AIDoctorChat() {
@@ -216,8 +163,13 @@ export default function AIDoctorChat() {
   const { user, loading: authLoading } = useAuth();
   const healthContext = useUserHealthContext();
   const { toast } = useToast();
-  const [chatMode, setChatMode] = useState<ChatMode>('ai');
+  usePageTitle('Ask AI');
+  // The chat on screen. It always starts new; stored history is listed
+  // under "Past chats" (history below) and can be reopened from there.
   const [messages, setMessages] = useState<Msg[]>([WELCOME_MESSAGE]);
+  // Every stored message (oldest first), as the server returns it.
+  const [history, setHistory] = useState<Array<StoredChatMessage & { sources?: ChatSource[] }>>([]);
+  const [showPast, setShowPast] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const [hasMoreHistory, setHasMoreHistory] = useState(false);
   const [earliestCursor, setEarliestCursor] = useState<string | null>(null);
@@ -387,15 +339,16 @@ export default function AIDoctorChat() {
         const resp = await fetch('/api/chat/messages', { credentials: 'include' });
         if (!resp.ok) return;
         const data = await resp.json();
-        const serverMessages: Msg[] = (data.messages || []).map((m: { role: string; content: string }) => ({
+        const serverMessages: StoredChatMessage[] = (data.messages || []).map((m: { role: string; content: string; created_at?: string | null }) => ({
           role: m.role as 'user' | 'assistant',
           content: m.content,
+          created_at: m.created_at ?? null,
         }));
         setHasMoreHistory(Boolean(data.hasMore));
         setEarliestCursor(typeof data.earliestCursor === 'string' ? data.earliestCursor : null);
 
         if (serverMessages.length > 0) {
-          setMessages([WELCOME_MESSAGE, ...serverMessages]);
+          setHistory(serverMessages);
         } else {
           // Server empty — attempt one-time migration from localStorage
           try {
@@ -412,7 +365,7 @@ export default function AIDoctorChat() {
                 });
                 if (imp.ok) {
                   localStorage.removeItem('womanie_chat_history');
-                  setMessages([WELCOME_MESSAGE, ...migratable]);
+                  setHistory(migratable.map(m => ({ role: m.role, content: m.content, created_at: null })));
                 }
               }
             }
@@ -548,7 +501,18 @@ export default function AIDoctorChat() {
           return [...prev, { role: 'assistant', content: assistantSoFar, sources: sourcesSoFar }];
         });
       },
-      onDone: () => setIsStreaming(false),
+      onDone: () => {
+        setIsStreaming(false);
+        // The server stored this turn; mirror it into Past chats without a refetch.
+        if (assistantSoFar) {
+          const now = new Date().toISOString();
+          setHistory(h => [
+            ...h,
+            { role: 'user', content: text, created_at: now },
+            { role: 'assistant', content: assistantSoFar, created_at: now, sources: sourcesSoFar },
+          ]);
+        }
+      },
       onError: (err) => {
         // If we got partial response, keep it and add error note
         if (assistantSoFar) {
@@ -574,15 +538,59 @@ export default function AIDoctorChat() {
     }
   };
 
+  // Older stored messages for the Past chats list (50 per page).
+  const loadEarlier = async () => {
+    if (!earliestCursor) return;
+    setLoadingEarlier(true);
+    try {
+      const resp = await fetch(
+        `/api/chat/messages?before=${encodeURIComponent(earliestCursor)}`,
+        { credentials: 'include' },
+      );
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+      const older: StoredChatMessage[] = (data.messages || []).map((m: { role: string; content: string; created_at?: string | null }) => ({
+        role: m.role as 'user' | 'assistant',
+        content: m.content,
+        created_at: m.created_at ?? null,
+      }));
+      setHistory(prev => [...older, ...prev]);
+      setHasMoreHistory(Boolean(data.hasMore));
+      setEarliestCursor(typeof data.earliestCursor === 'string' ? data.earliestCursor : null);
+    } catch (err) {
+      console.error('Load earlier failed:', err);
+    } finally {
+      setLoadingEarlier(false);
+    }
+  };
+
+  const pastChats = groupIntoChats(history);
+
+  const openPastChat = (chat: PastChat<StoredChatMessage & { sources?: ChatSource[] }>) => {
+    setMessages([WELCOME_MESSAGE, ...chat.messages.map(m => ({ role: m.role, content: m.content, sources: m.sources }))]);
+    setInput('');
+    setShowPast(false);
+  };
+
+  const startNewChat = () => {
+    setMessages([WELCOME_MESSAGE]);
+    setInput('');
+    setShowPast(false);
+    setTimeout(() => textareaRef.current?.focus(), 0);
+  };
+
   const clearChat = async () => {
     // Only ask for confirmation when there's real history to lose —
     // clearing an already-empty chat would just surface a pointless
     // prompt.
-    const hasRealHistory = messages.some(m => m !== WELCOME_MESSAGE);
-    if (hasRealHistory && !window.confirm('Clear this entire chat history? This cannot be undone.')) {
+    const hasRealHistory = history.length > 0 || messages.some(m => m !== WELCOME_MESSAGE);
+    if (hasRealHistory && !window.confirm('Delete all your past chats? This cannot be undone.')) {
       return;
     }
     setMessages([WELCOME_MESSAGE]);
+    setHistory([]);
+    setHasMoreHistory(false);
+    setEarliestCursor(null);
     setInput('');
     try { localStorage.removeItem('womanie_chat_history'); } catch { /* ignore */ }
     try {
@@ -631,108 +639,19 @@ export default function AIDoctorChat() {
     toast({ title: 'Chat exported', description: 'Saved a markdown file — open it anywhere or share with your doctor.' });
   };
 
-  // Suggested starter prompts. When we have no medical context at all
-  // (no profile data, no docs analyzed yet) the regular prompts are
-  // pointless — the assistant would just say "I don't have anything
-  // to reference". So guide the user toward uploading instead.
+  // At most 3 suggested first questions, from the life stage and what is
+  // in the records (src/lib/chatSuggestions.ts). With no records at all,
+  // the suggestions guide toward uploading instead.
   const hasContext = Boolean(medicalContext && medicalContext.length > 0);
-
-  // Match the exact `Life stage: <key>` string that the medicalContext
-  // builder emits (lines 254-256 above), keyed against the eight
-  // dashboard modes. Anchoring on the colon-prefixed key avoids the
-  // false positives the old substring match was prone to — "pregnancy"
-  // also appears in "trying to conceive" copy elsewhere in the
-  // context, for example.
+  // Match the exact `Life stage: <key>` line the medicalContext builder emits.
   const lifeStageMatch = medicalContext?.match(/Life stage: ([\w-]+)/);
   const lifeStage = lifeStageMatch?.[1] ?? null;
-
-  // Per-mode prompt sets. Each mode's questions are chosen so the
-  // assistant actually has something useful to say grounded in what
-  // it knows from the server-side context (profile + last 20 docs +
-  // last 100 extracted values + upcoming visits + recent notes).
-  const MODE_SUGGESTIONS: Record<string, string[]> = {
-    'pre-menstrual': [
-      'What changes should I expect before my first period?',
-      'How do I prepare a period kit for school?',
-      'When should I tell a trusted adult?',
-    ],
-    'menstrual-cycle': [
-      'Are my cycles regular based on my history?',
-      'Which lab results are most relevant for my cycle?',
-      'What symptoms should I track this month?',
-    ],
-    'contraception': [
-      'Is my contraception still the right fit?',
-      'What should I know about missed-pill recovery?',
-      'How would switching methods affect me?',
-    ],
-    'conception': [
-      'What does my BBT pattern suggest about ovulation?',
-      'When is my fertile window this cycle?',
-      'Which supplements help fertility?',
-    ],
-    'ivf': [
-      'Explain my beta hCG trend in plain language',
-      'What does my current IVF phase mean?',
-      'How should I support recovery after retrieval?',
-    ],
-    'pregnancy': [
-      'Is my pregnancy progressing normally?',
-      'What prenatal milestones are coming up?',
-      'Which supplements should I keep taking?',
-    ],
-    'postpartum': [
-      'What recovery milestones should I expect this week?',
-      'Is what I\'m experiencing normal postpartum bleeding?',
-      'How can I tell if it might be postpartum depression?',
-    ],
-    'menopause': [
-      'Where am I in the menopause transition?',
-      'What can help with my symptoms?',
-      'Which screenings should I be doing this year?',
-    ],
-    'post-menopause': [
-      'What should I prioritize for long-term health?',
-      'Are any of my labs concerning for someone my age?',
-      'Which screenings are overdue?',
-    ],
-  };
-
-  let suggestedQuestions: string[];
-  if (!hasContext) {
-    suggestedQuestions = [
-      'What kinds of tests should I be tracking?',
-      'What can you help me with?',
-      'What should I upload first?',
-    ];
-  } else {
-    const baseSuggestions = [
-      'Summarize my medical history',
-      'What do my latest lab results mean?',
-    ];
-
-    // Pick the mode-specific set when we have a known life stage;
-    // otherwise fall back to the old abnormal/concerning heuristic
-    // so users without a mode still get something useful.
-    const contextSuggestions = lifeStage && MODE_SUGGESTIONS[lifeStage]
-      ? MODE_SUGGESTIONS[lifeStage]
-      : medicalContext?.includes('abnormal') || medicalContext?.includes('critical')
-      ? ['Which results should I worry about?', 'What lifestyle changes could help?']
-      : ['Are there any concerning findings?', 'What tests should I do next?'];
-
-    // If the patient has an upcoming visit or recent doctor notes,
-    // surface a chip that helps them get value from the assistant
-    // about those — both are now in the server-side prompt context.
-    const proximitySuggestions: string[] = [];
-    if (medicalContext?.includes('Upcoming appointments:')) {
-      proximitySuggestions.push('What should I prepare for my next appointment?');
-    }
-    if (medicalContext?.includes('Recent doctor notes:')) {
-      proximitySuggestions.push('Explain my doctor\'s latest note in plain language');
-    }
-
-    suggestedQuestions = [...baseSuggestions, ...contextSuggestions, ...proximitySuggestions];
-  }
+  const suggestedQuestions = pickSuggestions({
+    lifeStage,
+    hasContext,
+    hasFlaggedResults: Boolean(medicalContext?.includes('abnormal') || medicalContext?.includes('critical')),
+    hasUpcomingVisit: Boolean(medicalContext?.includes('Upcoming appointments:')),
+  });
 
   if (authLoading) {
     return (
@@ -742,136 +661,86 @@ export default function AIDoctorChat() {
     );
   }
 
-  const currentModelLabel = AI_MODELS.find(m => m.id === selectedModel)?.label || 'Gemini Flash';
+  const isNewChat = !messages.some(m => m !== WELCOME_MESSAGE);
 
   return (
     // The mobile nav is a left rail now, so the pinned input only needs to
     // clear the phone's home-indicator safe area.
     <div className="min-h-screen bg-background flex flex-col pb-[env(safe-area-inset-bottom)]">
-      {/* Header */}
+      {/* Header: title, Past chats / New chat, and a ⋯ menu for the rest */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="px-3 py-2.5 sm:px-4 sm:py-3 flex items-center gap-2 sm:gap-3">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className="hidden sm:flex w-8 h-8 rounded-full bg-primary/10 items-center justify-center flex-shrink-0">
-              {chatMode === 'ai' ? <Bot className="h-3.5 w-3.5 text-primary" /> : <Stethoscope className="h-3.5 w-3.5 text-primary" />}
-            </div>
-            <div className="min-w-0 overflow-hidden">
-              <p className="label-mono !text-primary !text-[10px] leading-none whitespace-nowrap">&#10022; Ask AI</p>
-              <h1 className="font-display text-[17px] font-medium leading-tight whitespace-nowrap">Health Chat</h1>
-              <p className="text-[10px] text-muted-foreground hidden sm:block">
-                {chatMode === 'ai' ? 'AI-powered assistant' : 'Connect with real doctors'}
-              </p>
-            </div>
-          </div>
-          <button type="button" onClick={() => { window.location.href = '/'; }} className="text-xs sm:text-sm font-bold text-primary hover:opacity-80 transition-opacity hidden sm:block">
-            Womanie
-          </button>
-
-          {chatMode === 'ai' && (
-            <>
-              <Select value={selectedModel} onValueChange={setSelectedModel} disabled={isStreaming}>
-                <SelectTrigger className="w-auto h-8 text-xs gap-1 border-border shrink-0 px-2.5" aria-label={`AI model: ${currentModelLabel}`}>
-                  <Cpu className="h-3 w-3 hidden sm:block" />
-                  <SelectValue>
-                    <span className="sm:hidden">{currentModelLabel.replace(/^Claude\s+/, '')}</span>
-                    <span className="hidden sm:inline">{currentModelLabel}</span>
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {AI_MODELS.map((m) => (
-                    <SelectItem key={m.id} value={m.id}>
-                      <div className="flex flex-col">
-                        <span className="font-medium text-xs">{m.label}</span>
-                        <span className="text-[10px] text-muted-foreground">{m.description}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={exportChat} title="Export chat as markdown" aria-label="Export chat">
-                <Download className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={clearChat} title="Clear chat" aria-label="Clear chat">
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </>
+        <div className="px-3 py-2.5 sm:px-4 sm:py-3 flex items-center gap-2">
+          {showPast && (
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowPast(false)} aria-label="Back to chat">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
           )}
-        </div>
-
-        {/* Mode Switcher */}
-        <div className="px-3 sm:px-4 pb-2.5 sm:pb-3 flex gap-2">
-          <Button
-            variant={chatMode === 'ai' ? 'default' : 'outline'}
-            size="sm"
-            className="flex-1 rounded-xl h-9 text-xs font-semibold gap-1.5"
-            onClick={() => setChatMode('ai')}
-          >
-            <Bot className="h-3.5 w-3.5" />
-            AI Assistant
-          </Button>
-          <Button
-            variant={chatMode === 'real' ? 'default' : 'outline'}
-            size="sm"
-            className="flex-1 rounded-xl h-9 text-xs font-semibold gap-1.5"
-            onClick={() => setChatMode('real')}
-          >
-            <Stethoscope className="h-3.5 w-3.5" />
-            Real Doctor
-          </Button>
+          <h1 className="font-display text-[17px] font-medium leading-tight flex-1 min-w-0 truncate">
+            {showPast ? 'Past chats' : 'Ask AI'}
+          </h1>
+          {!showPast && !isNewChat && (
+            <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-xs shrink-0" onClick={startNewChat} disabled={isStreaming}>
+              <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+              New chat
+            </Button>
+          )}
+          {!showPast && (
+            <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-xs shrink-0" onClick={() => setShowPast(true)} disabled={isStreaming}>
+              <History className="h-3.5 w-3.5" aria-hidden="true" />
+              Past chats
+            </Button>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="More options">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="text-xs text-muted-foreground">AI model</DropdownMenuLabel>
+              <DropdownMenuRadioGroup value={selectedModel} onValueChange={(v) => { if (!isStreaming) setSelectedModel(v); }}>
+                {AI_MODELS.map((m) => (
+                  <DropdownMenuRadioItem key={m.id} value={m.id}>
+                    <span className="flex flex-col">
+                      <span className="text-xs font-medium">{m.label}</span>
+                      <span className="text-[10px] text-muted-foreground">{m.description}</span>
+                    </span>
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={exportChat}>
+                <Download className="mr-2 h-4 w-4" aria-hidden="true" />
+                Export this chat
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/library')}>
+                <BookOpen className="mr-2 h-4 w-4" aria-hidden="true" />
+                Research library
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={clearChat} className="text-destructive focus:text-destructive">
+                <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
+                Delete all chats
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
-      {/* Content based on mode */}
-      {chatMode === 'real' ? (
-        <RealDoctorPanel />
+      {/* Past chats list, or the chat itself */}
+      {showPast ? (
+        <PastChats
+          chats={pastChats}
+          loading={!historyLoaded}
+          hasMore={hasMoreHistory && Boolean(earliestCursor)}
+          loadingEarlier={loadingEarlier}
+          onOpen={openPastChat}
+          onLoadEarlier={loadEarlier}
+        />
       ) : (
         <>
           {/* Messages */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-            {hasMoreHistory && earliestCursor && (
-              <div className="flex justify-center">
-                <button
-                  type="button"
-                  disabled={loadingEarlier}
-                  onClick={async () => {
-                    if (!earliestCursor) return;
-                    setLoadingEarlier(true);
-                    try {
-                      const resp = await fetch(
-                        `/api/chat/messages?before=${encodeURIComponent(earliestCursor)}`,
-                        { credentials: 'include' },
-                      );
-                      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-                      const data = await resp.json();
-                      const older: Msg[] = (data.messages || []).map((m: { role: string; content: string }) => ({
-                        role: m.role as 'user' | 'assistant',
-                        content: m.content,
-                      }));
-                      // Prepend older messages after the WELCOME_MESSAGE sentinel.
-                      setMessages(prev => {
-                        const welcomeIdx = prev.findIndex(m => m === WELCOME_MESSAGE);
-                        if (welcomeIdx >= 0) {
-                          return [...prev.slice(0, welcomeIdx + 1), ...older, ...prev.slice(welcomeIdx + 1)];
-                        }
-                        return [...older, ...prev];
-                      });
-                      setHasMoreHistory(Boolean(data.hasMore));
-                      setEarliestCursor(typeof data.earliestCursor === 'string' ? data.earliestCursor : null);
-                    } catch (err) {
-                      console.error('Load earlier failed:', err);
-                    } finally {
-                      setLoadingEarlier(false);
-                    }
-                  }}
-                  className="text-xs text-muted-foreground hover:text-primary px-3 py-1.5 rounded-full bg-muted/50 hover:bg-muted disabled:opacity-60"
-                >
-                  {loadingEarlier ? 'Loading…' : 'Load earlier messages'}
-                </button>
-              </div>
-            )}
             {messages.map((msg, i) => (
               <div
                 key={i}
@@ -949,14 +818,7 @@ export default function AIDoctorChat() {
 
           {/* Suggested Questions */}
           {messages.length <= 1 && (
-            <div className="px-4 pb-2">
-              <button
-                type="button"
-                onClick={() => navigate('/library')}
-                className="mb-2 text-xs text-primary hover:underline underline-offset-2"
-              >
-                Browse the research library &rarr;
-              </button>
+            <div className="px-4 pb-2" data-testid="suggestions">
               <div className="flex flex-wrap gap-2">
                 {suggestedQuestions.map((q) => (
                   <Button
@@ -994,6 +856,7 @@ export default function AIDoctorChat() {
                 disabled={!input.trim() || isStreaming}
                 size="icon"
                 className="rounded-xl h-[44px] w-[44px] flex-shrink-0"
+                aria-label="Send"
               >
                 {isStreaming ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -1002,8 +865,17 @@ export default function AIDoctorChat() {
                 )}
               </Button>
             </div>
-            <p className="text-[10px] text-muted-foreground text-center mt-2">
-              AI responses are informational only. Always consult your doctor for medical decisions.
+            <p className="text-xs text-center mt-2">
+              <button
+                type="button"
+                onClick={() => navigate('/dashboard/appointments')}
+                className="text-primary hover:underline underline-offset-2"
+              >
+                Prefer a real doctor? Book a visit &rarr;
+              </button>
+            </p>
+            <p className="text-[10px] text-muted-foreground text-center mt-1">
+              Information only, not medical advice.
             </p>
           </div>
         </>

@@ -18,7 +18,7 @@ export const LIFE_STAGES: readonly LifeStage[] = [
   'post-menopause',
 ];
 
-const ALIASES: Record<string, LifeStage> = {
+export const LIFE_STAGE_ALIASES: Record<string, LifeStage> = {
   pregnant: 'pregnancy',
   'trying-to-conceive': 'conception',
   ttc: 'conception',
@@ -35,5 +35,5 @@ const ALIASES: Record<string, LifeStage> = {
 export function normalizeLifeStage(raw: unknown): LifeStage {
   const v = typeof raw === 'string' ? raw.trim().toLowerCase() : '';
   if ((LIFE_STAGES as readonly string[]).includes(v)) return v as LifeStage;
-  return ALIASES[v] ?? 'menstrual-cycle';
+  return LIFE_STAGE_ALIASES[v] ?? 'menstrual-cycle';
 }
