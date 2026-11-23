@@ -3,9 +3,9 @@ import { NavLink, useLocation } from "react-router-dom";
 import { Home, FileText, MessageCircle, Calendar, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Mobile navigation — the version 8 "museum index": a slim vertical rail
-// down the left edge with rotated labels (formerly a bottom tab bar). Shown only on small screens (md:hidden); desktop keeps
-// the existing dropdown menu. Rendered once app-wide and self-hides
+// Mobile navigation — a standard bottom tab bar: five tabs, each an icon
+// with its label underneath (never rotated, never numbered). Shown only on
+// small screens (md:hidden). Rendered once app-wide and self-hides
 // outside the patient dashboard area.
 //
 // Content clearance: while visible it adds `has-bottom-nav` to <body>,
@@ -48,40 +48,28 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed left-0 bottom-0 top-[env(safe-area-inset-top)] z-40 flex w-[46px] flex-col items-stretch justify-around border-r border-border bg-background/90 backdrop-blur pb-[env(safe-area-inset-bottom)] md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur pb-[env(safe-area-inset-bottom)] md:hidden"
       aria-label="Main"
     >
-      {TABS.map(({ to, label, exact }, i) => {
-        const ai = to === "/dashboard/ai-doctor";
-        return (
-          <NavLink
-            key={to}
-            to={to}
-            end={exact}
-            className={({ isActive }) =>
-              cn(
-                "relative flex flex-1 items-center justify-center transition-colors",
-                isActive ? "text-foreground" : ai ? "text-primary" : "text-muted-foreground hover:text-foreground",
-              )
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {/* Vertical museum-index label, read bottom-to-top */}
-                <span className="flex rotate-180 items-center gap-2 whitespace-nowrap text-[12.5px] uppercase tracking-[0.16em] [writing-mode:vertical-rl]">
-                  {isActive && <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />}
-                  {!isActive && ai && <span aria-hidden="true" className="text-[11px]">&#10022;</span>}
-                  <span className={cn(isActive && "font-medium")}>{label}</span>
-                  <span className={cn("font-mono text-[10px] tracking-normal", isActive ? "text-primary" : "text-border")}>
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                </span>
-                {isActive && <span className="absolute right-[-1px] top-1/2 h-20 w-[2px] -translate-y-1/2 bg-foreground" aria-hidden="true" />}
-              </>
-            )}
-          </NavLink>
-        );
-      })}
+      <ul className="flex h-16 items-stretch">
+        {TABS.map(({ to, label, icon: Icon, exact }) => (
+          <li key={to} className="flex-1">
+            <NavLink
+              to={to}
+              end={exact}
+              className={({ isActive }) =>
+                cn(
+                  "flex h-full flex-col items-center justify-center gap-1 text-[11px] transition-colors",
+                  isActive ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground",
+                )
+              }
+            >
+              <Icon className="h-5 w-5" aria-hidden="true" />
+              <span>{label}</span>
+            </NavLink>
+          </li>
+        ))}
+      </ul>
     </nav>
   );
 }

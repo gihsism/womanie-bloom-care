@@ -41,4 +41,13 @@ describe("BottomNav", () => {
     renderAt("/dashboard");
     expect(document.body.classList.contains("has-bottom-nav")).toBe(true);
   });
+
+  it("is a readable tab bar: an icon per tab, no numbers, no rotated text", () => {
+    const { container } = renderAt("/dashboard");
+    const links = screen.getAllByRole("link");
+    expect(links).toHaveLength(5);
+    for (const link of links) expect(link.querySelector("svg")).not.toBeNull();
+    expect(container.textContent).not.toMatch(/0[1-5]/);
+    expect(container.innerHTML).not.toMatch(/writing-mode|rotate-/);
+  });
 });
