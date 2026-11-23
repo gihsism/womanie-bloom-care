@@ -189,6 +189,31 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-23 — Test coverage: added security-invariant tests for doctors/connections
+doctors/connections.ts is the endpoint through which a doctor lists all their
+patient connections, joined with profiles and health_documents activity. It had
+no tests despite carrying two critical invariants: (1) the ownership filter must
+bind the session doctor's id as $1 (doctor_id) so a doctor can only see their
+own patient list; and (2) health data fields — patient_life_stage, last_upload_at,
+and recent_doc_count — must be gated on status = 'approved' via CASE WHEN so a
+doctor cannot learn a patient's health context (life stage, upload activity)
+from a pending connection before the patient has consented. Without the CASE WHEN
+guard, a doctor who sent a connection request could immediately read the patient's
+health metadata without any consent decision having been made.
+Added api/_routes/doctors/connections.test.ts with 8 tests covering: 401 when
+getAuthUser returns null; 405 for non-GET methods; a doctor ownership invariant
+confirming the query binds the session doctor's id as $1 — not any client-supplied
+value (a refactor trusting a query param would let any authenticated user see
+another doctor's entire patient list); a regression guard confirming the WHERE
+clause references doctor_id = $1; a health-data gate invariant confirming the SQL
+uses CASE WHEN c.status = 'approved' and covers all three health-sensitive columns
+(patient_life_stage, last_upload_at, recent_doc_count — dropping this guard would
+expose a patient's health state before consent); 200 with a connections array; a
+null-fields guard confirming health data fields are null on a pending connection
+row (the query result accurately reflects the CASE WHEN invariant); and 500 on a
+database error.
+Verified: tsc 0, eslint 0, 804/804 tests pass, vite build clean.
+
 ### 2026-11-22 — Test coverage: added security-invariant tests for auth/doctor-signup
 auth/doctor-signup.ts is the entry point through which doctors create accounts. It
 was hardened for atomic user creation (2026-11-01 pattern) and TOCTOU duplicate-email
