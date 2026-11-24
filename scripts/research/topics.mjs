@@ -163,6 +163,12 @@ export const TOPICS = [
   { id: 'osteoporosis-treatment', label: 'Osteoporosis treatment', stages: ['post-menopause', 'menopause'], query: '"osteoporosis, postmenopausal"[mh] AND (bisphosphonates OR denosumab OR treatment)', max: 3 },
   { id: 'skin-hair-hormones', label: 'Acne and hair changes linked to hormones', stages: ['menstrual-cycle', 'general'], query: '(acne vulgaris[mh] OR hirsutism[mh] OR alopecia[mh]) AND women AND (hormonal OR treatment)', max: 3 },
   { id: 'physical-activity-women', label: 'Physical activity for women', stages: ['general'], query: '(exercise[mh] OR "physical activity"[tiab]) AND women AND (guideline OR "all-cause mortality" OR "mental health")', max: 3 },
+
+  // ── Added 2026-11-24 (gaps found by scripts/research/citation-audit.mjs:
+  //    0-1 relevant sources for the question; not built yet) ───────────
+  { id: 'travel-pregnancy', label: 'Flying and travel in pregnancy', stages: ['pregnancy'], query: '("air travel"[mh] OR "air travel"[tiab] OR travel[mh] OR flying[tiab] OR "long-haul"[tiab] OR "travel medicine"[mh]) AND pregnancy[mh]', max: 3 },
+  { id: 'ivf-cumulative-success', label: 'How many IVF cycles it takes', stages: ['ivf', 'conception'], query: '("fertilization in vitro"[mh] OR "assisted reproductive techniques"[mh]) AND ("cumulative live birth"[tiab] OR "cumulative pregnancy"[tiab] OR "number of cycles"[tiab] OR "repeated cycles"[tiab] OR "treatment discontinuation"[tiab])', max: 3 },
+  { id: 'menopause-joint-pain', label: 'Joint and muscle aches at menopause', stages: ['menopause', 'post-menopause'], query: '(arthralgia[mh] OR "joint pain"[tiab] OR "musculoskeletal pain"[tiab] OR "musculoskeletal symptoms"[tiab] OR osteoarthritis[mh]) AND (menopause[mh] OR perimenopause[mh] OR menopaus*[tiab]) NOT "aromatase inhibitors"[mh]', max: 3 },
 ];
 
 /** Famous trials included by name. Search -> fetch -> title check. */

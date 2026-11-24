@@ -1,3 +1,7 @@
+import { postMenopauseBleed } from './bodyMap';
+
+/** Header-length version of POST_MENOPAUSE_BLEED_TEXT (bodyMap.ts). */
+export const POST_MENOPAUSE_BLEED_SHORT = 'Bleeding after menopause: see your doctor.';
 import { format } from 'date-fns';
 import type { LifeStage } from '@/components/dashboard/DashboardHeader';
 import type { CycleDialData } from '@/lib/bodyMap';
@@ -61,7 +65,13 @@ export function visitValue(v: Date | null | undefined, now: Date): string {
 }
 
 const inDays = (n: number) => (n <= 0 ? 'today' : n === 1 ? 'tomorrow' : `in ${n} days`);
-const ago = (min: number) => (min < 1 ? 'just now' : min < 60 ? `${min} min ago` : `${Math.floor(min / 60)} h ${min % 60 ? `${min % 60} min ` : ''}ago`);
+export const ago = (min: number) => {
+  if (min < 1) return 'just now';
+  if (min < 60) return `${min} min ago`;
+  if (min < 24 * 60) return `${Math.floor(min / 60)} h ${min % 60 ? `${min % 60} min ` : ''}ago`;
+  const d = Math.floor(min / (24 * 60));
+  return d === 1 ? 'yesterday' : `${d} days ago`;
+};
 const hm = (min: number) => { const h = Math.floor(min / 60); const m = Math.round(min % 60); return h ? `${h}h ${m}m` : `${m}m`; };
 
 export function headerFor(mode: LifeStage, f: HeaderFacts): HeaderModel {
@@ -130,7 +140,9 @@ export function headerFor(mode: LifeStage, f: HeaderFacts): HeaderModel {
       const w = f.hotFlushes7 ?? 0;
       const big = t > 0 ? `${t} hot flush${t === 1 ? '' : 'es'} today` : w > 0 ? `${w} hot flush${w === 1 ? '' : 'es'} this week` : 'No hot flushes today';
       const months: Fact = { label: 'Since last period', value: f.monthsSincePeriod == null ? 'Not logged' : `${f.monthsSincePeriod} month${f.monthsSincePeriod === 1 ? '' : 's'}` };
-      return m(big, 'Tap Hot flush each time one comes.', mode === 'menopause' ? months : { label: 'Hot flushes', value: `${w} this week` }, visit);
+      // A period logged within 12 months after menopause is a bleed worth a doctor's look.
+      const sentence = postMenopauseBleed(mode, f.monthsSincePeriod ?? null) ? POST_MENOPAUSE_BLEED_SHORT : 'Tap Hot flush each time one comes.';
+      return m(big, sentence, mode === 'menopause' ? months : { label: 'Hot flushes', value: `${w} this week` }, visit);
     }
     default:
       return m(chip, 'Tap a tile to log how you are.', visit, logged);

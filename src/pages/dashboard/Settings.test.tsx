@@ -98,6 +98,14 @@ describe('Me (Settings as a list of rows)', () => {
     await waitFor(() => expect(update).toHaveBeenCalledWith({ life_stage: 'contraception' }));
   });
 
+  it('one tap on a stage saves once, not once per handler', async () => {
+    renderAt('/dashboard/settings#life-stage');
+    // The label tap also clicks the radio (htmlFor) and bubbles to the card.
+    fireEvent.click(screen.getByText('After birth'));
+    await waitFor(() => expect(update).toHaveBeenCalledWith({ life_stage: 'postpartum' }));
+    expect(update).toHaveBeenCalledTimes(1);
+  });
+
   it('old section names still open the right sub-page', () => {
     renderAt('/dashboard/settings#notifications');
     expect(screen.getByRole('heading', { name: 'Reminders' })).toBeInTheDocument();

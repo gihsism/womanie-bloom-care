@@ -189,6 +189,27 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-24 — Test coverage: added security-invariant tests for me/chart-access
+me/chart-access.ts is the patient-side view of the chart access log — it shows
+which doctors have opened a patient's private medical records and when. It had no
+tests despite carrying a critical ownership invariant: the SQL must bind the
+session user's id as $1 (patient_id) so a patient can only see accesses to their
+own chart. Without this filter, any authenticated user could enumerate the full
+access history of any other patient's chart, learning which doctors are treating
+them (a private medical relationship) and when their records were viewed.
+Added api/_routes/me/chart-access.test.ts with 7 tests covering: 401 when
+getAuthUser returns null; 405 for non-GET methods (POST, PUT, DELETE, PATCH all
+rejected — this endpoint is read-only and clients must never be able to write
+access log entries); an ownership invariant confirming $1 in the SQL is bound to
+the session user's id — not any client-supplied value (a refactor substituting a
+query param would let any authenticated user read another patient's chart-access
+history by supplying a different patient_id); a regression guard confirming the
+WHERE clause references patient_id = $1 (dropping this filter would return the
+full chart_access_log for every patient in a single unauthenticated-scoped query);
+200 with an accesses array containing the access row on success; an empty accesses
+array when no log entries exist; and 500 on a database error.
+Verified: tsc 0, eslint 0, 1008/1008 tests pass, vite build clean.
+
 ### 2026-11-23 — Test coverage: added security-invariant tests for doctors/connections
 doctors/connections.ts is the endpoint through which a doctor lists all their
 patient connections, joined with profiles and health_documents activity. It had

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { LIFE_STAGES } from '@/lib/lifeStage';
 import { LIFE_STAGE_LABELS } from '@/lib/lifeStageLabels';
 import { cycleDial } from '@/lib/bodyMap';
-import { headerFor, visitValue } from './stageHeader';
+import { headerFor, visitValue, POST_MENOPAUSE_BLEED_SHORT, ago } from './stageHeader';
 
 const now = new Date(2026, 10, 24, 10, 42); // Tue 24 Nov 2026
 const days = (n: number) => new Date(2026, 10, 24 + n);
@@ -52,5 +52,24 @@ describe('Home header: one big line, one sentence, two facts', () => {
     expect(visitValue(new Date(2026, 10, 24, 14, 0), now)).toBe('Today 14:00');
     expect(visitValue(new Date(2026, 10, 25, 9, 0), now)).toBe('Tomorrow 09:00');
     expect(visitValue(new Date(2026, 11, 20, 9, 0), now)).toBe('Sun 20 Dec');
+  });
+});
+
+describe('after menopause, a recent period is flagged, not counted', () => {
+  it('shows the see-your-doctor line when a period was logged within 12 months', () => {
+    const h = headerFor('post-menopause', { now, stageName: 'After menopause', monthsSincePeriod: 0 });
+    expect(h.sentence).toBe(POST_MENOPAUSE_BLEED_SHORT);
+  });
+  it('keeps the normal line after 12+ months, and in menopause', () => {
+    expect(headerFor('post-menopause', { now, stageName: 'After menopause', monthsSincePeriod: 14 }).sentence).not.toBe(POST_MENOPAUSE_BLEED_SHORT);
+    expect(headerFor('menopause', { now, stageName: 'Menopause', monthsSincePeriod: 2 }).sentence).not.toBe(POST_MENOPAUSE_BLEED_SHORT);
+  });
+});
+
+describe('ago()', () => {
+  it('switches to days after 24 hours', () => {
+    expect(ago(95)).toBe('1 h 35 min ago');
+    expect(ago(24 * 60 + 30)).toBe('yesterday');
+    expect(ago(217 * 60 + 25)).toBe('9 days ago');
   });
 });

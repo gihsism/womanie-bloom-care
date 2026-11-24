@@ -26,7 +26,7 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 // /dashboard/stage, results and charts on Records, visits on Visits,
 // settings and medicines on Me.
 
-// Contraception: a daily-pill method gets "Mark today's pill taken"; other
+// Contraception: a daily-pill method gets "Log today's pill"; other
 // methods (patch, ring, IUD …) get "Log today". Same per-device setting the
 // contraception card stores.
 function hasDailyPill(userId: string): boolean {
@@ -44,7 +44,7 @@ const PatientDashboard = () => {
   usePageTitle('Home');
   const p = useStageProfile();
   const { selectedMode: mode, profile, periodData, pregnancyDueDate, ivfStartDate, ivfPhase, weeksPregnant } = p;
-  const signals = useTodaySignals(periodData, profile?.full_name);
+  const signals = useTodaySignals(periodData, profile?.full_name, { mode, pregnancyDueDate });
   const [sheet, setSheet] = useState<SheetKind | null>(null);
   const go = useGo(setSheet);
   const quick = useQuickLog(mode, user?.id ?? null, { cycleLength: periodData?.cycleLength });

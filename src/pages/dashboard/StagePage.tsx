@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { useScrollToHash } from '@/hooks/useScrollToHash';
 import { useStageProfile } from '@/hooks/useStageProfile';
 import { stageLabel } from '@/lib/stageLabels';
 import CycleCalendar from '@/components/dashboard/CycleCalendar';
@@ -46,29 +47,12 @@ function Section({ id, children }: { id?: string; children: ReactNode }) {
   return <div id={id} className={`mb-6 ${anchor}`}>{children}</div>;
 }
 
-// Scroll to the #anchor once the section exists (the trackers load data
-// first, so the element can appear a moment after the page renders).
-function useScrollToHash(ready: boolean) {
-  const { hash } = useLocation();
-  useEffect(() => {
-    if (!ready || !hash) return;
-    const id = decodeURIComponent(hash.slice(1));
-    let tries = 0;
-    const t = window.setInterval(() => {
-      const el = document.getElementById(id);
-      if (el || ++tries > 20) {
-        window.clearInterval(t);
-        el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
-    return () => window.clearInterval(t);
-  }, [hash, ready]);
-}
-
 export default function StagePage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const p = useStageProfile();
+  const { hash } = useLocation();
+  const guidesOpen = hash === '#guides';
   const mode = p.selectedMode;
   usePageTitle(mode ? stageLabel(mode) : 'Your stage');
   useScrollToHash(!!mode);
@@ -108,7 +92,7 @@ export default function StagePage() {
             </Section>
             <FertilityOutlookCard mode={mode} />
             <Section id="guides">
-              <GuidesSection title="Guides: nutrition during IVF">
+              <GuidesSection defaultOpen={guidesOpen} title="Guides: nutrition during IVF">
                 <IVFNutrition phase={(p.ivfPhase as Parameters<typeof IVFNutrition>[0]['phase']) ?? null} />
               </GuidesSection>
             </Section>
@@ -134,7 +118,7 @@ export default function StagePage() {
             )}
             {p.pregnancyDueDate && (
               <Section id="guides">
-                <GuidesSection title="Pregnancy guides: food & movement">
+                <GuidesSection defaultOpen={guidesOpen} title="Pregnancy guides: food & movement">
                   <PregnancyNutrition weeksPregnant={weeks} />
                   <PregnancyExercise weeksPregnant={weeks} />
                 </GuidesSection>
@@ -163,7 +147,7 @@ export default function StagePage() {
               <MenopauseDashboard isPostMenopause={mode === 'post-menopause'} onNavigateToDoctorChat={toChat} />
             </Section>
             <Section id="guides">
-              <GuidesSection title="Guides: nutrition in menopause">
+              <GuidesSection defaultOpen={guidesOpen} title="Guides: nutrition in menopause">
                 <MenopauseNutrition postmenopausal={mode === 'post-menopause'} />
               </GuidesSection>
             </Section>
@@ -197,7 +181,7 @@ export default function StagePage() {
         {/* Cycle-phase guides for the stages that track a cycle. */}
         {p.periodData && (cycleMode || mode === 'pre-menstrual' || mode === 'contraception') && (
           <Section id="guides">
-            <GuidesSection title="Guides for this cycle phase: food & movement">
+            <GuidesSection defaultOpen={guidesOpen} title="Guides for this cycle phase: food & movement">
               <CyclePhaseNutrition mode={mode} />
               <CyclePhaseExercise mode={mode} />
             </GuidesSection>
@@ -216,6 +200,10 @@ export default function StagePage() {
         )}
 
         <Section id="medicines"><MedicineLog stage={mode} /></Section>
+        {/* Room below the last sections, so a #medicines / #guides link can
+            scroll its section to the top instead of leaving it under the
+            tab bar at the bottom of a page that cannot scroll further. */}
+        {hash && <div aria-hidden="true" data-testid="anchor-spacer" className="h-[60vh]" />}
       </main>
     </div>
   );

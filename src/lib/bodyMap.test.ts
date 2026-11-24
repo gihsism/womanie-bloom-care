@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseRange, pickFlaggedLab, medsToday, kicksToday, weekWord, fmtGrams, lastFeed, nappiesToday, sleepTodayMin, fmtAgo, dayOfLife, countToday, cycleDial, pillRing, pillFromNotes, hotFlushes, monthsSince } from './bodyMap';
+import { parseRange, pickFlaggedLab, medsToday, kicksToday, weekWord, fmtGrams, lastFeed, nappiesToday, sleepTodayMin, fmtAgo, dayOfLife, postMenopauseBleed, countToday, cycleDial, pillRing, pillFromNotes, hotFlushes, monthsSince } from './bodyMap';
 
 const now = new Date(2026, 10, 15, 14, 0);
 const at = (h: number, dayOffset = 0) => new Date(2026, 10, 15 + dayOffset, h, 0).toISOString();
@@ -102,6 +102,9 @@ describe('baby body map helpers', () => {
     expect(fmtAgo(42)).toEqual({ value: '42', unit: 'min' });
     expect(fmtAgo(80)).toEqual({ value: '1h 20', unit: '' });
     expect(fmtAgo(120)).toEqual({ value: '2h', unit: '' });
+    expect(fmtAgo(23 * 60 + 59)).toEqual({ value: '23h 59', unit: '' });
+    expect(fmtAgo(24 * 60 + 5)).toEqual({ value: '1', unit: 'day' });
+    expect(fmtAgo(217 * 60 + 25)).toEqual({ value: '9', unit: 'days' });
     expect(dayOfLife('2026-11-04', now)).toBe(12);
     expect(dayOfLife(null, now)).toBeNull();
   });
@@ -167,5 +170,15 @@ describe('menopause helpers', () => {
     expect(monthsSince(new Date(2026, 3, 20), now)).toBe(6);
     expect(monthsSince(new Date(2026, 3, 10), now)).toBe(7);
     expect(monthsSince(null, now)).toBeNull();
+  });
+});
+
+describe('postMenopauseBleed', () => {
+  it('flags a period within 12 months only for post-menopause', () => {
+    expect(postMenopauseBleed('post-menopause', 0)).toBe(true);
+    expect(postMenopauseBleed('post-menopause', 11)).toBe(true);
+    expect(postMenopauseBleed('post-menopause', 12)).toBe(false);
+    expect(postMenopauseBleed('post-menopause', null)).toBe(false);
+    expect(postMenopauseBleed('menopause', 0)).toBe(false);
   });
 });

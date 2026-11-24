@@ -139,5 +139,42 @@ describe('doctors/patient security invariants', () => {
     expect(body).toHaveProperty('notes');
     expect(body).toHaveProperty('appointments');
     expect(body).toHaveProperty('periodRecords');
+    expect(body).toHaveProperty('visitQuestions');
+  });
+
+  // Questions to bring: only after the consent gate, only for this doctor's
+  // own visits with this patient, read-only.
+  it('visit questions are read after the consent gate, scoped to this doctor and patient', async () => {
+    const res = mockRes();
+    await handler(mockReq(PATIENT_ID), res);
+    const idx = query.mock.calls.findIndex(([sql]: [string]) => /FROM visit_questions/i.test(sql));
+    expect(idx).toBeGreaterThan(0);
+    const [vqSql, params] = query.mock.calls[idx] as [string, unknown[]];
+    expect(vqSql).toMatch(/^\s*SELECT/i);
+    expect(vqSql).toMatch(/a\.patient_id\s*=\s*vq\.user_id/i);
+    expect(vqSql).toMatch(/a\.doctor_id\s*=\s*\$2/i);
+    expect(params).toEqual([PATIENT_ID, DOCTOR.id]);
+  });
+
+  it('a missing visit_questions table (migration not applied) does not break the chart', async () => {
+    query.mockReset();
+    query.mockResolvedValueOnce(CONN_ROW);
+    query.mockResolvedValueOnce([]);
+    query.mockImplementation(async (sql: string) => {
+      if (/visit_questions/i.test(sql)) throw new Error('relation "visit_questions" does not exist');
+      return [];
+    });
+    const res = mockRes();
+    await handler(mockReq(PATIENT_ID), res);
+    expect(res._status).toBe(200);
+    expect((res._body as Record<string, unknown>).visitQuestions).toEqual([]);
+  });
+
+  it('no visit questions are read without consent', async () => {
+    query.mockReset();
+    query.mockResolvedValue([]);
+    const res = mockRes();
+    await handler(mockReq(PATIENT_ID), res);
+    expect(query.mock.calls.some(([sql]: [string]) => /visit_questions/i.test(sql))).toBe(false);
   });
 });

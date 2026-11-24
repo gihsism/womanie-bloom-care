@@ -33,6 +33,8 @@ const COMMON_VACCINES = ['Hepatitis B', 'Vitamin K', 'BCG', '6-in-1 (DTaP/IPV/Hi
 
 const fmtMin = (m: number | null) => {
   if (m === null || !Number.isFinite(m)) return '—';
+  // A day or more: "9 days", not "217h 36m" (an old last feed, live).
+  if (m >= 24 * 60) { const d = Math.floor(m / (24 * 60)); return d === 1 ? '1 day' : `${d} days`; }
   const h = Math.floor(m / 60); const min = Math.round(m % 60);
   return h === 0 ? `${min}m` : min === 0 ? `${h}h` : `${h}h ${min}m`;
 };

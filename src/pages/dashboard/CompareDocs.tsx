@@ -169,10 +169,10 @@ export default function CompareDocs() {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
         <Card className="p-6 max-w-md w-full text-center space-y-3">
-          <p className="text-sm">Pick two documents to compare from Medical History.</p>
+          <p className="text-sm">Pick two documents to compare from Records.</p>
           <Button variant="outline" onClick={() => navigate('/dashboard/medical-history')}>
             <ArrowLeft className="h-4 w-4 mr-1" />
-            Health Records
+            Records
           </Button>
         </Card>
       </div>
@@ -194,7 +194,7 @@ export default function CompareDocs() {
           <p className="text-sm">One or both documents weren't found in your account.</p>
           <Button variant="outline" onClick={() => navigate('/dashboard/medical-history')}>
             <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to Health Records
+            Back to Records
           </Button>
         </Card>
       </div>

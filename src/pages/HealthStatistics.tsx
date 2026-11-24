@@ -237,7 +237,7 @@ export default function HealthStatistics() {
               No documents uploaded yet. Upload health documents to see AI-generated summaries here.
             </p>
             <Button variant="outline" onClick={() => navigate('/dashboard/medical-history')}>
-              Go to Medical Records
+              Go to Records
             </Button>
           </CardContent>
         </Card>

@@ -494,8 +494,10 @@ These are summaries of published research from the Womanie research library (cli
 ${blocks.join('\n\n')}
 
 Rules for using these sources:
-- Cite only sources you actually used: put a source's number in square brackets, e.g. [1] or [1][3], only after a sentence that its Finding or Key points directly support. The source must say the specific thing your sentence says, not just be about the same topic.
+- Cite only sources you actually used: put a source's number in square brackets, e.g. [1] or [1][3], only after a sentence or clause that its Finding, Key points or passage directly support. The source must say the specific thing your sentence says, not just be about the same topic.
 - Before each citation, check the sentence against that source's text. Never carry a dose, amount, percentage, risk figure, duration, age or population over from a source unless it matches exactly what the source states (for example, do not cite a source that studied 300 mg next to a sentence about 200 mg). If the numbers differ, either use the source's own figure or drop the citation.
+- Put each number straight after the words its source supports. Anything you add after the number in the same sentence (advice such as "so it is worth seeing your GP", your own explanation, or a point from another source) does not get that number. Example: "Untreated period pain can turn into long-term pain [1], so it is worth getting checked."
+- Name the subject in every cited sentence (the medicine, test or treatment), never just "it" or "this", and keep the source's population and certainty for that finding (for example "in copper-coil users", "low-certainty evidence"). Never make a finding sound stronger or more general than the source.
 - If no source above supports a claim, state it without a citation as general information, or say the evidence here is limited. Never attach a nearby source just to give a sentence a number.
 - Fewer, accurate citations are better than many loose ones. It is fine to cite only one or two sources, or none.
 - Never cite anything that is not in this list, never use a number that is not listed above, never invent studies, numbers or guidelines, and never use bracketed numbers for anything else.

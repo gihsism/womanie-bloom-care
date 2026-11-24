@@ -14,6 +14,8 @@ export type Target = string;
 
 export const STAGE_PAGE = '/dashboard/stage';
 export const RECORDS = '/dashboard/medical-history';
+/** Records opened on its "My charts" segment (cycle, ovulation, sleep charts). */
+export const RECORDS_CHARTS = `${RECORDS}?tab=charts`;
 export const VISITS = '/dashboard/appointments';
 export const ME = '/dashboard/settings';
 
@@ -35,6 +37,19 @@ export interface TodaySignals {
   periodDaysUntil?: number | null;
   /** Start of the next upcoming visit (after today). */
   nextVisit?: Date | null;
+  /** Medicines whose reminder time has passed today without a "Taken" tick (time = HH:MM). */
+  medicinesDue?: Array<{ name: string; time: string }>;
+  /**
+   * Contraceptive pill ticks (contraception + daily pill only). reminderTime
+   * is the HH:MM she set on the contraception card; takenYesterday is null
+   * when she isn't ticking regularly (no nag for people who never tick);
+   * packDay 22–28 is the pill-free week of a 21/7 pack, as the card assumes.
+   */
+  pill?: { reminderTime: string; takenToday: boolean; takenYesterday: boolean | null; packDay?: number | null } | null;
+  /** Pregnancy vaccines in their window and not marked received / "not now". */
+  vaccinesDue?: string[];
+  /** Date of the last EPDS mood check; null = never taken; undefined = not known yet. */
+  lastMoodCheck?: Date | null;
   /** Getting-started progress; omitted or done === total hides the row. */
   setup?: { done: number; total: number; nameMissing?: boolean; nextTarget?: Target } | null;
 }
@@ -43,6 +58,16 @@ export const MAX_TODAY = 3;
 export const MAX_MORE = 4;
 const DAY = 86_400_000;
 export const MAX_LATE_DAYS = 14;
+/** The EPDS card asks to "check in again in 2 weeks". */
+export const MOOD_CHECK_EVERY_DAYS = 14;
+const MOOD_STAGES: readonly string[] = ['pregnancy', 'postpartum'];
+
+const minutesOf = (hhmmStr: string) => {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(hhmmStr);
+  return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+};
+/** Trim to one row of at most 60 characters. */
+const fit = (label: string) => (label.length <= 60 ? label : `${label.slice(0, 59).trimEnd()}…`);
 
 const WEEKDAY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const hhmm = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -81,7 +106,40 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
     const n = s.flaggedResults!;
     items.push({ id: 'flagged-results', label: n === 1 ? '1 result to talk to your doctor about' : `${n} results to talk to your doctor about`, target: RECORDS });
   }
-  // 4. A due stage task: period due in the next 2 days, or late
+  // 4. A due stage task: missed pill, medicine due, vaccination due,
+  //    mood check due, period due in the next 2 days or late.
+  const pill = s.pill;
+  if (mode === 'contraception' && pill && !(pill.packDay != null && pill.packDay > 21)) {
+    const due = minutesOf(pill.reminderTime);
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    if (!pill.takenToday && due != null && nowMin >= due) {
+      items.push({ id: 'pill-missed', label: `Today's pill not ticked yet (due ${pill.reminderTime})`, target: `${STAGE_PAGE}#contraception` });
+    } else if (pill.takenYesterday === false && !(pill.packDay != null && pill.packDay === 1)) {
+      items.push({ id: 'pill-missed', label: "Yesterday's pill not ticked. Missed it?", target: `${STAGE_PAGE}#contraception` });
+    }
+  }
+  const meds = s.medicinesDue ?? [];
+  if (meds.length === 1) {
+    items.push({ id: 'medicine-due', label: fit(`${meds[0].name} due (${meds[0].time})`), target: 'sheet:medicines' });
+  } else if (meds.length > 1) {
+    items.push({ id: 'medicine-due', label: `${meds.length} medicines due`, target: 'sheet:medicines' });
+  }
+  const vax = mode === 'pregnancy' ? s.vaccinesDue ?? [] : [];
+  if (vax.length > 0) {
+    items.push({
+      id: 'vaccination-due',
+      label: fit(vax.length === 1 ? `${vax[0]} vaccination due` : `${vax.length} vaccinations due: ${vax.join(', ')}`),
+      target: `${STAGE_PAGE}#vaccinations`,
+    });
+  }
+  if (MOOD_STAGES.includes(mode) && s.lastMoodCheck !== undefined) {
+    const last = s.lastMoodCheck;
+    if (last === null) {
+      items.push({ id: 'mood-check', label: 'Take the 2-minute mood check', target: `${STAGE_PAGE}#mood-check` });
+    } else if (daysBetween(last, now) >= MOOD_CHECK_EVERY_DAYS) {
+      items.push({ id: 'mood-check', label: 'Mood check due (every 2 weeks)', target: `${STAGE_PAGE}#mood-check` });
+    }
+  }
   const pd = s.periodDaysUntil;
   if (CYCLE_STAGES.includes(mode) && pd != null) {
     // Late by up to two weeks; beyond that the log is likely just stale.
@@ -130,7 +188,7 @@ export function primaryActionFor(
   const log: PrimaryAction = { label: 'Log today', target: 'sheet:log' };
   switch (mode) {
     case 'contraception':
-      return opts.dailyPill === false ? log : { label: "Mark today's pill taken", target: `${STAGE_PAGE}#contraception` };
+      return opts.dailyPill === false ? log : { label: "Log today's pill", target: `${STAGE_PAGE}#contraception` };
     case 'ivf':
       return { label: 'Log medication', target: 'sheet:medicines' };
     case 'pregnancy': {
@@ -162,9 +220,9 @@ export function moreFor(mode: LifeStage, opts: { weeksPregnant?: number | null }
       case 'pre-menstrual':
         return [{ label: 'What to expect', target: STAGE_PAGE }, { label: 'Your results', target: RECORDS }, meds];
       case 'menstrual-cycle':
-        return [{ label: 'Calendar', target: `${STAGE_PAGE}#cycle-calendar` }, { label: 'Charts & history', target: RECORDS }, guides, meds];
+        return [{ label: 'Calendar', target: `${STAGE_PAGE}#cycle-calendar` }, { label: 'Charts & history', target: RECORDS_CHARTS }, guides, meds];
       case 'conception':
-        return [{ label: 'Calendar', target: `${STAGE_PAGE}#cycle-calendar` }, { label: 'Ovulation & charts', target: RECORDS }, guides, meds];
+        return [{ label: 'Calendar', target: `${STAGE_PAGE}#cycle-calendar` }, { label: 'Ovulation & charts', target: RECORDS_CHARTS }, guides, meds];
       case 'contraception':
         return [{ label: 'Your method', target: `${STAGE_PAGE}#contraception` }, { label: 'Your results', target: RECORDS }, guides, meds];
       case 'ivf':
@@ -179,11 +237,12 @@ export function moreFor(mode: LifeStage, opts: { weeksPregnant?: number | null }
         ];
       }
       case 'postpartum':
+        // No "Baby tracker" row: the hero's own link already says it.
         return [
-          { label: 'Baby tracker', target: '/dashboard/baby' },
           { label: 'Your recovery', target: `${STAGE_PAGE}#recovery` },
           { label: 'Mood check', target: `${STAGE_PAGE}#mood-check` },
           { label: 'Birth details', target: '/dashboard/birth' },
+          meds,
         ];
       case 'menopause':
       case 'post-menopause':
