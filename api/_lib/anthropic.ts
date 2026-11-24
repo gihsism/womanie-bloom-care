@@ -15,9 +15,20 @@ export const SONNET_MODEL = 'claude-sonnet-5-5';
 // switched off (between_tools = no reasoning pass without tools).
 export const SONNET_NO_THINKING = { type: 'between_tools' } as const;
 
+// The parts of a Messages API reply body the server reads.
+export interface ClaudeReply {
+  content?: Array<{ type?: string; text?: string }>;
+  usage?: {
+    input_tokens?: number;
+    output_tokens?: number;
+    cache_read_input_tokens?: number;
+    cache_creation_input_tokens?: number;
+  };
+}
+
 // First text block of a Messages API reply (a reply may start with a
 // thinking block, so content[0] is not always the text).
-export function replyText(data: { content?: Array<{ type?: string; text?: string }> }): string | undefined {
+export function replyText(data: ClaudeReply): string | undefined {
   return data.content?.find(b => b.type === 'text')?.text;
 }
 

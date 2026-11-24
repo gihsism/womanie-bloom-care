@@ -3,7 +3,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from '../_lib/auth.js';
 import { checkAndConsume } from '../_lib/ratelimit.js';
 import { withSentry } from '../_lib/sentry.js';
-import { callAnthropicWithRetry, SONNET_MODEL, SONNET_NO_THINKING, replyText } from '../_lib/anthropic.js';
+import { callAnthropicWithRetry, SONNET_MODEL, SONNET_NO_THINKING, replyText, type ClaudeReply } from '../_lib/anthropic.js';
 
 // On-demand narrative summary across the patient's documents.
 //
@@ -59,7 +59,7 @@ async function callClaude(apiKey: string, userContent: string): Promise<string> 
     messages: [{ role: 'user', content: userContent }],
     thinking: SONNET_NO_THINKING,
   });
-  const data = await resp.json();
+  const data = (await resp.json()) as ClaudeReply;
   const text: string | undefined = replyText(data);
   if (!text) throw new Error('Empty Claude response');
   return text;
@@ -142,7 +142,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     parts.push('', `## Recent documents (${docRows.length})`);
     for (const d of docRows) {
       const name = d.ai_suggested_name || d.file_name;
-      const date = d.uploaded_at ? new Date(d.uploaded_at).toISOString().split('T')[0] : '';
+      const date = d.uploaded_at ? new Date(d.uploaded_at as string).toISOString().split('T')[0] : '';
       parts.push(`- ${name}${d.ai_suggested_category ? ` [${d.ai_suggested_category}]` : ''}${date ? ` · ${date}` : ''}`);
       if (d.ai_summary) {
         // First couple of sentences, aggressively trimmed, no markdown

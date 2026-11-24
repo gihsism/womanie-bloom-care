@@ -4,7 +4,7 @@ import { selectChatEvidenceForTurn, type ChatEvidence } from './chat-prompt';
 
 const ev = (n: number): ChatEvidence => ({
   researchItems: [],
-  chatSources: Array.from({ length: n }, (_, i) => ({ n: i + 1, id: `x${i}`, pmid: String(i), title: 't', source: 's', year: 2020, url: 'u' })),
+  chatSources: Array.from({ length: n }, (_, i) => ({ n: i + 1, id: `x${i}`, pmid: String(i), title: 't', source: 's', year: 2020, evidenceLevel: 'study' as const, url: 'u' })),
   passages: [],
   block: `block${n}`,
 });

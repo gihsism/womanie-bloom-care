@@ -17,7 +17,7 @@ function mockRes() {
   const headers: Record<string, string> = {};
   const body: { _status: number; _body: unknown; _headers: Record<string, string> } & Partial<VercelResponse> = {
     _status: 200, _body: null, _headers: headers,
-    setHeader: vi.fn((k: string, v: string) => { headers[k] = v; }) as VercelResponse['setHeader'],
+    setHeader: vi.fn((k: string, v: string) => { headers[k] = v; }) as unknown as VercelResponse['setHeader'],
     end: vi.fn() as VercelResponse['end'],
   };
   body.status = (code: number) => { status = code; body._status = code; return body as unknown as VercelResponse; };

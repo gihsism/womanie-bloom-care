@@ -40,7 +40,7 @@ function mockReq(b: unknown): VercelRequest {
 describe('connections/redeem-code security invariants', () => {
   beforeEach(() => {
     vi.mocked(getAuthUser).mockResolvedValue(SESSION_USER);
-    vi.mocked(checkAndConsume).mockReturnValue({ ok: true, remaining: 19, retryInSec: 0 });
+    vi.mocked(checkAndConsume).mockResolvedValue({ ok: true, remaining: 19, limit: 10, retryInSec: 0 });
     query.mockReset();
     // Default happy path: role check → doctor role; CTE → claimed=1
     query.mockResolvedValueOnce(DOCTOR_ROLE).mockResolvedValueOnce(SUCCESS_CLAIM);
@@ -66,7 +66,7 @@ describe('connections/redeem-code security invariants', () => {
   });
 
   it('returns 429 when the rate limit fires', async () => {
-    vi.mocked(checkAndConsume).mockReturnValue({ ok: false, remaining: 0, retryInSec: 3600 });
+    vi.mocked(checkAndConsume).mockResolvedValue({ ok: false, remaining: 0, limit: 10, retryInSec: 3600 });
     const res = mockRes();
     await handler(mockReq({ code: 'ABC123' }), res);
     expect(res._status).toBe(429);

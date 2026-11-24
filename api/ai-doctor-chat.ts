@@ -170,7 +170,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   if (extracted.length > 0) {
     const grouped: Record<string, Row[]> = {};
     for (const item of extracted as Row[]) {
-      const t = item.data_type || 'other';
+      const t = String(item.data_type || 'other'); // object keys are strings anyway
       if (!grouped[t]) grouped[t] = [];
       grouped[t].push(item);
     }

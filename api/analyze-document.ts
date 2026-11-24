@@ -6,7 +6,7 @@ import { normalizeUnit } from './_lib/normalize-unit.js';
 import { checkAndConsume } from './_lib/ratelimit.js';
 import { isBlobUrl } from './_lib/blob-url.js';
 import { withSentry } from './_lib/sentry.js';
-import { callAnthropicWithRetry, SONNET_MODEL, SONNET_NO_THINKING, replyText } from './_lib/anthropic.js';
+import { callAnthropicWithRetry, SONNET_MODEL, SONNET_NO_THINKING, replyText, type ClaudeReply } from './_lib/anthropic.js';
 import heicConvert from 'heic-convert';
 
 // Allow longer execution for AI analysis. Claude PDF analysis on a full
@@ -45,7 +45,10 @@ async function hashRequest(data: string): Promise<string> {
 // Best-effort parse of a Claude reply into our expected analysis shape.
 // Returns null if the content can't be coaxed into valid JSON at all, so
 // the caller can decide whether to retry or fail loudly.
-function tryParseAnalysisJson(raw: string): Record<string, unknown> | null {
+// The model's JSON is read field by field below without a schema.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnalysisJson = Record<string, any>;
+function tryParseAnalysisJson(raw: string): AnalysisJson | null {
   if (!raw) return null;
   const cleaned = raw.replace(/^```json?\s*/i, '').replace(/```\s*$/i, '').trim();
   try {
@@ -505,7 +508,8 @@ ${patientContext || ''}`;
 
 // neon() returns a tagged-template sql client; we type it loosely here
 // to avoid importing the internal types from @neondatabase/serverless.
-type NeonSql = ReturnType<typeof import('@neondatabase/serverless').neon>;
+// neon(url) without options: rows as objects, no full results.
+type NeonSql = import('@neondatabase/serverless').NeonQueryFunction<false, false>;
 
 async function processWithAI(
   sql: NeonSql, apiKey: string, dynamicHeader: string,
@@ -562,8 +566,10 @@ async function processWithAI(
       thinking: SONNET_NO_THINKING,
     });
 
-    const aiData = await aiResponse.json();
-    aiContent = replyText(aiData);
+    const aiData = (await aiResponse.json()) as ClaudeReply;
+    // Typed as before the api type-check existed; an empty reply is not
+    // handled here yet (see the security round-2 notes).
+    aiContent = replyText(aiData) as string;
     const usage = aiData.usage || {};
     logStage(documentId, 'anthropic_ok', anthropicStart, {
       inputTokens: usage.input_tokens,
@@ -608,7 +614,7 @@ async function processWithAI(
       ],
       thinking: SONNET_NO_THINKING,
     });
-    const fixData = await fixResp.json();
+    const fixData = (await fixResp.json()) as ClaudeReply;
     const fixContent: string = replyText(fixData) ?? '';
     analysis = tryParseAnalysisJson(fixContent);
     if (analysis) {
@@ -679,7 +685,7 @@ async function processWithAI(
   // document.
   const rows: unknown[][] = [];
   if (Array.isArray(analysis.extracted_data)) {
-    for (const item of analysis.extracted_data as Array<Record<string, unknown>>) {
+    for (const item of analysis.extracted_data as AnalysisJson[]) {
       rows.push([
         userId, documentId, analysisId,
         item.data_type || 'other', normalizeTestTitle(item.title) || 'Unknown',

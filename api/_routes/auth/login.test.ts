@@ -58,7 +58,7 @@ function mockReq(b: unknown, ip = '1.2.3.4'): VercelRequest {
 
 describe('auth/login security invariants', () => {
   beforeEach(() => {
-    vi.mocked(checkAndConsume).mockReturnValue({ ok: true, remaining: 9, retryInSec: 0 });
+    vi.mocked(checkAndConsume).mockResolvedValue({ ok: true, remaining: 9, limit: 10, retryInSec: 0 });
     vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
     query.mockReset();
     query
@@ -80,8 +80,8 @@ describe('auth/login security invariants', () => {
 
   it('returns 429 when the IP rate limit is exceeded', async () => {
     vi.mocked(checkAndConsume)
-      .mockReturnValueOnce({ ok: false, remaining: 0, retryInSec: 3600 })
-      .mockReturnValue({ ok: true, remaining: 9, retryInSec: 0 });
+      .mockResolvedValueOnce({ ok: false, remaining: 0, limit: 10, retryInSec: 3600 })
+      .mockResolvedValue({ ok: true, remaining: 9, limit: 10, retryInSec: 0 });
     const res = mockRes();
     await handler(mockReq({ email: 'user@test.com', password: 'pass1234' }), res);
     expect(res._status).toBe(429);
@@ -90,8 +90,8 @@ describe('auth/login security invariants', () => {
 
   it('returns 429 when the per-email rate limit is exceeded', async () => {
     vi.mocked(checkAndConsume)
-      .mockReturnValueOnce({ ok: true, remaining: 9, retryInSec: 0 })
-      .mockReturnValueOnce({ ok: false, remaining: 0, retryInSec: 1800 });
+      .mockResolvedValueOnce({ ok: true, remaining: 9, limit: 10, retryInSec: 0 })
+      .mockResolvedValueOnce({ ok: false, remaining: 0, limit: 10, retryInSec: 1800 });
     const res = mockRes();
     await handler(mockReq({ email: 'user@test.com', password: 'pass1234' }), res);
     expect(res._status).toBe(429);
@@ -101,7 +101,7 @@ describe('auth/login security invariants', () => {
   // who hasn't exhausted the limit yet could still enumerate registered emails via
   // different response codes on the first attempt of each day.
   it('does not query the database when the rate limit fires', async () => {
-    vi.mocked(checkAndConsume).mockReturnValue({ ok: false, remaining: 0, retryInSec: 3600 });
+    vi.mocked(checkAndConsume).mockResolvedValue({ ok: false, remaining: 0, limit: 10, retryInSec: 3600 });
     const res = mockRes();
     await handler(mockReq({ email: 'user@test.com', password: 'pass1234' }), res);
     expect(res._status).toBe(429);

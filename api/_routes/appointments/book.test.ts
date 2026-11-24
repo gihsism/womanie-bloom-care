@@ -136,7 +136,7 @@ describe('appointments/book security invariants', () => {
     const res = mockRes();
     await handler(mockReq({ doctor_id: 'doc_1', scheduled_at: FUTURE }), res);
     expect(res._status).toBe(200);
-    const insertCalls = query.mock.calls.filter(([sql]: [string]) =>
+    const insertCalls = query.mock.calls.filter(([sql]) =>
       /INSERT INTO appointments/i.test(sql)
     );
     expect(insertCalls.length).toBeGreaterThanOrEqual(1);
@@ -152,7 +152,7 @@ describe('appointments/book security invariants', () => {
   it('INSERT binds the session user id as patient_id, never a client-supplied value', async () => {
     const res = mockRes();
     await handler(mockReq({ doctor_id: 'doc_1', scheduled_at: FUTURE }), res);
-    const insertCalls = query.mock.calls.filter(([sql]: [string]) =>
+    const insertCalls = query.mock.calls.filter(([sql]) =>
       /INSERT INTO appointments/i.test(sql)
     );
     const [, params] = insertCalls[0] as [string, unknown[]];
