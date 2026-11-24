@@ -22,7 +22,9 @@ export default function LogSheet({ open, onOpenChange, mode, weeksPregnant }: Pr
   const navigate = useNavigate();
   const shortcuts = actionsFor(mode, weeksPregnant).filter(a => !a.target.startsWith('sheet:') && a.label !== 'Medicines');
   const medsFirst = open === 'medicines';
-  const log = <DailyLogging selectedMode={mode} />;
+  // The sheet title is the heading for the log; the card's own "Today's
+  // Quick Log" heading only shows when medicines come first.
+  const log = <DailyLogging selectedMode={mode} hideTitle={!medsFirst} />;
   const meds = <MedicineLog stage={mode} />;
 
   return (
