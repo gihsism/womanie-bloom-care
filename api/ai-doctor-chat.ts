@@ -7,7 +7,7 @@ import { parseConversationId, persistChatTurn } from './_lib/chatConversation.js
 import { buildLifeContext } from './_lib/life-context.js';
 import { buildProfileContext } from './_lib/profile-context.js';
 import { SOURCES_FOOTER_MARK, formatSourcesFooter, stripUnknownCitations } from './_lib/research/library.js';
-import { buildChatSystemPrompt, selectChatEvidence } from './_lib/research/chat-prompt.js';
+import { buildChatSystemPrompt, selectChatEvidenceForTurn } from './_lib/research/chat-prompt.js';
 import { checkCitations, evidenceTexts } from './_lib/research/citation-check.js';
 
 export const config = {
@@ -225,7 +225,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   // this server (never sent to a third party) and the search falls back
   // to keywords only if the model is unavailable or slower than ~3 s.
   // Never allowed to break the chat.
-  const { chatSources, researchItems, passages, block: evidenceBlock } = await selectChatEvidence(userTurnContent, profile?.life_stage);
+  // A follow-up that finds nothing on its own is searched together with
+  // the question before it (see selectChatEvidenceForTurn).
+  const previousUserTurn = [...messages.slice(0, -1)].reverse()
+    .find((m: { role?: unknown; content?: unknown }) => m?.role === 'user' && typeof m.content === 'string')?.content as string | undefined;
+  const { chatSources, researchItems, passages, block: evidenceBlock } = await selectChatEvidenceForTurn(userTurnContent, previousUserTurn, profile?.life_stage);
   const systemPrompt = buildChatSystemPrompt(medicalContext, evidenceBlock);
 
   const anthropicMessages = messages.map((m: { role: string; content: string }) => ({
