@@ -15,7 +15,8 @@
 //   coverage-gap data, costs ~2x), --concurrency N (default 4),
 //   --budget USD (cap across ALL runs, default 3; ledger in .cache/),
 //   --rejudge TAG (judge the answers stored by run TAG again, no new
-//   answers: keeps runs comparable after a judge or claim-splitter change).
+//   answers: keeps runs comparable after a judge or claim-splitter change),
+//   --set qa (the 4 QA cases + 10 regression questions instead of all 45).
 // Needs ANTHROPIC_API_KEY (env or .env.local; never printed).
 // Results: scripts/research/.cache/citation-audit-<tag>.json
 
@@ -24,7 +25,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Anthropic from '@anthropic-ai/sdk';
-import { buildChatSystemPrompt, selectChatEvidence } from '../../api/_lib/research/chat-prompt.ts';
+import { buildChatSystemPrompt, selectChatEvidence, selectChatEvidenceForTurn } from '../../api/_lib/research/chat-prompt.ts';
 import { getLibrary, stripUnknownCitations } from '../../api/_lib/research/library.ts';
 import { bestPassages } from '../../api/_lib/research/fulltext.ts';
 
@@ -47,6 +48,8 @@ const BUDGET_USD = Number(opt('budget', 3));
 // Re-judge the answers stored by an earlier run (no new chat answers), e.g.
 // after a change to the claim splitter or the judge, so runs stay comparable.
 const REJUDGE = opt('rejudge', null);
+// --set qa: the QA cases + QA_REGRESSION instead of AUDIT_QUESTIONS.
+const SET = opt('set', 'all');
 
 const CHAT_MODEL = 'claude-haiku-5-5'; // the chat's DEFAULT_MODEL
 const JUDGE_MODEL = 'claude-sonnet-5-5';
@@ -101,6 +104,45 @@ export const AUDIT_QUESTIONS = [
   { stage: 'general', q: 'should I take vitamin d every day in winter?' },
   { stage: 'general', q: 'I have thrush again, what treatment works for recurrent thrush?' },
 ];
+
+// QA findings on the live app (Nov 2026). `prev` = the user's previous
+// turn (answered first, then the follow-up is asked as in the chat).
+// `expect` = regexes the answer must match, `avoid` = must not match;
+// printed as pass/fail next to the judge's verdicts.
+export const QA_CASES = [
+  // The library's opioid items do not say codeine is advised against: the
+  // answer must say the evidence here does not cover it and refer on.
+  { stage: 'postpartum', q: 'Is codeine safe while breastfeeding?', expect: ['pharmacist|doctor|GP', "(don't|do not|doesn't|does not|not) (directly )?(cover|address|answer|say|include)|no (direct|specific|clear)|limited"] },
+  // Sources were diabetes diets, Japanese intakes and vegetarian diets.
+  { stage: 'pregnancy', q: 'Can I eat sushi while pregnant?', expect: ['midwife|doctor'] },
+  // Refused any dose although a dysmenorrhoea guideline was given. The
+  // library states no ibuprofen dose, so: say what the sources do support
+  // (cited), point to the label / pharmacist, and invent no mg figure.
+  { stage: 'menstrual-cycle', q: 'What ibuprofen dose works for period pain?', expect: ['label|packet|pharmacist', '\\[\\d\\]'], avoid: ['\\b\\d{2,4}\\s?mg\\b'] },
+  // Follow-up: the library has no sertraline dosing; say so, refer to the prescriber.
+  {
+    stage: 'postpartum',
+    prev: 'Is sertraline safe while breastfeeding?',
+    q: 'What dose?',
+    expect: ['prescri|doctor|GP|psychiatrist'],
+    avoid: ['\\b\\d+\\s?mg\\b'],
+  },
+];
+
+// Regression questions run next to the QA cases (named medicines, doses,
+// supplements, stages): answers must not get worse.
+export const QA_REGRESSION = [
+  'can I take paracetamol for a headache when pregnant?',
+  'should I take low dose aspirin in pregnancy?',
+  'can I take ibuprofen while breastfeeding?',
+  'how much coffee is safe while pregnant?',
+  'how much folic acid should I take while trying to conceive?',
+  'what actually works for bad period cramps besides ibuprofen?',
+  'how effective is the morning after pill if I take it after 3 days?',
+  'is HRT safe if I am 52 and having bad hot flushes?',
+  'I have osteoporosis, how well do bisphosphonates work and for how long?',
+  'I keep getting UTIs, does cranberry help?',
+].map((q) => AUDIT_QUESTIONS.find((x) => x.q === q));
 
 // ── API key + spend ledger (shared by every run, so the cap is total) ──
 
@@ -227,8 +269,7 @@ async function withRetry(fn) {
   }
 }
 
-async function auditOne(client, { stage, q }) {
-  const ev = await selectChatEvidence(q, stage, { timeoutMs: 20_000 });
+async function chatAnswer(client, stage, ev, messages) {
   const system = buildChatSystemPrompt(`Patient: Audit user, Life stage: ${stage}\n\n`, ev.block);
   const resp = await withRetry(() =>
     client.messages.create({
@@ -236,13 +277,37 @@ async function auditOne(client, { stage, q }) {
       max_tokens: 2000,
       thinking: { type: 'disabled' }, // as in the chat
       system,
-      messages: [{ role: 'user', content: q }],
+      messages,
     }),
   );
   track(CHAT_MODEL, resp.usage);
   const raw = resp.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
-  const answer = stripUnknownCitations(raw, ev.chatSources.map((s) => s.n));
-  return judge(client, { stage, q }, ev, answer);
+  return stripUnknownCitations(raw, ev.chatSources.map((s) => s.n));
+}
+
+const semDeps = { timeoutMs: 20_000 };
+
+async function auditOne(client, job) {
+  const { stage, q, prev } = job;
+  const messages = [];
+  if (prev) {
+    // The previous turn, answered exactly as the chat would.
+    const prevEv = await selectChatEvidence(prev, stage, semDeps);
+    const prevAnswer = await chatAnswer(client, stage, prevEv, [{ role: 'user', content: prev }]);
+    messages.push({ role: 'user', content: prev }, { role: 'assistant', content: prevAnswer });
+  }
+  messages.push({ role: 'user', content: q });
+  const ev = await selectChatEvidenceForTurn(q, prev, stage, (qq, st) => selectChatEvidence(qq, st, semDeps));
+  const answer = await chatAnswer(client, stage, ev, messages);
+  const out = await judge(client, job, ev, answer);
+  if (prev) out.prev = prev;
+  if (job.expect || job.avoid) {
+    out.checks = [
+      ...(job.expect ?? []).map((re) => ({ re, want: true, ok: new RegExp(re, 'i').test(answer) })),
+      ...(job.avoid ?? []).map((re) => ({ re, want: false, ok: !new RegExp(re, 'i').test(answer) })),
+    ];
+  }
+  return out;
 }
 
 /** Evidence of a stored result, rebuilt from the library and the stored passage ids. */
@@ -345,6 +410,12 @@ function printReport(results) {
     const titles = c.cites.map((n) => `[${n}] ${r.sources[n - 1]?.title.slice(0, 70) ?? '?'}`).join('; ');
     console.log(`- (${r.stage}) Q: ${r.q}\n  Claim: ${c.text.slice(0, 220)}\n  Cited: ${titles}\n  Problem: ${c.problem}`);
   }
+  const checked = results.filter((r) => r.checks);
+  if (checked.length) console.log('\nQA checks (answer must / must not match):');
+  for (const r of checked) {
+    const bad = r.checks.filter((c) => !c.ok).map((c) => `${c.want ? 'missing' : 'has'} /${c.re}/`);
+    console.log(`  ${bad.length ? 'FAIL' : 'ok  '}  ${r.prev ? `${r.prev} -> ` : ''}${r.q}${bad.length ? `: ${bad.join('; ')}` : ''}`);
+  }
   if (results.some((r) => r.relevance)) {
     console.log('\nRelevant sources per question (judge):');
     for (const r of results) {
@@ -356,7 +427,7 @@ function printReport(results) {
 
 async function main() {
   const stored = REJUDGE ? JSON.parse(fs.readFileSync(path.join(cacheDir, `citation-audit-${REJUDGE}.json`), 'utf8')).results : null;
-  let qs = (stored ?? AUDIT_QUESTIONS).filter((x) => !STAGES || STAGES.includes(x.stage));
+  let qs = (stored ?? (SET === 'qa' ? [...QA_CASES, ...QA_REGRESSION] : AUDIT_QUESTIONS)).filter((x) => !STAGES || STAGES.includes(x.stage));
   if (Number.isFinite(LIMIT)) qs = qs.slice(0, LIMIT);
   if (overBudget()) throw new Error(`Budget $${BUDGET_USD} already spent ($${ledger.usd.toFixed(3)}); raise --budget to continue.`);
   const client = new Anthropic({ apiKey: loadApiKey(), timeout: 120_000, maxRetries: 2 });

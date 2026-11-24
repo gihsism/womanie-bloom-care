@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { getLibrary, selectChatSources } from './library';
 import { semanticQuery, selectChatSourcesHybrid } from './hybrid';
 import { DEFAULT_EMBEDDING_MODEL, EMBEDDING_MODELS, modelFile } from './embed';
-import { DRUG_PREGNANCY_QUESTIONS, EVAL_QUESTIONS, MIXED_MEDICINE_QUESTIONS, scoreRuns, type EvalQuestion } from './search-eval';
+import { DRUG_PREGNANCY_QUESTIONS, EVAL_QUESTIONS, MIXED_MEDICINE_QUESTIONS, NO_SOURCE_QUESTIONS, QA_QUESTIONS, scoreRuns, type EvalQuestion } from './search-eval';
 
 // Retrieval quality on everyday patient questions (search-eval.ts).
 // Numbers at the time of writing (34 questions, 307 items):
@@ -20,7 +20,7 @@ const keywordRuns = () => EVAL_QUESTIONS.map((question) => ({ question, ranked: 
 describe('search eval: keyword-only (runs everywhere)', () => {
   it('every expected topic exists in the library', () => {
     const ids = new Set(getLibrary().topics.map((t) => t.id));
-    const missing = [...EVAL_QUESTIONS, ...DRUG_PREGNANCY_QUESTIONS, ...MIXED_MEDICINE_QUESTIONS].flatMap((q) => q.topics).filter((t) => !ids.has(t));
+    const missing = [...EVAL_QUESTIONS, ...DRUG_PREGNANCY_QUESTIONS, ...MIXED_MEDICINE_QUESTIONS, ...QA_QUESTIONS].flatMap((q) => q.topics).filter((t) => !ids.has(t));
     expect(missing).toEqual([]);
   });
 
@@ -85,6 +85,22 @@ describe.skipIf(!hasModel)('search eval: hybrid with the bundled model', () => {
     console.log(`mixed medicine eval: hybrid hit@3 ${r.hitAt3.toFixed(2)} hit@6 ${r.hitAt6.toFixed(2)}; misses@3: ${r.misses3.join(' | ')}`);
     expect(r.hitAt3).toBe(1);
     expect(r.hitAt6).toBe(1);
+  }, 60_000);
+
+  // The four QA findings (sushi, codeine, ibuprofen dose, sertraline dose
+  // follow-up): each must reach a source about what was asked.
+  it('QA questions find sources about what was asked', async () => {
+    const r = await runSet(QA_QUESTIONS);
+    console.log(`QA eval: hybrid hit@3 ${r.hitAt3.toFixed(2)} hit@6 ${r.hitAt6.toFixed(2)}; misses@3: ${r.misses3.join(' | ')}`);
+    expect(r.hitAt3).toBe(1);
+  }, 60_000);
+
+  // Relevance floor: nothing in the library mentions the subject, so the
+  // stage-only matches (pregnancy diets, vaccine reviews) must not be sent.
+  it('sends no sources when only the life stage matches', async () => {
+    for (const [q, stage] of NO_SOURCE_QUESTIONS) {
+      expect(await selectChatSourcesHybrid(q, stage, { timeoutMs: 20_000 }), q).toEqual([]);
+    }
   }, 60_000);
 
   it('does not attach sources to questions the library cannot answer', async () => {

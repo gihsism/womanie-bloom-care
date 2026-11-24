@@ -183,6 +183,22 @@ const SYNONYMS: Record<string, string[]> = {
   prozac: ['fluoxetine'],
   folic: ['folate'],
   folate: ['folic'],
+  // Foods pregnant women are told to watch: the library words them as the
+  // infection or contaminant (listeria, toxoplasmosis, mercury), never as
+  // the dish, so "sushi" alone matched only generic pregnancy-diet items.
+  sushi: ['fish', 'seafood', 'raw', 'listeria', 'mercury'],
+  sashimi: ['fish', 'seafood', 'raw', 'listeria', 'mercury'],
+  salmon: ['fish', 'seafood', 'listeria'],
+  tuna: ['fish', 'mercury'],
+  oyster: ['seafood', 'raw', 'listeria'],
+  prawn: ['seafood'],
+  shellfish: ['seafood'],
+  cheese: ['listeria', 'unpasteurised', 'dairy'],
+  brie: ['cheese', 'listeria', 'unpasteurised'],
+  camembert: ['cheese', 'listeria', 'unpasteurised'],
+  pate: ['listeria'],
+  deli: ['listeria'],
+  undercooked: ['raw', 'toxoplasmosis'],
 };
 
 // Medicines and supplements (stemmed query tokens). When a question names
@@ -321,7 +337,41 @@ export interface SearchOptions {
    * or null = keyword-only, exactly the original behaviour.
    */
   semantic?: SemanticInput | null;
+  /**
+   * Relevance floor (chat): when no item in the library matches any of the
+   * question's subject words (see SUBJECT_CONTEXT_WORDS), every hit shares
+   * only the life stage or a loose semantic neighbourhood with it; then
+   * only items at least SUBJECTLESS_MIN_COSINE close to the question stay.
+   */
+  requireSubject?: boolean;
 }
+
+/**
+ * Words that set the scene of a question (who, which life stage, what
+ * kind of question) rather than its subject. "Can I eat sushi while
+ * pregnant?" is about sushi: an item that matches only "eat" and
+ * "pregnant" (a gestational-diabetes diet, Japanese nutrient intakes) is
+ * off-topic unless its embedding is very close (SUBJECTLESS_MIN_COSINE).
+ * Stemmed like query tokens.
+ */
+export const SUBJECT_CONTEXT_WORDS = new Set(
+  (
+    'pregnant pregnancy expecting antenatal prenatal trimester breastfeeding breastfeed nursing lactation lactating ' +
+    'postpartum postnatal birth baby infant newborn woman women eat eating take taking use using dose doses dosage ' +
+    'work works working effective help helps try trying start stop worried worry risk risks late early long often'
+  )
+    .split(' ')
+    .map(stem),
+);
+
+/**
+ * Cosine an item needs when no item matches the question's subject words.
+ * From the chat eval: "is it safe to fly at 30 weeks" keeps the air-travel
+ * guideline (0.66) and loses COVID-vaccine and exercise items (~0.41);
+ * "can I eat sushi" (before its synonyms) lost Japanese nutrient intakes,
+ * diabetes diets and vegetarian diets (0.38-0.47).
+ */
+export const SUBJECTLESS_MIN_COSINE = 0.5;
 
 export interface SemanticInput {
   /** Unit-length query vector. */
@@ -429,7 +479,8 @@ export function searchItems(
   const sem = query.trim() ? opts.semantic ?? null : null;
   const substances = expanded.map((e) => e.token).filter((t) => SUBSTANCES.has(t));
   const asksPregnancy = qTokens.some((t) => PREGNANCY_WORDS.has(t));
-  const candidates: { it: IndexedItem; base: number; strength: number }[] = [];
+  const subjectTokens = opts.requireSubject ? qTokens.filter((t) => !SUBJECT_CONTEXT_WORDS.has(t) && !/^\d+$/.test(t)) : [];
+  const candidates: { it: IndexedItem; base: number; strength: number; cos: number; subject: boolean }[] = [];
 
   for (const it of indexItems(items, topics)) {
     if (opts.topic && !it.item.topics.includes(opts.topic)) continue;
@@ -449,19 +500,31 @@ export function searchItems(
     }
     for (const p of it.phrases) if (qLower.includes(` ${p} `)) raw += 2;
 
+    const subject = subjectTokens.some((t) => matched.has(t) || (SYNONYMS[t] ?? []).some((x) => matched.has(stem(x))));
     const coverage = qTokens.length
       ? qTokens.filter((t) => matched.has(t) || (SYNONYMS[t] ?? []).some((s) => matched.has(stem(s)))).length / qTokens.length
       : 1;
     const base = qTokens.length ? raw * (0.4 + 0.6 * coverage) : 1;
     if (sem) {
       const doc = sem.docs.get(it.item.id);
-      const strength = doc ? semanticStrength(dotProduct(sem.query, doc), sem.floor, sem.ceil) : 0;
+      const cos = doc ? dotProduct(sem.query, doc) : 0;
+      const strength = doc ? semanticStrength(cos, sem.floor, sem.ceil) : 0;
       if (raw === 0 && strength === 0) continue;
-      candidates.push({ it, base: raw === 0 ? 0 : base, strength });
+      candidates.push({ it, base: raw === 0 ? 0 : base, strength, cos, subject });
       continue;
     }
     if (qTokens.length > 0 && raw === 0) continue;
-    candidates.push({ it, base, strength: 0 });
+    candidates.push({ it, base, strength: 0, cos: 0, subject });
+  }
+  // Relevance floor: no item mentions any subject word of the question,
+  // so every candidate only shares its life stage or a loose semantic
+  // neighbourhood. Keep the close neighbours only (often none at all).
+  // Requiring the subject per item instead lost the right sources for
+  // everyday words the library does not use ("running", "screams").
+  if (subjectTokens.length && !candidates.some((c) => c.subject)) {
+    const close = candidates.filter((c) => c.cos >= SUBJECTLESS_MIN_COSINE);
+    candidates.length = 0;
+    candidates.push(...close);
   }
 
   // Hybrid: normalise the keyword part against the best keyword match of
@@ -565,7 +628,7 @@ export function selectChatSources(
 ): ResearchItem[] {
   if (!question || !question.trim()) return [];
   const lib = items ? { items, topics: topics ?? [] } : getLibrary();
-  const ranked = searchItems(lib.items, question.slice(0, 500), { lifeStage, minScore: 5, semantic }, lib.topics);
+  const ranked = searchItems(lib.items, question.slice(0, 500), { lifeStage, minScore: 5, semantic, requireSubject: true }, lib.topics);
   if (ranked.length === 0) return [];
   // Keep items within reach of the best one so a strong match does not
   // drag in loosely related filler.
@@ -586,10 +649,22 @@ export function toChatSources(items: ResearchItem[]): ChatSource[] {
   }));
 }
 
+/**
+ * Safety verdicts and doses for named medicines (QA, Nov 2026): the chat
+ * hinted at codeine's metabolism without saying anything the sources
+ * support, and refused any ibuprofen dose although it had a period-pain
+ * guideline. A dose may be reported only as what a given source states.
+ */
+export const MEDICINE_RULES = `Medicines, safety and doses:
+- Say whether a specific medicine is safe in pregnancy or while breastfeeding only if a research source above states it for that medicine. Otherwise say the research here does not cover it, and to ask a pharmacist or doctor before taking it; do not give a safety verdict of your own.
+- Doses: if a source above states a standard dose or regimen for the medicine asked about, you may report it as what that source says ("the guideline mentions ..."), with its number, and always add that they should check the label or with a pharmacist or doctor, especially if they have other conditions or take other medicines. Never give a dose, amount or schedule that no source above states. For prescription-only medicines (for example antidepressants, or opioids such as codeine) never go beyond what a source states: the dose is set by the prescriber, so say to ask them. Keep every pregnancy or breastfeeding caution a source gives.
+- If no source states a dose, say the research here does not give one and point to the label, a pharmacist or the prescriber, then share what the sources do say about the medicine (for example how well it works), rather than only declining.`;
+
 /** System-prompt block listing the numbered sources and citation rules. */
 export function buildSourcesPrompt(items: ResearchItem[]): string {
   if (items.length === 0) {
-    return `\n\n## Research sources\nNo items from the Womanie research library matched this question. Do not cite any sources or use bracketed numbers. If you give general health information, say it is general and suggest checking with a doctor or midwife.`;
+    return `\n\n## Research sources\nNo items from the Womanie research library matched this question. Do not cite any sources or use bracketed numbers. If you give general health information, say it is general and suggest checking with a doctor or midwife.
+${MEDICINE_RULES}`;
   }
   const blocks = items.map((it, i) => {
     const certainty = it.certainty && it.certainty !== 'not stated' ? `; certainty of evidence: ${it.certainty}` : '';
@@ -610,7 +685,9 @@ Rules for using these sources:
 - If no source above supports a claim, state it without a citation as general information, or say the evidence here is limited. Never attach a nearby source just to give a sentence a number.
 - Fewer, accurate citations are better than many loose ones. It is fine to cite only one or two sources, or none.
 - Never cite anything that is not in this list, never use a number that is not listed above, never invent studies, numbers or guidelines, and never use bracketed numbers for anything else.
+- First check whether any source above answers the question actually asked (the same medicine, food, test or situation, in the same group of people). If none does, say so plainly near the start (for example "The research I have here doesn't cover codeine while breastfeeding") and do not fill the gap with sources about something else. Leave out sources that are only about the same general area.
 - If the sources are uncertain, low-certainty, conflicting or do not quite answer the question, say so plainly.
+${MEDICINE_RULES}
 - Do not add your own "Sources" or reference list at the end; the app shows the cited sources under your answer.`;
 }
 

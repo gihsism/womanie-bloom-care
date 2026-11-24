@@ -104,6 +104,31 @@ export const MIXED_MEDICINE_QUESTIONS: EvalQuestion[] = [
   { q: 'Is codeine safe when breastfeeding?', stage: 'postpartum', topics: ['codeine-breastfeeding', 'medicines-breastfeeding'], title: 'codeine|opioid|analgesi' },
 ];
 
+/**
+ * QA findings on the live chat (Nov 2026). The sushi answer was given
+ * diabetes diets, Japanese nutrient intakes and vegetarian diets; the
+ * library words raw-fish risks as listeria / mercury / fish (fixed with
+ * query synonyms). The sertraline follow-up ("What dose?") is searched
+ * together with the question before it, as the chat does.
+ */
+export const QA_QUESTIONS: EvalQuestion[] = [
+  { q: 'Can I eat sushi while pregnant?', stage: 'pregnancy', topics: ['food-safety-pregnancy', 'omega3-pregnancy'], title: 'listeri|mercury|fish|toxoplasm|food' },
+  { q: 'Is codeine safe while breastfeeding?', stage: 'postpartum', topics: ['codeine-breastfeeding', 'medicines-breastfeeding'], title: 'codeine|opioid|analgesi' },
+  { q: 'What ibuprofen dose works for period pain?', stage: 'menstrual-cycle', topics: ['period-pain'], title: 'non-?steroidal|nsaid|ibuprofen|dysmenorr' },
+  { q: 'Is sertraline safe while breastfeeding?\nWhat dose?', stage: 'postpartum', topics: ['medicines-breastfeeding', 'postnatal-depression'], title: 'sertraline|antidepress' },
+];
+
+/**
+ * Questions the library cannot answer although they share a life stage
+ * with it: the chat must get no sources at all (relevance floor), not
+ * diet or vaccine reviews that only match "pregnant".
+ */
+export const NO_SOURCE_QUESTIONS: [string, string | null][] = [
+  ['is kombucha ok when pregnant?', 'pregnancy'],
+  ['can I eat ramen while breastfeeding?', 'postpartum'],
+  ['What dose?', 'postpartum'],
+];
+
 export interface EvalResult {
   hitAt3: number;
   hitAt6: number;
