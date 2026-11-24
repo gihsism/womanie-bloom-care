@@ -22,8 +22,7 @@ import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
 import {
   Send,
-  Bot,
-  User,
+  ChevronRight,
   Loader2,
   Trash2,
   Download,
@@ -725,6 +724,17 @@ export default function AIDoctorChat() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        {!showPast && (
+          <div className="px-4 -mt-1.5 pb-3">
+            <button
+              type="button"
+              onClick={() => navigate('/dashboard/appointments')}
+              className="page-sub text-left hover:underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stage-accent rounded"
+            >
+              Prefer a real doctor? <span className="font-bold text-stage-accent whitespace-nowrap">Book a visit &rarr;</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Past chats list, or the chat itself */}
@@ -746,16 +756,11 @@ export default function AIDoctorChat() {
                 key={i}
                 className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                {msg.role === 'assistant' && (
-                  <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
-                    <Bot className="h-3.5 w-3.5 text-primary" />
-                  </div>
-                )}
                 <div
-                  className={`group max-w-[85%] md:max-w-[70%] rounded-2xl px-4 py-3 relative ${
+                  className={`group rounded-[1.25rem] relative ${
                     msg.role === 'user'
-                      ? 'bg-primary text-primary-foreground rounded-br-md'
-                      : 'bg-muted rounded-bl-md'
+                      ? 'max-w-[85%] md:max-w-[70%] px-4 py-2.5 bg-stage-accent text-white rounded-br-md'
+                      : 'w-full md:max-w-[85%] px-4 py-3.5 bg-card border border-line'
                   }`}
                 >
                   {msg.role === 'assistant' ? (
@@ -769,7 +774,7 @@ export default function AIDoctorChat() {
                         const cited = citedSources(body, sources);
                         return (
                           <>
-                            <div className="prose prose-sm dark:prose-invert max-w-none text-sm [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&>h1]:text-base [&>h2]:text-sm [&>h3]:text-sm [&_a]:text-primary [&_a]:no-underline [&_a]:font-medium">
+                            <div className="prose dark:prose-invert max-w-none text-[16px] leading-relaxed [&>p]:mb-2.5 [&>p:last-child]:mb-0 [&>ul]:mb-2 [&>ol]:mb-2 [&>h1]:text-base [&>h2]:text-sm [&>h3]:text-sm [&_a]:text-stage-accent [&_a]:no-underline [&_a]:font-semibold [&_a]:text-[0.75em] [&_a]:align-super">
                               <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{linkCitations(body, cited)}</ReactMarkdown>
                             </div>
                             {cited.length > 0 && <ChatSources sources={cited} onBrowse={() => navigate('/library')} />}
@@ -793,24 +798,16 @@ export default function AIDoctorChat() {
                       )}
                     </>
                   ) : (
-                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                    <p className="text-[16px] font-medium whitespace-pre-wrap">{msg.content}</p>
                   )}
                 </div>
-                {msg.role === 'user' && (
-                  <div className="w-7 h-7 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0 mt-1">
-                    <User className="h-3.5 w-3.5 text-secondary" />
-                  </div>
-                )}
               </div>
             ))}
 
             {isStreaming && messages[messages.length - 1]?.role !== 'assistant' && (
               <div className="flex gap-3">
-                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Bot className="h-3.5 w-3.5 text-primary" />
-                </div>
-                <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
-                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                <div className="bg-card border border-line rounded-[1.25rem] px-4 py-3" aria-label="Thinking">
+                  <Loader2 className="h-4 w-4 animate-spin text-stage-accent" />
                 </div>
               </div>
             )}
@@ -818,36 +815,37 @@ export default function AIDoctorChat() {
 
           {/* Suggested Questions */}
           {messages.length <= 1 && (
-            <div className="px-4 pb-2" data-testid="suggestions">
-              <div className="flex flex-wrap gap-2">
+            <div className="px-4 pb-3" data-testid="suggestions">
+              <h2 className="section-title mb-2 px-0.5">Try asking</h2>
+              <div className="row-group">
                 {suggestedQuestions.map((q) => (
-                  <Button
+                  <button
                     key={q}
-                    variant="outline"
-                    size="sm"
-                    className="text-xs h-auto py-1.5 px-3 rounded-full max-w-full whitespace-normal text-left"
+                    type="button"
+                    className="w-full max-w-full whitespace-normal flex items-center gap-3 min-h-14 px-4 py-3 text-left text-[16px] font-medium hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-stage-accent"
                     onClick={() => {
                       setInput(q);
                       setTimeout(() => textareaRef.current?.focus(), 0);
                     }}
                   >
-                    {q}
-                  </Button>
+                    <span className="flex-1 min-w-0">{q}</span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+                  </button>
                 ))}
               </div>
             </div>
           )}
 
           {/* Input Area — the install banner stays away while it's on screen */}
-          <div className="border-t border-border bg-card p-4" data-hide-install-banner>
-            <div className="max-w-4xl mx-auto flex gap-2 items-end">
+          <div className="border-t border-line bg-background px-4 pt-3 pb-3" data-hide-install-banner>
+            <div className="max-w-4xl mx-auto relative">
               <Textarea
                 ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask about your health records..."
-                className="min-h-[44px] max-h-[120px] resize-none text-sm rounded-xl"
+                className="min-h-[52px] max-h-[120px] resize-none text-[16px] rounded-[1.625rem] border-stage-accent/60 pl-5 pr-14 py-3.5 focus-visible:ring-stage-accent"
                 rows={1}
                 disabled={isStreaming}
               />
@@ -855,7 +853,7 @@ export default function AIDoctorChat() {
                 onClick={handleSend}
                 disabled={!input.trim() || isStreaming}
                 size="icon"
-                className="rounded-xl h-[44px] w-[44px] flex-shrink-0"
+                className="absolute right-1.5 bottom-1.5 rounded-full h-10 w-10 bg-stage-accent text-white hover:bg-stage-accent/90"
                 aria-label="Send"
               >
                 {isStreaming ? (
@@ -865,16 +863,7 @@ export default function AIDoctorChat() {
                 )}
               </Button>
             </div>
-            <p className="text-xs text-center mt-2">
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard/appointments')}
-                className="text-primary hover:underline underline-offset-2"
-              >
-                Prefer a real doctor? Book a visit &rarr;
-              </button>
-            </p>
-            <p className="text-[10px] text-muted-foreground text-center mt-1">
+            <p className="text-[12px] text-muted-foreground text-center mt-2">
               Information only, not medical advice.
             </p>
           </div>

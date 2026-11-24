@@ -117,7 +117,7 @@ describe('Ask AI', () => {
     expect(deletes).toHaveLength(0);
   });
 
-  it('offers a real doctor as one line under the input', () => {
+  it('offers a real doctor as one line under the title', () => {
     renderChat();
     fireEvent.click(screen.getByRole('button', { name: /prefer a real doctor\? book a visit/i }));
     expect(screen.getByTestId('where')).toHaveTextContent('/dashboard/appointments');

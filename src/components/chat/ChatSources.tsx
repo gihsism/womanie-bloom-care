@@ -6,12 +6,12 @@ import { RESEARCH_DISCLAIMER, type ChatSource } from '@/lib/research-sources';
 export function ChatSources({ sources, onBrowse }: { sources: ChatSource[]; onBrowse?: () => void }) {
   if (sources.length === 0) return null;
   return (
-    <div className="mt-3 pt-2.5 border-t border-border/70" aria-label="Sources">
+    <div className="mt-3 pt-2.5 border-t border-line" aria-label="Sources">
       <p className="label-mono !text-[10px] mb-1.5">Sources</p>
       <ol className="space-y-1.5">
         {sources.map((s) => (
-          <li key={s.n} className="flex gap-2 text-xs leading-snug">
-            <span className="font-display text-primary tabular-nums w-4 shrink-0 text-right">{s.n}</span>
+          <li key={s.n} className="flex gap-1 text-[13px] leading-snug">
+            <span className="font-display font-bold text-stage-accent tabular-nums w-7 shrink-0">[{s.n}]</span>
             <a
               href={s.url}
               target="_blank"
