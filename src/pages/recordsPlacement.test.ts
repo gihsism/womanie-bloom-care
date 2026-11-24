@@ -153,6 +153,6 @@ describe('each flagged result shows once on Records', () => {
   });
 
   it('the tapped explanation keeps the "Ask AI" link the old card had', () => {
-    expect(records).toContain('Ask AI about {getFriendlyName(item.title)}');
+    expect(records).toContain('Ask AI about {item.title}');
   });
 });

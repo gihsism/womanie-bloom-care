@@ -594,7 +594,7 @@ function FlagRow({ item }: { item: MedicalDataItem }) {
             className="inline-flex items-center gap-1.5 min-h-11 px-2 text-[15px] font-semibold text-stage-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stage-accent rounded"
           >
             <MessageCircle className="h-4 w-4" aria-hidden="true" />
-            Ask AI about {getFriendlyName(item.title)}
+            Ask AI about {item.title}
           </button>
         </div>
       )}

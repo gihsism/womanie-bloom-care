@@ -220,7 +220,10 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
     // Lab-flag derived questions from useUserHealthContext.
     // Only when the lab itself is out of range: a result in the normal
     // range never becomes a question.
-    if (ctx.tshOutOfRange && ctx.labs.tsh && isFlaggedStatus(ctx.labs.tsh.status)) {
+    // Skipped when the flagged-lab list already asks about TSH (one
+    // question per result).
+    if (ctx.tshOutOfRange && ctx.labs.tsh && isFlaggedStatus(ctx.labs.tsh.status)
+        && !out.some(q => q.id === `lab:${getFriendlyName(ctx.labs.tsh!.title)}`)) {
       out.push({
         id: 'ctx:tsh',
         text: `My TSH is ${ctx.labs.tsh.value} — could thyroid be affecting my cycle / energy / mood?`,

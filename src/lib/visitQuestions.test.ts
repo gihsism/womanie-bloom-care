@@ -49,6 +49,7 @@ describe('questions only for out-of-range results', () => {
     expect(card).toContain(".in('status', [...FLAGGED_STATUSES])");
     expect(card).not.toContain("'borderline']");
     expect(card).toContain('isFlaggedStatus(ctx.labs.tsh.status)');
+    expect(card).toContain('!out.some(q => q.id === `lab:${getFriendlyName(ctx.labs.tsh!.title)}`)');
     expect(card).toContain('isFlaggedStatus(ctx.labs.amh?.status)');
     expect(card).toContain('isFlaggedStatus(ctx.labs.lh?.status)');
     expect(card).toContain('MODE_DEFAULTS[mode]');
