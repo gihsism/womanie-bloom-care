@@ -193,6 +193,10 @@ describe('api/_routes/db security invariants', () => {
   });
 
   it('appointments updates may change status/notes only', async () => {
+    query.mockImplementation(async (text: string) =>
+      /FROM appointments WHERE id = \$1/.test(text)
+        ? [{ patient_id: SESSION_USER.id, doctor_id: 'd1', status: 'scheduled', scheduled_at: '2099-01-01T10:00:00Z', duration: 30, notes: null }]
+        : []);
     const ok = mockRes();
     await handler(
       mockReq({ table: 'appointments', operation: 'update', updateData: { status: 'cancelled', notes: 'x' }, filters: [['id', 'eq', 'a1']] }),
@@ -205,6 +209,27 @@ describe('api/_routes/db security invariants', () => {
       bad,
     );
     expect(bad._status).toBe(403);
+  });
+
+  it('a patient cannot mark her appointment completed, and the UPDATE never runs', async () => {
+    query.mockImplementation(async (text: string) =>
+      /FROM appointments WHERE id = \$1/.test(text)
+        ? [{ patient_id: SESSION_USER.id, doctor_id: 'd1', status: 'scheduled', scheduled_at: '2099-01-01T10:00:00Z', duration: 30, notes: null }]
+        : []);
+    const res = mockRes();
+    await handler(
+      mockReq({ table: 'appointments', operation: 'update', updateData: { status: 'completed' }, filters: [['id', 'eq', 'a1']] }),
+      res,
+    );
+    expect(res._status).toBe(403);
+    expect(query.mock.calls.some(c => /^UPDATE appointments/.test(c[0] as string))).toBe(false);
+  });
+
+  it('appointments cannot be deleted through /api/db', async () => {
+    const res = mockRes();
+    await handler(mockReq({ table: 'appointments', operation: 'delete', filters: [['id', 'eq', 'a1']] }), res);
+    expect(res._status).toBe(403);
+    expect(query).not.toHaveBeenCalled();
   });
 
   it('doctor_notes insert needs an approved connection to the patient', async () => {

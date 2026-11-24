@@ -3,6 +3,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from '../_lib/auth.js';
 import { withSentry } from '../_lib/sentry.js';
 import { isIdent, isIdentList } from '../_lib/sql-ident.js';
+import { checkAppointmentUpdate } from '../_lib/appointment-update.js';
 
 // Which column identifies "mine" for each table accessible via /api/db.
 // - string: single owner column; its value must equal the session user id.
@@ -64,9 +65,9 @@ const INSERT_BLOCKED: Set<string> = new Set([
   'appointments',
 ]);
 
-// Tables where an UPDATE may only touch the listed columns. Both parties
-// of an appointment may change its status (cancel, undo, complete,
-// no-show) and the doctor writes a cancellation note; moving the slot
+// Tables where an UPDATE may only touch the listed columns. Which party
+// may set which appointment status is checked per row by
+// checkAppointmentUpdate (api/_lib/appointment-update.ts); moving the slot
 // goes through /api/appointments/reschedule, which re-checks overlaps.
 const UPDATABLE_COLUMNS: Record<string, string[]> = {
   appointments: ['status', 'notes'],
@@ -170,6 +171,25 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         if (conn.length === 0) {
           return res.status(403).json({ error: 'No approved connection to this patient' });
         }
+      }
+    }
+
+    // Appointments: who may set which status is decided per row (patient:
+    // cancel / undo her own cancellation of an upcoming visit; doctor:
+    // close-out). Deleting would erase a visit without a trace, and nothing
+    // in the app does it, so it is blocked.
+    if (table === 'appointments') {
+      if (operation === 'delete') {
+        return res.status(403).json({ error: 'Appointments cannot be deleted via /api/db' });
+      }
+      if (operation === 'update') {
+        const check = await checkAppointmentUpdate(
+          (text, params) => sql.query(text, params) as Promise<unknown[]>,
+          user.id,
+          filters,
+          updateData,
+        );
+        if (!check.ok) return res.status(check.status).json({ error: check.error });
       }
     }
 
