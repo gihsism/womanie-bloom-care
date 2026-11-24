@@ -3,6 +3,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from './_lib/auth.js';
 import { checkAndConsume } from './_lib/ratelimit.js';
 import { withSentry } from './_lib/sentry.js';
+import { parseConversationId, persistChatTurn } from './_lib/chatConversation.js';
 import { buildLifeContext } from './_lib/life-context.js';
 import { SOURCES_FOOTER_MARK, formatSourcesFooter, stripUnknownCitations } from './_lib/research/library.js';
 import { buildChatSystemPrompt, selectChatEvidence } from './_lib/research/chat-prompt.js';
@@ -38,7 +39,10 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
   if (!ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured');
 
-  const { messages, model: requestedModel, personalContext } = req.body || {};
+  const { messages, model: requestedModel, personalContext, conversationId: rawConversationId } = req.body || {};
+  // Groups this turn with the rest of its chat in "Past chats". Only a
+  // well-formed UUID is kept; the rows are still owned by user.id.
+  const conversationId = parseConversationId(rawConversationId);
   if (!Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'Messages required' });
   }
@@ -343,17 +347,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       const cleanText = stripUnknownCitations(assistantText, chatSources.map((s) => s.n));
       const storedText = cleanText + formatSourcesFooter(chatSources, cleanText);
       try {
-        if (userTurnContent) {
-          await sql.transaction([
-            sql`INSERT INTO chat_messages (user_id, role, content) VALUES (${user.id}, 'user', ${userTurnContent})`,
-            sql`INSERT INTO chat_messages (user_id, role, content, model) VALUES (${user.id}, 'assistant', ${storedText}, ${model})`,
-          ]);
-        } else {
-          await sql.query(
-            'INSERT INTO chat_messages (user_id, role, content, model) VALUES ($1, $2, $3, $4)',
-            [user.id, 'assistant', storedText, model]
-          );
-        }
+        await persistChatTurn(sql, {
+          userId: user.id,
+          conversationId,
+          userText: userTurnContent,
+          assistantText: storedText,
+          model,
+        });
       } catch (err) {
         console.error('Chat persistence error:', err);
       }

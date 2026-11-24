@@ -37,7 +37,7 @@ import {
 } from 'lucide-react';
 import { ChatSources } from '@/components/chat/ChatSources';
 import { PastChats } from '@/components/chat/PastChats';
-import { groupIntoChats, type PastChat, type StoredChatMessage } from '@/lib/chatSessions';
+import { groupIntoChats, newConversationId, type PastChat, type StoredChatMessage } from '@/lib/chatSessions';
 import { pickSuggestions } from '@/lib/chatSuggestions';
 import { citedSources, linkCitations, splitSourcesFooter, stripSourcesFooter, stripUnknownCitations, type ChatSource } from '@/lib/research-sources';
 
@@ -65,6 +65,7 @@ async function streamChat({
   messages,
   model,
   personalContext,
+  conversationId,
   onDelta,
   onSources,
   onDone,
@@ -73,6 +74,7 @@ async function streamChat({
   messages: Msg[];
   model: string;
   personalContext?: PersonalContext;
+  conversationId: string;
   onDelta: (text: string) => void;
   onSources?: (sources: ChatSource[]) => void;
   onDone: () => void;
@@ -82,7 +84,7 @@ async function streamChat({
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages, model, personalContext }),
+    body: JSON.stringify({ messages, model, personalContext, conversationId }),
   });
 
   if (!resp.ok) {
@@ -170,6 +172,9 @@ export default function AIDoctorChat() {
   // Every stored message (oldest first), as the server returns it.
   const [history, setHistory] = useState<Array<StoredChatMessage & { sources?: ChatSource[] }>>([]);
   const [showPast, setShowPast] = useState(false);
+  // The chat on screen. Every turn is stored under this id, so Past chats
+  // keeps separate chats apart. New chat = new id; reopening keeps its id.
+  const [conversationId, setConversationId] = useState(() => newConversationId());
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const [hasMoreHistory, setHasMoreHistory] = useState(false);
   const [earliestCursor, setEarliestCursor] = useState<string | null>(null);
@@ -339,10 +344,11 @@ export default function AIDoctorChat() {
         const resp = await fetch('/api/chat/messages', { credentials: 'include' });
         if (!resp.ok) return;
         const data = await resp.json();
-        const serverMessages: StoredChatMessage[] = (data.messages || []).map((m: { role: string; content: string; created_at?: string | null }) => ({
+        const serverMessages: StoredChatMessage[] = (data.messages || []).map((m: { role: string; content: string; created_at?: string | null; conversation_id?: string | null }) => ({
           role: m.role as 'user' | 'assistant',
           content: m.content,
           created_at: m.created_at ?? null,
+          conversation_id: m.conversation_id ?? null,
         }));
         setHasMoreHistory(Boolean(data.hasMore));
         setEarliestCursor(typeof data.earliestCursor === 'string' ? data.earliestCursor : null);
@@ -419,6 +425,7 @@ export default function AIDoctorChat() {
 
     let assistantSoFar = '';
     let sourcesSoFar: ChatSource[] = [];
+    const turnConversationId = conversationId;
     const conversationForApi = newMessages
       .filter(m => m !== WELCOME_MESSAGE)
       .map(m => ({ role: m.role, content: stripSourcesFooter(m.content) }));
@@ -490,6 +497,7 @@ export default function AIDoctorChat() {
       messages: conversationForApi,
       model: selectedModel,
       personalContext,
+      conversationId: turnConversationId,
       onSources: (sources) => { sourcesSoFar = sources; },
       onDelta: (chunk) => {
         assistantSoFar += chunk;
@@ -508,8 +516,8 @@ export default function AIDoctorChat() {
           const now = new Date().toISOString();
           setHistory(h => [
             ...h,
-            { role: 'user', content: text, created_at: now },
-            { role: 'assistant', content: assistantSoFar, created_at: now, sources: sourcesSoFar },
+            { role: 'user', content: text, created_at: now, conversation_id: turnConversationId },
+            { role: 'assistant', content: assistantSoFar, created_at: now, conversation_id: turnConversationId, sources: sourcesSoFar },
           ]);
         }
       },
@@ -549,10 +557,11 @@ export default function AIDoctorChat() {
       );
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const data = await resp.json();
-      const older: StoredChatMessage[] = (data.messages || []).map((m: { role: string; content: string; created_at?: string | null }) => ({
+      const older: StoredChatMessage[] = (data.messages || []).map((m: { role: string; content: string; created_at?: string | null; conversation_id?: string | null }) => ({
         role: m.role as 'user' | 'assistant',
         content: m.content,
         created_at: m.created_at ?? null,
+        conversation_id: m.conversation_id ?? null,
       }));
       setHistory(prev => [...older, ...prev]);
       setHasMoreHistory(Boolean(data.hasMore));
@@ -568,12 +577,16 @@ export default function AIDoctorChat() {
 
   const openPastChat = (chat: PastChat<StoredChatMessage & { sources?: ChatSource[] }>) => {
     setMessages([WELCOME_MESSAGE, ...chat.messages.map(m => ({ role: m.role, content: m.content, sources: m.sources }))]);
+    // Continue this chat under its id. Chats saved before ids existed
+    // have none; their follow-ups start a fresh id.
+    setConversationId(chat.conversationId ?? newConversationId());
     setInput('');
     setShowPast(false);
   };
 
   const startNewChat = () => {
     setMessages([WELCOME_MESSAGE]);
+    setConversationId(newConversationId());
     setInput('');
     setShowPast(false);
     setTimeout(() => textareaRef.current?.focus(), 0);
@@ -588,6 +601,7 @@ export default function AIDoctorChat() {
       return;
     }
     setMessages([WELCOME_MESSAGE]);
+    setConversationId(newConversationId());
     setHistory([]);
     setHasMoreHistory(false);
     setEarliestCursor(null);
