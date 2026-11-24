@@ -331,9 +331,36 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const rows = await sql.query(query, params);
     return res.status(200).json({ rows, rowCount: rows.length });
   } catch (error) {
-    console.error('DB error:', error);
-    return res.status(500).json({ error: error instanceof Error ? error.message : 'Database error' });
+    // Postgres error text echoes the offending values ("Key (email)=(...)",
+    // 'invalid input syntax for type uuid: "..."') and leaks schema detail,
+    // so neither the client nor the log gets it: the client gets a generic
+    // message, the log gets the SQLSTATE code, constraint and table only.
+    const { status, message } = clientDbError(error);
+    const body = (req.body ?? {}) as { table?: unknown; operation?: unknown };
+    console.error('DB error:', JSON.stringify({
+      code: pgField(error, 'code') ?? (error instanceof Error ? error.name : 'unknown'),
+      constraint: pgField(error, 'constraint'),
+      table: typeof body.table === 'string' ? body.table.slice(0, 64) : undefined,
+      operation: typeof body.operation === 'string' ? body.operation.slice(0, 16) : undefined,
+    }));
+    return res.status(status).json({ error: message });
   }
+}
+
+function pgField(err: unknown, key: 'code' | 'constraint'): string | undefined {
+  if (!err || typeof err !== 'object' || !(key in err)) return undefined;
+  const v = (err as Record<string, unknown>)[key];
+  return typeof v === 'string' ? v.slice(0, 128) : undefined;
+}
+
+// Generic, value-free messages by SQLSTATE class.
+function clientDbError(err: unknown): { status: number; message: string } {
+  const code = pgField(err, 'code') ?? '';
+  if (code === '23505') return { status: 409, message: 'This record already exists.' };
+  if (code.startsWith('23')) return { status: 400, message: 'The data was rejected by a database rule.' };
+  if (code.startsWith('22')) return { status: 400, message: 'Invalid value in request.' };
+  if (code === '42703' || code === '42P01') return { status: 400, message: 'Invalid request.' };
+  return { status: 500, message: 'Database error' };
 }
 
 export default withSentry(handler);

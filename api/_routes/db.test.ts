@@ -239,3 +239,52 @@ describe('api/_routes/db security invariants', () => {
     expect(query).not.toHaveBeenCalled();
   });
 });
+
+describe('api/_routes/db error responses', () => {
+  beforeEach(() => {
+    vi.mocked(getAuthUser).mockResolvedValue(SESSION_USER);
+    query.mockReset();
+  });
+
+  it('never returns raw Postgres error text, and logs no values', async () => {
+    const pgErr = Object.assign(
+      new Error('duplicate key value violates unique constraint "x" Key (email)=(secret@example.com)'),
+      { code: '23505', constraint: 'profiles_email_key', detail: 'Key (email)=(secret@example.com) already exists.' },
+    );
+    query.mockRejectedValue(pgErr);
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const res = mockRes();
+    await handler(
+      mockReq({ table: 'profiles', operation: 'update', updateData: { full_name: 'Jane Doe' } }),
+      res,
+    );
+    expect(res._status).toBe(409);
+    expect(JSON.stringify(res._body)).not.toMatch(/secret|duplicate|constraint|Key/);
+    const logged = log.mock.calls.map(c => c.join(' ')).join('\n');
+    expect(logged).toContain('23505');
+    expect(logged).toContain('profiles');
+    expect(logged).not.toMatch(/secret@|Jane/);
+    log.mockRestore();
+  });
+
+  it('maps an unknown failure to a generic 500', async () => {
+    query.mockRejectedValue(new Error('connection to 10.0.0.5 refused, password=hunter2'));
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const res = mockRes();
+    await handler(mockReq({ table: 'profiles', operation: 'select' }), res);
+    expect(res._status).toBe(500);
+    expect(res._body).toEqual({ error: 'Database error' });
+    expect(log.mock.calls.map(c => c.join(' ')).join('\n')).not.toContain('hunter2');
+    log.mockRestore();
+  });
+
+  it('maps a bad value (e.g. malformed uuid) to a generic 400', async () => {
+    query.mockRejectedValue(Object.assign(new Error('invalid input syntax for type uuid: "abc"'), { code: '22P02' }));
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const res = mockRes();
+    await handler(mockReq({ table: 'profiles', operation: 'select' }), res);
+    expect(res._status).toBe(400);
+    expect(JSON.stringify(res._body)).not.toContain('abc');
+    log.mockRestore();
+  });
+});
