@@ -13,7 +13,8 @@ export default defineConfig(() => ({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.svg", "apple-touch-icon.png", "og-image.png"],
+      // og-image.png is only for link previews (crawlers): not precached.
+      includeAssets: ["favicon.svg", "apple-touch-icon.png"],
       manifest: {
         // Stable install identity so updates/re-installs are recognised
         // as the same app rather than spawning a duplicate entry.
@@ -94,7 +95,40 @@ export default defineConfig(() => ({
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        // Bundled illustrations/photos (pregnancy week art ~0.9 MB each,
+        // About-page photos, the social-share image) are NOT precached: they
+        // made the install download ~14 MB over mobile data for pictures
+        // most users never open. They are cached on first view instead
+        // (runtimeCaching below), so they still work offline once seen.
+        globIgnores: ["**/node_modules/**/*", "assets/*.{png,jpg,jpeg,webp}", "og-image.png"],
         navigateFallbackDenylist: [/^\/api\//, /^\/~oauth/],
+        runtimeCaching: [
+          {
+            urlPattern: ({ url, sameOrigin }) =>
+              sameOrigin && url.pathname.startsWith("/assets/") && /\.(png|jpe?g|webp)$/.test(url.pathname),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "womanie-images",
+              expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 * 180 },
+            },
+          },
+          {
+            // Google Fonts stylesheet is render-blocking: serve the cached
+            // copy instantly on app start, refresh it in the background.
+            urlPattern: ({ url }) => url.origin === "https://fonts.googleapis.com",
+            handler: "StaleWhileRevalidate",
+            options: { cacheName: "google-fonts-stylesheets" },
+          },
+          {
+            urlPattern: ({ url }) => url.origin === "https://fonts.gstatic.com",
+            handler: "CacheFirst",
+            options: {
+              cacheName: "google-fonts-webfonts",
+              cacheableResponse: { statuses: [0, 200] },
+              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
+            },
+          },
+        ],
       },
     }),
   ].filter(Boolean),
@@ -116,15 +150,23 @@ export default defineConfig(() => ({
         // of dozens of tiny requests.
         manualChunks(id) {
           if (!id.includes("node_modules")) return;
+          // Tiny helpers the app shell imports too (cn() -> clsx). Left
+          // unassigned, Rollup pulls a manual chunk's dependencies INTO that
+          // chunk, so clsx landed in "charts" and every first paint
+          // downloaded + parsed all of recharts (~110 KB gzip) just for it.
+          if (id.includes("/node_modules/clsx/") || id.includes("/node_modules/tailwind-merge/")) {
+            return "ui-vendor";
+          }
           if (id.includes("recharts") || id.includes("/d3-") || id.includes("victory-vendor")) {
             return "charts";
           }
           if (
-            id.includes("/react-dom/") ||
-            id.includes("/react-router") ||
-            id.includes("/react/") ||
-            id.includes("/scheduler/")
+            id.includes("/node_modules/react-dom/") ||
+            id.includes("/node_modules/react-router") ||
+            id.includes("/node_modules/react/") ||
+            id.includes("/node_modules/scheduler/")
           ) {
+            // (anchored on /node_modules/ so @sentry/react is not swept in)
             return "react-vendor";
           }
           if (id.includes("@radix-ui") || id.includes("cmdk") || id.includes("vaul")) {

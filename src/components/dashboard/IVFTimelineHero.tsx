@@ -1,5 +1,5 @@
 import { format, differenceInDays } from 'date-fns';
-import { IVF_PHASES } from './IVFTracker';
+import { IVF_PHASES } from './ivfPhases';
 import { DetailsLink } from '@/components/dashboard/HomeBlocks';
 
 // Version 8 hero for IVF: the protocol as one vertical scale, like a

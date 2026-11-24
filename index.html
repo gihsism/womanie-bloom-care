@@ -35,6 +35,15 @@
   </head>
 
   <body>
+    <!-- Start the session check now, in parallel with the JS download;
+         AuthProvider (src/contexts/AuthContext.tsx) picks this promise up. -->
+    <script>
+      try {
+        var womanieMe = fetch('/api/auth/me', { credentials: 'include' });
+        womanieMe.catch(function () {}); // offline: AuthProvider handles it, no "unhandled rejection" noise
+        window.__womanieMe = womanieMe;
+      } catch (e) { /* AuthProvider fetches instead */ }
+    </script>
     <!-- Branded launch splash. Painted instantly from static HTML/CSS so
          the installed app (and a cold web load) opens on the Womanie mark
          and brand gradient instead of a blank white screen, then fades

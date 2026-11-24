@@ -1,6 +1,6 @@
 import { format, differenceInDays } from 'date-fns';
 import { fmtGrams } from '@/lib/bodyMap';
-import { getWeekData } from './PregnancyTracker';
+import { getWeekData } from './pregnancyWeekData';
 import { DetailsLink } from '@/components/dashboard/HomeBlocks';
 
 // Version 8 "body map" hero for pregnancy: a sculpted figure on the
