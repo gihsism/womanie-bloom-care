@@ -73,6 +73,15 @@ export const EMPTY_DRAFT: NoteDraft = {
   is_visible_to_patient: true,
 };
 
+// Questions the patient saved for an upcoming visit with this doctor
+// (read-only; table visit_questions, migration 012).
+export interface PatientVisitQuestions {
+  appointment_id: string;
+  scheduled_at: string;
+  updated_at: string | null;
+  questions: unknown;
+}
+
 export interface PeriodRecord {
   period_start_date: string;
   cycle_length: number;

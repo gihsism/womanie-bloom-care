@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { db } from '@/integrations/db/client';
 import { useToast } from '@/hooks/use-toast';
 import { Calendar, CheckCircle, Video, XCircle } from 'lucide-react';
@@ -23,6 +26,9 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
   const { toast } = useToast();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [showAllPast, setShowAllPast] = useState(false);
+  // The visit being cancelled (dialog open) and the reason typed so far.
+  const [cancelTarget, setCancelTarget] = useState<Appointment | null>(null);
+  const [cancelReason, setCancelReason] = useState('');
   const patientNameFor = (patientId: string): string => patientName(patients, patientId);
   const now = Date.now();
   const upcomingAppointments = upcomingOf(appointments, now);
@@ -37,14 +43,13 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
   // Reason is stamped into appointments.notes (no other surface writes
   // there) with a "Cancelled by doctor: <reason>" prefix so the patient
   // Appointments page can render the reason cleanly.
-  const cancelByDoctor = async (apt: Appointment) => {
+  const openCancel = (apt: Appointment) => {
+    setCancelReason('');
+    setCancelTarget(apt);
+  };
+
+  const cancelByDoctor = async (apt: Appointment, reason: string) => {
     const patientLabel = patientNameFor(apt.patient_id);
-    const when = new Date(apt.scheduled_at).toLocaleString();
-    const reason = window.prompt(
-      `Cancel the appointment with ${patientLabel} on ${when}?\n\nReason (the patient will see this):`,
-      ''
-    );
-    if (reason === null) return; // user cancelled the dialog
     const trimmed = reason.trim();
     if (!trimmed) {
       toast({
@@ -61,6 +66,7 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
         .update({ status: 'cancelled', notes: `Cancelled by doctor: ${trimmed}` })
         .eq('id', apt.id);
       if (error) throw error;
+      setCancelTarget(null);
       toast({
         title: 'Appointment cancelled',
         description: `${patientLabel} will see the cancellation and reason in their Appointments view.`,
@@ -167,7 +173,7 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
                       size="sm"
                       variant="ghost"
                       className="text-muted-foreground hover:text-destructive"
-                      onClick={() => cancelByDoctor(apt)}
+                      onClick={() => openCancel(apt)}
                       disabled={busyId === apt.id}
                     >
                       Cancel visit
@@ -276,6 +282,49 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={cancelTarget !== null} onOpenChange={o => { if (!o && busyId === null) setCancelTarget(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <form
+            onSubmit={e => {
+              e.preventDefault();
+              if (cancelTarget && cancelReason.trim()) void cancelByDoctor(cancelTarget, cancelReason);
+            }}
+          >
+            <DialogHeader>
+              <DialogTitle>Cancel this visit?</DialogTitle>
+              <DialogDescription>
+                {cancelTarget && (
+                  <>
+                    {patientNameFor(cancelTarget.patient_id)} ·{' '}
+                    {new Date(cancelTarget.scheduled_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                  </>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 py-4">
+              <Label htmlFor="cancel-reason">Reason (the patient will see this)</Label>
+              <Textarea
+                id="cancel-reason"
+                value={cancelReason}
+                onChange={e => setCancelReason(e.target.value)}
+                placeholder="e.g. I am unwell today. Please book another time."
+                maxLength={500}
+                rows={3}
+                autoFocus
+              />
+            </div>
+            <DialogFooter className="gap-2">
+              <Button type="button" variant="outline" onClick={() => setCancelTarget(null)} disabled={busyId !== null}>
+                Keep visit
+              </Button>
+              <Button type="submit" variant="destructive" disabled={!cancelReason.trim() || busyId !== null}>
+                {busyId !== null ? 'Cancelling…' : 'Cancel visit'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

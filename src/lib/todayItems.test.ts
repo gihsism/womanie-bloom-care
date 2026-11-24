@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { LifeStage } from '@/components/dashboard/DashboardHeader';
 import { LIFE_STAGES } from './lifeStage';
-import { todayItems, primaryActionFor, moreFor, MAX_TODAY, MAX_MORE, VISITS, RECORDS, RECORDS_CHARTS } from './todayItems';
+import { todayItems, primaryActionFor, moreFor, MAX_TODAY, MAX_MORE, VISITS, RECORDS, RECORDS_CHARTS, STAGE_PAGE, type TodaySignals } from './todayItems';
 
 // Monday 2026-11-23, 09:00 local
 const NOW = new Date(2026, 10, 23, 9, 0);
@@ -70,6 +70,66 @@ describe('todayItems', () => {
     expect(todayItems('menopause', { now: NOW, setup: { done: 1, total: 3, nameMissing: true } })[0].label).toBe('Add your name');
     expect(todayItems('menopause', { now: NOW, setup: { done: 2, total: 3 } })[0].label).toBe('Finish setting up (2 of 3 done)');
     expect(todayItems('menopause', { now: NOW, setup: { done: 3, total: 3 } })).toEqual([]);
+  });
+
+  describe('stage tasks', () => {
+    const pill = (p: Partial<NonNullable<TodaySignals['pill']>> = {}) => ({ reminderTime: '08:30', takenToday: false, takenYesterday: true, packDay: 5, ...p });
+
+    it('medicine due: one names it and its time, several are counted; opens the medicine ticks', () => {
+      const [one] = todayItems('menopause', { now: NOW, medicinesDue: [{ name: 'Vitamin D', time: '08:00' }] });
+      expect(one).toEqual({ id: 'medicine-due', label: 'Vitamin D due (08:00)', target: 'sheet:medicines' });
+      const [two] = todayItems('ivf', { now: NOW, medicinesDue: [{ name: 'Progesterone', time: '08:00' }, { name: 'Estradiol', time: '07:00' }] });
+      expect(two.label).toBe('2 medicines due');
+      expect(ids('ivf', { medicinesDue: [] })).toEqual([]);
+    });
+
+    it('missed pill: today unticked once her reminder time has passed', () => {
+      expect(ids('contraception', { pill: pill({ reminderTime: '09:30' }) })).toEqual([]); // 09:00 < 09:30
+      const [row] = todayItems('contraception', { now: NOW, pill: pill() });
+      expect(row).toEqual({ id: 'pill-missed', label: "Today's pill not ticked yet (due 08:30)", target: `${STAGE_PAGE}#contraception` });
+      expect(ids('contraception', { pill: pill({ takenToday: true }) })).toEqual([]);
+    });
+
+    it('missed pill: yesterday unticked, only for someone who ticks, never in the pill-free week', () => {
+      const late = pill({ reminderTime: '21:00', takenYesterday: false });
+      expect(todayItems('contraception', { now: NOW, pill: late })[0].label).toBe("Yesterday's pill not ticked. Missed it?");
+      expect(ids('contraception', { pill: { ...late, takenYesterday: null } })).toEqual([]);
+      expect(ids('contraception', { pill: { ...late, packDay: 1 } })).toEqual([]); // yesterday was day 28
+      expect(ids('contraception', { pill: pill({ packDay: 23 }) })).toEqual([]);
+      expect(ids('menstrual-cycle', { pill: pill() })).toEqual([]);
+    });
+
+    it('vaccination due: pregnancy only, links to the vaccination card', () => {
+      const [one] = todayItems('pregnancy', { now: NOW, vaccinesDue: ['Tdap'] });
+      expect(one).toEqual({ id: 'vaccination-due', label: 'Tdap vaccination due', target: `${STAGE_PAGE}#vaccinations` });
+      expect(todayItems('pregnancy', { now: NOW, vaccinesDue: ['Flu', 'COVID-19'] })[0].label).toBe('2 vaccinations due: Flu, COVID-19');
+      expect(ids('postpartum', { vaccinesDue: ['Tdap'] })).toEqual([]);
+    });
+
+    it('mood check due: never taken, or 2 weeks since the last one; pregnancy and postpartum only', () => {
+      expect(todayItems('postpartum', { now: NOW, lastMoodCheck: null })[0])
+        .toEqual({ id: 'mood-check', label: 'Take the 2-minute mood check', target: `${STAGE_PAGE}#mood-check` });
+      expect(ids('pregnancy', { lastMoodCheck: at(-13) })).toEqual([]);
+      expect(todayItems('pregnancy', { now: NOW, lastMoodCheck: at(-14) })[0].label).toBe('Mood check due (every 2 weeks)');
+      expect(ids('postpartum', { lastMoodCheck: undefined })).toEqual([]); // not loaded yet
+      expect(ids('menopause', { lastMoodCheck: null })).toEqual([]);
+    });
+
+    it('rank after doctor items, before heads-ups and setup; max 3', () => {
+      const s = { newDoctorNotes: 1, medicinesDue: [{ name: 'Iron', time: '08:00' }], vaccinesDue: ['Tdap'], lastMoodCheck: null, nextVisit: at(2), setup: { done: 1, total: 3 } };
+      expect(ids('pregnancy', s)).toEqual(['doctor-note', 'medicine-due', 'vaccination-due']);
+      expect(ids('pregnancy', { ...s, newDoctorNotes: 0, medicinesDue: [] })).toEqual(['vaccination-due', 'mood-check', 'visit-soon']);
+      expect(ids('contraception', { pill: pill(), medicinesDue: [{ name: 'Iron', time: '08:00' }], setup: { done: 1, total: 3 } }))
+        .toEqual(['pill-missed', 'medicine-due', 'setup']);
+    });
+
+    it('long medicine names still fit one 60-character row', () => {
+      const name = 'Extra-long compounded progesterone vaginal suppository 200 mg twice';
+      const [row] = todayItems('ivf', { now: NOW, medicinesDue: [{ name, time: '08:00' }] });
+      expect(row.label.length).toBeLessThanOrEqual(60);
+      const v = todayItems('pregnancy', { now: NOW, vaccinesDue: ['Tdap', 'Flu', 'RSV (Abrysvo)', 'COVID-19'] })[0];
+      expect(v.label.length).toBeLessThanOrEqual(60);
+    });
   });
 });
 

@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
+import { parsePillStatus, type PillStatus } from '@/lib/pillLog';
 
 const CONTRACEPTION_METHODS = [
   { id: 'pill', label: 'Birth Control Pill', emoji: '💊', effectiveness: '91-99%', schedule: 'Daily', description: 'Take at the same time every day for best protection.' },
@@ -57,14 +58,6 @@ interface SignalRow {
 // Pill state encoded inside the existing daily_health_signals.notes column.
 // Same surface DailyLogging.tsx already writes ("Pill: on-time" / "Pill: late" / "Pill: missed"),
 // kept consistent so the two surfaces never disagree.
-type PillStatus = 'on-time' | 'late' | 'missed';
-
-function parsePillStatus(notes: string | null): PillStatus | null {
-  if (!notes) return null;
-  const match = notes.match(/Pill:\s*(on-time|late|missed)/i);
-  if (!match) return null;
-  return match[1].toLowerCase() as PillStatus;
-}
 
 function setPillInNotes(notes: string | null, status: PillStatus | null): string | null {
   // Strip any existing "Pill: ..." segment, then append the new one if non-null.

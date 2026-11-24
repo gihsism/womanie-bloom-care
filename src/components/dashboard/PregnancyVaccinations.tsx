@@ -6,6 +6,7 @@ import { differenceInDays, format, parseISO } from 'date-fns';
 import { Syringe, Check, Clock, Info } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
+import { PREGNANCY_VACCINES as VACCINES, PREG_VACCINES_KEY, type Vaccine, type VaccineState } from '@/lib/pregnancyVaccines';
 
 // Pregnancy vaccination checklist — Tdap (27–36w), flu (any
 // trimester, seasonal), RSV / Abrysvo (32–36w, seasonal), Hep B if
@@ -21,67 +22,7 @@ interface PregnancyVaccinationsProps {
   dueDate: Date | null;
 }
 
-interface Vaccine {
-  key: string;
-  label: string;
-  fullName: string;
-  windowStartWeek: number;
-  windowEndWeek: number;
-  rationale: string;
-  cadence: 'every-pregnancy' | 'once-per-season' | 'as-indicated';
-}
-
-const VACCINES: Vaccine[] = [
-  {
-    key: 'tdap',
-    label: 'Tdap',
-    fullName: 'Tetanus / Diphtheria / Pertussis booster',
-    windowStartWeek: 27,
-    windowEndWeek: 36,
-    rationale:
-      'Given every pregnancy regardless of prior shots — antibodies cross the placenta and protect baby from pertussis (whooping cough) in the first months before they can be vaccinated.',
-    cadence: 'every-pregnancy',
-  },
-  {
-    key: 'flu',
-    label: 'Flu',
-    fullName: 'Seasonal influenza (inactivated)',
-    windowStartWeek: 0,
-    windowEndWeek: 40,
-    rationale:
-      'Recommended at any gestational age during flu season. Pregnant patients are at higher risk for severe flu; vaccination also passes protection to baby.',
-    cadence: 'once-per-season',
-  },
-  {
-    key: 'rsv',
-    label: 'RSV (Abrysvo)',
-    fullName: 'Maternal RSV (Pfizer Abrysvo)',
-    windowStartWeek: 32,
-    windowEndWeek: 36,
-    rationale:
-      'Single-dose maternal RSV vaccine during the recommended window passes antibodies to baby. Alternative is monoclonal antibody (nirsevimab) for the infant after birth — discuss with OB which path fits.',
-    cadence: 'once-per-season',
-  },
-  {
-    key: 'covid',
-    label: 'COVID-19',
-    fullName: 'COVID-19 (current formula)',
-    windowStartWeek: 0,
-    windowEndWeek: 40,
-    rationale:
-      'CDC recommends pregnant patients stay current with the most recent COVID-19 vaccine. Pregnancy raises the risk of severe COVID-19.',
-    cadence: 'once-per-season',
-  },
-];
-
-interface VaccineStatus {
-  receivedDate?: string; // yyyy-MM-dd
-  declined?: boolean;
-}
-
-type VaccineState = Record<string, VaccineStatus>;
-
-const STORAGE_KEY = (userId: string) => `womanie_preg_vaccinations_${userId}`;
+const STORAGE_KEY = PREG_VACCINES_KEY;
 
 export default function PregnancyVaccinations({ dueDate }: PregnancyVaccinationsProps) {
   const { user } = useAuth();

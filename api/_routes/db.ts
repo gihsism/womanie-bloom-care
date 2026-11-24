@@ -22,6 +22,9 @@ const OWNER_COLUMN: Record<string, string | string[]> = {
   birth_records: 'user_id',
   // Personal data older versions kept only on the device (migration 011).
   user_app_data: 'user_id',
+  // Questions to bring, saved per upcoming visit (migration 012). The
+  // patient owns them; the visit's doctor reads them via /api/doctors/patient.
+  visit_questions: 'user_id',
   patient_access_codes: 'patient_id',
   user_roles: 'user_id',
   document_analyses: 'user_id',
