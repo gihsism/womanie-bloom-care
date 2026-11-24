@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, FileText, MessageCircle, Calendar, Settings } from "lucide-react";
+import { Home, Folder, MessageSquareText, CalendarDays, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Mobile navigation — a standard bottom tab bar: five tabs, each an icon
@@ -23,10 +23,10 @@ interface Tab {
 
 const TABS: Tab[] = [
   { to: "/dashboard", label: "Home", icon: Home, exact: true },
-  { to: "/dashboard/medical-history", label: "Records", icon: FileText },
-  { to: "/dashboard/ai-doctor", label: "Ask AI", icon: MessageCircle },
-  { to: "/dashboard/appointments", label: "Visits", icon: Calendar },
-  { to: "/dashboard/settings", label: "Me", icon: Settings },
+  { to: "/dashboard/medical-history", label: "Records", icon: Folder },
+  { to: "/dashboard/ai-doctor", label: "Ask AI", icon: MessageSquareText },
+  { to: "/dashboard/appointments", label: "Visits", icon: CalendarDays },
+  { to: "/dashboard/settings", label: "Me", icon: User },
 ];
 
 // Where the tab bar belongs — the patient dashboard surfaces. Kept off
@@ -49,7 +49,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur pb-[env(safe-area-inset-bottom)]"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-background pb-[env(safe-area-inset-bottom)]"
       aria-label="Main"
     >
       <ul className="mx-auto flex h-16 max-w-xl items-stretch">
@@ -60,12 +60,13 @@ export function BottomNav() {
               end={exact}
               className={({ isActive }) =>
                 cn(
-                  "flex h-full flex-col items-center justify-center gap-1 text-[11px] transition-colors",
-                  isActive ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground",
+                  // Idea 4: white bar, grey tabs, the stage accent for the active one.
+                  "flex h-full flex-col items-center justify-center gap-0.5 text-[12.5px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-stage-accent",
+                  isActive ? "text-stage-accent" : "text-muted-foreground hover:text-foreground",
                 )
               }
             >
-              <Icon className="h-5 w-5" aria-hidden="true" />
+              <Icon className="h-6 w-6" strokeWidth={1.9} aria-hidden="true" />
               <span>{label}</span>
             </NavLink>
           </li>

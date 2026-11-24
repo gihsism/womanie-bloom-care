@@ -277,6 +277,22 @@
 }
 
 @layer utilities {
+  /* Idea 4 page header for the tab pages (Records, Ask AI, Visits, Me):
+     white, a hairline only once content scrolls under it, a big bold title. */
+  .page-head {
+    background-color: hsl(var(--background) / 0.95);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid hsl(var(--line));
+  }
+  .page-title {
+    font-family: theme('fontFamily.display');
+    font-size: 1.75rem;
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.015em;
+    color: hsl(var(--foreground));
+  }
+
   /* Small uppercase museum-label text (DM Mono) */
   .label-mono {
     font-family: "DM Mono", ui-monospace, Menlo, monospace;

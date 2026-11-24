@@ -668,14 +668,14 @@ export default function AIDoctorChat() {
     // clear the phone's home-indicator safe area.
     <div className="min-h-screen bg-background flex flex-col pb-[env(safe-area-inset-bottom)]">
       {/* Header: title, Past chats / New chat, and a ⋯ menu for the rest */}
-      <div className="border-b border-border bg-card sticky top-0 z-10">
+      <div className="page-head sticky top-0 z-10">
         <div className="px-3 py-2.5 sm:px-4 sm:py-3 flex items-center gap-2">
           {showPast && (
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowPast(false)} aria-label="Back to chat">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           )}
-          <h1 className="font-display text-[17px] font-medium leading-tight flex-1 min-w-0 truncate">
+          <h1 className="page-title flex-1 min-w-0 truncate">
             {showPast ? 'Past chats' : 'Ask AI'}
           </h1>
           {!showPast && !isNewChat && (

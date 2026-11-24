@@ -37,6 +37,12 @@ describe("BottomNav", () => {
     expect(screen.getByText("Home").closest("a")).not.toHaveAttribute("aria-current");
   });
 
+  it("idea 4: the active tab takes the stage accent, the rest stay grey", () => {
+    renderAt("/dashboard/appointments");
+    expect(screen.getByText("Visits").closest("a")!.className).toContain("text-stage-accent");
+    expect(screen.getByText("Home").closest("a")!.className).toContain("text-muted-foreground");
+  });
+
   it("adds the content-clearance body class while visible", () => {
     renderAt("/dashboard");
     expect(document.body.classList.contains("has-bottom-nav")).toBe(true);

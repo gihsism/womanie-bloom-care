@@ -374,7 +374,7 @@ const Settings = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="border-b border-border bg-card sticky top-0 z-10">
+      <div className="page-head sticky top-0 z-10">
         <div className="w-full px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -393,7 +393,7 @@ const Settings = () => {
                   <div className="h-6 w-px bg-border" />
                 </>
               )}
-              <h1 className="font-display text-xl font-medium">{section ? ME_SECTIONS[section] : 'Me'}</h1>
+              <h1 className="page-title">{section ? ME_SECTIONS[section] : 'Me'}</h1>
             </div>
           </div>
         </div>

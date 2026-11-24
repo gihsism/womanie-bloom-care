@@ -352,7 +352,7 @@ const Appointments = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="border-b border-border bg-card sticky top-0 z-10">
+      <div className="page-head sticky top-0 z-10">
         <div className="w-full px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -361,7 +361,7 @@ const Appointments = () => {
                 Back
               </Button>
               <div className="h-6 w-px bg-border" />
-              <h1 className="font-display text-xl font-medium whitespace-nowrap">Visits</h1>
+              <h1 className="page-title whitespace-nowrap">Visits</h1>
             </div>
             {/* The one primary action. With no visits it sits in the empty
                 state instead, so the page never shows two. */}
