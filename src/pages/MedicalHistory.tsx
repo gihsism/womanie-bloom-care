@@ -33,7 +33,6 @@ import HealthTimeline from '@/components/dashboard/HealthTimeline';
 import ResultsRangeChart from '@/components/dashboard/ResultsRangeChart';
 import DocumentCycleAlert from '@/components/dashboard/DocumentCycleAlert';
 import WeeklySummary from '@/components/dashboard/WeeklySummary';
-import RecentFindings from '@/components/dashboard/RecentFindings';
 import OverdueTests from '@/components/dashboard/OverdueTests';
 import HealthTrends from '@/components/dashboard/HealthTrends';
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
@@ -552,7 +551,15 @@ function ResultCard({ item, history = [] }: { item: MedicalDataItem; history?: M
 // One flagged result as a plain row (idea 4): "Ferritin · 12 µg/L · low"
 // in amber with what it is and the usual range; the full explanation
 // card opens under it on tap.
+function askAboutResult(item: Pick<MedicalDataItem, 'title' | 'value' | 'unit'>): string {
+  const valueBit = item.value ? `${item.value}${item.unit ? ' ' + item.unit : ''}` : '';
+  return valueBit
+    ? `What does my ${item.title} of ${valueBit} mean for me?`
+    : `What does my ${item.title} result mean for me?`;
+}
+
 function FlagRow({ item }: { item: MedicalDataItem }) {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const { line, sub } = flagRow(item);
   const [name, ...rest] = line.split(' · ');
@@ -576,7 +583,21 @@ function FlagRow({ item }: { item: MedicalDataItem }) {
         </span>
         <ChevronRight className={`h-4 w-4 text-muted-foreground flex-shrink-0 transition-transform ${open ? 'rotate-90' : ''}`} aria-hidden="true" />
       </button>
-      {open && <div className="px-3 pb-3"><ResultCard item={item} /></div>}
+      {open && (
+        <div className="px-3 pb-3 space-y-2">
+          <ResultCard item={item} />
+          {/* Folded in from the old "Results that need attention" card
+              (each flagged result now shows once on Records). */}
+          <button
+            type="button"
+            onClick={() => navigate(`/dashboard/ai-doctor?q=${encodeURIComponent(askAboutResult(item))}`)}
+            className="inline-flex items-center gap-1.5 min-h-11 px-2 text-[15px] font-semibold text-stage-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stage-accent rounded"
+          >
+            <MessageCircle className="h-4 w-4" aria-hidden="true" />
+            Ask AI about {getFriendlyName(item.title)}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -1760,7 +1781,6 @@ export default function MedicalHistory() {
                 {/* so the page's space-y-6 rhythm applies.                        */}
                 <div className="space-y-6 [&>*]:!mb-0 empty:hidden">
                   <WeeklySummary />
-                  <RecentFindings showViewAll={false} />
                   <OverdueTests />
                   <HealthTrends showViewAll={false} />
                   <HealthSummaryWidget showViewAll={false} />

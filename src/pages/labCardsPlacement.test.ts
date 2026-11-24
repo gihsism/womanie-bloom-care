@@ -5,7 +5,7 @@ import { describe, it, expect } from 'vitest';
 // Home is a short page (idea 4): stage header, one-tap tiles, Today,
 // "More for <stage>". The general lab cards live on Records; the stage lab cards,
 // chart cards and visit cards moved off Home too (Records / Visits).
-const CARDS = ['WeeklySummary', 'RecentFindings', 'OverdueTests', 'HealthTrends', 'HealthSummaryWidget'];
+const CARDS = ['WeeklySummary', 'OverdueTests', 'HealthTrends', 'HealthSummaryWidget'];
 const MOVED_OFF_HOME = [
   // lab cards -> Records
   'ModeLabInsights', 'CycleLabInsights', 'PregnancyLabInsights', 'LabFreshnessCard', 'AmhAgeContext',

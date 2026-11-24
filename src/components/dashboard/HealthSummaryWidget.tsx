@@ -61,8 +61,6 @@ export default function HealthSummaryWidget({ since = null, showViewAll = true }
   const healthScore = labs.length > 0 ? Math.round((normalCount / labs.length) * 100) : null;
   const conditions = data.filter(d => d.data_type === 'condition' && d.status === 'active');
 
-  // Top 3 flagged items
-  const flagged = labs.filter(d => d.status === 'abnormal' || d.status === 'critical').slice(0, 3);
 
   return (
     <Card className="p-4 mb-6">
@@ -109,25 +107,8 @@ export default function HealthSummaryWidget({ since = null, showViewAll = true }
           </div>
         </div>
 
-        {/* Flagged items preview */}
-        {flagged.length > 0 && (
-          <div className="space-y-1.5">
-            {flagged.map((item, i) => (
-              <div key={i} className={`flex items-center gap-2 text-xs px-2.5 py-1.5 rounded-lg ${
-                item.status === 'critical'
-                  ? 'bg-destructive/10 text-destructive'
-                  : 'bg-destructive/5 text-destructive/80'
-              }`}>
-                <span aria-hidden="true" className={`inline-block h-2 w-2 rounded-full flex-shrink-0 ${item.status === 'critical' ? 'bg-destructive' : 'bg-destructive/60'}`} />
-                <span className="font-medium">{item.title}</span>
-                {item.value && (
-                  <span className="font-mono ml-auto">{item.value}{item.unit ? ` ${item.unit}` : ''}</span>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-
+        {/* Flagged results are listed once on Records ("Talk to your doctor
+            about"); this card keeps only the overall picture. */}
         {/* Conditions */}
         {conditions.length > 0 && (
           <div className="flex flex-wrap gap-1.5">

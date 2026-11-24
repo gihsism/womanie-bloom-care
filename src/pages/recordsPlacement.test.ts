@@ -130,3 +130,21 @@ describe('Visits', () => {
     expect(visits).toContain("const bookVisit = () => navigate('/find-doctor');");
   });
 });
+
+describe('each flagged result shows once on Records', () => {
+  const summary = read('../components/dashboard/HealthSummaryWidget.tsx');
+
+  it('keeps "Talk to your doctor about" and "All results"', () => {
+    expect(records).toContain('Talk to your doctor about');
+    expect(records).toContain('All results');
+  });
+
+  it('drops the repeated "Results that need attention" card and the Health Overview flagged rows', () => {
+    expect(records).not.toMatch(/<RecentFindings\b/);
+    expect(summary).not.toMatch(/flagged\.map\(/);
+  });
+
+  it('the tapped explanation keeps the "Ask AI" link the old card had', () => {
+    expect(records).toContain('Ask AI about {getFriendlyName(item.title)}');
+  });
+});
