@@ -176,6 +176,7 @@ const SYNONYMS: Record<string, string[]> = {
   paracetamol: ['acetaminophen'],
   acetaminophen: ['paracetamol'],
   advil: ['ibuprofen'],
+  ibuprofen: ['nsaid', 'non-steroidal'],
   nurofen: ['ibuprofen'],
   clomid: ['clomiphene'],
   zoloft: ['sertraline'],
@@ -189,7 +190,7 @@ const SYNONYMS: Record<string, string[]> = {
 // own keywords) rank above items that only share a topic with it.
 const SUBSTANCES = new Set(
   (
-    'paracetamol acetaminophen tylenol panadol ibuprofen advil nurofen nsaid aspirin codeine opioid triptan sumatriptan ' +
+    'paracetamol acetaminophen tylenol panadol ibuprofen advil nurofen nsaid non-steroidal aspirin codeine opioid triptan sumatriptan ' +
     'antidepressant ssri snri sertraline zoloft fluoxetine prozac citalopram escitalopram paroxetine venlafaxine mirtazapine ' +
     'lithium lamotrigine valproate antiepileptic metformin insulin letrozole clomiphene clomid inositol myo-inositol ' +
     'progesterone progestogen dydrogesterone estrogen oestrogen estradiol testosterone tibolone levothyroxine thyroxine ' +
