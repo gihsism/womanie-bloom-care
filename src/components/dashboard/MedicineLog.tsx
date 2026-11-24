@@ -10,6 +10,7 @@ import { useLifeEvents } from '@/hooks/useLifeEvents';
 import { Pill, Plus, Check, Trash2, Bell, X } from 'lucide-react';
 import { format, isToday, parseISO } from 'date-fns';
 import { dueReminders } from '@/lib/medicine';
+import { emitHealthDataChange } from '@/lib/data-events';
 import EvidenceNote from '@/components/research/EvidenceNote';
 import { medicineMarker, specsForMarkers } from '@/lib/evidenceTopics';
 
@@ -100,6 +101,7 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
     const row = (Array.isArray(data) ? data[0] : data) as Medication | undefined;
     if (row) setMeds(prev => [...prev, row]);
     setName(''); setDose(''); setTimes(['08:00']); setAdding(false); setError(null);
+    emitHealthDataChange();
   };
 
   const stop = async (m: Medication) => {
@@ -108,14 +110,18 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
       .update({ active: false, updated_at: new Date().toISOString() }).eq('id', m.id).eq('user_id', userId);
     if (err) { setError('Could not update. Try again.'); return; }
     setMeds(prev => prev.filter(x => x.id !== m.id));
+    emitHealthDataChange();
   };
 
-  const take = (m: Medication) =>
-    doses.add({ occurred_at: new Date().toISOString(), data: { medication_id: m.id, name: m.name, dose: m.dose } });
+  // Home's "Today" list re-reads which medicines are due after each tick.
+  const take = async (m: Medication) => {
+    await doses.add({ occurred_at: new Date().toISOString(), data: { medication_id: m.id, name: m.name, dose: m.dose } });
+    emitHealthDataChange();
+  };
 
   const undoLast = (m: Medication) => {
     const last = doses.events.find(d => d.data?.medication_id === m.id && isToday(parseISO(d.occurred_at)));
-    if (last) void doses.remove(last.id);
+    if (last) void doses.remove(last.id).then(() => emitHealthDataChange());
   };
 
   const examples = (stage && EXAMPLES[stage]) || DEFAULT_EXAMPLES;
