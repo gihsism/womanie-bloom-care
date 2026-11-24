@@ -87,7 +87,7 @@ describe('primaryActionFor', () => {
       'pre-menstrual': 'Log today',
       'menstrual-cycle': 'Log today',
       conception: 'Log today',
-      contraception: "Mark today's pill taken",
+      contraception: "Log today's pill",
       ivf: 'Log medication',
       pregnancy: 'Log today',
       postpartum: 'Log a feed',

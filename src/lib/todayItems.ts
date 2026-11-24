@@ -130,7 +130,7 @@ export function primaryActionFor(
   const log: PrimaryAction = { label: 'Log today', target: 'sheet:log' };
   switch (mode) {
     case 'contraception':
-      return opts.dailyPill === false ? log : { label: "Mark today's pill taken", target: `${STAGE_PAGE}#contraception` };
+      return opts.dailyPill === false ? log : { label: "Log today's pill", target: `${STAGE_PAGE}#contraception` };
     case 'ivf':
       return { label: 'Log medication', target: 'sheet:medicines' };
     case 'pregnancy': {

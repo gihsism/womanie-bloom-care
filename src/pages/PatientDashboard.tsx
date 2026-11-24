@@ -28,7 +28,7 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 // /dashboard/stage, results and charts on Records, visits on Visits,
 // settings and medicines on Me.
 
-// Contraception: a daily-pill method gets "Mark today's pill taken"; other
+// Contraception: a daily-pill method gets "Log today's pill"; other
 // methods (patch, ring, IUD …) get "Log today". Same per-device setting the
 // contraception card stores.
 function hasDailyPill(userId: string): boolean {

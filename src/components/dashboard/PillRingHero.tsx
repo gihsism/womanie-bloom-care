@@ -56,7 +56,7 @@ export default function PillRingHero(_props: { name?: string | null }) {
     <section className="mb-6" aria-label="Your pill pack at a glance">
       <p className="label-mono">{format(now, 'EEE d MMM')}</p>
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
-        {ring.packDay ? <>Pill {ring.packDay} <span className="text-muted-foreground">of 28</span></> : <>Your pill <span className="text-muted-foreground">last 28 days</span></>}
+        {ring.packDay ? <>Pill {ring.packDay} <span className="text-muted-foreground">of 28</span></> : <>Your pill <span className="text-muted-foreground">· last 28 days</span></>}
       </h2>
       <p className="mt-1 text-[15px]">
         {!isPill ? 'Your method needs no daily pill.'
