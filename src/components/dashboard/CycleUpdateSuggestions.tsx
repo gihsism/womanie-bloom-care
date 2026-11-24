@@ -41,7 +41,7 @@ function getHormone(labs: LabResult[], names: string[]): { value: number; date: 
   return null;
 }
 
-function generateSuggestions(labs: LabResult[], lifeStage?: string | null): CycleSuggestion[] {
+export function generateSuggestions(labs: LabResult[], lifeStage?: string | null): CycleSuggestion[] {
   const suggestions: CycleSuggestion[] = [];
 
   const progesterone = getHormone(labs, ['Progesterone']);
@@ -129,7 +129,10 @@ function generateSuggestions(labs: LabResult[], lifeStage?: string | null): Cycl
   }
 
   // Thyroid affecting cycle length
-  if (tsh && (tsh.value > 4.5 || tsh.value < 0.4)) {
+  // Only where a natural cycle is being predicted (not in pregnancy, after
+  // birth, on the pill or after the periods have stopped).
+  const predictsCycle = !lifeStage || ['menstrual-cycle', 'conception', 'ivf', 'pre-menstrual'].includes(lifeStage);
+  if (predictsCycle && tsh && (tsh.value > 4.5 || tsh.value < 0.4)) {
     suggestions.push({
       id: 'thyroid_cycle',
       type: 'cycle_length_adjust',
