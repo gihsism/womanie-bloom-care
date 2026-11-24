@@ -225,6 +225,41 @@ describe('api/_routes/db security invariants', () => {
     expect(query.mock.calls.some(c => /^UPDATE appointments/.test(c[0] as string))).toBe(false);
   });
 
+  it('a patient account cannot write consultation_settings or doctor_schedule', async () => {
+    for (const body of [
+      { table: 'consultation_settings', operation: 'upsert', upsertData: { doctor_id: SESSION_USER.id, consultation_price: 1 } },
+      { table: 'consultation_settings', operation: 'update', updateData: { consultation_price: 1 } },
+      { table: 'doctor_schedule', operation: 'insert', insertData: { day_of_week: 1, start_time: '09:00', end_time: '17:00' } },
+      { table: 'doctor_schedule', operation: 'delete' },
+    ]) {
+      query.mockReset();
+      query.mockResolvedValue([]); // no doctor role
+      const res = mockRes();
+      await handler(mockReq(body), res);
+      expect(res._status).toBe(403);
+      expect(query).toHaveBeenCalledTimes(1);
+      expect(query.mock.calls[0][0]).toMatch(/FROM user_roles/);
+    }
+  });
+
+  it('a doctor can save consultation settings; anyone can still read them', async () => {
+    query.mockResolvedValueOnce([{ '?column?': 1 }]).mockResolvedValueOnce([{ doctor_id: SESSION_USER.id }]);
+    const ok = mockRes();
+    await handler(
+      mockReq({ table: 'consultation_settings', operation: 'upsert', upsertData: { doctor_id: SESSION_USER.id, consultation_price: 90 }, upsertOptions: { onConflict: 'doctor_id' } }),
+      ok,
+    );
+    expect(ok._status).toBe(200);
+    expect(query.mock.calls[1][0]).toMatch(/^INSERT INTO consultation_settings/);
+
+    query.mockReset();
+    query.mockResolvedValue([]);
+    const read = mockRes();
+    await handler(mockReq({ table: 'consultation_settings', operation: 'select' }), read);
+    expect(read._status).toBe(200);
+    expect(query.mock.calls[0][0]).toMatch(/^SELECT/);
+  });
+
   it('appointments cannot be deleted through /api/db', async () => {
     const res = mockRes();
     await handler(mockReq({ table: 'appointments', operation: 'delete', filters: [['id', 'eq', 'a1']] }), res);

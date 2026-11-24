@@ -4,6 +4,7 @@ import { getAuthUser } from '../_lib/auth.js';
 import { withSentry } from '../_lib/sentry.js';
 import { isIdent, isIdentList } from '../_lib/sql-ident.js';
 import { checkAppointmentUpdate } from '../_lib/appointment-update.js';
+import { DOCTOR_ONLY_WRITE_TABLES, hasDoctorRole } from '../_lib/doctor-account.js';
 
 // Which column identifies "mine" for each table accessible via /api/db.
 // - string: single owner column; its value must equal the session user id.
@@ -172,6 +173,16 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           return res.status(403).json({ error: 'No approved connection to this patient' });
         }
       }
+    }
+
+    // Doctor-only rows: a patient account must not create a schedule or
+    // consultation settings under its own id.
+    if (
+      DOCTOR_ONLY_WRITE_TABLES.has(table) &&
+      (operation === 'insert' || operation === 'update' || operation === 'upsert' || operation === 'delete') &&
+      !(await hasDoctorRole((text, params) => sql.query(text, params) as Promise<unknown[]>, user.id))
+    ) {
+      return res.status(403).json({ error: 'Only doctor accounts can change this' });
     }
 
     // Appointments: who may set which status is decided per row (patient:

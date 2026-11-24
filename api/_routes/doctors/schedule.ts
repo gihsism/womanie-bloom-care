@@ -3,6 +3,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from '../../_lib/auth.js';
 import { withSentry } from '../../_lib/sentry.js';
 import { parseScheduleDays } from '../../_lib/schedule-validation.js';
+import { hasDoctorRole } from '../../_lib/doctor-account.js';
 
 // Atomic replace of the signed-in doctor's weekly availability.
 //
@@ -30,6 +31,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const sql = neon(process.env.DATABASE_URL!);
+    // Only approved doctors have a schedule; a patient account must not
+    // create one (it would feed availability for a non-doctor id).
+    if (!(await hasDoctorRole((text, params) => sql.query(text, params) as Promise<unknown[]>, user.id))) {
+      return res.status(403).json({ error: 'Only doctor accounts can set a schedule' });
+    }
     // doctor_id is pinned to the session user server-side — a caller can
     // only replace their own schedule.
     const statements = [
