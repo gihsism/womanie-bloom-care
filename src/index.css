@@ -235,6 +235,31 @@
   body.has-bottom-nav .min-h-screen {
     min-height: calc(100vh - 4rem - env(safe-area-inset-bottom));
   }
+  /* Ask AI: the page is pinned to the visible screen (the visual
+     viewport, published by useChatViewport) and stops above the tab bar;
+     the conversation scrolls inside it and the message box stays at the
+     bottom. While the iPhone keyboard is open the tab bar steps aside and
+     the box sits right on top of the keyboard. */
+  .chat-shell {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: var(--chat-vv-top, 0px);
+    height: var(--chat-vv-h, 100dvh);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  body.has-bottom-nav .chat-shell {
+    height: calc(var(--chat-vv-h, 100dvh) - 4rem - env(safe-area-inset-bottom));
+  }
+  body.has-bottom-nav.keyboard-open .chat-shell {
+    height: var(--chat-vv-h, 100dvh);
+  }
+  body.keyboard-open nav[data-bottom-nav] {
+    display: none;
+  }
+
   /* Both visible: reserve room for the bar and the lifted prompt. */
   body.has-bottom-nav.has-install-banner {
     padding-bottom: calc(4rem + env(safe-area-inset-bottom) + var(--install-banner-h, 6rem));

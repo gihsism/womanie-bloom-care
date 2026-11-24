@@ -38,6 +38,7 @@ import { ChatSources } from '@/components/chat/ChatSources';
 import { PastChats } from '@/components/chat/PastChats';
 import { groupIntoChats, newConversationId, type PastChat, type StoredChatMessage } from '@/lib/chatSessions';
 import { pickSuggestions } from '@/lib/chatSuggestions';
+import { useChatViewport } from '@/lib/chatViewport';
 import { citedSources, linkCitations, splitSourcesFooter, stripSourcesFooter, stripUnknownCitations, type ChatSource } from '@/lib/research-sources';
 
 // `sources`: research-library items the server gave the model for this
@@ -228,6 +229,8 @@ export default function AIDoctorChat() {
   }, [user]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  // Message box fixed above the tab bar / keyboard (see .chat-shell).
+  useChatViewport();
 
   // Load user's medical context for personalized AI responses
   useEffect(() => {
@@ -677,11 +680,12 @@ export default function AIDoctorChat() {
   const isNewChat = !messages.some(m => m !== WELCOME_MESSAGE);
 
   return (
-    // The mobile nav is a left rail now, so the pinned input only needs to
-    // clear the phone's home-indicator safe area.
-    <div className="min-h-screen bg-background flex flex-col pb-[env(safe-area-inset-bottom)]">
+    // .chat-shell pins the page to the visible screen above the tab bar
+    // (and right above the keyboard while typing; see useChatViewport):
+    // header on top, the conversation scrolls, the message box stays put.
+    <div className="chat-shell bg-background" data-testid="chat-shell">
       {/* Header: title, Past chats / New chat, and a ⋯ menu for the rest */}
-      <div className="page-head sticky top-0 z-10">
+      <div className="page-head flex-none z-10">
         <div className="px-3 py-2.5 sm:px-4 sm:py-3 flex items-center gap-2">
           {showPast && (
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowPast(false)} aria-label="Back to chat">
@@ -764,7 +768,7 @@ export default function AIDoctorChat() {
       ) : (
         <>
           {/* Messages */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+          <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-4 space-y-4" data-testid="chat-scroll">
             {messages.map((msg, i) => (
               <div
                 key={i}
@@ -825,33 +829,33 @@ export default function AIDoctorChat() {
                 </div>
               </div>
             )}
+
+            {/* Suggested Questions */}
+            {messages.length <= 1 && (
+              <div className="pt-2" data-testid="suggestions">
+                <h2 className="section-title mb-2 px-0.5">Try asking</h2>
+                <div className="row-group">
+                  {suggestedQuestions.map((q) => (
+                    <button
+                      key={q}
+                      type="button"
+                      className="w-full max-w-full whitespace-normal flex items-center gap-3 min-h-14 px-4 py-3 text-left text-[16px] font-medium hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-stage-accent"
+                      onClick={() => {
+                        setInput(q);
+                        setTimeout(() => textareaRef.current?.focus(), 0);
+                      }}
+                    >
+                      <span className="flex-1 min-w-0">{q}</span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Suggested Questions */}
-          {messages.length <= 1 && (
-            <div className="px-4 pb-3" data-testid="suggestions">
-              <h2 className="section-title mb-2 px-0.5">Try asking</h2>
-              <div className="row-group">
-                {suggestedQuestions.map((q) => (
-                  <button
-                    key={q}
-                    type="button"
-                    className="w-full max-w-full whitespace-normal flex items-center gap-3 min-h-14 px-4 py-3 text-left text-[16px] font-medium hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-stage-accent"
-                    onClick={() => {
-                      setInput(q);
-                      setTimeout(() => textareaRef.current?.focus(), 0);
-                    }}
-                  >
-                    <span className="flex-1 min-w-0">{q}</span>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Input Area — the install banner stays away while it's on screen */}
-          <div className="border-t border-line bg-background px-4 pt-3 pb-3" data-hide-install-banner>
+          <div className="flex-none border-t border-line bg-background px-4 pt-3 pb-3" data-hide-install-banner data-testid="chat-composer">
             <div className="max-w-4xl mx-auto relative">
               <Textarea
                 ref={textareaRef}
