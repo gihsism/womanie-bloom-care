@@ -17,7 +17,7 @@ vi.mock('../../_lib/sentry.js', () => ({ withSentry: (h: unknown) => h }));
 
 import handler from './delete-account';
 import { getAuthUser } from '../../_lib/auth.js';
-import { list } from '@vercel/blob';
+import { list, del } from '@vercel/blob';
 
 const SESSION_USER = { id: 'user_1', email: 'user@test.com', sessionId: 'sess_1' };
 const CONFIRM_PHRASE = 'DELETE MY ACCOUNT';
@@ -152,5 +152,18 @@ describe('me/delete-account security invariants', () => {
     await handler(mockReq({ confirm: CONFIRM_PHRASE }), res);
     expect(res._status).toBe(200);
     expect((res._body as Record<string, unknown>).success).toBe(true);
+  });
+  it('deletes every page of the user\'s blobs, not just the first 1000', async () => {
+    process.env.BLOB_READ_WRITE_TOKEN = 'tok';
+    vi.mocked(del).mockClear();
+    vi.mocked(list)
+      .mockResolvedValueOnce({ blobs: [{ url: 'u1' }], cursor: 'c2', hasMore: true } as never)
+      .mockResolvedValueOnce({ blobs: [{ url: 'u2' }], cursor: '', hasMore: false } as never);
+    const res = mockRes();
+    await handler(mockReq({ confirm: CONFIRM_PHRASE }), res);
+    expect(res._status).toBe(200);
+    expect(vi.mocked(list).mock.calls[1][0]).toMatchObject({ prefix: `${SESSION_USER.id}/`, cursor: 'c2' });
+    expect(vi.mocked(del).mock.calls.map(c => c[0])).toEqual([['u1'], ['u2']]);
+    delete process.env.BLOB_READ_WRITE_TOKEN;
   });
 });

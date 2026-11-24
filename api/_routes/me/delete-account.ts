@@ -102,10 +102,17 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     try {
       const token = process.env.BLOB_READ_WRITE_TOKEN;
       if (token) {
-        const result = await list({ prefix: `${user.id}/`, token });
-        const urls = result.blobs.map(b => b.url);
-        if (urls.length > 0) {
-          await del(urls, { token });
+        // list() returns one page (up to 1000 blobs); walk every page so a
+        // heavy uploader's older files don't outlive her account.
+        let cursor: string | undefined;
+        for (let page = 0; page < 100; page++) {
+          const result = await list({ prefix: `${user.id}/`, token, cursor });
+          const urls = result.blobs.map(b => b.url);
+          if (urls.length > 0) {
+            await del(urls, { token });
+          }
+          if (!result.hasMore || !result.cursor) break;
+          cursor = result.cursor;
         }
       }
     } catch (e) {

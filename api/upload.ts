@@ -56,7 +56,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           };
         },
         onUploadCompleted: async ({ blob }) => {
-          console.log('Upload completed:', blob.url);
+          // No URL in the log: a public Blob URL is the file's only access key.
+          console.log('Upload completed:', blob.contentType);
         },
       });
 

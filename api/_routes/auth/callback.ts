@@ -52,6 +52,12 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const googleUser = await userResp.json();
+    // The email is used to find (and link to) an existing account below, so
+    // it must be one Google has verified; an unverified address would let
+    // its holder sign into someone else's Womanie account.
+    if (!googleUser?.id || !googleUser?.email || googleUser.verified_email === false) {
+      return res.redirect(302, '/auth/login?error=unverified_email');
+    }
     const sql = neon(process.env.DATABASE_URL!);
 
     // Find or create user

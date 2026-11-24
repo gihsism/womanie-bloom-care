@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { NO_REMOTE_IMAGES } from '@/lib/safeMarkdown';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -81,7 +82,7 @@ const PatientDocuments = ({ documents }: { documents: HealthDocument[] }) => {
                   </button>
                   {openSummary === doc.id && (
                     <div className="mt-2 ml-8 prose prose-sm max-w-none dark:prose-invert text-sm">
-                      <ReactMarkdown>{doc.ai_summary}</ReactMarkdown>
+                      <ReactMarkdown disallowedElements={NO_REMOTE_IMAGES}>{doc.ai_summary}</ReactMarkdown>
                     </div>
                   )}
                 </>

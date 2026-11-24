@@ -12,6 +12,7 @@ vi.mock('@neondatabase/serverless', () => ({
   neon: () => Object.assign(tagFn, { query, transaction }),
 }));
 vi.mock('@vercel/blob', () => ({ del: vi.fn() }));
+import { del } from '@vercel/blob';
 vi.mock('../../_lib/auth.js', () => ({ getAuthUser: vi.fn() }));
 vi.mock('../../_lib/sentry.js', () => ({ withSentry: (h: unknown) => h }));
 
@@ -131,5 +132,19 @@ describe('docs/delete security invariants', () => {
     await handler(mockReq({ documentId: DOC_ID }), res);
     expect(res._status).toBe(200);
     expect((res._body as Record<string, unknown>).success).toBe(true);
+  });
+  it('deletes the blob only when it is in the caller\'s own upload folder', async () => {
+    const base = 'https://abc.public.blob.vercel-storage.com';
+    vi.mocked(del).mockClear();
+    query.mockResolvedValueOnce([{ file_path: `${base}/user_2/their-scan.pdf` }]);
+    const res1 = mockRes();
+    await handler(mockReq({ documentId: DOC_ID }), res1);
+    expect(res1._status).toBe(200);
+    expect(del).not.toHaveBeenCalled();
+
+    query.mockResolvedValueOnce([{ file_path: `${base}/user_1/my-scan.pdf` }]);
+    const res2 = mockRes();
+    await handler(mockReq({ documentId: DOC_ID }), res2);
+    expect(del).toHaveBeenCalledWith(`${base}/user_1/my-scan.pdf`, expect.anything());
   });
 });

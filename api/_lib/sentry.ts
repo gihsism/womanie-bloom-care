@@ -1,6 +1,24 @@
 import * as Sentry from '@sentry/node';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
+// Request bodies here are health data (chat turns, lab values, notes) and
+// cookies carry the session JWT. sendDefaultPii:false already drops
+// cookies/IP, but request `data` is not PII-gated, so strip it (and any
+// cookie/authorization header) from every event as a second lock.
+export function scrubEvent<E extends { request?: { data?: unknown; cookies?: unknown; headers?: Record<string, string> } }>(event: E): E {
+  const r = event.request;
+  if (r) {
+    delete r.data;
+    delete r.cookies;
+    if (r.headers) {
+      for (const k of Object.keys(r.headers)) {
+        if (/^(cookie|authorization)$/i.test(k)) delete r.headers[k];
+      }
+    }
+  }
+  return event;
+}
+
 let initialized = false;
 function ensureInit() {
   if (initialized) return;
@@ -10,6 +28,7 @@ function ensureInit() {
     environment: process.env.VERCEL_ENV || process.env.NODE_ENV || 'production',
     sendDefaultPii: false,
     tracesSampleRate: 0.1,
+    beforeSend: scrubEvent,
   });
   initialized = true;
 }
