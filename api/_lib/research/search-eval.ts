@@ -72,6 +72,9 @@ export const DRUG_PREGNANCY_QUESTIONS: EvalQuestion[] = [
   { q: 'does taking tylenol in pregnancy cause autism?', stage: 'pregnancy', topics: ['paracetamol-pregnancy'], title: 'paracetamol|acetaminophen|analgesic' },
   { q: 'can I keep taking my antidepressant (sertraline) while pregnant?', stage: 'pregnancy', topics: ['medications-pregnancy'], title: 'antidepress|ssri|sertraline|psychotropic' },
   { q: 'should I take low dose aspirin in pregnancy?', stage: 'pregnancy', topics: ['aspirin-pregnancy'], title: 'aspirin|antiplatelet' },
+  // Added with the nsaids-pregnancy topic (Nov 2026, 2,507 items): before it
+  // the top results were postpartum perineal-pain and antirheumatic reviews.
+  { q: 'Can I take ibuprofen in pregnancy?', stage: 'pregnancy', topics: ['nsaids-pregnancy', 'medications-pregnancy'], title: 'ibuprofen|nsaid|non-?steroidal anti-inflammatory|analgesic' },
 ];
 
 /**
@@ -96,6 +99,9 @@ export const MIXED_MEDICINE_QUESTIONS: EvalQuestion[] = [
   },
   // USPSTF / SOGC No. 427 folic acid guidelines, "Folic acid supplementation during the preconception period"
   { q: 'what dose of folic acid should I take when trying to get pregnant?', stage: 'conception', topics: ['folic-acid'], title: 'folic|folate' },
+  // Added with the codeine-breastfeeding topic (Nov 2026, 2,507 items): before
+  // it no source named codeine or opioids at all.
+  { q: 'Is codeine safe when breastfeeding?', stage: 'postpartum', topics: ['codeine-breastfeeding', 'medicines-breastfeeding'], title: 'codeine|opioid|analgesi' },
 ];
 
 export interface EvalResult {

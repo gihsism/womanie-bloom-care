@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generatedAt": "2026-11-24T17:17:13.946Z",
+ "generatedAt": "2026-11-24T17:51:49.879Z",
  "source": "PMC Article Datasets (NIH/NLM PubMed Central, Open Access subset), retrieved from https://registry.opendata.aws/ncbi-pmc. Articles are provided by their publishers/authors under the licence shown per item.",
  "acknowledgement": "Full text courtesy of the U.S. National Library of Medicine (PubMed Central). Not endorsed by NLM.",
  "licencesAllowed": [
@@ -1776,6 +1776,24 @@
    "label": "Full text · CC BY",
    "hasBody": true,
    "chunks": 25,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "34187385": {
+   "pmcid": "PMC8243445",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8243445/",
+   "title": "Symptomatic treatment (using NSAIDS) versus antibiotics in uncomplicated lower urinary tract infection: a meta-analysis and systematic review of randomized controlled trials",
+   "credit": "Ong Lopez AMC, Tan CJL, Yabon AS, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 21,
    "sections": [
     "Abstract",
     "Results",
@@ -8218,6 +8236,24 @@
    "label": "Full text · CC BY",
    "hasBody": true,
    "chunks": 21,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "42877936": {
+   "pmcid": "PMC13668051",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13668051/",
+   "title": "Antispasmodic and analgesic strategies for renal colic in pregnancy: a comprehensive analysis",
+   "credit": "Lv B, Chen Y, Huang P, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 28,
    "sections": [
     "Abstract",
     "Results",
