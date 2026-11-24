@@ -19,17 +19,20 @@ interface StageLabCardsProps {
   mode: LifeStage;
   /** Start of the current pregnancy (pregnancyStart(dueDate)); null otherwise. */
   labSince: Date | null;
+  /** True when the page already shows its own primary upload button: then
+   *  the empty "Upload blood tests" card hides (one upload button per page). */
+  hideUploadCard?: boolean;
 }
 
-export default function StageLabCards({ mode, labSince }: StageLabCardsProps) {
+export default function StageLabCards({ mode, labSince, hideUploadCard = false }: StageLabCardsProps) {
   return (
     <div className="space-y-6 [&>*]:!mb-0 empty:hidden">
       {mode === 'pregnancy' ? (
-        <PregnancyLabInsights since={labSince} />
+        <PregnancyLabInsights since={labSince} hideUploadCard={hideUploadCard} />
       ) : mode === 'menstrual-cycle' || mode === 'conception' ? (
-        <CycleLabInsights mode={mode} />
+        <CycleLabInsights mode={mode} hideUploadCard={hideUploadCard} />
       ) : (
-        <ModeLabInsights mode={mode} />
+        <ModeLabInsights mode={mode} hideUploadCard={hideUploadCard} />
       )}
       <LabFreshnessCard mode={mode} />
       <AmhAgeContext mode={mode} />

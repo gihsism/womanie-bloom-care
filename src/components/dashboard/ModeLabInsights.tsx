@@ -92,9 +92,12 @@ const MODE_LABELS: Record<string, string> = {
 
 interface ModeLabInsightsProps {
   mode: string;
+  /** True when the page already shows its own primary upload button: then
+   *  the empty "Upload blood tests" card hides (one upload button per page). */
+  hideUploadCard?: boolean;
 }
 
-export default function ModeLabInsights({ mode }: ModeLabInsightsProps) {
+export default function ModeLabInsights({ mode, hideUploadCard = false }: ModeLabInsightsProps) {
   const { labs, loading } = useLabResults();
 
   const tests = TEST_MAP[mode];
@@ -112,6 +115,7 @@ export default function ModeLabInsights({ mode }: ModeLabInsightsProps) {
   const flagged = tested.filter(m => m.result?.status === 'abnormal' || m.result?.status === 'critical');
 
   if (labs.length === 0) {
+    if (hideUploadCard) return null;
     return <LabEmptyCard title="Upload blood tests" text={`See results relevant to ${MODE_LABELS[mode] || 'your health'}`} />;
   }
 

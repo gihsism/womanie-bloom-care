@@ -1772,7 +1772,9 @@ export default function MedicalHistory() {
                 )}
 
                 {/* Lab cards for your life stage (moved here from Home) */}
-                <StageLabCards mode={mode} labSince={labSince} />
+                {/* The primary "Upload a document" button is on this segment, so the
+                    empty "Upload your blood tests" card stays hidden. */}
+                <StageLabCards mode={mode} labSince={labSince} hideUploadCard={Boolean(uploadButton)} />
 
                 {/* ============ LAB SUMMARY CARDS (moved here from Home) ============ */}
                 {/* Each card hides itself when it has nothing to show. Order: the */}

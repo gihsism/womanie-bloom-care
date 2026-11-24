@@ -19,7 +19,7 @@ const PREGNANCY_TESTS = [
   { names: ['calcium'], label: 'Calcium', idealLabel: '8.5-10.5 mg/dL' },
 ];
 
-export default function PregnancyLabInsights({ since = null }: { since?: Date | null } = {}) {
+export default function PregnancyLabInsights({ since = null, hideUploadCard = false }: { since?: Date | null; hideUploadCard?: boolean } = {}) {
   const { labs: allLabs, loading } = useLabResults();
   // Only results from this pregnancy (older ones stay in Health Records).
   const labs = withinWindow(allLabs, since);
@@ -39,6 +39,8 @@ export default function PregnancyLabInsights({ since = null }: { since?: Date | 
   const flagged = tested.filter(m => m.result?.status === 'abnormal' || m.result?.status === 'critical');
 
   if (labs.length === 0) {
+    // One upload button per page: Records already shows its own.
+    if (hideUploadCard) return null;
     return (
       <LabEmptyCard
         title={allLabs.length > 0 ? 'No blood tests from this pregnancy yet' : 'Upload your blood tests'}

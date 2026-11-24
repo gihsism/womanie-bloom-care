@@ -6,6 +6,9 @@ import { LabAttentionBanner, LabCardHeader, LabEmptyCard, LabMissingTests, LabRo
 
 interface CycleLabInsightsProps {
   mode: string;
+  /** True when the page already shows its own primary upload button: then
+   *  the empty "Upload blood tests" card hides (one upload button per page). */
+  hideUploadCard?: boolean;
 }
 
 const CYCLE_TESTS = [
@@ -27,7 +30,7 @@ const CONCEPTION_EXTRA = [
   { names: ['testosterone'], label: 'Testosterone', note: 'High = possible PCOS' },
 ];
 
-export default function CycleLabInsights({ mode }: CycleLabInsightsProps) {
+export default function CycleLabInsights({ mode, hideUploadCard = false }: CycleLabInsightsProps) {
   const { labs, loading } = useLabResults();
 
   if (loading) return null;
@@ -48,6 +51,7 @@ export default function CycleLabInsights({ mode }: CycleLabInsightsProps) {
   const flagged = tested.filter(m => m.result?.status === 'abnormal' || m.result?.status === 'critical');
 
   if (labs.length === 0) {
+    if (hideUploadCard) return null;
     return <LabEmptyCard title="Upload blood tests" text="See your hormone levels, iron, thyroid and more" />;
   }
 
