@@ -66,6 +66,26 @@ export async function selectChatEvidence(
   return { researchItems, chatSources, passages, block: `${buildSourcesPrompt(researchItems)}${passagesBlock}` };
 }
 
+/**
+ * A short follow-up ("How many cups a day exactly?") names no topic, so
+ * the library finds nothing for it and the answer goes out unsourced. When
+ * the question alone finds no source, search again with the previous
+ * question in front of it. Questions that find sources on their own
+ * ("And what about ibuprofen?") are searched exactly as before.
+ */
+export async function selectChatEvidenceForTurn(
+  question: string | null | undefined,
+  previousQuestion: string | null | undefined,
+  lifeStage: string | null | undefined,
+  select: typeof selectChatEvidence = selectChatEvidence,
+): Promise<ChatEvidence> {
+  const first = await select(question, lifeStage);
+  const prev = previousQuestion?.trim();
+  if (first.chatSources.length > 0 || !prev || !question?.trim()) return first;
+  const again = await select(`${prev}\n${question}`, lifeStage);
+  return again.chatSources.length > 0 ? again : first;
+}
+
 /** The chat's system prompt around the patient's records and the evidence block. */
 export function buildChatSystemPrompt(medicalContext: string, evidenceBlock: string): string {
   return `You are an AI medical assistant for a women's health platform called Womanie. You have access to the patient's uploaded health documents and extracted medical data shown below. Use this information to provide personalized, empathetic health guidance.

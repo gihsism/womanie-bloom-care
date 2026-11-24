@@ -5,8 +5,9 @@ import { checkAndConsume } from './_lib/ratelimit.js';
 import { withSentry } from './_lib/sentry.js';
 import { parseConversationId, persistChatTurn } from './_lib/chatConversation.js';
 import { buildLifeContext } from './_lib/life-context.js';
+import { buildProfileContext } from './_lib/profile-context.js';
 import { SOURCES_FOOTER_MARK, formatSourcesFooter, stripUnknownCitations } from './_lib/research/library.js';
-import { buildChatSystemPrompt, selectChatEvidence } from './_lib/research/chat-prompt.js';
+import { buildChatSystemPrompt, selectChatEvidenceForTurn } from './_lib/research/chat-prompt.js';
 import { checkCitations, evidenceTexts } from './_lib/research/citation-check.js';
 
 export const config = {
@@ -149,34 +150,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   let medicalContext = '';
   if (profile) {
-    medicalContext += `Patient: ${profile.full_name || 'Unknown'}, Life stage: ${profile.life_stage || 'Not specified'}`;
-
-    // Enrich with mode-specific anchor data so the assistant can
-    // answer "what week am I?" / "where am I in my IVF cycle?"
-    // without having to ask the user. profiles already stores these
-    // — they were just not being passed into the prompt.
-    if (profile.pregnancy_due_date) {
-      const due = new Date(profile.pregnancy_due_date as string);
-      if (!Number.isNaN(due.getTime())) {
-        const today = new Date();
-        const daysUntilDue = Math.round((due.getTime() - today.getTime()) / 86_400_000);
-        const totalDays = 280 - daysUntilDue;
-        const weeksPregnant = Math.max(0, Math.min(42, Math.floor(totalDays / 7)));
-        const daysExtra = Math.max(0, totalDays % 7);
-        medicalContext += `\nPregnancy: due ${due.toISOString().split('T')[0]} (week ${weeksPregnant}${daysExtra ? ` + ${daysExtra}d` : ''}, ${daysUntilDue} days to go)`;
-      }
-    }
-    if (profile.ivf_phase) {
-      medicalContext += `\nIVF phase: ${profile.ivf_phase}`;
-      if (profile.ivf_start_date) {
-        const startDate = new Date(profile.ivf_start_date as string);
-        if (!Number.isNaN(startDate.getTime())) {
-          const days = Math.max(0, Math.floor((Date.now() - startDate.getTime()) / 86_400_000));
-          medicalContext += ` (day ${days + 1} of journey)`;
-        }
-      }
-    }
-    medicalContext += '\n\n';
+    // Stage anchors ("what week am I?") only for the stage she is in now.
+    medicalContext += buildProfileContext(profile, new Date());
   }
 
   type Row = Record<string, unknown>;
@@ -250,7 +225,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   // this server (never sent to a third party) and the search falls back
   // to keywords only if the model is unavailable or slower than ~3 s.
   // Never allowed to break the chat.
-  const { chatSources, researchItems, passages, block: evidenceBlock } = await selectChatEvidence(userTurnContent, profile?.life_stage);
+  // A follow-up that finds nothing on its own is searched together with
+  // the question before it (see selectChatEvidenceForTurn).
+  const previousUserTurn = [...messages.slice(0, -1)].reverse()
+    .find((m: { role?: unknown; content?: unknown }) => m?.role === 'user' && typeof m.content === 'string')?.content as string | undefined;
+  const { chatSources, researchItems, passages, block: evidenceBlock } = await selectChatEvidenceForTurn(userTurnContent, previousUserTurn, profile?.life_stage);
   const systemPrompt = buildChatSystemPrompt(medicalContext, evidenceBlock);
 
   const anthropicMessages = messages.map((m: { role: string; content: string }) => ({

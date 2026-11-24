@@ -121,8 +121,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const lines: string[] = [];
     lines.push(`Panel: ${panel}.`);
     if (typeof profile.life_stage === 'string') lines.push(`Life stage: ${profile.life_stage}.`);
-    if (typeof profile.pregnancy_due_date === 'string') lines.push(`Pregnant, due ${profile.pregnancy_due_date}.`);
-    if (typeof profile.ivf_phase === 'string') lines.push(`IVF phase: ${profile.ivf_phase}.`);
+    if (profile.life_stage === 'pregnancy' && typeof profile.pregnancy_due_date === 'string') lines.push(`Pregnant, due ${profile.pregnancy_due_date}.`);
+    if (profile.life_stage === 'ivf' && typeof profile.ivf_phase === 'string') lines.push(`IVF phase: ${profile.ivf_phase}.`);
     lines.push('', `## ${panel} readings (${matching.length})`);
     for (const r of matching.slice(0, 80)) {
       const val = r.value ?? '';
