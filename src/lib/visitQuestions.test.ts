@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseQuestions, fromSuggestions, addQuestion, toggleAsked, removeQuestion, MAX_QUESTIONS } from './visitQuestions';
+import { parseQuestions, fromSuggestions, addQuestion, toggleAsked, removeQuestion, MAX_QUESTIONS, visitDaysAway } from './visitQuestions';
 
 describe('visit questions', () => {
   it('parses stored JSONB, parsed or as a string, and drops junk', () => {
@@ -31,5 +31,12 @@ describe('visit questions', () => {
     const l = [{ id: 'a', text: 'A', asked: false }, { id: 'b', text: 'B', asked: false }];
     expect(toggleAsked(l, 'b')[1].asked).toBe(true);
     expect(removeQuestion(l, 'a')).toEqual([l[1]]);
+  });
+
+  it('counts days to the visit in calendar days', () => {
+    const now = new Date(2026, 10, 24, 18, 10); // Tue 18:10
+    expect(visitDaysAway(new Date(2026, 10, 24, 19, 0), now)).toBe('today');
+    expect(visitDaysAway(new Date(2026, 10, 25, 9, 0), now)).toBe('tomorrow'); // was "0 days away"
+    expect(visitDaysAway(new Date(2026, 10, 27, 10, 30), now)).toBe('in 3 days'); // was "2 days away"
   });
 });
