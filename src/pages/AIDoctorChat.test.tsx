@@ -83,6 +83,15 @@ describe('Ask AI', () => {
     expect(chips.length).toBeLessThanOrEqual(3);
   });
 
+  it('long suggestions wrap instead of widening the page (IVF chip was 403px on a 390px phone)', async () => {
+    renderChat();
+    await waitFor(() => expect(screen.getByTestId('suggestions')).toBeInTheDocument());
+    for (const chip of screen.getByTestId('suggestions').querySelectorAll('button')) {
+      expect(chip.className).toMatch(/\bwhitespace-normal\b/);
+      expect(chip.className).toMatch(/\bmax-w-full\b/);
+    }
+  });
+
   it('lists every old conversation under Past chats, and each one opens', async () => {
     renderChat();
     await waitFor(() => expect(fetchSpy).toHaveBeenCalled());

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { LifeStage } from '@/components/dashboard/DashboardHeader';
 import { LIFE_STAGES } from './lifeStage';
-import { todayItems, primaryActionFor, moreFor, MAX_TODAY, MAX_MORE, VISITS, RECORDS } from './todayItems';
+import { todayItems, primaryActionFor, moreFor, MAX_TODAY, MAX_MORE, VISITS, RECORDS, RECORDS_CHARTS } from './todayItems';
 
 // Monday 2026-11-23, 09:00 local
 const NOW = new Date(2026, 10, 23, 9, 0);
@@ -87,7 +87,7 @@ describe('primaryActionFor', () => {
       'pre-menstrual': 'Log today',
       'menstrual-cycle': 'Log today',
       conception: 'Log today',
-      contraception: "Mark today's pill taken",
+      contraception: "Log today's pill",
       ivf: 'Log medication',
       pregnancy: 'Log today',
       postpartum: 'Log a feed',
@@ -125,5 +125,21 @@ describe('moreFor', () => {
       expect(r.label).not.toMatch(/\b(BBT|LH|AMH|TSH|EPDS|FSH)\b/);
       expect(r.label).not.toBe(r.label.toUpperCase());
     }
+  });
+});
+
+describe('moreFor chart links', () => {
+  it('"Charts & history" and "Ovulation & charts" open Records on My charts, not the empty Results list', () => {
+    expect(moreFor('menstrual-cycle').find(r => r.label === 'Charts & history')?.target).toBe(RECORDS_CHARTS);
+    expect(moreFor('conception').find(r => r.label === 'Ovulation & charts')?.target).toBe(RECORDS_CHARTS);
+    expect(RECORDS_CHARTS).toBe('/dashboard/medical-history?tab=charts');
+  });
+});
+
+describe('moreFor postpartum', () => {
+  it('does not repeat the hero\'s "Baby tracker" link', () => {
+    const labels = moreFor('postpartum').map(r => r.label);
+    expect(labels).not.toContain('Baby tracker');
+    expect(labels).toEqual(['Your recovery', 'Mood check', 'Birth details', 'Medicines']);
   });
 });

@@ -164,11 +164,24 @@ export function sleepTodayMin(sleeps: Ev[], now: Date): number {
   }, 0);
 }
 
-/** "1h 20" / "42 min" for compact labels. */
+/** "1h 20" / "42 min" for compact labels; a day or more reads "2 days"
+ *  (live: an old last feed showed as "217h 25 ago"). */
 export function fmtAgo(min: number): { value: string; unit: string } {
   if (min < 60) return { value: String(min), unit: 'min' };
+  if (min >= 24 * 60) {
+    const d = Math.floor(min / (24 * 60));
+    return { value: String(d), unit: d === 1 ? 'day' : 'days' };
+  }
   const h = Math.floor(min / 60); const m = min % 60;
   return { value: m ? `${h}h ${String(m).padStart(2, '0')}` : `${h}h`, unit: '' };
+}
+
+/** Post-menopause with a period logged in the last 12 months: bleeding
+ *  after menopause should be checked, so Home says that instead of the
+ *  "12 months in a row marks menopause" countdown. */
+export const POST_MENOPAUSE_BLEED_TEXT = 'Bleeding after menopause is worth checking with your doctor.';
+export function postMenopauseBleed(mode: string, months: number | null): boolean {
+  return mode === 'post-menopause' && months != null && months < 12;
 }
 
 /** Day of life, birth day = day 1. */

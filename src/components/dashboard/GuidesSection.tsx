@@ -4,8 +4,10 @@ import { BookOpen, ChevronDown } from 'lucide-react';
 // Folds reading material (nutrition, movement and other guides) into one
 // closed section, so the dashboard leads with the things people log and
 // the guides are one tap away instead of several screens of scrolling.
-export default function GuidesSection({ title = 'Guides: nutrition, movement & more', children }: { title?: string; children: ReactNode }) {
-  const [open, setOpen] = useState(false);
+// defaultOpen: arriving via a "Guides" link (/dashboard/stage#guides) opens
+// it, so the link does not land on a closed card.
+export default function GuidesSection({ title = 'Guides: nutrition, movement & more', defaultOpen = false, children }: { title?: string; defaultOpen?: boolean; children: ReactNode }) {
+  const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="rounded-xl border bg-card">
       <button type="button" onClick={() => setOpen(o => !o)} aria-expanded={open}

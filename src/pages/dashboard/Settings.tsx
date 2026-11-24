@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Shield, Bell, User, Download, Loader2, Trash2, Wand2, KeyRound, Eye, EyeOff, Pill, Inbox, Phone, Smartphone, Users, HelpCircle, Info, LogOut, UserCog } from 'lucide-react';
@@ -342,7 +342,13 @@ const Settings = () => {
     loadSettings();
   }, [loadSettings]);
 
+  // One tap on a stage card reaches this twice (the radio's onValueChange
+  // and the card's onClick); live that was two saves per tap. Skip a
+  // repeat for the stage that is already being saved.
+  const savingStage = useRef<string | null>(null);
   const handleLifeStageChange = async (value: string) => {
+    if (savingStage.current === value) return;
+    savingStage.current = value;
     const stage = value as LifeStage;
     setSelectedStage(stage);
     setSaving(true);
@@ -367,6 +373,7 @@ const Settings = () => {
         variant: 'destructive',
       });
     } finally {
+      savingStage.current = null;
       setSaving(false);
     }
   };

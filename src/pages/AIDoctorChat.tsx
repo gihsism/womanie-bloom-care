@@ -825,7 +825,7 @@ export default function AIDoctorChat() {
                     key={q}
                     variant="outline"
                     size="sm"
-                    className="text-xs h-auto py-1.5 px-3 rounded-full"
+                    className="text-xs h-auto py-1.5 px-3 rounded-full max-w-full whitespace-normal text-left"
                     onClick={() => {
                       setInput(q);
                       setTimeout(() => textareaRef.current?.focus(), 0);

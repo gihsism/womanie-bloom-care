@@ -3,7 +3,7 @@ import { format, subDays } from 'date-fns';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
-import { hotFlushes, monthsSince } from '@/lib/bodyMap';
+import { hotFlushes, monthsSince, postMenopauseBleed, POST_MENOPAUSE_BLEED_TEXT } from '@/lib/bodyMap';
 import { DetailsLink } from '@/components/dashboard/HomeBlocks';
 
 // Version 8 "body map" hero for menopause and after: the same sculpted
@@ -49,8 +49,10 @@ export default function MenopauseBodyMap({ mode }: { name?: string | null; mode:
   const reached = months != null && months >= 12;
   const scaleY = (m: number) => 30 + (Math.min(12, m) / 12) * 260;
 
+  const bleed = postMenopauseBleed(mode, months);
   const monthsText = months == null
     ? 'Log your last period to count the months.'
+    : bleed ? POST_MENOPAUSE_BLEED_TEXT
     : reached
       ? `${months} months without a period: menopause is reached.`
       : months === 0
@@ -71,6 +73,7 @@ export default function MenopauseBodyMap({ mode }: { name?: string | null; mode:
       <p className="mt-1 text-[15px]">
         {hf.daysLogged7 ? monthsText
           : months == null ? 'Log hot flushes and your last period to see how this week went.'
+          : bleed ? POST_MENOPAUSE_BLEED_TEXT
           : '12 months in a row without a period marks menopause.'}
       </p>
 
