@@ -9,12 +9,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { onHealthDataChange } from '@/lib/data-events';
-import { differenceInDays, format, parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 import type { LifeStage } from './DashboardHeader';
 import { getFriendlyName } from '@/lib/medical-utils';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
-import { addQuestion, fromSuggestions, parseQuestions, removeQuestion, toggleAsked, type VisitQuestion } from '@/lib/visitQuestions';
+import { addQuestion, fromSuggestions, parseQuestions, removeQuestion, toggleAsked, visitDaysAway, type VisitQuestion } from '@/lib/visitQuestions';
 
 // Generates a personalised "questions to bring to your doctor"
 // checklist from the user's recent data + mode. Patients
@@ -330,7 +330,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
         <p className="text-[11px] text-muted-foreground mb-3">
           Next visit: {format(parseISO(upcomingApt.scheduled_at), 'EEE MMM d, h:mm a')}
           {upcomingApt.doctor_name && ` with ${upcomingApt.doctor_name}`}
-          {' '}({differenceInDays(parseISO(upcomingApt.scheduled_at), new Date())} days away)
+          {' '}({visitDaysAway(parseISO(upcomingApt.scheduled_at))})
         </p>
       )}
 
