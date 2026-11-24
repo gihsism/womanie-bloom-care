@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generatedAt": "2026-11-22T04:54:06.493Z",
+ "generatedAt": "2026-11-24T17:17:13.946Z",
  "source": "PMC Article Datasets (NIH/NLM PubMed Central, Open Access subset), retrieved from https://registry.opendata.aws/ncbi-pmc. Articles are provided by their publishers/authors under the licence shown per item.",
  "acknowledgement": "Full text courtesy of the U.S. National Library of Medicine (PubMed Central). Not endorsed by NLM.",
  "licencesAllowed": [
@@ -10,6 +10,23 @@
  ],
  "pruned": "kept only Conclusions, Recommendations, Results, Abstract, Plain language summary, Discussion (+ recommendation headings)",
  "items": {
+  "25798927": {
+   "pmcid": "PMC4370654",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "http://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4370654/",
+   "title": "Maternal Gestational Smoking, Diabetes, Alcohol Drinking, Pre-Pregnancy Obesity and the Risk of Cryptorchidism: A Systematic Review and Meta-Analysis of Observational Studies",
+   "credit": "Zhang L, Wang XH, Zheng XM, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 18,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion"
+   ]
+  },
   "25894555": {
    "pmcid": "PMC4404341",
    "version": 1,
@@ -21,6 +38,24 @@
    "label": "Full text · CC BY",
    "hasBody": true,
    "chunks": 18,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "26036214": {
+   "pmcid": "PMC4465305",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4465305/",
+   "title": "Corifollitropin alfa compared to daily FSH in controlled ovarian stimulation for in vitro fertilization: a meta-analysis",
+   "credit": "Fensore S, Di Marzio M, Tiboni GM",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 15,
    "sections": [
     "Abstract",
     "Results",
@@ -131,6 +166,23 @@
     "Results",
     "Discussion",
     "Conclusions"
+   ]
+  },
+  "26877200": {
+   "pmcid": "PMC5357731",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "http://creativecommons.org/licenses/by/3.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5357731/",
+   "title": "Vitamin D supplementation during pregnancy: Updated meta-analysis on maternal outcomes",
+   "credit": "Palacios C, De-Regil LM, Lombardo LK, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 11,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion"
    ]
   },
   "27430353": {
@@ -476,6 +528,21 @@
     "Conclusions"
    ]
   },
+  "30091965": {
+   "pmcid": "PMC6089331",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/3.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6089331/",
+   "title": "Update: Interim Guidance for Preconception Counseling and Prevention of Sexual Transmission of Zika Virus for Men with Possible Zika Virus Exposure — United States, August 2018",
+   "credit": "Polen KD, Gilboa SM, Hills S, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 2,
+   "sections": [
+    "Abstract"
+   ]
+  },
   "30109437": {
    "pmcid": "PMC6092728",
    "version": 1,
@@ -561,6 +628,42 @@
     "Discussion"
    ]
   },
+  "30390661": {
+   "pmcid": "PMC6215602",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6215602/",
+   "title": "A systematic review of prevention interventions to reduce prenatal alcohol exposure and fetal alcohol spectrum disorder in indigenous communities",
+   "credit": "Symons M, Pedruzzi RA, Bruce K, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 34,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "30419848": {
+   "pmcid": "PMC6233372",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6233372/",
+   "title": "The effect of exercise during pregnancy on gestational diabetes mellitus in normal-weight women: a systematic review and meta-analysis",
+   "credit": "Ming WK, Ding W, Zhang CJP, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 14,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
   "30499258": {
    "pmcid": "PMC6519063",
    "version": 2,
@@ -631,6 +734,24 @@
     "Discussion"
    ]
   },
+  "30621647": {
+   "pmcid": "PMC6325781",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6325781/",
+   "title": "Tobacco smoking and semen quality in infertile males: a systematic review and meta-analysis",
+   "credit": "Bundhun PK, Janoo G, Bhurtu A, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 16,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
   "30901325": {
    "pmcid": "PMC6430411",
    "version": 1,
@@ -663,6 +784,41 @@
    "sections": [
     "Abstract",
     "Plain english summary",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "31194720": {
+   "pmcid": "PMC6581290",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/3.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6581290/",
+   "title": "Dengue and Zika Virus Diagnostic Testing for Patients with a Clinically Compatible Illness and Risk for Infection with Both Viruses",
+   "credit": "Sharp TM, Fischer M, Muñoz-Jordán JL, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 15,
+   "sections": [
+    "Abstract",
+    "Recommended Testing for Symptomatic Nonpregnant Patients",
+    "Recommended Testing for Symptomatic Pregnant Women"
+   ]
+  },
+  "31305478": {
+   "pmcid": "PMC6641792",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "http://creativecommons.org/licenses/by/4.0",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6641792/",
+   "title": "Tobacco smoke exposure and the risk of childhood acute lymphoblastic leukemia and acute myeloid leukemia",
+   "credit": "Chunxia D, Meifang W, Jianhua Z, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 17,
+   "sections": [
+    "Abstract",
     "Results",
     "Discussion",
     "Conclusions"
@@ -1183,6 +1339,24 @@
     "Conclusions"
    ]
   },
+  "33198366": {
+   "pmcid": "PMC7696869",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7696869/",
+   "title": "Effect of Probiotic Supplementation on Newborn Birth Weight for Mother with Gestational Diabetes Mellitus or Overweight/Obesity: A Systematic Review and Meta-Analysis",
+   "credit": "Wang CC, Tung YT, Chang HC, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 13,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
   "33239350": {
    "pmcid": "PMC7719906",
    "version": 1,
@@ -1218,6 +1392,24 @@
     "Conclusions"
    ]
   },
+  "33299396": {
+   "pmcid": "PMC7710408",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7710408/",
+   "title": "Musculoskeletal Pain during the Menopausal Transition: A Systematic Review and Meta-Analysis",
+   "credit": "Lu Cb, Liu Pf, Zhou Ys, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 13,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
   "33315904": {
    "pmcid": "PMC7735615",
    "version": 1,
@@ -1234,6 +1426,23 @@
     "Results",
     "Discussion",
     "Conclusions"
+   ]
+  },
+  "33324253": {
+   "pmcid": "PMC7725748",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "http://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7725748/",
+   "title": "Association Between Smoking and Premenstrual Syndrome: A Meta-Analysis",
+   "credit": "Choi SH, Hamidovic A",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 12,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion"
    ]
   },
   "33407632": {
@@ -1485,6 +1694,23 @@
     "Discussion"
    ]
   },
+  "34059045": {
+   "pmcid": "PMC8167939",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8167939/",
+   "title": "GnRH agonist and hCG (dual trigger) versus hCG trigger for follicular maturation: a systematic review and meta-analysis of randomized trials",
+   "credit": "Hu KL, Wang S, Ye X, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 11,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion"
+   ]
+  },
   "34069867": {
    "pmcid": "PMC8157397",
    "version": 1,
@@ -1532,6 +1758,24 @@
    "label": "Full text · CC BY",
    "hasBody": true,
    "chunks": 26,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "34182957": {
+   "pmcid": "PMC8240295",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8240295/",
+   "title": "Assisted reproductive technology and hypertensive disorders of pregnancy: systematic review and meta-analyses",
+   "credit": "Chih HJ, Elias FTS, Gaudet L, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 25,
    "sections": [
     "Abstract",
     "Results",
@@ -1873,6 +2117,23 @@
     "Conclusions"
    ]
   },
+  "34751016": {
+   "pmcid": "PMC9118955",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9118955/",
+   "title": "Association of ovarian stimulation and embryonic aneuploidy in in vitro fertilization cycles with preimplantation genetic testing: A narrative systematic review",
+   "credit": "Rodriguez-Purata J, Gomez-Cuesta MJ, Cervantes-Bravo E",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 24,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion"
+   ]
+  },
   "34755503": {
    "pmcid": "PMC8769171",
    "version": 1,
@@ -1941,6 +2202,24 @@
    "sections": [
     "Abstract",
     "Plain language summary",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "34775977": {
+   "pmcid": "PMC8591897",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8591897/",
+   "title": "A better understanding of the association between maternal perception of foetal movements and late stillbirth—findings from an individual participant data meta-analysis",
+   "credit": "Thompson JMD, Wilson J, Bradford BF, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 21,
+   "sections": [
+    "Abstract",
     "Results",
     "Discussion",
     "Conclusions"
@@ -2174,6 +2453,40 @@
     "Abstract",
     "Results",
     "Discussion"
+   ]
+  },
+  "35206317": {
+   "pmcid": "PMC8871754",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8871754/",
+   "title": "Long-Term Safety of Prenatal and Neonatal Exposure to Paracetamol: A Systematic Review",
+   "credit": "Patel R, Sushko K, van den Anker J, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 16,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "35206475": {
+   "pmcid": "PMC8872164",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8872164/",
+   "title": "Adenomyosis as a Risk Factor for Myometrial or Endometrial Neoplasms—Review",
+   "credit": "Szubert M, Kozirog E, Wilczynski J",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 4,
+   "sections": [
+    "Abstract",
+    "Conclusions"
    ]
   },
   "35247352": {
@@ -2451,6 +2764,24 @@
    "label": "Full text · CC BY",
    "hasBody": true,
    "chunks": 22,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "35686687": {
+   "pmcid": "PMC10074750",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10074750/",
+   "title": "Intermittent selective serotonin reuptake inhibitors for premenstrual syndromes: A systematic review and meta-analysis of randomised trials",
+   "credit": "Reilly TJ, Wallman P, Clark I, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 16,
    "sections": [
     "Abstract",
     "Results",
@@ -2941,6 +3272,24 @@
     "Discussion"
    ]
   },
+  "36209308": {
+   "pmcid": "PMC9747857",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9747857/",
+   "title": "Periodontitis and Preeclampsia in Pregnancy: A Systematic Review and Meta-Analysis",
+   "credit": "Le QA, Akhter R, Coulton KM, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 21,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
   "36235862": {
    "pmcid": "PMC9572824",
    "version": 1,
@@ -2952,6 +3301,24 @@
    "label": "Full text · CC BY",
    "hasBody": true,
    "chunks": 19,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "36263151": {
+   "pmcid": "PMC9575702",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9575702/",
+   "title": "Maternal smoking during pregnancy and the risk of congenital urogenital malformations: A systematic review and meta-analysis",
+   "credit": "Zhang Q, Zhang ZC, He XY, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 14,
    "sections": [
     "Abstract",
     "Results",
@@ -3191,6 +3558,23 @@
     "Conclusions"
    ]
   },
+  "36693931": {
+   "pmcid": "PMC9873903",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9873903/",
+   "title": "A comprehensive analysis of chromosomal polymorphic variants on reproductive outcomes after intracytoplasmic sperm injection treatment",
+   "credit": "Ralapanawe MSB, Gajaweera SL, Karunaratne N, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 16,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion"
+   ]
+  },
   "36694251": {
    "pmcid": "PMC9872323",
    "version": 1,
@@ -3262,6 +3646,24 @@
     "Conclusions"
    ]
   },
+  "36794918": {
+   "pmcid": "PMC10152171",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10152171/",
+   "title": "The risk of miscarriage following COVID-19 vaccination: a systematic review and meta-analysis",
+   "credit": "Rimmer MP, Teh JJ, Mackenzie SC, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 18,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
   "36834617": {
    "pmcid": "PMC9964432",
    "version": 1,
@@ -3324,6 +3726,24 @@
    "label": "Full text · CC BY",
    "hasBody": true,
    "chunks": 18,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "36987390": {
+   "pmcid": "PMC10189071",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10189071/",
+   "title": "The impact of antihypertensive treatment of mild to moderate hypertension during pregnancy on maternal and neonatal outcomes: An updated meta‐analysis of randomized controlled trials",
+   "credit": "Attar A, Hosseinpour A, Moghadami M",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 21,
    "sections": [
     "Abstract",
     "Results",
@@ -3666,6 +4086,23 @@
     "Conclusions"
    ]
   },
+  "37347387": {
+   "pmcid": "PMC10543648",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10543648/",
+   "title": "Smoking during pregnancy and gestational diabetes mellitus: a systematic review and meta-analysis",
+   "credit": "Athanasiadou KI, Paschou SA, Papakonstantinou E, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 12,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion"
+   ]
+  },
   "37354277": {
    "pmcid": "PMC11081994",
    "version": 1,
@@ -3963,6 +4400,24 @@
    "label": "Full text · CC BY",
    "hasBody": true,
    "chunks": 20,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "37670890": {
+   "pmcid": "PMC10476097",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10476097/",
+   "title": "The clinical value of progestin-primed ovarian stimulation protocol for women with diminished ovarian reserve undergoing IVF/ICSI: a systematic review and meta-analysis",
+   "credit": "Lin G, Zhong X, Li S, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 16,
    "sections": [
     "Abstract",
     "Results",
@@ -4344,6 +4799,24 @@
     "Conclusions"
    ]
   },
+  "38034000": {
+   "pmcid": "PMC10682779",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10682779/",
+   "title": "Does endometrial compaction before embryo transfer affect pregnancy outcomes? a systematic review and meta-analysis",
+   "credit": "Chen XT, Sun ZG, Song JY",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 17,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
   "38042815": {
    "pmcid": "PMC10693090",
    "version": 1,
@@ -4556,6 +5029,23 @@
     "Discussion"
    ]
   },
+  "38233773": {
+   "pmcid": "PMC10792962",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10792962/",
+   "title": "Low-molecular-weight heparin for the prevention of preeclampsia in high-risk pregnancies without thrombophilia: a systematic review and meta-analysis",
+   "credit": "Chen J, Huai J, Yang H",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 10,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion"
+   ]
+  },
   "38263123": {
    "pmcid": "PMC10804786",
    "version": 1,
@@ -4619,6 +5109,24 @@
    "label": "Full text · CC BY",
    "hasBody": true,
    "chunks": 15,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "38287353": {
+   "pmcid": "PMC10826191",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10826191/",
+   "title": "Medication use during pregnancy and the risk of gastroschisis: a systematic review and meta-analysis of observational studies",
+   "credit": "Baldacci S, Santoro M, Mezzasalma L, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 19,
    "sections": [
     "Abstract",
     "Results",
@@ -4750,6 +5258,24 @@
     "Discussion"
    ]
   },
+  "38456943": {
+   "pmcid": "PMC11101511",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11101511/",
+   "title": "Are there gender-specific differences in hip and knee cartilage composition and degeneration? A systematic literature review",
+   "credit": "Di Martino A, Barile F, D’Agostino C, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 17,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
   "38501109": {
    "pmcid": "PMC10944893",
    "version": 1,
@@ -4765,6 +5291,23 @@
     "Abstract",
     "Results",
     "Discussion"
+   ]
+  },
+  "38530761": {
+   "pmcid": "PMC11152433",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11152433/",
+   "title": "Probiotics supplementation in the treatment of male infertility: A Systematic Review",
+   "credit": "Oliveira LCSdL, Costa EC, Martins FDG, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 18,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Conclusions"
    ]
   },
   "38570862": {
@@ -5099,6 +5642,23 @@
     "Conclusions"
    ]
   },
+  "38898143": {
+   "pmcid": "PMC11187099",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11187099/",
+   "title": "Low-molecular-weight heparin in the prevention of unexplained recurrent miscarriage: a systematic review and meta-analysis",
+   "credit": "Scarrone M, Salmeri N, Buzzaccarini G, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 16,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion"
+   ]
+  },
   "38902658": {
    "pmcid": "PMC11191278",
    "version": 1,
@@ -5161,6 +5721,24 @@
    "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11220992/",
    "title": "Mapping global prevalence of menopausal symptoms among middle-aged women: a systematic review and meta-analysis",
    "credit": "Fang Y, Liu F, Zhang X, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 20,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "38956626": {
+   "pmcid": "PMC11221034",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11221034/",
+   "title": "Effectiveness of exercise training on arterial stiffness and blood pressure among postmenopausal women: a systematic review and meta-analysis",
+   "credit": "Yang D, Tao S, Shao M, et al.",
    "label": "Full text · CC BY",
    "hasBody": true,
    "chunks": 20,
@@ -5367,6 +5945,24 @@
     "Conclusions"
    ]
   },
+  "39205682": {
+   "pmcid": "PMC11349655",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11349655/",
+   "title": "Effect of IVIG therapy on pregnant women with unexplained recurrent spontaneous abortion: a systematic review and meta-analysis",
+   "credit": "Ling Q, Xu J, Tian Y, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 14,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
   "39209313": {
    "pmcid": "PMC11608932",
    "version": 1,
@@ -5524,6 +6120,23 @@
    "sections": [
     "Abstract",
     "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "39394337": {
+   "pmcid": "PMC11867983",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11867983/",
+   "title": "Costs of medical evacuation and transportation of First Nations Peoples and Inuit who travel for medical care in Canada: A systematic review",
+   "credit": "Radhaa M, Leason J, Twalibu A, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 14,
+   "sections": [
+    "Abstract",
     "Discussion",
     "Conclusions"
    ]
@@ -6007,6 +6620,24 @@
     "Conclusions"
    ]
   },
+  "39800868": {
+   "pmcid": "PMC11969923",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11969923/",
+   "title": "L‐Arginine and L‐Citrulline for Prevention and Treatment of Pre‐Eclampsia: A Systematic Review and Meta‐Analysis",
+   "credit": "Makama M, McDougall ARA, Cao J, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 18,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
   "39833063": {
    "pmcid": "PMC11749783",
    "version": 1,
@@ -6025,6 +6656,24 @@
     "Conclusions"
    ]
   },
+  "39834271": {
+   "pmcid": "PMC11747145",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11747145/",
+   "title": "The benefits and harms of oral iron supplementation in non-anaemic pregnant women: a systematic review and meta-analysis",
+   "credit": "Watt A, Eaton H, Eastwick-Jones K, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 20,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
   "39856668": {
    "pmcid": "PMC11762881",
    "version": 1,
@@ -6036,6 +6685,24 @@
    "label": "Full text · CC BY",
    "hasBody": true,
    "chunks": 18,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "39861414": {
+   "pmcid": "PMC11768055",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11768055/",
+   "title": "Efficacy of N-Acetylcysteine in Polycystic Ovary Syndrome: Systematic Review and Meta-Analysis",
+   "credit": "Viña I, Viña JR, Carranza M, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 25,
    "sections": [
     "Abstract",
     "Results",
@@ -6228,6 +6895,23 @@
     "Recommendations",
     "Clinical implications of updated recommendations",
     "Conclusions"
+   ]
+  },
+  "40153182": {
+   "pmcid": "PMC11953139",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11953139/",
+   "title": "The Relationship Between Paternal Smoking and Overweight/Obesity with Childhood Overweight/Obesity: A Systematic Review",
+   "credit": "Hussain U, Ziauddeen N, Taylor E, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 14,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion"
    ]
   },
   "40172095": {
@@ -6740,6 +7424,24 @@
     "Recommendations"
    ]
   },
+  "40884573": {
+   "pmcid": "PMC12398445",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12398445/",
+   "title": "A Systematic Review of the Relation between Complementary Feeding and Children’s Development",
+   "credit": "Di Prete A, Galloway AT, Farrow C, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 25,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
   "40927887": {
    "pmcid": "PMC12553110",
    "version": 1,
@@ -6805,6 +7507,24 @@
    "chunks": 5,
    "sections": [
     "Abstract",
+    "Conclusions"
+   ]
+  },
+  "41030850": {
+   "pmcid": "PMC12477224",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12477224/",
+   "title": "Effects of exercise on bone metabolism in postmenopausal women: a systematic review and meta-analysis of randomized controlled trials",
+   "credit": "Zhang W, Li X, He Q, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 34,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
     "Conclusions"
    ]
   },
@@ -6931,6 +7651,42 @@
     "Abstract",
     "Plain language summary",
     "Summary of findings",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "41370423": {
+   "pmcid": "PMC12694983",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12694983/",
+   "title": "Ovulation triggers in unassisted reproduction, an old question still unanswered: a systematic review and meta-analysis",
+   "credit": "Piccini CD, Tessari JA, Brandão MG, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 19,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "41374057": {
+   "pmcid": "PMC12693841",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12693841/",
+   "title": "Dairy Intake and Iodine Status in Pregnant and Lactating Women: A Systematic Review and Meta-Analysis",
+   "credit": "Razmpoosh E, Geronimo K, Gauntlett C, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 49,
+   "sections": [
+    "Abstract",
     "Results",
     "Discussion",
     "Conclusions"
@@ -7203,6 +7959,24 @@
     "Conclusions"
    ]
   },
+  "42121335": {
+   "pmcid": "PMC13167700",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13167700/",
+   "title": "A systematic review of heart rate variability and menopausal vasomotor symptoms",
+   "credit": "Hira R, Uppal J, Deol P, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 16,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
   "42124073": {
    "pmcid": "PMC13164739",
    "version": 1,
@@ -7220,6 +7994,24 @@
     "Conclusions"
    ]
   },
+  "42138261": {
+   "pmcid": "PMC13178054",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13178054/",
+   "title": "Impact of travel time to health facilities on perinatal outcomes: a systematic review with narrative synthesis and meta-analysis",
+   "credit": "Roder-DeWan S, Ramadan M, Ouma P, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 21,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
   "42141930": {
    "pmcid": "PMC13182165",
    "version": 1,
@@ -7231,6 +8023,94 @@
    "label": "Full text · CC BY",
    "hasBody": true,
    "chunks": 40,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "42172285": {
+   "pmcid": "PMC13334920",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13334920/",
+   "title": "Does intracytoplasmic sperm injection outperform conventional in vitro fertilization in couples without severe male factor infertility? A systematic review and meta-analysis of randomized controlled trials",
+   "credit": "Kayimu K, Berntsen S, Fu Y, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 26,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion"
+   ]
+  },
+  "42252432": {
+   "pmcid": "PMC13491826",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13491826/",
+   "title": "The effectiveness of psychosocial interventions on physiological symptoms of menopause: a systematic review and meta-analysis",
+   "credit": "Robinson K, Hardy R, Melville M, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 25,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "42325976": {
+   "pmcid": "PMC13275481",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13275481/",
+   "title": "Functional MRI evidence of brain alterations in premenstrual dysphoric disorder: a systematic review",
+   "credit": "Bartoszewicz K, Szurowska E",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 37,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion"
+   ]
+  },
+  "42345555": {
+   "pmcid": "PMC13296226",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13296226/",
+   "title": "Long‐Term Side Effects of Breast Cancer Treatments: A Systematic Review",
+   "credit": "Babaee E, Soheyli M, Nafissi N",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 20,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "42500177": {
+   "pmcid": "PMC13399481",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13399481/",
+   "title": "Prenatal exposure to paracetamol and risk of autism spectrum disorder: systematic review and meta-analysis of observational studies",
+   "credit": "Oliveira JA, Lemos MJ, Queiroz LF, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 19,
    "sections": [
     "Abstract",
     "Results",
@@ -7255,6 +8135,24 @@
     "Discussion"
    ]
   },
+  "42654471": {
+   "pmcid": "PMC13515243",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13515243/",
+   "title": "Vasomotor Symptoms and Their Association with Depressive and Anxiety Symptoms in Peri- and Postmenopausal Women: A Systematic Review of Observational Studies",
+   "credit": "Neda-Stepan O, Enătescu VR, Giurgi-Oncu C, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 52,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
   "42712161": {
    "pmcid": "PMC13555026",
    "version": 1,
@@ -7266,6 +8164,24 @@
    "label": "Full text · CC BY",
    "hasBody": true,
    "chunks": 11,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "42780494": {
+   "pmcid": "PMC13597374",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13597374/",
+   "title": "Effects and exercise-prescription moderators of Tai Chi on cardiometabolic risk factors in middle-aged and older women: a systematic review and meta-analysis",
+   "credit": "Ma J, Liu W, Li J, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 32,
    "sections": [
     "Abstract",
     "Results",
