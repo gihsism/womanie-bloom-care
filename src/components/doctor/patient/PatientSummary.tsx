@@ -12,7 +12,9 @@ import type {
   MedicalDataRow,
   PatientAppointment,
   PeriodRecord,
+  PatientVisitQuestions as VisitQuestionsRow,
 } from './types';
+import PatientVisitQuestions from './PatientVisitQuestions';
 
 // Summary tab: one screen that answers "what do I need to know?". Four
 // rows (results out of range, visits, documents, notes), each opening its
@@ -26,6 +28,8 @@ interface Props {
   signals: HealthSignal[];
   periodRecords: PeriodRecord[];
   lifeStage: string | null;
+  /** Questions she saved for her upcoming visits with this doctor. */
+  visitQuestions?: VisitQuestionsRow[];
   onOpenTab: (tab: PatientTab) => void;
 }
 
@@ -59,7 +63,7 @@ const SummaryRow = ({
   </button>
 );
 
-const PatientSummary = ({ medicalData, documents, notes, appointments, signals, periodRecords, lifeStage, onOpenTab }: Props) => {
+const PatientSummary = ({ medicalData, documents, notes, appointments, signals, periodRecords, lifeStage, visitQuestions = [], onOpenTab }: Props) => {
   const [logsOpen, setLogsOpen] = useState(false);
   const flagged = flaggedResults(medicalData);
   const { last, next } = visitSummary(appointments, Date.now());
@@ -110,6 +114,9 @@ const PatientSummary = ({ medicalData, documents, notes, appointments, signals, 
           onClick={() => onOpenTab('notes')}
         />
       </Card>
+
+      {/* Her questions for the next visit with you. Self-hides when none. */}
+      <PatientVisitQuestions rows={visitQuestions} />
 
       {/* What the patient tracked herself. Self-hides empty blocks. */}
       <DoctorPatientTrackingSummary periodRecords={periodRecords} signals={signals} lifeStage={lifeStage} />

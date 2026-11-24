@@ -25,6 +25,7 @@ import {
   type PatientAppointment,
   type PatientProfile,
   type PeriodRecord,
+  type PatientVisitQuestions,
 } from '@/components/doctor/patient/types';
 
 // The doctor's view of one patient. Header: who she is and where she is
@@ -34,6 +35,10 @@ import {
 // All data comes from the consent-gated /api/doctors/patient, which 403s
 // unless this doctor has an APPROVED connection and logs every fetch to
 // chart_access_log for the patient to review.
+
+// Stable empty list: a fresh [] on every chart load would re-render forever
+// when the auth user object is recreated (see PatientDetails.test).
+const NO_VISIT_QUESTIONS: PatientVisitQuestions[] = [];
 
 const PatientDetails = () => {
   const navigate = useNavigate();
@@ -51,6 +56,7 @@ const PatientDetails = () => {
   const [appointments, setAppointments] = useState<PatientAppointment[]>([]);
   const [medicalData, setMedicalData] = useState<MedicalDataRow[]>([]);
   const [periodRecords, setPeriodRecords] = useState<PeriodRecord[]>([]);
+  const [visitQuestions, setVisitQuestions] = useState<PatientVisitQuestions[]>([]);
   // Skeleton only until the first answer; a refresh after saving a note
   // keeps the page in place.
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -104,6 +110,7 @@ const PatientDetails = () => {
       setAppointments(payload.appointments || []);
       setMedicalData(payload.medicalData || []);
       setPeriodRecords(payload.periodRecords || []);
+      setVisitQuestions(Array.isArray(payload.visitQuestions) ? payload.visitQuestions : NO_VISIT_QUESTIONS);
     } catch (error) {
       console.error('Error loading patient data:', error);
       toast({ variant: 'destructive', title: 'Could not load this chart', description: 'Please try again.' });
@@ -197,6 +204,7 @@ const PatientDetails = () => {
               signals={healthSignals}
               periodRecords={periodRecords}
               lifeStage={patient?.life_stage ?? null}
+              visitQuestions={visitQuestions}
               onOpenTab={setActiveTab}
             />
           </TabsContent>

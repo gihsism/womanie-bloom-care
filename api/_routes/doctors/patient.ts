@@ -110,6 +110,27 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       ),
     ]) as [unknown[], unknown[], unknown[], unknown[], unknown[], unknown[], unknown[]];
 
+    // Questions the patient saved for her upcoming visits with THIS doctor
+    // (read-only here). Joined on the doctor's own appointments with this
+    // patient, so a row the patient attached to some other visit never
+    // shows. Best-effort: until migration 012 is applied the table does
+    // not exist, and that must not break the chart.
+    let visitQuestions: unknown[] = [];
+    try {
+      visitQuestions = await sql.query(
+        `SELECT vq.appointment_id, vq.questions, vq.updated_at, a.scheduled_at
+           FROM visit_questions vq
+           JOIN appointments a ON a.id::text = vq.appointment_id AND a.patient_id = vq.user_id
+          WHERE vq.user_id = $1 AND a.doctor_id = $2
+            AND COALESCE(a.status, 'scheduled') <> 'cancelled'
+            AND a.scheduled_at >= NOW() - INTERVAL '1 day'
+          ORDER BY a.scheduled_at ASC`,
+        [patientId, doctor.id]
+      ) as unknown[];
+    } catch (vqErr) {
+      console.error('doctors/patient: visit_questions read failed (non-fatal):', vqErr);
+    }
+
     return res.status(200).json({
       profile: profileRows[0] ?? null,
       healthSignals: signalRows,
@@ -118,6 +139,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       notes: noteRows,
       appointments: apptRows,
       periodRecords: periodRows,
+      visitQuestions,
     });
   } catch (error) {
     console.error('doctors/patient error:', error);

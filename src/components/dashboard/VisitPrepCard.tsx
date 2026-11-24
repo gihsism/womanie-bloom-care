@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ClipboardCheck, Copy, Check, ExternalLink } from 'lucide-react';
+import { ClipboardCheck, Copy, Check, ExternalLink, Plus, X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -13,6 +14,7 @@ import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 import type { LifeStage } from './DashboardHeader';
 import { getFriendlyName } from '@/lib/medical-utils';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
+import { addQuestion, fromSuggestions, parseQuestions, removeQuestion, toggleAsked, type VisitQuestion } from '@/lib/visitQuestions';
 
 // Generates a personalised "questions to bring to your doctor"
 // checklist from the user's recent data + mode. Patients
@@ -27,6 +29,13 @@ import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 //   • Persistent / overdue tests
 //
 // Self-hides when there are zero questions to surface.
+//
+// With an upcoming visit she can save the list to that visit (table
+// visit_questions, migration 012): then she edits it here (add her own,
+// remove, tick when asked) and the doctor of that visit sees it read-only
+// in the patient chart. Before saving, the suggestions and ticks stay on
+// her device as before. If the table isn't there yet, the card behaves
+// exactly as before (no save button).
 
 interface VisitPrepCardProps {
   mode: LifeStage;
@@ -101,7 +110,13 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
 
   const [flagged, setFlagged] = useState<FlaggedRow[]>([]);
   const [signals, setSignals] = useState<SignalRow[]>([]);
-  const [upcomingApt, setUpcomingApt] = useState<{ scheduled_at: string; doctor_name: string | null } | null>(null);
+  const [upcomingApt, setUpcomingApt] = useState<{ id: string; scheduled_at: string; doctor_name: string | null } | null>(null);
+  // Saved list for the upcoming visit: null = not saved; canSave = the
+  // table answered (migration applied) and there is a visit to save to.
+  const [saved, setSaved] = useState<VisitQuestion[] | null>(null);
+  const [canSave, setCanSave] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [draft, setDraft] = useState('');
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [copied, setCopied] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -146,6 +161,18 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
     const apts = Array.isArray(aptResp?.appointments) ? aptResp.appointments : [];
     const next = apts.find((a: { scheduled_at: string }) => Date.parse(a.scheduled_at) > Date.now());
     setUpcomingApt(next ?? null);
+    if (next?.id) {
+      const { data, error } = await db.from('visit_questions')
+        .select('questions')
+        .eq('user_id', user.id)
+        .eq('appointment_id', String(next.id))
+        .maybeSingle();
+      setCanSave(!error);
+      setSaved(!error && data ? parseQuestions((data as { questions: unknown }).questions) : null);
+    } else {
+      setCanSave(false);
+      setSaved(null);
+    }
     setLoaded(true);
   }, [user]);
 
@@ -234,14 +261,51 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
     return out.slice(0, 6);
   }, [flagged, signals, ctx, mode]);
 
-  if (!loaded) return null;
-  if (questions.length === 0) return null;
+  // Save (or re-save) the list to the upcoming visit.
+  const store = async (next: VisitQuestion[]) => {
+    if (!user || !upcomingApt) return;
+    const prev = saved;
+    setSaved(next);
+    setSaving(true);
+    const { error } = await db.from('visit_questions').upsert(
+      { user_id: user.id, appointment_id: String(upcomingApt.id), questions: JSON.stringify(next), updated_at: new Date().toISOString() },
+      { onConflict: 'user_id,appointment_id' },
+    );
+    setSaving(false);
+    if (error) {
+      setSaved(prev);
+      toast({ variant: 'destructive', title: 'Could not save', description: 'Check your connection and try again.' });
+    }
+  };
 
-  const totalChecked = questions.filter(q => checked[q.id]).length;
-  const allChecked = totalChecked === questions.length;
+  const unshare = async () => {
+    if (!user || !upcomingApt) return;
+    if (!window.confirm('Remove this list from your visit? Your doctor will no longer see it.')) return;
+    const { error } = await db.from('visit_questions').delete()
+      .eq('user_id', user.id).eq('appointment_id', String(upcomingApt.id));
+    if (error) { toast({ variant: 'destructive', title: 'Could not remove', description: 'Try again.' }); return; }
+    setSaved(null);
+  };
+
+  const isSaved = saved !== null;
+  // What the card shows: the saved list, or the suggestions with device ticks.
+  const list: VisitQuestion[] = isSaved ? saved : fromSuggestions(questions, checked);
+
+  const addOwn = () => {
+    const next = addQuestion(list, draft);
+    if (next === list) return;
+    setDraft('');
+    void store(next);
+  };
+
+  if (!loaded) return null;
+  if (list.length === 0 && !isSaved) return null;
+
+  const totalChecked = list.filter(q => q.asked).length;
+  const allChecked = list.length > 0 && totalChecked === list.length;
 
   const handleCopy = async () => {
-    const text = questions.map(q => `• ${q.text}`).join('\n');
+    const text = list.map(q => `• ${q.text}`).join('\n');
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
@@ -258,7 +322,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
         <ClipboardCheck className="h-4 w-4 text-primary" />
         <h3 className="text-sm font-semibold">Questions for your next visit</h3>
         <Badge variant="outline" className="text-[10px] ml-auto">
-          {totalChecked}/{questions.length}
+          {totalChecked}/{list.length}
         </Badge>
       </div>
 
@@ -271,14 +335,14 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
       )}
 
       <ul className="space-y-2 mb-3">
-        {questions.map(q => {
-          const isChecked = !!checked[q.id];
+        {list.map(q => {
+          const isChecked = q.asked;
           return (
             <li key={q.id} className="flex items-start gap-2">
               <button
                 type="button"
                 className={`relative before:absolute before:-inset-3 before:content-[''] flex-shrink-0 mt-0.5 h-4 w-4 rounded border ${isChecked ? 'bg-primary border-primary' : 'border-border'} flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary`}
-                onClick={() => persistChecked({ ...checked, [q.id]: !isChecked })}
+                onClick={() => (isSaved ? void store(toggleAsked(saved, q.id)) : persistChecked({ ...checked, [q.id]: !isChecked }))}
                 aria-label={isChecked ? 'Mark as not asked' : 'Mark as asked'}
               >
                 {isChecked && <Check className="h-3 w-3 text-primary-foreground" />}
@@ -294,10 +358,52 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
               >
                 Ask AI
               </button>
+              {isSaved && (
+                <button
+                  type="button"
+                  className="tap-target flex-shrink-0 rounded p-0.5 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  onClick={() => void store(removeQuestion(saved, q.id))}
+                  aria-label={`Remove question: ${q.text}`}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
             </li>
           );
         })}
       </ul>
+
+      {canSave && upcomingApt && (
+        <div className="mb-3 space-y-2">
+          <form className="flex gap-2" onSubmit={e => { e.preventDefault(); addOwn(); }}>
+            <Input
+              value={draft}
+              onChange={e => setDraft(e.target.value)}
+              placeholder="Add your own question"
+              aria-label="Add your own question"
+              maxLength={300}
+              className="h-8 text-xs"
+            />
+            <Button type="submit" size="sm" variant="outline" className="h-8 gap-1" disabled={!draft.trim() || saving}>
+              <Plus className="h-3.5 w-3.5" /> Add
+            </Button>
+          </form>
+          {isSaved ? (
+            <p className="text-[11px] text-muted-foreground">
+              Saved to your visit on {format(parseISO(upcomingApt.scheduled_at), 'EEE MMM d')}. Your doctor can see this list.{' '}
+              <button type="button" className="underline hover:text-foreground" onClick={unshare}>Remove from visit</button>
+            </p>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2">
+              <Button size="sm" variant="outline" className="gap-1.5" disabled={saving} onClick={() => void store(list)}>
+                <ClipboardCheck className="h-3.5 w-3.5" />
+                Save for my visit
+              </Button>
+              <p className="text-[11px] text-muted-foreground">Your doctor will see the saved list before the visit.</p>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="flex gap-2">
         <Button size="sm" variant="outline" onClick={handleCopy} className="gap-1.5">
