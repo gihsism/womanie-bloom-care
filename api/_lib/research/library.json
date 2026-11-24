@@ -1,6 +1,6 @@
 {
  "version": "2026-11-24",
- "generatedAt": "2026-11-24T17:04:07.161Z",
+ "generatedAt": "2026-11-24T17:11:45.935Z",
  "source": "PubMed (NCBI E-utilities). Summaries written from abstracts only.",
  "disclaimer": "General information from published research, not medical advice. Talk to your doctor or midwife about your situation.",
  "topics": [
@@ -7823,6 +7823,773 @@
     "previous loss",
     "prevention",
     "placenta problems"
+   ]
+  },
+  {
+   "id": "pmid-41332102",
+   "pmid": "41332102",
+   "doi": "10.1111/jog.70142",
+   "title": "Risk Factors of Subchorionic Hematoma Under Assisted Reproductive Technology",
+   "source": "Journal of Obstetrics and Gynaecology Research",
+   "journal": "Journal of Obstetrics and Gynaecology Research",
+   "organisation": null,
+   "year": 2025,
+   "publicationTypes": [
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/41332102/",
+   "summary": "This review pulled together 50 studies on subchorionic hematoma (a collection of blood between the pregnancy sac and the womb wall) in pregnancies conceived with assisted reproductive technology such as IVF. It found that several things were linked to a higher chance of this bleed, including high hormone levels, embryo transfer, polycystic ovary syndrome, fluid-filled tubes, and using low-dose aspirin during pregnancy. The authors say more high-quality studies are needed to understand why these links exist.",
+   "keyPoints": [
+    "IVF and its steps, such as embryo transfer and hormone treatment, were described as a central risk factor for subchorionic hematoma.",
+    "High estrogen and progesterone levels, low blastocyst grading, PCOS and tubal hydrocele were linked to a higher risk.",
+    "Using low-dose aspirin during pregnancy was linked to a higher risk of subchorionic hematoma.",
+    "The authors call for better-quality studies to explain the mechanisms and improve outcomes for people having ART."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "pregnancy",
+    "ivf"
+   ],
+   "topics": [
+    "aspirin-pregnancy"
+   ],
+   "tags": [
+    "subchorionic hematoma",
+    "low-dose aspirin",
+    "ivf",
+    "assisted reproduction",
+    "pcos"
+   ],
+   "keywords": [
+    "subchorionic hematoma",
+    "subchorionic haemorrhage",
+    "bleeding in pregnancy",
+    "low-dose aspirin",
+    "baby aspirin",
+    "aspirin in pregnancy",
+    "ivf",
+    "embryo transfer",
+    "pcos",
+    "assisted reproductive technology"
+   ]
+  },
+  {
+   "id": "pmid-38233773",
+   "pmid": "38233773",
+   "doi": "10.1186/s12884-023-06218-9",
+   "title": "Low-molecular-weight heparin for the prevention of preeclampsia in high-risk pregnancies without thrombophilia: a systematic review and meta-analysis",
+   "source": "BMC Pregnancy and Childbirth",
+   "journal": "BMC Pregnancy and Childbirth",
+   "organisation": null,
+   "year": 2024,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/38233773/",
+   "summary": "This review pooled 10 randomised trials (1,758 women) to see whether low-molecular-weight heparin, a blood-thinning injection, helps prevent preeclampsia in high-risk pregnancies. It found that heparin lowered the chance of preeclampsia, but the benefit was only clear when it was used together with low-dose aspirin. The combination also reduced preterm birth and poor baby growth, and it worked better than aspirin alone. It made no difference to placental abruption. The women studied did not have a clotting disorder (thrombophilia).",
+   "keyPoints": [
+    "Low-molecular-weight heparin reduced the risk of preeclampsia in high-risk women without thrombophilia (relative risk 0.67).",
+    "The benefit was only significant in studies where heparin was added to low-dose aspirin.",
+    "Heparin plus low-dose aspirin also lowered the risk of preterm birth and fetal growth restriction.",
+    "The combination was reported as better than low-dose aspirin alone, with no effect on placental abruption."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "pregnancy"
+   ],
+   "topics": [
+    "aspirin-pregnancy"
+   ],
+   "tags": [
+    "preeclampsia",
+    "low-dose aspirin",
+    "heparin",
+    "preterm birth",
+    "fetal growth restriction"
+   ],
+   "keywords": [
+    "preeclampsia",
+    "pre-eclampsia",
+    "aspirin",
+    "low-dose aspirin",
+    "heparin",
+    "blood thinner",
+    "clexane",
+    "enoxaparin",
+    "high blood pressure in pregnancy",
+    "preterm birth",
+    "baby growth",
+    "pregnancy"
+   ]
+  },
+  {
+   "id": "pmid-38712869",
+   "pmid": "38712869",
+   "doi": "10.1080/0167482X.2024.2344079",
+   "title": "Impact of low-dose aspirin exposure on obstetrical outcomes: a meta-analysis",
+   "source": "Journal of Psychosomatic Obstetrics and Gynaecology",
+   "journal": "Journal of Psychosomatic Obstetrics and Gynaecology",
+   "organisation": null,
+   "year": 2024,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/38712869/",
+   "summary": "This review pooled 47 placebo-controlled trials (59,124 pregnant women) to see how low-dose aspirin affects birth outcomes. Overall, aspirin slightly lowered the risks of small-for-gestational-age babies, preterm birth, low birth weight and NICU admission, but it raised the risk of placental abruption. The benefits were clearest in women at high risk of preeclampsia, where placental abruption was not increased. In healthy, low-risk women, aspirin did not clearly improve outcomes and was linked to a higher chance of placental abruption.",
+   "keyPoints": [
+    "Across all trials, aspirin lowered the risk of small-for-gestational-age babies, preterm birth, low birth weight and NICU admission, but increased the risk of placental abruption.",
+    "In women at high risk of preeclampsia, aspirin reduced small-for-gestational-age babies, preterm birth and perinatal death, without raising placental abruption risk.",
+    "In healthy pregnant women, aspirin did not significantly improve outcomes and increased the risk of placental abruption.",
+    "In high-risk women, doses of 100 mg or more and starting at or before 20 weeks gave clearer benefits; the authors say more research is needed on the best dose and timing."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "pregnancy"
+   ],
+   "topics": [
+    "aspirin-pregnancy"
+   ],
+   "tags": [
+    "low-dose aspirin",
+    "preeclampsia",
+    "preterm birth",
+    "placental abruption",
+    "small for gestational age"
+   ],
+   "keywords": [
+    "aspirin",
+    "baby aspirin",
+    "low dose aspirin",
+    "pregnancy",
+    "preeclampsia",
+    "high blood pressure in pregnancy",
+    "preterm birth",
+    "premature birth",
+    "low birth weight",
+    "placental abruption",
+    "nicu",
+    "aspirin dose"
+   ]
+  },
+  {
+   "id": "pmid-38898143",
+   "pmid": "38898143",
+   "doi": "10.1038/s41598-024-62949-5",
+   "title": "Low-molecular-weight heparin in the prevention of unexplained recurrent miscarriage: a systematic review and meta-analysis",
+   "source": "Scientific Reports",
+   "journal": "Scientific Reports",
+   "organisation": null,
+   "year": 2024,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/38898143/",
+   "summary": "This review pooled six randomized trials (1016 women) to see whether low-molecular-weight heparin, a blood-thinning injection, helps women with unexplained recurrent miscarriage have a live birth. It was used on its own or together with low-dose aspirin, starting early in pregnancy. The heparin did not increase the chance of a live birth, and this held across the different subgroups looked at. The authors rate the evidence as moderate quality.",
+   "keyPoints": [
+    "Low-molecular-weight heparin did not raise live birth rates in women with unexplained recurrent miscarriage (pooled odds ratio 1.01).",
+    "No significant benefit was seen whether heparin was used alone or with low-dose aspirin, or in any other subgroup.",
+    "The review included 6 randomized trials with 1016 women in total.",
+    "The authors describe the evidence as moderate quality."
+   ],
+   "certainty": "moderate",
+   "lifeStages": [
+    "conception",
+    "pregnancy"
+   ],
+   "topics": [
+    "aspirin-pregnancy"
+   ],
+   "tags": [
+    "recurrent miscarriage",
+    "heparin",
+    "low-dose aspirin",
+    "live birth",
+    "pregnancy loss"
+   ],
+   "keywords": [
+    "recurrent miscarriage",
+    "repeated miscarriage",
+    "pregnancy loss",
+    "unexplained miscarriage",
+    "heparin",
+    "blood thinner",
+    "clexane",
+    "enoxaparin",
+    "low-dose aspirin",
+    "baby aspirin",
+    "live birth",
+    "injections in pregnancy"
+   ]
+  },
+  {
+   "id": "pmid-39205682",
+   "pmid": "39205682",
+   "doi": "10.3389/fendo.2024.1381461",
+   "title": "Effect of IVIG therapy on pregnant women with unexplained recurrent spontaneous abortion: a systematic review and meta-analysis",
+   "source": "Frontiers in Endocrinology",
+   "journal": "Frontiers in Endocrinology",
+   "organisation": null,
+   "year": 2024,
+   "publicationTypes": [
+    "Systematic Review",
+    "Meta-Analysis"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/39205682/",
+   "summary": "This review pooled 12 trials with 751 women who had repeated miscarriages with no known cause, to see whether intravenous immunoglobulin (IVIG) helps more babies to be born alive. Overall, IVIG did not raise live birth rates compared with other treatments or placebo. For women who tested positive for antiphospholipid antibodies, a combination of low-molecular-weight heparin plus low-dose aspirin gave a higher live birth rate than IVIG.",
+   "keyPoints": [
+    "IVIG did not significantly increase live birth rates compared with the non-IVIG groups overall (OR 1.07, 95% CI 0.65 to 1.75).",
+    "Compared with placebo (multivitamins, albumin or saline), IVIG showed a possible benefit that was not statistically significant (OR 1.43, 95% CI 0.99 to 2.07).",
+    "In women positive for antiphospholipid antibodies, heparin plus low-dose aspirin led to more live births than IVIG.",
+    "The review included 12 studies and 751 participants in total."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "pregnancy"
+   ],
+   "topics": [
+    "aspirin-pregnancy"
+   ],
+   "tags": [
+    "recurrent miscarriage",
+    "ivig",
+    "low-dose aspirin",
+    "heparin",
+    "antiphospholipid antibodies"
+   ],
+   "keywords": [
+    "recurrent miscarriage",
+    "repeated miscarriage",
+    "pregnancy loss",
+    "unexplained miscarriage",
+    "ivig",
+    "immunoglobulin",
+    "aspirin",
+    "baby aspirin",
+    "heparin",
+    "blood thinner",
+    "antiphospholipid",
+    "live birth"
+   ]
+  },
+  {
+   "id": "pmid-32828743",
+   "pmid": "32828743",
+   "doi": "10.1016/j.ajog.2020.08.018",
+   "title": "Guidelines-similarities and dissimilarities: a systematic review of international clinical practice guidelines for pregnancy hypertension",
+   "source": "American Journal of Obstetrics and Gynecology",
+   "journal": "American Journal of Obstetrics and Gynecology",
+   "organisation": null,
+   "year": 2022,
+   "publicationTypes": [
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/32828743/",
+   "summary": "This review compared 17 international guidelines on high blood pressure in pregnancy and found that 15 were clinically useful. The guidelines agree on many things, including using aspirin to help prevent preeclampsia, treating severe high blood pressure, and using magnesium sulfate to prevent seizures in severe preeclampsia. They differ on how to spot who is at risk early in pregnancy, how aspirin should be given, and whether adding calcium helps.",
+   "keyPoints": [
+    "Guidelines consistently recommend aspirin to help prevent preeclampsia.",
+    "Guidelines agree on treating severe high blood pressure in pregnancy with labetalol, nifedipine or hydralazine, and on using magnesium sulfate for eclampsia prevention and treatment in severe preeclampsia.",
+    "Guidelines disagree on how to identify preeclampsia risk early and how aspirin should be given; tools combining clinical risk, blood tests and ultrasound can substantially reduce preterm preeclampsia.",
+    "Guidelines differ on whether calcium should be added to aspirin, especially for women with low calcium intake and higher risk."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "pregnancy",
+    "postpartum"
+   ],
+   "topics": [
+    "aspirin-pregnancy"
+   ],
+   "tags": [
+    "low-dose aspirin",
+    "preeclampsia",
+    "pregnancy hypertension",
+    "clinical guidelines",
+    "blood pressure"
+   ],
+   "keywords": [
+    "aspirin",
+    "baby aspirin",
+    "preeclampsia",
+    "pre-eclampsia",
+    "high blood pressure",
+    "hypertension",
+    "pregnancy",
+    "calcium",
+    "magnesium sulfate",
+    "guidelines",
+    "blood pressure monitoring"
+   ]
+  },
+  {
+   "id": "pmid-33433020",
+   "pmid": "33433020",
+   "doi": "10.1111/head.14041",
+   "title": "Management of primary headaches during pregnancy, postpartum, and breastfeeding: A systematic review",
+   "source": "Headache",
+   "journal": "Headache",
+   "organisation": null,
+   "year": 2021,
+   "publicationTypes": [
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/33433020/",
+   "summary": "This review looked at which medicines are used to prevent or treat migraine and other primary headaches during pregnancy, after birth and while breastfeeding. Most of the 16 studies had a high risk of bias, and the evidence for safety was low to moderate. Low-dose aspirin, triptans, calcium channel blockers and antihistamines may not be linked to harm for the baby, while acetaminophen (paracetamol) and several other medicines may be linked to possible effects on the baby. No evidence was found on how well preventive medicines work, and there was too little evidence on non-drug treatments.",
+   "keyPoints": [
+    "Low-dose aspirin and triptans may not be associated with harm to the baby, based on low-to-moderate certainty evidence (the aspirin evidence was indirect).",
+    "Acetaminophen (paracetamol), prednisolone, indomethacin, ondansetron, antipsychotics and intravenous magnesium may be associated with adverse effects in the baby or child.",
+    "For prevention, calcium channel blockers and antihistamines may not be linked to harm, but the review found no evidence on how well any preventive medicine works.",
+    "For treating migraine or tension headache, metoclopramide plus diphenhydramine may work better than codeine (one trial, low certainty); there was too little evidence on non-drug treatments."
+   ],
+   "certainty": "low",
+   "lifeStages": [
+    "conception",
+    "pregnancy",
+    "postpartum"
+   ],
+   "topics": [
+    "aspirin-pregnancy",
+    "paracetamol-pregnancy"
+   ],
+   "tags": [
+    "migraine",
+    "headache",
+    "paracetamol",
+    "low-dose aspirin",
+    "breastfeeding",
+    "medication safety"
+   ],
+   "keywords": [
+    "migraine",
+    "headache",
+    "paracetamol",
+    "acetaminophen",
+    "tylenol",
+    "aspirin",
+    "triptans",
+    "pregnancy headache",
+    "breastfeeding medication",
+    "painkillers in pregnancy",
+    "postpartum headache",
+    "tension headache"
+   ]
+  },
+  {
+   "id": "pmid-33795180",
+   "pmid": "33795180",
+   "doi": "10.1016/j.amepre.2021.01.032",
+   "title": "Aspirin Prophylaxis During Pregnancy: A Systematic Review and Meta-Analysis",
+   "source": "American Journal of Preventive Medicine",
+   "journal": "American Journal of Preventive Medicine",
+   "organisation": null,
+   "year": 2021,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/33795180/",
+   "summary": "This review pulled together 35 placebo-controlled trials, covering 46,568 pregnant women, to look at low-dose aspirin taken to prevent pre-eclampsia. Aspirin lowered the risk of pre-eclampsia, preterm birth, perinatal death and poor growth of the baby in the womb, and it did not raise bleeding risk. The benefits were clearest when aspirin was started before 20 weeks of pregnancy. The effect of different aspirin doses was unclear and needs more study.",
+   "keyPoints": [
+    "Low-dose aspirin lowered the risk of pre-eclampsia, preterm birth, perinatal death and slow growth of the baby in the womb, without raising bleeding risk.",
+    "Starting aspirin before 20 weeks of pregnancy gave a clearly lower pre-eclampsia risk (RR 0.76) and better birth weight and gestational age at delivery.",
+    "Aspirin did not reduce the risk of gestational hypertension (high blood pressure in pregnancy).",
+    "The effect of aspirin dose on outcomes was not significant and needs further study."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "pregnancy"
+   ],
+   "topics": [
+    "aspirin-pregnancy"
+   ],
+   "tags": [
+    "low-dose aspirin",
+    "pre-eclampsia",
+    "preterm birth",
+    "pregnancy prevention"
+   ],
+   "keywords": [
+    "aspirin",
+    "baby aspirin",
+    "low-dose aspirin",
+    "pre-eclampsia",
+    "preeclampsia",
+    "high blood pressure in pregnancy",
+    "preterm birth",
+    "premature birth",
+    "fetal growth",
+    "birth weight",
+    "bleeding risk",
+    "pregnancy"
+   ]
+  },
+  {
+   "id": "pmid-31479546",
+   "pmid": "31479546",
+   "doi": "10.1002/uog.20859",
+   "title": "Impact of low-dose aspirin on adverse perinatal outcome: meta-analysis and meta-regression",
+   "source": "Ultrasound in Obstetrics & Gynecology",
+   "journal": "Ultrasound in Obstetrics & Gynecology",
+   "organisation": null,
+   "year": 2020,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/31479546/",
+   "summary": "Researchers combined results from 40 randomized trials (nearly 35,000 pregnant women) to see how low-dose aspirin affects babies' health around birth, beyond its known effect on pre-eclampsia, preterm birth and low birth weight. Starting aspirin by 16 weeks was linked to fewer deaths around the time of birth, and no extra harms were seen. Starting after 16 weeks was linked to fewer low Apgar scores and less bleeding in the baby's brain, but also a possible small rise in placental abruption that did not reach statistical significance.",
+   "keyPoints": [
+    "Starting low-dose aspirin at or before 16 weeks was linked to about half the risk of perinatal death (RR 0.47), with a number needed to treat of 92. This effect was seen only with doses of 100 mg or more a day.",
+    "Starting after 16 weeks was linked to fewer low 5-minute Apgar scores and less periventricular hemorrhage (bleeding in the baby's brain).",
+    "After 16 weeks there was also a trend toward more placental abruption (RR 1.20), which was not statistically significant. No significant increase in adverse events was seen when aspirin was started by 16 weeks.",
+    "Aspirin had no effect on the way women gave birth, whenever it was started."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "pregnancy"
+   ],
+   "topics": [
+    "aspirin-pregnancy"
+   ],
+   "tags": [
+    "low-dose aspirin",
+    "perinatal death",
+    "pre-eclampsia",
+    "placental abruption",
+    "apgar score"
+   ],
+   "keywords": [
+    "aspirin",
+    "baby aspirin",
+    "low dose aspirin",
+    "pregnancy",
+    "stillbirth",
+    "perinatal death",
+    "placental abruption",
+    "apgar score",
+    "brain bleed",
+    "preeclampsia",
+    "newborn outcomes",
+    "16 weeks"
+   ]
+  },
+  {
+   "id": "pmid-31494125",
+   "pmid": "31494125",
+   "doi": "10.1016/j.ajog.2019.08.047",
+   "title": "Does low-dose aspirin initiated before 11 weeks' gestation reduce the rate of preeclampsia?",
+   "source": "American Journal of Obstetrics and Gynecology",
+   "journal": "American Journal of Obstetrics and Gynecology",
+   "organisation": null,
+   "year": 2020,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/31494125/",
+   "summary": "This review pooled 8 randomized trials with 1,426 women to see whether starting low-dose aspirin before 11 weeks of pregnancy lowers the risk of preeclampsia. The women studied were at higher risk of pregnancy problems. Early aspirin did not clearly reduce preeclampsia, high blood pressure in pregnancy, or poor baby growth. It might lower the chance of preterm birth, but the authors say larger trials are needed to confirm this.",
+   "keyPoints": [
+    "Starting low-dose aspirin before 11 weeks did not significantly reduce preeclampsia, gestational hypertension, or any high blood pressure disorder of pregnancy.",
+    "It did not change the risk of fetal growth restriction (poor growth of the baby in the womb).",
+    "Early aspirin might reduce preterm birth (before 37 weeks), though this result was less steady in the checks the authors ran.",
+    "The authors conclude that larger randomized trials are needed to confirm the findings."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "pregnancy"
+   ],
+   "topics": [
+    "aspirin-pregnancy"
+   ],
+   "tags": [
+    "low-dose aspirin",
+    "preeclampsia",
+    "preterm birth",
+    "early pregnancy",
+    "high-risk pregnancy"
+   ],
+   "keywords": [
+    "aspirin",
+    "baby aspirin",
+    "preeclampsia",
+    "pre-eclampsia",
+    "high blood pressure in pregnancy",
+    "preterm birth",
+    "early pregnancy",
+    "miscarriage",
+    "pregnancy complications"
+   ]
+  },
+  {
+   "id": "pmid-29138036",
+   "pmid": "29138036",
+   "doi": "10.1016/j.ajog.2017.11.561",
+   "title": "Aspirin for the prevention of preterm and term preeclampsia: systematic review and metaanalysis",
+   "source": "American Journal of Obstetrics and Gynecology",
+   "journal": "American Journal of Obstetrics and Gynecology",
+   "organisation": null,
+   "year": 2018,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/29138036/",
+   "summary": "This review pooled results from 16 trials with almost 19,000 pregnant women to see whether aspirin lowers the risk of preeclampsia, a pregnancy condition linked to high blood pressure. Aspirin reduced the risk of preterm preeclampsia (preeclampsia leading to early delivery), but not preeclampsia that develops at term. The benefit was seen only when aspirin was started at 16 weeks of pregnancy or earlier and taken at 100 mg or more a day. Half of the trials were of good quality and half were of poor or uncertain quality, but the benefit was also seen in the high-quality studies.",
+   "keyPoints": [
+    "Aspirin was linked to a lower risk of preterm preeclampsia (relative risk 0.62), but had no significant effect on term preeclampsia.",
+    "The reduction in preterm preeclampsia was found only when aspirin was started at or before 16 weeks of pregnancy at a daily dose of 100 mg or more.",
+    "In that early, higher-dose group the risk of preterm preeclampsia was about two-thirds lower (relative risk 0.33).",
+    "Results were mixed across trials overall, and 8 of the 16 trials were of poor or uncertain quality."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "pregnancy"
+   ],
+   "topics": [
+    "aspirin-pregnancy"
+   ],
+   "tags": [
+    "aspirin",
+    "preeclampsia",
+    "preterm preeclampsia",
+    "pregnancy",
+    "prevention"
+   ],
+   "keywords": [
+    "aspirin",
+    "low-dose aspirin",
+    "baby aspirin",
+    "preeclampsia",
+    "pre-eclampsia",
+    "high blood pressure in pregnancy",
+    "pregnancy",
+    "preterm",
+    "prevention",
+    "100 mg",
+    "16 weeks"
+   ]
+  },
+  {
+   "id": "pmid-30556599",
+   "pmid": "30556599",
+   "doi": "10.1002/14651858.CD012203.pub2",
+   "title": "Care prior to and during subsequent pregnancies following stillbirth for improving outcomes",
+   "source": "Cochrane Database of Systematic Reviews",
+   "journal": "Cochrane Database of Systematic Reviews",
+   "organisation": null,
+   "year": 2018,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/30556599/",
+   "summary": "This Cochrane review looked at treatments given before or during a pregnancy that follows a stillbirth, to see if any improve outcomes. It found ten small trials covering only 222 women who had a previous stillbirth, testing medicines such as low-dose aspirin and blood thinners (heparin). The evidence was low or very low quality, so it is not clear whether any of these treatments help prevent another stillbirth. The authors say there is not enough evidence to guide care and that larger, well-designed trials are urgently needed.",
+   "keyPoints": [
+    "No clear evidence that low-dose aspirin or heparin reduces stillbirth, neonatal death or preterm birth in a pregnancy after stillbirth.",
+    "Some birthweight differences were seen with low-dose aspirin, but these were very unreliable because the trials were so small.",
+    "No trials tested emotional or psychological support for parents, which the authors call an urgent priority.",
+    "The authors conclude there is insufficient evidence to guide care and call for larger, well-designed trials."
+   ],
+   "certainty": "low",
+   "lifeStages": [
+    "conception",
+    "pregnancy"
+   ],
+   "topics": [
+    "aspirin-pregnancy"
+   ],
+   "tags": [
+    "stillbirth",
+    "low-dose aspirin",
+    "heparin",
+    "pregnancy after loss",
+    "recurrence"
+   ],
+   "keywords": [
+    "stillbirth",
+    "aspirin",
+    "low-dose aspirin",
+    "baby aspirin",
+    "heparin",
+    "blood thinners",
+    "pregnancy after stillbirth",
+    "next pregnancy",
+    "recurrent stillbirth",
+    "pregnancy loss"
+   ]
+  },
+  {
+   "id": "pmid-27640943",
+   "pmid": "27640943",
+   "doi": "10.1016/j.ajog.2016.09.076",
+   "title": "The role of aspirin dose on the prevention of preeclampsia and fetal growth restriction: systematic review and meta-analysis",
+   "source": "American Journal of Obstetrics and Gynecology",
+   "journal": "American Journal of Obstetrics and Gynecology",
+   "organisation": null,
+   "year": 2017,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/27640943/",
+   "summary": "This review pooled 45 randomized trials with about 20,900 pregnant women to see how the daily aspirin dose affects preeclampsia and poor baby growth. When aspirin was started at 16 weeks or earlier, it lowered the risk of preeclampsia, severe preeclampsia and fetal growth restriction, and higher doses (within the 50-150 mg range studied) worked better. When it was started after 16 weeks, the benefit was small or absent.",
+   "keyPoints": [
+    "Aspirin started at 16 weeks or earlier cut the risk of preeclampsia by about 43% (relative risk 0.57), severe preeclampsia by about 53%, and fetal growth restriction by about 44%.",
+    "With early starts, higher aspirin doses were linked to a bigger reduction in all three outcomes.",
+    "Aspirin started after 16 weeks had a modest effect on preeclampsia and no clear effect on severe preeclampsia or fetal growth restriction, with no dose-response pattern.",
+    "The authors say women at high risk should be identified early in pregnancy."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "pregnancy"
+   ],
+   "topics": [
+    "aspirin-pregnancy"
+   ],
+   "tags": [
+    "aspirin",
+    "preeclampsia",
+    "fetal growth restriction",
+    "high blood pressure in pregnancy"
+   ],
+   "keywords": [
+    "aspirin",
+    "low-dose aspirin",
+    "baby aspirin",
+    "preeclampsia",
+    "pre-eclampsia",
+    "fetal growth restriction",
+    "small baby",
+    "high blood pressure in pregnancy",
+    "aspirin dose",
+    "when to start aspirin"
+   ]
+  },
+  {
+   "id": "pmid-27807847",
+   "pmid": "27807847",
+   "doi": "10.1002/14651858.CD004832.pub4",
+   "title": "Aspirin for in vitro fertilisation",
+   "source": "Cochrane Database of Systematic Reviews",
+   "journal": "Cochrane Database of Systematic Reviews",
+   "organisation": null,
+   "year": 2016,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/27807847/",
+   "summary": "This Cochrane review combined 13 randomised trials with 2,653 women having assisted reproduction treatment such as IVF. It looked at whether taking aspirin (80 to 100 mg a day) improves the chance of a live birth. Women who took aspirin had about the same rates of live birth and pregnancy as women who took a placebo or nothing. The evidence was moderate to very low quality, and it cannot rule out possible harms.",
+   "keyPoints": [
+    "Live birth rates were similar with aspirin and with placebo or no treatment (moderate-quality evidence).",
+    "Clinical pregnancy rates were also similar between the two groups (moderate-quality evidence).",
+    "Miscarriage, multiple pregnancy, ectopic pregnancy and vaginal bleeding showed no clear difference, but the evidence was low to very low quality.",
+    "The authors found no evidence supporting routine aspirin use in a general IVF population, and the evidence does not exclude possible side effects."
+   ],
+   "certainty": "moderate",
+   "lifeStages": [
+    "conception",
+    "pregnancy",
+    "ivf"
+   ],
+   "topics": [
+    "aspirin-pregnancy"
+   ],
+   "tags": [
+    "aspirin",
+    "ivf",
+    "assisted reproduction",
+    "live birth",
+    "miscarriage"
+   ],
+   "keywords": [
+    "aspirin",
+    "low-dose aspirin",
+    "baby aspirin",
+    "ivf",
+    "fertility treatment",
+    "icsi",
+    "live birth",
+    "pregnancy rate",
+    "miscarriage",
+    "blood thinner"
+   ]
+  },
+  {
+   "id": "pmid-25833349",
+   "pmid": "25833349",
+   "doi": "10.1111/jch.12541",
+   "title": "Low-Dose Aspirin for Preventing Preeclampsia and Its Complications: A Meta-Analysis",
+   "source": "Journal of Clinical Hypertension",
+   "journal": "Journal of Clinical Hypertension",
+   "organisation": null,
+   "year": 2015,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/25833349/",
+   "summary": "This review pooled results from 29 randomized trials to see whether low-dose aspirin helps prevent preeclampsia (a pregnancy condition involving high blood pressure) in high-risk pregnancies. Aspirin lowered the chances of preeclampsia, severe preeclampsia, preterm birth and slow growth of the baby in the womb. Starting before 16 weeks of pregnancy worked better than starting later. Aspirin slightly raised the chance of placental abruption, but not other major complications.",
+   "keyPoints": [
+    "Low-dose aspirin reduced preeclampsia (odds ratio 0.71) and severe preeclampsia (odds ratio 0.37) in high-risk pregnancies.",
+    "It also reduced preterm birth and intrauterine growth restriction (slow growth of the baby in the womb).",
+    "Starting aspirin before 16 weeks of pregnancy was more effective for preeclampsia and growth restriction than starting later.",
+    "Aspirin increased placental abruption (odds ratio 1.35) but not other major complications; the authors concluded there was no major safety risk to mothers or babies."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "pregnancy"
+   ],
+   "topics": [
+    "aspirin-pregnancy"
+   ],
+   "tags": [
+    "low-dose aspirin",
+    "preeclampsia",
+    "preterm birth",
+    "fetal growth restriction",
+    "high-risk pregnancy"
+   ],
+   "keywords": [
+    "aspirin",
+    "baby aspirin",
+    "low dose aspirin",
+    "preeclampsia",
+    "pre-eclampsia",
+    "high blood pressure in pregnancy",
+    "preterm birth",
+    "premature birth",
+    "placental abruption",
+    "growth restriction",
+    "high risk pregnancy"
    ]
   },
   {
@@ -81781,6 +82548,161 @@
    ]
   },
   {
+   "id": "pmid-43055207",
+   "pmid": "43055207",
+   "doi": "10.1080/14647273.2026.2750620",
+   "title": "Optimizing IUI: evidence-based guidance for use of add-ons and variations in IUI treatment, a British Fertility Society policy and practice guideline",
+   "source": "Human Fertility",
+   "journal": "Human Fertility",
+   "organisation": null,
+   "year": 2026,
+   "publicationTypes": [
+    "Review",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/43055207/",
+   "summary": "The British Fertility Society reviewed 154 randomised trials (34,825 participants) on 25 add-ons and variations used in intrauterine insemination (IUI), including LH surge detection, follicle monitoring, and the timing of ovulation triggering. Many of these extras are offered without strong proof that they help. The review found that most of the evidence is low quality and many trials were too small, so most recommendations are uncertain.",
+   "keyPoints": [
+    "The guideline looked at 25 IUI add-ons and variations, including follicular monitoring, LH surge detection, and ovulation triggering and timing.",
+    "It was based on 154 randomised controlled trials with 34,825 participants.",
+    "Most of the evidence is low quality, which limits how certain the recommendations are.",
+    "The guideline says this uncertainty should be clearly explained to patients during counselling."
+   ],
+   "certainty": "low",
+   "lifeStages": [
+    "menstrual-cycle",
+    "conception"
+   ],
+   "topics": [
+    "ovulation-tests"
+   ],
+   "tags": [
+    "iui",
+    "fertility treatment",
+    "ovulation timing",
+    "lh surge",
+    "add-ons"
+   ],
+   "keywords": [
+    "iui",
+    "intrauterine insemination",
+    "ovulation test",
+    "lh surge",
+    "ovulation timing",
+    "trigger shot",
+    "fertility add-ons",
+    "follicle monitoring",
+    "timing sex",
+    "fertility treatment"
+   ]
+  },
+  {
+   "id": "pmid-40985294",
+   "pmid": "40985294",
+   "doi": "10.1002/14651858.CD006942.pub4",
+   "title": "Synchronised approach for intrauterine insemination in subfertile couples",
+   "source": "Cochrane Database of Systematic Reviews",
+   "journal": "Cochrane Database of Systematic Reviews",
+   "organisation": null,
+   "year": 2025,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/40985294/",
+   "summary": "This Cochrane review looked at 42 trials (6603 couples) of ways to time intrauterine insemination (IUI) with ovulation, such as using urine LH tests, hCG trigger injections, or different waiting times after the injection. For most comparisons, the evidence was low certainty and too imprecise to show whether one method works better than another. One small study suggested live birth or ongoing pregnancy may be lower with hCG alone than with hCG plus FSH, but this rests on low-certainty evidence. No clear differences were seen in clinical pregnancy or in side effects such as miscarriage or multiple pregnancy.",
+   "keyPoints": [
+    "There is not enough evidence to say whether any method of timing insemination with ovulation is better than another.",
+    "Comparing insemination 0 to 33 hours, 34 to 40 hours, or over 40 hours after the hCG injection gave results too imprecise to be useful.",
+    "Using a urine LH surge versus an hCG trigger, and recombinant versus urinary hCG, showed no clear difference in live birth or ongoing pregnancy (low-certainty evidence).",
+    "hCG alone may give lower live birth or ongoing pregnancy rates than hCG plus FSH, based on one small study of low-certainty evidence."
+   ],
+   "certainty": "low",
+   "lifeStages": [
+    "menstrual-cycle",
+    "conception",
+    "ivf"
+   ],
+   "topics": [
+    "ovulation-tests"
+   ],
+   "tags": [
+    "intrauterine insemination",
+    "ovulation timing",
+    "ovulation trigger",
+    "subfertility",
+    "hcg"
+   ],
+   "keywords": [
+    "iui",
+    "intrauterine insemination",
+    "ovulation test",
+    "lh test",
+    "ovulation predictor kit",
+    "trigger shot",
+    "hcg injection",
+    "timing insemination",
+    "fertility treatment",
+    "trying to conceive",
+    "infertility",
+    "ovulation timing"
+   ]
+  },
+  {
+   "id": "pmid-38032057",
+   "pmid": "38032057",
+   "doi": "10.1002/14651858.CD013827.pub2",
+   "title": "Progestogens for prevention of luteinising hormone (LH) surge in women undergoing controlled ovarian hyperstimulation as part of an assisted reproductive technology (ART) cycle",
+   "source": "Cochrane Database of Systematic Reviews",
+   "journal": "Cochrane Database of Systematic Reviews",
+   "organisation": null,
+   "year": 2023,
+   "publicationTypes": [
+    "Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/38032057/",
+   "summary": "This Cochrane review looked at 14 trials of women having fertility treatment (IVF-type cycles). It asked whether progestogen medicines taken by mouth can stop the body releasing an egg too early, as an alternative to the usual injected GnRH medicines. Progestogens may work about as well as GnRH antagonists at keeping egg collection cycles from being cancelled, but much of the evidence is low or very low quality and the results are uncertain. No firm conclusions could be drawn on live birth rates or most other outcomes.",
+   "keyPoints": [
+    "There may be little or no difference in egg-collection cancellation between progestogens and GnRH antagonists, but the evidence is low certainty.",
+    "One study in poor responders was very uncertain about live birth rates with medroxyprogesterone compared with a GnRH antagonist (very low certainty).",
+    "Micronised progesterone may give 2 to 6 more mature (MII) eggs than GnRH antagonists in normal responders (low-quality evidence).",
+    "When comparing progestogens, dydrogesterone suggested slightly fewer cancelled collections than medroxyprogesterone or micronised progesterone, but most results were uncertain."
+   ],
+   "certainty": "low",
+   "lifeStages": [
+    "menstrual-cycle",
+    "conception",
+    "ivf"
+   ],
+   "topics": [
+    "ovulation-tests"
+   ],
+   "tags": [
+    "ivf",
+    "premature ovulation",
+    "progestogens",
+    "fertility treatment",
+    "lh surge"
+   ],
+   "keywords": [
+    "ivf",
+    "fertility treatment",
+    "premature ovulation",
+    "lh surge",
+    "ovulation",
+    "progesterone",
+    "egg collection",
+    "gnrh",
+    "medroxyprogesterone",
+    "dydrogesterone",
+    "egg freezing",
+    "assisted reproduction"
+   ]
+  },
+  {
    "id": "pmid-42080744",
    "pmid": "42080744",
    "doi": "10.1097/EJA.0000000000002373",
@@ -82226,6 +83148,711 @@
     "birth",
     "caesarean",
     "patient-controlled analgesia"
+   ]
+  },
+  {
+   "id": "pmid-41062061",
+   "pmid": "41062061",
+   "doi": "10.1016/j.jaac.2025.09.031",
+   "title": "Systematic Review and Meta-Analysis: Acetaminophen Use During Pregnancy and the Risk of Neurodevelopmental Disorders in Childhood",
+   "source": "Journal of the American Academy of Child and Adolescent Psychiatry",
+   "journal": "Journal of the American Academy of Child and Adolescent Psychiatry",
+   "organisation": null,
+   "year": 2026,
+   "publicationTypes": [
+    "Systematic Review",
+    "Meta-Analysis"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/41062061/",
+   "summary": "This review pooled results from 16 studies to see whether taking paracetamol (acetaminophen) in pregnancy is linked to neurodevelopmental conditions in children. It found a small increased risk of ADHD, but the authors say this may be partly explained by other factors that were not measured or by reporting errors. No link was found with autism or other conditions. The authors say more research is needed.",
+   "keyPoints": [
+    "Paracetamol use in pregnancy was linked to a small increase in ADHD risk (pooled odds ratio 1.17, 95% CI 1.08-1.27).",
+    "The link got weaker in extra checks, and the authors say it may be partly due to unmeasured factors.",
+    "No significant link was found with autism when based on a doctor's diagnosis (OR 1.10, 95% CI 0.98-1.24).",
+    "No significant increase in risk was seen for other neurodevelopmental conditions, and the authors call for further, more robust studies."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy"
+   ],
+   "topics": [
+    "paracetamol-pregnancy"
+   ],
+   "tags": [
+    "paracetamol",
+    "acetaminophen",
+    "pregnancy",
+    "adhd",
+    "autism",
+    "neurodevelopment"
+   ],
+   "keywords": [
+    "paracetamol",
+    "acetaminophen",
+    "tylenol",
+    "panadol",
+    "pregnancy",
+    "adhd",
+    "autism",
+    "child development",
+    "pain relief",
+    "fever",
+    "medication safety",
+    "neurodevelopmental"
+   ]
+  },
+  {
+   "id": "pmid-41615881",
+   "pmid": "41615881",
+   "doi": "10.1093/humrep/deaf253",
+   "title": "Association between in utero exposure to acetaminophen and external genital tract malformations in boys and girls: a systematic review and meta-analysis",
+   "source": "Human Reproduction",
+   "journal": "Human Reproduction",
+   "organisation": null,
+   "year": 2026,
+   "publicationTypes": [
+    "Systematic Review",
+    "Meta-Analysis"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/41615881/",
+   "summary": "Researchers pooled results from 10 observational studies to see whether taking acetaminophen (paracetamol) in pregnancy is linked to birth differences in the external genitals of boys or girls. For boys, they found no link to undescended testicles or hypospadias, and no difference in a measure called anogenital distance. For girls, there was not enough data to draw any conclusion. The evidence was low to very low certainty, because the studies did not fully account for other factors that could affect results.",
+   "keyPoints": [
+    "No significant link was found between acetaminophen in pregnancy and undescended testicles (cryptorchidism) or hypospadias in boys.",
+    "No meta-analysis was possible for girls because there was too little data.",
+    "All included studies had a serious or critical risk of bias, and the certainty of the evidence was low to very low.",
+    "The authors note that acetaminophen remains an important medicine, and that going without pain or fever treatment in pregnancy may harm the developing baby."
+   ],
+   "certainty": "low",
+   "lifeStages": [
+    "pregnancy"
+   ],
+   "topics": [
+    "paracetamol-pregnancy"
+   ],
+   "tags": [
+    "paracetamol",
+    "acetaminophen",
+    "pregnancy",
+    "medication safety",
+    "birth defects"
+   ],
+   "keywords": [
+    "paracetamol",
+    "acetaminophen",
+    "tylenol",
+    "panadol",
+    "pregnancy",
+    "pain relief",
+    "fever",
+    "birth defects",
+    "genital malformations",
+    "hypospadias",
+    "undescended testicles",
+    "cryptorchidism"
+   ]
+  },
+  {
+   "id": "pmid-42500177",
+   "pmid": "42500177",
+   "doi": "10.61622/rbgo/2026rbgo108",
+   "title": "Prenatal exposure to paracetamol and risk of autism spectrum disorder: systematic review and meta-analysis of observational studies",
+   "source": "Revista Brasileira de Ginecologia E Obstetricia",
+   "journal": "Revista Brasileira de Ginecologia E Obstetricia",
+   "organisation": null,
+   "year": 2026,
+   "publicationTypes": [
+    "Systematic Review",
+    "Meta-Analysis"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/42500177/",
+   "summary": "This review pooled eight observational studies covering over 2.5 million people to look at whether paracetamol (acetaminophen) taken in pregnancy is linked to autism in children. It found a modest link: about an 18% higher chance of an autism diagnosis in exposed children, but no clear link for autism symptoms. The studies had some concerns about bias and family-related factors that could affect results, so the link does not show that paracetamol causes autism. The authors suggest pregnant women and their care teams talk through the benefits and risks of treating pain and fever.",
+   "keyPoints": [
+    "Pooled results showed an 18% higher risk of an autism diagnosis in children exposed to paracetamol before birth.",
+    "The increase for autism symptoms was not statistically significant.",
+    "Included studies had 'some concerns' to 'high' risk of bias, and family-related confounding was identified.",
+    "The authors call for careful benefit-risk discussions with expectant mothers about managing pain and fever."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy"
+   ],
+   "topics": [
+    "paracetamol-pregnancy"
+   ],
+   "tags": [
+    "paracetamol",
+    "acetaminophen",
+    "autism",
+    "pregnancy medication",
+    "fever and pain"
+   ],
+   "keywords": [
+    "paracetamol",
+    "acetaminophen",
+    "tylenol",
+    "panadol",
+    "autism",
+    "asd",
+    "pregnancy",
+    "pain relief",
+    "fever",
+    "medication safety",
+    "child development"
+   ]
+  },
+  {
+   "id": "pmid-38287353",
+   "pmid": "38287353",
+   "doi": "10.1186/s13023-023-02992-z",
+   "title": "Medication use during pregnancy and the risk of gastroschisis: a systematic review and meta-analysis of observational studies",
+   "source": "Orphanet Journal of Rare Diseases",
+   "journal": "Orphanet Journal of Rare Diseases",
+   "organisation": null,
+   "year": 2024,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/38287353/",
+   "summary": "This review pooled 18 observational studies covering about 750,000 pregnancies to see whether medicines taken in pregnancy are linked to gastroschisis, a birth defect where a baby's bowel develops outside the belly. Paracetamol (acetaminophen) was not linked to gastroschisis. Aspirin, ibuprofen, decongestants such as pseudoephedrine, and oral contraceptives were linked to a higher risk, but only in some subgroups of studies, so the authors say more research is needed.",
+   "keyPoints": [
+    "No association was found between paracetamol use in pregnancy and gastroschisis (RR 1.16, 95% CI 0.96-1.41).",
+    "First-trimester use of aspirin, ibuprofen, pseudoephedrine/phenylpropanolamine and oral contraceptives was associated with a higher risk of gastroschisis.",
+    "These links were significant only in certain subgroups, defined by location, adjustment variables and type of control group.",
+    "The authors call for more research to confirm these medicines as risk factors and to assess their safety in pregnancy."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "pregnancy"
+   ],
+   "topics": [
+    "paracetamol-pregnancy"
+   ],
+   "tags": [
+    "paracetamol",
+    "gastroschisis",
+    "ibuprofen",
+    "aspirin",
+    "birth defects",
+    "medication safety"
+   ],
+   "keywords": [
+    "paracetamol",
+    "acetaminophen",
+    "tylenol",
+    "panadol",
+    "pregnancy",
+    "gastroschisis",
+    "birth defect",
+    "ibuprofen",
+    "aspirin",
+    "decongestant",
+    "pseudoephedrine",
+    "painkillers"
+   ]
+  },
+  {
+   "id": "pmid-33233996",
+   "pmid": "33233996",
+   "doi": "10.1080/14767058.2020.1849105",
+   "title": "Non-prescribed drug use and predictors among pregnant women in Ethiopia: systematic review and meta-analysis",
+   "source": "Journal of Maternal-fetal & Neonatal Medicine",
+   "journal": "Journal of Maternal-fetal & Neonatal Medicine",
+   "organisation": null,
+   "year": 2022,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/33233996/",
+   "summary": "This review pooled 11 studies of 4,492 pregnant women in Ethiopia to see how often they take medicines without a prescription. About 3 in 10 women (30%) did so, and the rate differed by region. Paracetamol was the most common non-prescribed medicine, taken by about 34% of those who used any. The study measured how common this is, not whether the medicines caused harm.",
+   "keyPoints": [
+    "About 30% of pregnant women in Ethiopia used non-prescribed medicines, ranging from about 10% in Tigray to about 37% in Amhara.",
+    "Paracetamol was the most frequently used non-prescribed medicine (34%), followed by amoxicillin (15%), aspirin (4%), metronidazole (3%) and ciprofloxacin (3%).",
+    "Past self-medication, illness during pregnancy and marital status were linked to taking non-prescribed medicines.",
+    "The authors call for more awareness of possible side effects of non-prescribed medicines in pregnancy."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy"
+   ],
+   "topics": [
+    "paracetamol-pregnancy"
+   ],
+   "tags": [
+    "paracetamol",
+    "self-medication",
+    "non-prescribed drugs",
+    "pregnancy",
+    "ethiopia"
+   ],
+   "keywords": [
+    "paracetamol",
+    "acetaminophen",
+    "tylenol",
+    "painkillers",
+    "self-medication",
+    "over the counter",
+    "medicine in pregnancy",
+    "antibiotics",
+    "aspirin",
+    "pregnancy safety"
+   ]
+  },
+  {
+   "id": "pmid-34964403",
+   "pmid": "34964403",
+   "doi": "10.1080/14740338.2022.2020246",
+   "title": "Effect of Acetaminophen use during pregnancy on adverse pregnancy outcomes: a systematic review and meta-analysis",
+   "source": "Expert Opinion on Drug Safety",
+   "journal": "Expert Opinion on Drug Safety",
+   "organisation": null,
+   "year": 2022,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/34964403/",
+   "summary": "This review pooled six studies (four cohort, two case-control) to see whether taking acetaminophen (paracetamol) in pregnancy is linked to preterm birth, low birth weight or babies being small for their gestational age. It found no increased risk of preterm birth, and lower risks of low birth weight and small-for-gestational-age babies in those who took it. The authors conclude it does not appear to raise the risk of these outcomes, but the studies lacked information on dose and how often it was taken.",
+   "keyPoints": [
+    "No increased risk of preterm birth was found (RR 0.97; 95% CI 0.59-1.58).",
+    "Acetaminophen use was linked to lower risks of low birth weight (RR 0.65) and small-for-gestational-age babies (RR 0.69).",
+    "Use in the third trimester showed no significant effect on these outcomes.",
+    "There is little information on the dose and how often acetaminophen was used."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy"
+   ],
+   "topics": [
+    "paracetamol-pregnancy"
+   ],
+   "tags": [
+    "paracetamol",
+    "acetaminophen",
+    "pregnancy medication",
+    "preterm birth",
+    "birth weight"
+   ],
+   "keywords": [
+    "paracetamol",
+    "acetaminophen",
+    "tylenol",
+    "panadol",
+    "painkiller",
+    "pain relief",
+    "pregnancy",
+    "preterm birth",
+    "low birth weight",
+    "small for gestational age",
+    "medication safety"
+   ]
+  },
+  {
+   "id": "pmid-35206317",
+   "pmid": "35206317",
+   "doi": "10.3390/ijerph19042128",
+   "title": "Long-Term Safety of Prenatal and Neonatal Exposure to Paracetamol: A Systematic Review",
+   "source": "International Journal of Environmental Research and Public Health",
+   "journal": "International Journal of Environmental Research and Public Health",
+   "organisation": null,
+   "year": 2022,
+   "publicationTypes": [
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/35206317/",
+   "summary": "This review looked at 30 studies on whether paracetamol (acetaminophen) taken during pregnancy, or given to newborns, is linked to later health problems in children. Studies on use during pregnancy reported possible links with problems in brain development, allergic conditions such as asthma and eczema, and reproductive outcomes. Only one study found a possible link with newborn use. The authors say the evidence is limited and that better-quality data are urgently needed.",
+   "keyPoints": [
+    "30 studies were included; 27 looked at use during pregnancy, 2 at use in newborns and 1 at both.",
+    "Studies of use in pregnancy reported possible links with later brain development, allergic (atopic) and reproductive problems.",
+    "Only one study found a possible link between newborn paracetamol and long-term problems.",
+    "The authors describe the evidence as limited and call for stronger research on long-term safety."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy",
+    "postpartum"
+   ],
+   "topics": [
+    "paracetamol-pregnancy"
+   ],
+   "tags": [
+    "paracetamol",
+    "acetaminophen",
+    "pregnancy medication",
+    "child development",
+    "neonatal"
+   ],
+   "keywords": [
+    "paracetamol",
+    "acetaminophen",
+    "tylenol",
+    "panadol",
+    "pregnancy",
+    "painkiller",
+    "fever",
+    "autism",
+    "adhd",
+    "asthma",
+    "newborn",
+    "child development"
+   ]
+  },
+  {
+   "id": "pmid-33388821",
+   "pmid": "33388821",
+   "doi": "10.1007/s00228-020-03077-7",
+   "title": "Paracetamol overdose in the newborn and infant: a life-threatening event",
+   "source": "European Journal of Clinical Pharmacology",
+   "journal": "European Journal of Clinical Pharmacology",
+   "organisation": null,
+   "year": 2021,
+   "publicationTypes": [
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/33388821/",
+   "summary": "This review looked at published reports of newborns and infants who were given too much paracetamol (acetaminophen). In some cases the baby was exposed before birth after the mother took an overdose, and in others the cause was a dosing mistake. A single overdose with blood levels under a set safety limit carried a low risk of serious liver damage, but repeated high doses need careful handling. The antidote N-acetylcysteine reduces liver harm. The review is based on case reports, not large trials.",
+   "keyPoints": [
+    "Paracetamol is the only drug recommended for fever in newborns, and at recommended doses it has not been linked to liver injury in neonates.",
+    "Newborn poisoning came from a mother's overdose passing across the placenta in some cases, and from medication errors in others.",
+    "Babies with a single overdose and blood levels below the Rumack-Matthew nomogram limits are at low risk of serious liver damage; those with more than one high dose need cautious management.",
+    "N-acetylcysteine is the treatment of choice for paracetamol poisoning and is given by weight-based dosing tables."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy",
+    "postpartum"
+   ],
+   "topics": [
+    "paracetamol-pregnancy"
+   ],
+   "tags": [
+    "paracetamol",
+    "acetaminophen",
+    "overdose",
+    "newborn",
+    "medication safety"
+   ],
+   "keywords": [
+    "paracetamol",
+    "acetaminophen",
+    "tylenol",
+    "overdose",
+    "newborn",
+    "baby fever",
+    "infant dose",
+    "liver damage",
+    "pregnancy overdose",
+    "n-acetylcysteine",
+    "medication error"
+   ]
+  },
+  {
+   "id": "pmid-31916282",
+   "pmid": "31916282",
+   "doi": "10.1111/ppe.12615",
+   "title": "Acetaminophen use during pregnancy and the risk of attention deficit hyperactivity disorder: A causal association or bias?",
+   "source": "Paediatric and Perinatal Epidemiology",
+   "journal": "Paediatric and Perinatal Epidemiology",
+   "organisation": null,
+   "year": 2020,
+   "publicationTypes": [
+    "Meta-Analysis"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/31916282/",
+   "summary": "This review pooled seven observational studies on paracetamol (acetaminophen) use in pregnancy and ADHD in children. Taken at face value, the studies linked paracetamol use to a modestly higher chance of ADHD. When the authors tested for hidden factors such as parental ADHD, the link got smaller in most studies. They conclude the association may be due to unmeasured confounding, and that a causal link cannot be confirmed.",
+   "keyPoints": [
+    "Pooled adjusted results from seven observational studies showed a risk ratio of 1.35 for ADHD with paracetamol use in pregnancy.",
+    "Bias analysis lowered the estimated risk in five of the seven studies, suggesting parental ADHD could explain part of the link.",
+    "The authors say the association may be due to unmeasured confounding.",
+    "Their ability to conclude that paracetamol causes ADHD is limited."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy"
+   ],
+   "topics": [
+    "paracetamol-pregnancy"
+   ],
+   "tags": [
+    "paracetamol",
+    "acetaminophen",
+    "adhd",
+    "pregnancy medication",
+    "child development"
+   ],
+   "keywords": [
+    "paracetamol",
+    "acetaminophen",
+    "tylenol",
+    "panadol",
+    "pregnancy",
+    "adhd",
+    "pain relief",
+    "medication safety",
+    "child development",
+    "fever"
+   ]
+  },
+  {
+   "id": "pmid-30654621",
+   "pmid": "30654621",
+   "doi": "10.1177/0004867418823276",
+   "title": "Association of maternal prenatal acetaminophen use with the risk of attention deficit/hyperactivity disorder in offspring: A meta-analysis",
+   "source": "Australian and New Zealand Journal of Psychiatry",
+   "journal": "Australian and New Zealand Journal of Psychiatry",
+   "organisation": null,
+   "year": 2019,
+   "publicationTypes": [
+    "Meta-Analysis"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/30654621/",
+   "summary": "This review pooled eight cohort studies covering about 245,000 participants to look at paracetamol (acetaminophen) use in pregnancy and ADHD in children. It found an association: children whose mothers used it in pregnancy had a somewhat higher risk of ADHD. The link looked stronger with use in the third trimester and with longer use, about 28 days or more. Because the studies only observed groups of people, the abstract describes an association rather than proof of cause.",
+   "keyPoints": [
+    "Pooled results from eight cohort studies showed a 25% higher relative risk of ADHD in children exposed to paracetamol before birth.",
+    "Use in the third trimester was linked to a 26% higher relative risk.",
+    "Using paracetamol for 28 or more days in pregnancy was linked to a 63% higher relative risk.",
+    "The authors conclude there is an association, and that timing and duration of use may matter."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy"
+   ],
+   "topics": [
+    "paracetamol-pregnancy"
+   ],
+   "tags": [
+    "paracetamol",
+    "acetaminophen",
+    "pregnancy",
+    "adhd",
+    "child development"
+   ],
+   "keywords": [
+    "paracetamol",
+    "acetaminophen",
+    "tylenol",
+    "panadol",
+    "pain relief",
+    "fever",
+    "pregnancy",
+    "adhd",
+    "attention deficit",
+    "child behaviour",
+    "medication in pregnancy",
+    "third trimester"
+   ]
+  },
+  {
+   "id": "pmid-28237129",
+   "pmid": "28237129",
+   "doi": "10.1016/j.aller.2016.10.014",
+   "title": "Prenatal paracetamol use and asthma in childhood: A systematic review and meta-analysis",
+   "source": "Allergologia et Immunopathologia",
+   "journal": "Allergologia et Immunopathologia",
+   "organisation": null,
+   "year": 2017,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/28237129/",
+   "summary": "This review pooled results from 13 studies, covering over one million people, to see whether taking paracetamol (acetaminophen) during pregnancy is linked to asthma in children. It found a small but statistically significant link: children whose mothers took paracetamol in pregnancy were somewhat more likely to have asthma. The link appeared for use in the first trimester and in the second and third trimesters. The review shows an association only, and the abstract does not say whether paracetamol itself causes asthma.",
+   "keyPoints": [
+    "Prenatal paracetamol use was linked to a higher risk of childhood asthma (OR 1.19, 95% CI 1.12-1.27) across 13 studies.",
+    "Use in the first trimester was linked to increased asthma risk (OR 1.21, 95% CI 1.14-1.28).",
+    "Use in the second and third trimesters was also linked to increased asthma risk (OR 1.13, 95% CI 1.04-1.23).",
+    "The authors concluded that prenatal paracetamol exposure was significantly associated with increased child asthma risk."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy"
+   ],
+   "topics": [
+    "paracetamol-pregnancy"
+   ],
+   "tags": [
+    "paracetamol",
+    "acetaminophen",
+    "childhood asthma",
+    "medication in pregnancy",
+    "prenatal exposure"
+   ],
+   "keywords": [
+    "paracetamol",
+    "acetaminophen",
+    "tylenol",
+    "panadol",
+    "pregnancy",
+    "asthma",
+    "child asthma",
+    "pain relief in pregnancy",
+    "medicine in pregnancy",
+    "baby health"
+   ]
+  },
+  {
+   "id": "pmid-28333256",
+   "pmid": "28333256",
+   "doi": "10.1093/humrep/dex047",
+   "title": "Analgesia use during pregnancy and risk of cryptorchidism: a systematic review and meta-analysis",
+   "source": "Human Reproduction",
+   "journal": "Human Reproduction",
+   "organisation": null,
+   "year": 2017,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/28333256/",
+   "summary": "Researchers combined 10 earlier studies to see whether pain relief medicines (such as paracetamol) taken in pregnancy are linked to cryptorchidism, where a baby boy's testicle has not moved down into the scrotum. They found only weak evidence of a small link, and the result was borderline. The authors say any strong link seems unlikely, but more detailed research is needed.",
+   "keyPoints": [
+    "Pooled results from 10 studies showed only weak evidence of an association between any pain relief use in pregnancy and cryptorchidism (odds ratio 1.11, 95% CI 1.00-1.23).",
+    "Evidence for effects of how long or when in pregnancy the medicine was used was also weak, and there was too little data to combine results for these questions.",
+    "The authors conclude that analgesia use in pregnancy is not strongly linked to cryptorchidism but that further detailed research is needed.",
+    "Limitations include mothers' self-reported use possibly not matching real exposure, grouping different medicines together, and most studies being from Europe or the USA."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy"
+   ],
+   "topics": [
+    "paracetamol-pregnancy"
+   ],
+   "tags": [
+    "paracetamol",
+    "pain relief in pregnancy",
+    "cryptorchidism",
+    "male reproductive health",
+    "systematic review"
+   ],
+   "keywords": [
+    "paracetamol",
+    "acetaminophen",
+    "tylenol",
+    "painkillers",
+    "pain relief",
+    "analgesics",
+    "pregnancy",
+    "undescended testicle",
+    "cryptorchidism",
+    "baby boy",
+    "birth defects",
+    "medication safety"
+   ]
+  },
+  {
+   "id": "pmid-25429049",
+   "pmid": "25429049",
+   "doi": "10.1136/archdischild-2012-303043",
+   "title": "Paracetamol exposure in pregnancy and early childhood and development of childhood asthma: a systematic review and meta-analysis",
+   "source": "Archives of Disease in Childhood",
+   "journal": "Archives of Disease in Childhood",
+   "organisation": null,
+   "year": 2015,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/25429049/",
+   "summary": "This review pooled 11 observational studies to see whether paracetamol use in pregnancy or infancy is linked to asthma in children aged 5 and older. Using paracetamol in the first trimester was linked to somewhat higher odds of childhood asthma, but results varied a lot between studies and only one accounted for the mother's respiratory infections. In infancy, the link got weaker and was no longer clear once respiratory infections were taken into account. The authors concluded there is not enough evidence to change guidelines on early-life paracetamol use.",
+   "keyPoints": [
+    "First-trimester paracetamol use was linked to higher odds of childhood asthma (pooled odds ratio 1.39, 95% CI 1.01 to 1.91), but results differed a lot between studies.",
+    "Only one of the five pregnancy studies adjusted for the mother's respiratory tract infections, which could be an alternative explanation.",
+    "In infancy, more days of paracetamol use was linked to asthma, but the link shrank and became unclear after adjusting for respiratory infections.",
+    "The authors found insufficient evidence to warrant changing current guidelines on early-life paracetamol exposure."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy",
+    "postpartum"
+   ],
+   "topics": [
+    "paracetamol-pregnancy"
+   ],
+   "tags": [
+    "paracetamol",
+    "acetaminophen",
+    "childhood asthma",
+    "first trimester",
+    "infancy"
+   ],
+   "keywords": [
+    "paracetamol",
+    "acetaminophen",
+    "tylenol",
+    "panadol",
+    "pregnancy",
+    "asthma",
+    "child asthma",
+    "baby",
+    "infant",
+    "first trimester",
+    "pain relief",
+    "fever"
+   ]
+  },
+  {
+   "id": "pmid-25758061",
+   "pmid": "25758061",
+   "doi": "10.1002/14651858.CD010061.pub2",
+   "title": "Paracetamol (acetaminophen) for patent ductus arteriosus in preterm or low-birth-weight infants",
+   "source": "Cochrane Database of Systematic Reviews",
+   "journal": "Cochrane Database of Systematic Reviews",
+   "organisation": null,
+   "year": 2015,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/25758061/",
+   "summary": "This Cochrane review looked at whether paracetamol can help close a patent ductus arteriosus (a blood vessel near the heart that stays open) in babies born early. Only two small trials were found, covering 250 premature babies, and both compared oral paracetamol with oral ibuprofen. Paracetamol worked about as well as ibuprofen at closing the vessel, but the quality of the evidence was low to moderate. The authors say longer-term follow-up of these babies is needed before any recommendations can be made, partly because of reports linking paracetamol in pregnancy to autism and of brain effects in mice.",
+   "keyPoints": [
+    "Oral paracetamol appeared to close a patent ductus arteriosus about as well as oral ibuprofen in preterm babies.",
+    "Babies given paracetamol needed supplemental oxygen for fewer days and had less high bilirubin (jaundice) in the studies where this was measured.",
+    "Evidence quality was low for closure of the vessel and moderate for other outcomes, and only two trials were included.",
+    "The authors say trials must follow babies to at least 18 to 24 months before paracetamol can be recommended for newborns."
+   ],
+   "certainty": "low",
+   "lifeStages": [
+    "pregnancy",
+    "postpartum"
+   ],
+   "topics": [
+    "paracetamol-pregnancy"
+   ],
+   "tags": [
+    "paracetamol",
+    "patent ductus arteriosus",
+    "preterm babies",
+    "newborn care"
+   ],
+   "keywords": [
+    "paracetamol",
+    "acetaminophen",
+    "tylenol",
+    "patent ductus arteriosus",
+    "pda",
+    "premature baby",
+    "preterm infant",
+    "ibuprofen",
+    "newborn heart",
+    "autism"
    ]
   },
   {
@@ -92056,6 +93683,553 @@
     "meditation",
     "chemotherapy",
     "thinking problems"
+   ]
+  },
+  {
+   "id": "pmid-41468627",
+   "pmid": "41468627",
+   "doi": "10.1016/j.jpsychires.2025.12.046",
+   "title": "Comparison of premenstrual dysphoric disorder treatment with antidepressants and combined oral contraceptives: a systematic review with network meta-analysis",
+   "source": "Journal of Psychiatric Research",
+   "journal": "Journal of Psychiatric Research",
+   "organisation": null,
+   "year": 2026,
+   "publicationTypes": [
+    "Systematic Review",
+    "Meta-Analysis",
+    "Comparative Study"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/41468627/",
+   "summary": "This review pooled results from 16 studies (5 in the combined analysis) on treating premenstrual dysphoric disorder (PMDD) with antidepressants called SSRIs or combined birth control pills. Both types of treatment helped. Taking paroxetine continuously worked best among the antidepressants, and a drospirenone and ethinylestradiol pill taken in a 24/4 schedule worked best among the pills. The authors say more studies directly comparing the two treatment types are still needed.",
+   "keyPoints": [
+    "Both SSRI antidepressants and combined oral contraceptives were effective for managing PMDD.",
+    "Continuous paroxetine showed the greatest effect across all symptom areas measured.",
+    "The 24/4 drospirenone/ethinylestradiol pill was the most effective pill, helping both physical and emotional symptoms.",
+    "Choosing a treatment should take into account main symptoms, how well it is tolerated, and plans for pregnancy; head-to-head trials are still needed."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menstrual-cycle",
+    "contraception"
+   ],
+   "topics": [
+    "pmdd-treatment"
+   ],
+   "tags": [
+    "pmdd",
+    "ssri",
+    "paroxetine",
+    "combined pill",
+    "premenstrual symptoms"
+   ],
+   "keywords": [
+    "pmdd",
+    "premenstrual dysphoric disorder",
+    "pms",
+    "severe pms",
+    "antidepressants",
+    "ssri",
+    "paroxetine",
+    "birth control pill",
+    "contraceptive pill",
+    "mood symptoms",
+    "period mood swings",
+    "treatment"
+   ]
+  },
+  {
+   "id": "pmid-42045645",
+   "pmid": "42045645",
+   "doi": "10.1007/s10488-026-01504-y",
+   "title": "Prevalence, Risk Factors, and Treatments for Suicidality in People Living with Premenstrual Dysphoric Disorder (PMDD): A Systematic Review",
+   "source": "Administration and Policy in Mental Health",
+   "journal": "Administration and Policy in Mental Health",
+   "organisation": null,
+   "year": 2026,
+   "publicationTypes": [
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/42045645/",
+   "summary": "This review pulled together 18 studies on suicidal thoughts and behaviours in people with premenstrual dysphoric disorder (PMDD), a severe mood condition linked to the menstrual cycle. The studies consistently found that people with PMDD are at higher risk of suicidality, though the reported rates varied a lot between studies. No studies tested treatments for suicidality in people with PMDD. Many of the studies had quality problems, so exact numbers should be read with care.",
+   "keyPoints": [
+    "Evidence is clear that people with PMDD are at increased risk of suicidality, even though studies differed in methods and definitions.",
+    "Reported rates varied widely: 26%-86% for suicidal ideation, 11.5%-41.5% for suicide planning, and 7.1%-60.7% for suicide attempts.",
+    "Risk factors included other psychiatric conditions, high impulsivity, aggression and hopelessness scores, and hormonal factors.",
+    "No studies were found that tested treatments for suicidality in people with PMDD, and about 70% of studies had quality concerns."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menstrual-cycle"
+   ],
+   "topics": [
+    "pmdd-treatment"
+   ],
+   "tags": [
+    "pmdd",
+    "suicidality",
+    "mental health",
+    "premenstrual symptoms",
+    "risk factors"
+   ],
+   "keywords": [
+    "pmdd",
+    "premenstrual dysphoric disorder",
+    "suicidal thoughts",
+    "suicide risk",
+    "severe pms",
+    "premenstrual mood",
+    "depression before period",
+    "mental health",
+    "menstrual cycle mood"
+   ]
+  },
+  {
+   "id": "pmid-42325976",
+   "pmid": "42325976",
+   "doi": "10.3389/fpsyt.2026.1795420",
+   "title": "Functional MRI evidence of brain alterations in premenstrual dysphoric disorder: a systematic review",
+   "source": "Frontiers in Psychiatry",
+   "journal": "Frontiers in Psychiatry",
+   "organisation": null,
+   "year": 2026,
+   "publicationTypes": [
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/42325976/",
+   "summary": "This review pulled together brain-scan (fMRI) studies of women with premenstrual dysphoric disorder (PMDD), covering 294 women with PMDD and 304 without. It found differences in how brain areas involved in controlling emotions are activated and connected. The authors say this suggests PMDD involves wide brain networks, not one single spot, and may help guide new treatments, since about 40 percent of women do not respond to SSRIs.",
+   "keyPoints": [
+    "PMDD affects about 1.6% of women of reproductive age, and around 40% do not respond to SSRIs, the usual first treatment.",
+    "Women with PMDD showed less activation in some control and regulation areas of the brain, such as the anterior cingulate and prefrontal cortex.",
+    "They also showed more activation in the amygdala and insula, and weaker connections between emotion and control areas.",
+    "The authors suggest these brain differences could help in developing new treatments, but no treatment was tested."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menstrual-cycle"
+   ],
+   "topics": [
+    "pmdd-treatment"
+   ],
+   "tags": [
+    "pmdd",
+    "brain imaging",
+    "fmri",
+    "ssri",
+    "premenstrual symptoms"
+   ],
+   "keywords": [
+    "pmdd",
+    "premenstrual dysphoric disorder",
+    "pms",
+    "premenstrual mood",
+    "brain scan",
+    "mri",
+    "ssri",
+    "antidepressant",
+    "mood symptoms",
+    "period mood swings"
+   ]
+  },
+  {
+   "id": "pmid-42958210",
+   "pmid": "42958210",
+   "doi": "10.1186/s12905-026-04753-z",
+   "title": "The impact of menstruation-related symptoms on women's quality of life, work productivity, and economic burden: a structured narrative review",
+   "source": "BMC Women's Health",
+   "journal": "BMC Women's Health",
+   "organisation": null,
+   "year": 2026,
+   "publicationTypes": [
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/42958210/",
+   "summary": "This review pulled together 86 studies on painful periods, PMS/PMDD and heavy periods. It found these conditions are linked to lower quality of life, emotional distress and trouble coping at school or work. Most of the lost productivity came from people working while unwell rather than taking time off. Treatment often eased symptoms, but day-to-day functioning did not always improve to the same degree.",
+   "keyPoints": [
+    "Painful periods, PMS/PMDD and heavy periods were all linked to lower quality of life, psychological distress and impaired school or work functioning.",
+    "Lost productivity was mainly from presenteeism (working while unwell) rather than absence, so counting sick days underestimates the impact.",
+    "Anxiety, low mood, emotional ups and downs and poor sleep were key contributors to reduced quality of life.",
+    "Treatment and medical consultations often improved symptoms, but gains in productivity were inconsistent, and the authors call for approaches that address both clinical and psychosocial needs."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menstrual-cycle",
+    "general"
+   ],
+   "topics": [
+    "pmdd-treatment"
+   ],
+   "tags": [
+    "pmdd",
+    "pms",
+    "quality of life",
+    "work productivity",
+    "mental health",
+    "heavy periods"
+   ],
+   "keywords": [
+    "pmdd",
+    "pms",
+    "premenstrual",
+    "period pain",
+    "painful periods",
+    "heavy periods",
+    "work",
+    "productivity",
+    "mood",
+    "anxiety",
+    "sleep",
+    "treatment"
+   ]
+  },
+  {
+   "id": "pmid-39577497",
+   "pmid": "39577497",
+   "doi": "10.1016/j.jad.2024.11.033",
+   "title": "Cognition and behaviour across the menstrual cycle in individuals with premenstrual dysphoric disorder - A systematic review",
+   "source": "Journal of Affective Disorders",
+   "journal": "Journal of Affective Disorders",
+   "organisation": null,
+   "year": 2025,
+   "publicationTypes": [
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/39577497/",
+   "summary": "This review pulled together 21 studies (1,222 people) that looked at thinking and behaviour at different points in the menstrual cycle in people with and without premenstrual dysphoric disorder (PMDD). Tests of thinking skills, like memory and concentration, showed few and inconsistent differences linked to PMDD. Studies of how people process information suggest a tendency to focus on negative things may be central to the PMDD experience. The authors noted weaknesses in the studies, and the results could not be combined statistically.",
+   "keyPoints": [
+    "Evidence that PMDD changes thinking performance (cognitive abilities) was limited and inconsistent.",
+    "Studies suggest a negative attentional bias, meaning attention drawn to negative things, is central to how PMDD is experienced.",
+    "How people process and think about information, and how they behave, may tell us more about PMDD than their absolute thinking abilities.",
+    "Many studies had risk of bias, such as no power calculation and unsuitable statistical methods, and the results could not be combined."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menstrual-cycle"
+   ],
+   "topics": [
+    "pmdd-treatment"
+   ],
+   "tags": [
+    "pmdd",
+    "cognition",
+    "attention",
+    "mood",
+    "menstrual cycle"
+   ],
+   "keywords": [
+    "pmdd",
+    "premenstrual dysphoric disorder",
+    "pms",
+    "premenstrual mood",
+    "memory",
+    "concentration",
+    "brain fog",
+    "negative thinking",
+    "attention",
+    "behaviour"
+   ]
+  },
+  {
+   "id": "pmid-40014013",
+   "pmid": "40014013",
+   "doi": "10.1097/YIC.0000000000000585",
+   "title": "Selective serotonin reuptake inhibitors and quality of life: a meta-analysis of randomized placebo-controlled trials",
+   "source": "International Clinical Psychopharmacology",
+   "journal": "International Clinical Psychopharmacology",
+   "organisation": null,
+   "year": 2025,
+   "publicationTypes": [
+    "Meta-Analysis"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/40014013/",
+   "summary": "This review pooled results from randomized trials comparing SSRI antidepressants with placebo, looking at whether they improve quality of life. SSRIs gave small-to-moderate improvements in quality of life for several conditions, including premenstrual dysphoric disorder (PMDD) and menopausal symptoms. The authors note that small studies, many people dropping out, and uneven participant groups limit how strongly SSRIs can be recommended for this purpose.",
+   "keyPoints": [
+    "Compared with placebo, SSRIs improved quality of life in premenstrual dysphoric disorder (effect size 0.38) and menopausal symptoms (0.40).",
+    "Improvements were also seen in major depression, persistent depressive disorder, cancer and type 2 diabetes, but not clearly in COPD, heart failure or irritable bowel syndrome.",
+    "Paroxetine showed the largest effect among the SSRIs studied, and quality of life improved as depressive symptoms eased.",
+    "Small-study effects, high dropout rates and demographic imbalances limit how firmly SSRIs can be recommended to improve quality of life."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menstrual-cycle",
+    "menopause"
+   ],
+   "topics": [
+    "pmdd-treatment"
+   ],
+   "tags": [
+    "pmdd",
+    "ssri",
+    "quality of life",
+    "antidepressants",
+    "menopausal symptoms"
+   ],
+   "keywords": [
+    "pmdd",
+    "premenstrual dysphoric disorder",
+    "ssri",
+    "antidepressant",
+    "paroxetine",
+    "quality of life",
+    "menopause symptoms",
+    "severe pms",
+    "mood",
+    "placebo"
+   ]
+  },
+  {
+   "id": "pmid-35686687",
+   "pmid": "35686687",
+   "doi": "10.1177/02698811221099645",
+   "title": "Intermittent selective serotonin reuptake inhibitors for premenstrual syndromes: A systematic review and meta-analysis of randomised trials",
+   "source": "Journal of Psychopharmacology",
+   "journal": "Journal of Psychopharmacology",
+   "organisation": null,
+   "year": 2023,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/35686687/",
+   "summary": "This review pooled eight randomised trials (460 women) comparing two ways of taking SSRI antidepressants for premenstrual syndromes such as PMDD: only in the second half of the cycle (intermittent) versus every day (continuous). It found no clear difference between the two in how many women improved, how many dropped out, or how much symptoms changed. All the studies had a moderate or high risk of bias, so the results should be read with caution. Because intermittent dosing avoids the risk of antidepressant withdrawal symptoms, the authors suggest it should be considered more often.",
+   "keyPoints": [
+    "Eight trials with 460 women found no statistically significant difference between intermittent and continuous SSRI dosing for response rates.",
+    "Dropout rates and changes in symptom scores were also not meaningfully different between the two approaches.",
+    "All included studies had a moderate or high risk of bias.",
+    "Intermittent (luteal phase) dosing avoids withdrawal symptoms linked to long-term daily use, so the authors say it should be considered more commonly."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menstrual-cycle"
+   ],
+   "topics": [
+    "pmdd-treatment"
+   ],
+   "tags": [
+    "pmdd",
+    "pms",
+    "ssri",
+    "antidepressants",
+    "luteal phase dosing"
+   ],
+   "keywords": [
+    "pmdd",
+    "premenstrual dysphoric disorder",
+    "pms",
+    "premenstrual syndrome",
+    "ssri",
+    "antidepressant",
+    "luteal phase",
+    "intermittent dosing",
+    "withdrawal",
+    "mood symptoms",
+    "period mood swings"
+   ]
+  },
+  {
+   "id": "pmid-32845159",
+   "pmid": "32845159",
+   "doi": "10.1080/13548506.2020.1810718",
+   "title": "Short report: cognitive behavioral therapy - a primary mode for premenstrual syndrome management: systematic literature review",
+   "source": "Psychology, Health & Medicine",
+   "journal": "Psychology, Health & Medicine",
+   "organisation": null,
+   "year": 2021,
+   "publicationTypes": [
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/32845159/",
+   "summary": "This review looked at 32 studies of non-drug treatments for premenstrual syndrome (PMS) and premenstrual dysphoric disorder, mainly cognitive behavioral therapy (CBT) and psychoeducation (learning about PMS and how to manage it). All the studies found symptoms improved, in some cases to complete remission, with no side effects reported. Self-help packages seemed enough for most women, while the most severe cases needed one-to-one CBT. The authors say better-quality research is still needed.",
+   "keyPoints": [
+    "All 32 studies found that non-drug approaches such as CBT and psychoeducation reduced PMS symptoms, from significant improvement to complete remission.",
+    "No side effects were reported, and the benefits lasted over time.",
+    "Self-help packages, including ones delivered through modern technology, appeared to be enough for most women.",
+    "The most severe forms of PMS needed one-to-one CBT."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menstrual-cycle"
+   ],
+   "topics": [
+    "pmdd-treatment"
+   ],
+   "tags": [
+    "pmdd",
+    "pms",
+    "cognitive behavioral therapy",
+    "psychoeducation",
+    "self-help"
+   ],
+   "keywords": [
+    "pmdd",
+    "pms",
+    "premenstrual syndrome",
+    "premenstrual dysphoric disorder",
+    "cbt",
+    "therapy",
+    "counselling",
+    "self-help",
+    "mood",
+    "period symptoms",
+    "non-drug treatment",
+    "talking therapy"
+   ]
+  },
+  {
+   "id": "pmid-34224688",
+   "pmid": "34224688",
+   "doi": "10.1016/j.ajog.2021.06.090",
+   "title": "Efficacy of combined oral contraceptives for depressive symptoms and overall symptomatology in premenstrual syndrome: pairwise and network meta-analysis of randomized trials",
+   "source": "American Journal of Obstetrics and Gynecology",
+   "journal": "American Journal of Obstetrics and Gynecology",
+   "organisation": null,
+   "year": 2021,
+   "publicationTypes": [
+    "Network Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/34224688/",
+   "summary": "Researchers pooled the results of 9 randomized trials covering 1,205 women with premenstrual syndrome (PMS) or premenstrual dysphoric disorder (PMDD) to see whether combined birth control pills help. The pills worked better than placebo for overall premenstrual symptoms. They did not clearly help low mood or depressive symptoms in particular, and no one type of pill was shown to work better than another.",
+   "keyPoints": [
+    "Combined oral contraceptives were more effective than placebo for overall premenstrual symptoms in PMS or PMDD.",
+    "They did not show a clear benefit over placebo for premenstrual depressive symptoms specifically.",
+    "No combined oral contraceptive was found to be more effective than any other.",
+    "The authors note that evidence for this treatment has been scarce."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menstrual-cycle",
+    "contraception"
+   ],
+   "topics": [
+    "pmdd-treatment"
+   ],
+   "tags": [
+    "pmdd",
+    "pms",
+    "combined oral contraceptive",
+    "premenstrual depression",
+    "birth control pill"
+   ],
+   "keywords": [
+    "pmdd",
+    "pms",
+    "premenstrual syndrome",
+    "premenstrual dysphoric disorder",
+    "birth control pill",
+    "the pill",
+    "contraceptive pill",
+    "mood",
+    "depression",
+    "period symptoms",
+    "treatment"
+   ]
+  },
+  {
+   "id": "pmid-33324253",
+   "pmid": "33324253",
+   "doi": "10.3389/fpsyt.2020.575526",
+   "title": "Association Between Smoking and Premenstrual Syndrome: A Meta-Analysis",
+   "source": "Frontiers in Psychiatry",
+   "journal": "Frontiers in Psychiatry",
+   "organisation": null,
+   "year": 2020,
+   "publicationTypes": [
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/33324253/",
+   "summary": "This review combined results from 13 studies with about 25,800 participants to look at whether smoking is linked to premenstrual syndrome (PMS). People who smoked were more likely to have PMS, and the link was stronger for the severe form, premenstrual dysphoric disorder (PMDD). The studies show an association only, so they cannot prove that smoking causes PMS. The authors suggest the link may run both ways: smoking may be used to ease low mood, or it may make symptoms worse.",
+   "keyPoints": [
+    "Smoking was linked to a higher chance of PMS overall (odds ratio 1.56).",
+    "The link was stronger for PMDD (odds ratio 3.15) than for PMS (odds ratio 1.27).",
+    "The authors suggest nicotine may be used to relieve low mood, but may also worsen symptoms by affecting the brain's stress response.",
+    "Having both PMS or PMDD and tobacco use can make treatment more complicated."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menstrual-cycle"
+   ],
+   "topics": [
+    "pmdd-treatment"
+   ],
+   "tags": [
+    "pmdd",
+    "pms",
+    "smoking",
+    "nicotine",
+    "mood"
+   ],
+   "keywords": [
+    "pmdd",
+    "pms",
+    "premenstrual syndrome",
+    "premenstrual dysphoric disorder",
+    "smoking",
+    "cigarettes",
+    "nicotine",
+    "tobacco",
+    "mood",
+    "stress"
+   ]
+  },
+  {
+   "id": "pmid-27454391",
+   "pmid": "27454391",
+   "doi": "10.1097/WNF.0000000000000173",
+   "title": "Premenstrual Dysphoric Disorder Without Comorbid Psychiatric Conditions: A Systematic Review of Therapeutic Options",
+   "source": "Clinical Neuropharmacology",
+   "journal": "Clinical Neuropharmacology",
+   "organisation": null,
+   "year": 2016,
+   "publicationTypes": [
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/27454391/",
+   "summary": "This review looked at 55 studies on treating premenstrual dysphoric disorder (PMDD) in adult women who had no other mental health conditions. It found that the best-supported options were a type of antidepressant called SSRIs (especially paroxetine and fluoxetine) and low-dose combined hormonal pills. Other approaches such as light therapy, talking therapy, supplements and herbal medicines looked promising, but more research is needed to confirm they work.",
+   "keyPoints": [
+    "PMDD affects about 2% to 8% of women during their reproductive years.",
+    "SSRI antidepressants, especially paroxetine and fluoxetine, were among the best options for PMDD.",
+    "Low doses of oral estrogen-progestin (combined hormonal) pills were also among the best options.",
+    "Light therapy, cognitive behavioral therapy, supplements and herbal medicines showed promise but need more research."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menstrual-cycle"
+   ],
+   "topics": [
+    "pmdd-treatment"
+   ],
+   "tags": [
+    "pmdd",
+    "premenstrual",
+    "ssri",
+    "antidepressants",
+    "hormonal treatment",
+    "cognitive behavioral therapy"
+   ],
+   "keywords": [
+    "pmdd",
+    "premenstrual dysphoric disorder",
+    "pms",
+    "premenstrual mood",
+    "antidepressant",
+    "ssri",
+    "fluoxetine",
+    "paroxetine",
+    "birth control pill",
+    "supplements",
+    "herbal",
+    "light therapy"
    ]
   },
   {

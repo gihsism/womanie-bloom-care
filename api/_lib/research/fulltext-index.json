@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generatedAt": "2026-11-24T17:04:44.750Z",
+ "generatedAt": "2026-11-24T17:17:13.946Z",
  "source": "PMC Article Datasets (NIH/NLM PubMed Central, Open Access subset), retrieved from https://registry.opendata.aws/ncbi-pmc. Articles are provided by their publishers/authors under the licence shown per item.",
  "acknowledgement": "Full text courtesy of the U.S. National Library of Medicine (PubMed Central). Not endorsed by NLM.",
  "licencesAllowed": [
@@ -1428,6 +1428,23 @@
     "Conclusions"
    ]
   },
+  "33324253": {
+   "pmcid": "PMC7725748",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "http://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7725748/",
+   "title": "Association Between Smoking and Premenstrual Syndrome: A Meta-Analysis",
+   "credit": "Choi SH, Hamidovic A",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 12,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion"
+   ]
+  },
   "33407632": {
    "pmcid": "PMC7788930",
    "version": 1,
@@ -2438,6 +2455,24 @@
     "Discussion"
    ]
   },
+  "35206317": {
+   "pmcid": "PMC8871754",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8871754/",
+   "title": "Long-Term Safety of Prenatal and Neonatal Exposure to Paracetamol: A Systematic Review",
+   "credit": "Patel R, Sushko K, van den Anker J, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 16,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
   "35206475": {
    "pmcid": "PMC8872164",
    "version": 1,
@@ -2729,6 +2764,24 @@
    "label": "Full text · CC BY",
    "hasBody": true,
    "chunks": 22,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "35686687": {
+   "pmcid": "PMC10074750",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10074750/",
+   "title": "Intermittent selective serotonin reuptake inhibitors for premenstrual syndromes: A systematic review and meta-analysis of randomised trials",
+   "credit": "Reilly TJ, Wallman P, Clark I, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 16,
    "sections": [
     "Abstract",
     "Results",
@@ -4976,6 +5029,23 @@
     "Discussion"
    ]
   },
+  "38233773": {
+   "pmcid": "PMC10792962",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10792962/",
+   "title": "Low-molecular-weight heparin for the prevention of preeclampsia in high-risk pregnancies without thrombophilia: a systematic review and meta-analysis",
+   "credit": "Chen J, Huai J, Yang H",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 10,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion"
+   ]
+  },
   "38263123": {
    "pmcid": "PMC10804786",
    "version": 1,
@@ -5039,6 +5109,24 @@
    "label": "Full text · CC BY",
    "hasBody": true,
    "chunks": 15,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "38287353": {
+   "pmcid": "PMC10826191",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10826191/",
+   "title": "Medication use during pregnancy and the risk of gastroschisis: a systematic review and meta-analysis of observational studies",
+   "credit": "Baldacci S, Santoro M, Mezzasalma L, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 19,
    "sections": [
     "Abstract",
     "Results",
@@ -5554,6 +5642,23 @@
     "Conclusions"
    ]
   },
+  "38898143": {
+   "pmcid": "PMC11187099",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11187099/",
+   "title": "Low-molecular-weight heparin in the prevention of unexplained recurrent miscarriage: a systematic review and meta-analysis",
+   "credit": "Scarrone M, Salmeri N, Buzzaccarini G, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 16,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion"
+   ]
+  },
   "38902658": {
    "pmcid": "PMC11191278",
    "version": 1,
@@ -5833,6 +5938,24 @@
    "label": "Full text · CC BY",
    "hasBody": true,
    "chunks": 16,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "39205682": {
+   "pmcid": "PMC11349655",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11349655/",
+   "title": "Effect of IVIG therapy on pregnant women with unexplained recurrent spontaneous abortion: a systematic review and meta-analysis",
+   "credit": "Ling Q, Xu J, Tian Y, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 14,
    "sections": [
     "Abstract",
     "Results",
@@ -7942,6 +8065,23 @@
     "Conclusions"
    ]
   },
+  "42325976": {
+   "pmcid": "PMC13275481",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13275481/",
+   "title": "Functional MRI evidence of brain alterations in premenstrual dysphoric disorder: a systematic review",
+   "credit": "Bartoszewicz K, Szurowska E",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 37,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion"
+   ]
+  },
   "42345555": {
    "pmcid": "PMC13296226",
    "version": 1,
@@ -7953,6 +8093,24 @@
    "label": "Full text · CC BY",
    "hasBody": true,
    "chunks": 20,
+   "sections": [
+    "Abstract",
+    "Results",
+    "Discussion",
+    "Conclusions"
+   ]
+  },
+  "42500177": {
+   "pmcid": "PMC13399481",
+   "version": 1,
+   "licence": "CC BY",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "pmcUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13399481/",
+   "title": "Prenatal exposure to paracetamol and risk of autism spectrum disorder: systematic review and meta-analysis of observational studies",
+   "credit": "Oliveira JA, Lemos MJ, Queiroz LF, et al.",
+   "label": "Full text · CC BY",
+   "hasBody": true,
+   "chunks": 19,
    "sections": [
     "Abstract",
     "Results",
