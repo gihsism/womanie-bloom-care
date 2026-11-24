@@ -4,9 +4,8 @@ import { getAuthUser } from './_lib/auth.js';
 import { checkAndConsume } from './_lib/ratelimit.js';
 import { withSentry } from './_lib/sentry.js';
 import { buildLifeContext } from './_lib/life-context.js';
-import { SOURCES_FOOTER_MARK, buildSourcesPrompt, formatSourcesFooter, stripUnknownCitations, toChatSources, type ResearchItem } from './_lib/research/library.js';
-import { selectChatSourcesHybrid } from './_lib/research/hybrid.js';
-import { bestPassages, formatPassagesForPrompt, fulltextAttribution, type Passage } from './_lib/research/fulltext.js';
+import { SOURCES_FOOTER_MARK, formatSourcesFooter, stripUnknownCitations } from './_lib/research/library.js';
+import { buildChatSystemPrompt, selectChatEvidence } from './_lib/research/chat-prompt.js';
 
 export const config = {
   maxDuration: 60,
@@ -241,50 +240,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Research library: the 0-6 best-matching guideline/review summaries
   // for this question and life stage, given to the model as numbered
-  // sources. Hybrid keyword + semantic search; the question is embedded
-  // on this server (never sent to a third party) and the search falls
-  // back to keywords only if the model is unavailable or slower than
-  // ~3 s. Never allowed to break the chat.
-  let researchItems: ResearchItem[] = [];
-  try {
-    researchItems = await selectChatSourcesHybrid(userTurnContent, profile?.life_stage);
-  } catch (err) {
-    console.error('Research library unavailable:', err);
-  }
-  const chatSources = toChatSources(researchItems);
-
-  // Open-access full text (CC0 / CC BY / CC BY-SA only) for the chosen
-  // studies: the 3 passages that best match the question go into the
-  // prompt under the same [n] as their study. Never allowed to break the chat.
-  let passages: Passage[] = [];
-  try {
-    passages = bestPassages(userTurnContent ?? "", researchItems.map((it) => it.pmid), 3);
-    for (const s of chatSources) {
-      const a = fulltextAttribution(s.pmid);
-      if (a) s.fulltext = a.licence;
-    }
-  } catch (err) {
-    console.error('Full-text passages unavailable:', err);
-  }
-  const sourceNumber = (pmid: string) => chatSources.find((s) => s.pmid === pmid)?.n;
-  const passagesBlock = passages.length ? `\n\n${formatPassagesForPrompt(passages, sourceNumber)}` : '';
-
-  const systemPrompt = `You are an AI medical assistant for a women's health platform called Womanie. You have access to the patient's uploaded health documents and extracted medical data shown below. Use this information to provide personalized, empathetic health guidance.
-
-IMPORTANT RULES:
-- You are NOT a replacement for a real doctor. Always recommend consulting a healthcare professional for serious concerns.
-- Be warm, supportive, and use clear language.
-- Reference specific findings from the patient's records when relevant.
-- If asked about something not in the records, say so honestly.
-- Keep answers concise but thorough.
-- Format responses with markdown for readability.
-- Focus on women's health topics: reproductive health, menstrual cycles, fertility, pregnancy, menopause, general wellness.
-- Never fabricate medical data not present in the records.
-- Medicine, birth, baby and pregnancy logs are self-reported in the app; use them to answer questions like "how did my baby feed overnight?" and say when something is worth raising with a midwife, health visitor or doctor.
-- When discussing lab results, explain what values mean in plain language.
-
-## Patient Medical Records
-${medicalContext || 'No medical records available yet. Encourage the patient to upload their health documents for personalized advice.'}${buildSourcesPrompt(researchItems)}${passagesBlock}`;
+  // sources, plus the best open-access full-text passages under the same
+  // [n]. Hybrid keyword + semantic search; the question is embedded on
+  // this server (never sent to a third party) and the search falls back
+  // to keywords only if the model is unavailable or slower than ~3 s.
+  // Never allowed to break the chat.
+  const { chatSources, block: evidenceBlock } = await selectChatEvidence(userTurnContent, profile?.life_stage);
+  const systemPrompt = buildChatSystemPrompt(medicalContext, evidenceBlock);
 
   const anthropicMessages = messages.map((m: { role: string; content: string }) => ({
     role: m.role === 'system' ? 'user' : m.role,
