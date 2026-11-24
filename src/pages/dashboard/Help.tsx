@@ -33,7 +33,7 @@ const FAQS: Array<{ question: string; icon: typeof HelpCircle; answer: string | 
     question: 'How does document upload work?',
     icon: Upload,
     answer: [
-      'Tap "Upload Health Document" on the dashboard or Health Records page and pick a PDF, image, or DOCX.',
+      'Open Records (bottom bar), tap "Upload a document" and pick a PDF, image, or DOCX.',
       'Uploads go straight from your browser to Vercel Blob storage — we don\'t hold the file on our server in transit.',
       'Once uploaded we trigger an analysis with Claude (an AI model from Anthropic). That usually takes 30–90 seconds; the doc card shows an "Analyzing…" state while it runs and switches to a summary when complete.',
     ],
@@ -51,10 +51,10 @@ const FAQS: Array<{ question: string; icon: typeof HelpCircle; answer: string | 
     question: 'How do I share my records with a doctor?',
     icon: Shield,
     answer: [
-      'On Health Records, tap "Share with doctor" to generate an 8-character code.',
+      'On Records, tap "Share with doctor" to generate an 8-character code.',
       'Give the code to your doctor. They\'ll enter it in their Womanie doctor portal, which creates a pending connection request.',
-      'You approve (or decline) the request from the Medical History page. Approved doctors can read the documents you\'ve uploaded and your extracted values; they can\'t change anything.',
-      'Revoke a doctor\'s access any time from the Connected Doctors card.',
+      'You approve (or decline) the request on the Visits page. Approved doctors can read the documents you\'ve uploaded and your extracted values; they can\'t change anything.',
+      'Revoke a doctor\'s access any time from "Your doctors" on Visits.',
     ],
   },
   {
