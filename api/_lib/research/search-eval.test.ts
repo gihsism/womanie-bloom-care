@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { getLibrary, selectChatSources } from './library';
 import { semanticQuery, selectChatSourcesHybrid } from './hybrid';
 import { DEFAULT_EMBEDDING_MODEL, EMBEDDING_MODELS, modelFile } from './embed';
-import { EVAL_QUESTIONS, scoreRuns } from './search-eval';
+import { DRUG_PREGNANCY_QUESTIONS, EVAL_QUESTIONS, scoreRuns } from './search-eval';
 
 // Retrieval quality on everyday patient questions (search-eval.ts).
 // Numbers at the time of writing (34 questions, 307 items):
@@ -17,7 +17,7 @@ const keywordRuns = () => EVAL_QUESTIONS.map((question) => ({ question, ranked: 
 describe('search eval: keyword-only (runs everywhere)', () => {
   it('every expected topic exists in the library', () => {
     const ids = new Set(getLibrary().topics.map((t) => t.id));
-    const missing = EVAL_QUESTIONS.flatMap((q) => q.topics).filter((t) => !ids.has(t));
+    const missing = [...EVAL_QUESTIONS, ...DRUG_PREGNANCY_QUESTIONS].flatMap((q) => q.topics).filter((t) => !ids.has(t));
     expect(missing).toEqual([]);
   });
 
@@ -55,6 +55,20 @@ describe.skipIf(!hasModel)('search eval: hybrid with the bundled model', () => {
     expect(hybrid.hitAt6).toBeGreaterThanOrEqual(keyword.hitAt6);
     expect(hybrid.hitAt3).toBeGreaterThanOrEqual(0.8);
     expect(hybrid.hitAt6).toBeGreaterThanOrEqual(0.85);
+  }, 60_000);
+
+  // Floors at today's level (3 of 5 at hit@3 and hit@6: both paracetamol
+  // questions miss, see DRUG_PREGNANCY_QUESTIONS); raise them when the
+  // ranking is fixed. A drop below means a drug + pregnancy regression.
+  it('medicine + pregnancy questions find the drug-specific studies', async () => {
+    const runs = [];
+    for (const question of DRUG_PREGNANCY_QUESTIONS) {
+      runs.push({ question, ranked: await selectChatSourcesHybrid(question.q, question.stage, { timeoutMs: 20_000 }) });
+    }
+    const r = scoreRuns(runs);
+    console.log(`drug + pregnancy eval: hybrid hit@3 ${r.hitAt3.toFixed(2)} hit@6 ${r.hitAt6.toFixed(2)}; misses@3: ${r.misses3.join(' | ')}`);
+    expect(r.hitAt3).toBeGreaterThanOrEqual(0.6);
+    expect(r.hitAt6).toBeGreaterThanOrEqual(0.6);
   }, 60_000);
 
   it('does not attach sources to questions the library cannot answer', async () => {

@@ -10,6 +10,12 @@ export interface EvalQuestion {
   q: string;
   stage: string | null;
   topics: string[];
+  /**
+   * Stricter relevance (regex source, case-insensitive): the item's title
+   * must also match, e.g. a paracetamol question needs a paracetamol study,
+   * not a migraine guideline that happens to carry the topic.
+   */
+  title?: string;
 }
 
 export const EVAL_QUESTIONS: EvalQuestion[] = [
@@ -49,6 +55,24 @@ export const EVAL_QUESTIONS: EvalQuestion[] = [
   { q: 'should I get the flu jab when expecting', stage: null, topics: ['vaccines-pregnancy'] },
 ];
 
+/**
+ * "Medicine + pregnancy" questions, kept apart from EVAL_QUESTIONS so their
+ * known misses do not lower the main floor. A drug-specific topic and the
+ * drug in the title are both required. Known weakness (Nov 2026, 2,493
+ * items): the paracetamol questions rank migraine/headache guidelines and
+ * other "Medicines in pregnancy" guidelines above the paracetamol reviews,
+ * because that topic's label names paracetamol, so every item in it gets
+ * a topic-strength hit for "paracetamol", and guidelines get a 1.25x boost
+ * over reviews (1.1x).
+ */
+export const DRUG_PREGNANCY_QUESTIONS: EvalQuestion[] = [
+  { q: 'Is it safe to take paracetamol for a headache in pregnancy?', stage: 'pregnancy', topics: ['paracetamol-pregnancy'], title: 'paracetamol|acetaminophen|analgesic' },
+  { q: 'can I take paracetamol while pregnant?', stage: 'pregnancy', topics: ['paracetamol-pregnancy'], title: 'paracetamol|acetaminophen|analgesic' },
+  { q: 'does taking tylenol in pregnancy cause autism?', stage: 'pregnancy', topics: ['paracetamol-pregnancy'], title: 'paracetamol|acetaminophen|analgesic' },
+  { q: 'can I keep taking my antidepressant (sertraline) while pregnant?', stage: 'pregnancy', topics: ['medications-pregnancy'], title: 'antidepress|ssri|sertraline|psychotropic' },
+  { q: 'should I take low dose aspirin in pregnancy?', stage: 'pregnancy', topics: ['aspirin-pregnancy'], title: 'aspirin|antiplatelet' },
+];
+
 export interface EvalResult {
   hitAt3: number;
   hitAt6: number;
@@ -62,7 +86,8 @@ export function scoreRuns(runs: { question: EvalQuestion; ranked: ResearchItem[]
   let h6 = 0;
   const misses3: string[] = [];
   for (const { question, ranked } of runs) {
-    const rel = (it: ResearchItem) => it.topics.some((t) => question.topics.includes(t));
+    const title = question.title ? new RegExp(question.title, 'i') : null;
+    const rel = (it: ResearchItem) => it.topics.some((t) => question.topics.includes(t)) && (!title || title.test(it.title));
     const in3 = ranked.slice(0, 3).some(rel);
     if (in3) h3++;
     else misses3.push(question.q);
