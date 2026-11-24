@@ -1,4 +1,4 @@
-import { addDays } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import { db } from '@/integrations/db/client';
 import type { OnboardingData } from '@/contexts/OnboardingContext';
 import { pushAccountData } from '@/lib/account-data';
@@ -16,6 +16,14 @@ import { pushAccountData } from '@/lib/account-data';
 // - DOB / height / weight / blood type: no profiles column, so kept in
 //   per-user localStorage under `womanie_basic_info_<id>` and saved to
 //   the account (user_app_data, see src/lib/account-data.ts).
+
+// A calendar day picked on this device, as the date-only string the
+// database stores. The date pickers give local midnight, so
+// toISOString() (UTC) would save the day BEFORE for anyone east of
+// Greenwich (Zürich: 20 Nov 00:00 = 19 Nov 23:00 UTC).
+export function localYmd(d: Date | string): string {
+  return format(new Date(d), 'yyyy-MM-dd');
+}
 
 interface UserShape {
   id: string;
@@ -65,7 +73,7 @@ export async function commitOnboarding(user: UserShape, data: OnboardingData): P
   if (lifeStage) profileUpdate.life_stage = lifeStage;
 
   const dueDate = derivePregnancyDueDate(data);
-  if (dueDate) profileUpdate.pregnancy_due_date = dueDate.toISOString().split('T')[0];
+  if (dueDate) profileUpdate.pregnancy_due_date = localYmd(dueDate);
 
   // IVF onboarding doesn't currently capture a phase, but if the user
   // picked the IVF main focus we still want them landed on the right
@@ -101,7 +109,7 @@ export async function commitOnboarding(user: UserShape, data: OnboardingData): P
       await db.from('period_tracking').upsert(
         {
           user_id: user.id,
-          period_start_date: lastPeriodStart.toISOString().split('T')[0],
+          period_start_date: localYmd(lastPeriodStart),
           cycle_length: cycleLength,
           period_end_date: null,
         },
@@ -120,7 +128,7 @@ export async function commitOnboarding(user: UserShape, data: OnboardingData): P
   const ppBirth = data.postpartum?.birthDate;
   if (ppBirth) {
     try {
-      const iso = new Date(ppBirth).toISOString().split('T')[0];
+      const iso = localYmd(ppBirth);
       localStorage.setItem(`womanie_postpartum_birth_${user.id}`, iso);
     } catch { /* ignore */ }
   }
@@ -132,7 +140,7 @@ export async function commitOnboarding(user: UserShape, data: OnboardingData): P
       localStorage.setItem(
         `womanie_basic_info_${user.id}`,
         JSON.stringify({
-          dateOfBirth: basic.dateOfBirth ? new Date(basic.dateOfBirth).toISOString().split('T')[0] : null,
+          dateOfBirth: basic.dateOfBirth ? localYmd(basic.dateOfBirth) : null,
           heightCm: basic.height || null,
           weightKg: basic.weightUnit === 'kg' ? basic.weight : basic.weight ? basic.weight * 0.453592 : null,
           bloodType: basic.bloodType || null,
