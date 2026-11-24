@@ -135,8 +135,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const parts: string[] = [];
     parts.push(`Today: ${today.toISOString().split('T')[0]} (week of ${weekBucket}).`);
     if (profile.life_stage) parts.push(`Life stage: ${profile.life_stage}.`);
-    if (profile.pregnancy_due_date) parts.push(`Pregnancy due: ${profile.pregnancy_due_date}.`);
-    if (profile.ivf_phase) parts.push(`IVF phase: ${profile.ivf_phase}.`);
+    if (profile.life_stage === 'pregnancy' && profile.pregnancy_due_date) parts.push(`Pregnancy due: ${profile.pregnancy_due_date}.`);
+    if (profile.life_stage === 'ivf' && profile.ivf_phase) parts.push(`IVF phase: ${profile.ivf_phase}.`);
     if (profile.full_name) parts.push(`Patient's preferred name: ${profile.full_name}.`);
 
     parts.push('', `## Recent documents (${docRows.length})`);

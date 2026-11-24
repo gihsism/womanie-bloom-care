@@ -171,7 +171,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           let patientContext = '';
           if (profile) {
             if (profile.life_stage) patientContext += `Patient life stage: ${profile.life_stage}. `;
-            if (profile.pregnancy_due_date) patientContext += `Currently pregnant, due date: ${profile.pregnancy_due_date}. `;
+            if (profile.life_stage === 'pregnancy' && profile.pregnancy_due_date) patientContext += `Currently pregnant, due date: ${profile.pregnancy_due_date}. `;
           }
 
           const today = resolveToday(timezone);
@@ -216,7 +216,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     let patientContext = '';
     if (profile) {
       if (profile.life_stage) patientContext += `Patient life stage: ${profile.life_stage}. `;
-      if (profile.pregnancy_due_date) patientContext += `Currently pregnant, due date: ${profile.pregnancy_due_date}. `;
+      if (profile.life_stage === 'pregnancy' && profile.pregnancy_due_date) patientContext += `Currently pregnant, due date: ${profile.pregnancy_due_date}. `;
     }
 
     const today = resolveToday(timezone);
