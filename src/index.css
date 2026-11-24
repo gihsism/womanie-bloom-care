@@ -292,6 +292,48 @@
     letter-spacing: -0.015em;
     color: hsl(var(--foreground));
   }
+  /* One quiet line under the page title ("Last blood test · 12 Nov"). */
+  .page-sub {
+    font-size: 0.9375rem;
+    line-height: 1.35;
+    color: hsl(var(--muted-foreground));
+  }
+  /* The same scale as Home on every tab page: section titles like Home's
+     "Today", rows in one hairline-bordered group, and ONE primary button
+     per page in the stage accent. */
+  .section-title {
+    font-family: theme('fontFamily.display');
+    font-size: 1.1875rem;
+    line-height: 1.25;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .row-group {
+    border-radius: 1.25rem;
+    border: 1px solid hsl(var(--line));
+    background-color: hsl(var(--card));
+    overflow: hidden;
+  }
+  .row-group > * + * {
+    border-top: 1px solid hsl(var(--line));
+  }
+  .btn-stage {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 3.25rem;
+    padding: 0 1.25rem;
+    border-radius: 9999px;
+    background-color: hsl(var(--stage-accent));
+    color: #fff;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    transition: filter 0.15s;
+  }
+  .btn-stage:hover { filter: brightness(0.95); }
+  .btn-stage:focus-visible { outline: 2px solid hsl(var(--stage-accent)); outline-offset: 2px; }
+  .btn-stage:disabled { opacity: 0.5; pointer-events: none; }
 
   /* Small uppercase museum-label text (DM Mono) */
   .label-mono {

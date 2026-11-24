@@ -431,7 +431,7 @@ const Settings = () => {
           </MeGroup>
           <Button
             variant="outline"
-            className="w-full gap-2 text-destructive hover:text-destructive"
+            className="w-full h-12 gap-2 border-line text-[16px] font-semibold text-destructive hover:text-destructive"
             onClick={() => { window.location.href = '/api/auth/logout'; }}
             data-testid="me-logout"
           >
