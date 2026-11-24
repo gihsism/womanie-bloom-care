@@ -61,13 +61,14 @@ interface PersonalContext {
   cyclePhase?: string | null;
 }
 
-async function streamChat({
+export async function streamChat({
   messages,
   model,
   personalContext,
   conversationId,
   onDelta,
   onSources,
+  onReplace,
   onDone,
   onError,
 }: {
@@ -77,6 +78,8 @@ async function streamChat({
   conversationId: string;
   onDelta: (text: string) => void;
   onSources?: (sources: ChatSource[]) => void;
+  /** Final text after the server's citation check; replaces the streamed text. */
+  onReplace?: (text: string) => void;
   onDone: () => void;
   onError: (err: string) => void;
 }) {
@@ -123,6 +126,7 @@ async function streamChat({
       try {
         const parsed = JSON.parse(jsonStr);
         if (Array.isArray(parsed.sources)) onSources?.(parsed.sources as ChatSource[]);
+        if (typeof parsed.replace === 'string') onReplace?.(parsed.replace);
         const content = parsed.choices?.[0]?.delta?.content as string | undefined;
         if (content) onDelta(content);
       } catch {
@@ -142,6 +146,7 @@ async function streamChat({
       if (jsonStr === '[DONE]') continue;
       try {
         const parsed = JSON.parse(jsonStr);
+        if (typeof parsed.replace === 'string') onReplace?.(parsed.replace);
         const content = parsed.choices?.[0]?.delta?.content as string | undefined;
         if (content) onDelta(content);
       } catch { /* ignore */ }
@@ -507,6 +512,18 @@ export default function AIDoctorChat() {
             return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar, sources: sourcesSoFar } : m));
           }
           return [...prev, { role: 'assistant', content: assistantSoFar, sources: sourcesSoFar }];
+        });
+      },
+      onReplace: (clean) => {
+        // The server removed citations its sources do not support; show
+        // (and keep in Past chats) the text it saved, not the raw stream.
+        assistantSoFar = clean;
+        setMessages((prev) => {
+          const last = prev[prev.length - 1];
+          if (last?.role === 'assistant' && last !== WELCOME_MESSAGE) {
+            return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: clean, sources: sourcesSoFar } : m));
+          }
+          return prev;
         });
       },
       onDone: () => {

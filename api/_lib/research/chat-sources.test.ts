@@ -154,4 +154,29 @@ describe('ai-doctor-chat research sources', () => {
     expect(text.split('\n\n---')[0]).toBe('Keep caffeine moderate [1]. Some say more is fine.');
     expect(text).not.toContain(`[${n + 3}]`);
   });
+
+  it('removes a citation whose source never names the medicine, streams the fix and saves it', async () => {
+    const question = 'Is coffee OK in pregnancy?';
+    const items = await selectChatSourcesHybrid(question, 'pregnancy');
+    expect(items.some((it) => /gabapentin/i.test(`${it.title} ${it.summary} ${it.keyPoints.join(' ')}`))).toBe(false);
+    answer = 'Gabapentin can cause dizziness [1].';
+    const res = mockRes();
+    await handler(req(question), res as unknown as VercelResponse);
+
+    // The page streamed the raw text, then gets the cleaned text before [DONE].
+    const replace = res.written.find((w) => w.includes('"replace"'));
+    expect(replace).toBeDefined();
+    expect(JSON.parse(replace!.replace(/^data: /, '')).replace).toBe('Gabapentin can cause dizziness.');
+    expect(res.written.indexOf(replace!)).toBe(res.written.length - 2);
+
+    const stored = inserts.find((v) => typeof v[1] === 'string' && (v[1] as string).startsWith('Gabapentin'));
+    expect(stored![1]).toBe('Gabapentin can cause dizziness.');
+  });
+
+  it('sends no replace event when every citation holds', async () => {
+    answer = 'Keep caffeine moderate [1].';
+    const res = mockRes();
+    await handler(req('Is coffee OK in pregnancy?'), res as unknown as VercelResponse);
+    expect(res.written.some((w) => w.includes('"replace"'))).toBe(false);
+  });
 });
