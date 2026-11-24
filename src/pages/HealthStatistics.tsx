@@ -4,12 +4,10 @@ import { db } from "@/integrations/db/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { onHealthDataChange } from "@/lib/data-events";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FileText, Calendar, ArrowLeft, Activity, AlertTriangle, CheckCircle2, FlaskConical, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
+import { documentCategoryLabel } from "@/lib/documentCategory";
 import UserMenu from "@/components/UserMenu";
 import { format } from "date-fns";
 
@@ -159,139 +157,95 @@ export default function HealthStatistics() {
     }
   };
 
-  const getCategoryColor = (category: string | null) => {
-    const colors: Record<string, string> = {
-      lab_results: 'bg-primary/10 text-primary',
-      imaging: 'bg-secondary/10 text-secondary',
-      prescription: 'bg-accent/10 text-accent',
-      consultation_notes: 'bg-muted',
-      vaccination_record: 'bg-primary/20 text-primary',
-      other: 'bg-muted'
-    };
-    return colors[category || 'other'] || 'bg-muted';
-  };
+  // One header for the loading and loaded page (idea 4): back, a big
+  // title, and the CSV download as a quiet icon button. It used to fit
+  // title, button, wordmark and menu on one row, which cut the wordmark
+  // off on phones.
+  const header = (
+    <header className="page-head sticky top-0 z-10">
+      <div className="max-w-3xl mx-auto px-4 pt-3 pb-3">
+        <div className="flex items-center justify-between min-h-11">
+          <button type="button" onClick={() => navigate('/dashboard')} className="flex items-center gap-2 min-h-10 -ml-1 px-1 hover:text-stage-accent" aria-label="Back to Home">
+            <ArrowLeft className="h-5 w-5" />
+            <span className="text-[15px] font-medium">Home</span>
+          </button>
+          <div className="flex items-center gap-1">
+            {!loading && stats.labResults > 0 && (
+              <button
+                type="button"
+                onClick={downloadCsv}
+                disabled={downloadingCsv}
+                className="inline-flex items-center gap-1.5 min-h-10 rounded-full px-3 text-[14px] font-semibold text-stage-accent hover:bg-stage-tint disabled:opacity-50"
+                title="Download all your extracted lab values as a CSV"
+              >
+                <Download className="h-4 w-4" />
+                {downloadingCsv ? 'Preparing…' : 'CSV'}
+              </button>
+            )}
+            <UserMenu />
+          </div>
+        </div>
+        <h1 className="page-title mt-1">Health statistics</h1>
+        <p className="page-sub mt-1">Your documents and results in numbers</p>
+      </div>
+    </header>
+  );
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold mb-1">Health Statistics</h1>
-            <p className="text-muted-foreground">AI-analyzed summaries of your health documents</p>
-          </div>
-        </div>
-        <div className="grid gap-4">
-          {[1, 2, 3].map((i) => (
-            <Card key={i}>
-              <CardHeader>
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-20 w-full" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+      <div className="min-h-screen bg-background">
+        {header}
+        <main className="max-w-3xl mx-auto px-4 py-5 space-y-3" aria-busy="true">
+          <Skeleton className="h-24 w-full rounded-[1.25rem]" />
+          <Skeleton className="h-40 w-full rounded-[1.25rem]" />
+          <Skeleton className="h-40 w-full rounded-[1.25rem]" />
+        </main>
       </div>
     );
   }
 
+  const statTiles = [
+    { icon: FileText, label: 'Documents', value: stats.analyzedDocs, note: 'read', tone: 'text-stage-accent' },
+    { icon: FlaskConical, label: 'Lab results', value: stats.labResults, note: 'values', tone: 'text-stage-accent' },
+    { icon: CheckCircle2, label: 'In range', value: stats.normal, note: 'healthy', tone: 'text-stage-accent' },
+    { icon: AlertTriangle, label: 'Flagged', value: stats.critical + stats.abnormal, note: stats.critical > 0 ? `${stats.critical} critical` : 'to review', tone: 'text-destructive' },
+  ];
+
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold mb-1">Health Statistics</h1>
-          <p className="text-muted-foreground">AI-analyzed summaries of your health documents</p>
-        </div>
-        {stats.labResults > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={downloadCsv}
-            disabled={downloadingCsv}
-            className="gap-2"
-            title="Download all your extracted lab values as a CSV"
-          >
-            <Download className="h-4 w-4" />
-            {downloadingCsv ? 'Preparing…' : 'Download CSV'}
-          </Button>
-        )}
-        <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
-          Womanie
-        </a>
-        <UserMenu />
-      </div>
-
-      {documents.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground text-center mb-4">
-              No documents uploaded yet. Upload health documents to see AI-generated summaries here.
-            </p>
-            <Button variant="outline" onClick={() => navigate('/dashboard/medical-history')}>
+    <div className="min-h-screen bg-background">
+      {header}
+      <main className="max-w-3xl mx-auto px-4 pt-5 pb-10">
+        {documents.length === 0 ? (
+          <div className="panel px-5 py-10 text-center">
+            <FileText className="h-10 w-10 text-muted-foreground mx-auto" aria-hidden="true" />
+            <p className="mt-3 text-[17px] font-bold">No documents yet</p>
+            <p className="mt-1 text-[15px] text-muted-foreground">Upload a lab report in Records and its numbers show up here.</p>
+            <button type="button" className="btn-stage mt-6 px-8" onClick={() => navigate('/dashboard/medical-history')}>
               Go to Records
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-6">
-          {/* Stat cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Card className="p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <FileText className="h-4 w-4 text-primary" />
-                <p className="text-xs text-muted-foreground">Documents</p>
-              </div>
-              <p className="text-2xl font-bold">{stats.analyzedDocs}</p>
-              <p className="text-[11px] text-muted-foreground">analyzed</p>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <FlaskConical className="h-4 w-4 text-primary" />
-                <p className="text-xs text-muted-foreground">Lab results</p>
-              </div>
-              <p className="text-2xl font-bold">{stats.labResults}</p>
-              <p className="text-[11px] text-muted-foreground">tracked values</p>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <p className="text-xs text-muted-foreground">Healthy</p>
-              </div>
-              <p className="text-2xl font-bold">{stats.normal}</p>
-              <p className="text-[11px] text-muted-foreground">in range</p>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <AlertTriangle className={`h-4 w-4 ${stats.critical > 0 ? 'text-destructive' : 'text-amber-600'}`} />
-                <p className="text-xs text-muted-foreground">Flagged</p>
-              </div>
-              <p className="text-2xl font-bold">{stats.critical + stats.abnormal}</p>
-              <p className="text-[11px] text-muted-foreground">
-                {stats.critical > 0 ? `${stats.critical} critical` : 'needs review'}
-              </p>
-            </Card>
+            </button>
           </div>
+        ) : (
+          <div className="space-y-8">
+            <dl className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {statTiles.map((t) => (
+                <div key={t.label} className="panel px-4 py-3.5">
+                  <dt className="flex items-center gap-1.5 text-[14px] font-semibold text-muted-foreground">
+                    <t.icon className={`h-4 w-4 ${t.tone}`} aria-hidden="true" />
+                    {t.label}
+                  </dt>
+                  <dd className="mt-1 text-[1.75rem] font-extrabold leading-none">{t.value}</dd>
+                  <dd className="mt-1 text-[13px] text-muted-foreground">{t.note}</dd>
+                </div>
+              ))}
+            </dl>
 
-          {/* Breakdown by panel */}
-          {stats.topPanels.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Activity className="h-4 w-4 text-primary" />
+            {stats.topPanels.length > 0 && (
+              <section>
+                <h2 className="section-title mb-3 flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-stage-accent" aria-hidden="true" />
                   By panel
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
+                </h2>
+                <div className="row-group">
                   {stats.topPanels.map(([panel, count]) => {
                     const slug = panel
                       .toLowerCase()
@@ -303,60 +257,49 @@ export default function HealthStatistics() {
                         key={panel}
                         type="button"
                         onClick={() => navigate(`/dashboard/panel/${slug}`)}
-                        className="w-full flex items-center gap-3 hover:bg-muted/50 rounded px-1 py-0.5 -mx-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-muted/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-stage-accent"
                       >
-                        <span className="text-sm flex-shrink-0 w-40 truncate text-left">{panel}</span>
-                        <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
-                          <div
-                            className="bg-primary h-2 rounded-full"
-                            style={{ width: `${(count / stats.labResults) * 100}%` }}
-                          />
-                        </div>
-                        <span className="text-xs text-muted-foreground flex-shrink-0 w-8 text-right">{count}</span>
+                        <span className="text-[15px] font-semibold shrink-0 w-32 truncate">{panel}</span>
+                        <span className="flex-1 bg-muted rounded-full h-2 overflow-hidden" aria-hidden="true">
+                          <span className="block bg-stage-accent h-2 rounded-full" style={{ width: `${(count / stats.labResults) * 100}%` }} />
+                        </span>
+                        <span className="text-[14px] text-muted-foreground shrink-0 w-6 text-right">{count}</span>
                       </button>
                     );
                   })}
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              </section>
+            )}
 
-          {/* Document list */}
-          <div className="grid gap-4">
-          {documents.map((doc) => (
-            <Card key={doc.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <CardTitle className="text-xl mb-2">
-                      {doc.ai_suggested_name || doc.file_name}
-                    </CardTitle>
-                    <CardDescription className="flex items-center gap-2 flex-wrap">
-                      <Badge variant="outline" className={getCategoryColor(doc.ai_suggested_category)}>
-                        {doc.ai_suggested_category || doc.document_type}
-                      </Badge>
-                      <span className="flex items-center gap-1 text-sm">
-                        <Calendar className="h-3 w-3" />
-                        {format(new Date(doc.uploaded_at), 'MMM d, yyyy')}
+            <section>
+              <h2 className="section-title mb-3">Documents</h2>
+              <div className="row-group">
+                {documents.map((doc) => (
+                  <article key={doc.id} className="px-4 py-4">
+                    <div className="flex items-start gap-3">
+                      <span className="grid place-items-center h-10 w-10 shrink-0 rounded-full bg-stage-tint text-stage-accent" aria-hidden="true">
+                        <FileText className="h-5 w-5" />
                       </span>
-                    </CardDescription>
-                  </div>
-                  <FileText className="h-8 w-8 text-muted-foreground flex-shrink-0" />
-                </div>
-              </CardHeader>
-              {doc.ai_summary && (
-                <CardContent>
-                  <div className="bg-muted/50 rounded-lg p-4">
-                    <h4 className="font-semibold mb-2 text-sm">AI Summary</h4>
-                    <p className="text-sm leading-relaxed">{doc.ai_summary}</p>
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-          ))}
-        </div>
-        </div>
-      )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-[16px] font-bold leading-snug">{doc.ai_suggested_name || doc.file_name}</h3>
+                        <p className="mt-0.5 flex items-center gap-1.5 text-[14px] text-muted-foreground">
+                          {documentCategoryLabel(doc.ai_suggested_category || doc.document_type)}
+                          <span aria-hidden="true">·</span>
+                          <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
+                          {format(new Date(doc.uploaded_at), 'd MMM yyyy')}
+                        </p>
+                        {doc.ai_summary && (
+                          <p className="mt-2 text-[15px] leading-relaxed text-foreground/90">{doc.ai_summary}</p>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          </div>
+        )}
+      </main>
     </div>
   );
 }

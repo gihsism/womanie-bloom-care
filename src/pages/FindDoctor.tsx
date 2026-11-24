@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Calendar } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { doctorDisplayName } from '@/lib/doctorName';
 import { db } from '@/integrations/db/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Search, Star, Clock, Video, Calendar as CalendarIcon, CheckCircle, User, Loader2 } from 'lucide-react';
@@ -182,8 +183,8 @@ const FindDoctor = () => {
       }
 
       toast({
-        title: 'Appointment Booked',
-        description: `Your consultation with Dr. ${selectedDoctor.full_name} is scheduled for ${format(scheduledAt, 'PPP')} at ${selectedTime}`,
+        title: 'Visit booked',
+        description: `Your visit with ${doctorDisplayName(selectedDoctor.title, selectedDoctor.full_name)} is on ${format(scheduledAt, 'PPP')} at ${selectedTime}`,
         action: (
           <Button size="sm" variant="outline" onClick={() => navigate('/dashboard/appointments')}>
             View
@@ -315,62 +316,57 @@ const FindDoctor = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold">Find a Doctor</h1>
-              <p className="text-sm text-muted-foreground">Book a consultation with verified healthcare professionals</p>
-            </div>
-            <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
-              Womanie
-            </a>
-          </div>
+      <header className="page-head sticky top-0 z-10">
+        <div className="max-w-3xl mx-auto px-4 pt-3 pb-3">
+          <button type="button" onClick={() => navigate('/dashboard')} className="flex items-center gap-2 min-h-10 -ml-1 px-1 hover:text-stage-accent" aria-label="Back to Home">
+            <ArrowLeft className="h-5 w-5" />
+            <span className="text-[15px] font-medium">Home</span>
+          </button>
+          <h1 className="page-title mt-1">Find a doctor</h1>
+          <p className="page-sub mt-1">Book a visit with a verified doctor or midwife</p>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="max-w-3xl mx-auto px-4 py-5">
         {/* Search and Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row gap-2.5 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" aria-hidden="true" />
             <Input
-              placeholder="Search by name, specialty, language, or keywords..."
+              placeholder="Name, specialty or language"
+              aria-label="Search doctors"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="h-12 rounded-full pl-11 text-[16px] md:text-[16px]"
             />
           </div>
           <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue placeholder="All Specialties" />
+            <SelectTrigger className="w-full sm:w-[200px] h-12 rounded-full px-5 text-[15px]" aria-label="Specialty">
+              <SelectValue placeholder="All specialties" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Specialties</SelectItem>
+              <SelectItem value="all">All specialties</SelectItem>
               {specialties.map(specialty => (
                 <SelectItem key={specialty} value={specialty!}>{specialty}</SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select value={sortBy} onValueChange={v => setSortBy(v as typeof sortBy)}>
-            <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px] h-12 rounded-full px-5 text-[15px]" aria-label="Sort">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="name">Sort: Name (A–Z)</SelectItem>
+              <SelectItem value="name">Sort: name (A–Z)</SelectItem>
               <SelectItem value="rating">Sort: Highest rated</SelectItem>
               <SelectItem value="experience">Sort: Most experienced</SelectItem>
-              <SelectItem value="price_low">Sort: Price (low to high)</SelectItem>
+              <SelectItem value="price_low">Sort: price (low to high)</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Doctors List */}
         {loadingDoctors ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="space-y-3">
             {[1, 2, 3].map(i => (
               <Card key={i} className="overflow-hidden">
                 <CardHeader className="pb-4">
@@ -391,56 +387,56 @@ const FindDoctor = () => {
             ))}
           </div>
         ) : filteredDoctors.length === 0 ? (
-          <Card className="p-12 text-center">
-            <User className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Doctors Available</h3>
-            <p className="text-muted-foreground">
+          <div className="panel px-5 py-10 text-center">
+            <User className="h-10 w-10 mx-auto text-muted-foreground mb-3" aria-hidden="true" />
+            <h2 className="text-[17px] font-bold mb-1">No doctors found</h2>
+            <p className="text-[15px] text-muted-foreground">
               {searchQuery || specialtyFilter !== 'all' 
                 ? 'No doctors match your search criteria. Try adjusting your filters.'
-                : 'No verified doctors are currently accepting consultations. Please check back later.'}
+                : 'No verified doctors are taking bookings right now. Please check back later.'}
             </p>
-          </Card>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="space-y-3">
             {sortedDoctors.map(doctor => (
-              <Card key={doctor.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <Card key={doctor.id} className="overflow-hidden">
                 <CardHeader className="pb-4">
                   <div className="flex items-start gap-4">
                     <Avatar className="h-16 w-16">
                       <AvatarImage src={doctor.avatar_url || undefined} />
-                      <AvatarFallback className="bg-primary/10 text-primary text-lg">
+                      <AvatarFallback className="bg-stage-tint text-stage-accent text-lg font-bold">
                         {getInitials(doctor.full_name)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <CardTitle className="text-lg truncate">
-                          {doctor.title ? `${doctor.title} ` : 'Dr. '}{doctor.full_name}
-                        </CardTitle>
+                        <h2 className="text-[17px] font-bold leading-snug truncate">
+                          {doctorDisplayName(doctor.title, doctor.full_name)}
+                        </h2>
                         {doctor.is_verified && (
-                          <CheckCircle className="h-4 w-4 text-primary flex-shrink-0" aria-label="Verified" />
+                          <CheckCircle className="h-4 w-4 text-stage-accent flex-shrink-0" aria-label="Verified" />
                         )}
                         {isRecommended(doctor) && (
-                          <Badge className="bg-secondary/15 text-secondary border-secondary/30 text-[10px] px-2 py-0.5">
+                          <Badge className="bg-stage-tint text-stage-accent border-transparent text-[12px] px-2 py-0.5 hover:bg-stage-tint">
                             Recommended for you
                           </Badge>
                         )}
                       </div>
                       <div className="flex flex-wrap items-center gap-1.5 mb-1">
                         {doctor.specialty && (
-                          <Badge variant="secondary">{doctor.specialty}</Badge>
+                          <span className="text-[14px] font-semibold text-muted-foreground">{doctor.specialty}</span>
                         )}
                         {Array.isArray(doctor.specialties) && doctor.specialties
                           .filter(s => s && s !== doctor.specialty)
                           .slice(0, 2)
                           .map(s => (
-                            <Badge key={s} variant="outline" className="text-[10px]">{s}</Badge>
+                            <span key={s} className="text-[14px] text-muted-foreground">· {s}</span>
                           ))}
                       </div>
                       {(doctor.years_experience || (doctor.rating && doctor.review_count)) && (
-                        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                        <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
                           {doctor.years_experience && (
-                            <span>{doctor.years_experience}y experience</span>
+                            <span>{doctor.years_experience} years</span>
                           )}
                           {doctor.rating && doctor.review_count ? (
                             <span className="inline-flex items-center gap-0.5">
@@ -455,16 +451,13 @@ const FindDoctor = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {doctor.bio && (
-                    <p className="text-sm text-muted-foreground line-clamp-2">{doctor.bio}</p>
+                    <p className="text-[15px] text-muted-foreground line-clamp-2">{doctor.bio}</p>
                   )}
 
                   {Array.isArray(doctor.languages) && doctor.languages.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-1">
-                      <span className="text-[11px] text-muted-foreground">Languages:</span>
-                      {doctor.languages.slice(0, 4).map(l => (
-                        <Badge key={l} variant="outline" className="text-[10px]">{l}</Badge>
-                      ))}
-                    </div>
+                    <p className="text-[14px] text-muted-foreground">
+                      Speaks {doctor.languages.slice(0, 4).join(', ')}
+                    </p>
                   )}
 
                   <div className="flex flex-wrap gap-2 text-sm">
@@ -497,22 +490,26 @@ const FindDoctor = () => {
                     }
                   }}>
                     <DialogTrigger asChild>
-                      <Button className="w-full" onClick={() => setSelectedDoctor(doctor)}>
-                        <CalendarIcon className="h-4 w-4 mr-2" />
-                        Book Consultation
-                      </Button>
+                      <button
+                        type="button"
+                        className="w-full min-h-12 inline-flex items-center justify-center gap-2 rounded-full border border-stage-accent px-5 text-[16px] font-semibold text-stage-accent hover:bg-stage-tint"
+                        onClick={() => setSelectedDoctor(doctor)}
+                      >
+                        <CalendarIcon className="h-4 w-4" aria-hidden="true" />
+                        Book a visit
+                      </button>
                     </DialogTrigger>
                     <DialogContent className="max-w-md">
                       <DialogHeader>
-                        <DialogTitle>Book with Dr. {doctor.full_name}</DialogTitle>
+                        <DialogTitle>Book with {doctorDisplayName(doctor.title, doctor.full_name)}</DialogTitle>
                         <DialogDescription>
-                          Select a date and time for your consultation
+                          Pick a day and a time
                         </DialogDescription>
                       </DialogHeader>
                       
                       <div className="space-y-4">
                         <div>
-                          <label className="text-sm font-medium mb-2 block">Select Date</label>
+                          <p className="text-[15px] font-semibold mb-2">Day</p>
                           <Calendar
                             mode="single"
                             selected={selectedDate}
@@ -532,7 +529,7 @@ const FindDoctor = () => {
                           const slots = getAvailableTimeSlots(doctor, selectedDate);
                           return (
                             <div>
-                              <label className="text-sm font-medium mb-2 block">Select Time</label>
+                              <p className="text-[15px] font-semibold mb-2">Time</p>
                               {busySlotsLoading ? (
                                 <div className="flex items-center justify-center py-4 bg-muted/50 rounded-lg gap-2 text-sm text-muted-foreground">
                                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -574,8 +571,8 @@ const FindDoctor = () => {
                         })()}
 
                         {selectedDate && selectedTime && (
-                          <div className="p-4 bg-muted rounded-lg">
-                            <h4 className="font-medium mb-2">Appointment Summary</h4>
+                          <div className="p-4 bg-stage-tint rounded-2xl">
+                            <h3 className="text-[15px] font-bold mb-1">Your visit</h3>
                             <p className="text-sm text-muted-foreground">
                               {format(selectedDate, 'PPPP')} at {selectedTime}
                             </p>
@@ -591,7 +588,7 @@ const FindDoctor = () => {
                         )}
 
                         <Button
-                          className="w-full"
+                          className="btn-stage w-full"
                           disabled={!selectedDate || !selectedTime || bookingLoading}
                           onClick={handleBookAppointment}
                         >
@@ -601,7 +598,7 @@ const FindDoctor = () => {
                               Booking...
                             </>
                           ) : (
-                            'Confirm Booking'
+                            'Confirm booking'
                           )}
                         </Button>
                       </div>

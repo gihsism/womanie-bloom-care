@@ -1,11 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Home, ArrowLeft, Calendar, MessageSquare, FileText, Heart } from 'lucide-react';
+import { Home, ArrowLeft, Calendar, MessageSquare, FileText, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const suggestions = [
-  { icon: Home, label: 'Homepage', path: '/', description: 'Back to the main site' },
+  { icon: Home, label: 'Womanie website', path: '/', description: 'The main site' },
   { icon: Calendar, label: 'Home', path: '/dashboard', description: 'Your health today', auth: true },
   { icon: MessageSquare, label: 'Ask AI', path: '/dashboard/ai-doctor', description: 'Ask a health question', auth: true },
   { icon: FileText, label: 'Records', path: '/dashboard/medical-history', description: 'Your results and documents', auth: true },
@@ -21,53 +19,46 @@ const NotFound = () => {
     // data-hide-install-banner: on phones the install banner sat over
     // "Go back"; this page opts out so the way out is always visible.
     <div className="min-h-screen bg-background flex flex-col" data-hide-install-banner>
-      <div className="p-4 flex justify-center border-b border-border">
-        <button type="button" onClick={() => { window.location.href = '/'; }} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
+      <div className="w-full max-w-md mx-auto px-4 pt-3 min-h-12 flex items-center">
+        <button type="button" onClick={() => { window.location.href = '/'; }} className="text-xl font-extrabold text-stage-accent hover:opacity-80">
           Womanie
         </button>
       </div>
-      <div className="flex-1 flex items-center justify-center px-4">
-      <div className="max-w-md w-full text-center space-y-6">
-        <div className="space-y-3">
-          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-            <Heart className="h-10 w-10 text-primary" />
-          </div>
-          <h1 className="text-6xl font-bold text-primary">404</h1>
-          <p className="text-lg font-semibold text-foreground">Page not found</p>
-          <p className="text-sm text-muted-foreground">
-            The page you're looking for doesn't exist or has been moved.
-          </p>
-        </div>
+      <main className="flex-1 w-full max-w-md mx-auto px-4 pt-10 pb-10">
+        <p className="text-[15px] font-bold text-stage-accent">Error 404</p>
+        <h1 className="page-title mt-1">Page not found</h1>
+        <p className="page-sub mt-2">This page doesn't exist or has moved.</p>
 
-        <Button
-          variant="outline"
+        <button
+          type="button"
+          className="btn-stage w-full mt-7"
           onClick={() => (window.history.length > 1 ? navigate(-1) : navigate(user ? '/dashboard' : '/'))}
-          className="gap-2"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           Go back
-        </Button>
+        </button>
 
-        <div className="space-y-2">
+        <h2 className="section-title mt-10 mb-3">Or go to</h2>
+        <div className="row-group">
           {visibleSuggestions.map((s) => (
-            <Card
+            <button
               key={s.path}
-              className="p-3 flex items-center gap-3 cursor-pointer hover:bg-muted/50 transition-colors"
+              type="button"
+              className="w-full flex items-center gap-3.5 px-4 py-3.5 text-left hover:bg-muted/60"
               onClick={() => navigate(s.path)}
             >
-              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <s.icon className="h-4 w-4 text-primary" aria-hidden="true" />
-              </div>
-              <div className="text-left flex-1">
-                <p className="text-sm font-semibold">{s.label}</p>
-                <p className="text-xs text-muted-foreground">{s.description}</p>
-              </div>
-            </Card>
+              <span className="grid place-items-center h-10 w-10 shrink-0 rounded-full bg-stage-tint text-stage-accent" aria-hidden="true">
+                <s.icon className="h-5 w-5" />
+              </span>
+              <span className="flex-1 min-w-0">
+                <span className="block text-[16px] font-bold">{s.label}</span>
+                <span className="block text-[14px] text-muted-foreground">{s.description}</span>
+              </span>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+            </button>
           ))}
         </div>
-
-      </div>
-      </div>
+      </main>
     </div>
   );
 };

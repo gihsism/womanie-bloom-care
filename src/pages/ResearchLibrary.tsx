@@ -99,33 +99,31 @@ export default function ResearchLibrary() {
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
-      <header className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="px-3 py-2.5 flex items-center gap-2 max-w-3xl mx-auto">
-          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => navigate(-1)} aria-label="Back">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="min-w-0">
-            <p className="label-mono !text-primary !text-[10px] leading-none">&#10022; What the research says</p>
-            <h1 className="font-display text-[19px] font-medium leading-tight">Research library</h1>
-          </div>
+      <header className="page-head sticky top-0 z-10">
+        <div className="max-w-3xl mx-auto px-4 pt-3 pb-3">
+          <button type="button" onClick={() => navigate(-1)} className="flex items-center gap-2 min-h-10 -ml-1 px-1 hover:text-stage-accent" aria-label="Back">
+            <ArrowLeft className="h-5 w-5" />
+            <span className="text-[15px] font-medium">Back</span>
+          </button>
+          <h1 className="page-title mt-1">Research library</h1>
         </div>
       </header>
 
-      <main className="px-4 pt-4 pb-10 max-w-3xl mx-auto">
-        <p className="text-[13.5px] leading-relaxed text-muted-foreground">
+      <main className="px-4 pt-3 pb-10 max-w-3xl mx-auto">
+        <p className="page-sub">
           Clinical guidelines and research reviews about women&rsquo;s health, summarised in plain English.
         </p>
-        <p className="mt-1.5 text-[12px] leading-snug text-muted-foreground">{RESEARCH_DISCLAIMER}</p>
+        <p className="mt-1.5 text-[14px] leading-snug text-muted-foreground">{RESEARCH_DISCLAIMER}</p>
 
         {/* Search */}
-        <label className="mt-4 flex items-center gap-2 h-11 px-4 rounded-full border border-input bg-card focus-within:ring-2 focus-within:ring-ring/40">
-          <Search className="h-4 w-4 text-muted-foreground shrink-0" aria-hidden />
+        <label className="mt-4 flex items-center gap-2 h-12 px-4 rounded-full border border-input bg-card focus-within:ring-2 focus-within:ring-ring/40">
+          <Search className="h-5 w-5 text-muted-foreground shrink-0" aria-hidden />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search, e.g. coffee, iron, HRT"
-            className="flex-1 min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground/80"
+            className="flex-1 min-w-0 bg-transparent text-[16px] outline-none placeholder:text-muted-foreground"
             aria-label="Search the research library"
           />
           {query && (
@@ -136,7 +134,7 @@ export default function ResearchLibrary() {
         </label>
 
         {/* Life stage */}
-        <p className="label-mono mt-5 mb-2">Life stage</p>
+        <p className="mt-5 mb-2 text-[15px] font-semibold">Life stage</p>
         <div className="-mx-4 px-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {LIBRARY_STAGES.map((s) => (
             <Chip
@@ -151,7 +149,7 @@ export default function ResearchLibrary() {
         {/* Topics */}
         {data && data.topics.length > 0 && (
           <>
-            <p className="label-mono mt-4 mb-2">Topic</p>
+            <p className="mt-4 mb-2 text-[15px] font-semibold">Topic</p>
             <div className="-mx-4 px-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <Chip active={!topic} onClick={() => update({ topic: null })} label="All topics" />
               {data.topics.map((t) => (
@@ -163,18 +161,18 @@ export default function ResearchLibrary() {
 
         {/* Results */}
         <div className="mt-5 flex items-baseline justify-between gap-3">
-          <p className="text-[12.5px] text-muted-foreground min-w-0 truncate">
+          <p className="text-[14px] text-muted-foreground min-w-0 truncate">
             {loading ? 'Loading…' : `${items.length} ${items.length === 1 ? 'summary' : 'summaries'}${topicLabel ? ` · ${topicLabel}` : ''}${q ? ` · “${q}”` : ''}`}
           </p>
-          {data && <p className="label-mono !text-[10px] shrink-0">Updated {data.version}</p>}
+          {data && <p className="text-[13px] text-muted-foreground shrink-0">Updated {data.version}</p>}
         </div>
 
         {error && <p className="mt-6 text-sm text-destructive">{error}</p>}
         {loading && !data && (
-          <div className="py-16 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
+          <div className="py-16 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-stage-accent" /></div>
         )}
         {!loading && !error && items.length === 0 && (
-          <div className="mt-6 rounded-2xl border border-border bg-card p-5 text-sm text-muted-foreground">
+          <div className="mt-6 panel p-5 text-[15px] text-muted-foreground">
             Nothing matched. Try a simpler word, another topic, or &ldquo;All&rdquo; life stages.
           </div>
         )}
@@ -185,13 +183,13 @@ export default function ResearchLibrary() {
 
         {items.length > shown && (
           <div className="mt-4 flex justify-center">
-            <Button variant="outline" className="rounded-full h-10 px-6" onClick={() => setShown((n) => n + PAGE)}>
+            <Button variant="outline" className="rounded-full h-11 px-6 text-[15px]" onClick={() => setShown((n) => n + PAGE)}>
               Show more ({items.length - shown})
             </Button>
           </div>
         )}
 
-        <p className="mt-8 text-[11.5px] leading-relaxed text-muted-foreground text-center">
+        <p className="mt-8 text-[13px] leading-relaxed text-muted-foreground text-center">
           Sources come from PubMed (US National Library of Medicine). Summaries are written from each paper&rsquo;s
           abstract. {RESEARCH_DISCLAIMER}
         </p>
@@ -206,10 +204,10 @@ function Chip({ active, label, onClick }: { active: boolean; label: string; onCl
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`shrink-0 h-8 px-3.5 rounded-full border text-[12.5px] whitespace-nowrap transition-colors ${
+      className={`shrink-0 min-h-10 px-4 rounded-full border text-[14px] font-semibold whitespace-nowrap transition-colors ${
         active
-          ? 'bg-primary border-primary text-primary-foreground'
-          : 'bg-card border-border text-foreground hover:border-primary/60'
+          ? 'bg-stage-tint border-stage-accent text-stage-ink'
+          : 'bg-card border-line text-foreground hover:bg-muted/60'
       }`}
     >
       {label}
@@ -220,36 +218,35 @@ function Chip({ active, label, onClick }: { active: boolean; label: string; onCl
 function ResearchCard({ item }: { item: LibraryItem }) {
   const certainty = item.certainty && item.certainty !== 'not stated' ? `${item.certainty} certainty` : null;
   return (
-    <li className="rounded-2xl border border-border bg-card p-4">
+    <li className="panel p-4">
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="label-mono !text-primary !text-[10px]">{EVIDENCE_LABEL[item.evidenceLevel]}</span>
-        {item.landmark && <span className="label-mono !text-[10px]">· Landmark study</span>}
-        <span className="label-mono !text-[10px]">· {item.year}</span>
-        {certainty && <span className="label-mono !text-[10px]">· {certainty}</span>}
+        <span className="text-[13px] font-bold text-stage-accent">{EVIDENCE_LABEL[item.evidenceLevel]}</span>
+        {item.landmark && <span className="text-[13px] text-muted-foreground">· Landmark study</span>}
+        <span className="text-[13px] text-muted-foreground">· {item.year}</span>
+        {certainty && <span className="text-[13px] text-muted-foreground">· {certainty}</span>}
       </div>
-      <h2 className="mt-1.5 font-display text-[16px] leading-snug font-[450] break-words">{item.title}</h2>
-      <p className="mt-0.5 text-[12px] text-muted-foreground break-words">{item.source}</p>
-      <p className="mt-2.5 text-[13.5px] leading-relaxed">{item.summary}</p>
+      <h2 className="mt-1 text-[17px] leading-snug font-bold break-words">{item.title}</h2>
+      <p className="mt-0.5 text-[14px] text-muted-foreground break-words">{item.source}</p>
+      <p className="mt-2.5 text-[15px] leading-relaxed">{item.summary}</p>
       {item.keyPoints.length > 0 && (
         <ul className="mt-2.5 space-y-1.5">
           {item.keyPoints.map((k, i) => (
-            <li key={i} className="flex gap-2 text-[13px] leading-snug text-foreground/90">
-              <span className="mt-[7px] h-1 w-1 rounded-full bg-primary shrink-0" aria-hidden />
+            <li key={i} className="flex gap-2 text-[14px] leading-snug text-foreground/90">
+              <span className="mt-[8px] h-1 w-1 rounded-full bg-stage-accent shrink-0" aria-hidden />
               <span className="min-w-0">{k}</span>
             </li>
           ))}
         </ul>
       )}
-      <div className="mt-3.5 flex items-center justify-between gap-3">
-        <span className="text-[11.5px] text-muted-foreground">Published {item.year}</span>
+      <div className="mt-3 flex items-center justify-end gap-3">
         <a
           href={item.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-full border border-primary/40 text-primary text-[12.5px] hover:bg-primary/5"
+          className="inline-flex items-center gap-1.5 min-h-10 px-1 text-stage-accent text-[15px] font-semibold hover:underline underline-offset-4"
         >
           Read the source
-          <ExternalLink className="h-3 w-3" aria-hidden />
+          <ExternalLink className="h-4 w-4" aria-hidden />
         </a>
       </div>
     </li>

@@ -1,10 +1,9 @@
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Check } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import { PublicHero, PublicSection } from '@/components/public/PublicUI';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Pricing = () => {
@@ -17,7 +16,7 @@ const Pricing = () => {
       name: 'Free',
       price: '$0',
       period: 'forever',
-      description: 'Perfect for getting started with basic health tracking',
+      description: 'The basics, free for good',
       features: [
         'Menstrual cycle tracking',
         'Basic symptom logging',
@@ -26,14 +25,14 @@ const Pricing = () => {
         'Community access',
         'Educational resources',
       ],
-      cta: 'Get Started',
+      cta: 'Get started',
       popular: false,
     },
     {
       name: 'Premium',
       price: '$9.99',
-      period: 'per month',
-      description: 'For women who want comprehensive health insights',
+      period: 'a month',
+      description: 'Everything Womanie can tell you about your health',
       features: [
         'Everything in Free',
         'Unlimited AI health assistant',
@@ -44,14 +43,14 @@ const Pricing = () => {
         'Export health reports',
         'Priority support',
       ],
-      cta: 'Start Free Trial',
+      cta: 'Start free trial',
       popular: true,
     },
     {
       name: 'Professional',
       price: '$24.99',
-      period: 'per month',
-      description: 'For healthcare providers managing patient care',
+      period: 'a month',
+      description: 'For doctors and clinics caring for patients',
       features: [
         'Everything in Premium',
         'Patient management dashboard',
@@ -62,109 +61,84 @@ const Pricing = () => {
         'Team collaboration',
         'Dedicated account manager',
       ],
-      cta: 'Contact Sales',
+      cta: 'Email us',
       popular: false,
     },
   ];
 
+  const faqs = [
+    { q: 'Can I switch plans at any time?', a: "Yes. You can upgrade or downgrade at any time. Changes take effect straight away and we prorate any charges." },
+    { q: 'Is there a free trial?', a: 'Premium comes with a 14-day free trial. No credit card needed to start, and you can cancel any time before the trial ends.' },
+    { q: 'How can I pay?', a: 'All major credit cards (Visa, Mastercard, American Express), PayPal and Apple Pay.' },
+    { q: 'Is my data secure?', a: 'Yes. Your health data is encrypted in transit and at rest, you decide exactly what is shared with whom, and you can export or delete it at any time. It is never shared with third parties.' },
+  ];
+
+  // The professional plan is for clinics: its button opens an email to
+  // us (it used to say "Contact sales" but went to the sign-up page).
+  const choose = (plan: (typeof plans)[number]) => {
+    if (plan.name === 'Professional') {
+      window.location.href = 'mailto:support@womanie.info?subject=Womanie%20Professional';
+      return;
+    }
+    navigate(user ? '/dashboard' : '/auth/select-type');
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
+      <main>
+        <PublicHero title="Simple, clear pricing" sub="Start free. Always know what you'll pay." />
 
-      {/* Hero Section */}
-      <section className="py-16 lg:py-24 pt-32">
-        <div className="container mx-auto px-4">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-              Simple, Transparent Pricing
-            </h1>
-            <p className="text-xl text-muted-foreground">
-              Choose the plan that's right for you. Always know what you'll pay.
-            </p>
-          </div>
-
-          {/* Pricing Cards */}
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <section className="px-4 pb-10">
+          <div className="mx-auto max-w-5xl grid md:grid-cols-3 gap-4">
             {plans.map((plan) => (
-              <Card
-                key={plan.name}
-                className={`p-8 relative ${
-                  plan.popular ? 'border-primary border-2 shadow-lg' : ''
-                }`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-semibold">
-                    Most Popular
-                  </div>
-                )}
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                  <div className="mb-2">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground">/{plan.period}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{plan.description}</p>
+              <div key={plan.name} className={`panel p-6 flex flex-col ${plan.popular ? 'border-stage-accent ring-1 ring-stage-accent' : ''}`}>
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className="section-title">{plan.name}</h2>
+                  {plan.popular && <span className="rounded-full bg-stage-tint px-3 py-1 text-[13px] font-bold text-stage-accent">Most popular</span>}
                 </div>
-
-                <ul className="space-y-3 mb-8">
+                <p className="mt-3">
+                  <span className="text-[2.25rem] font-extrabold tracking-tight">{plan.price}</span>
+                  <span className="text-[15px] text-muted-foreground"> {plan.period}</span>
+                </p>
+                <p className="mt-1 text-[15px] text-muted-foreground">{plan.description}</p>
+                <ul className="mt-5 mb-6 space-y-2.5 flex-1">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex gap-3 items-start">
-                      <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                      <span className="text-sm">{feature}</span>
+                    <li key={feature} className="flex gap-2.5 items-start text-[15px]">
+                      <Check className="h-5 w-5 text-stage-accent shrink-0" aria-hidden="true" />
+                      {feature}
                     </li>
                   ))}
                 </ul>
-
-                <Button
-                  className="w-full"
-                  variant={plan.popular ? 'default' : 'outline'}
-                  onClick={() => navigate(user ? '/dashboard' : '/auth/select-type')}
-                >
-                  {user ? (plan.cta === 'Contact Sales' ? 'Contact Sales' : 'Go to Dashboard') : plan.cta}
-                </Button>
-              </Card>
+                {plan.popular ? (
+                  <button type="button" className="btn-stage w-full" onClick={() => choose(plan)}>
+                    {user ? 'Go to Home' : plan.cta}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="w-full min-h-12 rounded-full border border-input px-5 text-[16px] font-semibold hover:bg-muted/60"
+                    onClick={() => choose(plan)}
+                  >
+                    {plan.name === 'Professional' ? plan.cta : user ? 'Go to Home' : plan.cta}
+                  </button>
+                )}
+              </div>
             ))}
           </div>
+        </section>
 
-          {/* FAQ Section */}
-          <div className="max-w-3xl mx-auto mt-20">
-            <h2 className="text-3xl font-bold text-center mb-12">
-              Frequently Asked Questions
-            </h2>
-            <div className="space-y-6">
-              <Card className="p-6">
-                <h3 className="font-semibold mb-2">Can I switch plans anytime?</h3>
-                <p className="text-muted-foreground">
-                  Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately,
-                  and we'll prorate any charges.
-                </p>
-              </Card>
-              <Card className="p-6">
-                <h3 className="font-semibold mb-2">Is there a free trial?</h3>
-                <p className="text-muted-foreground">
-                  Premium plans come with a 14-day free trial. No credit card required to start.
-                  You can cancel anytime before the trial ends.
-                </p>
-              </Card>
-              <Card className="p-6">
-                <h3 className="font-semibold mb-2">What payment methods do you accept?</h3>
-                <p className="text-muted-foreground">
-                  We accept all major credit cards (Visa, Mastercard, American Express), PayPal,
-                  and Apple Pay.
-                </p>
-              </Card>
-              <Card className="p-6">
-                <h3 className="font-semibold mb-2">Is my data secure?</h3>
-                <p className="text-muted-foreground">
-                  Yes. Your health data is encrypted in transit and at rest, you decide exactly what is shared with whom, and you can export or delete your data at any time.
-                  Your health data is never shared with third parties.
-                </p>
-              </Card>
-            </div>
+        <PublicSection title="Questions" className="pb-16">
+          <div className="row-group">
+            {faqs.map((f) => (
+              <div key={f.q} className="px-4 py-4">
+                <h3 className="text-[16px] font-bold">{f.q}</h3>
+                <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">{f.a}</p>
+              </div>
+            ))}
           </div>
-        </div>
-      </section>
-
+        </PublicSection>
+      </main>
       <Footer />
     </div>
   );

@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Download, Smartphone, Check, ArrowLeft } from 'lucide-react';
+import { Check, Zap, WifiOff, Maximize } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import { IconRows, PublicHero, PublicSection } from '@/components/public/PublicUI';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -13,8 +11,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const Install = () => {
-  const navigate = useNavigate();
-  usePageTitle('Install App');
+  usePageTitle('Install the app');
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
@@ -54,129 +51,56 @@ const Install = () => {
     setDeferredPrompt(null);
   };
 
+  const iosSteps = [
+    { n: 1, title: 'Tap ··· then Share', description: 'The ··· button is at the bottom right of Safari. On older iPhones, tap the Share button instead: the square with an arrow pointing up.' },
+    { n: 2, title: 'Tap "Add to Home Screen"', description: "If you don't see it, tap \"View More\" or scroll down the list." },
+    { n: 3, title: 'Tap "Add"', description: 'Leave "Open as Web App" switched on if you see it. Womanie appears on your home screen like a regular app.' },
+  ];
+  const androidSteps = [
+    { n: 1, title: 'Open the browser menu', description: 'Tap the three dots in the top-right corner of your browser.' },
+    { n: 2, title: 'Tap "Add to Home screen" or "Install app"', description: 'The wording depends on your browser.' },
+    { n: 3, title: 'Confirm', description: 'Tap Install or Add. Womanie appears on your home screen like a regular app.' },
+  ];
+  const why = [
+    { icon: Zap, title: 'Quick to open', description: 'Starts straight from your home screen.' },
+    { icon: WifiOff, title: 'Works offline', description: 'See your data even without internet.' },
+    { icon: Maximize, title: 'Full screen', description: 'No browser bars, just Womanie.' },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
-      <main className="pt-24 pb-16 px-4">
-        <div className="container mx-auto max-w-2xl">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/')}
-            className="mb-8"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
+      <main>
+        <PublicHero
+          title="Install Womanie"
+          sub="Add Womanie to your home screen: quicker to open and it feels like an app."
+          cta={!isInstalled && !isIOS && deferredPrompt ? { label: 'Install Womanie', onClick: handleInstallClick } : undefined}
+        />
 
-          <div className="text-center mb-12">
-            <div className="w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Smartphone className="h-10 w-10 text-primary-foreground" />
-            </div>
-            <h1 className="text-3xl lg:text-4xl font-bold mb-4">
-              Install Womanie
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Add Womanie to your home screen for quick access and an app-like experience.
-            </p>
-          </div>
-
-          {isInstalled ? (
-            <Card className="p-8 text-center bg-primary/10 border-primary/20">
-              <Check className="h-16 w-16 text-primary mx-auto mb-4" />
-              <h2 className="text-2xl font-bold mb-2">Already Installed!</h2>
-              <p className="text-muted-foreground">
-                Womanie is installed on your device. You can find it on your home screen.
-              </p>
-            </Card>
-          ) : isIOS ? (
-            <Card className="p-8">
-              <h2 className="text-xl font-bold mb-6 text-center">Install on iPhone/iPad</h2>
-              <ol className="space-y-4">
-                <li className="flex gap-4">
-                  <span className="flex-shrink-0 w-8 h-8 bg-primary/20 text-primary rounded-full flex items-center justify-center font-bold">1</span>
-                  <div>
-                    <p className="font-medium">Tap ··· then Share</p>
-                    <p className="text-sm text-muted-foreground">The ··· button is at the bottom right of Safari. On older iPhones, tap the Share button instead: the square with an arrow pointing up.</p>
-                  </div>
-                </li>
-                <li className="flex gap-4">
-                  <span className="flex-shrink-0 w-8 h-8 bg-primary/20 text-primary rounded-full flex items-center justify-center font-bold">2</span>
-                  <div>
-                    <p className="font-medium">Tap "Add to Home Screen"</p>
-                    <p className="text-sm text-muted-foreground">If you don't see it, tap "View More" or scroll down the list.</p>
-                  </div>
-                </li>
-                <li className="flex gap-4">
-                  <span className="flex-shrink-0 w-8 h-8 bg-primary/20 text-primary rounded-full flex items-center justify-center font-bold">3</span>
-                  <div>
-                    <p className="font-medium">Tap "Add"</p>
-                    <p className="text-sm text-muted-foreground">Leave "Open as Web App" switched on if you see it. Womanie will appear on your home screen like a regular app.</p>
-                  </div>
-                </li>
-              </ol>
-            </Card>
-          ) : deferredPrompt ? (
-            <Card className="p-8 text-center">
-              <Download className="h-16 w-16 text-primary mx-auto mb-4" />
-              <h2 className="text-xl font-bold mb-4">Ready to Install</h2>
-              <p className="text-muted-foreground mb-6">
-                Click the button below to add Womanie to your home screen.
-              </p>
-              <Button size="lg" onClick={handleInstallClick} className="w-full sm:w-auto">
-                <Download className="mr-2 h-5 w-5" />
-                Install Womanie
-              </Button>
-            </Card>
-          ) : (
-            <Card className="p-8">
-              <h2 className="text-xl font-bold mb-6 text-center">Install on Android</h2>
-              <ol className="space-y-4">
-                <li className="flex gap-4">
-                  <span className="flex-shrink-0 w-8 h-8 bg-primary/20 text-primary rounded-full flex items-center justify-center font-bold">1</span>
-                  <div>
-                    <p className="font-medium">Open browser menu</p>
-                    <p className="text-sm text-muted-foreground">Tap the three dots in the top-right corner of your browser.</p>
-                  </div>
-                </li>
-                <li className="flex gap-4">
-                  <span className="flex-shrink-0 w-8 h-8 bg-primary/20 text-primary rounded-full flex items-center justify-center font-bold">2</span>
-                  <div>
-                    <p className="font-medium">Tap "Add to Home screen" or "Install app"</p>
-                    <p className="text-sm text-muted-foreground">The wording may vary by browser.</p>
-                  </div>
-                </li>
-                <li className="flex gap-4">
-                  <span className="flex-shrink-0 w-8 h-8 bg-primary/20 text-primary rounded-full flex items-center justify-center font-bold">3</span>
-                  <div>
-                    <p className="font-medium">Confirm installation</p>
-                    <p className="text-sm text-muted-foreground">Leave "Open as Web App" switched on if you see it. Womanie will appear on your home screen like a regular app.</p>
-                  </div>
-                </li>
-              </ol>
-            </Card>
-          )}
-
-          <div className="mt-12 text-center">
-            <h3 className="font-semibold mb-4">Why install Womanie?</h3>
-            <div className="grid sm:grid-cols-3 gap-4 text-sm">
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <p className="font-medium">Quick Access</p>
-                <p className="text-muted-foreground">Launch instantly from your home screen</p>
-              </div>
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <p className="font-medium">Works Offline</p>
-                <p className="text-muted-foreground">Access your data even without internet</p>
-              </div>
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <p className="font-medium">Full Screen</p>
-                <p className="text-muted-foreground">Enjoy an immersive app experience</p>
+        {isInstalled ? (
+          <PublicSection>
+            <div className="panel bg-stage-tint border-stage-accent/30 p-5 flex gap-3.5 items-start">
+              <Check className="h-6 w-6 text-stage-accent shrink-0" aria-hidden="true" />
+              <div>
+                <h2 className="text-[17px] font-bold">Already installed</h2>
+                <p className="text-[15px] text-muted-foreground">Womanie is on this device. You'll find it on your home screen.</p>
               </div>
             </div>
-          </div>
-        </div>
+          </PublicSection>
+        ) : isIOS ? (
+          <PublicSection title="On iPhone or iPad">
+            <IconRows items={iosSteps} />
+          </PublicSection>
+        ) : deferredPrompt ? null : (
+          <PublicSection title="On Android">
+            <IconRows items={androidSteps} />
+          </PublicSection>
+        )}
+
+        <PublicSection title="Why install it?" className="pb-16">
+          <IconRows items={why} />
+        </PublicSection>
       </main>
-
       <Footer />
     </div>
   );

@@ -1,16 +1,16 @@
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { useState } from 'react';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { Calendar, User, ArrowRight } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import { PublicHero, PublicSection } from '@/components/public/PublicUI';
 
 const Blog = () => {
   usePageTitle('Blog');
+  const [category, setCategory] = useState('All Articles');
 
   const articles = [
     {
-      title: 'Understanding Your Menstrual Cycle: A Complete Guide',
+      title: 'Understanding your menstrual cycle: a complete guide',
       excerpt: 'Learn about the four phases of your cycle and how to track them effectively for better health insights.',
       author: 'Dr. Sarah Johnson',
       date: 'March 15, 2024',
@@ -18,7 +18,7 @@ const Blog = () => {
       readTime: '8 min read',
     },
     {
-      title: '10 Signs of Ovulation You Shouldn\'t Ignore',
+      title: '10 signs of ovulation you shouldn\'t ignore',
       excerpt: 'Discover the key indicators of ovulation and how to use them to optimize your fertility window.',
       author: 'Dr. Emily Chen',
       date: 'March 12, 2024',
@@ -26,7 +26,7 @@ const Blog = () => {
       readTime: '6 min read',
     },
     {
-      title: 'PCOS: Symptoms, Diagnosis, and Management',
+      title: 'PCOS: symptoms, diagnosis and management',
       excerpt: 'A comprehensive guide to understanding and managing Polycystic Ovary Syndrome with lifestyle and medical interventions.',
       author: 'Dr. Maria Rodriguez',
       date: 'March 10, 2024',
@@ -34,7 +34,7 @@ const Blog = () => {
       readTime: '12 min read',
     },
     {
-      title: 'Nutrition for Hormonal Balance',
+      title: 'Food for hormonal balance',
       excerpt: 'How diet affects your hormones and what foods to eat for optimal menstrual health and energy.',
       author: 'Lisa Thompson, RD',
       date: 'March 8, 2024',
@@ -42,7 +42,7 @@ const Blog = () => {
       readTime: '10 min read',
     },
     {
-      title: 'Navigating Perimenopause: What to Expect',
+      title: 'Perimenopause: what to expect',
       excerpt: 'Understanding the transition to menopause and how to manage symptoms for a smoother journey.',
       author: 'Dr. Jennifer Lee',
       date: 'March 5, 2024',
@@ -50,7 +50,7 @@ const Blog = () => {
       readTime: '9 min read',
     },
     {
-      title: 'Mental Health and Your Cycle: The Connection',
+      title: 'Mental health and your cycle',
       excerpt: 'Exploring the relationship between hormonal fluctuations and mood, anxiety, and mental wellbeing.',
       author: 'Dr. Amanda White',
       date: 'March 1, 2024',
@@ -70,109 +70,71 @@ const Blog = () => {
     'Conditions',
   ];
 
+  const shown = category === 'All Articles' ? articles : articles.filter((a) => a.category === category);
+
+  // The page's one action: the working newsletter sign-up in the footer
+  // (this page had its own Subscribe button that did nothing).
+  const toNewsletter = () => {
+    const input = document.querySelector<HTMLInputElement>('input[aria-label="Email address for newsletter"]');
+    input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    input?.focus({ preventScroll: true });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
+      <main>
+        <PublicHero
+          title="Women's health blog"
+          sub="Expert insights, advice based on evidence, and stories from our community."
+          cta={{ label: 'Get new articles by email', onClick: toNewsletter }}
+        />
 
-      {/* Hero Section */}
-      <section className="py-16 lg:py-24 pt-32 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-              Women's Health Blog
-            </h1>
-            <p className="text-xl text-muted-foreground">
-              Expert insights, evidence-based advice, and community stories
-              to support your health journey.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Categories */}
-      <section className="py-8 border-b border-border">
-        <div className="container mx-auto px-4">
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {categories.map((category) => (
-              <Button
-                key={category}
-                variant="outline"
-                className="whitespace-nowrap"
-              >
-                {category}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Articles Grid */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {articles.map((article) => (
-              <Card key={article.title} className="overflow-hidden flex flex-col">
-                <div className="h-48 bg-muted"></div>
-                <div className="p-6 flex-1 flex flex-col">
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3">
-                    <span className="text-primary font-medium">{article.category}</span>
-                    <span>•</span>
-                    <span>{article.readTime}</span>
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3 line-clamp-2">
-                    {article.title}
-                  </h3>
-                  <p className="text-muted-foreground mb-4 line-clamp-3 flex-1">
-                    {article.excerpt}
-                  </p>
-                  <div className="flex items-center justify-between pt-4 border-t border-border">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <User className="h-4 w-4" />
-                      <span>{article.author}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      <span>{article.date}</span>
-                    </div>
-                  </div>
-                  <Button className="w-full mt-4 gap-2">
-                    Read More
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
-
-          {/* Load More */}
-          <div className="text-center mt-12">
-            <Button variant="outline" size="lg">
-              Load More Articles
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Newsletter */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <Card className="p-8 max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-4">Stay Informed</h2>
-            <p className="text-muted-foreground mb-6">
-              Get the latest women's health insights, tips, and research delivered to your inbox weekly.
-            </p>
-            <div className="flex gap-2 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-2 rounded-md border border-input bg-background"
-              />
-              <Button>Subscribe</Button>
+        <section className="px-4">
+          <div className="mx-auto max-w-3xl">
+            <div role="radiogroup" aria-label="Topic" className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
+              {categories.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  role="radio"
+                  aria-checked={category === c}
+                  onClick={() => setCategory(c)}
+                  className={`shrink-0 min-h-11 rounded-full border px-4 text-[15px] font-semibold transition-colors ${
+                    category === c ? 'border-stage-accent bg-stage-tint text-stage-ink' : 'border-line bg-card hover:bg-muted/60'
+                  }`}
+                >
+                  {c === 'All Articles' ? 'All' : c}
+                </button>
+              ))}
             </div>
-          </Card>
-        </div>
-      </section>
+          </div>
+        </section>
 
+        <PublicSection className="pt-6 pb-16">
+          {shown.length === 0 ? (
+            <div className="panel px-5 py-8 text-center">
+              <p className="text-[16px] font-bold">No articles about {category.toLowerCase()} yet</p>
+              <p className="mt-1 text-[15px] text-muted-foreground">New articles are on the way.</p>
+            </div>
+          ) : (
+            <div className="row-group">
+              {shown.map((article) => (
+                <article key={article.title} className="px-4 py-5">
+                  <p className="text-[14px] text-muted-foreground">
+                    <span className="font-semibold text-stage-accent">{article.category}</span> · {article.readTime}
+                  </p>
+                  <h2 className="mt-1 text-[18px] font-bold leading-snug">{article.title}</h2>
+                  <p className="mt-1.5 text-[15px] leading-relaxed text-muted-foreground">{article.excerpt}</p>
+                  <p className="mt-2.5 text-[14px] text-muted-foreground">
+                    {article.author} · {article.date} · <span className="font-semibold">Coming soon</span>
+                  </p>
+                </article>
+              ))}
+            </div>
+          )}
+        </PublicSection>
+      </main>
       <Footer />
     </div>
   );

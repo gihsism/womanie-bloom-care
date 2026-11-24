@@ -208,23 +208,23 @@ export function InstallBanner() {
       role="region"
       aria-label="Install Womanie"
     >
-      <div className="mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-lg backdrop-blur">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+      <div className="mx-auto flex max-w-md items-center gap-3 rounded-[1.25rem] border border-line bg-background/95 p-3 shadow-[0_8px_24px_rgba(0,0,0,0.10)] backdrop-blur">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-stage-tint">
           <img src="/apple-touch-icon.png" alt="" className="h-7 w-7 rounded-lg" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-foreground">Install Womanie</p>
-          <p className="truncate text-xs text-muted-foreground">
+          <p className="truncate text-[15px] font-bold text-foreground">Install Womanie</p>
+          <p className="truncate text-[13px] text-muted-foreground">
             {ios ? "Add it to your home screen for quick access" : "Use it like an app, even offline"}
           </p>
         </div>
         {ios ? (
-          <Button size="sm" variant="secondary" className="shrink-0 gap-1" onClick={() => navigate("/install")}>
+          <Button size="sm" className="shrink-0 gap-1 h-10 px-4 bg-stage-accent text-white text-[14px] font-bold hover:bg-stage-accent/90" onClick={() => navigate("/install")}>
             <Share className="h-4 w-4" />
             How
           </Button>
         ) : (
-          <Button size="sm" className="shrink-0 gap-1" onClick={install}>
+          <Button size="sm" className="shrink-0 gap-1 h-10 px-4 bg-stage-accent text-white text-[14px] font-bold hover:bg-stage-accent/90" onClick={install}>
             <Download className="h-4 w-4" />
             Install
           </Button>
@@ -233,7 +233,7 @@ export function InstallBanner() {
           type="button"
           onClick={dismiss}
           aria-label="Dismiss install prompt"
-          className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <X className="h-4 w-4" />
         </button>

@@ -71,7 +71,7 @@ const Navigation = () => {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-background/95 backdrop-blur-sm shadow-sm' : 'bg-transparent'
+        isScrolled ? 'bg-background/95 backdrop-blur-sm border-b border-line' : 'bg-background'
       }`}
       role="navigation"
       aria-label="Main navigation"
@@ -82,7 +82,7 @@ const Navigation = () => {
           <a
             href="/"
             onClick={(e) => { e.preventDefault(); navigate('/'); }}
-            className="text-2xl font-bold text-primary hover:opacity-80 transition-opacity"
+            className="text-2xl font-extrabold text-stage-accent hover:opacity-80 transition-opacity"
             aria-label="Womanie — go to homepage"
           >
             Womanie
@@ -115,21 +115,21 @@ const Navigation = () => {
               {user ? (
                 <>
                   <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
-                    My Space
+                    Home
                   </Button>
                   <Button variant="outline" size="sm" onClick={async () => {
                     window.location.href = '/api/auth/logout';
                   }}>
-                    Log Out
+                    Log out
                   </Button>
                 </>
               ) : (
                 <>
                   <Button variant="ghost" size="sm" onClick={() => startLogin(navigate)}>
-                    Log In
+                    Log in
                   </Button>
                   <Button size="sm" onClick={() => navigate('/auth/select-type')}>
-                    Get Started
+                    Get started
                   </Button>
                 </>
               )}
@@ -142,7 +142,7 @@ const Navigation = () => {
               className="md:hidden h-9 px-4"
               onClick={() => (user ? navigate('/dashboard') : startLogin(navigate))}
             >
-              {user ? 'My Space' : 'Log In'}
+              {user ? 'Home' : 'Log in'}
             </Button>
 
             {/* Hamburger */}
@@ -169,17 +169,17 @@ const Navigation = () => {
           role="menu"
           aria-hidden={!isMobileMenuOpen}
         >
-          <div className="py-4 border-t border-border bg-background shadow-lg">
+          <div className="py-4 border-t border-line bg-background">
             <div className="flex flex-col gap-1">
               {navLinks.map((link) => (
                 <button
                   key={link.label}
                   role="menuitem"
                   onClick={() => handleNav(link.href)}
-                  className={`text-sm font-medium transition-colors text-left py-2.5 px-2 rounded-lg ${
+                  className={`text-[16px] font-semibold transition-colors text-left min-h-11 py-2.5 px-3 rounded-xl ${
                     isActive(link.href)
-                      ? 'text-primary font-semibold bg-primary/5'
-                      : 'text-foreground/80 hover:text-primary hover:bg-muted/50'
+                      ? 'text-stage-accent bg-stage-tint'
+                      : 'text-foreground hover:bg-muted/60'
                   }`}
                 >
                   {link.label}
@@ -194,13 +194,13 @@ const Navigation = () => {
                       className="w-full justify-start"
                       onClick={() => handleNav('/welcome')}
                     >
-                      My Space
+                      What Womanie can do
                     </Button>
                     <Button
                       className="w-full"
                       onClick={() => handleNav('/dashboard')}
                     >
-                      Dashboard
+                      Go to Home
                     </Button>
                     <Button
                       variant="outline"
@@ -209,7 +209,7 @@ const Navigation = () => {
                         window.location.href = '/api/auth/logout';
                       }}
                     >
-                      Log Out
+                      Log out
                     </Button>
                   </>
                 ) : (
@@ -219,13 +219,13 @@ const Navigation = () => {
                       className="w-full"
                       onClick={() => { setIsMobileMenuOpen(false); startLogin(navigate); }}
                     >
-                      Log In
+                      Log in
                     </Button>
                     <Button
                       className="w-full"
                       onClick={() => handleNav('/auth/select-type')}
                     >
-                      Get Started
+                      Get started
                     </Button>
                   </>
                 )}

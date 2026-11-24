@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -38,67 +37,60 @@ const Footer = () => {
     Company: [
       { label: 'About', href: '/about' },
       { label: 'Pricing', href: '/pricing' },
-      { label: 'For Patients', href: '/for-patients' },
-      { label: 'For Doctors', href: '/for-doctors' },
+      { label: 'For patients', href: '/for-patients' },
+      { label: 'For doctors', href: '/for-doctors' },
     ],
     Product: [
       { label: 'Features', href: '/product' },
-      { label: 'AI Assistant', href: '/product' },
-      { label: 'Install App', href: '/install' },
+      { label: 'Ask AI', href: '/product' },
+      { label: 'Install the app', href: '/install' },
       { label: 'Community', href: '/community' },
     ],
     Resources: [
       { label: 'Blog', href: '/blog' },
-      { label: 'Health Statistics', href: '/health-statistics' },
+      { label: 'Health statistics', href: '/health-statistics' },
     ],
     Legal: [
-      { label: 'Privacy Policy', href: '/dashboard/privacy' },
-      { label: 'Terms of Service', href: '/dashboard/terms' },
+      { label: 'Privacy policy', href: '/privacy' },
+      { label: 'Terms of service', href: '/dashboard/terms' },
     ],
   };
 
-  const socialLinks = [
-    { icon: Facebook, href: 'https://facebook.com', label: 'Facebook' },
-    { icon: Twitter, href: 'https://twitter.com', label: 'Twitter' },
-    { icon: Instagram, href: 'https://instagram.com', label: 'Instagram' },
-    { icon: Linkedin, href: 'https://linkedin.com', label: 'LinkedIn' },
-  ];
-
   return (
-    <footer className="bg-muted/30 border-t border-border">
-      <div className="container mx-auto px-4 py-12 lg:py-16">
+    <footer className="bg-background border-t border-line">
+      <div className="mx-auto max-w-5xl px-4 py-10 lg:py-14">
         {/* Newsletter */}
-        <div className="mb-12 pb-12 border-b border-border">
-          <div className="max-w-2xl mx-auto text-center">
-            <h3 className="text-2xl font-bold mb-2">Stay Informed</h3>
-            <p className="text-muted-foreground mb-6">
-              Get health tips, product updates, and exclusive content delivered to your inbox
+        <div className="mb-10 pb-10 border-b border-line">
+          <div className="max-w-xl">
+            <h2 className="section-title mb-1">Health tips by email</h2>
+            <p className="text-[15px] text-muted-foreground mb-4">
+              Health tips and product news, now and then. Unsubscribe any time.
             </p>
-            <form onSubmit={handleSubscribe} className="flex gap-2 max-w-md mx-auto">
+            <form onSubmit={handleSubscribe} className="flex gap-2">
               <Input
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1"
+                className="flex-1 h-12 rounded-full px-5 text-[16px] md:text-[16px]"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 aria-label="Email address for newsletter"
               />
-              <Button type="submit" disabled={subscribing}>{subscribing ? 'Subscribing…' : 'Subscribe'}</Button>
+              <Button type="submit" variant="outline" className="h-12 px-5 text-[15px] font-semibold" disabled={subscribing}>{subscribing ? 'Subscribing…' : 'Subscribe'}</Button>
             </form>
           </div>
         </div>
 
         {/* Links */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
-              <h4 className="font-semibold mb-4">{category}</h4>
-              <ul className="space-y-2">
+              <h3 className="text-[15px] font-bold mb-3">{category}</h3>
+              <ul className="space-y-1">
                 {links.map((link) => (
                   <li key={link.label}>
                     <button
                       onClick={() => navigate(link.href)}
-                      className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                      className="min-h-9 text-[15px] text-muted-foreground hover:text-stage-accent transition-colors text-left"
                     >
                       {link.label}
                     </button>
@@ -109,34 +101,16 @@ const Footer = () => {
           ))}
         </div>
 
-        {/* Bottom */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-border">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate('/')}
-              className="text-xl font-bold text-primary hover:opacity-80 transition-opacity"
-            >
-              Womanie
-            </button>
-            <span className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} All rights reserved
-            </span>
-          </div>
-
-          <div className="flex gap-4">
-            {socialLinks.map((social) => (
-              <a
-                key={social.label}
-                href={social.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Follow us on ${social.label}`}
-                className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-primary hover:text-white transition-colors"
-              >
-                <social.icon className="h-5 w-5" aria-hidden="true" />
-              </a>
-            ))}
-          </div>
+        <div className="flex items-center gap-2 pt-6 border-t border-line">
+          <button
+            onClick={() => navigate('/')}
+            className="text-xl font-extrabold text-stage-accent hover:opacity-80 transition-opacity"
+          >
+            Womanie
+          </button>
+          <span className="text-[14px] text-muted-foreground">
+            © {new Date().getFullYear()} All rights reserved
+          </span>
         </div>
       </div>
     </footer>
