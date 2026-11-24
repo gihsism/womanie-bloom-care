@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,7 +24,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
-import { parsePillStatus, type PillStatus } from '@/lib/pillLog';
+import { parsePillStatus, yesterdayPillUnanswered, type PillStatus } from '@/lib/pillLog';
 
 const CONTRACEPTION_METHODS = [
   { id: 'pill', label: 'Birth Control Pill', emoji: '💊', effectiveness: '91-99%', schedule: 'Daily', description: 'Take at the same time every day for best protection.' },
@@ -204,7 +205,11 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
     }
   }, [packStartDate]);
 
-  const handleTakePill = async (status: PillStatus = 'on-time') => {
+  // Home asks "Yesterday's pill not ticked. Missed it?"; answer it here.
+  const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
+  const yesterdayUnanswered = useMemo(() => yesterdayPillUnanswered(signals, packDay), [signals, packDay]);
+
+  const handleTakePill = async (status: PillStatus = 'on-time', day: string = today) => {
     if (!userId) return;
     try {
       // Read existing today row to preserve other note segments + structured fields.
@@ -212,7 +217,7 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
         .from('daily_health_signals')
         .select('notes')
         .eq('user_id', userId)
-        .eq('signal_date', today)
+        .eq('signal_date', day)
         .maybeSingle();
 
       const newNotes = setPillInNotes((existing?.notes ?? null) as string | null, status);
@@ -221,19 +226,19 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
         .upsert(
           {
             user_id: userId,
-            signal_date: today,
+            signal_date: day,
             notes: newNotes,
           },
           { onConflict: 'user_id,signal_date' }
         );
 
       // First pill of a pack? Stamp the pack start.
-      if (!packStartDate) setPackStartDate(today);
+      if (!packStartDate && day === today) setPackStartDate(today);
 
       emitHealthDataChange();
       toast({
         title: status === 'missed' ? 'Logged as missed' : '✅ Logged!',
-        description: `${currentMethod?.label || 'Contraception'} marked ${status} for today.`,
+        description: `${currentMethod?.label || 'Contraception'} marked ${status} for ${day === today ? 'today' : 'yesterday'}.`,
       });
     } catch (e) {
       console.error('handleTakePill error', e);
@@ -347,6 +352,34 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
               </Button>
             </div>
           )}
+
+          {yesterdayUnanswered && (
+            <div className="flex items-center justify-between gap-2 mt-3 text-xs">
+              <span className="text-muted-foreground">Yesterday's pill not logged</span>
+              <div className="flex gap-1.5">
+                <Button variant="outline" size="sm" className="h-7 text-[11px]" onClick={() => handleTakePill('on-time', yesterday)}>
+                  I took it
+                </Button>
+                <Button variant="outline" size="sm" className="h-7 text-[11px]" onClick={() => handleTakePill('missed', yesterday)}>
+                  Missed it
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Her pill time: Home's "Today's pill not ticked yet" row waits for it. */}
+          <label className="flex items-center justify-between gap-2 mt-3 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <Bell className="h-3.5 w-3.5" />
+              Pill reminder time
+            </span>
+            <Input
+              type="time"
+              value={reminderTime}
+              className="h-8 w-28"
+              onChange={(e) => { if (/^\d{2}:\d{2}$/.test(e.target.value)) setReminderTime(e.target.value); }}
+            />
+          </label>
 
           {/* Streak & Pack Progress */}
           <div className="grid grid-cols-2 gap-3 mt-4">

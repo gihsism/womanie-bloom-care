@@ -59,3 +59,12 @@ export const toggleAsked = (list: VisitQuestion[], id: string): VisitQuestion[] 
   list.map(q => (q.id === id ? { ...q, asked: !q.asked } : q));
 
 export const removeQuestion = (list: VisitQuestion[], id: string): VisitQuestion[] => list.filter(q => q.id !== id);
+
+/** "today", "tomorrow" or "in N days", in calendar days (a visit tomorrow morning is not "0 days away"). */
+export function visitDaysAway(when: Date, now = new Date()): string {
+  const day = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const n = Math.round((day(when) - day(now)) / 86_400_000);
+  if (n <= 0) return 'today';
+  if (n === 1) return 'tomorrow';
+  return `in ${n} days`;
+}

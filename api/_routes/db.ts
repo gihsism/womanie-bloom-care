@@ -184,6 +184,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       // Never allow a client to change an owner column.
       const safeUpdate: Record<string, unknown> = { ...updateData };
       for (const c of cols) delete safeUpdate[c];
+      // updated_at is always set by the server below; a client copy would
+      // make Postgres fail with "multiple assignments to same column".
+      delete safeUpdate.updated_at;
       const keys = Object.keys(safeUpdate);
       if (keys.length === 0) return res.status(400).json({ error: 'No updatable columns' });
       if (!keys.every(isIdent)) return res.status(400).json({ error: 'Invalid column name' });

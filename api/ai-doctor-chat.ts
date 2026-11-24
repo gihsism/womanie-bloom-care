@@ -7,6 +7,7 @@ import { parseConversationId, persistChatTurn } from './_lib/chatConversation.js
 import { buildLifeContext } from './_lib/life-context.js';
 import { SOURCES_FOOTER_MARK, formatSourcesFooter, stripUnknownCitations } from './_lib/research/library.js';
 import { buildChatSystemPrompt, selectChatEvidence } from './_lib/research/chat-prompt.js';
+import { checkCitations, evidenceTexts } from './_lib/research/citation-check.js';
 
 export const config = {
   maxDuration: 60,
@@ -249,7 +250,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   // this server (never sent to a third party) and the search falls back
   // to keywords only if the model is unavailable or slower than ~3 s.
   // Never allowed to break the chat.
-  const { chatSources, block: evidenceBlock } = await selectChatEvidence(userTurnContent, profile?.life_stage);
+  const { chatSources, researchItems, passages, block: evidenceBlock } = await selectChatEvidence(userTurnContent, profile?.life_stage);
   const systemPrompt = buildChatSystemPrompt(medicalContext, evidenceBlock);
 
   const anthropicMessages = messages.map((m: { role: string; content: string }) => ({
@@ -344,7 +345,28 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     if (assistantText) {
       // Drop any [n] that is not one of the sources we gave the model, so
       // the saved reply never points at a source that does not exist.
-      const cleanText = stripUnknownCitations(assistantText, chatSources.map((s) => s.n));
+      // Then drop any [n] whose sentence names a medicine, a number or an
+      // effect direction that source n does not support (deterministic,
+      // no model call; see api/_lib/research/citation-check.ts).
+      let cleanText = stripUnknownCitations(assistantText, chatSources.map((s) => s.n));
+      try {
+        const checked = checkCitations(cleanText, evidenceTexts(researchItems, passages), {
+          exemptText: `${medicalContext}\n${userTurnContent ?? ''}`,
+        });
+        if (checked.removed.length) {
+          // Only the failing token (drug name or number), never the sentence.
+          console.warn('citation-check removed', checked.removed.map((r) => `[${r.n}] ${r.issue}: ${r.token}`).join('; '));
+        }
+        cleanText = checked.text;
+      } catch (err) {
+        console.error('citation-check failed:', err);
+      }
+      // The page showed the raw stream: hand it the text that is saved.
+      if (cleanText !== assistantText) {
+        try {
+          res.write(`data: ${JSON.stringify({ replace: cleanText })}\n\n`);
+        } catch { /* client gone; the saved reply is still the clean one */ }
+      }
       const storedText = cleanText + formatSourcesFooter(chatSources, cleanText);
       try {
         await persistChatTurn(sql, {

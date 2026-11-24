@@ -9,12 +9,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { onHealthDataChange } from '@/lib/data-events';
-import { differenceInCalendarDays, format, parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 import type { LifeStage } from './DashboardHeader';
 import { getFriendlyName } from '@/lib/medical-utils';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
-import { FLAGGED_STATUSES, addQuestion, fromSuggestions, isFlaggedStatus, parseQuestions, removeQuestion, toggleAsked, type VisitQuestion } from '@/lib/visitQuestions';
+import { FLAGGED_STATUSES, addQuestion, fromSuggestions, isFlaggedStatus, parseQuestions, removeQuestion, toggleAsked, visitDaysAway, type VisitQuestion } from '@/lib/visitQuestions';
 
 // Generates a personalised "questions to bring to your doctor"
 // checklist from the user's recent data + mode. Patients
@@ -103,7 +103,6 @@ const MODE_DEFAULTS: Record<string, string[]> = {
   ],
 };
 
-const daysAway = (n: number) => (n <= 0 ? 'today' : n === 1 ? 'tomorrow' : `in ${n} days`);
 
 export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
   const { user } = useAuth();
@@ -339,7 +338,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
         <p className="text-[14px] text-muted-foreground mb-3">
           For {format(parseISO(upcomingApt.scheduled_at), 'EEE d MMM, HH:mm')}
           {upcomingApt.doctor_name && ` with ${upcomingApt.doctor_name}`}
-          {' '}({daysAway(differenceInCalendarDays(parseISO(upcomingApt.scheduled_at), new Date()))})
+          {' '}({visitDaysAway(parseISO(upcomingApt.scheduled_at))})
         </p>
       )}
 

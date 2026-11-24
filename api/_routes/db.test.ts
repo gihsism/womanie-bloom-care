@@ -106,6 +106,25 @@ describe('api/_routes/db security invariants', () => {
     expect(params).toContain(SESSION_USER.id);
   });
 
+  it('update ignores a client updated_at (the server sets it once; two would fail in Postgres)', async () => {
+    query.mockResolvedValue([{ id: 'm1' }]);
+    const res = mockRes();
+    await handler(
+      mockReq({
+        table: 'medications',
+        operation: 'update',
+        updateData: { active: false, updated_at: '2026-11-24T17:00:00.000Z' },
+        filters: [['id', 'eq', 'm1'], ['user_id', 'eq', SESSION_USER.id]],
+      }),
+      res,
+    );
+    expect(res._status).toBe(200);
+    const [sql, params] = query.mock.calls[0] as [string, unknown[]];
+    expect(sql.match(/updated_at/g)).toHaveLength(1);
+    expect(sql).toMatch(/SET active = \$1, updated_at = now\(\)/);
+    expect(params).not.toContain('2026-11-24T17:00:00.000Z');
+  });
+
   it('upsert SQL includes a WHERE owner guard so it cannot overwrite another user\'s row', async () => {
     query.mockResolvedValue([{ id: SESSION_USER.id, full_name: 'Alice' }]);
     const res = mockRes();

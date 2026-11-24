@@ -11,6 +11,7 @@ import {
   searchItems,
   searchResearch,
   selectChatSources,
+  splitTopicLabel,
   toChatSources,
   type ResearchItem,
 } from './library';
@@ -116,6 +117,66 @@ describe('searchItems ranking', () => {
   it('filters by topic', () => {
     const res = searchItems(FIXTURES, '', { topic: 'caffeine-pregnancy' });
     expect(res.map((r) => r.item.pmid).sort()).toEqual(['1', '2']);
+  });
+
+  it('splits a topic label into its head and a bracketed example list', () => {
+    expect(splitTopicLabel('Medicines in pregnancy (paracetamol, antidepressants)')).toEqual({
+      head: 'Medicines in pregnancy',
+      aside: 'paracetamol, antidepressants',
+    });
+    // A bracket without a comma is an alias and stays in the head.
+    expect(splitTopicLabel('Polycystic ovary syndrome (PCOS)')).toEqual({ head: 'Polycystic ovary syndrome PCOS', aside: '' });
+  });
+
+  describe('named medicines', () => {
+    const topics = [
+      { id: 'medications-pregnancy', label: 'Medicines in pregnancy (paracetamol, antidepressants)', stages: ['pregnancy' as const] },
+      { id: 'migraine', label: 'Migraine and headache', stages: ['general' as const] },
+    ];
+    const meds: ResearchItem[] = [
+      item({
+        pmid: '10',
+        title: 'Recommendations for antirheumatic drugs in pregnancy and lactation',
+        evidenceLevel: 'guideline',
+        lifeStages: ['pregnancy'],
+        topics: ['medications-pregnancy'],
+        tags: ['rheumatology', 'pregnancy'],
+        keywords: ['antirheumatic drugs', 'pregnancy', 'medicines in pregnancy'],
+      }),
+      item({
+        pmid: '11',
+        title: 'Prenatal paracetamol exposure and childhood asthma',
+        lifeStages: ['pregnancy'],
+        topics: ['medications-pregnancy'],
+        tags: ['paracetamol', 'pregnancy'],
+        keywords: ['paracetamol', 'acetaminophen', 'pregnancy'],
+      }),
+      item({
+        pmid: '12',
+        title: 'Migraine treatment guideline',
+        evidenceLevel: 'guideline',
+        lifeStages: ['general'],
+        topics: ['migraine'],
+        tags: ['migraine', 'headache'],
+        keywords: ['migraine', 'headache', 'triptans', 'paracetamol'],
+      }),
+    ];
+
+    it('a drug named only in the topic label is not a strong match for every item', () => {
+      const res = searchItems(meds, 'can I take paracetamol while pregnant?', {}, topics);
+      expect(res[0].item.pmid).toBe('11');
+      const guideline = res.find((r) => r.item.pmid === '10');
+      expect(guideline && guideline.score).toBeLessThan(res[0].score / 2);
+    });
+
+    it('ranks the item that names the drug above a guideline that only mentions it', () => {
+      const res = searchItems(meds, 'paracetamol for a headache in pregnancy', {}, topics);
+      expect(res[0].item.pmid).toBe('11');
+    });
+
+    it('brand names reach the generic drug', () => {
+      expect(searchItems(meds, 'tylenol', {}, topics)[0].item.pmid).toBe('11');
+    });
   });
 
   it('maps app modes onto library stages', () => {
