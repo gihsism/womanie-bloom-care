@@ -176,6 +176,14 @@ export function fmtAgo(min: number): { value: string; unit: string } {
   return { value: m ? `${h}h ${String(m).padStart(2, '0')}` : `${h}h`, unit: '' };
 }
 
+/** Post-menopause with a period logged in the last 12 months: bleeding
+ *  after menopause should be checked, so Home says that instead of the
+ *  "12 months in a row marks menopause" countdown. */
+export const POST_MENOPAUSE_BLEED_TEXT = 'Bleeding after menopause is worth checking with your doctor.';
+export function postMenopauseBleed(mode: string, months: number | null): boolean {
+  return mode === 'post-menopause' && months != null && months < 12;
+}
+
 /** Day of life, birth day = day 1. */
 export function dayOfLife(birthDate: string | null | undefined, now: Date): number | null {
   if (!birthDate) return null;
