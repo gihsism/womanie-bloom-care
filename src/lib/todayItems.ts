@@ -14,6 +14,8 @@ export type Target = string;
 
 export const STAGE_PAGE = '/dashboard/stage';
 export const RECORDS = '/dashboard/medical-history';
+/** Records opened on its "My charts" segment (cycle, ovulation, sleep charts). */
+export const RECORDS_CHARTS = `${RECORDS}?tab=charts`;
 export const VISITS = '/dashboard/appointments';
 export const ME = '/dashboard/settings';
 
@@ -162,9 +164,9 @@ export function moreFor(mode: LifeStage, opts: { weeksPregnant?: number | null }
       case 'pre-menstrual':
         return [{ label: 'What to expect', target: STAGE_PAGE }, { label: 'Your results', target: RECORDS }, meds];
       case 'menstrual-cycle':
-        return [{ label: 'Calendar', target: `${STAGE_PAGE}#cycle-calendar` }, { label: 'Charts & history', target: RECORDS }, guides, meds];
+        return [{ label: 'Calendar', target: `${STAGE_PAGE}#cycle-calendar` }, { label: 'Charts & history', target: RECORDS_CHARTS }, guides, meds];
       case 'conception':
-        return [{ label: 'Calendar', target: `${STAGE_PAGE}#cycle-calendar` }, { label: 'Ovulation & charts', target: RECORDS }, guides, meds];
+        return [{ label: 'Calendar', target: `${STAGE_PAGE}#cycle-calendar` }, { label: 'Ovulation & charts', target: RECORDS_CHARTS }, guides, meds];
       case 'contraception':
         return [{ label: 'Your method', target: `${STAGE_PAGE}#contraception` }, { label: 'Your results', target: RECORDS }, guides, meds];
       case 'ivf':
