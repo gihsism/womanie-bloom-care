@@ -218,8 +218,7 @@ export default function PregnancyVaccinations({ dueDate }: PregnancyVaccinations
               </div>
               <p className="text-[11px] text-muted-foreground mb-2">
                 <Clock className="h-3 w-3 inline mr-1 -mt-0.5" />
-                Window: weeks {v.windowStartWeek === 0 ? 'any' : v.windowStartWeek}
-                {v.windowStartWeek === 0 ? '' : `–${v.windowEndWeek}`}
+                {v.windowStartWeek === 0 ? 'Any week of pregnancy' : `Weeks ${v.windowStartWeek}–${v.windowEndWeek}`}
                 {' · '}{v.cadence === 'every-pregnancy' ? 'every pregnancy' : v.cadence === 'once-per-season' ? 'once per season' : 'as indicated'}
               </p>
               <p className="text-[11px] text-muted-foreground mb-2">{v.rationale}</p>
