@@ -18,6 +18,8 @@ vi.mock('../../_lib/sentry.js', () => ({ withSentry: (h: unknown) => h }));
 import handler from './delete-account';
 import { getAuthUser } from '../../_lib/auth.js';
 import { list, del } from '@vercel/blob';
+import { readFileSync, readdirSync } from 'node:fs';
+import { hashSubject } from '../../_lib/ratelimit.js';
 
 const SESSION_USER = { id: 'user_1', email: 'user@test.com', sessionId: 'sess_1' };
 const CONFIRM_PHRASE = 'DELETE MY ACCOUNT';
@@ -165,5 +167,44 @@ describe('me/delete-account security invariants', () => {
     expect(vi.mocked(list).mock.calls[1][0]).toMatchObject({ prefix: `${SESSION_USER.id}/`, cursor: 'c2' });
     expect(vi.mocked(del).mock.calls.map(c => c[0])).toEqual([['u1'], ['u2']]);
     delete process.env.BLOB_READ_WRITE_TOKEN;
+  });
+
+  // Coverage guard: every table the app keeps per user - the /api/db
+  // whitelist (OWNER_COLUMN) plus every table created by db/migrations and
+  // the server-only auth/chat tables - must be erased. A new user-scoped
+  // table that is not added to delete-account fails here.
+  it('erases every user-scoped table (whitelist + migrations)', async () => {
+    const root = new URL('../../../', import.meta.url);
+    const dbSrc = readFileSync(new URL('api/_routes/db.ts', root), 'utf8');
+    const ownerBlock = dbSrc.slice(dbSrc.indexOf('const OWNER_COLUMN'), dbSrc.indexOf('};', dbSrc.indexOf('const OWNER_COLUMN')));
+    const whitelist = [...ownerBlock.matchAll(/^\s+([a-z_]+):/gm)].map(m => m[1]);
+    const migDir = new URL('db/migrations/', root);
+    const migrated = readdirSync(migDir).flatMap(f =>
+      [...readFileSync(new URL(f, migDir), 'utf8').matchAll(/CREATE TABLE IF NOT EXISTS ([a-z_]+)/gi)].map(m => m[1]));
+    const NOT_USER_ROWS = new Set([
+      'current_extracted_data', // a VIEW over medical_extracted_data (migration 002)
+    ]);
+    const expected = new Set(
+      [...whitelist, ...migrated, 'chat_messages', 'auth_sessions', 'auth_users', 'llm_cache']
+        .filter(t => !NOT_USER_ROWS.has(t)),
+    );
+    expect(whitelist.length).toBeGreaterThan(15);
+
+    query.mockImplementation(async (q: string) =>
+      /to_regclass/.test(q)
+        ? [{ present: true, visit_questions: true, pending_jobs: true, rate_limit_counters: true }]
+        : [{ email: 'User@Test.com' }]);
+    const res = mockRes();
+    await handler(mockReq({ confirm: CONFIRM_PHRASE }), res);
+    expect(res._status).toBe(200);
+    const deleted = new Set(
+      tagFn.mock.calls.flatMap(c => [...(c[0] as string[]).join('?').matchAll(/DELETE FROM ([a-z_]+)/g)].map(m => m[1])),
+    );
+    const missing = [...expected].filter(t => !deleted.has(t));
+    expect(missing).toEqual([]);
+
+    // Rate-limit rows are matched by the hashed id and hashed lower-case email.
+    const rl = tagFn.mock.calls.find(c => /DELETE FROM rate_limit_counters/.test((c[0] as string[]).join('?')));
+    expect(rl?.[1]).toEqual([hashSubject(SESSION_USER.id), hashSubject('user@test.com')]);
   });
 });

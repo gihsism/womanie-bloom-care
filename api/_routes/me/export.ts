@@ -40,6 +40,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       doctorProfile, doctorNotes, doctorSchedule,
       consultationSettings, chartAccessLog,
       lifeEvents, medications, babies, birthRecords, appData, visitQuestions,
+      roles, newsletter, analysisJobs,
     ] = await Promise.all([
       sql.query('SELECT * FROM profiles WHERE id = $1', [user.id]),
       sql.query('SELECT id, email, name, created_at FROM auth_users WHERE id = $1', [user.id]),
@@ -81,11 +82,17 @@ async function handler(req: VercelRequest, res: VercelResponse) {
            ORDER BY created_at DESC`,
         [user.id]
       ),
-      sql.query(
+      // conversation_id groups turns into chats (migration 013); before
+      // it is applied the export falls back to the columns that exist.
+      Promise.resolve(sql.query(
+        `SELECT role, content, model, conversation_id, created_at FROM chat_messages
+           WHERE user_id = $1 ORDER BY created_at ASC`,
+        [user.id]
+      )).catch(() => sql.query(
         `SELECT role, content, model, created_at FROM chat_messages
            WHERE user_id = $1 ORDER BY created_at ASC`,
         [user.id]
-      ),
+      )),
       sql.query(
         `SELECT id, code, is_used, expires_at, created_at FROM patient_access_codes
            WHERE patient_id = $1 ORDER BY created_at DESC`,
@@ -138,6 +145,20 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       // Migration 012; same fallback.
       Promise.resolve(sql.query('SELECT * FROM visit_questions WHERE user_id = $1 ORDER BY updated_at DESC', [user.id]))
         .catch(() => []),
+      sql.query('SELECT role, created_at FROM user_roles WHERE user_id = $1 ORDER BY created_at', [user.id]),
+      // Newsletter rows are keyed by email; join through the account so the
+      // query is still bound to the session user.
+      sql.query(
+        `SELECT n.email, n.source, n.created_at, n.unsubscribed_at
+           FROM newsletter_subscribers n JOIN auth_users u ON u.email = n.email
+          WHERE u.id = $1`,
+        [user.id]
+      ),
+      // Document-analysis retry ledger (migration 005).
+      Promise.resolve(sql.query(
+        'SELECT document_id, status, attempts, created_at, updated_at FROM pending_jobs WHERE user_id = $1 ORDER BY created_at DESC',
+        [user.id]
+      )).catch(() => []),
     ]) as Row[][];
 
     const payload = {
@@ -147,6 +168,10 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         session_user_id: user.id,
       },
       profile: profile[0] ?? null,
+      // Account roles ('patient' / 'doctor' / 'admin').
+      user_roles: roles,
+      newsletter_subscription: newsletter[0] ?? null,
+      document_analysis_jobs: analysisJobs,
       documents,
       document_analyses: analyses,
       medical_extracted_data: extracted,

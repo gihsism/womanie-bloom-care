@@ -9,6 +9,7 @@ vi.mock('../../_lib/sentry.js', () => ({ withSentry: (h: unknown) => h }));
 import handler from './export';
 import { getAuthUser } from '../../_lib/auth.js';
 
+type Row = Record<string, unknown>;
 const USER = { id: 'user_export_1', email: 'export@test.com', sessionId: 'sess_export_1' };
 
 function mockRes() {
@@ -106,6 +107,36 @@ describe('me/export security invariants', () => {
     expect(Array.isArray(body.appointments)).toBe(true);
     // doctor sections present even for a patient (empty arrays)
     expect(Array.isArray(body.doctor_authored_notes)).toBe(true);
+  });
+
+  it('exports chat conversation_id, visit_questions, user_roles and the newsletter row', async () => {
+    query.mockImplementation(async (q: string) => {
+      if (/FROM chat_messages/.test(q)) return [{ role: 'user', content: 'hi', model: null, conversation_id: 'c-1', created_at: 't' }];
+      if (/FROM visit_questions/.test(q)) return [{ id: 'vq1', question: 'Q?' }];
+      if (/FROM user_roles/.test(q)) return [{ role: 'patient', created_at: 't' }];
+      if (/FROM newsletter_subscribers/.test(q)) return [{ email: 'export@test.com', source: 'footer' }];
+      return [];
+    });
+    const res = mockRes();
+    await handler(mockReq(), res);
+    expect(res._status).toBe(200);
+    const body = res._body as Record<string, unknown>;
+    expect((body.chat_messages as Row[])[0].conversation_id).toBe('c-1');
+    expect(body.visit_questions).toEqual([{ id: 'vq1', question: 'Q?' }]);
+    expect(body.user_roles).toEqual([{ role: 'patient', created_at: 't' }]);
+    expect(body.newsletter_subscription).toEqual({ email: 'export@test.com', source: 'footer' });
+  });
+
+  it('still exports chats before migration 013 (no conversation_id column)', async () => {
+    query.mockImplementation(async (q: string) => {
+      if (/conversation_id/.test(q)) throw Object.assign(new Error('column does not exist'), { code: '42703' });
+      if (/FROM chat_messages/.test(q)) return [{ role: 'user', content: 'hi' }];
+      return [];
+    });
+    const res = mockRes();
+    await handler(mockReq(), res);
+    expect(res._status).toBe(200);
+    expect((res._body as Record<string, unknown>).chat_messages).toEqual([{ role: 'user', content: 'hi' }]);
   });
 
   it('returns 500 when the database throws', async () => {
