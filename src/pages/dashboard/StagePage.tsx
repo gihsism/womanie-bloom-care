@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { useScrollToHash } from '@/hooks/useScrollToHash';
 import { useStageProfile } from '@/hooks/useStageProfile';
 import { stageLabel } from '@/lib/stageLabels';
 import CycleCalendar from '@/components/dashboard/CycleCalendar';
@@ -44,25 +45,6 @@ const anchor = 'scroll-mt-4 md:scroll-mt-28';
 
 function Section({ id, children }: { id?: string; children: ReactNode }) {
   return <div id={id} className={`mb-6 ${anchor}`}>{children}</div>;
-}
-
-// Scroll to the #anchor once the section exists (the trackers load data
-// first, so the element can appear a moment after the page renders).
-function useScrollToHash(ready: boolean) {
-  const { hash } = useLocation();
-  useEffect(() => {
-    if (!ready || !hash) return;
-    const id = decodeURIComponent(hash.slice(1));
-    let tries = 0;
-    const t = window.setInterval(() => {
-      const el = document.getElementById(id);
-      if (el || ++tries > 20) {
-        window.clearInterval(t);
-        el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
-    return () => window.clearInterval(t);
-  }, [hash, ready]);
 }
 
 export default function StagePage() {
