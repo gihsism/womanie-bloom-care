@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -347,6 +348,20 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
               </Button>
             </div>
           )}
+
+          {/* Her pill time: Home's "Today's pill not ticked yet" row waits for it. */}
+          <label className="flex items-center justify-between gap-2 mt-3 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <Bell className="h-3.5 w-3.5" />
+              Pill reminder time
+            </span>
+            <Input
+              type="time"
+              value={reminderTime}
+              className="h-8 w-28"
+              onChange={(e) => { if (/^\d{2}:\d{2}$/.test(e.target.value)) setReminderTime(e.target.value); }}
+            />
+          </label>
 
           {/* Streak & Pack Progress */}
           <div className="grid grid-cols-2 gap-3 mt-4">
