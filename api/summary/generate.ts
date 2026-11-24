@@ -82,7 +82,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   // Cache hits don't call Anthropic, so only charge the rate-limit
   // budget when we're actually about to do fresh work.
   if (force) {
-    const rate = checkAndConsume('summary-generate-force', user.id, 10);
+    const rate = await checkAndConsume('summary-generate-force', user.id, 10);
     if (!rate.ok) {
       return res.status(429).json({
         error: `Too many refreshes — try again in ${Math.ceil(rate.retryInSec / 60)} minutes.`,

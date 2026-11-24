@@ -69,7 +69,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (force === true) {
-    const rate = checkAndConsume('panel-summary-force', user.id, 15);
+    const rate = await checkAndConsume('panel-summary-force', user.id, 15);
     if (!rate.ok) {
       return res.status(429).json({
         error: `Too many refreshes — try again in ${Math.ceil(rate.retryInSec / 60)} minutes.`,

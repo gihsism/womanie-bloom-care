@@ -19,6 +19,9 @@ vi.mock('@neondatabase/serverless', () => ({
 }));
 vi.mock('../auth.js', () => ({ getAuthUser: vi.fn() }));
 vi.mock('../sentry.js', () => ({ withSentry: (h: unknown) => h }));
+vi.mock('../ratelimit.js', () => ({
+  checkAndConsume: vi.fn(async () => ({ ok: true, remaining: 100, limit: 150, retryInSec: 0 })),
+}));
 
 import handler from '../../ai-doctor-chat';
 import { getAuthUser } from '../auth.js';

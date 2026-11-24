@@ -30,7 +30,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const user = await getAuthUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
-  const rate = checkAndConsume('ai-doctor-chat', user.id, 150);
+  const rate = await checkAndConsume('ai-doctor-chat', user.id, 150);
   if (!rate.ok) {
     return res.status(429).json({
       error: `You've reached today's chat limit (${rate.limit}). Try again in ${Math.ceil(rate.retryInSec / 60)} minutes.`,

@@ -29,7 +29,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // Cap redemption attempts so a doctor can't brute-force patient codes.
-  const limit = checkAndConsume('redeem-code', user.id, 20);
+  const limit = await checkAndConsume('redeem-code', user.id, 20);
   if (!limit.ok) {
     return res.status(429).json({
       error: `Too many attempts. Try again in ${Math.ceil(limit.retryInSec / 60)} minutes.`,

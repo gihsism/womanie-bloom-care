@@ -79,7 +79,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const sessionUser = await getAuthUser(req);
   if (!sessionUser) return res.status(401).json({ error: 'Unauthorized' });
 
-  const rate = checkAndConsume('analyze-document', sessionUser.id, 25);
+  const rate = await checkAndConsume('analyze-document', sessionUser.id, 25);
   if (!rate.ok) {
     return res.status(429).json({
       error: `Daily analysis limit reached (${rate.limit}). Try again in ${Math.ceil(rate.retryInSec / 60)} minutes.`,
