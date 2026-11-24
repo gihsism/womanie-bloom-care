@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { useLabResults } from '@/hooks/useLabResults';
 import EvidenceNote from '@/components/research/EvidenceNote';
 import { specsForLabs } from '@/lib/evidenceTopics';
-import { LabAttentionBanner, LabCardHeader, LabEmptyCard, LabMissingTests, LabRow } from './LabInsightParts';
+import { LabCardHeader, LabEmptyCard, LabMissingTests, LabRow } from './LabInsightParts';
 
 // Key tests to highlight during pregnancy
 const PREGNANCY_TESTS = [
@@ -36,7 +36,6 @@ export default function PregnancyLabInsights({ since = null, hideUploadCard = fa
 
   const tested = matched.filter(m => m.result);
   const missing = matched.filter(m => !m.result);
-  const flagged = tested.filter(m => m.result?.status === 'abnormal' || m.result?.status === 'critical');
 
   if (labs.length === 0) {
     // One upload button per page: Records already shows its own.
@@ -53,12 +52,8 @@ export default function PregnancyLabInsights({ since = null, hideUploadCard = fa
     <Card className="p-4 space-y-3">
       <LabCardHeader />
 
-      {/* Flagged items alert */}
-      {flagged.length > 0 && (
-        <LabAttentionBanner>
-          {flagged.length} result{flagged.length !== 1 ? 's' : ''} need{flagged.length === 1 ? 's' : ''} attention for pregnancy
-        </LabAttentionBanner>
-      )}
+      {/* No "N results need attention" banner: Records lists each flagged
+          result once, under "Talk to your doctor about". */}
 
       {/* Tested results */}
       <ul>

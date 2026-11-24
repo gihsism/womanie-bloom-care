@@ -48,13 +48,13 @@ describe('Records segments', () => {
 describe('Records → Results: stage lab cards moved from Home', () => {
   it('renders the stage lab cards once, with the pregnancy window', () => {
     expect(count(records, /<StageLabCards\b/)).toBe(1);
-    expect(records).toContain('<StageLabCards mode={mode} labSince={labSince} />');
+    expect(records).toContain('<StageLabCards mode={mode} labSince={labSince} hideUploadCard={Boolean(uploadButton)} />');
     expect(records).toContain("mode === 'pregnancy' ? pregnancyStart(pregnancyDueDate) : null");
     expect(records).toContain("select('life_stage, pregnancy_due_date')");
   });
 
   it("pregnancy shows only this pregnancy's labs", () => {
-    expect(stageLabs).toContain('<PregnancyLabInsights since={labSince} />');
+    expect(stageLabs).toContain('<PregnancyLabInsights since={labSince} hideUploadCard={hideUploadCard} />');
   });
 
   it.each(['CycleLabInsights', 'ModeLabInsights', 'LabFreshnessCard', 'AmhAgeContext'])(
@@ -142,6 +142,14 @@ describe('each flagged result shows once on Records', () => {
   it('drops the repeated "Results that need attention" card and the Health Overview flagged rows', () => {
     expect(records).not.toMatch(/<RecentFindings\b/);
     expect(summary).not.toMatch(/flagged\.map\(/);
+    for (const f of ['PregnancyLabInsights', 'CycleLabInsights', 'ModeLabInsights']) {
+      expect(read(`../components/dashboard/${f}.tsx`)).not.toContain('<LabAttentionBanner');
+    }
+  });
+
+  it('a flagged row still opens its explanation on tap', () => {
+    expect(records).toContain('aria-expanded={open}');
+    expect(records).toContain('onClick={() => setOpen(o => !o)}');
   });
 
   it('the tapped explanation keeps the "Ask AI" link the old card had', () => {

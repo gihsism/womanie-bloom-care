@@ -2,7 +2,7 @@ import { Card } from '@/components/ui/card';
 import { useLabResults } from '@/hooks/useLabResults';
 import EvidenceNote from '@/components/research/EvidenceNote';
 import { specsForLabs } from '@/lib/evidenceTopics';
-import { LabAttentionBanner, LabCardHeader, LabEmptyCard, LabMissingTests, LabRow } from './LabInsightParts';
+import { LabCardHeader, LabEmptyCard, LabMissingTests, LabRow } from './LabInsightParts';
 
 interface CycleLabInsightsProps {
   mode: string;
@@ -48,7 +48,6 @@ export default function CycleLabInsights({ mode, hideUploadCard = false }: Cycle
 
   const tested = matched.filter(m => m.result);
   const missing = matched.filter(m => !m.result);
-  const flagged = tested.filter(m => m.result?.status === 'abnormal' || m.result?.status === 'critical');
 
   if (labs.length === 0) {
     if (hideUploadCard) return null;
@@ -59,11 +58,8 @@ export default function CycleLabInsights({ mode, hideUploadCard = false }: Cycle
     <Card className="p-4 space-y-3">
       <LabCardHeader />
 
-      {flagged.length > 0 && (
-        <LabAttentionBanner>
-          {flagged.length} result{flagged.length !== 1 ? 's' : ''} may affect your cycle
-        </LabAttentionBanner>
-      )}
+      {/* No "N results need attention" banner: Records lists each flagged
+          result once, under "Talk to your doctor about". */}
 
       <ul>
         {tested.map(item => {
