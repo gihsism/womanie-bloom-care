@@ -145,4 +145,97 @@ describe('api/_routes/db security invariants', () => {
     expect(sql).toMatch(/WHERE profiles\.id\s*=/i);
     expect(params[params.length - 1]).toBe(SESSION_USER.id);
   });
+  it('rejects a client-supplied __owner_or__ filter (SQL injection through its column list)', async () => {
+    const res = mockRes();
+    await handler(
+      mockReq({
+        table: 'health_documents',
+        operation: 'select',
+        filters: [['__owner_or__', 'in', { cols: ['true) OR (true'], value: 'x' }]],
+      }),
+      res,
+    );
+    expect(res._status).toBe(400);
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('blocks every write to doctor_patient_connections (a self-approved connection would open any chart)', async () => {
+    for (const body of [
+      { operation: 'insert', insertData: { doctor_id: SESSION_USER.id, patient_id: 'victim', status: 'approved' } },
+      { operation: 'upsert', upsertData: { doctor_id: SESSION_USER.id, patient_id: 'victim', status: 'approved' } },
+      { operation: 'update', updateData: { status: 'approved' }, filters: [['doctor_id', 'eq', SESSION_USER.id]] },
+      { operation: 'delete', filters: [['doctor_id', 'eq', SESSION_USER.id]] },
+    ]) {
+      const res = mockRes();
+      await handler(mockReq({ table: 'doctor_patient_connections', ...body }), res);
+      expect(res._status).toBe(403);
+    }
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('still lets a doctor read their own doctor_patient_connections rows', async () => {
+    const res = mockRes();
+    await handler(
+      mockReq({ table: 'doctor_patient_connections', operation: 'select', filters: [['doctor_id', 'eq', SESSION_USER.id]] }),
+      res,
+    );
+    expect(res._status).toBe(200);
+  });
+
+  it('blocks inserting appointments directly (booking goes through /api/appointments/book)', async () => {
+    const res = mockRes();
+    await handler(
+      mockReq({ table: 'appointments', operation: 'insert', insertData: { patient_id: SESSION_USER.id, doctor_id: 'd1', scheduled_at: '2026-12-01T10:00:00Z' } }),
+      res,
+    );
+    expect(res._status).toBe(403);
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('appointments updates may change status/notes only', async () => {
+    const ok = mockRes();
+    await handler(
+      mockReq({ table: 'appointments', operation: 'update', updateData: { status: 'cancelled', notes: 'x' }, filters: [['id', 'eq', 'a1']] }),
+      ok,
+    );
+    expect(ok._status).toBe(200);
+    const bad = mockRes();
+    await handler(
+      mockReq({ table: 'appointments', operation: 'update', updateData: { scheduled_at: '2026-12-01T10:00:00Z' }, filters: [['id', 'eq', 'a1']] }),
+      bad,
+    );
+    expect(bad._status).toBe(403);
+  });
+
+  it('doctor_notes insert needs an approved connection to the patient', async () => {
+    query.mockResolvedValueOnce([]); // connection lookup: none
+    const res = mockRes();
+    await handler(
+      mockReq({ table: 'doctor_notes', operation: 'insert', insertData: { doctor_id: SESSION_USER.id, patient_id: 'victim', title: 't', content: 'c' } }),
+      res,
+    );
+    expect(res._status).toBe(403);
+    expect(query).toHaveBeenCalledTimes(1);
+    expect(query.mock.calls[0][1]).toEqual([SESSION_USER.id, 'victim']);
+
+    query.mockReset();
+    query.mockResolvedValueOnce([{ '?column?': 1 }]).mockResolvedValueOnce([{ id: 'n1' }]);
+    const ok = mockRes();
+    await handler(
+      mockReq({ table: 'doctor_notes', operation: 'insert', insertData: { doctor_id: SESSION_USER.id, patient_id: 'p1', title: 't', content: 'c' } }),
+      ok,
+    );
+    expect(ok._status).toBe(200);
+    expect(query.mock.calls[1][0]).toMatch(/^INSERT INTO doctor_notes/);
+  });
+
+  it('doctor_notes cannot be re-pointed at another patient', async () => {
+    const res = mockRes();
+    await handler(
+      mockReq({ table: 'doctor_notes', operation: 'update', updateData: { patient_id: 'victim' }, filters: [['id', 'eq', 'n1']] }),
+      res,
+    );
+    expect(res._status).toBe(403);
+    expect(query).not.toHaveBeenCalled();
+  });
 });

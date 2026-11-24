@@ -45,14 +45,32 @@ const OWNER_COLUMN: Record<string, string | string[]> = {
 // walk through every doctor-only flow in the app.
 const WRITE_BLOCKED: Set<string> = new Set([
   'user_roles',
+  // The consent gate for /api/doctors/patient. Rows are created by
+  // /api/connections/redeem-code and /api/appointments/book (always
+  // 'pending') and approved/removed only by the patient through
+  // /api/connections/respond. A generic insert/update here would let any
+  // account write { doctor_id: me, patient_id: <anyone>, status: 'approved' }
+  // and open that patient's whole chart. The app only reads it here.
+  'doctor_patient_connections',
 ]);
 
 // Rows that may be edited but not CREATED through /api/db. doctor_profiles
 // rows are created by /api/auth/doctor-signup (pending verification); a
 // client-side insert would let any patient mint their own doctor profile.
+// appointments are created by /api/appointments/book, which checks the
+// doctor, the slot and the overlap; a direct insert would skip all of that.
 const INSERT_BLOCKED: Set<string> = new Set([
   'doctor_profiles',
+  'appointments',
 ]);
+
+// Tables where an UPDATE may only touch the listed columns. Both parties
+// of an appointment may change its status (cancel, undo, complete,
+// no-show) and the doctor writes a cancellation note; moving the slot
+// goes through /api/appointments/reschedule, which re-checks overlaps.
+const UPDATABLE_COLUMNS: Record<string, string[]> = {
+  appointments: ['status', 'notes'],
+};
 
 // Columns only server endpoints may write. is_verified/verification_status
 // are flipped by /api/admin/doctors on approval; letting the owner set them
@@ -86,8 +104,12 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     // Every client-supplied filter must name a real column. (Server-added
     // owner filters and the '__owner_or__' sentinel are appended later and
     // are trusted.)
+    // '__owner_or__' is itself a valid identifier, so it is rejected by name:
+    // its value carries column names that are interpolated into the SQL
+    // unchecked, and a client copy would inject an arbitrary WHERE clause
+    // (e.g. `true) OR (true`) that escapes the owner scope.
     for (const f of filters) {
-      if (!Array.isArray(f) || !isIdent(f[0])) {
+      if (!Array.isArray(f) || !isIdent(f[0]) || f[0].startsWith('__')) {
         return res.status(400).json({ error: 'Invalid filter column' });
       }
     }
@@ -114,6 +136,40 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       );
       if (blocked.length) {
         return res.status(403).json({ error: `Column(s) not writable via /api/db: ${blocked.join(', ')}` });
+      }
+    }
+    if (operation === 'update' && UPDATABLE_COLUMNS[table]) {
+      const allowed = UPDATABLE_COLUMNS[table];
+      const extra = Object.keys(updateData && typeof updateData === 'object' ? updateData : {})
+        .filter(k => k !== 'updated_at' && !allowed.includes(k));
+      if (extra.length) {
+        return res.status(403).json({ error: `Column(s) not writable via /api/db: ${extra.join(', ')}` });
+      }
+    }
+
+    // doctor_notes are shown to the patient (/api/me/doctor-notes) and fed
+    // to her AI chat. Only a doctor with an APPROVED connection to that
+    // patient may write one, and an existing note can't be re-pointed at
+    // another patient.
+    if (table === 'doctor_notes') {
+      if (operation === 'update' && updateData && typeof updateData === 'object' && 'patient_id' in updateData) {
+        return res.status(403).json({ error: 'Column(s) not writable via /api/db: patient_id' });
+      }
+      if (operation === 'insert' || operation === 'upsert') {
+        const raw = operation === 'insert' ? insertData : upsertData;
+        const row = (Array.isArray(raw) ? raw[0] : raw) as Record<string, unknown> | undefined;
+        const patientId = row && typeof row === 'object' ? row.patient_id : undefined;
+        if (typeof patientId !== 'string' || !patientId) {
+          return res.status(400).json({ error: 'patient_id required' });
+        }
+        const conn = await sql.query(
+          `SELECT 1 FROM doctor_patient_connections
+            WHERE doctor_id = $1 AND patient_id = $2 AND status = 'approved' LIMIT 1`,
+          [user.id, patientId]
+        );
+        if (conn.length === 0) {
+          return res.status(403).json({ error: 'No approved connection to this patient' });
+        }
       }
     }
 
