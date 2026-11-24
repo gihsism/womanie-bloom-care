@@ -1,170 +1,106 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Calendar as CalendarIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Card } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
 import { useOnboarding } from '@/contexts/OnboardingContext';
+import OnboardingScreen from './OnboardingScreen';
+import { Choice, ChoiceGroup, Chip, DateField, FIELD, FieldLabel } from './Choice';
+import { CYCLE_LENGTHS, type StageFormProps } from './stageForm';
 
-const TryingToConceiveForm = () => {
-  const navigate = useNavigate();
+// Trying to conceive. Screen 2: last period + usual length (for the
+// fertile window). Screen 3: how long, and any treatment so far.
+const DURATIONS = [
+  { value: 'just-started', label: 'Just started' },
+  { value: '1-3-months', label: '1 to 3 months' },
+  { value: '3-6-months', label: '3 to 6 months' },
+  { value: '6-12-months', label: '6 to 12 months' },
+  { value: 'over-year', label: 'Over a year' },
+];
+
+const treatmentOptions = [
+  { id: 'none', label: 'None' },
+  { id: 'ovulation', label: 'Ovulation tracking' },
+  { id: 'medications', label: 'Medications' },
+  { id: 'iui', label: 'IUI' },
+  { id: 'ivf', label: 'IVF' },
+  { id: 'other', label: 'Other' },
+];
+
+const TryingToConceiveForm = ({ part, onNext, onBack, onFinish }: StageFormProps) => {
   const { data, updateTryingToConceive } = useOnboarding();
-  
-  const [tryingDuration, setTryingDuration] = useState(data.tryingToConceive?.tryingDuration || '');
-  const [lastPeriodStart, setLastPeriodStart] = useState<Date | undefined>(
-    data.tryingToConceive?.lastPeriodStart
-  );
-  const [cycleLength, setCycleLength] = useState(data.tryingToConceive?.averageCycleLength || 28);
-  const [treatments, setTreatments] = useState<string[]>(
-    data.tryingToConceive?.fertilityTreatments || []
-  );
 
-  const treatmentOptions = [
-    { id: 'none', label: 'None' },
-    { id: 'ovulation', label: 'Ovulation tracking' },
-    { id: 'medications', label: 'Medications' },
-    { id: 'iui', label: 'IUI' },
-    { id: 'ivf', label: 'IVF' },
-    { id: 'other', label: 'Other' },
-  ];
+  const [tryingDuration, setTryingDuration] = useState(data.tryingToConceive?.tryingDuration || '');
+  const [lastPeriodStart, setLastPeriodStart] = useState<Date | undefined>(data.tryingToConceive?.lastPeriodStart);
+  const [cycleLength, setCycleLength] = useState(data.tryingToConceive?.averageCycleLength || 28);
+  const [treatments, setTreatments] = useState<string[]>(data.tryingToConceive?.fertilityTreatments || []);
 
   const toggleTreatment = (treatmentId: string) => {
     setTreatments((prev) => {
       if (treatmentId === 'none') {
         return prev.includes('none') ? [] : ['none'];
       }
-      const newTreatments = prev.includes(treatmentId)
+      return prev.includes(treatmentId)
         ? prev.filter((t) => t !== treatmentId)
         : [...prev.filter((t) => t !== 'none'), treatmentId];
-      return newTreatments;
     });
   };
 
-  const isFormValid = () => {
-    return tryingDuration && lastPeriodStart && cycleLength;
-  };
+  const firstValid = Boolean(lastPeriodStart && cycleLength);
+  const isFormValid = () => Boolean(tryingDuration && lastPeriodStart && cycleLength);
 
-  const handleFinish = () => {
-    updateTryingToConceive({
-      tryingDuration,
-      lastPeriodStart,
-      averageCycleLength: cycleLength,
-      fertilityTreatments: treatments,
-    });
-    navigate('/onboarding/success');
-  };
+  const save = () => updateTryingToConceive({
+    tryingDuration,
+    lastPeriodStart,
+    averageCycleLength: cycleLength,
+    fertilityTreatments: treatments,
+  });
+
+  if (part === 0 || !firstValid) {
+    return (
+      <OnboardingScreen
+        step={2}
+        title="When did your last period start?"
+        sub="We use it to find your fertile days."
+        onBack={onBack}
+        primary={{ label: 'Continue', disabled: !firstValid, onClick: () => { save(); onNext(); } }}
+      >
+        <DateField label="Last period started" value={lastPeriodStart} onChange={setLastPeriodStart} disabled={(date) => date > new Date()} />
+        <div className="mt-6">
+          <FieldLabel htmlFor="cycle-length">Days from one period to the next, usually</FieldLabel>
+          <Select value={cycleLength.toString()} onValueChange={(v) => setCycleLength(Number(v))}>
+            <SelectTrigger id="cycle-length" className={FIELD}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CYCLE_LENGTHS.map((day) => (
+                <SelectItem key={day} value={day.toString()}>{day} days</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </OnboardingScreen>
+    );
+  }
 
   return (
-    <div>
-      <div className="text-center mb-8">
-        <h1 className="text-3xl lg:text-4xl font-bold mb-3">
-          Let's optimize your fertility tracking
-        </h1>
-      </div>
-
-      <Card className="p-6 lg:p-8">
-        <div className="space-y-6">
-          {/* Trying Duration */}
-          <div className="space-y-2">
-            <Label>How long have you been trying? *</Label>
-            <Select value={tryingDuration} onValueChange={setTryingDuration}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select duration" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="just-started">Just started</SelectItem>
-                <SelectItem value="1-3-months">1-3 months</SelectItem>
-                <SelectItem value="3-6-months">3-6 months</SelectItem>
-                <SelectItem value="6-12-months">6-12 months</SelectItem>
-                <SelectItem value="over-year">Over a year</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Last Period Start */}
-          <div className="space-y-2">
-            <Label>When did your last period start? *</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    'w-full justify-start text-left font-normal',
-                    !lastPeriodStart && 'text-muted-foreground'
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {lastPeriodStart ? format(lastPeriodStart, 'PPP') : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={lastPeriodStart}
-                  onSelect={setLastPeriodStart}
-                  disabled={(date) => date > new Date()}
-                  initialFocus
-                  className="pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          {/* Average Cycle Length */}
-          <div className="space-y-2">
-            <Label>Average cycle length (days) *</Label>
-            <Select value={cycleLength.toString()} onValueChange={(v) => setCycleLength(Number(v))}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.from({ length: 25 }, (_, i) => i + 21).map((day) => (
-                  <SelectItem key={day} value={day.toString()}>
-                    {day} days
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Fertility Treatments */}
-          <div className="space-y-4">
-            <Label>Are you undergoing any fertility treatments?</Label>
-            <div className="space-y-3">
-              {treatmentOptions.map((option) => (
-                <div key={option.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={option.id}
-                    checked={treatments.includes(option.id)}
-                    onCheckedChange={() => toggleTreatment(option.id)}
-                  />
-                  <label
-                    htmlFor={option.id}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                  >
-                    {option.label}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
+    <OnboardingScreen
+      step={3}
+      title="How long have you been trying?"
+      onBack={onBack}
+      primary={{ label: 'Continue', disabled: !isFormValid(), onClick: () => { save(); onFinish(); } }}
+    >
+      <ChoiceGroup label="How long have you been trying?">
+        {DURATIONS.map((d) => (
+          <Choice key={d.value} title={d.label} selected={tryingDuration === d.value} onSelect={() => setTryingDuration(d.value)} />
+        ))}
+      </ChoiceGroup>
+      <div className="mt-7">
+        <FieldLabel optional>Any treatment so far?</FieldLabel>
+        <div role="group" aria-label="Fertility treatment so far" className="flex flex-wrap gap-2">
+          {treatmentOptions.map((o) => (
+            <Chip key={o.id} selected={treatments.includes(o.id)} onToggle={() => toggleTreatment(o.id)}>{o.label}</Chip>
+          ))}
         </div>
-
-        <Button
-          className="w-full mt-8"
-          onClick={handleFinish}
-          disabled={!isFormValid()}
-        >
-          Finish Setup
-        </Button>
-      </Card>
-    </div>
+      </div>
+    </OnboardingScreen>
   );
 };
 

@@ -1,66 +1,55 @@
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useOnboarding } from '@/contexts/OnboardingContext';
-import ProgressBar from '@/components/onboarding/ProgressBar';
+import { usePageTitle } from '@/hooks/usePageTitle';
+import { ONBOARDING_PATHS } from '@/lib/onboardingFlow';
 import RegularCycleForm from '@/components/onboarding/RegularCycleForm';
 import TryingToConceiveForm from '@/components/onboarding/TryingToConceiveForm';
 import PregnancyForm from '@/components/onboarding/PregnancyForm';
 import PreMenstrualForm from '@/components/onboarding/PreMenstrualForm';
 import MenopauseForm from '@/components/onboarding/MenopauseForm';
 import PostpartumForm from '@/components/onboarding/PostpartumForm';
+import type { StageFormProps } from '@/components/onboarding/stageForm';
 
+// Screens 2 and 3 of the first run: the stage's two questions. The part
+// is in the URL (?q=2) so the phone's back gesture steps between them.
 const ModeSetup = () => {
+  usePageTitle('Your stage');
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const { data, setCurrentStep } = useOnboarding();
+  const part: 0 | 1 = params.get('q') === '2' ? 1 : 0;
 
-  const handleBack = () => {
-    setCurrentStep(2);
-    navigate('/onboarding/life-stage');
+  const props: StageFormProps = {
+    part,
+    onNext: () => navigate(ONBOARDING_PATHS.second),
+    onBack: () => {
+      if (part === 1) { navigate(ONBOARDING_PATHS.first); return; }
+      setCurrentStep(1);
+      navigate(ONBOARDING_PATHS.stage);
+    },
+    onFinish: () => {
+      setCurrentStep(4);
+      navigate(ONBOARDING_PATHS.about);
+    },
   };
 
-  const renderForm = () => {
-    switch (data.lifeStage.stage) {
-      case 'regular-cycle':
-        return <RegularCycleForm />;
-      case 'trying-to-conceive':
-        return <TryingToConceiveForm />;
-      case 'pregnant':
-        return <PregnancyForm />;
-      case 'postpartum':
-        return <PostpartumForm />;
-      case 'pre-menstrual':
-        return <PreMenstrualForm />;
-      case 'menopause':
-        return <MenopauseForm />;
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-background flex flex-col px-4 py-8">
-      <div className="mb-4 flex items-center justify-between">
-        <button
-          onClick={handleBack}
-          className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
-          aria-label="Go back"
-        >
-          <ArrowLeft className="h-5 w-5" />
-          <span className="text-sm">Back</span>
-        </button>
-        <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
-          Womanie
-        </a>
-      </div>
-
-      <div className="flex-1 flex items-center justify-center">
-        <div className="w-full max-w-2xl">
-          <ProgressBar currentStep={3} totalSteps={3} />
-          {renderForm()}
-        </div>
-      </div>
-    </div>
-  );
+  switch (data.lifeStage.stage) {
+    case 'regular-cycle':
+      return <RegularCycleForm {...props} />;
+    case 'trying-to-conceive':
+      return <TryingToConceiveForm {...props} />;
+    case 'pregnant':
+      return <PregnancyForm {...props} />;
+    case 'postpartum':
+      return <PostpartumForm {...props} />;
+    case 'pre-menstrual':
+      return <PreMenstrualForm {...props} />;
+    case 'menopause':
+      return <MenopauseForm {...props} />;
+    default:
+      // No stage yet (opened directly): start at the stage picker.
+      return <Navigate to={ONBOARDING_PATHS.stage} replace />;
+  }
 };
 
 export default ModeSetup;

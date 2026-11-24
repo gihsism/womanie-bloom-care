@@ -31,7 +31,7 @@ describe('PatientLogIn — Google-only accounts', () => {
     ));
     renderPage();
     fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'old-saved-password' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Log In' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Log in' }));
     await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('signs in with Google'));
     expect(screen.getAllByRole('button', { name: /Continue with Google/ })).toHaveLength(1);
     expect(localStorage.getItem('womanie_last_method')).toBe('google');

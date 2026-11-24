@@ -1,105 +1,50 @@
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { User, Stethoscope, ArrowLeft } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { User, Stethoscope, ChevronRight } from 'lucide-react';
+import AuthLayout from '@/components/auth/AuthLayout';
 
 const SelectUserType = () => {
   const navigate = useNavigate();
   usePageTitle('Get Started');
 
+  const Row = ({ icon: Icon, title, text, to, clinic }: { icon: typeof User; title: string; text: string; to: string; clinic?: boolean }) => (
+    <button
+      type="button"
+      onClick={() => navigate(to)}
+      data-stage={clinic ? 'clinic' : undefined}
+      className="w-full flex items-center gap-4 px-4 py-4 text-left hover:bg-muted/60"
+    >
+      <span className="grid place-items-center h-12 w-12 shrink-0 rounded-full bg-stage-head text-stage-ink" aria-hidden="true">
+        <Icon className="h-6 w-6" strokeWidth={1.9} />
+      </span>
+      <span className="flex-1 min-w-0">
+        <span className="block text-[17px] font-bold leading-snug">{title}</span>
+        <span className="block text-[14px] leading-snug text-muted-foreground">{text}</span>
+      </span>
+      <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+    </button>
+  );
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Navigation */}
-      <div className="p-4 flex items-center justify-between">
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-foreground hover:text-primary"
-          aria-label="Go back"
-        >
-          <ArrowLeft className="h-5 w-5" />
-          <span className="text-sm">Back</span>
+    <AuthLayout backHref="/" title="Welcome to Womanie" sub="How will you use the app?">
+      <div className="row-group">
+        <Row icon={User} title="For my own health" text="Track your cycle, understand your results, book doctors" to="/auth/signup" />
+        <Row icon={Stethoscope} title="I'm a doctor or midwife" text="See your patients' results and visits" to="/auth/doctor-signup" clinic />
+      </div>
+
+      {/* Already-have-an-account row — both audiences land on the
+          same screen, so we have to surface both login paths. */}
+      <p className="mt-8 text-center text-[15px] text-muted-foreground">
+        Have an account?{' '}
+        <button type="button" onClick={() => navigate('/auth/login')} className="font-semibold text-stage-accent hover:underline">
+          Patient log in
         </button>
-        <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
-          Womanie
-        </a>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center px-4 pb-16">
-        <div className="w-full max-w-4xl">
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-4xl font-bold text-primary hover:opacity-80 transition-opacity">Womanie</a>
-          </div>
-
-          {/* Heading */}
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold mb-3">Welcome to Womanie</h2>
-            <p className="text-lg text-muted-foreground">How will you use the app?</p>
-          </div>
-
-          {/* Selection Cards */}
-          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {/* Patient Card */}
-            <Card
-              onClick={() => navigate('/auth/signup')}
-              className="p-8 cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/50 group"
-            >
-              <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                  <User className="h-10 w-10 text-primary" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold mb-2">Patient</h3>
-                  <p className="text-muted-foreground">
-                    Track your health, consult with doctors, and manage your reproductive wellness
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            {/* Healthcare Provider Card */}
-            <Card
-              onClick={() => navigate('/auth/doctor-signup')}
-              className="p-8 cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-secondary/50 group"
-            >
-              <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-20 h-20 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
-                  <Stethoscope className="h-10 w-10 text-secondary" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold mb-2">Healthcare Provider</h3>
-                  <p className="text-muted-foreground">
-                    Provide care, review patient data, and manage consultations
-                  </p>
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          {/* Already-have-an-account row — both audiences land on the
-              same screen, so we have to surface both login paths. */}
-          <div className="text-center mt-8 text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <button
-              type="button"
-              onClick={() => navigate('/auth/login')}
-              className="text-primary hover:underline font-medium"
-            >
-              Patient login
-            </button>
-            {' · '}
-            <button
-              type="button"
-              onClick={() => navigate('/auth/doctor-login')}
-              className="text-primary hover:underline font-medium"
-            >
-              Doctor login
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+        {' · '}
+        <button type="button" onClick={() => navigate('/auth/doctor-login')} className="font-semibold text-stage-accent hover:underline">
+          Doctor log in
+        </button>
+      </p>
+    </AuthLayout>
   );
 };
 

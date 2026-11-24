@@ -1,181 +1,127 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Calendar as CalendarIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
 import { useOnboarding } from '@/contexts/OnboardingContext';
+import { cn } from '@/lib/utils';
+import OnboardingScreen from './OnboardingScreen';
+import { Choice, ChoiceGroup, DateField, FIELD, FieldLabel } from './Choice';
+import type { StageFormProps } from './stageForm';
 
-const PregnancyForm = () => {
-  const navigate = useNavigate();
+// Pregnancy. Screen 2: how far along (last period, due date or week).
+// Screen 3: first pregnancy? plus anything the doctor is watching.
+type DateType = 'lastPeriod' | 'dueDate' | 'currentWeek';
+const WAYS: { value: DateType; label: string }[] = [
+  { value: 'lastPeriod', label: 'Last period' },
+  { value: 'dueDate', label: 'Due date' },
+  { value: 'currentWeek', label: 'Current week' },
+];
+
+const PregnancyForm = ({ part, onNext, onBack, onFinish }: StageFormProps) => {
   const { data, updatePregnancy } = useOnboarding();
-  
-  const [dateType, setDateType] = useState<'lastPeriod' | 'dueDate' | 'currentWeek'>(
-    data.pregnancy?.dateType || 'lastPeriod'
-  );
-  const [lastPeriodDate, setLastPeriodDate] = useState<Date | undefined>(
-    data.pregnancy?.lastPeriodDate
-  );
+
+  const [dateType, setDateType] = useState<DateType>(data.pregnancy?.dateType || 'lastPeriod');
+  const [lastPeriodDate, setLastPeriodDate] = useState<Date | undefined>(data.pregnancy?.lastPeriodDate);
   const [dueDate, setDueDate] = useState<Date | undefined>(data.pregnancy?.dueDate);
-  const [currentWeek, setCurrentWeek] = useState(data.pregnancy?.currentWeek || '');
+  const [currentWeek, setCurrentWeek] = useState<string | number>(data.pregnancy?.currentWeek || '');
   const [firstPregnancy, setFirstPregnancy] = useState(
     data.pregnancy?.firstPregnancy !== undefined ? data.pregnancy.firstPregnancy.toString() : ''
   );
   const [complications, setComplications] = useState(data.pregnancy?.complications || '');
 
-  const isFormValid = () => {
+  const dateValid = () => {
     if (dateType === 'lastPeriod' && !lastPeriodDate) return false;
     if (dateType === 'dueDate' && !dueDate) return false;
     if (dateType === 'currentWeek' && (!currentWeek || Number(currentWeek) < 1 || Number(currentWeek) > 42)) return false;
-    return firstPregnancy !== '';
+    return true;
   };
+  const isFormValid = () => dateValid() && firstPregnancy !== '';
 
-  const handleFinish = () => {
-    updatePregnancy({
-      dateType,
-      lastPeriodDate: dateType === 'lastPeriod' ? lastPeriodDate : undefined,
-      dueDate: dateType === 'dueDate' ? dueDate : undefined,
-      currentWeek: dateType === 'currentWeek' ? Number(currentWeek) : 0,
-      firstPregnancy: firstPregnancy === 'true',
-      complications,
-    });
-    navigate('/onboarding/success');
-  };
+  const save = () => updatePregnancy({
+    dateType,
+    lastPeriodDate: dateType === 'lastPeriod' ? lastPeriodDate : undefined,
+    dueDate: dateType === 'dueDate' ? dueDate : undefined,
+    currentWeek: dateType === 'currentWeek' ? Number(currentWeek) : 0,
+    ...(firstPregnancy !== '' ? { firstPregnancy: firstPregnancy === 'true' } : {}),
+    complications,
+  });
+
+  if (part === 0 || !dateValid()) {
+    return (
+      <OnboardingScreen
+        step={2}
+        title="How far along are you?"
+        sub="Pick whichever you know. We work out the week and the due date."
+        onBack={onBack}
+        primary={{ label: 'Continue', disabled: !dateValid(), onClick: () => { save(); onNext(); } }}
+      >
+        <div role="radiogroup" aria-label="What do you know?" className="grid grid-cols-3 gap-1 rounded-full bg-muted p-1">
+          {WAYS.map((w) => (
+            <button
+              key={w.value}
+              type="button"
+              role="radio"
+              aria-checked={dateType === w.value}
+              onClick={() => setDateType(w.value)}
+              className={cn(
+                'min-h-11 rounded-full px-2 text-[15px] font-semibold transition-colors',
+                dateType === w.value ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {w.label}
+            </button>
+          ))}
+        </div>
+        <div className="mt-5">
+          {dateType === 'lastPeriod' && (
+            <DateField label="First day of your last period" value={lastPeriodDate} onChange={setLastPeriodDate} disabled={(date) => date > new Date()} />
+          )}
+          {dateType === 'dueDate' && (
+            <DateField label="Due date" value={dueDate} onChange={setDueDate} disabled={(date) => date < new Date()} />
+          )}
+          {dateType === 'currentWeek' && (
+            <>
+              <FieldLabel htmlFor="current-week">Week of pregnancy (1 to 42)</FieldLabel>
+              <Input
+                id="current-week"
+                type="number"
+                inputMode="numeric"
+                min="1"
+                max="42"
+                placeholder="e.g. 12"
+                className={FIELD}
+                value={currentWeek}
+                onChange={(e) => setCurrentWeek(e.target.value)}
+              />
+            </>
+          )}
+        </div>
+      </OnboardingScreen>
+    );
+  }
 
   return (
-    <div>
-      <div className="text-center mb-8">
-        <h1 className="text-3xl lg:text-4xl font-bold mb-3">
-          Congratulations! Tell us about your pregnancy
-        </h1>
+    <OnboardingScreen
+      step={3}
+      title="Is this your first pregnancy?"
+      onBack={onBack}
+      primary={{ label: 'Continue', disabled: !isFormValid(), onClick: () => { save(); onFinish(); } }}
+    >
+      <ChoiceGroup label="Is this your first pregnancy?">
+        <Choice title="Yes" selected={firstPregnancy === 'true'} onSelect={() => setFirstPregnancy('true')} />
+        <Choice title="No" selected={firstPregnancy === 'false'} onSelect={() => setFirstPregnancy('false')} />
+      </ChoiceGroup>
+      <div className="mt-7">
+        <FieldLabel htmlFor="complications" optional>Anything your doctor is keeping an eye on?</FieldLabel>
+        <Textarea
+          id="complications"
+          placeholder="For example high blood pressure or diabetes"
+          className="rounded-[1.25rem] px-4 py-3 text-[16px]"
+          value={complications}
+          onChange={(e) => setComplications(e.target.value)}
+          rows={3}
+        />
       </div>
-
-      <Card className="p-6 lg:p-8">
-        <div className="space-y-6">
-          {/* Pregnancy Date Selection */}
-          <div className="space-y-4">
-            <Label>Choose how to track your pregnancy *</Label>
-            <Tabs value={dateType} onValueChange={(v) => setDateType(v as typeof dateType)}>
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="lastPeriod">Last Period</TabsTrigger>
-                <TabsTrigger value="dueDate">Due Date</TabsTrigger>
-                <TabsTrigger value="currentWeek">Current Week</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="lastPeriod" className="mt-4">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        'w-full justify-start text-left font-normal',
-                        !lastPeriodDate && 'text-muted-foreground'
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {lastPeriodDate ? format(lastPeriodDate, 'PPP') : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={lastPeriodDate}
-                      onSelect={setLastPeriodDate}
-                      disabled={(date) => date > new Date()}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-              </TabsContent>
-
-              <TabsContent value="dueDate" className="mt-4">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        'w-full justify-start text-left font-normal',
-                        !dueDate && 'text-muted-foreground'
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dueDate ? format(dueDate, 'PPP') : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={dueDate}
-                      onSelect={setDueDate}
-                      disabled={(date) => date < new Date()}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-              </TabsContent>
-
-              <TabsContent value="currentWeek" className="mt-4">
-                <Input
-                  type="number"
-                  min="1"
-                  max="42"
-                  placeholder="Enter week (1-42)"
-                  value={currentWeek}
-                  onChange={(e) => setCurrentWeek(e.target.value)}
-                />
-              </TabsContent>
-            </Tabs>
-          </div>
-
-          {/* First Pregnancy */}
-          <div className="space-y-4">
-            <Label>Is this your first pregnancy? *</Label>
-            <RadioGroup value={firstPregnancy} onValueChange={setFirstPregnancy}>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="true" id="first-yes" />
-                <Label htmlFor="first-yes" className="cursor-pointer">Yes</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="false" id="first-no" />
-                <Label htmlFor="first-no" className="cursor-pointer">No</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          {/* Complications */}
-          <div className="space-y-2">
-            <Label htmlFor="complications">
-              Any complications or conditions? <span className="text-muted-foreground text-sm">(Optional)</span>
-            </Label>
-            <Textarea
-              id="complications"
-              placeholder="Please describe any complications or medical conditions..."
-              value={complications}
-              onChange={(e) => setComplications(e.target.value)}
-              rows={4}
-            />
-          </div>
-        </div>
-
-        <Button
-          className="w-full mt-8"
-          onClick={handleFinish}
-          disabled={!isFormValid()}
-        >
-          Finish Setup
-        </Button>
-      </Card>
-    </div>
+    </OnboardingScreen>
   );
 };
 

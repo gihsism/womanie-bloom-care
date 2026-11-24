@@ -2,52 +2,16 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { 
-  Calendar, 
-  MessageSquare, 
-  FileText, 
-  Activity, 
-  ArrowRight, 
-  Heart,
-  Shield,
-  Sparkles,
-} from 'lucide-react';
+import { Calendar, MessageSquare, FileText, Activity, ChevronRight, Loader2, Shield } from 'lucide-react';
+import { ONBOARDING_PATHS } from '@/lib/onboardingFlow';
 
+// After sign-up: what Womanie does, then ONE next step (set it up for
+// your stage, five short screens). Going straight to Home stays a link.
 const features = [
-  {
-    icon: Calendar,
-    title: 'Cycle Tracking',
-    description: 'Log your period, track symptoms, and get personalised predictions.',
-    bg: 'bg-primary/10',
-    color: 'text-primary',
-    path: '/dashboard',
-  },
-  {
-    icon: MessageSquare,
-    title: 'AI Health Assistant',
-    description: 'Get instant health guidance powered by latest AI models.',
-    bg: 'bg-secondary/10',
-    color: 'text-secondary',
-    path: '/dashboard/ai-doctor',
-  },
-  {
-    icon: FileText,
-    title: 'Document Analysis',
-    description: 'Upload lab results for AI-powered summaries and insights.',
-    bg: 'bg-purple/10',
-    color: 'text-purple',
-    path: '/dashboard/medical-history',
-  },
-  {
-    icon: Activity,
-    title: 'Health Insights',
-    description: 'Track patterns in mood, symptoms, and overall wellbeing.',
-    bg: 'bg-accent/10',
-    color: 'text-accent',
-    path: '/health-statistics',
-  },
+  { icon: Calendar, title: 'Track your cycle', description: 'Log periods and symptoms, see what comes next.', path: '/dashboard' },
+  { icon: FileText, title: 'Understand your results', description: 'Upload a lab report and read it in plain words.', path: '/dashboard/medical-history' },
+  { icon: MessageSquare, title: 'Ask AI', description: 'Answers from medical research, with sources.', path: '/dashboard/ai-doctor' },
+  { icon: Activity, title: 'See patterns', description: 'Mood, symptoms and results over time.', path: '/health-statistics' },
 ];
 
 const Welcome = () => {
@@ -63,106 +27,68 @@ const Welcome = () => {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 via-secondary/10 to-accent/10 flex items-center justify-center animate-pulse">
-            <Heart className="h-8 w-8 text-primary" />
-          </div>
-          <p className="text-sm text-muted-foreground">Loading your space...</p>
-        </div>
+      <div className="min-h-screen bg-background flex items-center justify-center" role="status" aria-label="Loading">
+        <Loader2 className="h-6 w-6 animate-spin text-stage-accent" />
       </div>
     );
   }
 
-  const userName = user.user_metadata?.full_name?.split(' ')[0] || 'there';
+  const userName = user.user_metadata?.full_name?.split(' ')[0] || '';
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <div className="p-4 flex items-center justify-between border-b border-border">
+      <div className="w-full max-w-md mx-auto px-4 pt-3 min-h-12 flex items-center">
         <button
           type="button"
           onClick={() => { window.location.href = '/'; }}
-          className="text-xl font-bold text-primary hover:opacity-80 transition-opacity z-50 relative cursor-pointer"
+          className="text-xl font-extrabold text-stage-accent hover:opacity-80"
         >
           Womanie
         </button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate('/dashboard', { replace: true })}
-          className="text-muted-foreground"
-        >
-          Go to dashboard
-        </Button>
       </div>
 
-      <div className="flex-1 flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-lg space-y-6">
-          {/* Greeting */}
-          <div className="text-center space-y-3">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 via-secondary/10 to-accent/10 flex items-center justify-center mx-auto">
-              <Heart className="h-8 w-8 text-primary" />
-            </div>
-            <h2 className="text-3xl font-bold text-foreground">
-              Welcome, {userName}! 🎉
-            </h2>
-            <p className="text-muted-foreground text-base">
-              Your personal health companion is ready. Here's what you can do:
-            </p>
-          </div>
+      <main className="flex-1 w-full max-w-md mx-auto px-4 pt-6 pb-6">
+        <h1 className="page-title">{userName ? `Welcome, ${userName}` : 'Welcome'}</h1>
+        <p className="page-sub mt-2">Your health in one place. Here is what you can do.</p>
 
-          {/* Features */}
-          <div className="space-y-2.5">
-            {features.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <Card
-                  key={feature.title}
-                  className="p-3.5 flex items-center gap-3.5 cursor-pointer hover:bg-muted/50 transition-colors"
-                  onClick={() => navigate(feature.path)}
-                >
-                  <div className={`w-9 h-9 rounded-lg ${feature.bg} flex items-center justify-center flex-shrink-0`}>
-                    <Icon className={`h-4.5 w-4.5 ${feature.color}`} />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-foreground text-sm">{feature.title}</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">{feature.description}</p>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                </Card>
-              );
-            })}
-          </div>
-
-          {/* Privacy note */}
-          <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-primary/5 border border-primary/10">
-            <Shield className="h-4 w-4 text-primary flex-shrink-0" />
-            <span className="text-xs text-muted-foreground">
-              Your data is encrypted and visible only to you. We never share your health data.
-            </span>
-          </div>
-
-          {/* Actions */}
-          <div className="space-y-3 pt-1">
-            <Button
-              size="lg"
-              className="w-full"
-              onClick={() => navigate('/dashboard', { replace: true })}
+        <div className="row-group mt-6">
+          {features.map(({ icon: Icon, title, description, path }) => (
+            <button
+              key={title}
+              type="button"
+              onClick={() => navigate(path)}
+              className="w-full flex items-center gap-3.5 px-4 py-3.5 text-left hover:bg-muted/60"
             >
-              Explore dashboard
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full gap-2"
-              onClick={() => navigate('/onboarding/basic-info')}
-            >
-              <Sparkles className="h-4 w-4" />
-              Personalise my experience
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
+              <span className="grid place-items-center h-10 w-10 shrink-0 rounded-full bg-stage-tint text-stage-accent" aria-hidden="true">
+                <Icon className="h-5 w-5" />
+              </span>
+              <span className="flex-1 min-w-0">
+                <span className="block text-[16px] font-bold leading-snug">{title}</span>
+                <span className="block text-[14px] leading-snug text-muted-foreground">{description}</span>
+              </span>
+              <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+            </button>
+          ))}
+        </div>
+
+        <p className="mt-4 flex items-start gap-2 text-[14px] text-muted-foreground">
+          <Shield className="h-4 w-4 mt-0.5 shrink-0 text-stage-accent" aria-hidden="true" />
+          Your data is encrypted and only you can see it. We never share your health data.
+        </p>
+      </main>
+
+      <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm">
+        <div className="w-full max-w-md mx-auto px-4 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] space-y-1">
+          <button type="button" className="btn-stage w-full" onClick={() => navigate(ONBOARDING_PATHS.stage)}>
+            Set up Womanie for me
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/dashboard', { replace: true })}
+            className="w-full min-h-11 text-[15px] font-semibold text-muted-foreground hover:text-stage-accent"
+          >
+            Skip, go to Home
+          </button>
         </div>
       </div>
     </div>

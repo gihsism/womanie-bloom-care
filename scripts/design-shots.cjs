@@ -204,6 +204,19 @@ async function doctorRoute(r) {
 // the stage picker; the device starts with no stage remembered.
 const pick = (label) => async (p) => { await p.getByRole('radio', { name: new RegExp(label) }).click(); };
 const next = async (p) => { await p.getByRole('button', { name: /^Continue$/ }).click(); await p.waitForTimeout(400); };
+const pickDay = async (p) => { // the 1st of this month
+  await p.getByRole('button', { name: /Last period started/ }).click();
+  await p.locator('button[role="gridcell"]:not([disabled])').first().click();
+  await p.keyboard.press('Escape');
+};
+const pregnancyToAbout = async (p) => {
+  await pick('Pregnancy')(p); await next(p);
+  await p.getByRole('radio', { name: 'Current week' }).click();
+  await p.getByLabel(/Week of pregnancy/).fill('24');
+  await next(p);
+  await p.getByRole('radio', { name: 'Yes' }).click();
+  await next(p);
+};
 const FIRST_RUN_PAGES = [
   ['select-type', '/auth/select-type', null, true],
   ['login', '/auth/login', null, true],
@@ -214,28 +227,24 @@ const FIRST_RUN_PAGES = [
   ['2-pregnancy-date', '/onboarding/life-stage', async (p) => { await pick('Pregnancy')(p); await next(p); }],
   ['3-pregnancy-more', '/onboarding/life-stage', async (p) => {
     await pick('Pregnancy')(p); await next(p);
-    await p.getByRole('tab', { name: /week/i }).click();
-    await p.getByLabel(/week/i).fill('24');
+    await p.getByRole('radio', { name: 'Current week' }).click();
+    await p.getByLabel(/Week of pregnancy/).fill('24');
     await next(p);
   }],
-  ['2-cycle-date', '/onboarding/life-stage', async (p) => { await pick('Period tracking')(p); await next(p); }],
+  ['2-cycle-date', '/onboarding/life-stage', async (p) => { await pick('Period tracking')(p); await next(p); await pickDay(p); }],
   ['3-cycle-focus', '/onboarding/life-stage', async (p) => {
     await pick('Period tracking')(p); await next(p);
-    await p.getByRole('button', { name: /pick a date/i }).click();
-    await p.locator('[role="gridcell"] button:not([disabled])').first().click();
-    await p.keyboard.press('Escape');
+    await pickDay(p);
     await next(p);
   }],
   ['3-cycle-focus-picked', '/onboarding/life-stage', async (p) => {
     await pick('Period tracking')(p); await next(p);
-    await p.getByRole('button', { name: /pick a date/i }).click();
-    await p.locator('[role="gridcell"] button:not([disabled])').first().click();
-    await p.keyboard.press('Escape');
+    await pickDay(p);
     await next(p);
-    await p.getByRole('radio', { name: /Avoiding pregnancy/ }).click();
+    await p.getByRole('radio', { name: /Birth control/ }).click();
   }],
-  ['4-about-you', '/onboarding/basic-info'],
-  ['5-done', '/onboarding/success'],
+  ['4-about-you', '/onboarding/life-stage', async (p) => { await pregnancyToAbout(p); }],
+  ['5-done', '/onboarding/life-stage', async (p) => { await pregnancyToAbout(p); await p.getByRole('button', { name: 'Skip for now' }).click(); }],
 ];
 const PUBLIC_PAGES = [
   ['index', '/', null, true],
