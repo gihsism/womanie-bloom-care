@@ -72,7 +72,7 @@ function relativeDay(d: Date): string {
   if (isTomorrow(d)) return 'Tomorrow';
   const days = Math.round((d.getTime() - Date.now()) / 86_400_000);
   if (days > 0 && days < 7) return format(d, 'EEEE');
-  return format(d, 'MMM d, yyyy');
+  return format(d, 'EEE d MMM');
 }
 
 function isUpcoming(apt: AppointmentRow): boolean {
@@ -236,22 +236,23 @@ const Appointments = () => {
     return (
       <li
         key={apt.id}
-        className={`flex items-start gap-3 p-4 rounded-lg border bg-card ${
+        className={`rounded-[1.25rem] border border-line bg-card p-4 ${
           kind === 'past' || isCancelled ? 'opacity-70' : ''
         }`}
       >
+       <div className="flex items-start gap-3">
         {apt.doctor_avatar_url ? (
-          <img src={apt.doctor_avatar_url} alt="" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+          <img src={apt.doctor_avatar_url} alt="" className="w-11 h-11 rounded-full object-cover flex-shrink-0" />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <Stethoscope className="h-6 w-6 text-primary" />
+          <div className="w-11 h-11 rounded-full bg-stage-tint flex items-center justify-center flex-shrink-0">
+            <Stethoscope className="h-5 w-5 text-stage-accent" strokeWidth={1.9} />
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-            <span className="text-sm font-medium truncate">{name}</span>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[17px] font-bold truncate">{name}</span>
             {apt.doctor_verified && (
-              <span className="inline-flex items-center gap-1 text-[10px] text-green-700 dark:text-green-300">
+              <span className="inline-flex items-center gap-1 text-[12px] text-green-700 dark:text-green-300">
                 <ShieldCheck className="h-3 w-3" />
                 Verified
               </span>
@@ -275,33 +276,37 @@ const Appointments = () => {
               <Badge variant="outline" className="h-4 px-1.5 text-[9px]">Payment pending</Badge>
             )}
           </div>
-          {specialty && <p className="text-[11px] text-muted-foreground mb-1">{specialty}</p>}
-          <p className="text-xs text-muted-foreground">
+          {specialty && <p className="text-[14px] text-muted-foreground">{specialty}</p>}
+        </div>
+       </div>
+        <div className="mt-3">
+          <p className="text-[19px] font-extrabold tabular-nums">
             {kind === 'upcoming'
-              ? `${relativeDay(when)} · ${format(when, 'p')} · in ${formatDistanceToNowStrict(when)}`
-              : `${format(when, 'PPP')} · ${format(when, 'p')}`}
-            {apt.duration ? ` · ${apt.duration} min` : ''}
+              ? `${relativeDay(when)} · ${format(when, 'HH:mm')}`
+              : `${format(when, 'd MMM yyyy')} · ${format(when, 'HH:mm')}`}
           </p>
-          <p className="text-[11px] text-muted-foreground mt-0.5 inline-flex items-center gap-1">
-            {isVideo ? <Video className="h-3 w-3" /> : <MapPin className="h-3 w-3" />}
+          <p className="text-[14px] text-muted-foreground mt-0.5 inline-flex items-center gap-1.5 flex-wrap">
+            {kind === 'upcoming' && <span>in {formatDistanceToNowStrict(when)} ·</span>}
+            {isVideo ? <Video className="h-3.5 w-3.5" /> : <MapPin className="h-3.5 w-3.5" />}
             {isVideo ? 'Video consultation' : 'In-person'}
+            {apt.duration ? ` · ${apt.duration} min` : ''}
           </p>
           {isCancelled && (() => {
             const reason = doctorCancelReason(apt.notes);
             if (!reason) return null;
             return (
-              <p className="text-[11px] mt-1.5 px-2 py-1 rounded bg-destructive/5 border border-destructive/20 text-destructive">
+              <p className="text-[13px] mt-2 px-2.5 py-1.5 rounded-lg bg-destructive/5 border border-destructive/20 text-destructive">
                 <span className="font-medium">Cancelled by doctor:</span> {reason}
               </p>
             );
           })()}
         </div>
         {kind === 'upcoming' && !isCancelled && (
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-wrap justify-between gap-x-0 gap-y-1 mt-3 pt-2 -mx-2 border-t border-line">
             <Button
               variant="ghost"
               size="sm"
-              className="text-xs gap-1 text-muted-foreground hover:text-foreground"
+              className="text-[13px] gap-1 px-2 text-stage-accent font-semibold hover:text-stage-accent"
               onClick={() => {
                 downloadIcs({
                   uid: apt.id,
@@ -324,7 +329,7 @@ const Appointments = () => {
             <Button
               variant="ghost"
               size="sm"
-              className="text-xs gap-1 text-muted-foreground hover:text-foreground"
+              className="text-[13px] gap-1 px-2 text-stage-accent font-semibold hover:text-stage-accent"
               onClick={() => setRescheduling(apt)}
               disabled={busyId === apt.id}
             >
@@ -334,7 +339,7 @@ const Appointments = () => {
             <Button
               variant="ghost"
               size="sm"
-              className="text-xs gap-1 text-muted-foreground hover:text-destructive"
+              className="text-[13px] gap-1 px-2 font-semibold text-muted-foreground hover:text-destructive"
               onClick={() => cancel(apt)}
               disabled={busyId === apt.id}
             >
@@ -356,45 +361,38 @@ const Appointments = () => {
         <div className="w-full px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')} className="gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Back
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">
+                <ArrowLeft className="h-5 w-5" />
               </Button>
-              <div className="h-6 w-px bg-border" />
-              <h1 className="page-title whitespace-nowrap">Visits</h1>
+              <div className="min-w-0">
+                <h1 className="page-title whitespace-nowrap">Visits</h1>
+                {loaded && (
+                  <p className="page-sub">
+                    {nextVisit ? `Next: ${relativeDay(new Date(nextVisit.scheduled_at))} · ${format(new Date(nextVisit.scheduled_at), 'HH:mm')}` : 'No visit booked'}
+                  </p>
+                )}
+              </div>
             </div>
-            {/* The one primary action. With no visits it sits in the empty
-                state instead, so the page never shows two. */}
-            {loaded && nextVisit && (
-              <Button variant="default" size="sm" className="gap-2" onClick={bookVisit}>
-                <Search className="h-4 w-4" />
-                Book a visit
-              </Button>
-            )}
           </div>
         </div>
       </div>
 
-      <div className="w-full max-w-3xl mx-auto px-4 py-8 space-y-8">
+      <div className="w-full max-w-3xl mx-auto px-4 py-6 space-y-7">
         {/* Next visit, with the questions to bring attached to it */}
         <section aria-labelledby="next-visit-heading">
           <div className="flex items-center gap-2 mb-3">
-            <CalendarClock className="h-4 w-4 text-primary" />
-            <h2 id="next-visit-heading" className="text-sm font-semibold text-muted-foreground">
+            <CalendarClock className="h-5 w-5 text-stage-accent" strokeWidth={1.9} />
+            <h2 id="next-visit-heading" className="section-title">
               Your next visit
             </h2>
           </div>
           {!loaded ? (
-            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full rounded-[1.25rem]" />
           ) : nextVisit ? (
             <ul className="space-y-2">{renderAppointment(nextVisit, 'upcoming')}</ul>
           ) : (
-            <Card className="p-6 text-center">
-              <p className="text-sm text-muted-foreground mb-3">No visits yet.</p>
-              <Button size="sm" className="gap-2" onClick={bookVisit}>
-                <Search className="h-4 w-4" />
-                Book a visit
-              </Button>
+            <Card className="rounded-[1.25rem] border-line shadow-none p-6 text-center">
+              <p className="text-[16px] text-muted-foreground">No visits yet.</p>
             </Card>
           )}
           {/* Questions to bring: hides itself when there is nothing to ask. */}
@@ -404,6 +402,14 @@ const Appointments = () => {
             </div>
           )}
         </section>
+
+        {/* The one primary action on the page. */}
+        {loaded && (
+          <button type="button" className="btn-stage w-full" onClick={bookVisit}>
+            <Search className="h-5 w-5" aria-hidden="true" />
+            Book a visit
+          </button>
+        )}
 
         {/* Notes from your doctor: hides itself when there are none. */}
         <div className="empty:hidden [&>*]:!mb-0">
@@ -419,7 +425,7 @@ const Appointments = () => {
         {/* Later visits */}
         {loaded && laterVisits.length > 0 && (
           <section aria-labelledby="later-visits-heading">
-            <h2 id="later-visits-heading" className="text-sm font-semibold text-muted-foreground mb-3">
+            <h2 id="later-visits-heading" className="section-title mb-3">
               Later visits ({laterVisits.length})
             </h2>
             <ul className="space-y-2">
@@ -429,26 +435,26 @@ const Appointments = () => {
         )}
 
         {/* Your doctors: who can see your records, and when they looked */}
-        <details className="group rounded-lg border border-border bg-card">
-          <summary className="flex cursor-pointer list-none items-center gap-2 p-4 text-sm font-medium">
-            <Users className="h-4 w-4 text-primary" />
+        <details className="group row-group">
+          <summary className="flex cursor-pointer list-none items-center gap-3 min-h-14 px-4 py-3 text-[17px] font-medium hover:bg-muted/50">
+            <Users className="h-5 w-5 text-stage-accent" strokeWidth={1.9} />
             <span className="flex-1">Your doctors</span>
             <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden="true" />
           </summary>
-          <div className="space-y-4 border-t border-border p-4">
+          <div className="space-y-4 border-t border-line p-4">
             <ConnectedDoctors />
             <ChartAccessLog />
           </div>
         </details>
 
         {/* Past visits */}
-        <details className="group rounded-lg border border-border bg-card">
-          <summary className="flex cursor-pointer list-none items-center gap-2 p-4 text-sm font-medium">
-            <History className="h-4 w-4 text-muted-foreground" />
+        <details className="group row-group">
+          <summary className="flex cursor-pointer list-none items-center gap-3 min-h-14 px-4 py-3 text-[17px] font-medium hover:bg-muted/50">
+            <History className="h-5 w-5 text-stage-accent" strokeWidth={1.9} />
             <span className="flex-1">Past visits{loaded ? ` (${past.length})` : ''}</span>
             <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden="true" />
           </summary>
-          <div className="border-t border-border p-4">
+          <div className="border-t border-line p-4">
               {loaded && past.length > 3 && (
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {([

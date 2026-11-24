@@ -80,16 +80,14 @@ export default function DoctorNotesCard() {
   const hidden = rows.length - visible.length;
 
   return (
-    <Card className="p-4 mb-4">
+    <Card className="rounded-[1.25rem] border-line shadow-none p-4 mb-4">
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
-          <NotebookPen className="h-4 w-4 text-primary" />
-        </div>
+        <NotebookPen className="h-5 w-5 text-stage-accent flex-shrink-0" strokeWidth={1.9} />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold">
+          <p className="text-[17px] font-bold">
             {rows.length === 1 ? 'Note from your doctor' : `${rows.length} notes from your doctors`}
           </p>
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-[14px] text-muted-foreground">
             Clinical notes your doctors have shared with you.
           </p>
         </div>
@@ -104,7 +102,7 @@ export default function DoctorNotesCard() {
           const isExpanded = expandedId === note.id;
           const created = new Date(note.created_at);
           return (
-            <li key={note.id} className="border rounded-lg p-3 bg-muted/20">
+            <li key={note.id} className="border border-line rounded-2xl p-3">
               <div className="flex items-start gap-3">
                 {note.doctor_avatar_url ? (
                   <img src={note.doctor_avatar_url} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
@@ -115,7 +113,7 @@ export default function DoctorNotesCard() {
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-sm font-medium truncate">{note.title}</span>
+                    <span className="text-[15px] font-semibold truncate">{note.title}</span>
                     <Badge
                       variant="outline"
                       className={`h-4 px-1.5 text-[9px] capitalize ${noteTypeBadgeClass(note.note_type)}`}

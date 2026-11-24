@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { onHealthDataChange } from '@/lib/data-events';
-import { differenceInDays, format, parseISO } from 'date-fns';
+import { differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 import type { LifeStage } from './DashboardHeader';
 import { getFriendlyName } from '@/lib/medical-utils';
@@ -101,6 +101,8 @@ const MODE_DEFAULTS: Record<string, string[]> = {
     'Are my current symptoms expected for my stage?',
   ],
 };
+
+const daysAway = (n: number) => (n <= 0 ? 'today' : n === 1 ? 'tomorrow' : `in ${n} days`);
 
 export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
   const { user } = useAuth();
@@ -317,42 +319,42 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
   };
 
   return (
-    <Card className="p-4">
-      <div className="flex items-center gap-2 mb-2">
-        <ClipboardCheck className="h-4 w-4 text-primary" />
-        <h3 className="text-sm font-semibold">Questions for your next visit</h3>
-        <Badge variant="outline" className="text-[10px] ml-auto">
+    <Card className="rounded-[1.25rem] border-line shadow-none p-4">
+      <div className="flex items-center gap-2 mb-1">
+        <ClipboardCheck className="h-5 w-5 text-stage-accent" strokeWidth={1.9} />
+        <h3 className="text-[17px] font-bold">Questions to bring</h3>
+        <Badge variant="outline" className="text-[12px] ml-auto border-line tabular-nums">
           {totalChecked}/{list.length}
         </Badge>
       </div>
 
       {upcomingApt && (
-        <p className="text-[11px] text-muted-foreground mb-3">
-          Next visit: {format(parseISO(upcomingApt.scheduled_at), 'EEE MMM d, h:mm a')}
+        <p className="text-[14px] text-muted-foreground mb-3">
+          For {format(parseISO(upcomingApt.scheduled_at), 'EEE d MMM, HH:mm')}
           {upcomingApt.doctor_name && ` with ${upcomingApt.doctor_name}`}
-          {' '}({differenceInDays(parseISO(upcomingApt.scheduled_at), new Date())} days away)
+          {' '}({daysAway(differenceInCalendarDays(parseISO(upcomingApt.scheduled_at), new Date()))})
         </p>
       )}
 
-      <ul className="space-y-2 mb-3">
+      <ul className="divide-y divide-line border-y border-line mb-3">
         {list.map(q => {
           const isChecked = q.asked;
           return (
-            <li key={q.id} className="flex items-start gap-2">
+            <li key={q.id} className="flex items-start gap-3 py-2.5">
               <button
                 type="button"
-                className={`relative before:absolute before:-inset-3 before:content-[''] flex-shrink-0 mt-0.5 h-4 w-4 rounded border ${isChecked ? 'bg-primary border-primary' : 'border-border'} flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary`}
+                className={`relative before:absolute before:-inset-3 before:content-[''] flex-shrink-0 mt-0.5 h-5 w-5 rounded-md border-2 ${isChecked ? 'bg-stage-accent border-stage-accent' : 'border-input'} flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-stage-accent`}
                 onClick={() => (isSaved ? void store(toggleAsked(saved, q.id)) : persistChecked({ ...checked, [q.id]: !isChecked }))}
                 aria-label={isChecked ? 'Mark as not asked' : 'Mark as asked'}
               >
-                {isChecked && <Check className="h-3 w-3 text-primary-foreground" />}
+                {isChecked && <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />}
               </button>
-              <p className={`text-xs leading-snug flex-1 ${isChecked ? 'line-through text-muted-foreground' : ''}`}>
+              <p className={`text-[15px] leading-snug flex-1 ${isChecked ? 'line-through text-muted-foreground' : ''}`}>
                 {q.text}
               </p>
               <button
                 type="button"
-                className="tap-target text-[10px] text-primary hover:underline opacity-70 hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5 flex-shrink-0"
+                className="tap-target text-[13px] font-semibold text-stage-accent hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5 flex-shrink-0"
                 onClick={() => navigate(`/dashboard/ai-doctor?q=${encodeURIComponent(q.text)}`)}
                 title="Ask the AI assistant first"
               >
@@ -382,42 +384,42 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
               placeholder="Add your own question"
               aria-label="Add your own question"
               maxLength={300}
-              className="h-8 text-xs"
+              className="h-10 text-[15px]"
             />
-            <Button type="submit" size="sm" variant="outline" className="h-8 gap-1" disabled={!draft.trim() || saving}>
+            <Button type="submit" size="sm" variant="outline" className="h-10 gap-1 border-line" disabled={!draft.trim() || saving}>
               <Plus className="h-3.5 w-3.5" /> Add
             </Button>
           </form>
           {isSaved ? (
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-[13px] text-muted-foreground">
               Saved to your visit on {format(parseISO(upcomingApt.scheduled_at), 'EEE MMM d')}. Your doctor can see this list.{' '}
               <button type="button" className="underline hover:text-foreground" onClick={unshare}>Remove from visit</button>
             </p>
           ) : (
             <div className="flex flex-wrap items-center gap-2">
-              <Button size="sm" variant="outline" className="gap-1.5" disabled={saving} onClick={() => void store(list)}>
+              <Button size="sm" variant="outline" className="gap-1.5 border-stage-accent text-stage-accent font-semibold" disabled={saving} onClick={() => void store(list)}>
                 <ClipboardCheck className="h-3.5 w-3.5" />
                 Save for my visit
               </Button>
-              <p className="text-[11px] text-muted-foreground">Your doctor will see the saved list before the visit.</p>
+              <p className="text-[13px] text-muted-foreground">Your doctor will see the saved list before the visit.</p>
             </div>
           )}
         </div>
       )}
 
       <div className="flex gap-2">
-        <Button size="sm" variant="outline" onClick={handleCopy} className="gap-1.5">
+        <Button size="sm" variant="ghost" onClick={handleCopy} className="gap-1.5 text-muted-foreground hover:text-foreground">
           {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
           {copied ? 'Copied' : 'Copy all'}
         </Button>
-        <Button size="sm" variant="ghost" className="gap-1.5" onClick={() => navigate('/dashboard/print-health-record')}>
+        <Button size="sm" variant="ghost" className="gap-1.5 text-muted-foreground hover:text-foreground" onClick={() => navigate('/dashboard/health-record/print')}>
           <ExternalLink className="h-3.5 w-3.5" />
           Print full record
         </Button>
       </div>
 
       {allChecked && (
-        <p className="text-[11px] text-primary mt-3">
+        <p className="text-[14px] font-semibold text-stage-accent mt-3">
           All questions asked — great visit prep!
         </p>
       )}
