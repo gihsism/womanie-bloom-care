@@ -1,19 +1,19 @@
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { flaggedResults } from '@/lib/doctorPatient';
+import { flaggedResults, isFlagged } from '@/lib/doctorPatient';
 import type { HealthDocument, MedicalDataRow, PeriodRecord } from './types';
 
 // Results tab of the doctor's patient chart: search, flagged values
 // (newest reading per test), then everything grouped by panel.
+// Idea 4: rows in hairline groups; out of range in the app's one warning
+// colour (never the stage colour), in range quiet.
 
 function statusBadgeClass(status: string | null): string {
   const s = (status || '').toLowerCase();
-  if (s === 'critical') return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200';
-  if (s === 'high' || s === 'low' || s === 'abnormal') return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200';
-  if (s === 'borderline') return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200';
-  if (s === 'normal') return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200';
+  if (s === 'critical') return 'bg-destructive text-destructive-foreground';
+  if (s === 'high' || s === 'low' || s === 'abnormal') return 'bg-destructive/10 text-destructive';
+  if (s === 'borderline') return 'bg-muted text-foreground';
+  if (s === 'normal') return 'bg-stage-tint text-stage-accent';
   return 'bg-muted text-muted-foreground';
 }
 
@@ -93,32 +93,24 @@ const LabResultsView = ({
 
   if (medicalData.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Results</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground text-center py-8">
-            No results yet. They appear once the patient uploads a lab report.
-          </p>
-        </CardContent>
-      </Card>
+      <p className="row-group px-4 py-6 text-center text-[15px] text-muted-foreground">
+        No results yet. They appear once the patient uploads a lab report.
+      </p>
     );
   }
 
   const Row = ({ r }: { r: MedicalDataRow }) => {
     const phaseInfo = isCycleHormone(r.title) ? cyclePhaseForDate(r.date_recorded) : null;
     return (
-    <div className="flex items-start gap-3 border rounded-lg p-3 bg-card">
-      <Badge className={`text-[10px] capitalize shrink-0 ${statusBadgeClass(r.status)}`} variant="outline">
-        {r.status || 'unknown'}
-      </Badge>
+    <div className="flex items-start gap-3 px-4 py-3">
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{r.title}</p>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5 text-xs">
-          <span className="font-mono">{formatValue(r.value, r.unit)}</span>
+        <p className="text-[17px] font-medium truncate">{r.title}</p>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5 text-[14px]">
+          <span className={`font-semibold tabular-nums ${isFlagged(r.status) ? 'text-destructive' : ''}`}>
+            {formatValue(r.value, r.unit)}
+          </span>
           {phaseInfo && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
+            <span className="text-[12px] font-semibold px-2 py-0.5 rounded-full bg-stage-tint text-stage-accent">
               day {phaseInfo.cycleDay} · {phaseInfo.phase}
             </span>
           )}
@@ -129,13 +121,16 @@ const LabResultsView = ({
             <span className="text-muted-foreground">{new Date(r.date_recorded).toLocaleDateString()}</span>
           )}
           {docNameById.has(r.document_id) && (
-            <span className="text-muted-foreground truncate">· {docNameById.get(r.document_id)}</span>
+            <span className="text-muted-foreground truncate">{docNameById.get(r.document_id)}</span>
           )}
         </div>
         {r.notes && (
-          <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{r.notes}</p>
+          <p className="text-[13px] text-muted-foreground mt-1 line-clamp-2">{r.notes}</p>
         )}
       </div>
+      <span className={`mt-0.5 shrink-0 rounded-full px-2.5 py-0.5 text-[12px] font-semibold capitalize ${statusBadgeClass(r.status)}`}>
+        {r.status || 'unknown'}
+      </span>
     </div>
     );
   };
@@ -147,30 +142,27 @@ const LabResultsView = ({
         aria-label="Search tests"
         value={query}
         onChange={e => setQuery(e.target.value)}
-        className="max-w-md"
+        className="h-12 rounded-full px-4 text-[16px] max-w-md"
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Out of range</CardTitle>
-          <CardDescription>
+      <section aria-labelledby="results-flagged-heading" className="space-y-2">
+        <div>
+          <h2 id="results-flagged-heading" className="section-title">Out of range</h2>
+          <p className="page-sub mt-0.5">
             {flagged.length === 0
               ? 'All latest results are in range.'
               : `Latest reading of each test, most urgent first.`}
-          </CardDescription>
-        </CardHeader>
+          </p>
+        </div>
         {flagged.length > 0 && (
-          <CardContent className="space-y-2">
+          <div className="row-group">
             {flagged.map(r => <Row key={r.id} r={r} />)}
-          </CardContent>
+          </div>
         )}
-      </Card>
+      </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All results by panel</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <section aria-labelledby="results-all-heading" className="space-y-4">
+        <h2 id="results-all-heading" className="section-title">All results by panel</h2>
           {(() => {
             const groups = new Map<string, MedicalDataRow[]>();
             for (const r of allRecent) {
@@ -185,17 +177,17 @@ const LabResultsView = ({
               return b[1].length - a[1].length;
             });
             if (sortedGroups.length === 0) {
-              return <p className="text-muted-foreground text-center py-8">No results match the filter.</p>;
+              return <p className="row-group px-4 py-6 text-center text-[15px] text-muted-foreground">No results match the filter.</p>;
             }
             return sortedGroups.map(([panel, items]) => (
               <div key={panel}>
-                <p className="text-sm font-semibold text-muted-foreground mb-1.5">
+                <p className="text-[15px] font-semibold text-muted-foreground mb-2 ml-1">
                   {panel} · {items.length}
                 </p>
-                <div className="space-y-2">
+                <div className="row-group">
                   {items.slice(0, 30).map(r => <Row key={r.id} r={r} />)}
                   {items.length > 30 && (
-                    <p className="text-[11px] text-muted-foreground text-center">
+                    <p className="px-4 py-3 text-[13px] text-muted-foreground text-center">
                       +{items.length - 30} more in {panel}. Use search to narrow.
                     </p>
                   )}
@@ -203,8 +195,7 @@ const LabResultsView = ({
               </div>
             ));
           })()}
-        </CardContent>
-      </Card>
+      </section>
     </div>
   );
 };

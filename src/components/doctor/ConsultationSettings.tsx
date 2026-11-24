@@ -91,15 +91,15 @@ const ConsultationSettings = ({ doctorId }: { doctorId: string }) => {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
+      <Card className="panel rounded-[1.25rem] border-line bg-card shadow-none">
+        <CardHeader className="p-4 pb-3">
+          <CardTitle className="section-title flex items-center gap-2">
+            <Settings className="h-5 w-5 text-stage-accent" strokeWidth={1.9} aria-hidden="true" />
             Bookings and price
           </CardTitle>
           <CardDescription>Whether patients can book you, and what a visit costs</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="p-4 pt-0 space-y-6">
           {/* Availability Toggle */}
           <div className="flex items-center justify-between p-4 border rounded-lg">
             <div>
@@ -178,22 +178,22 @@ const ConsultationSettings = ({ doctorId }: { doctorId: string }) => {
             Online payment through Womanie is not available yet.
           </p>
 
-          <Button onClick={handleSave} disabled={isSaving} className="w-full bg-secondary hover:bg-secondary/90">
+          <Button variant="outline" onClick={handleSave} disabled={isSaving} className="w-full h-12 border-stage-accent text-[15px] font-semibold text-stage-accent hover:text-stage-accent">
             {isSaving ? 'Saving...' : 'Save'}
           </Button>
         </CardContent>
       </Card>
 
       {/* Schedule Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
+      <Card className="panel rounded-[1.25rem] border-line bg-card shadow-none">
+        <CardHeader className="p-4 pb-3">
+          <CardTitle className="section-title flex items-center gap-2">
+            <Clock className="h-5 w-5 text-stage-accent" strokeWidth={1.9} aria-hidden="true" />
             Opening hours
           </CardTitle>
           <CardDescription>Patients can book you inside these hours</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 pt-0">
           <ScheduleEditor doctorId={doctorId} />
         </CardContent>
       </Card>
@@ -314,7 +314,7 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
         return (
           <div
             key={index}
-            className={`flex items-center gap-4 p-3 border rounded-lg ${
+            className={`flex flex-wrap items-center gap-x-3 gap-y-2 p-3 border border-line rounded-2xl ${
               invalid ? 'border-destructive bg-destructive/5' : ''
             }`}
           >
@@ -325,7 +325,7 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
               aria-label={`Work on ${dayName}`}
               className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
                 schedule[index].active
-                  ? 'bg-secondary border-secondary text-secondary-foreground'
+                  ? 'bg-stage-accent border-stage-accent text-white'
                   : 'border-muted-foreground'
               }`}
             >
@@ -333,22 +333,26 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
             </button>
             <span className="w-24 font-medium">{dayName}</span>
             {schedule[index].active ? (
-              <div className="flex items-center gap-2 flex-1">
+              // Phone width: the two times wrap under the day instead of
+              // running off the screen.
+              <div className="flex flex-wrap items-center gap-2 min-w-0 flex-1 basis-[15rem]">
                 <input
                   type="time"
                   value={schedule[index].start}
                   onChange={(e) => updateTime(index, 'start', e.target.value)}
-                  className={`px-3 py-1 border rounded bg-background ${invalid ? 'border-destructive' : ''}`}
+                  aria-label={`${dayName} from`}
+                  className={`min-w-0 w-[7.5rem] px-3 py-1.5 border border-input rounded-full bg-background ${invalid ? 'border-destructive' : ''}`}
                 />
                 <span className="text-muted-foreground">to</span>
                 <input
                   type="time"
                   value={schedule[index].end}
                   onChange={(e) => updateTime(index, 'end', e.target.value)}
-                  className={`px-3 py-1 border rounded bg-background ${invalid ? 'border-destructive' : ''}`}
+                  aria-label={`${dayName} to`}
+                  className={`min-w-0 w-[7.5rem] px-3 py-1.5 border border-input rounded-full bg-background ${invalid ? 'border-destructive' : ''}`}
                 />
                 {invalid && (
-                  <span className="text-xs text-destructive ml-2">End must be after start</span>
+                  <span className="basis-full text-xs text-destructive">End must be after start</span>
                 )}
               </div>
             ) : (
@@ -358,7 +362,8 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
         );
       })}
       <Button
-        className="w-full mt-4 bg-secondary hover:bg-secondary/90"
+        variant="outline"
+        className="mt-4 w-full h-12 border-stage-accent text-[15px] font-semibold text-stage-accent hover:text-stage-accent"
         onClick={handleSaveSchedule}
         disabled={isSaving || invalidDays.length > 0}
       >

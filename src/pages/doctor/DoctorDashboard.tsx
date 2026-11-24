@@ -13,6 +13,7 @@ import {
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRequireRole } from '@/hooks/useRequireRole';
+import { useClinicTheme } from '@/hooks/useClinicTheme';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle, ArrowRightLeft, LogOut, Menu, UserPlus } from 'lucide-react';
 import DoctorTodayList from '@/components/doctor/DoctorTodayList';
@@ -27,6 +28,10 @@ import type { DoctorAppointment, DoctorPatientConnection } from '@/lib/doctorDas
 // need her), ONE primary action ("Add a patient") and the patient list
 // with search. Appointments and Profile & settings sit behind tabs; log
 // out and patient view sit in the Menu.
+//
+// Idea 4: the same page scale as the patient side (page title, section
+// titles, hairline row groups, one accent button) in the neutral
+// "clinic" colours, since doctors are not in a life stage.
 
 interface DoctorProfile {
   id: string;
@@ -41,6 +46,7 @@ type View = 'home' | 'appointments' | 'settings';
 const DoctorDashboard = () => {
   const navigate = useNavigate();
   usePageTitle('Doctor Portal');
+  useClinicTheme();
   const { loading } = useRequireRole('doctor', '/auth/doctor-login');
   const { user } = useAuth();
   const [doctorProfile, setDoctorProfile] = useState<DoctorProfile | null>(null);
@@ -103,14 +109,14 @@ const DoctorDashboard = () => {
   if (loading || !hasLoaded) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="border-b border-border bg-card p-4">
-          <Skeleton className="h-6 w-48" />
+        <div className="page-head px-4 py-4">
+          <Skeleton className="h-8 w-48" />
         </div>
-        <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-4">
+        <div className="px-4 py-6 max-w-3xl mx-auto space-y-6">
           <Skeleton className="h-10 w-full max-w-sm" />
-          <Skeleton className="h-40 rounded-xl" />
-          <Skeleton className="h-11 rounded-xl" />
-          <Skeleton className="h-48 rounded-xl" />
+          <Skeleton className="h-40 rounded-[1.25rem]" />
+          <Skeleton className="h-[3.25rem] rounded-full" />
+          <Skeleton className="h-48 rounded-[1.25rem]" />
         </div>
       </div>
     );
@@ -131,17 +137,17 @@ const DoctorDashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header: who you are + one Menu. No logo link out of the app. */}
-      <div className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <div className="page-head sticky top-0 z-10">
+        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-lg font-bold truncate">{doctorProfile?.full_name || 'Doctor'}</h1>
+            <h1 className="page-title truncate">{doctorProfile?.full_name || 'Doctor'}</h1>
             {doctorProfile?.specialty && (
-              <p className="text-sm text-muted-foreground truncate">{doctorProfile.specialty}</p>
+              <p className="page-sub truncate">{doctorProfile.specialty}</p>
             )}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2 shrink-0">
+              <Button variant="outline" size="sm" className="gap-2 shrink-0 h-10 px-4 border-line text-[15px] font-semibold">
                 <Menu className="h-4 w-4" aria-hidden="true" />
                 Menu
               </Button>
@@ -161,31 +167,32 @@ const DoctorDashboard = () => {
         </div>
       </div>
 
-      {verification && (
-        <div
-          role="status"
-          className={`border-b px-4 py-2 ${
-            verification.tone === 'bad'
-              ? 'bg-destructive/10 border-destructive/30 text-destructive'
-              : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200'
-          }`}
-        >
-          <p className="max-w-3xl mx-auto text-sm flex items-start gap-2">
-            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
-            {verification.text}
-          </p>
-        </div>
-      )}
+      <div className="px-4 py-5 max-w-3xl mx-auto">
+        {verification && (
+          <div
+            role="status"
+            className={`mb-5 rounded-[1.25rem] border px-4 py-3 text-[15px] flex items-start gap-2.5 ${
+              verification.tone === 'bad'
+                ? 'bg-destructive/5 border-destructive/25 text-destructive'
+                : 'bg-stage-tint border-line text-foreground'
+            }`}
+          >
+            <AlertCircle
+              className={`h-5 w-5 shrink-0 mt-px ${verification.tone === 'bad' ? '' : 'text-stage-accent'}`}
+              aria-hidden="true"
+            />
+            <p>{verification.text}</p>
+          </div>
+        )}
 
-      <div className="p-4 md:p-6 max-w-3xl mx-auto">
         <Tabs value={view} onValueChange={v => setView(v as View)} className="space-y-6">
-          <TabsList className="grid grid-cols-3 w-full max-w-md">
-            <TabsTrigger value="home">Home</TabsTrigger>
-            <TabsTrigger value="appointments">Appointments</TabsTrigger>
-            <TabsTrigger value="settings">Profile & settings</TabsTrigger>
+          <TabsList className="flex w-full gap-6 h-11">
+            <TabsTrigger value="home" className="text-[15px]">Home</TabsTrigger>
+            <TabsTrigger value="appointments" className="text-[15px]">Appointments</TabsTrigger>
+            <TabsTrigger value="settings" className="text-[15px]">Profile & settings</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="home" className="space-y-6">
+          <TabsContent value="home" className="space-y-7">
             <DoctorTodayList
               appointments={appointments}
               patients={patients}
@@ -195,14 +202,10 @@ const DoctorDashboard = () => {
             {addingPatient ? (
               <AddPatientForm onAdded={loadDoctorData} onClose={() => setAddingPatient(false)} />
             ) : (
-              <Button
-                size="lg"
-                className="w-full gap-2 bg-secondary hover:bg-secondary/90"
-                onClick={() => setAddingPatient(true)}
-              >
+              <button type="button" className="btn-stage w-full" onClick={() => setAddingPatient(true)}>
                 <UserPlus className="h-5 w-5" aria-hidden="true" />
                 Add a patient
-              </Button>
+              </button>
             )}
 
             <DoctorPatientList patients={patients} />

@@ -32,3 +32,24 @@ export function initStageTheme(): void {
     if (isStoredStage(v)) document.documentElement.setAttribute('data-stage', v);
   } catch { /* storage blocked */ }
 }
+
+/** The doctor side's colour set (index.css [data-stage="clinic"]). */
+export const CLINIC_THEME = 'clinic';
+
+/**
+ * Doctor pages: switch <html> to the clinic colours. Not remembered on the
+ * device (the doctor's own patient view keeps its stage), and returns an
+ * undo that puts back whatever was there before.
+ */
+export function applyClinicTheme(): () => void {
+  if (typeof document === 'undefined') return () => {};
+  const root = document.documentElement;
+  const before = root.getAttribute('data-stage');
+  root.setAttribute('data-stage', CLINIC_THEME);
+  return () => {
+    // Only undo our own change: a page that set a stage since keeps it.
+    if (root.getAttribute('data-stage') !== CLINIC_THEME) return;
+    if (before && before !== CLINIC_THEME) root.setAttribute('data-stage', before);
+    else root.removeAttribute('data-stage');
+  };
+}

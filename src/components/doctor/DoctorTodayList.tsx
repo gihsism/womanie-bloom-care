@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { CalendarClock, CalendarX, ChevronRight, ClipboardCheck, FileText, X } from 'lucide-react';
@@ -85,30 +84,31 @@ const DoctorTodayList = ({ appointments, patients, onOpenAppointments }: Props) 
 
   return (
     <section aria-labelledby="doctor-today-heading" className="space-y-2">
-      <h2 id="doctor-today-heading" className="text-lg font-semibold">Today</h2>
+      <h2 id="doctor-today-heading" className="section-title">Today</h2>
       {items.length === 0 ? (
-        <Card className="p-4 text-sm text-muted-foreground">Nothing needs you right now.</Card>
+        <p className="row-group px-4 py-4 text-[15px] text-muted-foreground">Nothing needs you right now.</p>
       ) : (
-        <Card className="divide-y">
+        <div className="row-group">
           {visible.map(item => {
             const Icon = ICONS[item.kind];
             return (
               <div
                 key={item.key}
-                className={`flex items-center gap-1 ${item.startingSoon ? 'bg-primary/5' : ''}`}
+                className={`flex items-center gap-1 ${item.startingSoon ? 'bg-stage-tint' : ''}`}
               >
                 <button
                   type="button"
                   onClick={() => open(item)}
-                  className="flex flex-1 min-w-0 items-center gap-3 p-3 text-left hover:bg-muted/40 transition-colors"
+                  className="flex flex-1 min-w-0 items-center gap-3 min-h-14 px-4 py-3 text-left hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-stage-accent"
                 >
                   <Icon
-                    className={`h-5 w-5 shrink-0 ${item.kind === 'cancelled' ? 'text-destructive' : 'text-primary'}`}
+                    className={`h-5 w-5 shrink-0 ${item.kind === 'cancelled' ? 'text-destructive' : 'text-stage-accent'}`}
+                    strokeWidth={1.9}
                     aria-hidden="true"
                   />
                   <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-medium truncate">{item.title}</span>
-                    <span className="block text-xs text-muted-foreground truncate">{item.detail}</span>
+                    <span className="block text-[17px] font-medium truncate">{item.title}</span>
+                    <span className="block text-[14px] text-muted-foreground truncate">{item.detail}</span>
                   </span>
                   <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                 </button>
@@ -116,7 +116,7 @@ const DoctorTodayList = ({ appointments, patients, onOpenAppointments }: Props) 
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="h-8 w-8 p-0 mr-2 text-muted-foreground"
+                    className="h-10 w-10 p-0 mr-2 text-muted-foreground"
                     onClick={() => dismiss(item.appointmentId!)}
                     aria-label="Hide this cancellation"
                   >
@@ -130,12 +130,12 @@ const DoctorTodayList = ({ appointments, patients, onOpenAppointments }: Props) 
             <button
               type="button"
               onClick={() => setExpanded(e => !e)}
-              className="w-full p-2 text-sm text-primary hover:bg-muted/40"
+              className="w-full min-h-12 px-4 text-[15px] font-semibold text-stage-accent hover:bg-muted/50"
             >
               {expanded ? 'Show less' : `Show ${items.length - MAX_ROWS} more`}
             </button>
           )}
-        </Card>
+        </div>
       )}
     </section>
   );

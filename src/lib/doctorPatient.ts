@@ -1,4 +1,17 @@
 // Pure helpers for the doctor's patient chart (PatientDetails).
+import type { LifeStage } from '@/components/dashboard/DashboardHeader';
+import { LIFE_STAGES, LIFE_STAGE_ALIASES } from './lifeStage';
+
+/**
+ * The patient's stage as a colour-set key (for the stage chip on her chart),
+ * aliases included. Unknown or empty values give null: no chip, rather than
+ * a made-up stage colour.
+ */
+export function patientStageKey(raw: string | null | undefined): LifeStage | null {
+  const v = typeof raw === 'string' ? raw.trim().toLowerCase() : '';
+  if ((LIFE_STAGES as readonly string[]).includes(v)) return v as LifeStage;
+  return LIFE_STAGE_ALIASES[v] ?? null;
+}
 
 export interface LabRow {
   id: string;

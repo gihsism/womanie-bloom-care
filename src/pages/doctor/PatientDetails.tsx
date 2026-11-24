@@ -6,10 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useRequireRole } from '@/hooks/useRequireRole';
+import { useClinicTheme } from '@/hooks/useClinicTheme';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, PenLine } from 'lucide-react';
 import { stageLabel } from '@/lib/doctorDashboard';
-import { normalizePatientTab, pregnancyWeek, type PatientTab } from '@/lib/doctorPatient';
+import { normalizePatientTab, patientStageKey, pregnancyWeek, type PatientTab } from '@/lib/doctorPatient';
 import PatientSummary from '@/components/doctor/patient/PatientSummary';
 import PatientResults from '@/components/doctor/patient/PatientResults';
 import PatientDocuments from '@/components/doctor/patient/PatientDocuments';
@@ -35,6 +36,10 @@ import {
 // All data comes from the consent-gated /api/doctors/patient, which 403s
 // unless this doctor has an APPROVED connection and logs every fetch to
 // chart_access_log for the patient to review.
+//
+// Idea 4: the page wears the doctor's neutral "clinic" colours; only the
+// small chip with HER stage is in that stage's colour (data-stage on the
+// chip re-derives the stage tokens for just that element).
 
 // Stable empty list: a fresh [] on every chart load would re-render forever
 // when the auth user object is recreated (see PatientDetails.test).
@@ -43,6 +48,7 @@ const NO_VISIT_QUESTIONS: PatientVisitQuestions[] = [];
 const PatientDetails = () => {
   const navigate = useNavigate();
   usePageTitle('Patient');
+  useClinicTheme();
   const { patientId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
@@ -127,12 +133,12 @@ const PatientDetails = () => {
   if (loading || !hasLoaded) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="border-b border-border bg-card p-4">
-          <Skeleton className="h-6 w-48" />
+        <div className="page-head px-4 py-4">
+          <Skeleton className="h-8 w-48" />
         </div>
-        <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-4">
+        <div className="px-4 py-5 max-w-3xl mx-auto space-y-4">
           <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-56 rounded-xl" />
+          <Skeleton className="h-56 rounded-[1.25rem]" />
         </div>
       </div>
     );
@@ -141,20 +147,23 @@ const PatientDetails = () => {
   if (!hasAccess) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 px-4 text-center">
-        <p className="text-muted-foreground">
+        <p className="text-[16px] text-muted-foreground max-w-sm">
           You don't have access to this chart. The patient has to approve your request first.
         </p>
-        <Button onClick={() => navigate('/doctor/dashboard')}>
-          <ArrowLeft className="h-4 w-4 mr-2" aria-hidden="true" />
+        <button type="button" className="btn-stage" onClick={() => navigate('/doctor/dashboard')}>
+          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           Back to patients
-        </Button>
+        </button>
       </div>
     );
   }
 
   const preg = pregnancyWeek(patient?.pregnancy_due_date ?? null, Date.now());
+  const stageKey = patientStageKey(patient?.life_stage);
+  const stageText = stageLabel(patient?.life_stage);
+  // The stage shows as a chip when it maps to a colour set; otherwise as text.
   const facts = [
-    stageLabel(patient?.life_stage) ?? 'Life stage not set',
+    stageKey ? null : stageText ?? 'Life stage not set',
     preg
       ? `Week ${preg.week} (${preg.daysToDue > 0 ? `${preg.daysToDue} days to due date` : preg.daysToDue === 0 ? 'due today' : `${-preg.daysToDue} days past due`})`
       : null,
@@ -163,36 +172,52 @@ const PatientDetails = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
+      <div className="page-head sticky top-0 z-10">
+        <div className="max-w-3xl mx-auto px-4 py-4 flex items-start gap-2">
           <Button
             variant="ghost"
             size="sm"
-            className="shrink-0 px-2"
+            className="shrink-0 h-10 w-10 p-0 -ml-2"
             onClick={() => navigate('/doctor/dashboard')}
             aria-label="Back to patients"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="min-w-0 flex-1">
-            <h1 className="text-lg font-bold truncate">{patient?.full_name || 'Patient'}</h1>
-            <p className="text-sm text-muted-foreground truncate">{facts.join(' · ')}</p>
+            <h1 className="page-title truncate">{patient?.full_name || 'Patient'}</h1>
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+              {stageKey && (
+                <span
+                  data-stage={stageKey}
+                  data-testid="patient-stage-chip"
+                  className="inline-flex items-center rounded-full bg-stage-head px-2.5 py-0.5 text-[13px] font-semibold text-stage-ink"
+                >
+                  {stageText}
+                </span>
+              )}
+              {facts.length > 0 && <p className="page-sub">{facts.join(' · ')}</p>}
+            </div>
           </div>
-          <Button onClick={() => writeNote()} size="sm" className="shrink-0 gap-1.5">
-            <PenLine className="h-4 w-4" aria-hidden="true" />
-            Write a note
-          </Button>
         </div>
       </div>
 
-      <div className="p-4 md:p-6 max-w-3xl mx-auto">
-        <Tabs value={activeTab} onValueChange={v => setActiveTab(v as PatientTab)} className="space-y-4">
-          <TabsList className="w-full grid grid-cols-5 h-auto">
-            <TabsTrigger value="summary" className="text-xs sm:text-sm px-1">Summary</TabsTrigger>
-            <TabsTrigger value="results" className="text-xs sm:text-sm px-1">Results</TabsTrigger>
-            <TabsTrigger value="documents" className="text-xs sm:text-sm px-1">Documents</TabsTrigger>
-            <TabsTrigger value="notes" className="text-xs sm:text-sm px-1">Notes</TabsTrigger>
-            <TabsTrigger value="visits" className="text-xs sm:text-sm px-1">Visits</TabsTrigger>
+      <div className="px-4 py-5 max-w-3xl mx-auto space-y-5">
+        {/* The one primary action, from any tab. While the new-note form
+            is open on Notes, its Save button is the primary instead. */}
+        {!(noteFormOpen && activeTab === 'notes') && (
+          <button type="button" className="btn-stage w-full" onClick={() => writeNote()}>
+            <PenLine className="h-5 w-5" aria-hidden="true" />
+            Write a note
+          </button>
+        )}
+
+        <Tabs value={activeTab} onValueChange={v => setActiveTab(v as PatientTab)} className="space-y-5">
+          <TabsList className="w-full flex justify-between sm:justify-start sm:gap-6 h-11 overflow-x-auto">
+            <TabsTrigger value="summary" className="text-[15px]">Summary</TabsTrigger>
+            <TabsTrigger value="results" className="text-[15px]">Results</TabsTrigger>
+            <TabsTrigger value="documents" className="text-[15px]">Documents</TabsTrigger>
+            <TabsTrigger value="notes" className="text-[15px]">Notes</TabsTrigger>
+            <TabsTrigger value="visits" className="text-[15px]">Visits</TabsTrigger>
           </TabsList>
 
           <TabsContent value="summary">

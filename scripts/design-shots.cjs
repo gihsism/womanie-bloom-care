@@ -5,6 +5,7 @@
 //
 //   npx vite --port 8093 &
 //   node scripts/design-shots.cjs [baseUrl] [stage] [only] [outDir]
+//   node scripts/design-shots.cjs [baseUrl] doctor [only] [outDir]   (doctor side)
 //
 // Needs Playwright (PLAYWRIGHT_DIR, default ~/.cache/womanie-ux/node_modules).
 const os = require('os');
@@ -14,7 +15,8 @@ const { chromium } = require(path.join(process.env.PLAYWRIGHT_DIR || path.join(o
 const BASE = process.argv[2] || 'http://localhost:8093';
 const STAGE = process.argv[3] || 'pregnancy';
 const ONLY = process.argv[4] || '';
-const OUT = process.argv[5] || path.join(os.homedir(), '.cache/womanie-ux/build4/round2');
+const DOCTOR_SIDE = STAGE === 'doctor';
+const OUT = process.argv[5] || path.join(os.homedir(), '.cache/womanie-ux/build4', DOCTOR_SIDE ? 'doctor' : 'round2');
 const UID = 'u-demo';
 const day = (n, h = 9, m = 0) => { const d = new Date(); d.setHours(h, m, 0, 0); d.setDate(d.getDate() + n); return d; };
 const ymd = (d) => d.toISOString().slice(0, 10);
@@ -113,18 +115,102 @@ const PAGES = [
   ['me', '/dashboard/settings'],
 ];
 
+// ---- Doctor side: Dr. Laura Meier, three patients, a day of visits ----
+const DOC_ID = 'doc1';
+const soon = new Date(Date.now() + 90 * 60_000); // a visit later today
+const DOCTOR_FIX = {
+  user_roles: [{ role: 'doctor' }],
+  doctor_profiles: [{ id: 'dp1', user_id: DOC_ID, full_name: 'Dr. Laura Meier', specialty: 'Gynaecology & obstetrics', is_verified: true, verification_status: 'approved', bio: 'Gynaecologist in Zürich. Pregnancy care, cycle problems, menopause.', consultation_price: 120, accepts_bookings: true }],
+  appointments: [
+    { id: 'v1', doctor_id: DOC_ID, patient_id: 'p1', scheduled_at: soon.toISOString(), status: 'scheduled', consultation_type: 'in_person', duration: 30, notes: null },
+    { id: 'v2', doctor_id: DOC_ID, patient_id: 'p2', scheduled_at: day(2, 9, 0).toISOString(), status: 'scheduled', consultation_type: 'video', duration: 20, notes: null },
+    { id: 'v3', doctor_id: DOC_ID, patient_id: 'p3', scheduled_at: day(-1, 11, 0).toISOString(), status: 'scheduled', consultation_type: 'in_person', duration: 30, notes: null },
+    { id: 'v4', doctor_id: DOC_ID, patient_id: 'p1', scheduled_at: day(-28, 9, 0).toISOString(), status: 'completed', consultation_type: 'in_person', duration: 30, notes: null },
+    { id: 'v5', doctor_id: DOC_ID, patient_id: 'p2', scheduled_at: day(-12, 16, 0).toISOString(), status: 'no_show', consultation_type: 'video', duration: 20, notes: null },
+  ],
+};
+const CONNECTIONS = [
+  { id: 'c1', patient_id: 'p1', status: 'approved', created_at: day(-120).toISOString(), connection_type: 'code', patient_full_name: 'Anna Keller', patient_life_stage: 'pregnancy', last_upload_at: day(-1).toISOString(), recent_doc_count: 2 },
+  { id: 'c2', patient_id: 'p2', status: 'approved', created_at: day(-90).toISOString(), connection_type: 'code', patient_full_name: 'Sofia Brunner', patient_life_stage: 'menopause', last_upload_at: day(-20).toISOString(), recent_doc_count: 0 },
+  { id: 'c3', patient_id: 'p3', status: 'approved', created_at: day(-60).toISOString(), connection_type: 'code', patient_full_name: 'Lea Frei', patient_life_stage: 'conception', last_upload_at: null, recent_doc_count: 0 },
+  { id: 'c4', patient_id: 'p4', status: 'pending', created_at: day(-1).toISOString(), connection_type: 'code', patient_full_name: 'Mia Huber', patient_life_stage: null },
+];
+const CHART = {
+  profile: { id: 'p1', full_name: 'Anna Keller', life_stage: 'pregnancy', pregnancy_due_date: ymd(day(70)), ivf_phase: null },
+  healthSignals: [
+    { id: 'h1', signal_date: ymd(day(-1)), symptoms: ['back pain', 'tiredness'], mood: ['calm'], discharge: null, notes: 'Worse in the evening.' },
+    { id: 'h2', signal_date: ymd(day(-3)), symptoms: ['heartburn'], mood: ['tired'], discharge: null, notes: null },
+  ],
+  documents: FIX.health_documents,
+  medicalData: FIX.current_extracted_data.map((r) => ({ ...r, status: r.status === 'abnormal' ? (r.title === 'Ferritin' ? 'low' : 'high') : r.status })),
+  notes: [
+    { id: 'n1', title: 'Iron supplement', content: 'Ferrous sulfate 200 mg once a day with orange juice. Recheck ferritin in 6 weeks.', note_type: 'recommendation', created_at: day(-10).toISOString(), is_visible_to_patient: true },
+    { id: 'n2', title: 'TSH borderline', content: 'Repeat TSH and free T4 at the next visit before deciding on treatment.', note_type: 'follow_up', created_at: day(-10).toISOString(), is_visible_to_patient: false },
+  ],
+  appointments: [{ id: 'v1', scheduled_at: soon.toISOString(), status: 'scheduled', consultation_type: 'in_person', notes: null, duration: 30 },
+    { id: 'v4', scheduled_at: day(-28, 9, 0).toISOString(), status: 'completed', consultation_type: 'in_person', notes: null, duration: 30 }],
+  periodRecords: [],
+  visitQuestions: [{ appointment_id: 'v1', scheduled_at: soon.toISOString(), updated_at: day(-1).toISOString(), questions: [
+    { id: 'q1', text: 'Should I keep taking the iron tablets after the birth?', asked: false },
+    { id: 'q2', text: 'Is the back pain at night normal?', asked: false },
+  ] }],
+};
+
+async function doctorRoute(r) {
+  const req = r.request();
+  const u = new URL(req.url());
+  const p = u.pathname;
+  const json = (o, status = 200) => r.fulfill({ status, contentType: 'application/json', body: JSON.stringify(o) });
+  if (p === '/api/auth/me') return json({ user: { id: DOC_ID, email: 'laura.meier@example.com', name: 'Laura Meier', hasPassword: true, created_at: day(-400).toISOString() } });
+  if (p === '/api/db') {
+    let b = {};
+    try { b = JSON.parse(req.postData() || '{}'); } catch { /* not JSON */ }
+    if (b.operation && b.operation !== 'select') return json({ rows: [] });
+    let rows = DOCTOR_FIX[b.table];
+    if (!rows) { unknown.add(`db:${b.table}`); rows = []; }
+    return json({ rows });
+  }
+  if (p === '/api/doctors/connections') return json({ connections: CONNECTIONS });
+  // Same consent rule as the server: only an approved connection opens a chart.
+  if (p === '/api/doctors/patient') return u.searchParams.get('id') === 'p1' ? json(CHART) : json({ error: 'no access' }, 403);
+  unknown.add(`${req.method()} ${p}`);
+  return json({});
+}
+
+const tab = (name) => async (p) => { await p.getByRole('tab', { name }).click(); };
+const DOCTOR_PAGES = [
+  ['dashboard', '/doctor/dashboard'],
+  ['appointments', '/doctor/dashboard', tab('Appointments')],
+  ['cancel-dialog', '/doctor/dashboard', async (p) => {
+    await tab('Appointments')(p);
+    await p.getByRole('button', { name: 'Cancel visit' }).first().click();
+    await p.getByLabel(/Reason/).fill('I am unwell today. Please book another time.');
+  }],
+  ['patient-summary', '/doctor/patient/p1'],
+  ['patient-results', '/doctor/patient/p1', tab('Results')],
+  ['patient-notes', '/doctor/patient/p1', tab('Notes')],
+  ['patient-documents', '/doctor/patient/p1', tab('Documents')],
+  ['patient-visits', '/doctor/patient/p1', tab('Visits')],
+  ['settings', '/doctor/dashboard', tab('Profile & settings')],
+  ['login', '/auth/doctor-login'],
+  ['for-doctors', '/for-doctors'],
+];
+
 (async () => {
   const b = await chromium.launch();
   const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
-  await ctx.addInitScript((s) => { try { localStorage.setItem('womanie_stage_theme', s); } catch { /* blocked */ } }, STAGE);
-  await ctx.route('**/api/**', route);
+  // Doctor side: the device remembers a patient stage (pregnancy) to prove
+  // the doctor pages switch to the clinic colours anyway.
+  await ctx.addInitScript((s) => { try { localStorage.setItem('womanie_stage_theme', s); } catch { /* blocked */ } }, DOCTOR_SIDE ? 'pregnancy' : STAGE);
+  await ctx.route('**/api/**', DOCTOR_SIDE ? doctorRoute : route);
   const p = await ctx.newPage();
   p.on('pageerror', (e) => console.log('PAGEERROR', String(e).slice(0, 300)));
-  for (const [name, url, act] of PAGES) {
+  for (const [name, url, act] of DOCTOR_SIDE ? DOCTOR_PAGES : PAGES) {
     if (ONLY && !name.startsWith(ONLY)) continue;
     await p.goto(BASE + url, { waitUntil: 'networkidle' });
     await p.waitForTimeout(1200);
     if (act) { await act(p); await p.waitForTimeout(600); }
+    await p.mouse.move(1, 1); // no hover left over from the last click
     await p.evaluate(() => document.fonts.ready);
     await p.screenshot({ path: path.join(OUT, `${STAGE}-${name}.png`) });
     // Whole page with the tab bar at the bottom (a tall viewport, not fullPage,

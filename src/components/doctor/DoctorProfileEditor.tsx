@@ -201,14 +201,14 @@ const DoctorProfileEditor = ({ doctorId }: DoctorProfileEditorProps) => {
 
   if (!loaded) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-4 w-4" />
+      <Card className="panel rounded-[1.25rem] border-line bg-card shadow-none">
+        <CardHeader className="p-4 pb-3">
+          <CardTitle className="section-title flex items-center gap-2">
+            <User className="h-5 w-5 text-stage-accent" strokeWidth={1.9} aria-hidden="true" />
             Public profile
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 pt-0">
           <p className="text-sm text-muted-foreground">Loading…</p>
         </CardContent>
       </Card>
@@ -216,17 +216,17 @@ const DoctorProfileEditor = ({ doctorId }: DoctorProfileEditorProps) => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <User className="h-4 w-4" />
+    <Card className="panel rounded-[1.25rem] border-line bg-card shadow-none">
+      <CardHeader className="p-4 pb-3">
+        <CardTitle className="section-title flex items-center gap-2">
+          <User className="h-5 w-5 text-stage-accent" strokeWidth={1.9} aria-hidden="true" />
           Public profile
         </CardTitle>
         <CardDescription>
           What patients see when they find you in the doctor directory.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="p-4 pt-0 space-y-4">
         {/* Avatar uploader. Saves on file pick (not on Save profile), so
             the new image is live whether or not the doctor scrolls
             down to hit Save below. */}
@@ -382,7 +382,7 @@ const DoctorProfileEditor = ({ doctorId }: DoctorProfileEditorProps) => {
           <p className="text-[11px] text-muted-foreground">{bio.length} / 1000 characters.</p>
         </div>
         <div className="pt-2">
-          <Button onClick={handleSave} disabled={saving}>
+          <Button variant="outline" onClick={handleSave} disabled={saving} className="w-full h-12 border-stage-accent text-[15px] font-semibold text-stage-accent hover:text-stage-accent">
             {saving ? (
               <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving…</>
             ) : (

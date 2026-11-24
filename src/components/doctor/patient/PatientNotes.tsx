@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -25,26 +23,28 @@ const typeLabel = (t: string | null) => NOTE_TYPES.find(([v]) => v === t)?.[1] ?
 const NoteFields = ({ value, onChange, idPrefix }: { value: NoteDraft; onChange: (d: NoteDraft) => void; idPrefix: string }) => (
   <div className="space-y-3">
     <div className="space-y-1.5">
-      <label htmlFor={`${idPrefix}-title`} className="text-sm font-medium">Title</label>
+      <label htmlFor={`${idPrefix}-title`} className="text-[15px] font-semibold">Title</label>
       <Input
         id={`${idPrefix}-title`}
         value={value.title}
         onChange={e => onChange({ ...value, title: e.target.value })}
         placeholder="e.g. Visit on 12 Nov"
+        className="h-12 rounded-full px-4 text-[16px]"
       />
     </div>
     <div className="space-y-1.5">
-      <label htmlFor={`${idPrefix}-content`} className="text-sm font-medium">Note</label>
+      <label htmlFor={`${idPrefix}-content`} className="text-[15px] font-semibold">Note</label>
       <Textarea
         id={`${idPrefix}-content`}
         value={value.content}
         onChange={e => onChange({ ...value, content: e.target.value })}
         rows={5}
+        className="rounded-2xl text-[16px]"
       />
     </div>
     <div className="grid sm:grid-cols-2 gap-3">
       <div className="space-y-1.5">
-        <span className="text-sm font-medium">Type</span>
+        <span className="text-[15px] font-semibold">Type</span>
         <Select value={value.note_type} onValueChange={v => onChange({ ...value, note_type: v })}>
           <SelectTrigger aria-label="Note type"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -53,7 +53,7 @@ const NoteFields = ({ value, onChange, idPrefix }: { value: NoteDraft; onChange:
         </Select>
       </div>
       <div className="space-y-1.5">
-        <span className="text-sm font-medium">Who can see it</span>
+        <span className="text-[15px] font-semibold">Who can see it</span>
         <Select
           value={value.is_visible_to_patient ? 'visible' : 'hidden'}
           onValueChange={v => onChange({ ...value, is_visible_to_patient: v === 'visible' })}
@@ -152,26 +152,23 @@ const PatientNotes = ({ doctorId, patientId, notes, formOpen, draft, onDraftChan
   return (
     <div className="space-y-4">
       {formOpen && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">New note</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <NoteFields value={draft} onChange={onDraftChange} idPrefix="new-note" />
-            <div className="flex gap-2">
-              <Button
-                onClick={add}
-                className="bg-secondary hover:bg-secondary/90"
-                disabled={!draft.title || !draft.content || saving}
-              >
-                {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving…</> : 'Save note'}
-              </Button>
-              <Button variant="outline" onClick={() => onFormOpenChange(false)} disabled={saving}>
-                Cancel
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <section className="row-group p-4 space-y-4" aria-labelledby="new-note-heading">
+          <h2 id="new-note-heading" className="section-title">New note</h2>
+          <NoteFields value={draft} onChange={onDraftChange} idPrefix="new-note" />
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={add}
+              className="btn-stage flex-1"
+              disabled={!draft.title || !draft.content || saving}
+            >
+              {saving ? <><Loader2 className="h-4 w-4 animate-spin" />Saving…</> : 'Save note'}
+            </button>
+            <Button variant="outline" className="h-[3.25rem] px-5 border-line" onClick={() => onFormOpenChange(false)} disabled={saving}>
+              Cancel
+            </Button>
+          </div>
+        </section>
       )}
 
       {notes.length > 5 && (
@@ -180,50 +177,55 @@ const PatientNotes = ({ doctorId, patientId, notes, formOpen, draft, onDraftChan
           aria-label="Search notes"
           value={query}
           onChange={e => setQuery(e.target.value)}
+          className="h-12 rounded-full px-4 text-[16px]"
         />
       )}
 
       {notes.length === 0 ? (
         !formOpen && (
-          <Card className="p-6 text-center text-sm text-muted-foreground">
+          <p className="row-group px-4 py-6 text-center text-[15px] text-muted-foreground">
             No notes yet. Use “Write a note” at the top.
-          </Card>
+          </p>
         )
       ) : visible.length === 0 ? (
-        <p className="text-muted-foreground text-center py-8 text-sm">No notes match “{query}”.</p>
+        <p className="row-group px-4 py-6 text-center text-[15px] text-muted-foreground">No notes match “{query}”.</p>
       ) : (
-        <div className="space-y-3">
+        <div className="row-group">
           {visible.map(note => editingId === note.id ? (
-            <Card key={note.id} className="p-4 bg-muted/30 space-y-3">
+            <div key={note.id} className="p-4 bg-stage-tint space-y-3">
               <NoteFields value={editing} onChange={setEditing} idPrefix={`edit-${note.id}`} />
               <div className="flex gap-2">
-                <Button size="sm" onClick={update} disabled={!editing.title || !editing.content || updating}>
+                <Button size="sm" className="h-10 px-4 bg-stage-accent text-white hover:bg-stage-accent/90" onClick={update} disabled={!editing.title || !editing.content || updating}>
                   {updating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving…</> : 'Save changes'}
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setEditingId(null)} disabled={updating}>
+                <Button variant="outline" size="sm" className="h-10 px-4 border-line bg-background" onClick={() => setEditingId(null)} disabled={updating}>
                   Cancel
                 </Button>
               </div>
-            </Card>
+            </div>
           ) : (
-            <Card key={note.id} className="p-4">
-              <div className="flex items-start justify-between mb-2 gap-3">
+            <article key={note.id} className="px-4 py-3">
+              <div className="flex items-start justify-between mb-1.5 gap-3">
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-medium">{note.title}</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <h3 className="text-[17px] font-semibold">{note.title}</h3>
+                  <p className="text-[14px] text-muted-foreground">
                     {new Date(note.created_at).toLocaleDateString()} · {typeLabel(note.note_type)}
                   </p>
                 </div>
-                <Badge variant={note.is_visible_to_patient ? 'default' : 'outline'} className="shrink-0">
+                <span
+                  className={`shrink-0 rounded-full px-2.5 py-0.5 text-[12px] font-semibold ${
+                    note.is_visible_to_patient ? 'bg-stage-tint text-stage-accent' : 'bg-muted text-muted-foreground'
+                  }`}
+                >
                   {note.is_visible_to_patient ? 'Patient can see' : 'Only you'}
-                </Badge>
+                </span>
               </div>
-              <p className="text-sm whitespace-pre-wrap">{note.content}</p>
-              <div className="flex gap-1 mt-2 -ml-2">
+              <p className="text-[15px] whitespace-pre-wrap">{note.content}</p>
+              <div className="flex gap-1 mt-1.5 -ml-2">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 px-2 text-xs"
+                  className="h-9 px-2 text-[14px] font-semibold text-stage-accent hover:text-stage-accent"
                   disabled={deletingId === note.id}
                   onClick={() => {
                     setEditingId(note.id);
@@ -240,14 +242,14 @@ const PatientNotes = ({ doctorId, patientId, notes, formOpen, draft, onDraftChan
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive"
+                  className="h-9 px-2 text-[14px] font-semibold text-muted-foreground hover:text-destructive"
                   onClick={() => remove(note.id)}
                   disabled={deletingId === note.id}
                 >
                   {deletingId === note.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Delete'}
                 </Button>
               </div>
-            </Card>
+            </article>
           ))}
         </div>
       )}

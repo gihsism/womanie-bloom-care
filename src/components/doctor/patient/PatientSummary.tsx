@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, Calendar, ChevronDown, ChevronRight, FileText, MessageSquare } from 'lucide-react';
 import DoctorPatientTrackingSummary from '@/components/dashboard/DoctorPatientTrackingSummary';
 import { flaggedResults, visitSummary, type PatientTab } from '@/lib/doctorPatient';
@@ -52,14 +50,18 @@ const SummaryRow = ({
   <button
     type="button"
     onClick={onClick}
-    className="flex w-full items-start gap-3 p-3 text-left hover:bg-muted/40 transition-colors"
+    className="flex w-full items-start gap-3 min-h-14 px-4 py-3 text-left hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-stage-accent"
   >
-    <Icon className={`h-5 w-5 mt-0.5 shrink-0 ${tone === 'alert' ? 'text-amber-600' : 'text-primary'}`} aria-hidden="true" />
+    <Icon
+      className={`h-5 w-5 mt-0.5 shrink-0 ${tone === 'alert' ? 'text-destructive' : 'text-stage-accent'}`}
+      strokeWidth={1.9}
+      aria-hidden="true"
+    />
     <span className="min-w-0 flex-1">
-      <span className="block text-sm font-medium">{title}</span>
-      {detail && <span className="block text-xs text-muted-foreground mt-0.5">{detail}</span>}
+      <span className={`block text-[17px] font-medium ${tone === 'alert' ? 'text-destructive' : ''}`}>{title}</span>
+      {detail && <span className="block text-[14px] text-muted-foreground mt-0.5">{detail}</span>}
     </span>
-    <ChevronRight className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+    <ChevronRight className="h-4 w-4 mt-1 shrink-0 text-muted-foreground" aria-hidden="true" />
   </button>
 );
 
@@ -83,19 +85,19 @@ const PatientSummary = ({ medicalData, documents, notes, appointments, signals, 
 
   return (
     <div className="space-y-6">
-      <Card className="divide-y">
+      <div className="row-group">
         <SummaryRow
           icon={flagged.length > 0 ? AlertTriangle : FileText}
           tone={flagged.length > 0 ? 'alert' : undefined}
           title={resultsTitle}
           detail={flagged.length > 0 && (
-            <span className="flex flex-wrap gap-1 mt-1">
+            <span className="flex flex-wrap gap-1.5 mt-1.5">
               {flagged.slice(0, 3).map(r => (
-                <Badge key={r.id} variant="outline" className="text-[11px] font-normal">
-                  {r.title}{fmtValue(r)} · {(r.status || '').toLowerCase()}
-                </Badge>
+                <span key={r.id} className="rounded-full bg-destructive/10 px-2.5 py-0.5 text-[13px] text-destructive">
+                  <span className="font-semibold">{r.title}{fmtValue(r)}</span> · {(r.status || '').toLowerCase()}
+                </span>
               ))}
-              {flagged.length > 3 && <span className="text-xs">+{flagged.length - 3} more</span>}
+              {flagged.length > 3 && <span className="self-center text-[13px]">+{flagged.length - 3} more</span>}
             </span>
           )}
           onClick={() => onOpenTab('results')}
@@ -113,7 +115,7 @@ const PatientSummary = ({ medicalData, documents, notes, appointments, signals, 
           detail={notes[0] ? `Latest: ${notes[0].title}` : 'None yet'}
           onClick={() => onOpenTab('notes')}
         />
-      </Card>
+      </div>
 
       {/* Her questions for the next visit with you. Self-hides when none. */}
       <PatientVisitQuestions rows={visitQuestions} />
@@ -122,10 +124,10 @@ const PatientSummary = ({ medicalData, documents, notes, appointments, signals, 
       <DoctorPatientTrackingSummary periodRecords={periodRecords} signals={signals} lifeStage={lifeStage} />
 
       {signals.length > 0 && (
-        <Card>
+        <div className="row-group">
           <button
             type="button"
-            className="flex w-full items-center justify-between p-3 text-left text-sm font-medium"
+            className="flex w-full items-center justify-between min-h-14 px-4 py-3 text-left text-[17px] font-medium hover:bg-muted/50"
             aria-expanded={logsOpen}
             onClick={() => setLogsOpen(o => !o)}
           >
@@ -133,7 +135,7 @@ const PatientSummary = ({ medicalData, documents, notes, appointments, signals, 
             <ChevronDown className={`h-4 w-4 transition-transform ${logsOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
           </button>
           {logsOpen && (
-            <div className="divide-y border-t">
+            <div className="divide-y divide-line border-t border-line">
               {signals.map(s => {
                 const parts = [
                   s.symptoms?.length ? `Symptoms: ${s.symptoms.join(', ')}` : null,
@@ -141,18 +143,18 @@ const PatientSummary = ({ medicalData, documents, notes, appointments, signals, 
                   s.discharge ? `Discharge: ${s.discharge}` : null,
                 ].filter(Boolean);
                 return (
-                  <div key={s.id} className="p-3 text-sm">
-                    <p className="font-medium">
+                  <div key={s.id} className="px-4 py-3 text-[15px]">
+                    <p className="font-semibold">
                       {new Date(s.signal_date).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}
                     </p>
-                    {parts.length > 0 && <p className="text-xs text-muted-foreground">{parts.join(' · ')}</p>}
-                    {s.notes && <p className="text-xs mt-1">{s.notes}</p>}
+                    {parts.length > 0 && <p className="text-[14px] text-muted-foreground">{parts.join(' · ')}</p>}
+                    {s.notes && <p className="text-[14px] mt-1">{s.notes}</p>}
                   </div>
                 );
               })}
             </div>
           )}
-        </Card>
+        </div>
       )}
     </div>
   );

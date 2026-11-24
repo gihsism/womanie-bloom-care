@@ -118,11 +118,11 @@ export default function DoctorPatientTrackingSummary({
   if (!hasAnything) return null;
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-semibold">Patient tracking summary</CardTitle>
+    <Card className="panel rounded-[1.25rem] border-line bg-card shadow-none">
+      <CardHeader className="px-4 pt-4 pb-3">
+        <CardTitle className="font-sans text-[17px] font-semibold tracking-normal">What she tracked</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 text-sm">
+      <CardContent className="px-4 pb-4 space-y-3 text-[15px]">
         {cycleStats && (
           <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
             <span className="flex items-center gap-1.5 text-muted-foreground">

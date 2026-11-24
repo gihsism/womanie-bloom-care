@@ -134,6 +134,17 @@
     --stage-accent: 216 21.3% 36.9%;        /* #4A5A72 */
     --stage-tint: 220 23.1% 94.9%;          /* #EFF1F5 */
   }
+  /* The doctor side is not a life stage: one calm, neutral "clinic" set
+     (petrol grey) on the doctor dashboard, patient chart, doctor log-in /
+     sign-up and For Doctors. Set by useClinicTheme (src/lib/stageTheme.ts),
+     never remembered on the device; same AA checks as the stages. */
+  [data-stage="clinic"] {             /* petrol grey */
+    --stage-head: 195 20% 90%;              /* #E0E8EB */
+    --stage-head-ink: 196 40% 16%;          /* #183039 */
+    --stage-head-muted: 195 25% 28%;        /* #365059 */
+    --stage-accent: 194 38% 31%;            /* #315F6D */
+    --stage-tint: 195 22% 95.5%;            /* #F1F5F6 */
+  }
 
   /* The shared tokens follow the stage. Declared on every element that
      sets a stage so a nested data-stage (the dev preview) re-derives them. */
@@ -341,6 +352,13 @@
   }
   .row-group > * + * {
     border-top: 1px solid hsl(var(--line));
+  }
+  /* The same box for one block of content (a form, a card with a title):
+     no hairlines between its children. */
+  .panel {
+    border-radius: 1.25rem;
+    border: 1px solid hsl(var(--line));
+    background-color: hsl(var(--card));
   }
   .btn-stage {
     display: inline-flex;

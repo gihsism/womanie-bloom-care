@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  patientStageKey,
   flaggedResults,
   isFlagged,
   normalizePatientTab,
@@ -76,5 +77,18 @@ describe('safeDocumentUrl', () => {
     expect(safeDocumentUrl('javascript:alert(1)')).toBeNull();
     expect(safeDocumentUrl('http://example.com/a.pdf')).toBeNull();
     expect(safeDocumentUrl(null)).toBeNull();
+  });
+});
+
+describe('patientStageKey', () => {
+  it('maps stored stages and aliases to a colour set', () => {
+    expect(patientStageKey('pregnancy')).toBe('pregnancy');
+    expect(patientStageKey(' Pregnant ')).toBe('pregnancy');
+    expect(patientStageKey('perimenopause')).toBe('menopause');
+  });
+  it('gives no chip for empty or unknown stages', () => {
+    expect(patientStageKey(null)).toBeNull();
+    expect(patientStageKey('')).toBeNull();
+    expect(patientStageKey('something else')).toBeNull();
   });
 });

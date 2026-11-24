@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { ChevronDown, ExternalLink, FileText } from 'lucide-react';
@@ -18,7 +17,7 @@ const PatientDocuments = ({ documents }: { documents: HealthDocument[] }) => {
   const [openSummary, setOpenSummary] = useState<string | null>(null);
 
   if (documents.length === 0) {
-    return <Card className="p-6 text-center text-sm text-muted-foreground">The patient has not uploaded any documents yet.</Card>;
+    return <p className="row-group px-4 py-6 text-center text-[15px] text-muted-foreground">The patient has not uploaded any documents yet.</p>;
   }
 
   const q = query.trim().toLowerCase();
@@ -47,24 +46,30 @@ const PatientDocuments = ({ documents }: { documents: HealthDocument[] }) => {
           aria-label="Search documents"
           value={query}
           onChange={e => setQuery(e.target.value)}
+          className="h-12 rounded-full px-4 text-[16px]"
         />
       )}
       {visible.length === 0 ? (
-        <p className="text-muted-foreground text-center py-8 text-sm">No documents match “{query}”.</p>
+        <p className="row-group px-4 py-6 text-center text-[15px] text-muted-foreground">No documents match “{query}”.</p>
       ) : (
-        <Card className="divide-y">
+        <div className="row-group">
           {visible.map(doc => (
-            <div key={doc.id} className="p-3">
+            <div key={doc.id} className="px-4 py-3">
               <div className="flex items-center gap-3">
-                <FileText className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+                <FileText className="h-5 w-5 shrink-0 text-stage-accent" strokeWidth={1.9} aria-hidden="true" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium truncate">{doc.ai_suggested_name || doc.file_name}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[17px] font-medium truncate">{doc.ai_suggested_name || doc.file_name}</p>
+                  <p className="text-[14px] text-muted-foreground first-letter:uppercase">
                     {(doc.document_type || 'Document').replace(/_/g, ' ')} · {doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString() : 'date unknown'}
                   </p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => openDoc(doc)} className="shrink-0">
-                  <ExternalLink className="h-4 w-4 mr-1.5" aria-hidden="true" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => openDoc(doc)}
+                  className="shrink-0 -mr-2 px-2 text-[14px] font-semibold text-stage-accent hover:text-stage-accent"
+                >
+                  <ExternalLink className="h-4 w-4" aria-hidden="true" />
                   Open
                 </Button>
               </div>
@@ -72,7 +77,7 @@ const PatientDocuments = ({ documents }: { documents: HealthDocument[] }) => {
                 <>
                   <button
                     type="button"
-                    className="mt-2 ml-8 text-xs text-primary inline-flex items-center gap-1"
+                    className="mt-1 ml-8 min-h-8 text-[14px] font-semibold text-stage-accent inline-flex items-center gap-1"
                     aria-expanded={openSummary === doc.id}
                     onClick={() => setOpenSummary(s => (s === doc.id ? null : doc.id))}
                   >
@@ -80,7 +85,7 @@ const PatientDocuments = ({ documents }: { documents: HealthDocument[] }) => {
                     <ChevronDown className={`h-3 w-3 transition-transform ${openSummary === doc.id ? 'rotate-180' : ''}`} aria-hidden="true" />
                   </button>
                   {openSummary === doc.id && (
-                    <div className="mt-2 ml-8 prose prose-sm max-w-none dark:prose-invert text-sm">
+                    <div className="mt-1 ml-8 prose prose-sm max-w-none dark:prose-invert text-[15px]">
                       <ReactMarkdown>{doc.ai_summary}</ReactMarkdown>
                     </div>
                   )}
@@ -88,7 +93,7 @@ const PatientDocuments = ({ documents }: { documents: HealthDocument[] }) => {
               )}
             </div>
           ))}
-        </Card>
+        </div>
       )}
     </div>
   );

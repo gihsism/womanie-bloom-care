@@ -1,4 +1,3 @@
-import { Card } from '@/components/ui/card';
 import { Check, ClipboardList } from 'lucide-react';
 import { parseQuestions } from '@/lib/visitQuestions';
 import type { PatientVisitQuestions as Row } from './types';
@@ -15,15 +14,15 @@ const PatientVisitQuestions = ({ rows }: { rows: Row[] }) => {
   if (!next) return null;
   const when = new Date(next.scheduled_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
   return (
-    <Card className="p-4" aria-labelledby="patient-visit-questions">
+    <section className="panel p-4" aria-labelledby="patient-visit-questions">
       <div className="flex items-center gap-2 mb-1">
-        <ClipboardList className="h-4 w-4 text-primary" aria-hidden="true" />
-        <h3 id="patient-visit-questions" className="text-sm font-semibold">Questions she's bringing</h3>
+        <ClipboardList className="h-5 w-5 text-stage-accent" strokeWidth={1.9} aria-hidden="true" />
+        <h3 id="patient-visit-questions" className="text-[17px] font-semibold">Questions she's bringing</h3>
       </div>
-      <p className="text-xs text-muted-foreground mb-3">For the visit on {when} · written by the patient</p>
-      <ul className="space-y-1.5">
+      <p className="text-[14px] text-muted-foreground mb-3">For the visit on {when} · written by the patient</p>
+      <ul className="space-y-2">
         {next.list.map(q => (
-          <li key={q.id} className="flex items-start gap-2 text-sm">
+          <li key={q.id} className="flex items-start gap-2 text-[15px]">
             {q.asked
               ? <Check className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" aria-label="Marked as asked" />
               : <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground/60" aria-hidden="true" />}
@@ -31,7 +30,7 @@ const PatientVisitQuestions = ({ rows }: { rows: Row[] }) => {
           </li>
         ))}
       </ul>
-    </Card>
+    </section>
   );
 };
 

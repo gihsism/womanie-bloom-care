@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import { LIFE_STAGES } from './lifeStage';
-import { applyStageTheme } from './stageTheme';
+import { applyClinicTheme, applyStageTheme, CLINIC_THEME } from './stageTheme';
 
 // Idea 4 "Colour by stage": every stored life stage has its own colour set
 // in src/index.css (the one place), and every text pair on it passes WCAG
@@ -69,7 +69,8 @@ describe('idea 4 neutrals', () => {
   });
 });
 
-describe.each(LIFE_STAGES)('stage colours: %s', (stage) => {
+// The doctor side's neutral "clinic" set gets exactly the same checks.
+describe.each([...LIFE_STAGES, CLINIC_THEME])('stage colours: %s', (stage) => {
   const b = block(`[data-stage="${stage}"] {`);
   const head = token(b, 'stage-head');
   const headInk = token(b, 'stage-head-ink');
@@ -107,9 +108,13 @@ describe('one place', () => {
     expect(css).toMatch(/:root, \[data-stage\] \{[^}]*--primary: var\(--stage-accent\)/);
   });
 
-  it('the stage colours are distinct', () => {
-    const heads = LIFE_STAGES.map(s => block(`[data-stage="${s}"] {`).match(/--stage-head:\s*([^;]+);/)![1]);
-    expect(new Set(heads).size).toBe(LIFE_STAGES.length);
+  it('the stage colours are distinct, and the clinic set is none of them', () => {
+    const all = [...LIFE_STAGES, CLINIC_THEME];
+    const heads = all.map(s => block(`[data-stage="${s}"] {`).match(/--stage-head:\s*([^;]+);/)![1]);
+    const accents = all.map(s => block(`[data-stage="${s}"] {`).match(/--stage-accent:\s*([^;]+);/)![1]);
+    expect(new Set(heads).size).toBe(all.length);
+    expect(new Set(accents).size).toBe(all.length);
+    expect(css.split(`[data-stage="${CLINIC_THEME}"] {`).length - 1).toBe(1);
   });
 });
 
@@ -118,6 +123,34 @@ describe('applyStageTheme', () => {
     applyStageTheme('pregnancy');
     expect(document.documentElement.getAttribute('data-stage')).toBe('pregnancy');
     applyStageTheme('nonsense');
+    expect(document.documentElement.hasAttribute('data-stage')).toBe(false);
+  });
+});
+
+describe('applyClinicTheme', () => {
+  it('switches to clinic without remembering it, and the undo restores the stage', () => {
+    localStorage.clear();
+    applyStageTheme('pregnancy');
+    localStorage.clear();
+    const undo = applyClinicTheme();
+    expect(document.documentElement.getAttribute('data-stage')).toBe('clinic');
+    expect(localStorage.getItem('womanie_stage_theme')).toBeNull();
+    undo();
+    expect(document.documentElement.getAttribute('data-stage')).toBe('pregnancy');
+  });
+
+  it('undo clears the attribute when there was no stage, and leaves a newer stage alone', () => {
+    document.documentElement.removeAttribute('data-stage');
+    applyClinicTheme()();
+    expect(document.documentElement.hasAttribute('data-stage')).toBe(false);
+    const undo = applyClinicTheme();
+    applyStageTheme('ivf');
+    undo();
+    expect(document.documentElement.getAttribute('data-stage')).toBe('ivf');
+  });
+
+  it('a stored stage is never "clinic"', () => {
+    applyStageTheme(CLINIC_THEME);
     expect(document.documentElement.hasAttribute('data-stage')).toBe(false);
   });
 });

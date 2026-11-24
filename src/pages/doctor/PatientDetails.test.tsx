@@ -67,4 +67,33 @@ describe('PatientDetails', () => {
     const title = (await screen.findByLabelText('Title')) as HTMLInputElement;
     expect(title.value).toMatch(/^Visit on /);
   });
+
+  it('shows the patient stage as a chip in her stage colour, on a clinic-coloured page', async () => {
+    document.documentElement.setAttribute('data-stage', 'pregnancy');
+    global.fetch = vi.fn().mockResolvedValue({ status: 200, ok: true, json: async () => chart }) as unknown as typeof fetch;
+    const { unmount } = renderAt('/doctor/patient/p1');
+    const chip = await screen.findByTestId('patient-stage-chip');
+    expect(chip.textContent).toBe('Trying to conceive');
+    expect(chip.getAttribute('data-stage')).toBe('conception');
+    expect(document.documentElement.getAttribute('data-stage')).toBe('clinic');
+    unmount();
+    expect(document.documentElement.getAttribute('data-stage')).toBe('pregnancy');
+  });
+
+  it('an unknown stage is plain text, not a coloured chip', async () => {
+    const odd = { ...chart, profile: { ...chart.profile, life_stage: 'research study' } };
+    global.fetch = vi.fn().mockResolvedValue({ status: 200, ok: true, json: async () => odd }) as unknown as typeof fetch;
+    renderAt('/doctor/patient/p1');
+    expect(await screen.findByText('Research study')).toBeTruthy();
+    expect(screen.queryByTestId('patient-stage-chip')).toBeNull();
+  });
+
+  it('with the new-note form open on Notes, "Write a note" steps aside for Save note', async () => {
+    global.fetch = vi.fn().mockResolvedValue({ status: 200, ok: true, json: async () => chart }) as unknown as typeof fetch;
+    renderAt('/doctor/patient/p1');
+    fireEvent.click(await screen.findByRole('button', { name: /Write a note/ }));
+    await waitFor(() => expect(screen.getByText('New note')).toBeTruthy());
+    expect(screen.queryByRole('button', { name: /Write a note/ })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Save note' })).toBeTruthy();
+  });
 });

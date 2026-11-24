@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { ACCESS_CODE_MAX, isAccessCodeComplete, normalizeAccessCode } from '@/lib/doctorDashboard';
 
@@ -51,12 +50,12 @@ const AddPatientForm = ({ onAdded, onClose }: Props) => {
   };
 
   return (
-    <Card className="p-4">
+    <div className="panel p-4">
       <form onSubmit={submit} className="space-y-3">
-        <label htmlFor="patient-code" className="text-sm font-medium block">
+        <label htmlFor="patient-code" className="text-[17px] font-semibold block">
           Patient's access code
         </label>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-[14px] text-muted-foreground">
           The patient creates it in Womanie under “Share with doctor”.
         </p>
         <div className="flex gap-2">
@@ -69,17 +68,17 @@ const AddPatientForm = ({ onAdded, onClose }: Props) => {
             value={code}
             onChange={e => setCode(normalizeAccessCode(e.target.value))}
             maxLength={ACCESS_CODE_MAX + 4}
-            className="flex-1 min-w-0 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary bg-background tracking-widest"
+            className="flex-1 min-w-0 h-[3.25rem] px-4 text-[17px] font-semibold border border-input rounded-full focus:outline-none focus:ring-2 focus:ring-stage-accent bg-background tracking-widest"
           />
-          <Button type="submit" disabled={!isAccessCodeComplete(code) || busy} className="bg-secondary hover:bg-secondary/90">
+          <button type="submit" disabled={!isAccessCodeComplete(code) || busy} className="btn-stage shrink-0">
             {busy ? 'Sending…' : 'Send request'}
-          </Button>
+          </button>
         </div>
-        <Button type="button" variant="ghost" size="sm" onClick={onClose}>
+        <Button type="button" variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={onClose}>
           Cancel
         </Button>
       </form>
-    </Card>
+    </div>
   );
 };
 

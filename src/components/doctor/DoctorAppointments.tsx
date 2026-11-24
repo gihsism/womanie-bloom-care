@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -129,27 +127,24 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Coming up</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {upcomingAppointments.length > 0 ? (
-            <div className="space-y-4">
-              {upcomingAppointments.map((apt) => (
-                <div key={apt.id} className="flex flex-wrap items-center justify-between gap-2 border-b pb-4 last:border-0">
+    <div className="space-y-7">
+      <section aria-labelledby="doctor-upcoming-heading" className="space-y-3">
+        <h2 id="doctor-upcoming-heading" className="section-title">Coming up</h2>
+        {upcomingAppointments.length > 0 ? (
+          <div className="row-group">
+            {upcomingAppointments.map((apt) => (
+                <div key={apt.id} className="px-4 pt-3 pb-1.5">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="bg-primary/10 p-2 rounded-full" aria-hidden="true">
+                    <div className="grid place-items-center h-10 w-10 shrink-0 rounded-full bg-stage-tint" aria-hidden="true">
                       {apt.consultation_type === 'video' ? (
-                        <Video className="h-4 w-4 text-primary" />
+                        <Video className="h-5 w-5 text-stage-accent" strokeWidth={1.9} />
                       ) : (
-                        <Calendar className="h-4 w-4 text-primary" />
+                        <Calendar className="h-5 w-5 text-stage-accent" strokeWidth={1.9} />
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-medium">{patientNameFor(apt.patient_id)}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-[17px] font-semibold truncate">{patientNameFor(apt.patient_id)}</p>
+                      <p className="text-[14px] text-muted-foreground">
                         {new Date(apt.scheduled_at).toLocaleDateString([], {
                           weekday: 'short',
                           month: 'short',
@@ -161,10 +156,11 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between gap-2 mt-1 pl-[3.25rem] -mx-2">
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant="ghost"
+                      className="px-2 text-[14px] font-semibold text-stage-accent hover:text-stage-accent"
                       onClick={() => navigate(`/doctor/patient/${apt.patient_id}`)}
                     >
                       Open chart
@@ -172,7 +168,7 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="text-muted-foreground hover:text-destructive"
+                      className="px-2 text-[14px] font-semibold text-muted-foreground hover:text-destructive"
                       onClick={() => openCancel(apt)}
                       disabled={busyId === apt.id}
                     >
@@ -181,36 +177,34 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
                   </div>
                 </div>
               ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-center py-8">No visits booked. Patients book you from the doctor directory.</p>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        ) : (
+          <p className="row-group px-4 py-4 text-[15px] text-muted-foreground">No visits booked. Patients book you from the doctor directory.</p>
+        )}
+      </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Past and cancelled</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <section aria-labelledby="doctor-past-heading" className="space-y-3">
+        <h2 id="doctor-past-heading" className="section-title">Past and cancelled</h2>
           {pastAppointments.length > 0 ? (
-            <div className="space-y-4">
+            <div className="row-group">
               {(showAllPast ? pastAppointments : pastAppointments.slice(0, 10)).map((apt) => {
                 const toClose = needsCloseout(apt, now);
                 const wasResolved = apt.status === 'completed' || apt.status === 'no_show';
                 return (
                   <div
                     key={apt.id}
-                    className={`flex flex-wrap items-center justify-between gap-2 border-b pb-4 last:border-0 ${
-                      apt.status === 'cancelled' ? 'opacity-60' : ''
-                    }`}
+                    className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-3"
                   >
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium">{patientNameFor(apt.patient_id)}</p>
-                      <p className="text-sm text-muted-foreground">
+                    {/* Name and date keep a readable width; the close-out
+                        buttons wrap onto their own line on a phone. */}
+                    <div className="min-w-[11rem] flex-1">
+                      <p className={`text-[17px] font-medium ${apt.status === 'cancelled' ? 'text-muted-foreground' : ''}`}>
+                        {patientNameFor(apt.patient_id)}
+                      </p>
+                      <p className="text-[14px] text-muted-foreground">
                         {new Date(apt.scheduled_at).toLocaleDateString()}
                         {apt.duration ? ` · ${apt.duration} min` : ''}
-                        {toClose && ' · did it happen?'}
+                        {toClose && <span className="font-semibold text-foreground"> · did it happen?</span>}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
@@ -219,21 +213,21 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
                           <Button
                             size="sm"
                             variant="outline"
-                            className="h-7 text-xs"
+                            className="h-9 text-[13px] font-semibold border-stage-accent bg-background text-stage-accent hover:text-stage-accent"
                             disabled={busyId === apt.id}
                             onClick={() => setStatus(apt, 'completed')}
                           >
-                            <CheckCircle className="h-3 w-3 mr-1" aria-hidden="true" />
+                            <CheckCircle className="h-4 w-4" aria-hidden="true" />
                             It happened
                           </Button>
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="h-7 text-xs text-muted-foreground"
+                            className="h-9 text-[13px] font-semibold text-muted-foreground"
                             disabled={busyId === apt.id}
                             onClick={() => setStatus(apt, 'no_show')}
                           >
-                            <XCircle className="h-3 w-3 mr-1" aria-hidden="true" />
+                            <XCircle className="h-4 w-4" aria-hidden="true" />
                             Patient didn't come
                           </Button>
                         </>
@@ -242,7 +236,7 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-7 text-xs text-muted-foreground"
+                          className="h-9 px-2 text-[13px] font-semibold text-muted-foreground"
                           disabled={busyId === apt.id}
                           onClick={() => setStatus(apt, 'scheduled')}
                           title="Reopen this appointment"
@@ -251,40 +245,42 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
                         </Button>
                       )}
                       {!toClose && (
-                        <Badge
-                          variant="outline"
-                          className={
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-[13px] font-semibold ${
                             apt.status === 'completed'
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200'
+                              ? 'bg-stage-tint text-stage-accent'
                               : apt.status === 'no_show'
-                              ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200'
+                              ? 'bg-destructive/10 text-destructive'
                               : 'bg-muted text-muted-foreground'
-                          }
+                          }`}
                         >
                           {apt.status === 'completed' ? 'Completed'
                             : apt.status === 'no_show' ? "Didn't come"
                             : apt.status === 'cancelled' ? 'Cancelled'
                             : apt.status || 'Booked'}
-                        </Badge>
+                        </span>
                       )}
                     </div>
                   </div>
                 );
               })}
               {pastAppointments.length > 10 && !showAllPast && (
-                <Button variant="ghost" size="sm" className="w-full" onClick={() => setShowAllPast(true)}>
+                <button
+                  type="button"
+                  className="w-full min-h-12 px-4 text-[15px] font-semibold text-stage-accent hover:bg-muted/50"
+                  onClick={() => setShowAllPast(true)}
+                >
                   Show all {pastAppointments.length}
-                </Button>
+                </button>
               )}
             </div>
           ) : (
-            <p className="text-muted-foreground text-center py-8">No past visits yet.</p>
+            <p className="row-group px-4 py-4 text-[15px] text-muted-foreground">No past visits yet.</p>
           )}
-        </CardContent>
-      </Card>
+      </section>
 
       <Dialog open={cancelTarget !== null} onOpenChange={o => { if (!o && busyId === null) setCancelTarget(null); }}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md rounded-[1.25rem]">
           <form
             onSubmit={e => {
               e.preventDefault();
@@ -292,7 +288,7 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
             }}
           >
             <DialogHeader>
-              <DialogTitle>Cancel this visit?</DialogTitle>
+              <DialogTitle className="section-title">Cancel this visit?</DialogTitle>
               <DialogDescription>
                 {cancelTarget && (
                   <>
@@ -303,7 +299,7 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-2 py-4">
-              <Label htmlFor="cancel-reason">Reason (the patient will see this)</Label>
+              <Label htmlFor="cancel-reason" className="text-[15px] font-semibold">Reason (the patient will see this)</Label>
               <Textarea
                 id="cancel-reason"
                 value={cancelReason}
@@ -312,13 +308,14 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
                 maxLength={500}
                 rows={3}
                 autoFocus
+                className="rounded-2xl text-[16px]"
               />
             </div>
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setCancelTarget(null)} disabled={busyId !== null}>
+              <Button type="button" variant="outline" className="h-11 border-line" onClick={() => setCancelTarget(null)} disabled={busyId !== null}>
                 Keep visit
               </Button>
-              <Button type="submit" variant="destructive" disabled={!cancelReason.trim() || busyId !== null}>
+              <Button type="submit" variant="destructive" className="h-11" disabled={!cancelReason.trim() || busyId !== null}>
                 {busyId !== null ? 'Cancelling…' : 'Cancel visit'}
               </Button>
             </DialogFooter>

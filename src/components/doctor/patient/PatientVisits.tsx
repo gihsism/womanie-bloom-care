@@ -1,4 +1,3 @@
-import { Card } from '@/components/ui/card';
 import { Calendar, Video } from 'lucide-react';
 import type { PatientAppointment } from './types';
 
@@ -14,32 +13,37 @@ const STATUS: Record<string, string> = {
 
 const PatientVisits = ({ appointments }: { appointments: PatientAppointment[] }) => {
   if (appointments.length === 0) {
-    return <Card className="p-6 text-center text-sm text-muted-foreground">No visits with this patient yet.</Card>;
+    return <p className="row-group px-4 py-6 text-center text-[15px] text-muted-foreground">No visits with this patient yet.</p>;
   }
   const now = Date.now();
   return (
-    <Card className="divide-y">
+    <div className="row-group">
       {appointments.map(apt => {
         const when = new Date(apt.scheduled_at);
         const s = (apt.status || 'scheduled').toLowerCase();
         const label = s === 'scheduled' && when.getTime() < now ? 'Not closed yet' : STATUS[s] ?? apt.status;
         const Icon = apt.consultation_type === 'video' ? Video : Calendar;
         return (
-          <div key={apt.id} className={`flex items-start gap-3 p-3 ${s === 'cancelled' ? 'opacity-60' : ''}`}>
-            <Icon className="h-4 w-4 mt-0.5 shrink-0 text-primary" aria-hidden="true" />
+          <div key={apt.id} className="flex items-start gap-3 min-h-14 px-4 py-3">
+            <Icon
+              className={`h-5 w-5 mt-0.5 shrink-0 ${s === 'cancelled' ? 'text-muted-foreground' : 'text-stage-accent'}`}
+              strokeWidth={1.9}
+              aria-hidden="true"
+            />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">
+              <p className={`text-[17px] font-medium ${s === 'cancelled' ? 'text-muted-foreground' : ''}`}>
                 {when.toLocaleDateString()} at {when.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>
-              <p className="text-xs text-muted-foreground">
-                {apt.consultation_type === 'video' ? 'Video' : 'In person'} · {label}
+              <p className="text-[14px] text-muted-foreground">
+                {apt.consultation_type === 'video' ? 'Video' : 'In person'} ·{' '}
+                <span className={label === 'Not closed yet' ? 'font-semibold text-foreground' : ''}>{label}</span>
               </p>
-              {apt.notes && <p className="text-xs text-muted-foreground mt-1">{apt.notes}</p>}
+              {apt.notes && <p className="text-[14px] text-muted-foreground mt-1">{apt.notes}</p>}
             </div>
           </div>
         );
       })}
-    </Card>
+    </div>
   );
 };
 
