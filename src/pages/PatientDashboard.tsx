@@ -2,28 +2,26 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import ModeHeroStat from '@/components/dashboard/ModeHeroStat';
-import PregnancyBodyMap from '@/components/dashboard/PregnancyBodyMap';
-import BabyBodyMap from '@/components/dashboard/BabyBodyMap';
-import CycleDialHero from '@/components/dashboard/CycleDialHero';
-import PillRingHero from '@/components/dashboard/PillRingHero';
-import MenopauseBodyMap from '@/components/dashboard/MenopauseBodyMap';
-import IVFTimelineHero from '@/components/dashboard/IVFTimelineHero';
-import { TodayList, PrimaryButton, MoreForStage, useGo, type SheetKind } from '@/components/dashboard/HomeBlocks';
+import { useGo, type SheetKind } from '@/components/dashboard/HomeBlocks';
 import LogSheet from '@/components/dashboard/LogSheet';
+import HomeView from '@/components/home/HomeView';
 import { useStageProfile } from '@/hooks/useStageProfile';
 import { useTodaySignals } from '@/hooks/useTodaySignals';
-import { todayItems, primaryActionFor, moreFor } from '@/lib/todayItems';
+import { useQuickLog } from '@/hooks/useQuickLog';
+import { useHeaderFacts } from '@/hooks/useHeaderFacts';
+import { todayItems, moreFor } from '@/lib/todayItems';
+import { tilesFor } from '@/lib/quickLog/tiles';
+import { headerFor } from '@/lib/stageHeader';
 import { stageLabel } from '@/lib/stageLabels';
 import { usePageTitle } from '@/hooks/usePageTitle';
 
-// Home: the same short template for every life stage —
-//   1. greeting, with the stage as a quiet "· change" link (to Me)
-//   2. one hero: one fact, one sentence, one "Details" link
-//   3. Today: at most 3 ranked one-line rows (lib/todayItems.ts)
-//   4. one filled button (opens the Log sheet or the stage's main tool)
-//   5. "More for <stage>": at most 4 links to detail pages
+// Home, idea 4 "Colour by stage" — the same template for every life stage:
+//   1. the stage's coloured header: chip, one big status line, one
+//      sentence, two small facts (lib/stageHeader.ts)
+//   2. one-tap tiles, 3 per row: tapping LOGS (lib/quickLog), with an
+//      Undo snackbar; hold or "…" opens the full form
+//   3. Today: what needs her (lib/todayItems.ts) + what she logged, with times
+//   4. "More for <stage>": at most 4 links to detail pages
 // Everything else lives one tap away: the stage's trackers and guides on
 // /dashboard/stage, results and charts on Records, visits on Visits,
 // settings and medicines on Me.
@@ -49,51 +47,47 @@ const PatientDashboard = () => {
   const signals = useTodaySignals(periodData, profile?.full_name);
   const [sheet, setSheet] = useState<SheetKind | null>(null);
   const go = useGo(setSheet);
+  const quick = useQuickLog(mode, user?.id ?? null, { cycleLength: periodData?.cycleLength });
+  const facts = useHeaderFacts({
+    mode: mode ?? 'menstrual-cycle', userId: user?.id ?? '', stageName: mode ? stageLabel(mode) : '',
+    periodData, dueDate: pregnancyDueDate, ivfStartDate, ivfPhase, signals, quick: quick.state, meds: quick.meds,
+  });
+  const { reloadPeriod } = p;
 
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!loading && !user) navigate('/auth/login');
   }, [user, loading, navigate]);
 
+  // A period started from a tile moves the cycle day: re-read it.
+  useEffect(() => { void reloadPeriod?.(); }, [quick.state.periodStartedToday, reloadPeriod]);
+
   if (loading || !mode) {
     return (
       <div className="min-h-screen bg-background px-4 py-6 space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-4 w-32" />
-        <Skeleton className="h-64 w-full rounded-xl" />
-        <Skeleton className="h-24 w-full rounded-xl" />
+        <Skeleton className="h-56 w-full rounded-3xl" />
+        <Skeleton className="h-28 w-full rounded-3xl" />
+        <Skeleton className="h-28 w-full rounded-3xl" />
       </div>
     );
   }
   if (!user) return null;
 
-  const name = profile?.full_name;
-  const firstName = name ? name.split(' ')[0] : 'there';
-
-  const hero =
-    mode === 'pregnancy' && pregnancyDueDate ? <PregnancyBodyMap dueDate={pregnancyDueDate} name={name} />
-    : mode === 'postpartum' ? <BabyBodyMap />
-    : (mode === 'menstrual-cycle' || mode === 'conception') && periodData
-      ? <CycleDialHero lastPeriodStart={periodData.lastPeriodStart} cycleLength={periodData.cycleLength} name={name} mode={mode} />
-    : mode === 'contraception' ? <PillRingHero name={name} />
-    : mode === 'menopause' || mode === 'post-menopause' ? <MenopauseBodyMap name={name} mode={mode} />
-    : mode === 'ivf' ? <IVFTimelineHero startDate={ivfStartDate} phase={ivfPhase} name={name} />
-    : <ModeHeroStat selectedMode={mode} periodData={periodData} pregnancyDueDate={pregnancyDueDate} ivfStartDate={ivfStartDate} ivfPhase={ivfPhase} />;
+  const tiles = tilesFor(mode, { weeksPregnant, dailyPill: hasDailyPill(user.id), meds: quick.meds, hasBaby: quick.hasBaby });
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="w-full max-w-2xl mx-auto px-4 pt-6 pb-8">
-        <header className="mb-5">
-          <DashboardHeader userName={firstName} selectedMode={mode} />
-        </header>
-
-        {hero}
-
-        <TodayList items={todayItems(mode, signals)} go={go} />
-
-        <PrimaryButton action={primaryActionFor(mode, { weeksPregnant, dailyPill: hasDailyPill(user.id) })} go={go} />
-
-        <MoreForStage stage={stageLabel(mode)} rows={moreFor(mode, { weeksPregnant })} go={go} />
+      <div className="w-full max-w-2xl mx-auto px-4 pt-0 sm:pt-6 pb-8">
+        <HomeView
+          header={headerFor(mode, facts)}
+          tiles={tiles}
+          state={quick.state}
+          items={todayItems(mode, signals)}
+          stage={stageLabel(mode)}
+          more={moreFor(mode, { weeksPregnant })}
+          go={go}
+          log={quick.log}
+        />
       </div>
 
       <LogSheet open={sheet} onOpenChange={(o) => { if (!o) setSheet(null); }} mode={mode} weeksPregnant={weeksPregnant} />

@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, it, expect } from 'vitest';
 
-// Home is a short page: greeting, hero, Today, one button, "More for
-// <stage>". The general lab cards live on Records; the stage lab cards,
+// Home is a short page (idea 4): stage header, one-tap tiles, Today,
+// "More for <stage>". The general lab cards live on Records; the stage lab cards,
 // chart cards and visit cards moved off Home too (Records / Visits).
 const CARDS = ['WeeklySummary', 'RecentFindings', 'OverdueTests', 'HealthTrends', 'HealthSummaryWidget'];
 const MOVED_OFF_HOME = [
@@ -63,15 +63,18 @@ describe('Home stays short', () => {
     expect(home).not.toContain('withHero');
   });
 
-  it('renders the five-block template: header, hero, Today, one button, More', () => {
-    for (const block of ['<DashboardHeader', '{hero}', '<TodayList', '<PrimaryButton', '<MoreForStage']) {
-      expect(home).toContain(block);
+  it('renders the idea-4 template: stage header, tiles, Today, More (no filled primary button)', () => {
+    expect(home).toContain('<HomeView');
+    const view = read('../components/home/HomeView.tsx');
+    for (const block of ['<StageHeader', '<TileGrid', '<TodayLog', '<MoreForStage']) {
+      expect(view).toContain(block);
     }
-    expect(home.match(/<PrimaryButton\b/g)).toHaveLength(1);
+    expect(view).not.toContain('PrimaryButton');
+    expect(home).not.toContain('PrimaryButton');
   });
 
-  it('header has no Upload / Devices / Community pills or mode dropdown', () => {
-    const header = read('../components/dashboard/DashboardHeader.tsx');
+  it('header has no Upload / Devices / Community pills or mode dropdown; its chip changes the stage', () => {
+    const header = read('../components/home/StageHeader.tsx');
     for (const t of ['Upload', 'Devices', 'Community', 'Health Chat', 'Med Records', 'DropdownMenu']) {
       expect(header).not.toContain(t);
     }

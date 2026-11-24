@@ -178,6 +178,7 @@ export function useStageProfile() {
     ivfStartDate,
     ivfPhase,
     weeksPregnant: weeksPregnantFrom(pregnancyDueDate),
+    reloadPeriod: loadPeriodData,
     setPregnancyDue,
     resetPregnancy,
     switchToPostpartum,

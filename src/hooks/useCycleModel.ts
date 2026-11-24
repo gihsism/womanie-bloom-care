@@ -11,7 +11,7 @@ import { useCyclePrediction, type DaySignal, type PeriodRecord } from './useCycl
 // so it shows the same personal prediction as the calendar instead of a
 // plain "last start + stored length".
 
-export function useCycleModel() {
+export function useCycleModel(enabled = true) {
   const { user } = useAuth();
   const healthContext = useUserHealthContext();
   const [periodRecords, setPeriodRecords] = useState<PeriodRecord[]>([]);
@@ -19,7 +19,7 @@ export function useCycleModel() {
   const [loaded, setLoaded] = useState(false);
 
   const load = useCallback(async () => {
-    if (!user) return;
+    if (!user || !enabled) return;
     const [{ data: periods }, { data: signals }] = await Promise.all([
       db.from('period_tracking').select('id, period_start_date, period_end_date, cycle_length')
         .eq('user_id', user.id).order('period_start_date', { ascending: false }),
@@ -41,7 +41,7 @@ export function useCycleModel() {
     }
     setDaySignals(map);
     setLoaded(true);
-  }, [user]);
+  }, [user, enabled]);
 
   useEffect(() => { load(); return onHealthDataChange(load); }, [load]);
 

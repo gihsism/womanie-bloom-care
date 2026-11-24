@@ -29,7 +29,6 @@ const FILES = [
   'DailyLogging.tsx',
   'LHSurgeCard.tsx',
   'PMSForecastCard.tsx',
-  'ModeHeroStat.tsx',
   'MenopauseDashboard.tsx',
   'PostpartumDashboard.tsx',
   'PostpartumPelvicFloor.tsx',
@@ -54,5 +53,28 @@ describe('Home non-health cards use neutral tokens', () => {
     expect(src.match(HEAT) ?? []).toEqual([]);
     expect(src).toMatch(/bg-primary\/15/);
     expect(src).toMatch(/bg-primary\/65/);
+  });
+});
+
+// Idea 4: Home's own components take every colour from the tokens (the
+// stage set in index.css, switched by <html data-stage>), never a hex or a
+// named Tailwind palette colour of their own.
+const HOME = ['StageHeader.tsx', 'TileGrid.tsx', 'TodayLog.tsx', 'HomeView.tsx', 'UndoBar.tsx', 'ChoiceSheet.tsx', 'TileIcon.tsx'];
+const PALETTE = /\b(?:text|bg|border|from|via|to|fill|stroke|ring)-(?:red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|slate|gray|zinc|neutral|stone)-\d{2,3}\b/g;
+
+describe('Home (idea 4) uses only tokens', () => {
+  it.each(HOME)('%s has no hex colour and no palette colour class', (f) => {
+    const src = readFileSync(resolve(__dirname, '../home', f), 'utf8');
+    expect(src.match(/#[0-9a-fA-F]{3,8}\b/g) ?? []).toEqual([]);
+    expect(src.match(PALETTE) ?? []).toEqual([]);
+  });
+
+  it('the tiles and header use the stage tokens', () => {
+    const tiles = readFileSync(resolve(__dirname, '../home/TileGrid.tsx'), 'utf8');
+    const header = readFileSync(resolve(__dirname, '../home/StageHeader.tsx'), 'utf8');
+    expect(tiles).toMatch(/bg-stage-tint/);
+    expect(tiles).toMatch(/text-stage-accent/);
+    expect(header).toMatch(/bg-stage-head/);
+    expect(header).toMatch(/text-stage-ink/);
   });
 });

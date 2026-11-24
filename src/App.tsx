@@ -69,6 +69,9 @@ const MedicalHistory = lazy(() => import("./pages/MedicalHistory"));
 const AIDoctorChat = lazy(() => import("./pages/AIDoctorChat"));
 const Devices = lazy(() => import("./pages/dashboard/Devices"));
 const RecoverDocuments = lazy(() => import("./pages/RecoverDocuments"));
+// Dev-only design preview of Home (fixture data, no login). The ternary is
+// folded to null in production builds, so the module is never shipped.
+const DevHomePreview = import.meta.env.DEV ? lazy(() => import("./dev/HomePreview")) : null;
 
 function PageLoader() {
   return (
@@ -141,6 +144,7 @@ const App = () => (
                   <Route path="/dashboard/birth" element={<BirthRecord />} />
                   <Route path="/dashboard/baby" element={<BabyPage />} />
                   <Route path="/dashboard/stage" element={<StagePage />} />
+                  {DevHomePreview && <Route path="/dashboard/dev-home" element={<DevHomePreview />} />}
                   <Route path="/library" element={<ResearchLibrary />} />
                   {/* Dashboard menu entries that historically pointed to
                       dedicated pages we never shipped. Redirect them to
