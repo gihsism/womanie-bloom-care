@@ -3,6 +3,8 @@ import {
   getStatusInfo,
   getFriendlyName,
   generateFallbackNote,
+  flagRow,
+  rangeDirection,
   friendlyStatus,
   type MedicalDataItem,
 } from "./medical-utils";
@@ -113,5 +115,18 @@ describe("generateFallbackNote", () => {
     const note = generateFallbackNote(item({ title: "Ferritin", value: "8", status: "critical" }));
     expect(note).toContain("outside the healthy range");
     expect(note).toContain("next doctor visit");
+  });
+});
+
+describe('flagRow (Records, talk to your doctor about)', () => {
+  it('reads like the mock: value, direction, what it is and the usual range', () => {
+    expect(flagRow({ title: 'Ferritin', value: '12', unit: 'µg/L', reference_range: '15-150', status: 'abnormal' }))
+      .toEqual({ line: 'Ferritin · 12 µg/L · low', sub: 'Your iron stores · usual 15–150' });
+    expect(rangeDirection('4.8', '0.4 - 4.0')).toBe('high');
+    expect(rangeDirection('2', '0.4-4.0')).toBeNull();
+  });
+  it('without a numeric range falls back to the status', () => {
+    expect(flagRow({ title: 'Urine culture', value: 'positive', unit: null, reference_range: null, status: 'critical' }))
+      .toEqual({ line: 'Urine culture · positive · urgent', sub: '' });
   });
 });

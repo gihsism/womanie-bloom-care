@@ -186,3 +186,27 @@ export function generateFallbackNote(item: MedicalDataItem): string | null {
   if (explanation) return explanation.normal;
   return null;
 }
+
+/** "low" / "high" when the value sits outside its reference range, else null. */
+export function rangeDirection(value: string | null, refRange: string | null): 'low' | 'high' | null {
+  const n = value ? parseFloat(value.replace(',', '.')) : NaN;
+  const m = refRange?.match(/([\d.]+)\s*[-–]\s*([\d.]+)/);
+  if (Number.isNaN(n) || !m) return null;
+  const lo = parseFloat(m[1]);
+  const hi = parseFloat(m[2]);
+  if (n < lo) return 'low';
+  if (n > hi) return 'high';
+  return null;
+}
+
+/** One row on Records' "Talk to your doctor about" list (idea 4):
+ *  "Ferritin · 12 µg/L · low" and "Your iron stores · usual 15–150". */
+export function flagRow(item: Pick<MedicalDataItem, 'title' | 'value' | 'unit' | 'reference_range' | 'status'>): { line: string; sub: string } {
+  const word = rangeDirection(item.value, item.reference_range) ?? (item.status === 'critical' ? 'urgent' : 'to discuss');
+  const value = item.value ? `${item.value}${item.unit ? ` ${item.unit}` : ''}` : null;
+  const line = [item.title, value, word].filter(Boolean).join(' · ');
+  const friendly = getFriendlyName(item.title).split(' — ')[1];
+  const what = friendly ? friendly.charAt(0).toUpperCase() + friendly.slice(1) : null;
+  const usual = item.reference_range ? `usual ${item.reference_range.replace(/\s*-\s*/, '–')}` : null;
+  return { line, sub: [what, usual].filter(Boolean).join(' · ') };
+}

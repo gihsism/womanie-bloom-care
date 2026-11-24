@@ -111,13 +111,13 @@ export default function LabFreshnessCard({ mode }: LabFreshnessCardProps) {
   if (!MODE_TARGETS[mode]) return null;
 
   return (
-    <Card className="p-4 mb-4 border-l-4 border-l-blue-500 bg-blue-50/40 dark:bg-blue-900/10">
+    <Card className="rounded-[1.25rem] border-line shadow-none p-4 mb-4">
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-8 h-8 rounded-xl bg-blue-500/15 flex items-center justify-center">
-          <Clock className="h-4 w-4 text-blue-700 dark:text-blue-300" />
+        <div className="w-9 h-9 rounded-full bg-stage-tint flex items-center justify-center">
+          <Clock className="h-[18px] w-[18px] text-stage-accent" strokeWidth={1.9} />
         </div>
         <div>
-          <p className="text-sm font-semibold">Worth rechecking</p>
+          <p className="text-[17px] font-bold">Worth rechecking</p>
           <p className="text-[11px] text-muted-foreground">
             Labs we'd expect to see refreshed for your current mode.
           </p>
@@ -126,8 +126,8 @@ export default function LabFreshnessCard({ mode }: LabFreshnessCardProps) {
 
       <ul className="space-y-2">
         {flagged.map(item => (
-          <li key={item.key} className="flex items-start gap-2 text-xs">
-            <AlertCircle className="h-3.5 w-3.5 text-blue-700 dark:text-blue-300 flex-shrink-0 mt-0.5" />
+          <li key={item.key} className="flex items-start gap-2 text-[14px]">
+            <AlertCircle className="h-4 w-4 text-stage-accent flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <p>
                 <span className="font-medium text-foreground/90">{item.label}:</span>{' '}

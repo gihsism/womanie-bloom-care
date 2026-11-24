@@ -88,12 +88,12 @@ export function LabMissingTests({ title, labels }: { title: string; labels: stri
 export function LabEmptyCard({ title, text }: { title: string; text: string }) {
   const navigate = useNavigate();
   return (
-    <Card className="p-4 border-dashed">
+    <Card className="p-4 rounded-[1.25rem] border-line border-dashed shadow-none">
       <div className="text-center space-y-2">
-        <Upload className="h-5 w-5 text-primary mx-auto" aria-hidden="true" />
+        <Upload className="h-5 w-5 text-stage-accent mx-auto" aria-hidden="true" />
         <p className="font-display text-[17px] leading-tight font-medium">{title}</p>
         <p className="text-xs text-muted-foreground">{text}</p>
-        <Button size="sm" variant="outline" onClick={() => navigate('/dashboard/medical-history')}>
+        <Button size="sm" variant="outline" onClick={() => navigate('/dashboard/medical-history?upload=1')}>
           Upload documents
         </Button>
       </div>

@@ -49,8 +49,6 @@ import {
   Clock,
   Lightbulb,
   ArrowRight,
-  Heart,
-  Eye,
   HelpCircle,
   Trash2,
   Pencil,
@@ -59,6 +57,7 @@ import {
   Link2,
   Search,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
   Printer,
   MessageCircle,
@@ -73,6 +72,7 @@ import {
   priorityOrder,
   getStatusInfo,
   getFriendlyName,
+  flagRow,
   // NB: generateFallbackNote is intentionally NOT imported — this file
   // defines its own local generateFallbackNote below, which shadowed the
   // import and won at runtime. Importing it too was a conflicting no-op.
@@ -550,6 +550,38 @@ function ResultCard({ item, history = [] }: { item: MedicalDataItem; history?: M
   );
 }
 
+// One flagged result as a plain row (idea 4): "Ferritin · 12 µg/L · low"
+// in amber with what it is and the usual range; the full explanation
+// card opens under it on tap.
+function FlagRow({ item }: { item: MedicalDataItem }) {
+  const [open, setOpen] = useState(false);
+  const { line, sub } = flagRow(item);
+  const [name, ...rest] = line.split(' · ');
+  return (
+    <div>
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center gap-3 min-h-16 px-4 py-3 text-left hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-stage-accent"
+      >
+        <span className="grid place-items-center h-10 w-10 rounded-full bg-destructive/10 text-destructive flex-shrink-0" aria-hidden="true">
+          <FlaskConical className="h-5 w-5" strokeWidth={1.9} />
+        </span>
+        <span className="flex-1 min-w-0">
+          <span className="block text-[16px] font-semibold leading-snug">
+            {name}
+            {rest.length > 0 && <span className="text-destructive"> · {rest.join(' · ')}</span>}
+          </span>
+          {sub && <span className="block text-[14px] text-muted-foreground leading-snug mt-0.5">{sub}</span>}
+        </span>
+        <ChevronRight className={`h-4 w-4 text-muted-foreground flex-shrink-0 transition-transform ${open ? 'rotate-90' : ''}`} aria-hidden="true" />
+      </button>
+      {open && <div className="px-3 pb-3"><ResultCard item={item} /></div>}
+    </div>
+  );
+}
+
 const riskColor = (status: string | null) => {
   if (status === 'critical') return 'bg-destructive/10 text-destructive border-destructive/30';
   if (status === 'abnormal') return 'bg-destructive/5 text-destructive/80 border-destructive/20';
@@ -573,7 +605,7 @@ export default function MedicalHistory() {
   const [docFilter, setDocFilter] = useState<DocFilter>('all');
   const [docSearch, setDocSearch] = useState('');
   const { toast } = useToast();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   // Three segments: Results (default) | Documents | My charts.
   // ?tab=documents|charts opens one directly; ?doc=<id> opens Documents.
   type Segment = 'results' | 'documents' | 'charts';
@@ -584,6 +616,14 @@ export default function MedicalHistory() {
   });
   const [pregnancyDueDate, setPregnancyDueDate] = useState<Date | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
+  // ?upload=1 (the lab cards' "Upload documents") opens the upload dialog,
+  // also when Records is already open.
+  const wantsUpload = searchParams.get('upload') === '1';
+  useEffect(() => {
+    if (!wantsUpload) return;
+    setUploadOpen(true);
+    setSearchParams(p => { p.delete('upload'); return p; }, { replace: true });
+  }, [wantsUpload, setSearchParams]);
   const [justUploaded, setJustUploaded] = useState(false);
   const [openTrend, setOpenTrend] = useState<string | null>(null);
 
@@ -1103,6 +1143,18 @@ export default function MedicalHistory() {
 
   const hasData = medicalData.length > 0;
   const hasDocuments = documents.length > 0;
+  const lastResultDate = medicalData.reduce<Date | null>((latest, m) => {
+    if (!m.date_recorded) return latest;
+    const d = new Date(m.date_recorded);
+    return Number.isNaN(d.getTime()) || (latest && latest >= d) ? latest : d;
+  }, null);
+  // The one primary action on Records, under whichever segment is open.
+  const uploadButton = hasDocuments && (
+    <button type="button" className="btn-stage w-full" onClick={() => setUploadOpen(true)}>
+      <Upload className="h-5 w-5" aria-hidden="true" />
+      Upload a document
+    </button>
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -1114,7 +1166,9 @@ export default function MedicalHistory() {
           </Button>
           <div className="flex-1 min-w-0">
             <h1 className="page-title truncate">Records</h1>
-            <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Your results explained in plain language</p>
+            <p className="page-sub truncate">
+              {lastResultDate ? `Last result · ${format(lastResultDate, 'd MMMM')}` : 'Your results explained in plain language'}
+            </p>
           </div>
           <div className="hidden sm:block">
             <ShareWithDoctor />
@@ -1146,8 +1200,8 @@ export default function MedicalHistory() {
         {/* Segments + the one primary action. With no documents yet the
             upload button sits in the empty state instead, so there is
             never a second upload banner. */}
-        <div className="flex items-center gap-2">
-          <div role="tablist" aria-label="Records sections" className="flex flex-1 min-w-0 gap-1 rounded-full bg-muted p-1">
+        <div>
+          <div role="tablist" aria-label="Records sections" className="flex w-full min-w-0 gap-1 rounded-full bg-muted p-1">
             {([
               ['results', 'Results'],
               ['documents', 'Documents'],
@@ -1159,7 +1213,7 @@ export default function MedicalHistory() {
                 role="tab"
                 aria-selected={segment === key}
                 onClick={() => setSegment(key)}
-                className={`flex-1 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                className={`flex-1 whitespace-nowrap rounded-full px-3 h-10 text-[15px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stage-accent ${
                   segment === key ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -1167,13 +1221,6 @@ export default function MedicalHistory() {
               </button>
             ))}
           </div>
-          {hasDocuments && (
-            <Button size="sm" className="gap-1.5 flex-shrink-0" onClick={() => setUploadOpen(true)}>
-              <Upload className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Upload a document</span>
-              <span className="sm:hidden">Upload</span>
-            </Button>
-          )}
         </div>
         {reanalyzing && (
           <Progress value={reanalyzeProgress.total > 0 ? (reanalyzeProgress.done / reanalyzeProgress.total) * 100 : 0} className="h-1.5 bg-muted" />
@@ -1184,28 +1231,29 @@ export default function MedicalHistory() {
 
         {/* Empty state: one sentence, one button (Results + Documents) */}
         {!hasDocuments && segment !== 'charts' && (
-          <Card className="border-dashed">
+          <Card className="rounded-[1.25rem] border-line border-dashed shadow-none">
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                <FileText className="h-8 w-8 text-primary" />
+              <div className="w-16 h-16 rounded-full bg-stage-tint flex items-center justify-center mb-4">
+                <FileText className="h-8 w-8 text-stage-accent" strokeWidth={1.75} />
               </div>
-              <p className="text-sm text-muted-foreground text-center max-w-sm mb-4">
+              <p className="text-[16px] text-muted-foreground text-center max-w-sm mb-5">
                 No documents yet. Upload a lab result, prescription or report and we'll explain it in plain language.
               </p>
-              <Button className="gap-1.5" onClick={() => setUploadOpen(true)}>
-                <Upload className="h-4 w-4" />
+              <button type="button" className="btn-stage" onClick={() => setUploadOpen(true)}>
+                <Upload className="h-5 w-5" aria-hidden="true" />
                 Upload a document
-              </Button>
+              </button>
             </CardContent>
           </Card>
         )}
 
         {segment === 'charts' && <MyCharts mode={mode} />}
+        {segment === 'charts' && uploadButton}
 
         {segment === 'documents' && hasDocuments && (
           <Card className="overflow-hidden">
             <div className="p-4 pb-3 flex items-center justify-between">
-              <h3 className="text-sm font-medium">My Documents ({documents.length})</h3>
+              <h3 className="text-[17px] font-bold">My documents ({documents.length})</h3>
             </div>
             {/* Filter chips — quick scoping when the doc list grows
                 past a screenful. Counts show inline so the user
@@ -1612,10 +1660,10 @@ export default function MedicalHistory() {
                                             return (
                                               <div key={lab.id} className="flex items-center gap-2 py-1.5 px-3">
                                                 <span aria-hidden="true" className={`inline-block h-2 w-2 rounded-full flex-shrink-0 ${si.dot}`} />
-                                                <span className="text-xs flex-1 min-w-0 truncate">{lab.title}</span>
-                                                <span className="text-xs font-mono font-medium text-foreground">{lab.value}{lab.unit ? ` ${lab.unit}` : ''}</span>
+                                                <span className="text-[15px] flex-1 min-w-0 truncate">{lab.title}</span>
+                                                <span className="text-[15px] font-semibold tabular-nums text-foreground">{lab.value}{lab.unit ? ` ${lab.unit}` : ''}</span>
                                                 {lab.reference_range && (
-                                                  <span className="text-[9px] text-muted-foreground hidden sm:inline">({lab.reference_range})</span>
+                                                  <span className="text-[12px] text-muted-foreground hidden sm:inline">({lab.reference_range})</span>
                                                 )}
                                               </div>
                                             );
@@ -1645,19 +1693,19 @@ export default function MedicalHistory() {
             <HealthTimeline documents={documents} medicalData={medicalData} />
           </div>
         )}
+        {segment === 'documents' && uploadButton}
 
         {segment === 'results' && hasDocuments && (
           <div className="space-y-6">
               <>
                 {/* Your health snapshot, in one line */}
                 {hasData && stats.labResults.length > 0 && (
-                  <div id="snapshot" className="flex items-center gap-2 text-sm scroll-mt-20">
-                    <Heart className="h-4 w-4 text-primary flex-shrink-0" aria-hidden="true" />
-                    <p className="text-muted-foreground">
-                      <span className="font-medium text-foreground">{stats.labResults.length} result{stats.labResults.length !== 1 ? 's' : ''}</span>
+                  <div id="snapshot" className="scroll-mt-20">
+                    <p className="text-[16px] text-foreground">
+                      <span className="font-bold">{stats.labResults.length} result{stats.labResults.length !== 1 ? 's' : ''}</span>
                       {stats.abnormalLabs + stats.criticalLabs > 0
-                        ? <> · <span className="font-medium text-destructive/80">{stats.abnormalLabs + stats.criticalLabs} to talk about with your doctor</span></>
-                        : ' · nothing flagged'}
+                        ? <> · <span className="font-bold text-destructive">{stats.abnormalLabs + stats.criticalLabs} to talk about</span> with your doctor</>
+                        : <span className="text-muted-foreground"> · nothing flagged</span>}
                     </p>
                   </div>
                 )}
@@ -1665,13 +1713,10 @@ export default function MedicalHistory() {
                 {/* ⚠️ Things that need attention — front and center */}
                 {flaggedItems.length > 0 && (
                   <div id="attention" className="scroll-mt-20">
-                    <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-                      <Eye className="h-4 w-4 text-destructive/80" />
-                      Talk to your doctor about
-                    </h3>
-                    <div className="space-y-3">
+                    <h2 className="section-title mb-2.5">Talk to your doctor about</h2>
+                    <div className="row-group">
                       {flaggedItems.map(item => (
-                        <ResultCard key={item.id} item={item} />
+                        <FlagRow key={item.id} item={item} />
                       ))}
                     </div>
                   </div>
@@ -1683,10 +1728,10 @@ export default function MedicalHistory() {
                     <DialogTrigger asChild>
                       <button
                         type="button"
-                        className="w-full flex items-center gap-3 rounded-lg border border-border bg-card p-4 text-left hover:bg-muted/30 transition-colors"
+                        className="row-group w-full flex items-center gap-3 min-h-14 px-4 py-3 text-left hover:bg-muted/50 transition-colors"
                       >
-                        <ShieldAlert className="h-4 w-4 text-primary flex-shrink-0" aria-hidden="true" />
-                        <span className="flex-1 text-sm font-medium">Possible risks to ask about ({riskItems.length})</span>
+                        <ShieldAlert className="h-5 w-5 text-stage-accent flex-shrink-0" strokeWidth={1.9} aria-hidden="true" />
+                        <span className="flex-1 text-[17px] font-medium">Possible risks to ask about ({riskItems.length})</span>
                         <ArrowRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                       </button>
                     </DialogTrigger>
@@ -1747,9 +1792,8 @@ export default function MedicalHistory() {
                 {/* All results grouped by panel — collapsible, friendly */}
                 {stats.labsByPanel.length > 0 && (
                   <div id="results" className="scroll-mt-20">
-                    <div className="flex items-center gap-2 mb-3">
-                      <FlaskConical className="h-4 w-4 text-primary flex-shrink-0" />
-                      <h3 className="text-sm font-medium flex-shrink-0">All results</h3>
+                    <div className="flex items-center gap-2 mb-2.5">
+                      <h2 className="section-title flex-shrink-0">All results</h2>
                       {/* Shrinks instead of pushing the page wider than a phone. */}
                       <div className="relative ml-auto min-w-0 w-40 sm:w-52">
                         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -1758,11 +1802,11 @@ export default function MedicalHistory() {
                           placeholder="Search results..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="h-8 w-full pl-8 pr-3 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          className="h-9 w-full pl-8 pr-3 text-[14px] rounded-full border border-line bg-background focus:outline-none focus:ring-2 focus:ring-stage-accent/40"
                         />
                       </div>
                     </div>
-                    <div className="space-y-3">
+                    <div className="row-group">
                       {stats.labsByPanel.map(([panelName, labs]) => {
                         // Filter by search query
                         const filteredLabs = searchQuery
@@ -1774,25 +1818,21 @@ export default function MedicalHistory() {
                         const isExpanded = expandedPanels.has(panelName) || !!searchQuery;
 
                         return (
-                          <Card key={panelName} className={`overflow-hidden ${hasIssues ? 'border-destructive/20' : ''}`}>
+                          <div key={panelName}>
                             <button
                               onClick={() => togglePanel(panelName)}
-                              className="w-full p-4 flex items-center justify-between gap-3 hover:bg-muted/30 transition-colors text-left"
+                              aria-expanded={isExpanded}
+                              className="w-full min-h-14 px-4 py-3 flex items-center gap-3 hover:bg-muted/50 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-stage-accent"
                             >
-                              <div className="flex items-center gap-3 min-w-0">
-                                <span aria-hidden="true" className={`inline-block h-2.5 w-2.5 rounded-full flex-shrink-0 ${hasIssues ? 'bg-destructive/60' : allGood ? 'bg-foreground/25' : 'bg-muted-foreground/40'}`} />
-                                <div>
-                                  <span className="text-sm font-medium">{panelName}</span>
-                                  <p className="text-[11px] text-muted-foreground">
-                                    {filteredLabs.length}{searchQuery ? `/${labs.length}` : ''} test{filteredLabs.length !== 1 ? 's' : ''} — {
-                                      hasIssues
-                                        ? `${filteredLabs.filter(l => l.status === 'abnormal' || l.status === 'critical').length} need${filteredLabs.filter(l => l.status === 'abnormal' || l.status === 'critical').length === 1 ? 's' : ''} review`
-                                        : 'all look good'
-                                    }
-                                  </p>
-                                </div>
-                              </div>
-                              <ArrowRight className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                              <span className="flex-1 min-w-0 truncate text-[17px] font-medium">{panelName}</span>
+                              <span className="text-[15px] text-muted-foreground tabular-nums whitespace-nowrap">
+                                {filteredLabs.length}{searchQuery ? `/${labs.length}` : ''} · {
+                                  hasIssues
+                                    ? <span className="font-bold text-destructive">{filteredLabs.filter(l => l.status === 'abnormal' || l.status === 'critical').length} to discuss</span>
+                                    : allGood ? 'all normal' : 'see results'
+                                }
+                              </span>
+                              <ChevronRight className={`h-4 w-4 text-muted-foreground flex-shrink-0 transition-transform ${isExpanded ? 'rotate-90' : ''}`} aria-hidden="true" />
                             </button>
                             {isExpanded && (() => {
                               const sorted = [...filteredLabs].sort((a, b) => {
@@ -1804,7 +1844,7 @@ export default function MedicalHistory() {
                               const normals = sorted.filter(l => l.status !== 'abnormal' && l.status !== 'critical');
 
                               return (
-                                <div className="px-4 pb-4 border-t border-border/50 pt-3 space-y-3">
+                                <div className="px-4 pb-4 border-t border-line pt-3 space-y-3">
                                   {/* Abnormal results — full cards */}
                                   {abnormals.map(lab => (
                                     <div key={lab.id} className="space-y-2">
@@ -1827,12 +1867,12 @@ export default function MedicalHistory() {
                                           const si = getStatusInfo(lab.status);
                                           return (
                                             <div key={lab.id}>
-                                              <div className="flex items-center gap-2 py-1 px-2 rounded hover:bg-muted/30">
+                                              <div className="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-muted/30">
                                                 <span aria-hidden="true" className={`inline-block h-2 w-2 rounded-full flex-shrink-0 ${si.dot}`} />
-                                                <span className="text-xs flex-1 min-w-0 truncate">{lab.title}</span>
-                                                <span className="text-xs font-mono font-medium text-foreground">{lab.value}{lab.unit ? ` ${lab.unit}` : ''}</span>
+                                                <span className="text-[15px] flex-1 min-w-0 truncate">{lab.title}</span>
+                                                <span className="text-[15px] font-semibold tabular-nums text-foreground">{lab.value}{lab.unit ? ` ${lab.unit}` : ''}</span>
                                                 {lab.reference_range && (
-                                                  <span className="text-[9px] text-muted-foreground hidden sm:inline">({lab.reference_range})</span>
+                                                  <span className="text-[12px] text-muted-foreground hidden sm:inline">({lab.reference_range})</span>
                                                 )}
                                                 {trendButton(lab)}
                                               </div>
@@ -1846,12 +1886,14 @@ export default function MedicalHistory() {
                                 </div>
                               );
                             })()}
-                          </Card>
+                          </div>
                         );
                       })}
                     </div>
                   </div>
                 )}
+
+                {uploadButton}
 
                 {/* Active conditions & medications — friendly */}
                 {(stats.activeConditions.length > 0 || stats.activeMedications.length > 0) && (
@@ -1899,13 +1941,13 @@ export default function MedicalHistory() {
                 {/* More about your results: the deeper analysis, one tap away. */}
                 {/* IMPORTANT: Do NOT remove these components. They are custom-built */}
                 {/* and live in src/components/dashboard/.                          */}
-                <details className="group rounded-lg border border-border bg-card">
-                  <summary className="flex cursor-pointer list-none items-center gap-2 p-4 text-sm font-medium">
-                    <Lightbulb className="h-4 w-4 text-primary" />
+                <details className="group row-group">
+                  <summary className="flex cursor-pointer list-none items-center gap-3 min-h-14 px-4 py-3 text-[17px] font-medium hover:bg-muted/50">
+                    <Lightbulb className="h-5 w-5 text-stage-accent" strokeWidth={1.9} />
                     <span className="flex-1">More about your results</span>
                     <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden="true" />
                   </summary>
-                  <div className="space-y-6 border-t border-border p-4">
+                  <div className="space-y-6 border-t border-line p-4">
                 {/* ============ VISUAL RANGE CHART ============ */}
                 <ResultsRangeChart medicalData={medicalData} />
 
