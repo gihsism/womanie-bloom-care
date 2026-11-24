@@ -9,6 +9,13 @@ export interface VisitQuestion {
 }
 
 export const MAX_QUESTIONS = 20;
+
+// Questions come only from results outside the normal range (the same
+// "flagged" Records uses), plus the stage questions. Normal and
+// borderline results never generate a question.
+export const FLAGGED_STATUSES = ['critical', 'abnormal'] as const;
+export const isFlaggedStatus = (status: string | null | undefined): boolean =>
+  status === 'critical' || status === 'abnormal';
 export const MAX_QUESTION_CHARS = 300;
 
 /** Parse the stored questions (JSONB may arrive parsed or as a string); drops junk. */

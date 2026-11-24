@@ -14,7 +14,7 @@ import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 import type { LifeStage } from './DashboardHeader';
 import { getFriendlyName } from '@/lib/medical-utils';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
-import { addQuestion, fromSuggestions, parseQuestions, removeQuestion, toggleAsked, type VisitQuestion } from '@/lib/visitQuestions';
+import { FLAGGED_STATUSES, addQuestion, fromSuggestions, isFlaggedStatus, parseQuestions, removeQuestion, toggleAsked, type VisitQuestion } from '@/lib/visitQuestions';
 
 // Generates a personalised "questions to bring to your doctor"
 // checklist from the user's recent data + mode. Patients
@@ -23,7 +23,8 @@ import { addQuestion, fromSuggestions, parseQuestions, removeQuestion, toggleAsk
 // they can copy it / mark items off live.
 //
 // Source signals (highest-value first):
-//   • Flagged extracted labs (critical / abnormal / borderline)
+//   • Flagged extracted labs (critical / abnormal only — never normal
+//     or borderline results)
 //   • Mode-specific prompts (pregnancy week, postpartum stage, etc.)
 //   • Recent symptom patterns
 //   • Persistent / overdue tests
@@ -149,7 +150,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
         .select('title, value, unit, status, date_recorded')
         .eq('user_id', user.id)
         .eq('data_type', 'lab_result')
-        .in('status', ['critical', 'abnormal', 'borderline']),
+        .in('status', [...FLAGGED_STATUSES]),
       db.from('daily_health_signals')
         .select('signal_date, symptoms, notes')
         .eq('user_id', user.id)
@@ -188,6 +189,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
     // De-dupe by friendly test name and keep the most-recent reading.
     const byTest = new Map<string, FlaggedRow>();
     for (const f of flagged) {
+      if (!isFlaggedStatus(f.status)) continue;
       const key = getFriendlyName(f.title);
       const existing = byTest.get(key);
       if (!existing) {
@@ -216,19 +218,21 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
     }
 
     // Lab-flag derived questions from useUserHealthContext.
-    if (ctx.tshOutOfRange && ctx.labs.tsh) {
+    // Only when the lab itself is out of range: a result in the normal
+    // range never becomes a question.
+    if (ctx.tshOutOfRange && ctx.labs.tsh && isFlaggedStatus(ctx.labs.tsh.status)) {
       out.push({
         id: 'ctx:tsh',
         text: `My TSH is ${ctx.labs.tsh.value} — could thyroid be affecting my cycle / energy / mood?`,
       });
     }
-    if (ctx.pcosLhFshPattern) {
+    if (ctx.pcosLhFshPattern && (isFlaggedStatus(ctx.labs.lh?.status) || isFlaggedStatus(ctx.labs.fsh?.status))) {
       out.push({
         id: 'ctx:pcos',
         text: 'My LH/FSH ratio looks like a PCOS pattern — should we work that up?',
       });
     }
-    if (ctx.amhAssessment?.reserveLabel === 'diminished') {
+    if (ctx.amhAssessment?.reserveLabel === 'diminished' && isFlaggedStatus(ctx.labs.amh?.status)) {
       out.push({
         id: 'ctx:amh',
         text: `My AMH is in the diminished-reserve range for my age (${ctx.age}) — what are my options to discuss?`,

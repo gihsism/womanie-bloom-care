@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { parseQuestions, fromSuggestions, addQuestion, toggleAsked, removeQuestion, MAX_QUESTIONS } from './visitQuestions';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { parseQuestions, fromSuggestions, addQuestion, toggleAsked, removeQuestion, MAX_QUESTIONS, isFlaggedStatus, FLAGGED_STATUSES } from './visitQuestions';
 
 describe('visit questions', () => {
   it('parses stored JSONB, parsed or as a string, and drops junk', () => {
@@ -31,5 +33,24 @@ describe('visit questions', () => {
     const l = [{ id: 'a', text: 'A', asked: false }, { id: 'b', text: 'B', asked: false }];
     expect(toggleAsked(l, 'b')[1].asked).toBe(true);
     expect(removeQuestion(l, 'a')).toEqual([l[1]]);
+  });
+});
+
+describe('questions only for out-of-range results', () => {
+  it('only critical and abnormal count as flagged', () => {
+    expect(isFlaggedStatus('critical')).toBe(true);
+    expect(isFlaggedStatus('abnormal')).toBe(true);
+    for (const s of ['normal', 'borderline', 'expected', null, undefined]) expect(isFlaggedStatus(s)).toBe(false);
+    expect([...FLAGGED_STATUSES]).toEqual(['critical', 'abnormal']);
+  });
+
+  it('the card asks only for flagged labs and gates every lab-derived question on the lab status', () => {
+    const card = readFileSync(resolve(__dirname, '../components/dashboard/VisitPrepCard.tsx'), 'utf8');
+    expect(card).toContain(".in('status', [...FLAGGED_STATUSES])");
+    expect(card).not.toContain("'borderline']");
+    expect(card).toContain('isFlaggedStatus(ctx.labs.tsh.status)');
+    expect(card).toContain('isFlaggedStatus(ctx.labs.amh?.status)');
+    expect(card).toContain('isFlaggedStatus(ctx.labs.lh?.status)');
+    expect(card).toContain('MODE_DEFAULTS[mode]');
   });
 });
