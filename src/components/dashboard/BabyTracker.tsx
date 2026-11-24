@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +9,8 @@ import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLifeEvents, importLocalOnce, type LifeEvent } from '@/hooks/useLifeEvents';
 import { Baby, Milk, Moon, Droplets, Ruler, Syringe, Trash2, Play, Square, BarChart3, Plus, Timer } from 'lucide-react';
-import BabyStatsTab from './BabyStatsTab';
+// Stats tab draws charts (recharts, ~110 KB gzip): load it when opened.
+const BabyStatsTab = lazy(() => import('./BabyStatsTab'));
 import { differenceInMinutes, format, isToday, isYesterday, parseISO } from 'date-fns';
 
 // Baby tracker: feeds, sleep, nappies, growth and vaccinations, per baby
@@ -531,7 +532,7 @@ export default function BabyTracker({ initialTab = 'feed', openAdd = false }: { 
           <TabsContent value="nappy" className="pt-3"><NappyTab babyId={baby.id} /></TabsContent>
           <TabsContent value="growth" className="pt-3"><GrowthTab babyId={baby.id} /></TabsContent>
           <TabsContent value="vax" className="pt-3"><VaccineTab babyId={baby.id} /></TabsContent>
-          <TabsContent value="stats" className="pt-3"><BabyStatsTab babyId={baby.id} onGoTo={setTab} /></TabsContent>
+          <TabsContent value="stats" className="pt-3"><Suspense fallback={null}><BabyStatsTab babyId={baby.id} onGoTo={setTab} /></Suspense></TabsContent>
         </Tabs>
       )}
     </Card>
