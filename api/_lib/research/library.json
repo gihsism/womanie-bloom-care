@@ -1,6 +1,6 @@
 {
  "version": "2026-11-24",
- "generatedAt": "2026-11-24T17:11:45.935Z",
+ "generatedAt": "2026-11-24T17:46:31.434Z",
  "source": "PubMed (NCBI E-utilities). Summaries written from abstracts only.",
  "disclaimer": "General information from published research, not medical advice. Talk to your doctor or midwife about your situation.",
  "topics": [
@@ -946,6 +946,28 @@
   {
    "id": "paracetamol-pregnancy",
    "label": "Paracetamol (acetaminophen) in pregnancy",
+   "stages": [
+    "pregnancy"
+   ]
+  },
+  {
+   "id": "codeine-breastfeeding",
+   "label": "Codeine and opioid painkillers while breastfeeding",
+   "stages": [
+    "postpartum"
+   ]
+  },
+  {
+   "id": "nsaids-pregnancy",
+   "label": "Ibuprofen and NSAID painkillers in pregnancy",
+   "stages": [
+    "pregnancy",
+    "conception"
+   ]
+  },
+  {
+   "id": "antihistamines-pregnancy",
+   "label": "Antihistamines and hay fever in pregnancy",
    "stages": [
     "pregnancy"
    ]
@@ -6356,7 +6378,6 @@
    ],
    "certainty": "moderate",
    "lifeStages": [
-    "pregnancy",
     "postpartum",
     "general"
    ],
@@ -6508,7 +6529,6 @@
    ],
    "certainty": "not stated",
    "lifeStages": [
-    "pregnancy",
     "postpartum"
    ],
    "topics": [
@@ -6903,6 +6923,111 @@
     "folic acid",
     "supplements",
     "low iron"
+   ]
+  },
+  {
+   "id": "pmid-28675776",
+   "pmid": "28675776",
+   "doi": "10.1111/all.13241",
+   "title": "Vitamin D supplementation in primary allergy prevention: Systematic review of randomized and non-randomized studies",
+   "source": "Allergy",
+   "journal": "Allergy",
+   "organisation": null,
+   "year": 2018,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/28675776/",
+   "summary": "This review looked at whether taking vitamin D during pregnancy or breastfeeding, or giving it to babies, helps prevent allergies such as eczema, hay fever, asthma and food allergy in children. Only five studies qualified, and the quality of the evidence was very low. The studies suggest vitamin D may not lower the risk of these allergies, but the overall picture is uncertain.",
+   "keyPoints": [
+    "Only one randomised trial and four non-randomised studies were eligible for the review.",
+    "Very low certainty evidence suggests vitamin D supplements may not reduce the risk of eczema, allergic rhinitis (hay fever), asthma or wheezing, or food allergy.",
+    "No studies were found on preventing allergies by giving vitamin D to children.",
+    "The authors conclude that information is limited and the effect of vitamin D on allergy prevention remains uncertain."
+   ],
+   "certainty": "very low",
+   "lifeStages": [
+    "pregnancy",
+    "postpartum"
+   ],
+   "topics": [
+    "antihistamines-pregnancy"
+   ],
+   "tags": [
+    "vitamin d",
+    "allergy prevention",
+    "hay fever",
+    "asthma",
+    "eczema",
+    "breastfeeding"
+   ],
+   "keywords": [
+    "vitamin d",
+    "allergies",
+    "hay fever",
+    "allergic rhinitis",
+    "asthma",
+    "eczema",
+    "food allergy",
+    "pregnancy supplements",
+    "breastfeeding",
+    "baby allergies",
+    "wheezing",
+    "sunshine vitamin"
+   ]
+  },
+  {
+   "id": "pmid-27878468",
+   "pmid": "27878468",
+   "doi": "10.1007/s40264-016-0479-9",
+   "title": "The Risk of Adverse Pregnancy Outcome After First Trimester Exposure to H1 Antihistamines: A Systematic Review and Meta-Analysis",
+   "source": "Drug Safety",
+   "journal": "Drug Safety",
+   "organisation": null,
+   "year": 2017,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/27878468/",
+   "summary": "This review combined results from 37 studies on women who took H1 antihistamines (the type used for allergies, hay fever, hives and sometimes pregnancy nausea) in the first trimester. Babies of women who used them did not have more major birth defects than babies of women who did not. There was also no link to miscarriage, premature birth, stillbirth or low birth weight.",
+   "keyPoints": [
+    "Taking H1 antihistamines in the first trimester was not linked to more major birth defects in cohort studies or case-control studies.",
+    "No increased risk was found for miscarriage, premature birth, stillbirth or low birth weight.",
+    "The authors concluded these medicines are not associated with an increased risk of major malformation or other adverse fetal outcomes.",
+    "The review pooled a large number of studies, with no sign of publication bias."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy"
+   ],
+   "topics": [
+    "antihistamines-pregnancy"
+   ],
+   "tags": [
+    "antihistamines",
+    "hay fever",
+    "allergy",
+    "medication safety",
+    "first trimester",
+    "birth defects"
+   ],
+   "keywords": [
+    "antihistamine",
+    "hay fever",
+    "allergy",
+    "allergies",
+    "pregnancy",
+    "first trimester",
+    "birth defects",
+    "miscarriage",
+    "hives",
+    "cold",
+    "morning sickness",
+    "medication safety"
    ]
   },
   {
@@ -8163,7 +8288,8 @@
    ],
    "topics": [
     "aspirin-pregnancy",
-    "paracetamol-pregnancy"
+    "paracetamol-pregnancy",
+    "antihistamines-pregnancy"
    ],
    "tags": [
     "migraine",
@@ -17989,7 +18115,6 @@
    "certainty": "low",
    "lifeStages": [
     "conception",
-    "pregnancy",
     "postpartum"
    ],
    "topics": [
@@ -18042,7 +18167,6 @@
    "certainty": "low",
    "lifeStages": [
     "conception",
-    "pregnancy",
     "postpartum"
    ],
    "topics": [
@@ -18096,7 +18220,6 @@
    "certainty": "not stated",
    "lifeStages": [
     "conception",
-    "pregnancy",
     "postpartum"
    ],
    "topics": [
@@ -18910,7 +19033,6 @@
    "certainty": "low",
    "lifeStages": [
     "conception",
-    "pregnancy",
     "postpartum"
    ],
    "topics": [
@@ -21417,6 +21539,303 @@
     "false positive",
     "abnormal cells",
     "screening accuracy"
+   ]
+  },
+  {
+   "id": "pmid-40148770",
+   "pmid": "40148770",
+   "doi": "10.1186/s12887-025-05577-w",
+   "title": "Assessment of cortisol as a neonatal pain biomarker in the application of non-pharmacological analgesia therapies: systematic review and meta-analysis",
+   "source": "BMC Pediatrics",
+   "journal": "BMC Pediatrics",
+   "organisation": null,
+   "year": 2025,
+   "publicationTypes": [
+    "Systematic Review",
+    "Meta-Analysis"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/40148770/",
+   "summary": "This review pooled 10 studies to see whether non-drug comfort methods ease pain in newborns, using the stress hormone cortisol as a pain marker. Skin-to-skin contact and breastfeeding lowered cortisol, which suggests they reduce pain from procedures like heel pricks. Sucrose (sugar solution) did not clearly lower cortisol. This is about comforting babies, not about painkillers taken by breastfeeding mothers.",
+   "keyPoints": [
+    "Skin-to-skin contact had a large effect on lowering newborn cortisol, and was described as the most effective method for pain from procedures like heel pricks in preterm babies under 28 weeks.",
+    "Breastfeeding had a moderate effect and was described as an effective and safe way to ease newborn pain and lower cortisol.",
+    "Sucrose had only a small effect and was not found effective at reducing newborn pain based on cortisol.",
+    "Non-drug therapies overall reduced pain as measured by cortisol, though the size of the effect varied by gestational age."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "postpartum"
+   ],
+   "topics": [
+    "codeine-breastfeeding"
+   ],
+   "tags": [
+    "newborn pain",
+    "skin-to-skin contact",
+    "breastfeeding",
+    "sucrose",
+    "heel prick",
+    "preterm infants"
+   ],
+   "keywords": [
+    "newborn pain",
+    "baby pain relief",
+    "heel prick",
+    "skin to skin",
+    "kangaroo care",
+    "breastfeeding comfort",
+    "sugar water",
+    "sucrose",
+    "cortisol",
+    "premature baby",
+    "non-drug pain relief",
+    "infant stress"
+   ]
+  },
+  {
+   "id": "pmid-33069970",
+   "pmid": "33069970",
+   "doi": "10.1016/j.jclinane.2020.110105",
+   "title": "Labor neuraxial analgesia and breastfeeding: An updated systematic review",
+   "source": "Journal of Clinical Anesthesia",
+   "journal": "Journal of Clinical Anesthesia",
+   "organisation": null,
+   "year": 2021,
+   "publicationTypes": [
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/33069970/",
+   "summary": "This review looked at whether having an epidural or spinal (neuraxial) pain relief during labor affects how likely a mother is to breastfeed. It pooled 15 studies with over 16,000 women, and the results were very mixed: some found no difference, some found lower breastfeeding rates after neuraxial pain relief, and some were in between. The authors think other factors, such as skin-to-skin contact and breastfeeding support, may explain much of the difference. The studies were mostly observational, so they cannot prove cause and effect.",
+   "keyPoints": [
+    "Across 15 studies, 6 found no difference in breastfeeding, 6 found lower breastfeeding with neuraxial pain relief, and 3 had mixed results.",
+    "Results were very inconsistent, likely because of other factors that can muddy the picture, such as immediate skin-to-skin contact and maternity leave.",
+    "Education programs and breastfeeding support are likely more important for long-term breastfeeding success than the type of labor pain relief."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy",
+    "postpartum"
+   ],
+   "topics": [
+    "codeine-breastfeeding"
+   ],
+   "tags": [
+    "labor pain relief",
+    "epidural",
+    "breastfeeding",
+    "neuraxial analgesia"
+   ],
+   "keywords": [
+    "epidural",
+    "spinal",
+    "labor pain relief",
+    "labour pain relief",
+    "painkillers in labor",
+    "breastfeeding",
+    "nursing",
+    "breastfeeding success",
+    "childbirth",
+    "pain medication"
+   ]
+  },
+  {
+   "id": "pmid-31263203",
+   "pmid": "31263203",
+   "doi": "10.1038/s41372-019-0411-0",
+   "title": "Supporting breastfeeding for women on opioid maintenance therapy: a systematic review",
+   "source": "Journal of Perinatology",
+   "journal": "Journal of Perinatology",
+   "organisation": null,
+   "year": 2019,
+   "publicationTypes": [
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/31263203/",
+   "summary": "This review looked at ways to help women on opioid maintenance therapy (such as methadone or buprenorphine treatment for opioid use disorder) breastfeed their babies. Only four studies were found, and in all four breastfeeding rates improved. Three of the four had moderate to serious risk of bias, so the results should be read with caution. Programs that worked well used a team approach, kept mother and newborn together, and put the woman's needs at the centre of care.",
+   "keyPoints": [
+    "Breastfeeding rates are low in women on opioid maintenance therapy, even though breastfeeding has known benefits.",
+    "All four studies found a statistically significant improvement in breastfeeding rates after an intervention.",
+    "Three of the four studies had moderate to serious risk of bias because of confounding factors.",
+    "Successful programs shared an integrated approach, a well-prepared multidisciplinary team, keeping mother and newborn together, and patient-centred care."
+   ],
+   "certainty": "low",
+   "lifeStages": [
+    "postpartum"
+   ],
+   "topics": [
+    "codeine-breastfeeding"
+   ],
+   "tags": [
+    "breastfeeding",
+    "opioid maintenance therapy",
+    "opioid use disorder",
+    "postpartum support"
+   ],
+   "keywords": [
+    "breastfeeding",
+    "opioids",
+    "methadone",
+    "buprenorphine",
+    "painkillers",
+    "opioid use disorder",
+    "maintenance therapy",
+    "lactation",
+    "newborn",
+    "rooming-in",
+    "postpartum"
+   ]
+  },
+  {
+   "id": "pmid-26652709",
+   "pmid": "26652709",
+   "doi": "10.2217/pgs.15.157",
+   "title": "The pharmacogenetics of opioid therapy in the management of postpartum pain: a systematic review",
+   "source": "Pharmacogenomics",
+   "journal": "Pharmacogenomics",
+   "organisation": null,
+   "year": 2016,
+   "publicationTypes": [
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/26652709/",
+   "summary": "This review looked at 17 studies on how a mother's genes may affect how opioid painkillers work after childbirth. It looked at both pain relief and side effects for mothers and their breastfeeding babies. The review found that variations in a few genes (CYP2D6, OPRM1 A118G, UGT2B7 C802T and ABCB1 G2677AT) may affect how well these medicines work or how likely side effects are. The authors say this could help tailor pain care after birth, though the abstract does not rate how certain the evidence is.",
+   "keyPoints": [
+    "Opioids are commonly prescribed for pain after childbirth, but balancing pain relief with safety for mother and breastfeeding baby can be hard.",
+    "Seventeen studies were included, covering different opioids, gene variations and outcomes.",
+    "Variations in the CYP2D6, OPRM1 A118G, UGT2B7 C802T and ABCB1 G2677AT genes may influence pain relief or side effects.",
+    "The authors suggest these findings may help personalise pain care after birth."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "postpartum"
+   ],
+   "topics": [
+    "codeine-breastfeeding"
+   ],
+   "tags": [
+    "opioids",
+    "postpartum pain",
+    "breastfeeding",
+    "pharmacogenetics",
+    "codeine"
+   ],
+   "keywords": [
+    "codeine",
+    "opioid",
+    "painkillers",
+    "breastfeeding",
+    "postpartum pain",
+    "genes",
+    "cyp2d6",
+    "side effects",
+    "baby safety",
+    "pain relief after birth",
+    "genetic testing",
+    "medication"
+   ]
+  },
+  {
+   "id": "pmid-27121239",
+   "pmid": "27121239",
+   "doi": "10.1177/0890334415623779",
+   "title": "Labor Epidural Analgesia and Breastfeeding: A Systematic Review",
+   "source": "Journal of Human Lactation",
+   "journal": "Journal of Human Lactation",
+   "organisation": null,
+   "year": 2016,
+   "publicationTypes": [
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/27121239/",
+   "summary": "This review looked at 23 studies on whether having an epidural for pain relief in labor affects breastfeeding in the first days after birth. The results were mixed: 12 studies linked epidurals to poorer breastfeeding success, 10 found no effect, and 1 found a positive link. Most studies were observational and had weaknesses, so it is not clear whether epidurals themselves cause any breastfeeding difficulty.",
+   "keyPoints": [
+    "Of 23 studies, 12 found a negative link between labor epidural and breastfeeding success, 10 found no effect, and 1 found a positive link.",
+    "Most studies were observational, and the few randomized trials had inadequate or unclear randomization.",
+    "Many studies were small or did not account for things like a mother's intention to breastfeed, social support, or the type and dose of pain relief.",
+    "It is unclear how much any effect might be due to factors like infant alertness, maternal fever, oxytocin release, labor length, or instrumental delivery."
+   ],
+   "certainty": "low",
+   "lifeStages": [
+    "pregnancy",
+    "postpartum"
+   ],
+   "topics": [
+    "codeine-breastfeeding"
+   ],
+   "tags": [
+    "epidural",
+    "labor pain relief",
+    "breastfeeding",
+    "postpartum"
+   ],
+   "keywords": [
+    "epidural",
+    "labor pain relief",
+    "labour analgesia",
+    "breastfeeding",
+    "nursing",
+    "painkillers",
+    "opioids",
+    "fentanyl",
+    "latch",
+    "breastfeeding support",
+    "childbirth"
+   ]
+  },
+  {
+   "id": "pmid-27755486",
+   "pmid": "27755486",
+   "doi": "10.1097/AAP.0000000000000460",
+   "title": "The Analgesic Efficacy of Nonsteroidal Anti-inflammatory Agents (NSAIDs) in Patients Undergoing Cesarean Deliveries: A Meta-Analysis",
+   "source": "Regional Anesthesia and Pain Medicine",
+   "journal": "Regional Anesthesia and Pain Medicine",
+   "organisation": null,
+   "year": 2016,
+   "publicationTypes": [
+    "Meta-Analysis"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/27755486/",
+   "summary": "This review pooled 22 randomized trials of women having a cesarean delivery to see whether NSAID painkillers (like ibuprofen-type medicines) help with pain after surgery. Women who received NSAIDs reported lower pain scores at 12 and 24 hours, used less opioid medicine, and felt less drowsy. Nausea and vomiting were no different between the groups. The authors say more research is needed on the best NSAID regimen and on effects such as breastfeeding.",
+   "keyPoints": [
+    "Women given NSAIDs after cesarean delivery reported lower pain at 12 and 24 hours than those who did not receive them.",
+    "They used significantly less opioid painkiller medicine after surgery.",
+    "They had less drowsiness or sedation, but no difference in nausea or vomiting.",
+    "The pain benefit at 24 hours was seen with NSAIDs given by injection or drip, but not by mouth or rectally."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy",
+    "postpartum"
+   ],
+   "topics": [
+    "codeine-breastfeeding"
+   ],
+   "tags": [
+    "cesarean",
+    "nsaids",
+    "opioids",
+    "postoperative pain",
+    "breastfeeding"
+   ],
+   "keywords": [
+    "c-section",
+    "caesarean",
+    "cesarean",
+    "ibuprofen",
+    "pain relief",
+    "painkillers",
+    "opioids",
+    "codeine",
+    "after surgery",
+    "breastfeeding",
+    "drowsiness",
+    "nsaid"
    ]
   },
   {
@@ -35318,7 +35737,6 @@
    "certainty": "not stated",
    "lifeStages": [
     "conception",
-    "pregnancy",
     "ivf"
    ],
    "topics": [
@@ -37962,7 +38380,6 @@
    ],
    "certainty": "not stated",
    "lifeStages": [
-    "pregnancy",
     "postpartum",
     "general"
    ],
@@ -40830,7 +41247,6 @@
    ],
    "certainty": "not stated",
    "lifeStages": [
-    "pregnancy",
     "postpartum"
    ],
    "topics": [
@@ -53317,7 +53733,6 @@
    ],
    "certainty": "moderate",
    "lifeStages": [
-    "menstrual-cycle",
     "general"
    ],
    "topics": [
@@ -64518,7 +64933,6 @@
    ],
    "certainty": "not stated",
    "lifeStages": [
-    "conception",
     "postpartum",
     "general"
    ],
@@ -67920,11 +68334,13 @@
    ],
    "certainty": "not stated",
    "lifeStages": [
+    "conception",
     "pregnancy"
    ],
    "topics": [
     "medications-pregnancy",
-    "paracetamol-pregnancy"
+    "paracetamol-pregnancy",
+    "nsaids-pregnancy"
    ],
    "tags": [
     "paracetamol",
@@ -68227,7 +68643,6 @@
    ],
    "certainty": "moderate",
    "lifeStages": [
-    "pregnancy",
     "postpartum"
    ],
    "topics": [
@@ -78634,6 +79049,313 @@
    ]
   },
   {
+   "id": "pmid-42877936",
+   "pmid": "42877936",
+   "doi": "10.3389/fphar.2026.1758430",
+   "title": "Antispasmodic and analgesic strategies for renal colic in pregnancy: a comprehensive analysis",
+   "source": "Frontiers in Pharmacology",
+   "journal": "Frontiers in Pharmacology",
+   "organisation": null,
+   "year": 2026,
+   "publicationTypes": [
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/42877936/",
+   "summary": "This review pooled results from ten randomised trials (936 pregnant women) comparing antispasmodic and pain-relief medicines for kidney stone pain (renal colic) in pregnancy. Phloroglucinol worked best for pain relief within one hour and caused the fewest side effects like nausea and dizziness. Progesterone came second, and anisodamine did worst. The authors say more high-quality research is needed to confirm these findings.",
+   "keyPoints": [
+    "Phloroglucinol was the most effective at easing pain within 1 hour and had the fewest side effects.",
+    "Progesterone ranked second for pain relief; anisodamine was the least effective.",
+    "Phloroglucinol had lower pain recurrence at 6 hours and fewer side effects such as blurred vision and palpitations than anisodamine.",
+    "The authors conclude phloroglucinol is preferred, can be combined with progesterone, and anisodamine is not advised, but more high-quality research is needed."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "pregnancy"
+   ],
+   "topics": [
+    "nsaids-pregnancy"
+   ],
+   "tags": [
+    "renal colic",
+    "kidney stones",
+    "pain relief in pregnancy",
+    "phloroglucinol",
+    "antispasmodics"
+   ],
+   "keywords": [
+    "kidney stone pain",
+    "renal colic",
+    "pregnancy pain relief",
+    "painkillers in pregnancy",
+    "phloroglucinol",
+    "progesterone",
+    "nausea",
+    "side effects",
+    "flank pain",
+    "analgesia"
+   ]
+  },
+  {
+   "id": "pmid-38423229",
+   "pmid": "38423229",
+   "doi": "10.1016/j.reprotox.2024.108561",
+   "title": "Pregnancy outcomes and birth defects in offspring following Non-steroidal anti-inflammatory drugs exposure during pregnancy: A systematic review and meta-analysis",
+   "source": "Reproductive Toxicology",
+   "journal": "Reproductive Toxicology",
+   "organisation": null,
+   "year": 2024,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/38423229/",
+   "summary": "This review pooled results from many studies on NSAID painkillers (such as ibuprofen) taken during pregnancy. Babies exposed in early pregnancy had a higher chance of birth defects than unexposed babies, and NSAID use was also linked to preterm birth. Miscarriage risk looked a little higher too, but that result could be due to chance. The authors say pregnant women should weigh the possible benefits and risks before using NSAIDs.",
+   "keyPoints": [
+    "Early-pregnancy NSAID exposure was linked to a 28% higher risk of congenital anomalies overall (OR 1.28).",
+    "The risk of major birth defects was 19% higher (OR 1.19) compared with babies not exposed.",
+    "Miscarriage risk trended higher (OR 1.20), but the finding was not statistically significant.",
+    "NSAID use in pregnancy was linked to a negative impact on preterm birth, and the authors advise weighing benefits and risks."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "pregnancy"
+   ],
+   "topics": [
+    "nsaids-pregnancy"
+   ],
+   "tags": [
+    "nsaids",
+    "ibuprofen",
+    "pregnancy medication",
+    "birth defects",
+    "miscarriage",
+    "preterm birth"
+   ],
+   "keywords": [
+    "ibuprofen",
+    "nsaid",
+    "painkillers",
+    "pain relief",
+    "advil",
+    "naproxen",
+    "aspirin",
+    "birth defects",
+    "miscarriage",
+    "preterm birth",
+    "medication in pregnancy",
+    "anti-inflammatory"
+   ]
+  },
+  {
+   "id": "pmid-38715235",
+   "pmid": "38715235",
+   "doi": "10.1111/anae.16307",
+   "title": "Opioid analgesic exposure during the first trimester of pregnancy and the risk of major congenital malformations in infants: a systematic review and meta-analysis†",
+   "source": "Anaesthesia",
+   "journal": "Anaesthesia",
+   "organisation": null,
+   "year": 2024,
+   "publicationTypes": [
+    "Systematic Review",
+    "Meta-Analysis"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/38715235/",
+   "summary": "This review pooled results from 12 studies on prescribed opioid painkillers taken in the first three months of pregnancy and the chance of major birth defects in babies. Overall, babies exposed to opioids were not found to have a higher chance of major birth defects than unexposed babies. However, most of the studies had serious problems in how they were done, so the true risk is still uncertain.",
+   "keyPoints": [
+    "Opioid painkiller use in the first trimester was not linked to a higher overall risk of major birth defects (relative risk 1.04).",
+    "No clear increase was seen for heart or brain and spine malformations.",
+    "A small increase in atrial septal defects (a type of heart defect) was seen with codeine, and higher but very uncertain estimates were seen for gut malformations and cleft palate.",
+    "Eleven of the 12 studies were at high risk of bias, so the findings remain uncertain."
+   ],
+   "certainty": "low",
+   "lifeStages": [
+    "conception",
+    "pregnancy"
+   ],
+   "topics": [
+    "nsaids-pregnancy"
+   ],
+   "tags": [
+    "opioids",
+    "painkillers",
+    "first trimester",
+    "birth defects",
+    "codeine"
+   ],
+   "keywords": [
+    "opioids",
+    "codeine",
+    "painkillers",
+    "pain relief",
+    "first trimester",
+    "birth defects",
+    "congenital malformations",
+    "pregnancy medication",
+    "cleft palate",
+    "heart defect",
+    "safe in pregnancy"
+   ]
+  },
+  {
+   "id": "pmid-34635936",
+   "pmid": "34635936",
+   "doi": "10.1007/s00228-021-03222-w",
+   "title": "Maternal non-steroidal anti-inflammatory drug exposure during pregnancy and risk of miscarriage: a systematic review and meta-analysis",
+   "source": "European Journal of Clinical Pharmacology",
+   "journal": "European Journal of Clinical Pharmacology",
+   "organisation": null,
+   "year": 2022,
+   "publicationTypes": [
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/34635936/",
+   "summary": "Researchers combined ten studies covering about 207,000 pregnant women to see whether NSAID painkillers (such as ibuprofen) are linked to miscarriage. Overall, NSAID use during pregnancy was not clearly linked to a higher chance of miscarriage. However, women who took NSAIDs around the time of conception did have a higher chance of miscarriage. The authors say more research is needed on whether the type, dose or timing of the medicine matters.",
+   "keyPoints": [
+    "Across all ten studies, NSAID use during pregnancy was not statistically significantly linked to miscarriage.",
+    "NSAID use around the time of conception was linked to a higher risk of miscarriage (odds ratio 2.32).",
+    "No significant link was seen for NSAID use in the first trimester, though the sample may have been too small to tell.",
+    "More studies are needed to see whether the risk differs by NSAID type, dose or timing."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "pregnancy"
+   ],
+   "topics": [
+    "nsaids-pregnancy"
+   ],
+   "tags": [
+    "nsaids",
+    "ibuprofen",
+    "miscarriage",
+    "painkillers",
+    "pregnancy medication"
+   ],
+   "keywords": [
+    "ibuprofen",
+    "nsaid",
+    "painkillers",
+    "pain relief",
+    "miscarriage",
+    "pregnancy loss",
+    "trying to conceive",
+    "first trimester",
+    "anti-inflammatory",
+    "naproxen",
+    "aspirin",
+    "medication safety"
+   ]
+  },
+  {
+   "id": "pmid-34187385",
+   "pmid": "34187385",
+   "doi": "10.1186/s12879-021-06323-0",
+   "title": "Symptomatic treatment (using NSAIDS) versus antibiotics in uncomplicated lower urinary tract infection: a meta-analysis and systematic review of randomized controlled trials",
+   "source": "BMC Infectious Diseases",
+   "journal": "BMC Infectious Diseases",
+   "organisation": null,
+   "year": 2021,
+   "publicationTypes": [
+    "Comparative Study",
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/34187385/",
+   "summary": "This review pooled four randomized trials with 1165 non-pregnant adult women who had an uncomplicated lower urinary tract infection (UTI, such as a bladder infection). It compared treating with anti-inflammatory painkillers (NSAIDs, like ibuprofen) against treating with antibiotics. Antibiotics worked better: more women had their symptoms clear by day 3 or 4, and fewer developed a kidney or other upper urinary tract infection. The study did not include pregnant women, so it does not tell us about NSAID use in pregnancy.",
+   "keyPoints": [
+    "Women taking NSAIDs were less likely to have their UTI symptoms resolve by day 3 or 4 than women taking antibiotics (moderate certainty).",
+    "Upper urinary tract infection complications were more likely with NSAIDs than with antibiotics (moderate certainty).",
+    "A positive urine culture was more likely to persist with NSAIDs, and these women were about three times more likely to need a rescue antibiotic (low certainty for the rescue antibiotic finding).",
+    "The authors concluded antibiotics were more effective than NSAIDs for acute uncomplicated lower UTI; the review covered non-pregnant women only."
+   ],
+   "certainty": "moderate",
+   "lifeStages": [
+    "conception",
+    "general"
+   ],
+   "topics": [
+    "nsaids-pregnancy"
+   ],
+   "tags": [
+    "urinary tract infection",
+    "nsaids",
+    "antibiotics",
+    "ibuprofen",
+    "uti treatment"
+   ],
+   "keywords": [
+    "uti",
+    "urinary tract infection",
+    "bladder infection",
+    "cystitis",
+    "ibuprofen",
+    "nsaid",
+    "painkillers",
+    "antibiotics",
+    "anti-inflammatory",
+    "non-pregnant women"
+   ]
+  },
+  {
+   "id": "pmid-31628860",
+   "pmid": "31628860",
+   "doi": "10.1002/14651858.CD007618.pub2",
+   "title": "Nonsteroidal anti-inflammatory drugs for assisted reproductive technology",
+   "source": "Cochrane Database of Systematic Reviews",
+   "journal": "Cochrane Database of Systematic Reviews",
+   "organisation": null,
+   "year": 2019,
+   "publicationTypes": [
+    "Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/31628860/",
+   "summary": "This Cochrane review looked at whether anti-inflammatory painkillers (NSAIDs) taken alongside fertility treatment such as IVF help women get pregnant or avoid miscarriage. It pooled 11 trials with 1,884 women. The researchers could not tell whether NSAIDs make any difference to ongoing pregnancy or miscarriage, and the evidence was of very low quality. No trial reported live birth rates.",
+   "keyPoints": [
+    "It is uncertain whether NSAIDs given during assisted reproduction change ongoing pregnancy or miscarriage rates; the evidence was very low quality.",
+    "None of the trials reported live birth per woman, the main outcome of interest.",
+    "Evidence on clinical pregnancy, ectopic pregnancy, multiple pregnancy and side effects was also uncertain (low to very low quality).",
+    "The authors say larger, well-designed placebo-controlled trials that report live births are needed."
+   ],
+   "certainty": "very low",
+   "lifeStages": [
+    "conception",
+    "pregnancy",
+    "ivf"
+   ],
+   "topics": [
+    "nsaids-pregnancy"
+   ],
+   "tags": [
+    "nsaids",
+    "ivf",
+    "assisted reproduction",
+    "miscarriage",
+    "fertility treatment"
+   ],
+   "keywords": [
+    "ibuprofen",
+    "nsaid",
+    "painkillers",
+    "anti-inflammatory",
+    "ivf",
+    "fertility treatment",
+    "embryo transfer",
+    "miscarriage",
+    "indomethacin",
+    "pregnancy rate",
+    "infertility"
+   ]
+  },
+  {
    "id": "pmid-38318725",
    "pmid": "38318725",
    "doi": "10.1093/nutrit/nuad158",
@@ -79012,7 +79734,6 @@
    ],
    "certainty": "not stated",
    "lifeStages": [
-    "pregnancy",
     "postpartum",
     "general"
    ],
@@ -79319,7 +80040,6 @@
    ],
    "certainty": "low",
    "lifeStages": [
-    "pregnancy",
     "postpartum"
    ],
    "topics": [
@@ -80494,10 +81214,8 @@
    ],
    "certainty": "not stated",
    "lifeStages": [
-    "menstrual-cycle",
     "pregnancy",
-    "postpartum",
-    "general"
+    "postpartum"
    ],
    "topics": [
     "ovarian-cysts"
@@ -83830,7 +84548,6 @@
    ],
    "certainty": "low",
    "lifeStages": [
-    "pregnancy",
     "postpartum"
    ],
    "topics": [
@@ -90654,7 +91371,6 @@
    "certainty": "very low",
    "lifeStages": [
     "conception",
-    "pregnancy",
     "ivf"
    ],
    "topics": [
@@ -123281,7 +123997,6 @@
    "certainty": "not stated",
    "lifeStages": [
     "conception",
-    "pregnancy",
     "ivf"
    ],
    "topics": [
@@ -123628,7 +124343,6 @@
    "certainty": "not stated",
    "lifeStages": [
     "conception",
-    "pregnancy",
     "ivf",
     "general"
    ],
@@ -125386,8 +126100,7 @@
    ],
    "certainty": "moderate",
    "lifeStages": [
-    "postpartum",
-    "general"
+    "postpartum"
    ],
    "topics": [
     "vitamin-d"

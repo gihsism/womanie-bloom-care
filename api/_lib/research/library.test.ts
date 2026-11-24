@@ -7,6 +7,7 @@ import {
   evidenceForTopic,
   formatSourcesFooter,
   getLibrary,
+  isAfterBirthTitle,
   normalizeLifeStage,
   searchItems,
   searchResearch,
@@ -177,6 +178,25 @@ describe('searchItems ranking', () => {
     it('brand names reach the generic drug', () => {
       expect(searchItems(meds, 'tylenol', {}, topics)[0].item.pmid).toBe('11');
     });
+
+    it('a pregnancy question puts the pregnancy study above an after-birth one', () => {
+      const afterBirth = item({
+        pmid: '13',
+        title: 'Paracetamol for perineal pain in the early postpartum period',
+        lifeStages: ['pregnancy', 'postpartum'],
+        topics: ['medications-pregnancy'],
+        tags: ['paracetamol', 'perineal pain'],
+        keywords: ['paracetamol', 'acetaminophen', 'pregnancy', 'after birth'],
+      });
+      expect(isAfterBirthTitle(afterBirth.title)).toBe(true);
+      expect(isAfterBirthTitle('Prenatal paracetamol exposure and childhood asthma')).toBe(false);
+      expect(isAfterBirthTitle('Paracetamol for patent ductus arteriosus in preterm infants')).toBe(true);
+      const res = searchItems([afterBirth, meds[1]], 'can I take paracetamol while pregnant?', {}, topics);
+      expect(res.map((r) => r.item.pmid)).toEqual(['11', '13']);
+      // Without "pregnant" in the question nothing changes for it.
+      const plain = searchItems([afterBirth], 'paracetamol perineal pain', {}, topics);
+      expect(plain[0].item.pmid).toBe('13');
+    });
   });
 
   it('maps app modes onto library stages', () => {
@@ -280,6 +300,19 @@ describe('library.json data file', () => {
     const picked = selectChatSources('Is coffee OK in pregnancy?', 'pregnancy');
     expect(picked.length).toBeGreaterThanOrEqual(3);
     expect(picked.some((p) => /caffeine/i.test(p.title))).toBe(true);
+  });
+
+  // The "paracetamol in pregnancy" search also returned a Cochrane review of
+  // paracetamol for a preterm baby's patent ductus arteriosus; the build
+  // used to add the topic's 'pregnancy' stage to it and it ranked #1 for
+  // "Can I take paracetamol while pregnant?". build-library.mjs now keeps
+  // the abstract's own stages for baby-only titles (mergeStages).
+  it('a newborn-treatment review is not tagged as pregnancy evidence', () => {
+    const pda = lib.items.find((it) => it.pmid === '25758061');
+    expect(pda?.lifeStages).toEqual(['postpartum']);
+    const top = selectChatSources('Can I take paracetamol while pregnant?', 'pregnancy').slice(0, 3);
+    expect(top.length).toBeGreaterThan(0);
+    expect(top.some((it) => /ductus|preterm|newborn|neonat/i.test(it.title))).toBe(false);
   });
 
   it('evidenceForTopic returns best evidence for a topic id or keyword', () => {

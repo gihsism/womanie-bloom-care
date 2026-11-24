@@ -209,6 +209,20 @@ export const SUBSTANCE_TITLE_BOOST = 1.3;
 export const SUBSTANCE_KEYWORD_BOOST = 1.1;
 /** Lift for pregnancy items when the question itself says pregnant/pregnancy. */
 export const PREGNANCY_QUERY_BOOST = 1.1;
+/**
+ * For a pregnancy question, an item whose title is about the time after
+ * birth or the baby (and never names pregnancy) answers a different
+ * question: e.g. paracetamol for perineal pain after birth, or for a
+ * preterm baby's heart duct. It gets no pregnancy lift and this factor.
+ */
+export const AFTER_BIRTH_TITLE_FACTOR = 0.85;
+const AFTER_BIRTH_TITLE = /\b(postpartum|post-partum|postnatal|after (child)?birth|puerper\w*|newborns?|neonat\w*|preterm infants?|infants?)\b/i;
+const PREGNANCY_TITLE = /\b(pregnan\w*|prenatal|antenatal|in utero|gestation\w*|during (labou?r|childbirth))\b/i;
+
+/** True when a title is about after birth or the baby, not about pregnancy. */
+export function isAfterBirthTitle(title: string): boolean {
+  return AFTER_BIRTH_TITLE.test(title) && !PREGNANCY_TITLE.test(title);
+}
 
 function stem(w: string): string {
   if (w.length > 5 && w.endsWith('ies')) return w.slice(0, -3) + 'y';
@@ -397,7 +411,8 @@ function stageFactor(item: ResearchItem, stage: LifeStage | null): number {
  * factor, x evidence boost, with a small recency nudge. Words in a topic
  * label's bracketed example list count like a summary hit (1). A medicine
  * the question names lifts items with it in the title (x1.3) or own
- * keywords (x1.1); "pregnant" in the question lifts pregnancy items (x1.1).
+ * keywords (x1.1); "pregnant" in the question lifts pregnancy items (x1.1)
+ * and lowers items whose title is about after birth or the baby (x0.85).
  */
 export function searchItems(
   items: ResearchItem[],
@@ -457,7 +472,13 @@ export function searchItems(
     const recency = 1 + Math.max(0, 10 - (nowYear - it.item.year)) * 0.005;
     const cochrane = /cochrane/i.test(it.item.journal) ? COCHRANE_BOOST : 1;
     const substance = substanceFactor(it, substances);
-    const pregnancy = asksPregnancy && it.item.lifeStages.includes('pregnancy') ? PREGNANCY_QUERY_BOOST : 1;
+    const pregnancy = !asksPregnancy
+      ? 1
+      : isAfterBirthTitle(it.item.title)
+        ? AFTER_BIRTH_TITLE_FACTOR
+        : it.item.lifeStages.includes('pregnancy')
+          ? PREGNANCY_QUERY_BOOST
+          : 1;
     const score =
       base * stageFactor(it.item, stage) * EVIDENCE_BOOST[it.item.evidenceLevel] * cochrane * recency * substance * pregnancy;
     if (opts.minScore && score < opts.minScore) continue;

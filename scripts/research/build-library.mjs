@@ -23,6 +23,9 @@
 //   --fetch-only     stop after step 1
 //   --limit N        summarise at most N new records (for a test run)
 //   --refresh        ignore both caches
+//   --only a,b       search PubMed for these topic ids only (no landmarks)
+//                    and merge the hits into the cached records, so new
+//                    topics can be added without re-running every search
 //
 // Env
 //   ANTHROPIC_API_KEY   read from the environment or from .env.local in
@@ -48,6 +51,8 @@ const args = process.argv.slice(2);
 const flag = (f) => args.includes(f);
 const limitIdx = args.indexOf('--limit');
 const LIMIT = limitIdx >= 0 ? Number(args[limitIdx + 1]) : Infinity;
+const onlyIdx = args.indexOf('--only');
+const ONLY = onlyIdx >= 0 ? new Set(String(args[onlyIdx + 1] || '').split(',').map((s) => s.trim()).filter(Boolean)) : null;
 const MODEL = process.env.RESEARCH_MODEL || 'claude-sonnet-5-5';
 const MIN_YEAR = 2015;
 // Multiplies every topic's `max` (TOPIC_SCALE=6 grows the library ~6x).
@@ -153,10 +158,15 @@ function evidenceLevel(rec) {
   return 'study';
 }
 
-async function fetchAll() {
+async function fetchAll(seed = null) {
   /** pmid -> { topics:Set, stages:Set, pass } */
   const assigned = new Map();
+  // --only: records already cached count as "picked by an earlier topic",
+  // exactly as in a full build (they gain the new topic but do not use
+  // its quota).
+  for (const rec of seed || []) assigned.set(rec.pmid, { topics: new Set(rec.topics), stages: new Set(rec.stages), pass: 'cached' });
   for (const topic of TOPICS) {
+    if (ONLY && !ONLY.has(topic.id)) continue;
     const max = Math.max(1, Math.round((topic.max ?? 4) * SCALE));
     const quota = { guideline: Math.ceil(max / 3), cochrane: Math.ceil(max / 3) };
     const picked = [];
@@ -181,7 +191,7 @@ async function fetchAll() {
   // Landmarks: fetch a few candidates per title search and keep the first
   // whose fetched title really is the named trial.
   const landmarkIds = new Map();
-  for (const lm of LANDMARKS) {
+  for (const lm of ONLY ? [] : LANDMARKS) {
     const ids = await esearch(lm.query, 5);
     const cands = ids.length ? await efetch(ids) : [];
     const hit = cands.find((c) => c.title.toLowerCase().includes(lm.mustInclude));
@@ -189,10 +199,15 @@ async function fetchAll() {
     else console.warn(`  landmark ${lm.id}: not found, skipped`);
   }
 
-  const allIds = [...new Set([...assigned.keys(), ...landmarkIds.keys()])];
+  const seeded = new Map((seed || []).map((r) => [r.pmid, r]));
+  const allIds = [...new Set([...assigned.keys(), ...landmarkIds.keys()])].filter((id) => !seeded.has(id));
   console.log(`Fetching ${allIds.length} PubMed records…`);
   const recs = await efetch(allIds);
-  const records = [];
+  // Cached records keep their fields; only their topics/stages can grow.
+  const records = [...seeded.values()].map((r) => {
+    const a = assigned.get(r.pmid);
+    return r.landmark || !a ? r : { ...r, topics: [...a.topics], stages: [...a.stages] };
+  });
   for (const rec of recs) {
     const a = assigned.get(rec.pmid);
     const lm = landmarkIds.get(rec.pmid);
@@ -347,6 +362,37 @@ function displayJournal(title) {
   return t || title;
 }
 
+// Items whose subject is the baby itself (a newborn/infant treatment or
+// supplement) with no pregnancy/mother/birth wording in the title. A topic
+// adds its stages to every record its search returned, so e.g. a review of
+// paracetamol for a preterm baby's heart duct, found by the "paracetamol in
+// pregnancy" search, got the 'pregnancy' stage and topped pregnancy
+// questions. For these items the stages Claude read from the abstract are
+// used alone; the topic's stages are not merged in.
+const INFANT_TITLE = /\b(newborns?|neonat\w*|preterm (infants?|babies|neonates)|low[- ]birth[- ]weight (infants?|babies)|infants?|babies|baby)\b/i;
+const MATERNAL_TITLE = /\b(pregnan\w*|prenatal|antenatal|maternal|mothers?|women|woman|gestation\w*|gravidarum|obstetric\w*|labou?r|birth(?![- ]?weight)|childbirth|deliver\w*|caesarean|cesarean|breast[- ]?fe\w*|breast ?milk|human milk|lactat\w*|in utero|fetal|foetal|fetus|perinatal|intrapartum|embryo\w*|ivf|twins?|parents?|outcomes?)\b/i;
+export function isInfantOnlyTitle(title) {
+  return INFANT_TITLE.test(title) && !MATERNAL_TITLE.test(title);
+}
+
+/**
+ * The stages Claude read from the abstract, plus the stages of the topics
+ * whose searches found the record (topics add recall). Two exceptions:
+ *  - an item about the baby only keeps the abstract's stages alone;
+ *  - 'pregnancy' is a safety claim, so a topic does not add it when the
+ *    abstract's stages share none with the topic's (the search caught an
+ *    item from another stage: coffee after a caesarean found by "caffeine
+ *    in pregnancy", NSAIDs for UTIs found by "NSAIDs in pregnancy").
+ */
+export function mergeStages(title, summaryStages, topicStages) {
+  const own = (summaryStages || []).filter((x) => STAGES.includes(x));
+  let topic = topicStages || [];
+  if (own.length > 0 && isInfantOnlyTitle(title)) topic = [];
+  else if (own.length > 0 && !topic.some((x) => own.includes(x))) topic = topic.filter((x) => x !== 'pregnancy');
+  const merged = [...own, ...topic];
+  return STAGES.filter((x) => merged.includes(x));
+}
+
 function assemble(records, cache) {
   const items = [];
   const rejected = { excluded: 0, invalid: 0, missing: 0 };
@@ -363,7 +409,7 @@ function assemble(records, cache) {
     const org = clean(s.organisation);
     const organisation = level === 'guideline' && org && haystack.includes(org.toLowerCase()) ? org : '';
     const journal = displayJournal(rec.journal);
-    const lifeStages = [...new Set([...(s.life_stages || []), ...rec.stages])].filter((x) => STAGES.includes(x));
+    const lifeStages = mergeStages(rec.title, s.life_stages, rec.stages);
     const item = {
       id: `pmid-${rec.pmid}`,
       pmid: rec.pmid,
@@ -417,7 +463,14 @@ function assemble(records, cache) {
 
 async function main() {
   let records = flag('--refresh') ? null : readJson(RECORDS, null);
-  if (!records || !flag('--skip-fetch')) {
+  if (ONLY) {
+    const unknown = [...ONLY].filter((id) => !TOPICS.some((t) => t.id === id));
+    if (unknown.length) throw new Error(`--only: unknown topic ids ${unknown.join(', ')}`);
+    if (!records) throw new Error('--only needs .cache/records.json from a full build');
+    console.log(`Searching PubMed for ${[...ONLY].join(', ')} only…`);
+    records = await fetchAll(records);
+    writeJson(RECORDS, records);
+  } else if (!records || !flag('--skip-fetch')) {
     console.log('Searching PubMed…');
     records = await fetchAll();
     writeJson(RECORDS, records);
