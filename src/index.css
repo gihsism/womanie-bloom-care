@@ -5,68 +5,151 @@
 /* Womanie Health App Design System - Soft & Calming Colors */
 
 @layer base {
+  /* Idea 4 "Colour by stage" (2026-11-24): white content, near-black ink,
+     one calm colour set per life stage. The stage set is switched in ONE
+     place: <html data-stage="…"> (src/lib/stageTheme.ts) picks a block
+     below; every component reads the tokens, never a hex of its own.
+     Each stage has five colours (HSL, hex in the comment):
+       --stage-head        full-bleed header background
+       --stage-head-ink    big text on the header
+       --stage-head-muted  small text on the header and its fact boxes
+       --stage-accent      links, icons, active tab, badges (white text on it)
+       --stage-tint        tile background
+     Every text pair is WCAG AA (4.5:1), checked by src/lib/stageColors.test.ts. */
   :root {
-    /* Version 8 "gallery wall", colour option C (2026-11-15): blush wall, ink, raspberry accent,
-       burnt orange reserved for out-of-range values (never pink). */
-    --background: 15 45% 94%;
-    --foreground: 340 10% 12%;
+    /* Neutrals */
+    --background: 0 0% 100%;          /* #FFFFFF */
+    --foreground: 0 2% 11%;           /* #1C1B1B ink */
+    --line: 22 17% 91%;               /* #ECE7E4 hairlines */
 
-    --card: 15 55% 97%;
-    --card-foreground: 340 10% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 2% 11%;
 
-    --popover: 15 55% 98%;
-    --popover-foreground: 340 10% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 2% 11%;
 
-    /* Raspberry - the single accent */
-    --primary: 336 66% 46%;
-    --primary-foreground: 15 55% 98%;
+    --primary-foreground: 0 0% 100%;
 
     /* Ink - solid buttons, strong text */
-    --secondary: 340 10% 12%;
-    --secondary-foreground: 15 55% 97%;
+    --secondary: 0 2% 11%;
+    --secondary-foreground: 0 0% 100%;
 
-    /* Soft raspberry */
-    --accent: 336 52% 60%;
     --accent-foreground: 0 0% 100%;
 
-    --muted: 15 30% 89%;
-    --muted-foreground: 10 8% 32%;
+    --muted: 24 22% 95%;              /* #F6F3F1 quiet fills */
+    --muted-foreground: 0 3% 38%;     /* #635E5E, 6.4:1 on white */
 
-    --purple: 336 52% 60%;
     --purple-foreground: 0 0% 100%;
-
-    --turquoise: 10 8% 32%;
+    --turquoise: 0 3% 38%;
     --turquoise-foreground: 0 0% 100%;
 
-    /* Low / out of range */
+    /* Low / out of range (never the stage colour) */
     --destructive: 18 85% 38%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 12 22% 80%;
-    --input: 12 20% 76%;
-    --ring: 336 66% 46%;
+    --border: 22 17% 91%;             /* = --line */
+    --input: 20 5% 58%;               /* form-field outline, 3:1 on white */
 
-    --radius: 0.875rem;
+    --radius: 1rem;
 
-    --chart-1: 336 66% 46%;
-    --chart-2: 340 10% 12%;
-    --chart-3: 336 50% 72%;
-    --chart-4: 10 6% 46%;
+    --chart-2: 0 2% 11%;
+    --chart-4: 0 3% 46%;
     --chart-5: 18 85% 38%;
 
-    --sidebar-background: 15 45% 94%;
-    --sidebar-foreground: 340 10% 12%;
-    --sidebar-primary: 336 66% 46%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 2% 11%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 15 30% 89%;
-    --sidebar-accent-foreground: 340 10% 12%;
-    --sidebar-border: 12 22% 80%;
-    --sidebar-ring: 336 66% 46%;
+    --sidebar-accent: 24 22% 95%;
+    --sidebar-accent-foreground: 0 2% 11%;
+    --sidebar-border: 22 17% 91%;
 
-    --gradient-pink: linear-gradient(135deg, hsl(336 66% 46%) 0%, hsl(336 58% 58%) 100%);
-    --gradient-calm: linear-gradient(135deg, hsl(340 10% 12%) 0%, hsl(340 8% 24%) 100%);
-    --gradient-nature: linear-gradient(135deg, hsl(340 10% 14%) 0%, hsl(340 8% 28%) 100%);
-    --gradient-wellness: linear-gradient(135deg, hsl(336 66% 46%) 0%, hsl(340 10% 14%) 100%);
+    /* Default stage set (period tracking) until the profile has loaded. */
+    --stage-head: 345.6 64.1% 92.4%;        /* #F8DFE5 */
+    --stage-head-ink: 336.6 55.2% 22.7%;    /* #5A1A33 */
+    --stage-head-muted: 336.5 39.4% 34.3%;  /* #7A3550 */
+    --stage-accent: 339.8 48.8% 40.6%;      /* #9A3557 */
+    --stage-tint: 346.2 61.9% 95.9%;        /* #FBEEF1 */
+  }
+
+  [data-stage="pre-menstrual"] {      /* peach */
+    --stage-head: 20.6 81.4% 91.6%;         /* #FBE4D8 */
+    --stage-head-ink: 18.3 64.3% 22%;       /* #5C2A14 */
+    --stage-head-muted: 19.8 56.4% 30.6%;   /* #7A3F22 */
+    --stage-accent: 18.1 67.5% 37.5%;       /* #A0461F */
+    --stage-tint: 21 83.3% 95.3%;           /* #FDF0E9 */
+  }
+  [data-stage="menstrual-cycle"] {    /* warm rose */
+    --stage-head: 345.6 64.1% 92.4%;        /* #F8DFE5 */
+    --stage-head-ink: 336.6 55.2% 22.7%;    /* #5A1A33 */
+    --stage-head-muted: 336.5 39.4% 34.3%;  /* #7A3550 */
+    --stage-accent: 339.8 48.8% 40.6%;      /* #9A3557 */
+    --stage-tint: 346.2 61.9% 95.9%;        /* #FBEEF1 */
+  }
+  [data-stage="contraception"] {      /* lavender */
+    --stage-head: 250 47.4% 92.5%;          /* #E6E3F5 */
+    --stage-head-ink: 250.6 40.8% 24.5%;    /* #2E2558 */
+    --stage-head-muted: 251.2 31.9% 36.3%;  /* #4A3F7A */
+    --stage-accent: 251.3 36.2% 46.1%;      /* #5B4BA0 */
+    --stage-tint: 250.9 52.4% 95.9%;        /* #F1EFFA */
+  }
+  [data-stage="conception"] {         /* honey */
+    --stage-head: 40 68.4% 88.8%;           /* #F6E9CF */
+    --stage-head-ink: 37.2 64.4% 17.6%;     /* #4A3410 */
+    --stage-head-muted: 37.9 64.6% 25.5%;   /* #6B4C17 */
+    --stage-accent: 37.3 85.2% 29.2%;       /* #8A5A0B */
+    --stage-tint: 40.9 68.8% 93.7%;         /* #FAF3E4 */
+  }
+  [data-stage="ivf"] {                /* sky */
+    --stage-head: 208.8 55.6% 91.2%;        /* #DCE9F5 */
+    --stage-head-ink: 211.8 60.7% 22%;      /* #16365A */
+    --stage-head-muted: 212.8 45.5% 32.4%;  /* #2D4F78 */
+    --stage-accent: 213.1 53.2% 39.4%;      /* #2F5F9A */
+    --stage-tint: 207.7 56.5% 95.5%;        /* #EDF4FA */
+  }
+  [data-stage="pregnancy"] {          /* sage */
+    --stage-head: 157.5 30.8% 89.8%;        /* #DDEDE7 */
+    --stage-head-ink: 171.2 48.2% 16.7%;    /* #163F39 */
+    --stage-head-muted: 170.2 31.4% 26.9%;  /* #2F5A53 */
+    --stage-accent: 171.4 42.3% 29.2%;      /* #2B6A61 */
+    --stage-tint: 156 31.3% 93.7%;          /* #EAF4F0 */
+  }
+  [data-stage="postpartum"] {         /* mauve */
+    --stage-head: 307.5 34.8% 91%;          /* #F0E0EE */
+    --stage-head-ink: 308.2 41.5% 20.8%;    /* #4B1F45 */
+    --stage-head-muted: 308.8 29.3% 32.2%;  /* #6A3A63 */
+    --stage-accent: 308 37.3% 39.4%;        /* #8A3F80 */
+    --stage-tint: 312 41.7% 95.3%;          /* #F8EEF6 */
+  }
+  [data-stage="menopause"] {          /* moss */
+    --stage-head: 73.6 35.5% 87.8%;         /* #E6EBD5 */
+    --stage-head-ink: 73.2 50.6% 15.9%;     /* #343D14 */
+    --stage-head-muted: 72.7 40.6% 25.1%;   /* #4F5A26 */
+    --stage-accent: 73.2 56.2% 26.9%;       /* #5A6B1E */
+    --stage-tint: 76.4 35.5% 93.9%;         /* #F2F5EA */
+  }
+  [data-stage="post-menopause"] {     /* slate */
+    --stage-head: 218.2 22.4% 90.4%;        /* #E1E5EC */
+    --stage-head-ink: 214.6 26% 19.6%;      /* #25303F */
+    --stage-head-muted: 215.2 18.2% 31.2%;  /* #414D5E */
+    --stage-accent: 216 21.3% 36.9%;        /* #4A5A72 */
+    --stage-tint: 220 23.1% 94.9%;          /* #EFF1F5 */
+  }
+
+  /* The shared tokens follow the stage. Declared on every element that
+     sets a stage so a nested data-stage (the dev preview) re-derives them. */
+  :root, [data-stage] {
+    --primary: var(--stage-accent);
+    --ring: var(--stage-accent);
+    --accent: var(--stage-accent);
+    --purple: var(--stage-accent);
+    --chart-1: var(--stage-accent);
+    --chart-3: var(--stage-head);
+    --sidebar-primary: var(--stage-accent);
+    --sidebar-ring: var(--stage-accent);
+    --gradient-pink: linear-gradient(135deg, hsl(var(--stage-accent)) 0%, hsl(var(--stage-head-muted)) 100%);
+    --gradient-calm: linear-gradient(135deg, hsl(var(--foreground)) 0%, hsl(0 2% 24%) 100%);
+    --gradient-nature: linear-gradient(135deg, hsl(var(--foreground)) 0%, hsl(0 2% 28%) 100%);
+    --gradient-wellness: linear-gradient(135deg, hsl(var(--stage-accent)) 0%, hsl(var(--stage-head-ink)) 100%);
   }
 
   .dark {
@@ -121,19 +204,17 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    background-image: radial-gradient(70% 45% at 70% 30%, hsl(15 55% 97%) 0%, transparent 70%);
-    background-attachment: fixed;
   }
 
-  /* Version 8 typography: Fraunces for headings and big numbers, Jost for
-     reading, DM Mono for small uppercase labels. */
+  /* Idea 4 typography: Figtree everywhere (tailwind fontFamily.sans has
+     the fallback stack); headings bold and slightly tight. DM Mono stays
+     for the few small uppercase labels. */
   h1, h2, h3, .font-display {
-    font-family: "Fraunces", Georgia, serif;
-    font-optical-sizing: auto;
+    font-family: theme('fontFamily.display');
     letter-spacing: -0.01em;
   }
-  h1 { font-weight: 500; }
-  h2, h3 { font-weight: 500; }
+  h1 { font-weight: 800; }
+  h2, h3 { font-weight: 700; }
 
   /* When the bottom tab bar is visible (BottomNav toggles this class),
      pad the page so the fixed bar never covers the last row of content.
@@ -318,11 +399,4 @@ body::before {
   top: env(safe-area-inset-top);
 }
 
-/* Version 8: serif headings stay light. Fraunces is loaded at 400-600;
-   older markup asks for font-bold/semibold, which would look heavy (or
-   faux-bold), so headings settle at 500. */
-:is(h1, h2, h3).font-bold,
-:is(h1, h2, h3).font-semibold,
-:is(h1, h2, h3).font-extrabold {
-  font-weight: 500;
-}
+/* Headings take the weight their markup asks for (Figtree has 400-800). */

@@ -15,11 +15,22 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Jost', 'Avenir Next', 'Futura', 'system-ui', 'sans-serif'],
-        display: ['Fraunces', 'Georgia', 'serif'],
+        // Idea 4: one family everywhere; a solid system fallback stack.
+        sans: ['Figtree', 'ui-sans-serif', 'system-ui', '-apple-system', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+        display: ['Figtree', 'ui-sans-serif', 'system-ui', '-apple-system', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
         mono: ['"DM Mono"', 'ui-monospace', 'Menlo', 'monospace'],
       },
       colors: {
+        // Per-stage colours (index.css, switched by <html data-stage="…">).
+        stage: {
+          head: "hsl(var(--stage-head) / <alpha-value>)",
+          ink: "hsl(var(--stage-head-ink) / <alpha-value>)",
+          muted: "hsl(var(--stage-head-muted) / <alpha-value>)",
+          accent: "hsl(var(--stage-accent) / <alpha-value>)",
+          tint: "hsl(var(--stage-tint) / <alpha-value>)",
+        },
+        ink: "hsl(var(--foreground) / <alpha-value>)",
+        line: "hsl(var(--line) / <alpha-value>)",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

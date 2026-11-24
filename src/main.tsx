@@ -3,6 +3,10 @@ import * as Sentry from '@sentry/react';
 import App from './App.tsx';
 import './index.css';
 import { reloadOnceForStaleChunk } from './lib/staleChunk';
+import { initStageTheme } from './lib/stageTheme';
+
+// Stage colours before first paint (the device's last-seen life stage).
+initStageTheme();
 
 if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({

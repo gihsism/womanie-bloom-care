@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import type { LifeStage } from '@/components/dashboard/DashboardHeader';
 import { normalizeLifeStage } from '@/lib/lifeStage';
+import { applyStageTheme } from '@/lib/stageTheme';
 
 // The profile + period facts that Home and the stage page (/dashboard/stage)
 // both need, and the handlers the stage trackers call to save them. Moved
@@ -66,6 +67,11 @@ export function useStageProfile() {
   useEffect(() => {
     loadPeriodData();
   }, [loadPeriodData]);
+
+  // The page colours follow the stage (idea 4): one attribute on <html>.
+  useEffect(() => {
+    if (selectedMode) applyStageTheme(selectedMode);
+  }, [selectedMode]);
 
   const fetchProfile = useCallback(async (userId: string) => {
     try {
