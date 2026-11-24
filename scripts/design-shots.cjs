@@ -6,6 +6,8 @@
 //   npx vite --port 8093 &
 //   node scripts/design-shots.cjs [baseUrl] [stage] [only] [outDir]
 //   node scripts/design-shots.cjs [baseUrl] doctor [only] [outDir]   (doctor side)
+//   node scripts/design-shots.cjs [baseUrl] first-run [only] [outDir] (log in, sign up, Welcome, onboarding)
+//   node scripts/design-shots.cjs [baseUrl] public [only] [outDir]    (landing and the other public pages)
 //
 // Needs Playwright (PLAYWRIGHT_DIR, default ~/.cache/womanie-ux/node_modules).
 const os = require('os');
@@ -16,7 +18,8 @@ const BASE = process.argv[2] || 'http://localhost:8093';
 const STAGE = process.argv[3] || 'pregnancy';
 const ONLY = process.argv[4] || '';
 const DOCTOR_SIDE = STAGE === 'doctor';
-const OUT = process.argv[5] || path.join(os.homedir(), '.cache/womanie-ux/build4', DOCTOR_SIDE ? 'doctor' : 'round2');
+const FLOW_SIDE = STAGE === 'first-run' || STAGE === 'public';
+const OUT = process.argv[5] || path.join(os.homedir(), '.cache/womanie-ux/build4', DOCTOR_SIDE ? 'doctor' : FLOW_SIDE ? 'round4' : 'round2');
 const UID = 'u-demo';
 const day = (n, h = 9, m = 0) => { const d = new Date(); d.setHours(h, m, 0, 0); d.setDate(d.getDate() + n); return d; };
 const ymd = (d) => d.toISOString().slice(0, 10);
@@ -79,11 +82,29 @@ const sse = () => [
   'data: [DONE]', '',
 ].join('\n\n');
 
+// Public pages and the first run: a few doctors and library entries.
+const DOCTORS = [
+  { id: 'dp1', user_id: 'doc1', full_name: 'Laura Meier', title: 'Dr.', specialty: 'Gynaecology & obstetrics', specialties: ['Gynaecology & obstetrics'], bio: 'Gynaecologist in Zürich. Pregnancy care, cycle problems, menopause.', avatar_url: null, is_verified: true, years_experience: 14, languages: ['English', 'German'], rating: 4.9, review_count: 38, consultation_settings: { consultation_price: 120, currency: 'CHF', consultation_duration: 30, video_enabled: true, is_available: true } },
+  { id: 'dp2', user_id: 'doc2', full_name: 'Sara Rossi', title: null, specialty: 'Midwife', specialties: ['Midwife'], bio: 'Midwife. Pregnancy, birth preparation and the weeks after birth.', avatar_url: null, is_verified: true, years_experience: 9, languages: ['English', 'Italian'], rating: 4.8, review_count: 21, consultation_settings: { consultation_price: 80, currency: 'CHF', consultation_duration: 20, video_enabled: true, is_available: true } },
+];
+const LIB_ITEM = (id, title, source, year, evidenceLevel, summary) => ({ id, pmid: id, title, source, year, evidenceLevel, certainty: 'moderate', landmark: false, url: 'https://example.org/' + id, summary, keyPoints: [], lifeStages: ['pregnancy'], topics: ['nutrition'], tags: [] });
+const LIBRARY = { version: '1', disclaimer: '', stage: 'all', topic: null, total: 3,
+  topics: [{ id: 'nutrition', label: 'Food and supplements', count: 2 }, { id: 'pain', label: 'Pain', count: 1 }],
+  items: [
+    LIB_ITEM('101', 'Iron supplements in pregnancy', 'Cochrane Review', 2024, 'systematic review', 'Daily iron lowers the chance of anaemia at birth; side effects such as constipation are common.'),
+    LIB_ITEM('102', 'Caffeine and pregnancy outcomes', 'BMJ', 2022, 'systematic review', 'Up to about 200 mg of caffeine a day (two cups of coffee) is not linked to harm.'),
+    LIB_ITEM('103', 'Antenatal care for a positive pregnancy experience', 'WHO guideline', 2016, 'guideline', 'Eight contacts with a midwife or doctor during pregnancy are recommended.'),
+  ] };
+
 const unknown = new Set();
+let anon = false; // log in / sign up / public pages: nobody is signed in
 async function route(r) {
   const req = r.request();
   const p = new URL(req.url()).pathname;
   const json = (o) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(o) });
+  if (p === '/api/auth/me' && anon) return r.fulfill({ status: 401, contentType: 'application/json', body: '{"error":"Not signed in"}' });
+  if (p === '/api/doctors/list') return json({ doctors: DOCTORS });
+  if (p === '/api/research/library') return json(LIBRARY);
   if (p === '/api/auth/me') return json({ user: { id: UID, email: 'anna@example.com', name: 'Anna Keller', hasPassword: true, created_at: day(-200).toISOString() } });
   if (p === '/api/db') {
     let b = {};
@@ -177,6 +198,60 @@ async function doctorRoute(r) {
   return json({});
 }
 
+// ---- First run: log in, sign up, Welcome, then the onboarding screens ----
+// An entry's 4th field = signed out. Onboarding answers live in the
+// onboarding context (localStorage), so each shot clicks through from
+// the stage picker; the device starts with no stage remembered.
+const pick = (label) => async (p) => { await p.getByRole('radio', { name: new RegExp(label) }).click(); };
+const next = async (p) => { await p.getByRole('button', { name: /^Continue$/ }).click(); await p.waitForTimeout(400); };
+const FIRST_RUN_PAGES = [
+  ['select-type', '/auth/select-type', null, true],
+  ['login', '/auth/login', null, true],
+  ['signup', '/auth/signup', null, true],
+  ['welcome', '/welcome'],
+  ['1-stage', '/onboarding/life-stage'],
+  ['1-stage-picked', '/onboarding/life-stage', pick('Pregnancy')],
+  ['2-pregnancy-date', '/onboarding/life-stage', async (p) => { await pick('Pregnancy')(p); await next(p); }],
+  ['3-pregnancy-more', '/onboarding/life-stage', async (p) => {
+    await pick('Pregnancy')(p); await next(p);
+    await p.getByRole('tab', { name: /week/i }).click();
+    await p.getByLabel(/week/i).fill('24');
+    await next(p);
+  }],
+  ['2-cycle-date', '/onboarding/life-stage', async (p) => { await pick('Period tracking')(p); await next(p); }],
+  ['3-cycle-focus', '/onboarding/life-stage', async (p) => {
+    await pick('Period tracking')(p); await next(p);
+    await p.getByRole('button', { name: /pick a date/i }).click();
+    await p.locator('[role="gridcell"] button:not([disabled])').first().click();
+    await p.keyboard.press('Escape');
+    await next(p);
+  }],
+  ['3-cycle-focus-picked', '/onboarding/life-stage', async (p) => {
+    await pick('Period tracking')(p); await next(p);
+    await p.getByRole('button', { name: /pick a date/i }).click();
+    await p.locator('[role="gridcell"] button:not([disabled])').first().click();
+    await p.keyboard.press('Escape');
+    await next(p);
+    await p.getByRole('radio', { name: /Avoiding pregnancy/ }).click();
+  }],
+  ['4-about-you', '/onboarding/basic-info'],
+  ['5-done', '/onboarding/success'],
+];
+const PUBLIC_PAGES = [
+  ['index', '/', null, true],
+  ['product', '/product', null, true],
+  ['for-patients', '/for-patients', null, true],
+  ['pricing', '/pricing', null, true],
+  ['about', '/about', null, true],
+  ['blog', '/blog', null, true],
+  ['install', '/install', null, true],
+  ['community', '/community', null, true],
+  ['library', '/library?stage=all', null, true],
+  ['not-found', '/no-such-page', null, true],
+  ['health-statistics', '/health-statistics'],
+  ['find-doctor', '/find-doctor'],
+];
+
 const tab = (name) => async (p) => { await p.getByRole('tab', { name }).click(); };
 const DOCTOR_PAGES = [
   ['dashboard', '/doctor/dashboard'],
@@ -201,15 +276,25 @@ const DOCTOR_PAGES = [
   const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
   // Doctor side: the device remembers a patient stage (pregnancy) to prove
   // the doctor pages switch to the clinic colours anyway.
-  await ctx.addInitScript((s) => { try { localStorage.setItem('womanie_stage_theme', s); } catch { /* blocked */ } }, DOCTOR_SIDE ? 'pregnancy' : STAGE);
+  // First run / public: nothing remembered on the device.
+  if (!FLOW_SIDE) await ctx.addInitScript((s) => { try { localStorage.setItem('womanie_stage_theme', s); } catch { /* blocked */ } }, DOCTOR_SIDE ? 'pregnancy' : STAGE);
   await ctx.route('**/api/**', DOCTOR_SIDE ? doctorRoute : route);
   const p = await ctx.newPage();
   p.on('pageerror', (e) => console.log('PAGEERROR', String(e).slice(0, 300)));
-  for (const [name, url, act] of DOCTOR_SIDE ? DOCTOR_PAGES : PAGES) {
+  const list = DOCTOR_SIDE ? DOCTOR_PAGES : STAGE === 'first-run' ? FIRST_RUN_PAGES : STAGE === 'public' ? PUBLIC_PAGES : PAGES;
+  for (const [name, url, act, signedOut] of list) {
     if (ONLY && !name.startsWith(ONLY)) continue;
+    anon = Boolean(signedOut);
+    if (FLOW_SIDE) { // a fresh device for every shot
+      await p.goto(BASE + '/no-such-page', { waitUntil: 'domcontentloaded' });
+      await p.evaluate(() => { localStorage.clear(); document.documentElement.removeAttribute('data-stage'); });
+    }
     await p.goto(BASE + url, { waitUntil: 'networkidle' });
     await p.waitForTimeout(1200);
-    if (act) { await act(p); await p.waitForTimeout(600); }
+    if (act) {
+      try { await act(p); } catch (e) { console.log('ACTION FAILED', name, String(e).split('\n')[0]); }
+      await p.waitForTimeout(600);
+    }
     await p.mouse.move(1, 1); // no hover left over from the last click
     await p.evaluate(() => document.fonts.ready);
     await p.screenshot({ path: path.join(OUT, `${STAGE}-${name}.png`) });
