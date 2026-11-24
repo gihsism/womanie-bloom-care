@@ -45,7 +45,10 @@ function fixture(mode: LifeStage): Fixture {
       const start = daysFrom(-17);
       return {
         state: { ...base, row: { symptoms: ['Headache'], mood: ['sad'], notes: null }, taps: { [tapKey.symptom('Headache')]: iso(8, 10), [tapKey.mood('sad')]: iso(7, 45) } },
-        facts: { cycle: cycleDial(start, 28, new Date()), nextVisit: mode === 'pre-menstrual' ? null : visit }, signals: {},
+        // Before a first period nothing is logged yet: no cycle, just the last symptom.
+        facts: mode === 'pre-menstrual'
+          ? { lastSymptom: { name: 'Headache', date: new Date() }, nextVisit: null }
+          : { cycle: cycleDial(start, 28, new Date()), cycleStart: start, nextVisit: visit }, signals: {},
       };
     }
     case 'contraception':

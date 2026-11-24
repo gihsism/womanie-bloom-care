@@ -40,6 +40,7 @@ export function useHeaderFacts(i: Input): HeaderFacts {
   const [lastPeriod, setLastPeriod] = useState<Date | null>(null);
   const [baby, setBaby] = useState<{ name: string | null; birth_date: string | null } | null>(null);
   const [lastFeedAt, setLastFeedAt] = useState<string | null>(null);
+  const [lastSymptom, setLastSymptom] = useState<{ name: string; date: Date } | null>(null);
 
   useEffect(() => {
     if (!userId) return;
@@ -56,6 +57,14 @@ export function useHeaderFacts(i: Input): HeaderFacts {
         setNotes(((sig.data as { signal_date: string; notes: string | null }[] | null) ?? []).map(r => ({ ...r, signal_date: String(r.signal_date).slice(0, 10) })));
         const lp = (per.data as { period_start_date: string }[] | null)?.[0]?.period_start_date;
         setLastPeriod(lp ? new Date(`${String(lp).slice(0, 10)}T00:00:00`) : null);
+      }
+      if (mode === 'pre-menstrual') {
+        // Before a first period: the last symptom she logged (last 90 days).
+        const { data } = await db.from('daily_health_signals').select('signal_date, symptoms').eq('user_id', userId)
+          .gte('signal_date', format(subDays(new Date(), 90), 'yyyy-MM-dd')).order('signal_date', { ascending: false }).limit(30);
+        if (!alive) return;
+        const row = ((data as { signal_date: string; symptoms: string[] | null }[] | null) ?? []).find(r => (r.symptoms?.length ?? 0) > 0);
+        setLastSymptom(row ? { name: row.symptoms![row.symptoms!.length - 1], date: new Date(`${String(row.signal_date).slice(0, 10)}T00:00:00`) } : null);
       }
       if (mode === 'postpartum') {
         const { data } = await db.from('babies').select('id, name, birth_date').eq('user_id', userId).order('created_at', { ascending: true }).limit(1);
@@ -95,6 +104,9 @@ export function useHeaderFacts(i: Input): HeaderFacts {
     // The full personal prediction when it has loaded (as the old dial did).
     const usable = loaded && periodRecords.length > 0;
     const start = usable ? new Date(`${periodRecords[0].period_start_date}T00:00:00`) : i.periodData?.lastPeriodStart ?? null;
+    facts.cycleStart = start;
+    const todaySymptoms = i.quick.row.symptoms ?? [];
+    facts.lastSymptom = todaySymptoms.length ? { name: todaySymptoms[todaySymptoms.length - 1], date: now } : lastSymptom;
     if (start) {
       const predictedLen = usable ? differenceInDays(p.predictedPeriodStart, start) : 0;
       const okLen = predictedLen >= 15 && predictedLen <= 60;
@@ -124,7 +136,7 @@ export function useHeaderFacts(i: Input): HeaderFacts {
     const idx = IVF_PHASES.findIndex(ph => ph.key === i.ivfPhase);
     if (idx >= 0 && i.ivfStartDate) {
       const name = (k: number) => IVF_PHASES[k].label.replace(' (TWW)', '').replace('Ovarian ', '').replace(' & Culture', '');
-      facts.ivf = { phase: name(idx), next: idx < IVF_PHASES.length - 1 ? name(idx + 1) : null, day: Math.max(0, differenceInDays(now, i.ivfStartDate)) + 1 };
+      facts.ivf = { phase: name(idx), next: idx < IVF_PHASES.length - 1 ? name(idx + 1) : null, day: differenceInDays(now, i.ivfStartDate) + 1 };
     }
     const doses = i.quick.events.filter(e => e.kind === 'med_dose');
     const total = i.meds.reduce((n, m) => n + Math.max(1, m.times_per_day ?? 1), 0);

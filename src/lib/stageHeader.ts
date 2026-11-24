@@ -20,6 +20,10 @@ export interface HeaderFacts {
   kicksToday?: number;
   /** Period tracking / trying / before first period */
   cycle?: CycleDialData | null;
+  /** Start of the last period she actually logged (null = none logged). */
+  cycleStart?: Date | null;
+  /** The most recent symptom she logged (any day), for stages without a cycle yet. */
+  lastSymptom?: { name: string; date: Date } | null;
   /** The next visit (today's first, else the next one booked). */
   nextVisit?: Date | null;
   /** Contraception */
@@ -72,6 +76,7 @@ export const ago = (min: number) => {
   const d = Math.floor(min / (24 * 60));
   return d === 1 ? 'yesterday' : `${d} days ago`;
 };
+const shortName = (s: string) => (s.length <= 16 ? s : `${s.slice(0, 15).trimEnd()}…`);
 const hm = (min: number) => { const h = Math.floor(min / 60); const m = Math.round(min % 60); return h ? `${h}h ${m}m` : `${m}m`; };
 
 export function headerFor(mode: LifeStage, f: HeaderFacts): HeaderModel {
@@ -85,6 +90,11 @@ export function headerFor(mode: LifeStage, f: HeaderFacts): HeaderModel {
   switch (mode) {
     case 'pregnancy': {
       if (!f.dueDate) return m('Your pregnancy', 'Add your due date to see your week.', visit, logged);
+      const daysLeft = daysBetween(now, f.dueDate);
+      // A due date more than 40 weeks away, or long past, is a typo or an
+      // old pregnancy: never show "Week 0" or "Week 42 of 40".
+      if (daysLeft > 280) return m('Your pregnancy', 'Check your due date in Me.', visit, logged);
+      if (daysLeft < -14) return m('Is your baby here?', 'Switch to After birth in Me.', visit, logged);
       const week = Math.min(42, Math.max(0, Math.floor((now.getTime() - (f.dueDate.getTime() - 280 * DAY)) / (7 * DAY))));
       const left = Math.max(0, daysBetween(now, f.dueDate));
       const sentence = left > 0 ? `${left} day${left === 1 ? '' : 's'} to go · due ${format(f.dueDate, 'd MMM')}` : 'Due date reached · any day now';
@@ -95,11 +105,24 @@ export function headerFor(mode: LifeStage, f: HeaderFacts): HeaderModel {
     case 'menstrual-cycle':
     case 'conception':
     case 'pre-menstrual': {
-      const c = f.cycle;
+      // Before a first period nothing is predicted until she has logged one.
+      const c = mode === 'pre-menstrual' && !f.cycleStart ? null : f.cycle;
       if (!c) {
-        return mode === 'pre-menstrual'
-          ? m('No period yet', 'Tap Period when it starts.', visit, logged)
-          : m('Log your period', 'Tap Period below when it starts.', visit, logged);
+        if (mode === 'pre-menstrual') {
+          const s = f.lastSymptom;
+          const last: Fact = s ? { label: 'Last symptom', value: shortName(s.name) } : logged;
+          return m('No period yet', 'Log your first period when it comes.', last, visit);
+        }
+        return m('Log your period', 'Tap Period below when it starts.', visit, logged);
+      }
+      // A period well past its expected day: count on instead of wrapping
+      // round to a new "Day 3 of 28" nobody logged.
+      const elapsed = f.cycleStart ? daysBetween(f.cycleStart, now) : null;
+      if (elapsed != null && elapsed >= c.length) {
+        const late = elapsed - c.length + 1;
+        const lastFact: Fact = { label: 'Last period', value: format(f.cycleStart!, 'd MMM') };
+        if (late > 60) return m('Log your period', `Last one logged ${elapsed} days ago`, lastFact, visit);
+        return m(`Day ${elapsed + 1}`, `Period ${late} day${late === 1 ? '' : 's'} later than expected`, lastFact, visit);
       }
       const sentence = c.phase === 'period' ? `Period day ${c.day}`
         : c.daysToPeriod <= 1 ? `Period likely ${inDays(c.daysToPeriod)}`
@@ -122,6 +145,8 @@ export function headerFor(mode: LifeStage, f: HeaderFacts): HeaderModel {
     }
     case 'ivf': {
       if (!f.ivf) return m('Your IVF cycle', 'Set your start date and phase.', visit, logged);
+      if (f.ivf.day < 1) return m('Your IVF cycle', `Starts ${inDays(1 - f.ivf.day)}`, visit, logged);
+      if (f.ivf.day > 90) return m('Your IVF cycle', 'Set the start of your new cycle.', visit, logged);
       const doses: Fact = f.doses && f.doses.total > 0
         ? { label: 'Doses today', value: `${f.doses.taken} of ${f.doses.total}` }
         : { label: 'Doses today', value: 'None set up' };
@@ -130,8 +155,8 @@ export function headerFor(mode: LifeStage, f: HeaderFacts): HeaderModel {
     case 'postpartum': {
       const b = f.baby;
       if (!b) return m('After birth', 'Add your baby to log feeds and nappies.', visit, logged);
-      const age = b.dayOfLife == null ? b.name : b.dayOfLife < 15 ? `${b.name} · day ${b.dayOfLife}` : `${b.name} · ${Math.floor((b.dayOfLife - 1) / 7)} weeks`;
-      const sentence = b.lastFeedMin != null ? `Last feed ${ago(b.lastFeedMin)} · ${b.feedsToday} today` : 'No feeds logged yet today';
+      const age = b.dayOfLife == null || b.dayOfLife < 1 ? b.name : b.dayOfLife < 15 ? `${b.name} · day ${b.dayOfLife}` : `${b.name} · ${Math.floor((b.dayOfLife - 1) / 7)} weeks`;
+      const sentence = b.lastFeedMin != null ? `Last feed ${ago(b.lastFeedMin)} · ${b.feedsToday} today` : 'No feeds logged yet';
       return m(age, sentence, { label: 'Nappies today', value: `${b.wet} wet · ${b.dirty} dirty` }, { label: 'Sleep today', value: hm(b.sleepMin) });
     }
     case 'menopause':

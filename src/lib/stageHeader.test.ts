@@ -66,6 +66,64 @@ describe('after menopause, a recent period is flagged, not counted', () => {
   });
 });
 
+describe('no data, no made-up numbers', () => {
+  const dial = cycleDial(days(-17), 28, now);
+  it('before a first period: no cycle day or next period until one is logged', () => {
+    const h = headerFor('pre-menstrual', { now, stageName: 'Before first period', cycle: dial, nextVisit: null,
+      lastSymptom: { name: 'Headache', date: now } });
+    expect(h.big).toBe('No period yet');
+    expect(h.sentence).toBe('Log your first period when it comes.');
+    expect(h.facts).toEqual([{ label: 'Last symptom', value: 'Headache' }, { label: 'Next visit', value: 'None booked' }]);
+    const text = [h.big, h.sentence, ...h.facts.flatMap(f => [f.label, f.value])].join(' ');
+    expect(text).not.toMatch(/Day \d+ of|Period in|Next period/);
+  });
+  it('before a first period, without symptoms, falls back to what was logged today', () => {
+    const h = headerFor('pre-menstrual', { now, stageName: 'Before first period', loggedToday: 0 });
+    expect(h.facts[0]).toEqual({ label: 'Logged today', value: '0' });
+  });
+  it('before a first period, once one is logged, the cycle shows', () => {
+    const h = headerFor('pre-menstrual', { now, stageName: 'Before first period', cycle: dial, cycleStart: days(-17) });
+    expect(h.big).toBe('Day 18 of 28');
+  });
+  it('a period overdue counts on instead of wrapping round', () => {
+    const h = headerFor('menstrual-cycle', { now, stageName: 'Period tracking', cycle: cycleDial(days(-33), 28, now), cycleStart: days(-33) });
+    expect(h.big).toBe('Day 34');
+    expect(h.sentence).toBe('Period 6 days later than expected');
+    expect(h.facts[0]).toEqual({ label: 'Last period', value: '22 Oct' });
+  });
+  it('a period logged months ago asks for the next one', () => {
+    const h = headerFor('conception', { now, stageName: 'Trying to conceive', cycle: cycleDial(days(-120), 28, now), cycleStart: days(-120) });
+    expect(h.big).toBe('Log your period');
+    expect(h.sentence).toBe('Last one logged 120 days ago');
+  });
+  it('IVF without a cycle start, or one far off, shows no day count', () => {
+    expect(headerFor('ivf', { now, stageName: 'IVF' }).big).toBe('Your IVF cycle');
+    const soon = headerFor('ivf', { now, stageName: 'IVF', ivf: { phase: 'Stimulation', next: 'Trigger Shot', day: -2 } });
+    expect(soon.big).toBe('Your IVF cycle');
+    expect(soon.sentence).toBe('Starts in 3 days');
+    expect(headerFor('ivf', { now, stageName: 'IVF', ivf: { phase: 'Stimulation', next: null, day: 200 } }).big).toBe('Your IVF cycle');
+  });
+  it('after birth without a baby, or with a birth date still to come', () => {
+    const none = headerFor('postpartum', { now, stageName: 'After birth' });
+    expect(none.sentence).toBe('Add your baby to log feeds and nappies.');
+    expect(none.facts.map(f => f.label)).not.toContain('Nappies today');
+    const unborn = headerFor('postpartum', { now, stageName: 'After birth',
+      baby: { name: 'Mia', dayOfLife: -3, lastFeedMin: null, feedsToday: 0, wet: 0, dirty: 0, sleepMin: 0 } });
+    expect(unborn.big).toBe('Mia');
+    expect(unborn.sentence).toBe('No feeds logged yet');
+  });
+  it('pregnancy: no "Week 0" or "Week 42 of 40" from a wrong or old due date', () => {
+    expect(headerFor('pregnancy', { now, stageName: 'Pregnancy', dueDate: days(300) }).big).toBe('Your pregnancy');
+    expect(headerFor('pregnancy', { now, stageName: 'Pregnancy', dueDate: days(-30) }).big).toBe('Is your baby here?');
+    expect(headerFor('pregnancy', { now, stageName: 'Pregnancy', dueDate: days(-3) }).big).toBe('Week 40 of 40');
+  });
+  it('menopause without any period logged says so', () => {
+    const h = headerFor('menopause', { now, stageName: 'Menopause' });
+    expect(h.big).toBe('No hot flushes today');
+    expect(h.facts[0]).toEqual({ label: 'Since last period', value: 'Not logged' });
+  });
+});
+
 describe('ago()', () => {
   it('switches to days after 24 hours', () => {
     expect(ago(95)).toBe('1 h 35 min ago');
