@@ -164,9 +164,14 @@ export function sleepTodayMin(sleeps: Ev[], now: Date): number {
   }, 0);
 }
 
-/** "1h 20" / "42 min" for compact labels. */
+/** "1h 20" / "42 min" for compact labels; a day or more reads "2 days"
+ *  (live: an old last feed showed as "217h 25 ago"). */
 export function fmtAgo(min: number): { value: string; unit: string } {
   if (min < 60) return { value: String(min), unit: 'min' };
+  if (min >= 24 * 60) {
+    const d = Math.floor(min / (24 * 60));
+    return { value: String(d), unit: d === 1 ? 'day' : 'days' };
+  }
   const h = Math.floor(min / 60); const m = min % 60;
   return { value: m ? `${h}h ${String(m).padStart(2, '0')}` : `${h}h`, unit: '' };
 }

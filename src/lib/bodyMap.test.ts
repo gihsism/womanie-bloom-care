@@ -102,6 +102,9 @@ describe('baby body map helpers', () => {
     expect(fmtAgo(42)).toEqual({ value: '42', unit: 'min' });
     expect(fmtAgo(80)).toEqual({ value: '1h 20', unit: '' });
     expect(fmtAgo(120)).toEqual({ value: '2h', unit: '' });
+    expect(fmtAgo(23 * 60 + 59)).toEqual({ value: '23h 59', unit: '' });
+    expect(fmtAgo(24 * 60 + 5)).toEqual({ value: '1', unit: 'day' });
+    expect(fmtAgo(217 * 60 + 25)).toEqual({ value: '9', unit: 'days' });
     expect(dayOfLife('2026-11-04', now)).toBe(12);
     expect(dayOfLife(null, now)).toBeNull();
   });
