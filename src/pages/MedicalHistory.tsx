@@ -39,7 +39,6 @@ import HealthTrends from '@/components/dashboard/HealthTrends';
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import { useToast } from '@/hooks/use-toast';
 import {
-  ArrowLeft,
   FileText,
   Pill,
   FlaskConical,
@@ -1109,9 +1108,7 @@ export default function MedicalHistory() {
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="px-3 py-3 sm:px-4 sm:py-4 flex items-center gap-2 sm:gap-3">
-          <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">
-            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-          </Button>
+          {/* Records is a bottom-nav tab: no back arrow (sub-pages keep theirs). */}
           <div className="flex-1 min-w-0">
             <h1 className="text-base sm:font-display text-xl font-medium truncate">Records</h1>
             <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Your results explained in plain language</p>

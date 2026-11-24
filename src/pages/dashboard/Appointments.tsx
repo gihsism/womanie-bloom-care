@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format, formatDistanceToNowStrict, isToday, isTomorrow, isPast } from 'date-fns';
 import {
-  ArrowLeft,
   CalendarClock,
   Video,
   MapPin,
@@ -355,12 +354,8 @@ const Appointments = () => {
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="w-full px-4 py-4">
           <div className="flex items-center justify-between">
+            {/* Visits is a bottom-nav tab: no back arrow (sub-pages keep theirs). */}
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')} className="gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Back
-              </Button>
-              <div className="h-6 w-px bg-border" />
               <h1 className="font-display text-xl font-medium whitespace-nowrap">Visits</h1>
             </div>
             {/* The one primary action. With no visits it sits in the empty
