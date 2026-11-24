@@ -181,11 +181,12 @@ export function moreFor(mode: LifeStage, opts: { weeksPregnant?: number | null }
         ];
       }
       case 'postpartum':
+        // No "Baby tracker" row: the hero's own link already says it.
         return [
-          { label: 'Baby tracker', target: '/dashboard/baby' },
           { label: 'Your recovery', target: `${STAGE_PAGE}#recovery` },
           { label: 'Mood check', target: `${STAGE_PAGE}#mood-check` },
           { label: 'Birth details', target: '/dashboard/birth' },
+          meds,
         ];
       case 'menopause':
       case 'post-menopause':

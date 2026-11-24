@@ -135,3 +135,11 @@ describe('moreFor chart links', () => {
     expect(RECORDS_CHARTS).toBe('/dashboard/medical-history?tab=charts');
   });
 });
+
+describe('moreFor postpartum', () => {
+  it('does not repeat the hero\'s "Baby tracker" link', () => {
+    const labels = moreFor('postpartum').map(r => r.label);
+    expect(labels).not.toContain('Baby tracker');
+    expect(labels).toEqual(['Your recovery', 'Mood check', 'Birth details', 'Medicines']);
+  });
+});
