@@ -182,4 +182,25 @@ describe('ai-doctor-chat research sources', () => {
     await handler(req('Is coffee OK in pregnancy?'), res as unknown as VercelResponse);
     expect(res.written.some((w) => w.includes('"replace"'))).toBe(false);
   });
+
+  it('rejects an over-long new message before calling the model', async () => {
+    const res = mockRes();
+    await handler(req('x'.repeat(8001)), res as unknown as VercelResponse);
+    expect(res._status).toBe(413);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('sends only the latest turns of a very long history to the model', async () => {
+    answer = 'Fine [1].';
+    const history = Array.from({ length: 120 }, (_, i) =>
+      i % 2 ? { role: 'assistant', content: `answer ${i}` } : { role: 'user', content: `question ${i}` });
+    history.push({ role: 'user', content: 'Is coffee OK in pregnancy?' });
+    const r = req('');
+    (r.body as { messages: unknown[] }).messages = history;
+    await handler(r, mockRes() as unknown as VercelResponse);
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body as string);
+    expect(body.messages.length).toBeLessThanOrEqual(40);
+    expect(body.messages[0].role).toBe('user');
+    expect(body.messages[body.messages.length - 1].content).toBe('Is coffee OK in pregnancy?');
+  });
 });

@@ -879,6 +879,7 @@ export default function AIDoctorChat() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask about your health records..."
+                maxLength={8000}
                 className="min-h-[44px] max-h-[120px] resize-none text-sm rounded-xl"
                 rows={1}
                 disabled={isStreaming}

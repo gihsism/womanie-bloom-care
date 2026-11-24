@@ -3,6 +3,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from './_lib/auth.js';
 import { checkAndConsume } from './_lib/ratelimit.js';
 import { withSentry } from './_lib/sentry.js';
+import { applyChatLimits } from './_lib/chat-limits.js';
 import { parseConversationId, persistChatTurn } from './_lib/chatConversation.js';
 import { buildLifeContext } from './_lib/life-context.js';
 import { buildProfileContext } from './_lib/profile-context.js';
@@ -41,13 +42,14 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
   if (!ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured');
 
-  const { messages, model: requestedModel, personalContext, conversationId: rawConversationId } = req.body || {};
+  const { messages: rawMessages, model: requestedModel, personalContext, conversationId: rawConversationId } = req.body || {};
   // Groups this turn with the rest of its chat in "Past chats". Only a
   // well-formed UUID is kept; the rows are still owned by user.id.
   const conversationId = parseConversationId(rawConversationId);
-  if (!Array.isArray(messages) || messages.length === 0) {
-    return res.status(400).json({ error: 'Messages required' });
-  }
+  // Caps the history size and the new message's length (see chat-limits.ts).
+  const limited = applyChatLimits(rawMessages);
+  if (!limited.ok) return res.status(limited.status).json({ error: limited.error });
+  const messages = limited.messages;
   const model = ALLOWED_MODELS.includes(requestedModel) ? requestedModel : DEFAULT_MODEL;
 
   // Client-supplied context: things the server can't see (age lives in
