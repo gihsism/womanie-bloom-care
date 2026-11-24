@@ -167,7 +167,47 @@ const SYNONYMS: Record<string, string[]> = {
   nursing: ['breastfeeding'],
   amh: ['anti-mullerian', 'ovarian', 'reserve'],
   back: ['supine'],
+  pee: ['urine', 'urinary', 'urination'],
+  wee: ['urine', 'urinary', 'urination'],
+  burn: ['burning', 'dysuria'],
+  swollen: ['swelling', 'oedema', 'edema'],
+  tylenol: ['paracetamol', 'acetaminophen'],
+  panadol: ['paracetamol', 'acetaminophen'],
+  paracetamol: ['acetaminophen'],
+  acetaminophen: ['paracetamol'],
+  advil: ['ibuprofen'],
+  nurofen: ['ibuprofen'],
+  clomid: ['clomiphene'],
+  zoloft: ['sertraline'],
+  prozac: ['fluoxetine'],
+  folic: ['folate'],
+  folate: ['folic'],
 };
+
+// Medicines and supplements (stemmed query tokens). When a question names
+// one, items about that substance (in their title, or failing that their
+// own keywords) rank above items that only share a topic with it.
+const SUBSTANCES = new Set(
+  (
+    'paracetamol acetaminophen tylenol panadol ibuprofen advil nurofen nsaid aspirin codeine opioid triptan sumatriptan ' +
+    'antidepressant ssri snri sertraline zoloft fluoxetine prozac citalopram escitalopram paroxetine venlafaxine mirtazapine ' +
+    'lithium lamotrigine valproate antiepileptic metformin insulin letrozole clomiphene clomid inositol myo-inositol ' +
+    'progesterone progestogen dydrogesterone estrogen oestrogen estradiol testosterone tibolone levothyroxine thyroxine ' +
+    'iron folic folate iodine omega-3 dha fish-oil calcium magnesium vitamin probiotic ' +
+    'antibiotic nitrofurantoin trimethoprim cranberry fluconazole clotrimazole metronidazole antihistamine ondansetron ' +
+    'doxylamine pyridoxine ginger tranexamic mefenamic labetalol nifedipine methyldopa heparin ' +
+    'raloxifene bisphosphonate alendronate denosumab gabapentin fezolinetant clonidine misoprostol mifepristone ' +
+    'levonorgestrel ulipristal domperidone melatonin'
+  )
+    .split(' ')
+    .map(stem),
+);
+
+/** Score multipliers for items that name a substance the question names. */
+export const SUBSTANCE_TITLE_BOOST = 1.3;
+export const SUBSTANCE_KEYWORD_BOOST = 1.1;
+/** Lift for pregnancy items when the question itself says pregnant/pregnancy. */
+export const PREGNANCY_QUERY_BOOST = 1.1;
 
 function stem(w: string): string {
   if (w.length > 5 && w.endsWith('ies')) return w.slice(0, -3) + 'y';
@@ -197,11 +237,32 @@ function expandQuery(tokens: string[]): { token: string; weight: number }[] {
 
 interface IndexedItem {
   item: ResearchItem;
-  strong: Set<string>; // keywords, tags, topic ids/labels
-  topic: Set<string>; // our curated topic labels: high precision
+  strong: Set<string>; // keywords, tags, topic ids/label heads
+  topic: Set<string>; // our curated topic ids/label heads: high precision
+  /** Words from a topic label's bracketed example list: weak, like a summary hit. */
+  topicAside: Set<string>;
+  /** The item's own keywords and tags (not its topics). */
+  own: Set<string>;
   title: Set<string>;
   body: Set<string>;
   phrases: string[]; // multi-word keywords/tags, lowercased
+}
+
+/**
+ * Splits a topic label into its head and its bracketed example list.
+ * "Medicines in pregnancy (paracetamol, antidepressants)" names examples:
+ * not every item in the topic is about paracetamol, so those words must
+ * not count as a strong match for all of them. A bracket without a comma
+ * is an alias of the head ("Polycystic ovary syndrome (PCOS)") and stays.
+ */
+export function splitTopicLabel(label: string): { head: string; aside: string } {
+  let aside = '';
+  const head = label.replace(/\(([^)]*)\)/g, (_whole, inner: string) => {
+    if (!inner.includes(',')) return ` ${inner} `;
+    aside += ` ${inner}`;
+    return ' ';
+  });
+  return { head: head.replace(/\s+/g, ' ').trim(), aside: aside.trim() };
 }
 
 const indexCache = new WeakMap<ResearchItem[], IndexedItem[]>();
@@ -209,13 +270,17 @@ const indexCache = new WeakMap<ResearchItem[], IndexedItem[]>();
 function indexItems(items: ResearchItem[], topics: ResearchTopic[]): IndexedItem[] {
   const hit = indexCache.get(items);
   if (hit) return hit;
-  const topicLabel = new Map(topics.map((t) => [t.id, t.label]));
+  const topicLabel = new Map(topics.map((t) => [t.id, splitTopicLabel(t.label)]));
   const idx = items.map((item) => {
-    const topicText = item.topics.map((t) => `${t.replace(/-/g, ' ')} ${topicLabel.get(t) ?? ''}`).join(' ');
+    const topicText = item.topics.map((t) => `${t.replace(/-/g, ' ')} ${topicLabel.get(t)?.head ?? ''}`).join(' ');
+    const asideText = item.topics.map((t) => topicLabel.get(t)?.aside ?? '').join(' ');
+    const own = new Set(tokenize([...item.keywords, ...item.tags].join(' ')));
     return {
       item,
-      strong: new Set(tokenize([...item.keywords, ...item.tags, topicText].join(' '))),
+      strong: new Set([...own, ...tokenize(topicText)]),
       topic: new Set(tokenize(topicText)),
+      topicAside: new Set(tokenize(asideText)),
+      own,
       title: new Set(tokenize(item.title)),
       body: new Set(tokenize(`${item.summary} ${item.keyPoints.join(' ')}`)),
       phrases: [...item.keywords, ...item.tags].filter((k) => k.includes(' ')).map((k) => k.toLowerCase()),
@@ -283,7 +348,11 @@ export interface ScoredItem {
   score: number;
 }
 
-const EVIDENCE_BOOST: Record<EvidenceLevel, number> = { guideline: 1.25, 'systematic review': 1.1, study: 1 };
+// Kept small: evidence level breaks ties between similarly relevant items
+// but must not lift an off-subject guideline over the review that answers
+// the question (was 1.25, which put e.g. an antirheumatic-drugs guideline
+// above the paracetamol-in-pregnancy reviews).
+const EVIDENCE_BOOST: Record<EvidenceLevel, number> = { guideline: 1.15, 'systematic review': 1.1, study: 1 };
 // Cochrane reviews are the most rigorous reviews in the library.
 const COCHRANE_BOOST = 1.1;
 
@@ -300,6 +369,16 @@ function dotProduct(a: Float32Array, b: Float32Array): number {
   return s;
 }
 
+const PREGNANCY_WORDS = new Set(['pregnant', 'pregnancy', 'expecting', 'antenatal', 'prenatal'].map(stem));
+
+/** Named medicine in the title > in the item's own keywords > neither. */
+function substanceFactor(it: IndexedItem, substances: string[]): number {
+  if (substances.length === 0) return 1;
+  if (substances.some((s) => it.title.has(s))) return SUBSTANCE_TITLE_BOOST;
+  if (substances.some((s) => it.own.has(s))) return SUBSTANCE_KEYWORD_BOOST;
+  return 1;
+}
+
 function stageFactor(item: ResearchItem, stage: LifeStage | null): number {
   if (!stage) return 1;
   if (item.lifeStages.includes(stage)) return 1.5;
@@ -314,7 +393,10 @@ function stageFactor(item: ResearchItem, stage: LifeStage | null): number {
  * Score per query token: keyword/tag/topic hit 3, title hit 2, summary hit
  * 1 (synonyms count 0.7x), plus 2 per multi-word keyword found verbatim in
  * the query; then x coverage (share of query tokens matched), x life-stage
- * factor, x evidence boost, with a small recency nudge.
+ * factor, x evidence boost, with a small recency nudge. Words in a topic
+ * label's bracketed example list count like a summary hit (1). A medicine
+ * the question names lifts items with it in the title (x1.3) or own
+ * keywords (x1.1); "pregnant" in the question lifts pregnancy items (x1.1).
  */
 export function searchItems(
   items: ResearchItem[],
@@ -329,6 +411,8 @@ export function searchItems(
   const nowYear = new Date().getFullYear();
   const results: ScoredItem[] = [];
   const sem = query.trim() ? opts.semantic ?? null : null;
+  const substances = expanded.map((e) => e.token).filter((t) => SUBSTANCES.has(t));
+  const asksPregnancy = qTokens.some((t) => PREGNANCY_WORDS.has(t));
   const candidates: { it: IndexedItem; base: number; strength: number }[] = [];
 
   for (const it of indexItems(items, topics)) {
@@ -341,7 +425,7 @@ export function searchItems(
       let s = 0;
       if (it.strong.has(token)) s = it.topic.has(token) ? 4 : 3;
       else if (it.title.has(token)) s = 2;
-      else if (it.body.has(token)) s = 1;
+      else if (it.body.has(token) || it.topicAside.has(token)) s = 1;
       if (s > 0) {
         raw += s * weight;
         matched.add(token);
@@ -371,7 +455,10 @@ export function searchItems(
     const base = sem ? blendScores(kwBase, strength, sem.weight, ref) : kwBase;
     const recency = 1 + Math.max(0, 10 - (nowYear - it.item.year)) * 0.005;
     const cochrane = /cochrane/i.test(it.item.journal) ? COCHRANE_BOOST : 1;
-    const score = base * stageFactor(it.item, stage) * EVIDENCE_BOOST[it.item.evidenceLevel] * cochrane * recency;
+    const substance = substanceFactor(it, substances);
+    const pregnancy = asksPregnancy && it.item.lifeStages.includes('pregnancy') ? PREGNANCY_QUERY_BOOST : 1;
+    const score =
+      base * stageFactor(it.item, stage) * EVIDENCE_BOOST[it.item.evidenceLevel] * cochrane * recency * substance * pregnancy;
     if (opts.minScore && score < opts.minScore) continue;
     results.push({ item: it.item, score: Math.round(score * 100) / 100 });
   }

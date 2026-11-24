@@ -58,12 +58,13 @@ export const EVAL_QUESTIONS: EvalQuestion[] = [
 /**
  * "Medicine + pregnancy" questions, kept apart from EVAL_QUESTIONS so their
  * known misses do not lower the main floor. A drug-specific topic and the
- * drug in the title are both required. Known weakness (Nov 2026, 2,493
- * items): the paracetamol questions rank migraine/headache guidelines and
+ * drug in the title are both required. History (Nov 2026, 2,493 items):
+ * the paracetamol questions used to rank migraine/headache guidelines and
  * other "Medicines in pregnancy" guidelines above the paracetamol reviews,
- * because that topic's label names paracetamol, so every item in it gets
- * a topic-strength hit for "paracetamol", and guidelines get a 1.25x boost
- * over reviews (1.1x).
+ * because that topic's label names paracetamol (every item in it got a
+ * topic-strength hit) and guidelines got 1.25x vs reviews 1.1x. Fixed in
+ * library.ts: bracketed label examples count weakly, a drug named in the
+ * title lifts the item, guidelines get 1.15x.
  */
 export const DRUG_PREGNANCY_QUESTIONS: EvalQuestion[] = [
   { q: 'Is it safe to take paracetamol for a headache in pregnancy?', stage: 'pregnancy', topics: ['paracetamol-pregnancy'], title: 'paracetamol|acetaminophen|analgesic' },
@@ -71,6 +72,30 @@ export const DRUG_PREGNANCY_QUESTIONS: EvalQuestion[] = [
   { q: 'does taking tylenol in pregnancy cause autism?', stage: 'pregnancy', topics: ['paracetamol-pregnancy'], title: 'paracetamol|acetaminophen|analgesic' },
   { q: 'can I keep taking my antidepressant (sertraline) while pregnant?', stage: 'pregnancy', topics: ['medications-pregnancy'], title: 'antidepress|ssri|sertraline|psychotropic' },
   { q: 'should I take low dose aspirin in pregnancy?', stage: 'pregnancy', topics: ['aspirin-pregnancy'], title: 'aspirin|antiplatelet' },
+];
+
+/**
+ * Mixed "named medicine or supplement" questions outside pregnancy-only
+ * wording. Expected items checked by hand against library.json (Nov 2026,
+ * 2,493 items): the title must name the substance (and, where the
+ * question is about a specific outcome, that outcome).
+ */
+export const MIXED_MEDICINE_QUESTIONS: EvalQuestion[] = [
+  // "Sertraline and breastfeeding: review and meta-analysis"
+  { q: 'is it ok to take sertraline while breastfeeding?', stage: 'postpartum', topics: ['medicines-breastfeeding', 'postnatal-depression', 'breastfeeding'], title: 'sertraline|antidepress|ssri' },
+  // SOGC No. 469 iron guideline, "Intermittent oral iron supplementation during pregnancy", ...
+  { q: 'do I need iron tablets in pregnancy?', stage: 'pregnancy', topics: ['anaemia-pregnancy', 'iron-deficiency'], title: '\\biron\\b' },
+  // "Type and timing of menopausal hormone therapy and breast cancer risk", WHI trials, ...
+  { q: 'does HRT raise my risk of breast cancer?', stage: 'menopause', topics: ['hrt-benefits-risks', 'breast-health'], title: 'breast' },
+  // Metformin items are spread over several topics; the title must name both.
+  {
+    q: 'does metformin help with PCOS?',
+    stage: 'menstrual-cycle',
+    topics: ['pcos', 'ovarian-cysts', 'combined-pill', 'iui', 'ivf-outcomes', 'ovarian-stimulation', 'ivf-lifestyle', 'lifestyle-fertility', 'preconception-care', 'weight-diet', 'hypertension-pregnancy'],
+    title: 'metformin.*(pcos|polycystic)|(pcos|polycystic).*metformin',
+  },
+  // USPSTF / SOGC No. 427 folic acid guidelines, "Folic acid supplementation during the preconception period"
+  { q: 'what dose of folic acid should I take when trying to get pregnant?', stage: 'conception', topics: ['folic-acid'], title: 'folic|folate' },
 ];
 
 export interface EvalResult {
