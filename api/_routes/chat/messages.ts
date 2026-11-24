@@ -2,6 +2,7 @@ import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from '../../_lib/auth.js';
 import { withSentry } from '../../_lib/sentry.js';
+import { isMissingColumnError } from '../../_lib/chatConversation.js';
 
 // Upper bound on a localStorage history import (see POST).
 const MAX_IMPORT = 500;
@@ -21,25 +22,31 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const before = typeof req.query.before === 'string' ? req.query.before : null;
     const limit = Math.min(Math.max(parseInt(req.query.limit as string, 10) || 50, 1), 200);
 
+    // conversation_id (migration 013) groups "Past chats"; until the
+    // migration is applied the column is missing, so read without it.
+    const page = (cols: string) => before
+      ? sql.query(
+          `SELECT ${cols}
+             FROM chat_messages
+            WHERE user_id = $1 AND created_at < $2
+            ORDER BY created_at DESC
+            LIMIT $3`,
+          [user.id, before, limit]
+        )
+      : sql.query(
+          `SELECT ${cols}
+             FROM chat_messages
+            WHERE user_id = $1
+            ORDER BY created_at DESC
+            LIMIT $2`,
+          [user.id, limit]
+        );
     let rows: Array<Record<string, unknown>>;
-    if (before) {
-      rows = await sql.query(
-        `SELECT id, role, content, model, created_at
-           FROM chat_messages
-          WHERE user_id = $1 AND created_at < $2
-          ORDER BY created_at DESC
-          LIMIT $3`,
-        [user.id, before, limit]
-      ) as Array<Record<string, unknown>>;
-    } else {
-      rows = await sql.query(
-        `SELECT id, role, content, model, created_at
-           FROM chat_messages
-          WHERE user_id = $1
-          ORDER BY created_at DESC
-          LIMIT $2`,
-        [user.id, limit]
-      ) as Array<Record<string, unknown>>;
+    try {
+      rows = await page('id, role, content, model, created_at, conversation_id') as Array<Record<string, unknown>>;
+    } catch (err) {
+      if (!isMissingColumnError(err)) throw err;
+      rows = await page('id, role, content, model, created_at') as Array<Record<string, unknown>>;
     }
     // Return oldest-first so the client can append to message state
     // in natural reading order.

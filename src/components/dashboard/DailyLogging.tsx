@@ -15,6 +15,8 @@ import type { LifeStage } from './DashboardHeader';
 
 interface DailyLoggingProps {
   selectedMode: LifeStage;
+  /** The Log sheet already says "Log today"; don't repeat a heading under it. */
+  hideTitle?: boolean;
 }
 
 const SYMPTOM_OPTIONS = [
@@ -88,7 +90,7 @@ interface QuickLogData {
   notes: string;
 }
 
-const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
+const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [data, setData] = useState<QuickLogData>({
@@ -278,7 +280,7 @@ const DailyLogging = ({ selectedMode }: DailyLoggingProps) => {
     <Card className="p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-base font-semibold">Today's Quick Log</h3>
+          {!hideTitle && <h3 className="text-base font-semibold">Today's Quick Log</h3>}
           <p className="text-xs text-muted-foreground">{format(new Date(), 'EEEE, MMMM d')}</p>
         </div>
         {saved && (

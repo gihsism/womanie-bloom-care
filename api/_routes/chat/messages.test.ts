@@ -140,4 +140,34 @@ describe('chat/messages security invariants', () => {
     expect(res._status).toBe(200);
     expect(res._body).toEqual({ cleared: true });
   });
+
+  // Conversations (migration 013): GET returns conversation_id, still
+  // scoped to the session user, and still works before the migration.
+  it('GET: selects conversation_id and filters by the session user only', async () => {
+    const res = mockRes();
+    await handler(mockReq('GET', undefined, { userId: 'someone_else' }), res);
+    const [sql, params] = query.mock.calls[0] as [string, unknown[]];
+    expect(sql).toMatch(/conversation_id/);
+    expect(sql).toMatch(/WHERE user_id = \$1/);
+    expect(params[0]).toBe(USER.id);
+    expect(params).not.toContain('someone_else');
+  });
+
+  it('GET: falls back to the old columns when conversation_id does not exist yet', async () => {
+    query
+      .mockRejectedValueOnce(Object.assign(new Error('column "conversation_id" does not exist'), { code: '42703' }))
+      .mockResolvedValueOnce(MSG_ROWS_DESC);
+    const res = mockRes();
+    await handler(mockReq('GET'), res);
+    expect(res._status).toBe(200);
+    const [retrySql, retryParams] = query.mock.calls[1] as [string, unknown[]];
+    expect(retrySql).not.toMatch(/conversation_id/);
+    expect(retryParams[0]).toBe(USER.id);
+    expect((res._body as { messages: unknown[] }).messages).toHaveLength(2);
+  });
+
+  it('GET: other database errors are not swallowed by the fallback', async () => {
+    query.mockRejectedValueOnce(Object.assign(new Error('boom'), { code: '08006' }));
+    await expect(handler(mockReq('GET'), mockRes())).rejects.toThrow('boom');
+  });
 });

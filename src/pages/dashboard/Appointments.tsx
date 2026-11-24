@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format, formatDistanceToNowStrict, isToday, isTomorrow, isPast } from 'date-fns';
 import {
-  ArrowLeft,
   CalendarClock,
   Video,
   MapPin,
@@ -360,10 +359,8 @@ const Appointments = () => {
       <div className="page-head sticky top-0 z-10">
         <div className="w-full px-4 py-4">
           <div className="flex items-center justify-between">
+            {/* Visits is a bottom-nav tab: no back arrow (sub-pages keep theirs). */}
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
               <div className="min-w-0">
                 <h1 className="page-title whitespace-nowrap">Visits</h1>
                 {loaded && (
