@@ -59,7 +59,7 @@ export function Choice({ selected, onSelect, title, description, icon: Icon, sta
         className={cn(
           'grid place-items-center h-6 w-6 shrink-0 border-2',
           multi ? 'rounded-md' : 'rounded-full',
-          selected ? 'border-stage-accent bg-stage-accent text-white' : 'border-input bg-background',
+          selected ? 'border-stage-accent bg-stage-accent text-stage-on' : 'border-input bg-background',
         )}
       >
         {selected && <Check className="h-3.5 w-3.5" strokeWidth={3} />}

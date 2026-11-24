@@ -219,12 +219,12 @@ export function InstallBanner() {
           </p>
         </div>
         {ios ? (
-          <Button size="sm" className="shrink-0 gap-1 h-10 px-4 bg-stage-accent text-white text-[14px] font-bold hover:bg-stage-accent/90" onClick={() => navigate("/install")}>
+          <Button size="sm" className="shrink-0 gap-1 h-10 px-4 bg-stage-accent text-stage-on text-[14px] font-bold hover:bg-stage-accent/90" onClick={() => navigate("/install")}>
             <Share className="h-4 w-4" />
             How
           </Button>
         ) : (
-          <Button size="sm" className="shrink-0 gap-1 h-10 px-4 bg-stage-accent text-white text-[14px] font-bold hover:bg-stage-accent/90" onClick={install}>
+          <Button size="sm" className="shrink-0 gap-1 h-10 px-4 bg-stage-accent text-stage-on text-[14px] font-bold hover:bg-stage-accent/90" onClick={install}>
             <Download className="h-4 w-4" />
             Install
           </Button>

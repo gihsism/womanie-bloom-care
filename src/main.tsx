@@ -4,9 +4,12 @@ import App from './App.tsx';
 import './index.css';
 import { reloadOnceForStaleChunk } from './lib/staleChunk';
 import { initStageTheme } from './lib/stageTheme';
+import { initColorScheme } from './lib/colorScheme';
 
-// Stage colours before first paint (the device's last-seen life stage).
+// Stage colours before first paint (the device's last-seen life stage),
+// and night mode (system setting or Me -> Appearance).
 initStageTheme();
+initColorScheme();
 
 if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({

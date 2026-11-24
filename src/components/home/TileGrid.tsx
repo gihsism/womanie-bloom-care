@@ -66,10 +66,10 @@ function TileButton({ tile, badge, busy, now, onTap, onDetails }: TileButtonProp
         onContextMenu={(e) => { e.preventDefault(); clear(); held.current = true; onDetails(tile); }}
         onClick={() => { if (held.current) { held.current = false; return; } onTap(tile); }}
         className={`w-full h-[112px] rounded-3xl flex flex-col items-center justify-center gap-2 px-1 text-center select-none [-webkit-touch-callout:none] transition-[transform,background-color] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stage-accent focus-visible:ring-offset-2 disabled:opacity-70 ${
-          running ? 'bg-stage-accent text-white' : 'bg-stage-tint text-foreground hover:brightness-[0.98]'
+          running ? 'bg-stage-accent text-stage-on' : 'bg-stage-tint text-foreground hover:brightness-[0.98]'
         }`}
       >
-        <span className={`grid place-items-center h-[52px] w-[52px] rounded-full ${running ? 'bg-white/20 text-white' : 'bg-white text-stage-accent'}`}>
+        <span className={`grid place-items-center h-[52px] w-[52px] rounded-full ${running ? 'bg-stage-on/15 text-stage-on' : 'bg-stage-chip text-stage-accent'}`}>
           <TileIcon name={tile.icon} className="h-[30px] w-[30px]" />
         </span>
         <span className="text-[16px] sm:text-[17px] font-bold leading-[1.1] line-clamp-2 break-words">
@@ -78,12 +78,12 @@ function TileButton({ tile, badge, busy, now, onTap, onDetails }: TileButtonProp
         </span>
       </button>
       {badge.count && !running && (
-        <span aria-hidden="true" className="pointer-events-none absolute top-2.5 right-3 min-w-[28px] h-7 px-2 rounded-full bg-stage-accent text-white text-[15px] font-extrabold grid place-items-center tabular-nums">
+        <span aria-hidden="true" className="pointer-events-none absolute top-2.5 right-3 min-w-[28px] h-7 px-2 rounded-full bg-stage-accent text-stage-on text-[15px] font-extrabold grid place-items-center tabular-nums">
           {badge.count}
         </span>
       )}
       {!badge.count && badge.done && !running && (
-        <span aria-hidden="true" className="pointer-events-none absolute top-2.5 right-3 h-7 w-7 rounded-full bg-stage-accent text-white grid place-items-center">
+        <span aria-hidden="true" className="pointer-events-none absolute top-2.5 right-3 h-7 w-7 rounded-full bg-stage-accent text-stage-on grid place-items-center">
           <Check className="h-4 w-4" strokeWidth={3} />
         </span>
       )}
@@ -91,7 +91,7 @@ function TileButton({ tile, badge, busy, now, onTap, onDetails }: TileButtonProp
         type="button"
         aria-label={`${tile.label}: details`}
         onClick={() => onDetails(tile)}
-        className={`sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:top-1 focus-visible:left-1 focus-visible:h-8 focus-visible:w-8 focus-visible:grid focus-visible:place-items-center focus-visible:rounded-full focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stage-accent ${running ? 'text-stage-accent' : 'text-stage-ink'}`}
+        className={`sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:top-1 focus-visible:left-1 focus-visible:h-8 focus-visible:w-8 focus-visible:grid focus-visible:place-items-center focus-visible:rounded-full focus-visible:bg-stage-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stage-accent ${running ? 'text-stage-accent' : 'text-stage-ink'}`}
       >
         <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
       </button>

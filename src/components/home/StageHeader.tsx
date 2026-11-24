@@ -12,7 +12,7 @@ export default function StageHeader({ model }: { model: HeaderModel }) {
       <Link
         to="/dashboard/settings#life-stage"
         aria-label={`${model.chip}: change life stage`}
-        className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-white/60 text-[15px] font-bold hover:bg-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stage-ink"
+        className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-stage-chip/60 text-[15px] font-bold hover:bg-stage-chip/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stage-ink"
       >
         <TileIcon name={model.chipIcon} className="h-[18px] w-[18px]" />
         {model.chip}
@@ -21,7 +21,7 @@ export default function StageHeader({ model }: { model: HeaderModel }) {
       <p className="mt-1.5 text-[18px] font-semibold text-stage-muted">{model.sentence}</p>
       <dl className="mt-5 grid grid-cols-2 gap-2 tabular-nums">
         {model.facts.map(f => (
-          <div key={f.label} className="rounded-2xl bg-white/70 px-3 py-2.5 min-w-0">
+          <div key={f.label} className="rounded-2xl bg-stage-chip/70 px-3 py-2.5 min-w-0">
             <dt className="text-[14px] font-semibold text-stage-muted truncate">{f.label}</dt>
             <dd className="text-[18px] font-extrabold truncate">{f.value}</dd>
           </div>

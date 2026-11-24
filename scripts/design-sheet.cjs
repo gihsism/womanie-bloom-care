@@ -3,6 +3,9 @@
 //   node scripts/design-sheet.cjs ~/.cache/womanie-ux/build4/doctor doctor   -> doctor-pages.png
 //   node scripts/design-sheet.cjs ~/.cache/womanie-ux/build4/round4 first-run -> onboarding.png
 //   node scripts/design-sheet.cjs ~/.cache/womanie-ux/build4/round4 public    -> public-pages.png
+//   node scripts/design-sheet.cjs ~/.cache/womanie-ux/build4/dark night       -> dark.png
+//     (night mode: each screen light and dark side by side; shots taken with
+//      COLOR_SCHEME=light|dark node scripts/design-shots.cjs ...)
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
@@ -13,6 +16,10 @@ const STAGES = process.argv.slice(3).length ? process.argv.slice(3) : ['pregnanc
 const DOCTOR = STAGES[0] === 'doctor';
 const FIRST_RUN = STAGES[0] === 'first-run';
 const PUBLIC = STAGES[0] === 'public';
+const NIGHT = STAGES[0] === 'night';
+const NIGHT_SHOTS = [['pregnancy-home', 'Home · Pregnancy'], ['menstrual-cycle-home', 'Home · Period tracking'], ['menopause-home', 'Home · Menopause'],
+  ['pregnancy-records', 'Records'], ['pregnancy-records-flag-open', 'Records · flag opened'], ['pregnancy-ask-answer', 'Ask AI · answer'], ['pregnancy-me', 'Me · Appearance'],
+  ['doctor-patient-summary', 'Doctor · patient'], ['doctor-dashboard', 'Doctor home'], ['first-run-1-stage-picked', 'Onboarding · stage picker']];
 // Boards with many shots wrap onto rows of PER_ROW phones.
 const FIRST_RUN_SHOTS = [['select-type', 'Get started'], ['login', 'Log in'], ['signup', 'Sign up'], ['welcome', 'Welcome'],
   ['1-stage', '1 · Stage'], ['1-stage-picked', '1 · Stage picked'], ['2-pregnancy-date', '2 · Pregnancy date'], ['3-pregnancy-more', '3 · Pregnancy more'],
@@ -27,7 +34,22 @@ const SHOTS = FIRST_RUN ? FIRST_RUN_SHOTS : PUBLIC ? PUBLIC_SHOTS : DOCTOR
 const TITLE = FIRST_RUN ? 'Womanie · idea 4: log in, sign up and the first-run screens' : PUBLIC ? 'Womanie · idea 4: the public pages' : DOCTOR ? 'Womanie · idea 4 on the doctor side (clinic colours)' : 'Womanie · idea 4 on Records, Ask AI, Visits and Me';
 const FILE = FIRST_RUN ? 'onboarding.png' : PUBLIC ? 'public-pages.png' : DOCTOR ? 'doctor-pages.png' : 'all-pages.png';
 
-(async () => {
+async function nightBoard() {
+  const b = await chromium.launch();
+  const p = await (await b.newContext({ viewport: { width: 40 + 4 * 420, height: 1000 }, deviceScaleFactor: 1.5 })).newPage();
+  const img = (f) => `data:image/png;base64,${fs.readFileSync(path.join(DIR, f)).toString('base64')}`;
+  const phone = (f, t) => `<div><div style="font:600 17px Figtree;margin:0 0 8px 4px">${t}</div><img src="${img(f)}" style="width:390px;height:844px;object-fit:cover;object-position:top;border-radius:30px;box-shadow:0 8px 24px rgba(0,0,0,.25)"></div>`;
+  const pairs = NIGHT_SHOTS.map(([s, t]) => `<div style="display:flex;gap:30px">${phone(`${s}-light.png`, `${t} · light`)}${phone(`${s}-dark.png`, `${t} · dark`)}</div>`).join('');
+  await p.setContent(`<html><head><link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&display=swap" rel="stylesheet"></head><body style="margin:0;background:#6F6668;color:#fff;padding:30px 40px;font-family:Figtree"><div style="font:700 30px Figtree;margin-bottom:18px">Womanie · idea 4 night mode (follows the phone; Me → Appearance to override)</div><div style="display:flex;flex-wrap:wrap;gap:40px 60px;width:${4 * 420 + 30}px">${pairs}</div></body></html>`);
+  await p.waitForLoadState('networkidle');
+  await p.evaluate(() => document.fonts.ready);
+  await p.screenshot({ path: path.join(DIR, 'dark.png'), fullPage: true });
+  await b.close();
+  console.log(path.join(DIR, 'dark.png'));
+}
+
+if (NIGHT) nightBoard();
+else (async () => {
   const b = await chromium.launch();
   const p = await (await b.newContext({ viewport: { width: 40 + Math.min(SHOTS.length, PER_ROW) * 420, height: 1000 }, deviceScaleFactor: 1.5 })).newPage();
   const img = (f) => `data:image/png;base64,${fs.readFileSync(path.join(DIR, f)).toString('base64')}`;

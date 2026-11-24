@@ -71,7 +71,7 @@ describe('idea 4 neutrals', () => {
 
 // The doctor side's neutral "clinic" set gets exactly the same checks.
 describe.each([...LIFE_STAGES, CLINIC_THEME])('stage colours: %s', (stage) => {
-  const b = block(`[data-stage="${stage}"] {`);
+  const b = block(`\n  [data-stage="${stage}"] {`);
   const head = token(b, 'stage-head');
   const headInk = token(b, 'stage-head-ink');
   const headMuted = token(b, 'stage-head-muted');
@@ -100,21 +100,100 @@ describe.each([...LIFE_STAGES, CLINIC_THEME])('stage colours: %s', (stage) => {
   });
 });
 
+// Night mode: the same AA bar on every dark set (index.css .dark blocks).
+// Text on the accent turns dark (--stage-on); fact boxes and chips use
+// --stage-chip over the header instead of white.
+const darkRoot = block('  .dark {');
+const D_BG = token(darkRoot, 'background');
+const D_CARD = token(darkRoot, 'card');
+const D_INK = token(darkRoot, 'foreground');
+const D_MUTED = token(darkRoot, 'muted-foreground');
+const D_ON = token(darkRoot, 'stage-on');
+const D_DESTR = token(darkRoot, 'destructive');
+const D_DESTR_FG = token(darkRoot, 'destructive-foreground');
+const D_MUTED_FILL = token(darkRoot, 'muted');
+
+describe('night mode neutrals', () => {
+  it('background is a warm near-black, not pure black', () => {
+    expect(D_BG).not.toEqual([0, 0, 0]);
+    expect(luminance(D_BG)).toBeLessThan(0.02);
+    expect(D_BG[0]).toBeGreaterThanOrEqual(D_BG[2]); // warm: red >= blue
+    expect(luminance(D_CARD)).toBeGreaterThan(luminance(D_BG)); // cards lifted
+  });
+
+  it.each([
+    ['ink on background', D_INK, D_BG],
+    ['ink on card', D_INK, D_CARD],
+    ['muted on background', D_MUTED, D_BG],
+    ['muted on card', D_MUTED, D_CARD],
+    ['muted on muted fill', D_MUTED, D_MUTED_FILL],
+    ['"talk to your doctor" amber on background', D_DESTR, D_BG],
+    ['"talk to your doctor" amber on card', D_DESTR, D_CARD],
+    ['amber on its 5% wash (Records rows)', D_DESTR, mix(D_CARD, D_DESTR, 0.05)],
+    ['amber at 80% on card', mix(D_CARD, D_DESTR, 0.8), D_CARD],
+    ['text on amber badge', D_DESTR_FG, D_DESTR],
+    ['ink button text (secondary)', token(darkRoot, 'secondary-foreground'), token(darkRoot, 'secondary')],
+  ] as const)('%s is AA', (_n, fg, bg) => {
+    expect(contrast(fg as RGB, bg as RGB)).toBeGreaterThanOrEqual(AA);
+  });
+
+  it('form-field outline is 3:1 on background', () => {
+    expect(contrast(token(darkRoot, 'input'), D_BG)).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe.each(['default', ...LIFE_STAGES, CLINIC_THEME])('night stage colours: %s', (stage) => {
+  const b = stage === 'default' ? darkRoot : block(`.dark[data-stage="${stage}"]`);
+  const head = token(b, 'stage-head');
+  const headInk = token(b, 'stage-head-ink');
+  const headMuted = token(b, 'stage-head-muted');
+  const accent = token(b, 'stage-accent');
+  const tint = token(b, 'stage-tint');
+  const chip = token(b, 'stage-chip');
+  const factBox = mix(head, chip, 0.7);
+
+  it.each([
+    ['header ink on header', headInk, head],
+    ['header muted on header', headMuted, head],
+    ['header ink on fact box', headInk, factBox],
+    ['header muted on fact box', headMuted, factBox],
+    ['accent on background (links, active tab)', accent, D_BG],
+    ['accent on card', accent, D_CARD],
+    ['dark text on accent (badges, buttons, my chat bubble)', D_ON, accent],
+    ['accent on tile', accent, tint],
+    ['accent on tile icon circle', accent, chip],
+    ['ink on tile (tile words)', D_INK, tint],
+    ['muted on tile', D_MUTED, tint],
+    ['header ink on chip (60%)', headInk, mix(head, chip, 0.6)],
+  ] as const)('%s is AA', (_name, fg, bg) => {
+    expect(contrast(fg as RGB, bg as RGB)).toBeGreaterThanOrEqual(AA);
+  });
+
+  it('header and tiles stay dark and calm (no bright blocks at night)', () => {
+    expect(luminance(head)).toBeLessThan(0.05);
+    expect(luminance(tint)).toBeLessThan(0.05);
+    expect(luminance(tint)).toBeGreaterThan(luminance(D_BG));
+  });
+});
+
 describe('one place', () => {
   it('every stored stage has exactly one block, and the shared tokens follow the stage', () => {
     for (const s of LIFE_STAGES) {
-      expect(css.split(`[data-stage="${s}"] {`).length - 1).toBe(1);
+      expect(css.split(`\n  [data-stage="${s}"] {`).length - 1).toBe(1);
+      expect(css.split(`.dark[data-stage="${s}"]`).length - 1).toBe(1);
     }
     expect(css).toMatch(/:root, \[data-stage\] \{[^}]*--primary: var\(--stage-accent\)/);
   });
 
   it('the stage colours are distinct, and the clinic set is none of them', () => {
     const all = [...LIFE_STAGES, CLINIC_THEME];
-    const heads = all.map(s => block(`[data-stage="${s}"] {`).match(/--stage-head:\s*([^;]+);/)![1]);
-    const accents = all.map(s => block(`[data-stage="${s}"] {`).match(/--stage-accent:\s*([^;]+);/)![1]);
-    expect(new Set(heads).size).toBe(all.length);
-    expect(new Set(accents).size).toBe(all.length);
-    expect(css.split(`[data-stage="${CLINIC_THEME}"] {`).length - 1).toBe(1);
+    for (const prefix of ['\n  ', '.dark']) {
+      const heads = all.map(s => block(`${prefix}[data-stage="${s}"]`).match(/--stage-head:\s*([^;]+);/)![1]);
+      const accents = all.map(s => block(`${prefix}[data-stage="${s}"]`).match(/--stage-accent:\s*([^;]+);/)![1]);
+      expect(new Set(heads).size).toBe(all.length);
+      expect(new Set(accents).size).toBe(all.length);
+    }
+    expect(css.split(`\n  [data-stage="${CLINIC_THEME}"] {`).length - 1).toBe(1);
   });
 });
 

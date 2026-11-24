@@ -195,7 +195,7 @@ const PatientNotes = ({ doctorId, patientId, notes, formOpen, draft, onDraftChan
             <div key={note.id} className="p-4 bg-stage-tint space-y-3">
               <NoteFields value={editing} onChange={setEditing} idPrefix={`edit-${note.id}`} />
               <div className="flex gap-2">
-                <Button size="sm" className="h-10 px-4 bg-stage-accent text-white hover:bg-stage-accent/90" onClick={update} disabled={!editing.title || !editing.content || updating}>
+                <Button size="sm" className="h-10 px-4 bg-stage-accent text-stage-on hover:bg-stage-accent/90" onClick={update} disabled={!editing.title || !editing.content || updating}>
                   {updating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving…</> : 'Save changes'}
                 </Button>
                 <Button variant="outline" size="sm" className="h-10 px-4 border-line bg-background" onClick={() => setEditingId(null)} disabled={updating}>

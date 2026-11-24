@@ -75,7 +75,7 @@ const DoctorPatientList = ({ patients }: Props) => {
                   <span className="flex items-center gap-2">
                     <span className="text-[17px] font-medium truncate">{name}</span>
                     {newDocs > 0 && (
-                      <span className="shrink-0 rounded-full bg-stage-accent px-2 py-0.5 text-[12px] font-bold text-white tabular-nums">
+                      <span className="shrink-0 rounded-full bg-stage-accent px-2 py-0.5 text-[12px] font-bold text-stage-on tabular-nums">
                         {newDocs} new
                       </span>
                     )}

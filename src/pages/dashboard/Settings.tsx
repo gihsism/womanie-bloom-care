@@ -23,6 +23,7 @@ import MedicineLog from '@/components/dashboard/MedicineLog';
 import { useAttentionCount } from '@/hooks/useAttentionCount';
 import { MeRow, MeGroup } from './me/MeRow';
 import { ME_SECTIONS, meSectionFromHash } from './me/sections';
+import { AppearancePicker } from './me/AppearancePicker';
 
 // Labels come from the one label map (src/lib/lifeStageLabels.ts); the
 // stored values (profiles.life_stage) are unchanged.
@@ -420,6 +421,7 @@ const Settings = () => {
             <MeRow icon={Smartphone} label="Connected devices" onClick={() => navigate('/dashboard/devices')} testId="me-row-devices" />
             <MeRow icon={Users} label="Community" onClick={() => navigate('/community')} testId="me-row-community" />
           </MeGroup>
+          <AppearancePicker />
           <MeGroup>
             <MeRow icon={Shield} label="Privacy & your data" onClick={() => openSection('privacy')} testId="me-row-privacy" />
             <MeRow icon={KeyRound} label="Password & sign-in" onClick={() => openSection('password')} testId="me-row-password" />

@@ -28,6 +28,8 @@ export default {
           muted: "hsl(var(--stage-head-muted) / <alpha-value>)",
           accent: "hsl(var(--stage-accent) / <alpha-value>)",
           tint: "hsl(var(--stage-tint) / <alpha-value>)",
+          on: "hsl(var(--stage-on) / <alpha-value>)",
+          chip: "hsl(var(--stage-chip) / <alpha-value>)",
         },
         ink: "hsl(var(--foreground) / <alpha-value>)",
         line: "hsl(var(--line) / <alpha-value>)",

@@ -325,7 +325,7 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
               aria-label={`Work on ${dayName}`}
               className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
                 schedule[index].active
-                  ? 'bg-stage-accent border-stage-accent text-white'
+                  ? 'bg-stage-accent border-stage-accent text-stage-on'
                   : 'border-muted-foreground'
               }`}
             >

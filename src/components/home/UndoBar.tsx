@@ -26,7 +26,7 @@ export default function UndoBar({ msg, onClose }: { msg: UndoMessage | null; onC
       aria-live="polite"
       className="fixed inset-x-3 z-50 mx-auto max-w-xl bottom-[calc(4.75rem+env(safe-area-inset-bottom))] rounded-2xl bg-foreground text-background shadow-lg px-4 py-3 flex items-center gap-3"
     >
-      <span className="grid place-items-center h-7 w-7 rounded-full bg-stage-accent text-white flex-shrink-0">
+      <span className="grid place-items-center h-7 w-7 rounded-full bg-stage-accent text-stage-on flex-shrink-0">
         <Check className="h-4 w-4" strokeWidth={3} aria-hidden="true" />
       </span>
       <div className="flex-1 min-w-0">

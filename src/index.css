@@ -69,6 +69,10 @@
     --stage-head-muted: 336.5 39.4% 34.3%;  /* #7A3550 */
     --stage-accent: 339.8 48.8% 40.6%;      /* #9A3557 */
     --stage-tint: 346.2 61.9% 95.9%;        /* #FBEEF1 */
+    /* Text/icons on the accent, and the chip/fact-box/icon-circle surface
+       on the header and tiles (white in light, see .dark for night). */
+    --stage-on: 0 0% 100%;
+    --stage-chip: 0 0% 100%;
   }
 
   [data-stage="pre-menstrual"] {      /* peach */
@@ -163,47 +167,139 @@
     --gradient-wellness: linear-gradient(135deg, hsl(var(--stage-accent)) 0%, hsl(var(--stage-head-ink)) 100%);
   }
 
+  /* Night (dark) mode, 2026-11-24: for feeds at 3 am and a last look
+     before sleep. <html class="dark"> is set by src/lib/colorScheme.ts
+     (system setting, or Me -> Appearance: Automatic / Light / Dark).
+     Warm near-black, never #000; cards a step lighter; each stage keeps
+     its hue, softened and desaturated so it glows without glaring. Text
+     ON the accent turns dark (--stage-on). Every pair is AA, checked by
+     src/lib/stageColors.test.ts on the dark sets too. The block below
+     also carries the default (period-tracking rose) stage set. */
   .dark {
-    --background: 340 12% 9%;
-    --foreground: 15 30% 92%;
-    --card: 340 10% 12%;
-    --card-foreground: 15 30% 92%;
-    --popover: 340 10% 12%;
-    --popover-foreground: 15 30% 92%;
-    --primary: 336 75% 70%;
-    --primary-foreground: 340 12% 9%;
-    --secondary: 15 30% 92%;
-    --secondary-foreground: 340 12% 9%;
-    --accent: 336 55% 64%;
-    --accent-foreground: 340 12% 9%;
-    --muted: 340 8% 17%;
-    --muted-foreground: 15 10% 72%;
-    --purple: 336 55% 64%;
-    --purple-foreground: 340 12% 9%;
-    --turquoise: 15 10% 72%;
-    --turquoise-foreground: 340 12% 9%;
-    --destructive: 22 85% 60%;
-    --destructive-foreground: 340 12% 9%;
-    --border: 340 8% 24%;
-    --input: 340 8% 24%;
-    --ring: 336 75% 70%;
-    --chart-1: 336 75% 70%;
-    --chart-2: 15 30% 92%;
-    --chart-3: 336 45% 50%;
-    --chart-4: 15 8% 60%;
-    --chart-5: 22 85% 60%;
-    --sidebar-background: 340 12% 10%;
-    --sidebar-foreground: 15 30% 92%;
-    --sidebar-primary: 336 75% 70%;
-    --sidebar-primary-foreground: 340 12% 9%;
-    --sidebar-accent: 340 8% 17%;
-    --sidebar-accent-foreground: 15 30% 92%;
-    --sidebar-border: 340 8% 24%;
-    --sidebar-ring: 336 75% 70%;
-    --gradient-pink: linear-gradient(135deg, hsl(336 75% 70%) 0%, hsl(336 62% 62%) 100%);
-    --gradient-calm: linear-gradient(135deg, hsl(340 8% 20%) 0%, hsl(340 8% 28%) 100%);
-    --gradient-nature: linear-gradient(135deg, hsl(340 8% 20%) 0%, hsl(340 8% 28%) 100%);
-    --gradient-wellness: linear-gradient(135deg, hsl(336 75% 70%) 0%, hsl(340 8% 24%) 100%);
+    color-scheme: dark;
+    --background: 330 11% 7%;         /* #141012 warm near-black */
+    --foreground: 345 25% 94%;        /* #F3EDEF, 16:1 on background */
+    --line: 330 9% 19%;               /* #342C30 hairlines */
+    --card: 330 10% 12%;              /* #221C1F lifted surface */
+    --card-foreground: 345 25% 94%;
+    --popover: 330 10% 12%;
+    --popover-foreground: 345 25% 94%;
+    --primary-foreground: 330 11% 7%;
+    --secondary: 345 25% 94%;
+    --secondary-foreground: 330 11% 7%;
+    --accent-foreground: 330 11% 7%;
+    --muted: 330 9% 16%;              /* #2D2629 quiet fills */
+    --muted-foreground: 337 9% 70%;   /* #B8AAAF, 8.6:1 on background */
+    --purple-foreground: 330 11% 7%;
+    --turquoise: 337 9% 70%;
+    --turquoise-foreground: 330 11% 7%;
+    --destructive: 22 85% 66%;        /* #F2955F soft amber, 8.3:1 */
+    --destructive-foreground: 330 11% 7%;
+    --border: 330 9% 19%;
+    --input: 330 6% 42%;              /* field outline, 3:1 on background */
+    --chart-2: 345 25% 94%;
+    --chart-4: 337 9% 60%;
+    --chart-5: 22 85% 66%;
+    --sidebar-background: 330 11% 7%;
+    --sidebar-foreground: 345 25% 94%;
+    --sidebar-primary-foreground: 330 11% 7%;
+    --sidebar-accent: 330 9% 16%;
+    --sidebar-accent-foreground: 345 25% 94%;
+    --sidebar-border: 330 9% 19%;
+    --stage-on: 330 11% 7%;           /* text and icons on the accent */
+
+    --stage-head: 340 24% 15%;              /* #2F1D23 */
+    --stage-head-ink: 340 40% 92%;          /* #F2E3E8 */
+    --stage-head-muted: 340 24% 78%;        /* #D2BAC2 */
+    --stage-accent: 340 62% 74%;            /* #E694AF soft rose */
+    --stage-tint: 340 21% 13%;              /* #281A1F */
+    --stage-chip: 340 18% 24%;              /* #482F38 */
+  }
+
+  .dark[data-stage="pre-menstrual"], .dark [data-stage="pre-menstrual"] {
+    --stage-head: 20 24% 15%;               /* #2F231D */
+    --stage-head-ink: 20 40% 92%;
+    --stage-head-muted: 20 24% 78%;
+    --stage-accent: 20 60% 74%;             /* #E4AF95 */
+    --stage-tint: 20 21% 13%;
+    --stage-chip: 20 18% 24%;
+  }
+  .dark[data-stage="menstrual-cycle"], .dark [data-stage="menstrual-cycle"] {
+    --stage-head: 340 24% 15%;              /* #2F1D23 */
+    --stage-head-ink: 340 40% 92%;
+    --stage-head-muted: 340 24% 78%;
+    --stage-accent: 340 62% 74%;            /* #E694AF */
+    --stage-tint: 340 21% 13%;
+    --stage-chip: 340 18% 24%;
+  }
+  .dark[data-stage="contraception"], .dark [data-stage="contraception"] {
+    --stage-head: 250 24% 15%;              /* #201D2F */
+    --stage-head-ink: 250 40% 92%;
+    --stage-head-muted: 250 24% 78%;
+    --stage-accent: 250 50% 74%;            /* #A79CDE */
+    --stage-tint: 250 21% 13%;
+    --stage-chip: 250 18% 24%;
+  }
+  .dark[data-stage="conception"], .dark [data-stage="conception"] {
+    --stage-head: 40 24% 15%;               /* #2F291D */
+    --stage-head-ink: 40 40% 92%;
+    --stage-head-muted: 40 24% 78%;
+    --stage-accent: 40 60% 74%;             /* #E4CA95 */
+    --stage-tint: 40 21% 13%;
+    --stage-chip: 40 18% 24%;
+  }
+  .dark[data-stage="ivf"], .dark [data-stage="ivf"] {
+    --stage-head: 210 24% 15%;              /* #1D262F */
+    --stage-head-ink: 210 40% 92%;
+    --stage-head-muted: 210 24% 78%;
+    --stage-accent: 210 58% 74%;            /* #96BDE3 */
+    --stage-tint: 210 21% 13%;
+    --stage-chip: 210 18% 24%;
+  }
+  .dark[data-stage="pregnancy"], .dark [data-stage="pregnancy"] {
+    --stage-head: 166 24% 15%;              /* #1D2F2B */
+    --stage-head-ink: 166 40% 92%;
+    --stage-head-muted: 166 24% 78%;
+    --stage-accent: 165 38% 74%;            /* #A4D6C9 */
+    --stage-tint: 166 21% 13%;
+    --stage-chip: 166 18% 24%;
+  }
+  .dark[data-stage="postpartum"], .dark [data-stage="postpartum"] {
+    --stage-head: 308 24% 15%;              /* #2F1D2D */
+    --stage-head-ink: 308 40% 92%;
+    --stage-head-muted: 308 24% 78%;
+    --stage-accent: 308 40% 74%;            /* #D7A2D0 */
+    --stage-tint: 308 21% 13%;
+    --stage-chip: 308 18% 24%;
+  }
+  .dark[data-stage="menopause"], .dark [data-stage="menopause"] {
+    --stage-head: 74 24% 15%;               /* #2B2F1D */
+    --stage-head-ink: 74 40% 92%;
+    --stage-head-muted: 74 24% 78%;
+    --stage-accent: 74 40% 74%;             /* #CBD7A2 */
+    --stage-tint: 74 21% 13%;
+    --stage-chip: 74 18% 24%;
+  }
+  .dark[data-stage="post-menopause"], .dark [data-stage="post-menopause"] {
+    --stage-head: 216 21% 15%;              /* #1E252E */
+    --stage-head-ink: 216 40% 92%;
+    --stage-head-muted: 216 24% 78%;
+    --stage-accent: 216 26% 74%;            /* #ABB9CE */
+    --stage-tint: 216 18% 13%;
+    --stage-chip: 216 18% 24%;
+  }
+  .dark[data-stage="clinic"], .dark [data-stage="clinic"] {
+    --stage-head: 195 24% 15%;              /* #1D2B2F */
+    --stage-head-ink: 195 40% 92%;
+    --stage-head-muted: 195 24% 78%;
+    --stage-accent: 195 32% 74%;            /* #A7C7D2 */
+    --stage-tint: 195 21% 13%;
+    --stage-chip: 195 18% 24%;
+  }
+  .dark, .dark [data-stage] {
+    --gradient-calm: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%);
+    --gradient-nature: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%);
+    --gradient-wellness: linear-gradient(135deg, hsl(var(--stage-accent)) 0%, hsl(var(--stage-head-muted)) 100%);
   }
 
 }
@@ -369,7 +465,7 @@
     padding: 0 1.25rem;
     border-radius: 9999px;
     background-color: hsl(var(--stage-accent));
-    color: #fff;
+    color: hsl(var(--stage-on));
     font-size: 1.0625rem;
     font-weight: 700;
     transition: filter 0.15s;

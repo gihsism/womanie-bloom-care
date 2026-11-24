@@ -794,7 +794,7 @@ export default function AIDoctorChat() {
                 <div
                   className={`group rounded-[1.25rem] relative ${
                     msg.role === 'user'
-                      ? 'max-w-[85%] md:max-w-[70%] px-4 py-2.5 bg-stage-accent text-white rounded-br-md'
+                      ? 'max-w-[85%] md:max-w-[70%] px-4 py-2.5 bg-stage-accent text-stage-on rounded-br-md'
                       : 'w-full md:max-w-[85%] px-4 py-3.5 bg-card border border-line'
                   }`}
                 >
@@ -888,7 +888,7 @@ export default function AIDoctorChat() {
                 onClick={handleSend}
                 disabled={!input.trim() || isStreaming}
                 size="icon"
-                className="absolute right-1.5 bottom-1.5 rounded-full h-10 w-10 bg-stage-accent text-white hover:bg-stage-accent/90"
+                className="absolute right-1.5 bottom-1.5 rounded-full h-10 w-10 bg-stage-accent text-stage-on hover:bg-stage-accent/90"
                 aria-label="Send"
               >
                 {isStreaming ? (

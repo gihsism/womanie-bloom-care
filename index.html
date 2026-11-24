@@ -8,7 +8,22 @@
     <meta name="author" content="Womanie" />
 
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#F7ECE9" />
+    <meta name="theme-color" content="#FFFFFF" />
+    <!-- Night mode before first paint (same rule as src/lib/colorScheme.ts):
+         Me -> Appearance choice on this device, else the system setting. -->
+    <script>
+      (function () {
+        var p = 'auto';
+        try { p = localStorage.getItem('womanie_color_scheme') || 'auto'; } catch (e) {}
+        var dark = p === 'dark' || (p !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) {
+          document.documentElement.classList.add('dark');
+          document.documentElement.style.colorScheme = 'dark';
+          var m = document.querySelector('meta[name="theme-color"]');
+          if (m) m.setAttribute('content', '#141012');
+        }
+      })();
+    </script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Womanie" />
@@ -54,6 +69,9 @@
         transition: opacity 0.35s ease;
       }
       #app-splash.is-hidden { opacity: 0; pointer-events: none; }
+      /* Night mode: warm near-black, no bright flash at 3 am. */
+      html.dark #app-splash { background: #141012; }
+      html.dark #app-splash img { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
       #app-splash img {
         width: 88px;
         height: 88px;

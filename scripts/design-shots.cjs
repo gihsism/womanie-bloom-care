@@ -9,6 +9,9 @@
 //   node scripts/design-shots.cjs [baseUrl] first-run [only] [outDir] (log in, sign up, Welcome, onboarding)
 //   node scripts/design-shots.cjs [baseUrl] public [only] [outDir]    (landing and the other public pages)
 //
+//   COLOR_SCHEME=dark node scripts/design-shots.cjs ...  (emulated system dark/light;
+//     files get a -dark / -light suffix; night mode follows it by default)
+//
 // Needs Playwright (PLAYWRIGHT_DIR, default ~/.cache/womanie-ux/node_modules).
 const os = require('os');
 const path = require('path');
@@ -20,6 +23,8 @@ const ONLY = process.argv[4] || '';
 const DOCTOR_SIDE = STAGE === 'doctor';
 const FLOW_SIDE = STAGE === 'first-run' || STAGE === 'public';
 const OUT = process.argv[5] || path.join(os.homedir(), '.cache/womanie-ux/build4', DOCTOR_SIDE ? 'doctor' : FLOW_SIDE ? 'round4' : 'round2');
+const SCHEME = process.env.COLOR_SCHEME || ''; // '', 'light' or 'dark'
+const SUFFIX = SCHEME ? `-${SCHEME}` : '';
 const UID = 'u-demo';
 const day = (n, h = 9, m = 0) => { const d = new Date(); d.setHours(h, m, 0, 0); d.setDate(d.getDate() + n); return d; };
 const ymd = (d) => d.toISOString().slice(0, 10);
@@ -123,6 +128,7 @@ async function route(r) {
 }
 
 const PAGES = [
+  ['home', '/dashboard'],
   ['records', '/dashboard/medical-history'],
   ['records-documents', '/dashboard/medical-history', async (p) => { await p.getByRole('tab', { name: 'Documents' }).first().click(); }],
   ['ask', '/dashboard/ai-doctor'],
@@ -282,7 +288,7 @@ const DOCTOR_PAGES = [
 
 (async () => {
   const b = await chromium.launch();
-  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
+  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, colorScheme: SCHEME || 'light' });
   // Doctor side: the device remembers a patient stage (pregnancy) to prove
   // the doctor pages switch to the clinic colours anyway.
   // First run / public: nothing remembered on the device.
@@ -306,13 +312,13 @@ const DOCTOR_PAGES = [
     }
     await p.mouse.move(1, 1); // no hover left over from the last click
     await p.evaluate(() => document.fonts.ready);
-    await p.screenshot({ path: path.join(OUT, `${STAGE}-${name}.png`) });
+    await p.screenshot({ path: path.join(OUT, `${STAGE}-${name}${SUFFIX}.png`) });
     // Whole page with the tab bar at the bottom (a tall viewport, not fullPage,
     // so the fixed bar is not painted half-way down).
     const h = await p.evaluate(() => document.documentElement.scrollHeight);
     await p.setViewportSize({ width: 390, height: Math.min(6000, Math.max(844, h)) });
     await p.waitForTimeout(300);
-    await p.screenshot({ path: path.join(OUT, `${STAGE}-${name}-full.png`) });
+    await p.screenshot({ path: path.join(OUT, `${STAGE}-${name}${SUFFIX}-full.png`) });
     await p.setViewportSize({ width: 390, height: 844 });
     console.log('shot', name);
   }

@@ -353,7 +353,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
                 onClick={() => (isSaved ? void store(toggleAsked(saved, q.id)) : persistChecked({ ...checked, [q.id]: !isChecked }))}
                 aria-label={isChecked ? 'Mark as not asked' : 'Mark as asked'}
               >
-                {isChecked && <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />}
+                {isChecked && <Check className="h-3.5 w-3.5 text-stage-on" strokeWidth={3} />}
               </button>
               <p className={`text-[15px] leading-snug flex-1 ${isChecked ? 'line-through text-muted-foreground' : ''}`}>
                 {q.text}
