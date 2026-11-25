@@ -6953,12 +6953,12 @@
     "postpartum"
    ],
    "topics": [
-    "antihistamines-pregnancy"
+    "vitamin-d-pregnancy",
+    "vitamin-d"
    ],
    "tags": [
     "vitamin d",
     "allergy prevention",
-    "hay fever",
     "asthma",
     "eczema",
     "breastfeeding"
@@ -6966,8 +6966,6 @@
    "keywords": [
     "vitamin d",
     "allergies",
-    "hay fever",
-    "allergic rhinitis",
     "asthma",
     "eczema",
     "food allergy",
@@ -6975,7 +6973,8 @@
     "breastfeeding",
     "baby allergies",
     "wheezing",
-    "sunshine vitamin"
+    "sunshine vitamin",
+    "allergy prevention"
    ]
   },
   {
@@ -56177,16 +56176,13 @@
    ],
    "certainty": "not stated",
    "lifeStages": [
-    "menstrual-cycle",
     "postpartum",
     "contraception"
    ],
    "topics": [
-    "irregular-cycles",
     "breastfeeding-problems",
     "postpartum-contraception",
-    "contraception-effectiveness",
-    "medicines-breastfeeding"
+    "contraception-effectiveness"
    ],
    "tags": [
     "breastfeeding",
@@ -56201,7 +56197,6 @@
     "lactational amenorrhea",
     "birth control after birth",
     "can i get pregnant while breastfeeding",
-    "no periods breastfeeding",
     "natural family planning",
     "postpartum birth control",
     "nursing mother pregnancy risk"
@@ -59017,11 +59012,10 @@
     "menstrual-cycle",
     "conception",
     "pregnancy",
-    "ivf",
     "general"
    ],
    "topics": [
-    "iui"
+    "pcos"
    ],
    "tags": [
     "pcos",
@@ -63072,23 +63066,19 @@
     "ivf"
    ],
    "topics": [
-    "ivf-outcomes",
-    "embryo-transfer",
-    "ivf-add-ons"
+    "ivf-add-ons",
+    "embryo-transfer"
    ],
    "tags": [
     "assisted hatching",
     "ivf",
     "embryo transfer",
-    "frozen embryo transfer",
     "live birth"
    ],
    "keywords": [
     "assisted hatching",
     "ivf",
     "embryo transfer",
-    "frozen embryo",
-    "fresh transfer",
     "live birth rate",
     "embryo shell",
     "fertility treatment",
