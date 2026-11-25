@@ -29,7 +29,7 @@ describe('vercel.json security headers', () => {
     const html = readFileSync(resolve(root, 'index.html'), 'utf8');
     const inline = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]);
     expect(inline.length).toBeGreaterThan(0);
-    const csp = header('Content-Security-Policy-Report-Only');
+    const csp = header('Content-Security-Policy');
     const scriptSrc = csp.split(';').map(s => s.trim()).find(s => s.startsWith('script-src')) ?? '';
     expect(scriptSrc).not.toContain("'unsafe-inline'");
     for (const body of inline) {
