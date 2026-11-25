@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { getLibrary, selectChatSources } from './library';
 import { semanticQuery, selectChatSourcesHybrid } from './hybrid';
 import { DEFAULT_EMBEDDING_MODEL, EMBEDDING_MODELS, modelFile } from './embed';
-import { DRUG_PREGNANCY_QUESTIONS, EVAL_QUESTIONS, MIXED_MEDICINE_QUESTIONS, NO_SOURCE_QUESTIONS, QA_QUESTIONS, scoreRuns, type EvalQuestion } from './search-eval';
+import { AUDIT_QUESTIONS, DRUG_PREGNANCY_QUESTIONS, EVAL_QUESTIONS, MIXED_MEDICINE_QUESTIONS, NO_SOURCE_QUESTIONS, QA_QUESTIONS, scoreAudit, scoreRuns, type EvalQuestion } from './search-eval';
 
 // Retrieval quality on everyday patient questions (search-eval.ts).
 // Numbers at the time of writing (34 questions, 307 items):
@@ -22,6 +22,19 @@ describe('search eval: keyword-only (runs everywhere)', () => {
     const ids = new Set(getLibrary().topics.map((t) => t.id));
     const missing = [...EVAL_QUESTIONS, ...DRUG_PREGNANCY_QUESTIONS, ...MIXED_MEDICINE_QUESTIONS, ...QA_QUESTIONS].flatMap((q) => q.topics).filter((t) => !ids.has(t));
     expect(missing).toEqual([]);
+  });
+
+  it('every audit item id exists in the library', () => {
+    const ids = new Set(getLibrary().items.map((i) => i.id));
+    expect(AUDIT_QUESTIONS.flatMap((q) => q.ids).filter((id) => !ids.has(id))).toEqual([]);
+    expect(AUDIT_QUESTIONS.length).toBe(40);
+  });
+
+  // Citation audit (Nov 2026, 37 scored questions): keyword-only hit@3 was
+  // 0.84 before the audit fixes, 0.92 after.
+  it('citation audit: keyword-only keeps its level', () => {
+    const r = scoreAudit(AUDIT_QUESTIONS.map((question) => ({ question, ranked: selectChatSources(question.q, question.stage) })));
+    expect(r.hit, r.misses.join(' | ')).toBeGreaterThanOrEqual(0.9);
   });
 
   it('keyword search keeps its baseline', () => {
@@ -94,6 +107,18 @@ describe.skipIf(!hasModel)('search eval: hybrid with the bundled model', () => {
     console.log(`QA eval: hybrid hit@3 ${r.hitAt3.toFixed(2)} hit@6 ${r.hitAt6.toFixed(2)}; misses@3: ${r.misses3.join(' | ')}`);
     expect(r.hitAt3).toBe(1);
   }, 60_000);
+
+  // Citation audit (Nov 2026): hybrid hit@3 was 0.89 (33 of 37) before
+  // the audit fixes (phrase synonyms, rare-word focus, topic anchor, IVF
+  // population factor); every scored question must now have a hand-checked
+  // item among the first three sources the chat sends.
+  describe('citation audit: question -> expected items in the top 3', () => {
+    it.each(AUDIT_QUESTIONS.filter((a) => !a.gap).map((a) => [a.q, a] as const))('%s', async (_q, a) => {
+      const ranked = await selectChatSourcesHybrid(a.q, a.stage, { timeoutMs: 20_000 });
+      const top3 = ranked.slice(0, 3).map((it) => it.id);
+      expect(top3.some((id) => a.ids.includes(id)), `top 3: ${top3.join(', ')}; expected one of ${a.ids.join(', ')}`).toBe(true);
+    }, 30_000);
+  });
 
   // Relevance floor: nothing in the library mentions the subject, so the
   // stage-only matches (pregnancy diets, vaccine reviews) must not be sent.

@@ -1,14 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import {
+  ANCHOR_MISS_FACTOR,
   LIFE_STAGES,
   browseItems,
   buildSourcesPrompt,
   citedNumbers,
+  demotedIds,
   evidenceForTopic,
   formatSourcesFooter,
   getLibrary,
   isAfterBirthTitle,
   normalizeLifeStage,
+  phraseExpansions,
   searchItems,
   searchResearch,
   selectChatSources,
@@ -355,5 +358,95 @@ describe('library.json data file', () => {
     const byKeyword = evidenceForTopic('ferritin', { limit: 3 });
     expect(byKeyword.length).toBeGreaterThan(0);
     expect(searchResearch('ferritin', { limit: 1 })[0].item.pmid).toBe(byKeyword[0].pmid);
+  });
+});
+
+// Citation audit (Nov 2026): retrieval fixes, see search-eval.ts AUDIT_QUESTIONS.
+describe('citation-audit retrieval fixes', () => {
+  it('everyday phrasing reaches the library wording', () => {
+    expect(phraseExpansions("My periods stopped for 4 months and I'm not pregnant, why?", 'menstrual-cycle')).toContain('amenorrhea');
+    expect(phraseExpansions('missed period, not pregnant', null)).toContain('amenorrhoea');
+    expect(phraseExpansions('How can I tell if I have postpartum depression?', 'postpartum')).toContain('screening');
+    expect(phraseExpansions('heavy periods with clots', 'menstrual-cycle')).toEqual([]);
+  });
+
+  it('an age in a fertility question means age, a week count does not', () => {
+    expect(phraseExpansions('What are the IVF success rates at 40?', 'ivf')).toContain('age');
+    expect(phraseExpansions("I'm 38, is it too late to have a baby", 'conception')).toContain('age');
+    expect(phraseExpansions('still no baby at 40 weeks', 'conception')).not.toContain('age');
+    // Outside fertility stages a number is just a number.
+    expect(phraseExpansions('bad headache at 38 weeks', 'pregnancy')).not.toContain('age');
+    expect(phraseExpansions('hot flushes at 48', 'menopause')).not.toContain('age');
+  });
+
+  const topics = [
+    { id: 'endometriosis', label: 'Endometriosis', stages: ['menstrual-cycle' as const] },
+    { id: 'heavy-bleeding', label: 'Heavy periods', stages: ['menstrual-cycle' as const] },
+    { id: 'thyroid-pregnancy', label: 'Thyroid in pregnancy', stages: ['pregnancy' as const] },
+  ];
+
+  it('an item that never mentions the question\'s topic word ranks below one that does', () => {
+    const endo = item({
+      pmid: '20',
+      title: 'Imaging for endometriosis',
+      lifeStages: ['menstrual-cycle'],
+      topics: ['endometriosis'],
+      tags: ['endometriosis'],
+      keywords: ['endometriosis', 'ultrasound'],
+      summary: 'Ultrasound and MRI before surgery.',
+    });
+    const bleeding = item({
+      pmid: '21',
+      title: 'Inherited bleeding disorders: gynaecological management',
+      evidenceLevel: 'guideline',
+      lifeStages: ['menstrual-cycle'],
+      topics: ['heavy-bleeding'],
+      tags: ['heavy bleeding', 'diagnosis'],
+      keywords: ['heavy periods', 'diagnosis'],
+      summary: 'How doctors diagnose bleeding disorders and plan surgery.',
+    });
+    const items = [bleeding, endo];
+    const score = (q: string) => searchItems(items, q, { lifeStage: 'menstrual-cycle' }, topics).find((r) => r.item.pmid === '21')!.score;
+    // "endometriosis" names a topic (anchor); "endoscopy" names none. The
+    // bleeding guideline matches neither, so only the anchor lowers it.
+    const anchored = score('How do doctors diagnose endometriosis, do I need surgery?');
+    const plain = score('How do doctors diagnose endoscopy, do I need surgery?');
+    expect(anchored).toBeCloseTo(plain * ANCHOR_MISS_FACTOR, 1);
+    // The endometriosis item keeps full weight.
+    const endoScore = searchItems(items, 'endometriosis surgery', { lifeStage: 'menstrual-cycle' }, topics).find((r) => r.item.pmid === '20')!.score;
+    const endoAlone = searchItems([endo], 'endometriosis surgery', { lifeStage: 'menstrual-cycle' }, topics)[0].score;
+    expect(endoScore).toBe(endoAlone);
+  });
+
+  it('a superseded guideline or a duplicate "Summary:" record steps back only while the newer one is present', () => {
+    const lib = getLibrary();
+    const demoted = demotedIds(lib.items);
+    expect(demoted.has('pmid-30024653')).toBe(true); // PCOS 2018 -> 2023
+    expect(demoted.has('pmid-37589624')).toBe(false);
+    expect(demoted.has('pmid-29064966')).toBe(true); // LARC PB 186 Summary, full PB 186 is in the library
+    expect(demoted.has('pmid-29064972')).toBe(false);
+    // Without its successor in the searched items the old one keeps full weight.
+    const old = lib.items.find((i) => i.id === 'pmid-30024653')!;
+    expect(demotedIds([old]).size).toBe(0);
+    const pcos = searchResearch('How is PCOS diagnosed?', { lifeStage: 'menstrual-cycle', limit: 3 }).map((r) => r.item.id);
+    expect(pcos[0]).toBe('pmid-37589624');
+    expect(pcos).not.toContain('pmid-30024653');
+  });
+
+  it('an IVF-population study is lowered for a pregnancy question that is not about IVF', () => {
+    const general = item({
+      pmid: '22',
+      title: 'Levothyroxine in pregnant women with hypothyroidism',
+      lifeStages: ['pregnancy'],
+      topics: ['thyroid-pregnancy'],
+      tags: ['thyroid', 'levothyroxine'],
+      keywords: ['thyroid', 'levothyroxine', 'pregnancy'],
+    });
+    const ivf = item({ ...general, pmid: '23', title: 'Levothyroxine in pregnant women with hypothyroidism undergoing IVF' });
+    const q = 'Can I keep taking my levothyroxine in pregnancy?';
+    expect(searchItems([ivf, general], q, { lifeStage: 'pregnancy' }, topics)[0].item.pmid).toBe('22');
+    // For someone in IVF the IVF study is not lowered.
+    const inIvf = searchItems([ivf, general], q, { lifeStage: 'ivf' }, topics);
+    expect(inIvf.find((r) => r.item.pmid === '23')!.score).toBeGreaterThanOrEqual(inIvf.find((r) => r.item.pmid === '22')!.score);
   });
 });
