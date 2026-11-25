@@ -233,7 +233,7 @@ const PatientDetails = () => {
           </TabsContent>
 
           <TabsContent value="visits">
-            <PatientVisits appointments={appointments} />
+            <PatientVisits appointments={appointments} visitQuestions={visitQuestions} />
           </TabsContent>
         </Tabs>
       </div>
