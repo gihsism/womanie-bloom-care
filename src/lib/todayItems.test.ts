@@ -133,6 +133,36 @@ describe('todayItems', () => {
   });
 });
 
+describe('todayItems: baby vaccinations and weekly mood', () => {
+  it('baby at a vaccination age: postpartum only, opens the Vaccines tab', () => {
+    const [row] = todayItems('postpartum', { now: NOW, babyVaccines: [{ name: 'Mia', age: '2 months' }] });
+    expect(row).toEqual({ id: 'baby-vaccination', label: 'Mia is 2 months: check the vaccine booklet', target: '/dashboard/baby?tab=vax' });
+    expect(todayItems('postpartum', { now: NOW, babyVaccines: [{ name: 'A', age: '2 months' }, { name: 'B', age: '2 months' }] })[0].id).toBe('baby-vaccination');
+    expect(ids('pregnancy', { babyVaccines: [{ name: 'Mia', age: '2 months' }] })).toEqual([]);
+    const long = todayItems('postpartum', { now: NOW, babyVaccines: [{ name: 'Maximiliana Charlotte Alexandra', age: '4 months' }] })[0];
+    expect(long.label.length).toBeLessThanOrEqual(60);
+  });
+
+  it('weekly mood: a week since the last mood tick opens the log', () => {
+    expect(todayItems('menopause', { now: NOW, lastMoodLog: at(-7) })[0])
+      .toEqual({ id: 'mood-weekly', label: 'How has your mood been this week?', target: 'sheet:log' });
+    expect(ids('menopause', { lastMoodLog: at(-6) })).toEqual([]);
+    expect(ids('menopause', { lastMoodLog: undefined })).toEqual([]); // not loaded yet
+  });
+
+  it('weekly mood: never ticked shows on Mondays only; not for the EPDS stages', () => {
+    expect(ids('contraception', { lastMoodLog: null })).toEqual(['mood-weekly']); // NOW is a Monday
+    expect(todayItems('contraception', { now: at(1), lastMoodLog: null }).map(i => i.id)).toEqual([]); // Tuesday
+    expect(ids('pregnancy', { lastMoodLog: null })).toEqual([]);
+    expect(ids('postpartum', { lastMoodLog: at(-30) })).toEqual([]);
+  });
+
+  it('weekly mood ranks after heads-ups, before setup', () => {
+    expect(ids('menstrual-cycle', { lastMoodLog: at(-8), nextVisit: at(2), setup: { done: 1, total: 3 } }))
+      .toEqual(['visit-soon', 'mood-weekly', 'setup']);
+  });
+});
+
 describe('primaryActionFor', () => {
   it('pregnancy switches at weeks 28 and 37', () => {
     expect(primaryActionFor('pregnancy', { weeksPregnant: 20 }).label).toBe('Log today');
