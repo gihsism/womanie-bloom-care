@@ -5,7 +5,7 @@
 -- Additive only: indexes, nothing existing is altered or dropped. The app
 -- works before this is applied (the queries are just slower).
 --
--- Apply with:  node scripts/apply-migration.mjs db/migrations/015_doctor_day_indexes.sql
+-- Apply with:  node scripts/apply-migration.mjs db/migrations/016_doctor_day_indexes.sql
 -- Idempotent: safe to run twice.
 CREATE INDEX IF NOT EXISTS appointments_doctor_scheduled_idx
   ON appointments (doctor_id, scheduled_at);
