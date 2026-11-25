@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -8,25 +8,13 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import { useScrollToHash } from '@/hooks/useScrollToHash';
 import { useStageProfile } from '@/hooks/useStageProfile';
 import { stageLabel } from '@/lib/stageLabels';
-import CycleCalendar from '@/components/dashboard/CycleCalendar';
-import PregnancyTracker from '@/components/dashboard/PregnancyTracker';
-import PregnancyWeightTracker from '@/components/dashboard/PregnancyWeightTracker';
-import BloodPressureTracker from '@/components/dashboard/BloodPressureTracker';
 import PregnancyVaccinations from '@/components/dashboard/PregnancyVaccinations';
 import PregnancyNutrition from '@/components/dashboard/PregnancyNutrition';
 import PregnancyExercise from '@/components/dashboard/PregnancyExercise';
 import MenopauseNutrition from '@/components/dashboard/MenopauseNutrition';
 import IVFNutrition from '@/components/dashboard/IVFNutrition';
-import IVFTracker from '@/components/dashboard/IVFTracker';
-import PreMenstrualDashboard from '@/components/dashboard/PreMenstrualDashboard';
-import MenopauseDashboard from '@/components/dashboard/MenopauseDashboard';
-import PostpartumDashboard from '@/components/dashboard/PostpartumDashboard';
-import EpdsScreener from '@/components/dashboard/EpdsScreener';
 import MedicineLog from '@/components/dashboard/MedicineLog';
 import GuidesSection from '@/components/dashboard/GuidesSection';
-import MenopauseSymptomCalendar from '@/components/dashboard/MenopauseSymptomCalendar';
-import PerimenopauseStageCard from '@/components/dashboard/PerimenopauseStageCard';
-import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
 import CyclePhaseNutrition from '@/components/dashboard/CyclePhaseNutrition';
 import CyclePhaseExercise from '@/components/dashboard/CyclePhaseExercise';
 import PMSForecastCard from '@/components/dashboard/PMSForecastCard';
@@ -34,6 +22,24 @@ import FertilityOutlookCard from '@/components/dashboard/FertilityOutlookCard';
 import FertilityForecast from '@/components/dashboard/FertilityForecast';
 import EvidenceNote from '@/components/research/EvidenceNote';
 import { evidenceSpec } from '@/lib/evidenceTopics';
+
+// Each life stage renders a different set of trackers, and one person only
+// ever sees one stage — so the stage-specific trackers load on demand
+// instead of shipping all of them (~280 KB) to everyone who opens this page.
+// The <Section> wrappers (and their #anchor ids) render immediately; only
+// their contents wait for the tracker's code.
+const CycleCalendar = lazy(() => import('@/components/dashboard/CycleCalendar'));
+const PregnancyTracker = lazy(() => import('@/components/dashboard/PregnancyTracker'));
+const PregnancyWeightTracker = lazy(() => import('@/components/dashboard/PregnancyWeightTracker'));
+const BloodPressureTracker = lazy(() => import('@/components/dashboard/BloodPressureTracker'));
+const IVFTracker = lazy(() => import('@/components/dashboard/IVFTracker'));
+const PreMenstrualDashboard = lazy(() => import('@/components/dashboard/PreMenstrualDashboard'));
+const MenopauseDashboard = lazy(() => import('@/components/dashboard/MenopauseDashboard'));
+const PostpartumDashboard = lazy(() => import('@/components/dashboard/PostpartumDashboard'));
+const EpdsScreener = lazy(() => import('@/components/dashboard/EpdsScreener'));
+const MenopauseSymptomCalendar = lazy(() => import('@/components/dashboard/MenopauseSymptomCalendar'));
+const PerimenopauseStageCard = lazy(() => import('@/components/dashboard/PerimenopauseStageCard'));
+const ContraceptionDashboard = lazy(() => import('@/components/dashboard/ContraceptionDashboard'));
 
 // /dashboard/stage — everything for the current life stage that used to be
 // stacked on Home: the stage's big tracker (unchanged), its guides and the
@@ -44,7 +50,11 @@ import { evidenceSpec } from '@/lib/evidenceTopics';
 const anchor = 'scroll-mt-4 md:scroll-mt-28';
 
 function Section({ id, children }: { id?: string; children: ReactNode }) {
-  return <div id={id} className={`mb-6 ${anchor}`}>{children}</div>;
+  return (
+    <div id={id} className={`mb-6 ${anchor}`}>
+      <Suspense fallback={<Skeleton className="h-40 w-full rounded-xl" />}>{children}</Suspense>
+    </div>
+  );
 }
 
 export default function StagePage() {
