@@ -22,6 +22,7 @@ import docsFile from './_routes/docs/file.js';
 import docsPendingRetries from './_routes/docs/pending-retries.js';
 import doctorsAvailability from './_routes/doctors/availability.js';
 import doctorsConnections from './_routes/doctors/connections.js';
+import doctorsDay from './_routes/doctors/day.js';
 import doctorsList from './_routes/doctors/list.js';
 import doctorsPatient from './_routes/doctors/patient.js';
 import doctorsPatientTrends from './_routes/doctors/patient-trends.js';
@@ -77,6 +78,7 @@ export const ROUTES: Record<string, Handler> = {
   'docs/pending-retries': docsPendingRetries,
   'doctors/availability': doctorsAvailability,
   'doctors/connections': doctorsConnections,
+  'doctors/day': doctorsDay,
   'doctors/list': doctorsList,
   'doctors/patient': doctorsPatient,
   'doctors/patient-trends': doctorsPatientTrends,
