@@ -10,12 +10,14 @@ import { useClinicTheme } from '@/hooks/useClinicTheme';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, PenLine } from 'lucide-react';
 import { stageLabel } from '@/lib/doctorDashboard';
-import { normalizePatientTab, patientStageKey, pregnancyWeek, type PatientTab } from '@/lib/doctorPatient';
+import { cycleDay, normalizePatientTab, patientStageKey, pregnancyWeek, type PatientTab } from '@/lib/doctorPatient';
 import PatientSummary from '@/components/doctor/patient/PatientSummary';
 import PatientResults from '@/components/doctor/patient/PatientResults';
 import PatientDocuments from '@/components/doctor/patient/PatientDocuments';
 import PatientNotes from '@/components/doctor/patient/PatientNotes';
 import PatientVisits from '@/components/doctor/patient/PatientVisits';
+import PatientTrends from '@/components/doctor/patient/PatientTrends';
+import type { TrendsPayload } from '@/lib/patientTrends';
 import {
   EMPTY_DRAFT,
   type NoteDraft,
@@ -24,6 +26,7 @@ import {
   type HealthSignal,
   type MedicalDataRow,
   type PatientAppointment,
+  type PatientMedicine,
   type PatientProfile,
   type PeriodRecord,
   type PatientVisitQuestions,
@@ -31,7 +34,7 @@ import {
 
 // The doctor's view of one patient. Header: who she is and where she is
 // (stage, pregnancy week, IVF phase) + ONE primary action, "Write a note".
-// Below: tabs Summary · Results · Documents · Notes · Visits.
+// Below: tabs Summary · Trends · Results · Documents · Notes · Visits.
 //
 // All data comes from the consent-gated /api/doctors/patient, which 403s
 // unless this doctor has an APPROVED connection and logs every fetch to
@@ -44,6 +47,7 @@ import {
 // Stable empty list: a fresh [] on every chart load would re-render forever
 // when the auth user object is recreated (see PatientDetails.test).
 const NO_VISIT_QUESTIONS: PatientVisitQuestions[] = [];
+const NO_MEDICINES: PatientMedicine[] = [];
 
 const PatientDetails = () => {
   const navigate = useNavigate();
@@ -63,6 +67,9 @@ const PatientDetails = () => {
   const [medicalData, setMedicalData] = useState<MedicalDataRow[]>([]);
   const [periodRecords, setPeriodRecords] = useState<PeriodRecord[]>([]);
   const [visitQuestions, setVisitQuestions] = useState<PatientVisitQuestions[]>([]);
+  const [medicines, setMedicines] = useState<PatientMedicine[]>([]);
+  // Trends load on first open of the tab (own consent-gated endpoint).
+  const [trends, setTrends] = useState<{ patientId: string; data: TrendsPayload } | null>(null);
   // Skeleton only until the first answer; a refresh after saving a note
   // keeps the page in place.
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -117,6 +124,7 @@ const PatientDetails = () => {
       setMedicalData(payload.medicalData || []);
       setPeriodRecords(payload.periodRecords || []);
       setVisitQuestions(Array.isArray(payload.visitQuestions) ? payload.visitQuestions : NO_VISIT_QUESTIONS);
+      setMedicines(Array.isArray(payload.medicines) ? payload.medicines : NO_MEDICINES);
     } catch (error) {
       console.error('Error loading patient data:', error);
       toast({ variant: 'destructive', title: 'Could not load this chart', description: 'Please try again.' });
@@ -162,11 +170,13 @@ const PatientDetails = () => {
   const stageKey = patientStageKey(patient?.life_stage);
   const stageText = stageLabel(patient?.life_stage);
   // The stage shows as a chip when it maps to a colour set; otherwise as text.
+  const day = preg ? null : cycleDay(periodRecords, patient?.life_stage ?? null, Date.now());
   const facts = [
     stageKey ? null : stageText ?? 'Life stage not set',
     preg
       ? `Week ${preg.week} (${preg.daysToDue > 0 ? `${preg.daysToDue} days to due date` : preg.daysToDue === 0 ? 'due today' : `${-preg.daysToDue} days past due`})`
       : null,
+    day ? `Cycle day ${day}` : null,
     patient?.ivf_phase ? `IVF: ${patient.ivf_phase}` : null,
   ].filter(Boolean);
 
@@ -212,12 +222,14 @@ const PatientDetails = () => {
         )}
 
         <Tabs value={activeTab} onValueChange={v => setActiveTab(v as PatientTab)} className="space-y-5">
-          <TabsList className="w-full flex justify-between sm:justify-start sm:gap-6 h-11 overflow-x-auto">
-            <TabsTrigger value="summary" className="text-[15px]">Summary</TabsTrigger>
-            <TabsTrigger value="results" className="text-[15px]">Results</TabsTrigger>
-            <TabsTrigger value="documents" className="text-[15px]">Documents</TabsTrigger>
-            <TabsTrigger value="notes" className="text-[15px]">Notes</TabsTrigger>
-            <TabsTrigger value="visits" className="text-[15px]">Visits</TabsTrigger>
+          {/* Six tabs: two rows of three on a phone, one row from sm up. */}
+          <TabsList className="w-full grid grid-cols-3 sm:grid-cols-6 h-auto gap-y-1">
+            <TabsTrigger value="summary" className="text-[15px] px-1">Summary</TabsTrigger>
+            <TabsTrigger value="trends" className="text-[15px] px-1">Trends</TabsTrigger>
+            <TabsTrigger value="results" className="text-[15px] px-1">Results</TabsTrigger>
+            <TabsTrigger value="documents" className="text-[15px] px-1">Documents</TabsTrigger>
+            <TabsTrigger value="notes" className="text-[15px] px-1">Notes</TabsTrigger>
+            <TabsTrigger value="visits" className="text-[15px] px-1">Visits</TabsTrigger>
           </TabsList>
 
           <TabsContent value="summary">
@@ -230,8 +242,21 @@ const PatientDetails = () => {
               periodRecords={periodRecords}
               lifeStage={patient?.life_stage ?? null}
               visitQuestions={visitQuestions}
+              medicines={medicines}
+              profile={patient}
               onOpenTab={setActiveTab}
             />
+          </TabsContent>
+
+          <TabsContent value="trends">
+            {patientId && (
+              <PatientTrends
+                key={patientId}
+                patientId={patientId}
+                cached={trends?.patientId === patientId ? trends.data : null}
+                onLoaded={data => setTrends({ patientId, data })}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="results">
@@ -258,7 +283,7 @@ const PatientDetails = () => {
           </TabsContent>
 
           <TabsContent value="visits">
-            <PatientVisits appointments={appointments} />
+            <PatientVisits appointments={appointments} visitQuestions={visitQuestions} />
           </TabsContent>
         </Tabs>
       </div>

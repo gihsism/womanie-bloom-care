@@ -86,8 +86,8 @@ export function visitSummary<T extends VisitRow>(visits: T[], now: number): { la
   return { last, next };
 }
 
-export type PatientTab = 'summary' | 'results' | 'documents' | 'notes' | 'visits';
-export const PATIENT_TABS: readonly PatientTab[] = ['summary', 'results', 'documents', 'notes', 'visits'];
+export type PatientTab = 'summary' | 'trends' | 'results' | 'documents' | 'notes' | 'visits';
+export const PATIENT_TABS: readonly PatientTab[] = ['summary', 'trends', 'results', 'documents', 'notes', 'visits'];
 
 // ?tab= deep links. Old names keep working: overview/health -> summary,
 // labs -> results.
@@ -97,5 +97,78 @@ export function normalizePatientTab(raw: string | null): PatientTab | null {
   if (v === 'overview' || v === 'health') return 'summary';
   if (v === 'labs') return 'results';
   if (v === 'appointments') return 'visits';
+  if (v === 'charts' || v === 'trend') return 'trends';
   return null;
+}
+
+// ---- "Before the visit" brief (top of the Summary tab) ----
+
+// Stages where a cycle day means something to a gynaecologist.
+const CYCLE_STAGES = new Set(['menstrual-cycle', 'contraception', 'conception', 'ivf', 'pre-menstrual']);
+
+/**
+ * Day of her current cycle (day 1 = first day of the latest logged period),
+ * or null when the stage has no cycle, nothing is logged, or the latest
+ * period is more than 60 days old (then "cycle day 74" would mislead).
+ */
+export function cycleDay(
+  periods: Array<{ period_start_date: string }>,
+  lifeStage: string | null,
+  now: number,
+): number | null {
+  if (lifeStage && !CYCLE_STAGES.has(lifeStage)) return null;
+  let latest = -Infinity;
+  for (const p of periods) {
+    const t = Date.parse(p.period_start_date);
+    if (Number.isFinite(t) && t <= now && t > latest) latest = t;
+  }
+  if (!Number.isFinite(latest)) return null;
+  const day = Math.floor((now - latest) / 86_400_000) + 1;
+  return day >= 1 && day <= 60 ? day : null;
+}
+
+// Moods the patient can log that a clinician would want to notice.
+export const LOW_MOODS: Readonly<Record<string, string>> = { sad: 'Sad', anxious: 'Anxious', irritable: 'Irritable' };
+/** Days with a low mood (in the last 30) at which the brief marks the row. */
+export const LOW_MOOD_ATTENTION_DAYS = 5;
+
+export interface MoodSummary {
+  /** Days she logged any mood. */
+  loggedDays: number;
+  /** Days with at least one low mood. */
+  lowDays: number;
+  /** Low moods by count, most frequent first. */
+  low: Array<{ key: string; label: string; days: number }>;
+  needsAttention: boolean;
+}
+
+export function moodSummary(signals: Array<{ mood: string[] | null }>): MoodSummary {
+  let loggedDays = 0;
+  let lowDays = 0;
+  const counts: Record<string, number> = {};
+  for (const s of signals) {
+    const moods = Array.isArray(s.mood) ? [...new Set(s.mood)] : [];
+    if (moods.length === 0) continue;
+    loggedDays++;
+    const lows = moods.filter(m => m in LOW_MOODS);
+    if (lows.length) lowDays++;
+    for (const m of lows) counts[m] = (counts[m] ?? 0) + 1;
+  }
+  const low = Object.entries(counts)
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([key, days]) => ({ key, label: LOW_MOODS[key], days }));
+  return { loggedDays, lowDays, low, needsAttention: lowDays >= LOW_MOOD_ATTENTION_DAYS };
+}
+
+export interface MedicineRow {
+  name: string;
+  dose: string | null;
+  times_per_day: number | null;
+}
+
+/** "Iron 50 mg, 2× a day" - name, then dose and frequency when known. */
+export function medicineLine(m: MedicineRow): string {
+  const parts = [m.name.trim(), m.dose?.trim() || null].filter(Boolean).join(' ');
+  const freq = m.times_per_day && m.times_per_day > 0 ? `${m.times_per_day}× a day` : null;
+  return freq ? `${parts}, ${freq}` : parts;
 }

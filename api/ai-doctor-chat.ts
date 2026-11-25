@@ -7,6 +7,7 @@ import { applyChatLimits } from './_lib/chat-limits.js';
 import { parseConversationId, persistChatTurn } from './_lib/chatConversation.js';
 import { buildLifeContext } from './_lib/life-context.js';
 import { buildProfileContext } from './_lib/profile-context.js';
+import { fetchPersonalRows, selectPersonalContext } from './_lib/personal-retrieval.js';
 import { SOURCES_FOOTER_MARK, formatSourcesFooter, stripUnknownCitations } from './_lib/research/library.js';
 import { buildChatSystemPrompt, selectChatEvidenceForTurn } from './_lib/research/chat-prompt.js';
 import { checkCitations, evidenceTexts } from './_lib/research/citation-check.js';
@@ -42,7 +43,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
   if (!ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured');
 
-  const { messages: rawMessages, model: requestedModel, personalContext, conversationId: rawConversationId } = req.body || {};
+  const { messages: rawMessages, model: requestedModel, personalContext, conversationId: rawConversationId, today: clientToday } = req.body || {};
   // Groups this turn with the rest of its chat in "Past chats". Only a
   // well-formed UUID is kept; the rows are still owned by user.id.
   const conversationId = parseConversationId(rawConversationId);
@@ -100,17 +101,10 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       ? lastMsg.content
       : null;
 
-  const [docs, extracted, profileRow, upcomingApts, visibleNotes, lifeMeds, lifeEvents, lifeBirth, lifeBabies] = await Promise.all([
-    sql.query(
-      `SELECT file_name, ai_suggested_name, ai_summary, ai_suggested_category, document_type
-       FROM health_documents WHERE user_id = $1 ORDER BY uploaded_at DESC LIMIT 20`,
-      [user.id]
-    ),
-    sql.query(
-      `SELECT data_type, title, value, unit, reference_range, status, date_recorded, notes
-       FROM medical_extracted_data WHERE user_id = $1 ORDER BY date_recorded DESC NULLS LAST LIMIT 100`,
-      [user.id]
-    ),
+  // Her documents and extracted values, read in full (paged, capped) and
+  // filtered per question below; see api/_lib/personal-retrieval.ts.
+  const [personalRows, profileRow, upcomingApts, visibleNotes, lifeMeds, lifeEvents, lifeBirth, lifeBabies] = await Promise.all([
+    fetchPersonalRows(sql, user.id),
     sql.query(
       `SELECT full_name, life_stage, pregnancy_due_date, ivf_start_date, ivf_phase
          FROM profiles WHERE id = $1`,
@@ -153,41 +147,23 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   let medicalContext = '';
   if (profile) {
     // Stage anchors ("what week am I?") only for the stage she is in now.
-    medicalContext += buildProfileContext(profile, new Date());
+    medicalContext += buildProfileContext(profile, new Date(), clientToday);
   }
 
   type Row = Record<string, unknown>;
 
-  if (docs.length > 0) {
-    medicalContext += '## Uploaded Documents\n';
-    (docs as Row[]).forEach((d, i) => {
-      medicalContext += `${i + 1}. ${d.ai_suggested_name || d.file_name} (${d.ai_suggested_category || d.document_type})\n`;
-      if (d.ai_summary) medicalContext += `   Summary: ${d.ai_summary}\n`;
-    });
-    medicalContext += '\n';
-  }
-
-  if (extracted.length > 0) {
-    const grouped: Record<string, Row[]> = {};
-    for (const item of extracted as Row[]) {
-      const t = String(item.data_type || 'other'); // object keys are strings anyway
-      if (!grouped[t]) grouped[t] = [];
-      grouped[t].push(item);
-    }
-    medicalContext += '## Extracted Medical Data\n';
-    for (const [type, items] of Object.entries(grouped)) {
-      medicalContext += `\n### ${type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}\n`;
-      for (const item of items) {
-        let line = `- ${item.title}`;
-        if (item.value) line += `: ${item.value}${item.unit ? ' ' + item.unit : ''}`;
-        if (item.reference_range) line += ` (ref: ${item.reference_range})`;
-        if (item.status) line += ` [${item.status}]`;
-        if (item.date_recorded) line += ` — ${item.date_recorded}`;
-        if (item.notes) line += `\n  Note: ${item.notes}`;
-        medicalContext += line + '\n';
-      }
-    }
-  }
+  // Question-aware personal records: the full history of every test the
+  // question names, matching documents, recent out-of-range values and a
+  // small baseline, within a token budget (replaces "latest 20 documents
+  // + latest 100 values" regardless of the question).
+  const previousUserTurn = [...messages.slice(0, -1)].reverse()
+    .find((m: { role?: unknown; content?: unknown }) => m?.role === 'user' && typeof m.content === 'string')?.content as string | undefined;
+  medicalContext += selectPersonalContext({
+    question: userTurnContent,
+    previousQuestion: previousUserTurn,
+    labs: personalRows.labs,
+    docs: personalRows.docs,
+  }).block;
 
   if (upcomingApts.length > 0) {
     medicalContext += '\n## Upcoming Appointments\n';
@@ -229,8 +205,6 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   // Never allowed to break the chat.
   // A follow-up that finds nothing on its own is searched together with
   // the question before it (see selectChatEvidenceForTurn).
-  const previousUserTurn = [...messages.slice(0, -1)].reverse()
-    .find((m: { role?: unknown; content?: unknown }) => m?.role === 'user' && typeof m.content === 'string')?.content as string | undefined;
   const { chatSources, researchItems, passages, block: evidenceBlock } = await selectChatEvidenceForTurn(userTurnContent, previousUserTurn, profile?.life_stage);
   const systemPrompt = buildChatSystemPrompt(medicalContext, evidenceBlock);
 

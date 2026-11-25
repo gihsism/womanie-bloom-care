@@ -103,6 +103,9 @@ function maskRows(table: string, rows: unknown[]): unknown[] {
 }
 
 function ownerCols(table: string): string[] | null {
+  // Own keys only: 'constructor', '__proto__' etc. must not resolve
+  // through Object.prototype and pass as a table.
+  if (typeof table !== 'string' || !Object.prototype.hasOwnProperty.call(OWNER_COLUMN, table)) return null;
   const o = OWNER_COLUMN[table];
   if (!o) return null;
   return Array.isArray(o) ? o : [o];
@@ -188,6 +191,28 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       if (operation === 'update' && updateData && typeof updateData === 'object' && 'patient_id' in updateData) {
         return res.status(403).json({ error: 'Column(s) not writable via /api/db: patient_id' });
       }
+      // Editing a note the patient can already read also needs the
+      // connection to still be approved: once she removes the doctor, the
+      // doctor can no longer change what she sees (deleting stays possible,
+      // so a doctor can still withdraw a note). One note per update, by id.
+      if (operation === 'update') {
+        const idFilter = filters.find(f => f[0] === 'id' && f[1] === 'eq');
+        if (!idFilter || typeof idFilter[2] !== 'string' || !idFilter[2]) {
+          return res.status(400).json({ error: 'Note id required' });
+        }
+        const ok = await sql.query(
+          `SELECT 1 FROM doctor_notes n
+             JOIN doctor_patient_connections c
+               ON c.doctor_id = n.doctor_id AND c.patient_id = n.patient_id AND c.status = 'approved'
+             JOIN user_roles r ON r.user_id = n.doctor_id AND r.role = 'doctor'
+            WHERE n.id = $1 AND n.doctor_id = $2
+            LIMIT 1`,
+          [idFilter[2], user.id]
+        );
+        if (ok.length === 0) {
+          return res.status(403).json({ error: 'No approved connection to this patient' });
+        }
+      }
       if (operation === 'insert' || operation === 'upsert') {
         const raw = operation === 'insert' ? insertData : upsertData;
         const row = (Array.isArray(raw) ? raw[0] : raw) as Record<string, unknown> | undefined;
@@ -196,8 +221,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           return res.status(400).json({ error: 'patient_id required' });
         }
         const conn = await sql.query(
-          `SELECT 1 FROM doctor_patient_connections
-            WHERE doctor_id = $1 AND patient_id = $2 AND status = 'approved' LIMIT 1`,
+          `SELECT 1 FROM doctor_patient_connections c
+             JOIN user_roles r ON r.user_id = c.doctor_id AND r.role = 'doctor'
+            WHERE c.doctor_id = $1 AND c.patient_id = $2 AND c.status = 'approved' LIMIT 1`,
           [user.id, patientId]
         );
         if (conn.length === 0) {

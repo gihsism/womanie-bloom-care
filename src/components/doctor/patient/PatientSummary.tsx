@@ -10,11 +10,15 @@ import type {
   MedicalDataRow,
   PatientAppointment,
   PeriodRecord,
+  PatientMedicine,
+  PatientProfile,
   PatientVisitQuestions as VisitQuestionsRow,
 } from './types';
 import PatientVisitQuestions from './PatientVisitQuestions';
+import PatientVisitBrief from './PatientVisitBrief';
 
-// Summary tab: one screen that answers "what do I need to know?". Four
+// Summary tab: one screen that answers "what do I need to know?". First
+// the "Before the visit" brief (stage, medicines, mood, questions), then four
 // rows (results out of range, visits, documents, notes), each opening its
 // tab, then what the patient tracked herself, then her daily logs folded.
 
@@ -28,6 +32,9 @@ interface Props {
   lifeStage: string | null;
   /** Questions she saved for her upcoming visits with this doctor. */
   visitQuestions?: VisitQuestionsRow[];
+  /** Her active medicines (her own log). */
+  medicines?: PatientMedicine[];
+  profile?: PatientProfile | null;
   onOpenTab: (tab: PatientTab) => void;
 }
 
@@ -65,7 +72,7 @@ const SummaryRow = ({
   </button>
 );
 
-const PatientSummary = ({ medicalData, documents, notes, appointments, signals, periodRecords, lifeStage, visitQuestions = [], onOpenTab }: Props) => {
+const PatientSummary = ({ medicalData, documents, notes, appointments, signals, periodRecords, lifeStage, visitQuestions = [], medicines = [], profile = null, onOpenTab }: Props) => {
   const [logsOpen, setLogsOpen] = useState(false);
   const flagged = flaggedResults(medicalData);
   const { last, next } = visitSummary(appointments, Date.now());
@@ -85,6 +92,15 @@ const PatientSummary = ({ medicalData, documents, notes, appointments, signals, 
 
   return (
     <div className="space-y-6">
+      <PatientVisitBrief
+        profile={profile}
+        appointments={appointments}
+        periodRecords={periodRecords}
+        signals={signals}
+        medicines={medicines}
+        visitQuestions={visitQuestions}
+      />
+
       <div className="row-group">
         <SummaryRow
           icon={flagged.length > 0 ? AlertTriangle : FileText}

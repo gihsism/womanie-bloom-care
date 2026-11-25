@@ -1199,9 +1199,7 @@ export default function MedicalHistory() {
               {lastResultDate ? `Last result · ${format(lastResultDate, 'd MMMM')}` : 'Your results explained in plain language'}
             </p>
           </div>
-          <div className="hidden sm:block">
-            <ShareWithDoctor />
-          </div>
+          <ShareWithDoctor />
           {/* Less-used actions live behind "⋯". Log out lives only in Me. */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

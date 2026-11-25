@@ -18,6 +18,8 @@ export const RECORDS = '/dashboard/medical-history';
 export const RECORDS_CHARTS = `${RECORDS}?tab=charts`;
 export const VISITS = '/dashboard/appointments';
 export const ME = '/dashboard/settings';
+/** The baby tracker opened on its Vaccines tab. */
+export const BABY_VACCINES = '/dashboard/baby?tab=vax';
 
 export interface TodayItem {
   id: string;
@@ -50,6 +52,14 @@ export interface TodaySignals {
   vaccinesDue?: string[];
   /** Date of the last EPDS mood check; null = never taken; undefined = not known yet. */
   lastMoodCheck?: Date | null;
+  /** Postpartum: babies at a common vaccination age with nothing logged around it. */
+  babyVaccines?: Array<{ name: string; age: string }>;
+  /**
+   * Last day a mood was ticked in the daily log; null = none in the last
+   * weeks; undefined = not known yet. Drives the gentle weekly mood row for
+   * the stages without the EPDS check.
+   */
+  lastMoodLog?: Date | null;
   /** Getting-started progress; omitted or done === total hides the row. */
   setup?: { done: number; total: number; nameMissing?: boolean; nextTarget?: Target } | null;
 }
@@ -58,9 +68,14 @@ export const MAX_TODAY = 3;
 export const MAX_MORE = 4;
 const DAY = 86_400_000;
 export const MAX_LATE_DAYS = 14;
+/** PMSForecastCard's window: the 5 days before the predicted period. */
+export const PMS_WINDOW_DAYS = 5;
 /** The EPDS card asks to "check in again in 2 weeks". */
 export const MOOD_CHECK_EVERY_DAYS = 14;
 const MOOD_STAGES: readonly string[] = ['pregnancy', 'postpartum'];
+/** The other stages get a gentle weekly mood prompt (daily log mood ticks). */
+export const MOOD_LOG_EVERY_DAYS = 7;
+const MONDAY = 1;
 
 const minutesOf = (hhmmStr: string) => {
   const m = /^(\d{1,2}):(\d{2})$/.exec(hhmmStr);
@@ -107,7 +122,7 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
     items.push({ id: 'flagged-results', label: n === 1 ? '1 result to talk to your doctor about' : `${n} results to talk to your doctor about`, target: RECORDS });
   }
   // 4. A due stage task: missed pill, medicine due, vaccination due,
-  //    mood check due, period due in the next 2 days or late.
+  //    baby vaccination age, mood check due, period due in the next 2 days or late.
   const pill = s.pill;
   if (mode === 'contraception' && pill && !(pill.packDay != null && pill.packDay > 21)) {
     const due = minutesOf(pill.reminderTime);
@@ -140,6 +155,12 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
       items.push({ id: 'mood-check', label: 'Mood check due (every 2 weeks)', target: `${STAGE_PAGE}#mood-check` });
     }
   }
+  const babies = mode === 'postpartum' ? s.babyVaccines ?? [] : [];
+  if (babies.length === 1) {
+    items.push({ id: 'baby-vaccination', label: fit(`${babies[0].name} is ${babies[0].age}: check the vaccine booklet`), target: BABY_VACCINES });
+  } else if (babies.length > 1) {
+    items.push({ id: 'baby-vaccination', label: 'Vaccination age: check the babies\' booklets', target: BABY_VACCINES });
+  }
   const pd = s.periodDaysUntil;
   if (CYCLE_STAGES.includes(mode) && pd != null) {
     // Late by up to two weeks; beyond that the log is likely just stale.
@@ -152,15 +173,26 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
     }
   }
   // 5. Time-limited heads-ups: PMS in the next few days, a visit within 7 days
+  // Same window as the PMS card on the stage page: the 5 days before the period.
   if (mode === 'menstrual-cycle' && pd != null && pd >= 3 && pd <= 7) {
-    const pmsFrom = new Date(startOfDay(now) + (pd - 2) * DAY);
-    items.push({ id: 'pms-soon', label: `PMS likely from ${dayName(now, pmsFrom)}`, target: `${STAGE_PAGE}#pms` });
+    const label = pd > PMS_WINDOW_DAYS
+      ? `PMS likely from ${dayName(now, new Date(now.getFullYear(), now.getMonth(), now.getDate() + pd - PMS_WINDOW_DAYS))}`
+      : `PMS days: period in ${pd} days`;
+    items.push({ id: 'pms-soon', label, target: `${STAGE_PAGE}#pms` });
   }
   if (s.nextVisit) {
     const n = daysBetween(now, s.nextVisit);
     if (n >= 1 && n <= 7) {
       items.push({ id: 'visit-soon', label: `Visit ${onDay(now, s.nextVisit)} at ${hhmm(s.nextVisit)}`, target: VISITS });
     }
+  }
+  // 5b. Gentle weekly mood prompt for the stages without the EPDS check: a
+  // week since she last ticked a mood; someone who never ticks one sees
+  // it on Mondays only, so it stays weekly rather than daily.
+  if (!MOOD_STAGES.includes(mode) && s.lastMoodLog !== undefined) {
+    const last = s.lastMoodLog;
+    const due = last === null ? now.getDay() === MONDAY : daysBetween(last, now) >= MOOD_LOG_EVERY_DAYS;
+    if (due) items.push({ id: 'mood-weekly', label: 'How has your mood been this week?', target: 'sheet:log' });
   }
   // 6. Unfinished setup, as one row
   if (s.setup && s.setup.done < s.setup.total) {

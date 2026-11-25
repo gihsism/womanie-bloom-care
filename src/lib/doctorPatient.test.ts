@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
+  cycleDay,
+  medicineLine,
+  moodSummary,
   patientStageKey,
   flaggedResults,
   isFlagged,
@@ -80,5 +83,55 @@ describe('patientStageKey', () => {
     expect(patientStageKey(null)).toBeNull();
     expect(patientStageKey('')).toBeNull();
     expect(patientStageKey('something else')).toBeNull();
+  });
+});
+
+describe('cycleDay', () => {
+  const now = Date.parse('2026-11-25T12:00:00Z');
+  it('counts the first day of the latest period as day 1', () => {
+    expect(cycleDay([{ period_start_date: '2026-10-20' }, { period_start_date: '2026-11-25' }], 'menstrual-cycle', now)).toBe(1);
+    expect(cycleDay([{ period_start_date: '2026-11-12' }], null, now)).toBe(14);
+  });
+  it('is null for stages without a cycle, nothing logged, or a stale period', () => {
+    expect(cycleDay([{ period_start_date: '2026-11-12' }], 'pregnancy', now)).toBeNull();
+    expect(cycleDay([{ period_start_date: '2026-11-12' }], 'menopause', now)).toBeNull();
+    expect(cycleDay([], 'menstrual-cycle', now)).toBeNull();
+    expect(cycleDay([{ period_start_date: '2026-08-01' }], 'menstrual-cycle', now)).toBeNull();
+    expect(cycleDay([{ period_start_date: 'junk' }], 'menstrual-cycle', now)).toBeNull();
+  });
+  it('ignores a future-dated start', () => {
+    expect(cycleDay([{ period_start_date: '2026-11-12' }, { period_start_date: '2026-12-10' }], 'conception', now)).toBe(14);
+  });
+});
+
+describe('moodSummary', () => {
+  it('counts days, not mentions, and ranks low moods', () => {
+    const m = moodSummary([
+      { mood: ['sad', 'anxious'] },
+      { mood: ['anxious', 'anxious'] },
+      { mood: ['happy'] },
+      { mood: null },
+      { mood: [] },
+    ]);
+    expect(m.loggedDays).toBe(3);
+    expect(m.lowDays).toBe(2);
+    expect(m.low).toEqual([
+      { key: 'anxious', label: 'Anxious', days: 2 },
+      { key: 'sad', label: 'Sad', days: 1 },
+    ]);
+    expect(m.needsAttention).toBe(false);
+  });
+  it('marks the row from 5 low-mood days', () => {
+    const five = Array.from({ length: 5 }, () => ({ mood: ['sad'] }));
+    expect(moodSummary(five).needsAttention).toBe(true);
+    expect(moodSummary(five.slice(1)).needsAttention).toBe(false);
+  });
+});
+
+describe('medicineLine', () => {
+  it('joins name, dose and frequency when known', () => {
+    expect(medicineLine({ name: 'Iron', dose: '50 mg', times_per_day: 2 })).toBe('Iron 50 mg, 2× a day');
+    expect(medicineLine({ name: 'Vitamin D ', dose: null, times_per_day: null })).toBe('Vitamin D');
+    expect(medicineLine({ name: 'Folic acid', dose: '', times_per_day: 0 })).toBe('Folic acid');
   });
 });

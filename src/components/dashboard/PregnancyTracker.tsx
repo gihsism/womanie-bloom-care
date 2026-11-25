@@ -35,7 +35,7 @@ import fruitWeek36 from '@/assets/fruit-week-36.png';
 import fruitWeek40 from '@/assets/fruit-week-40.png';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
-import { differenceInDays, addDays, format, parseISO } from 'date-fns';
+import { differenceInCalendarDays, differenceInDays, addDays, format, parseISO } from 'date-fns';
 import {
   Baby,
   Calendar,
@@ -380,7 +380,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
     const totalDays = differenceInDays(today, gestationStart);
     const weeksPregnant = Math.floor(totalDays / 7);
     const daysExtra = totalDays % 7;
-    const daysUntilDue = differenceInDays(dueDate, today);
+    const daysUntilDue = differenceInCalendarDays(dueDate, today);
     const trimester = weeksPregnant < 13 ? 1 : weeksPregnant < 27 ? 2 : 3;
     const trimesterLabel = trimester === 1 ? 'First' : trimester === 2 ? 'Second' : 'Third';
     const trimesterKey = trimester === 1 ? 'first' : trimester === 2 ? 'second' : 'third';

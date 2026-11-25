@@ -87,3 +87,12 @@ export interface PeriodRecord {
   period_start_date: string;
   cycle_length: number;
 }
+
+// Her active medicines (her own Medicine log), read-only.
+export interface PatientMedicine {
+  id: string;
+  name: string;
+  dose: string | null;
+  times_per_day: number | null;
+  started_on: string | null;
+}

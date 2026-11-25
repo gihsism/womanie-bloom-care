@@ -70,7 +70,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error('Document delete error:', error);
-    return res.status(500).json({ error: error instanceof Error ? error.message : 'Delete failed' });
+    return res.status(500).json({ error: 'Delete failed' });
   }
 }
 

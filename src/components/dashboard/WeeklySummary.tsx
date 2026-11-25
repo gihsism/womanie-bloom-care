@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { NO_REMOTE_IMAGES } from '@/lib/safeMarkdown';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -142,7 +143,7 @@ export default function WeeklySummary() {
         ref={contentRef}
         className={`prose prose-sm dark:prose-invert max-w-none ${overflows && !expanded ? 'max-h-60 overflow-hidden relative' : ''}`}
       >
-        <ReactMarkdown>{data.summary}</ReactMarkdown>
+        <ReactMarkdown disallowedElements={NO_REMOTE_IMAGES}>{data.summary}</ReactMarkdown>
         {overflows && !expanded && (
           <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-card pointer-events-none" />
         )}

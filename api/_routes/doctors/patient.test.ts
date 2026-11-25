@@ -174,11 +174,67 @@ describe('doctors/patient security invariants', () => {
     expect((res._body as Record<string, unknown>).visitQuestions).toEqual([]);
   });
 
+  // Current medicines: read only after the consent gate, only for the
+  // consented patient, only active rows, never a write.
+  it('medicines are read after the consent gate, scoped to the consented patient, active only', async () => {
+    const res = mockRes();
+    await handler(mockReq(PATIENT_ID), res);
+    expect(res._status).toBe(200);
+    const idx = query.mock.calls.findIndex(([sql]) => /FROM medications/i.test(sql));
+    expect(idx).toBeGreaterThan(0);
+    const [medSql, params] = query.mock.calls[idx] as [string, unknown[]];
+    expect(medSql).toMatch(/^\s*SELECT/i);
+    expect(medSql).toMatch(/WHERE user_id = \$1 AND active IS NOT FALSE/);
+    expect(params).toEqual([PATIENT_ID]);
+    expect((res._body as Record<string, unknown>).medicines).toEqual([]);
+  });
+
+  it('no medicines are read without consent', async () => {
+    query.mockReset();
+    query.mockResolvedValue([]);
+    const res = mockRes();
+    await handler(mockReq(PATIENT_ID), res);
+    expect(res._status).toBe(403);
+    expect(query.mock.calls.some(([sql]) => /medications/i.test(sql))).toBe(false);
+  });
+
+  it('a medicines read failure does not break the chart', async () => {
+    query.mockReset();
+    query.mockResolvedValueOnce(CONN_ROW);
+    query.mockResolvedValueOnce([]);
+    query.mockImplementation(async (sql: string) => {
+      if (/FROM medications/i.test(sql)) throw new Error('relation "medications" does not exist');
+      return [];
+    });
+    const res = mockRes();
+    await handler(mockReq(PATIENT_ID), res);
+    expect(res._status).toBe(200);
+    expect((res._body as Record<string, unknown>).medicines).toEqual([]);
+  });
+
   it('no visit questions are read without consent', async () => {
     query.mockReset();
     query.mockResolvedValue([]);
     const res = mockRes();
     await handler(mockReq(PATIENT_ID), res);
     expect(query.mock.calls.some(([sql]) => /visit_questions/i.test(sql))).toBe(false);
+  });
+});
+
+// A doctor whose approval the admin revoked (user_roles 'doctor' row
+// deleted) still has her old 'approved' connection rows. Those must stop
+// opening the chart: consent was given to a verified doctor.
+describe('doctors/patient: revoked doctor', () => {
+  it('403 when the connection is approved but the account no longer has the doctor role', async () => {
+    vi.mocked(getAuthUser).mockResolvedValue(DOCTOR);
+    query.mockReset();
+    query.mockImplementation(async (sql: string) => {
+      if (/doctor_patient_connections/.test(sql)) return /user_roles/.test(sql) ? [] : CONN_ROW;
+      return []; // user_roles: no 'doctor' row any more
+    });
+    const res = mockRes();
+    await handler(mockReq(PATIENT_ID), res);
+    expect(res._status).toBe(403);
+    expect(query.mock.calls.some(([s]) => /chart_access_log|health_documents/.test(String(s)))).toBe(false);
   });
 });

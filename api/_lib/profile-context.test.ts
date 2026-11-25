@@ -27,6 +27,21 @@ describe('buildProfileContext', () => {
     }
   });
 
+  it('counts whole calendar days, not hours: a late-evening question is not one day short', () => {
+    // 23:00 in Zurich = 22:00 UTC; due date 60 calendar days away.
+    const evening = new Date('2026-11-25T22:00:00Z');
+    const s = buildProfileContext({ ...base, pregnancy_due_date: '2027-01-24', life_stage: 'pregnancy' }, evening, '2026-11-25');
+    expect(s).toContain('week 31 + 3d, 60 days to go');
+  });
+
+  it("uses her local date just after midnight, and ignores a date far from the server's", () => {
+    const justAfterMidnightZurich = new Date('2026-11-25T23:30:00Z'); // 00:30 on 26 Nov in Zurich
+    const s = buildProfileContext({ ...base, life_stage: 'ivf' }, justAfterMidnightZurich, '2026-11-26');
+    expect(s).toContain('(day 8 of journey)');
+    const bogus = buildProfileContext({ ...base, life_stage: 'ivf' }, justAfterMidnightZurich, '2030-01-01');
+    expect(bogus).toContain('(day 7 of journey)');
+  });
+
   it('no stage', () => {
     expect(buildProfileContext({}, now)).toBe('Patient: Unknown, Life stage: Not specified\n\n');
   });

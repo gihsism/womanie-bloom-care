@@ -48,9 +48,24 @@ const DoctorPatientList = ({ patients }: Props) => {
       )}
 
       {patients.length === 0 ? (
-        <p className="row-group px-4 py-4 text-[15px] text-muted-foreground">
-          No patients yet. Ask a patient for her access code, then tap “Add a patient”.
-        </p>
+        // First-run state for a new doctor: how a patient gets linked.
+        <section className="panel p-4 text-[15px] space-y-3" aria-labelledby="doctor-first-patient-heading">
+          <div>
+            <h3 id="doctor-first-patient-heading" className="text-[17px] font-semibold">No patients yet. Here is how to add your first one</h3>
+            <p className="text-muted-foreground mt-1">
+              Patients link themselves to you with a one-time code, so you only ever see the patients who chose you.
+            </p>
+          </div>
+          <ol className="list-decimal pl-5 space-y-1.5">
+            <li>
+              Ask your patient to open Womanie (<span className="whitespace-nowrap">womanie.info</span>), go to{' '}
+              <strong className="font-medium">Records → Share with doctor</strong> and tap{' '}
+              <strong className="font-medium">Generate new code</strong>. The code works for 24 hours.
+            </li>
+            <li>Tap <strong className="font-medium">Add a patient</strong> above and type her 8-character code.</li>
+            <li>She approves your request in her app. Her chart then opens from this list.</li>
+          </ol>
+        </section>
       ) : visible.length === 0 ? (
         <p className="row-group px-4 py-4 text-[15px] text-muted-foreground">No patients match “{query}”.</p>
       ) : (

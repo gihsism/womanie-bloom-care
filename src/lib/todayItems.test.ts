@@ -48,8 +48,11 @@ describe('todayItems', () => {
     expect(soon.label).toBe('Visit on Thursday at 08:00');
     const [tom] = todayItems('ivf', { now: NOW, nextVisit: at(1, 8, 0) });
     expect(tom.label).toBe('Visit tomorrow at 08:00');
-    const [pms] = todayItems('menstrual-cycle', { now: NOW, periodDaysUntil: 5 });
-    expect(pms.label).toBe('PMS likely from Thursday');
+    // PMS window = the 5 days before the period, as on the stage page's PMS card.
+    const [pms] = todayItems('menstrual-cycle', { now: NOW, periodDaysUntil: 7 });
+    expect(pms.label).toBe('PMS likely from Wednesday');
+    expect(todayItems('menstrual-cycle', { now: NOW, periodDaysUntil: 6 })[0].label).toBe('PMS likely from tomorrow');
+    expect(todayItems('menstrual-cycle', { now: NOW, periodDaysUntil: 4 })[0].label).toBe('PMS days: period in 4 days');
   });
 
   it('period rows only for cycle stages, only within 2 days or when late', () => {
@@ -130,6 +133,36 @@ describe('todayItems', () => {
       const v = todayItems('pregnancy', { now: NOW, vaccinesDue: ['Tdap', 'Flu', 'RSV (Abrysvo)', 'COVID-19'] })[0];
       expect(v.label.length).toBeLessThanOrEqual(60);
     });
+  });
+});
+
+describe('todayItems: baby vaccinations and weekly mood', () => {
+  it('baby at a vaccination age: postpartum only, opens the Vaccines tab', () => {
+    const [row] = todayItems('postpartum', { now: NOW, babyVaccines: [{ name: 'Mia', age: '2 months' }] });
+    expect(row).toEqual({ id: 'baby-vaccination', label: 'Mia is 2 months: check the vaccine booklet', target: '/dashboard/baby?tab=vax' });
+    expect(todayItems('postpartum', { now: NOW, babyVaccines: [{ name: 'A', age: '2 months' }, { name: 'B', age: '2 months' }] })[0].id).toBe('baby-vaccination');
+    expect(ids('pregnancy', { babyVaccines: [{ name: 'Mia', age: '2 months' }] })).toEqual([]);
+    const long = todayItems('postpartum', { now: NOW, babyVaccines: [{ name: 'Maximiliana Charlotte Alexandra', age: '4 months' }] })[0];
+    expect(long.label.length).toBeLessThanOrEqual(60);
+  });
+
+  it('weekly mood: a week since the last mood tick opens the log', () => {
+    expect(todayItems('menopause', { now: NOW, lastMoodLog: at(-7) })[0])
+      .toEqual({ id: 'mood-weekly', label: 'How has your mood been this week?', target: 'sheet:log' });
+    expect(ids('menopause', { lastMoodLog: at(-6) })).toEqual([]);
+    expect(ids('menopause', { lastMoodLog: undefined })).toEqual([]); // not loaded yet
+  });
+
+  it('weekly mood: never ticked shows on Mondays only; not for the EPDS stages', () => {
+    expect(ids('contraception', { lastMoodLog: null })).toEqual(['mood-weekly']); // NOW is a Monday
+    expect(todayItems('contraception', { now: at(1), lastMoodLog: null }).map(i => i.id)).toEqual([]); // Tuesday
+    expect(ids('pregnancy', { lastMoodLog: null })).toEqual([]);
+    expect(ids('postpartum', { lastMoodLog: at(-30) })).toEqual([]);
+  });
+
+  it('weekly mood ranks after heads-ups, before setup', () => {
+    expect(ids('menstrual-cycle', { lastMoodLog: at(-8), nextVisit: at(2), setup: { done: 1, total: 3 } }))
+      .toEqual(['visit-soon', 'mood-weekly', 'setup']);
   });
 });
 

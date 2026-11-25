@@ -24,6 +24,7 @@ import {
   CalendarCog,
   ChevronDown,
   Users,
+  FileText,
 } from 'lucide-react';
 import { downloadIcs } from '@/lib/ics';
 import RescheduleDialog from '@/components/dashboard/RescheduleDialog';
@@ -398,6 +399,16 @@ const Appointments = () => {
               <VisitPrepCard mode={mode} />
             </div>
           )}
+          {/* For a doctor who is not on Womanie: a printable one-pager. */}
+          <button
+            type="button"
+            onClick={() => navigate('/dashboard/visit-summary/print')}
+            className="mt-3 inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+            data-testid="visits-visit-summary"
+          >
+            <FileText className="h-4 w-4" />
+            Seeing a doctor who isn't on Womanie? Prepare a visit summary
+          </button>
         </section>
 
         {/* The one primary action on the page. */}

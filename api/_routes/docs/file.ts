@@ -98,9 +98,12 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   const ownerId = String(doc.user_id);
   if (ownerId !== user.id) {
+    // ...and the reader must still hold the doctor role (a revoked doctor
+    // keeps her old connection rows).
     const conn = await sql.query(
-      `SELECT id FROM doctor_patient_connections
-         WHERE doctor_id = $1 AND patient_id = $2 AND status = 'approved'
+      `SELECT c.id FROM doctor_patient_connections c
+         JOIN user_roles r ON r.user_id = c.doctor_id AND r.role = 'doctor'
+         WHERE c.doctor_id = $1 AND c.patient_id = $2 AND c.status = 'approved'
          LIMIT 1`,
       [user.id, ownerId],
     ) as unknown[];

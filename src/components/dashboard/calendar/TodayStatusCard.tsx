@@ -1,6 +1,6 @@
 import { Sparkles, TrendingUp, TrendingDown, AlertCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { addDays, differenceInDays, format, parseISO, startOfDay } from 'date-fns';
+import { addDays, differenceInCalendarDays, format, parseISO, startOfDay } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { CyclePrediction, SymptomPattern, PeriodRecord } from '@/hooks/useCyclePrediction';
 import { useNotificationPrefs } from '@/hooks/useNotificationPrefs';
@@ -90,7 +90,7 @@ const TodayStatusCard = ({
       return { main: cycleDay, sub: 'day of period' };
     }
     if (isInFertileWindow) {
-      const daysToOvulation = differenceInDays(prediction.predictedOvulationDate, today);
+      const daysToOvulation = differenceInCalendarDays(prediction.predictedOvulationDate, today);
       if (daysToOvulation === 0) {
         return { main: 'Ovulation', sub: 'High chance of pregnancy' };
       }
@@ -134,7 +134,7 @@ const TodayStatusCard = ({
         tone: 'text-red-700 dark:text-red-300',
       };
     }
-    const daysToOvulation = differenceInDays(prediction.predictedOvulationDate, today);
+    const daysToOvulation = differenceInCalendarDays(prediction.predictedOvulationDate, today);
     if (isInFertileWindow) {
       if (Math.abs(daysToOvulation) <= 1) {
         return {
