@@ -152,3 +152,78 @@ export function scoreRuns(runs: { question: EvalQuestion; ranked: ResearchItem[]
   const n = runs.length;
   return { hitAt3: h3 / n, hitAt6: h6 / n, n, misses3 };
 }
+
+/**
+ * Citation-accuracy audit (Nov 2026, 2,507 items): 40 everyday questions
+ * across life stages. `ids` are the items judged by hand to answer the
+ * question and to be current (guideline > review > trial, nothing
+ * outdated); a question hits when one of them is among the top 3 sources
+ * the chat would send. `gap` marks questions the library has no good
+ * source for (see docs/research-gaps.md): they are reported, not scored.
+ */
+export interface AuditQuestion {
+  q: string;
+  stage: string;
+  ids: string[];
+  gap?: boolean;
+}
+
+export const AUDIT_QUESTIONS: AuditQuestion[] = [
+  // Periods
+  { q: 'How long is a normal period and how much bleeding is too much?', stage: 'menstrual-cycle', ids: ['pmid-42932433', 'pmid-29731212', 'pmid-35638592'] },
+  { q: "My periods stopped for 4 months and I'm not pregnant, why?", stage: 'menstrual-cycle', ids: ['pmid-28368518', 'pmid-36777338', 'pmid-40682949', 'pmid-37589624'] },
+  { q: 'Does the pill help with PMS mood swings?', stage: 'menstrual-cycle', ids: ['pmid-37365881', 'pmid-34224688', 'pmid-41468627'] },
+  { q: "What's the best painkiller for period cramps?", stage: 'menstrual-cycle', ids: ['pmid-26224322', 'pmid-40216328'] },
+  // PCOS
+  { q: 'How is PCOS diagnosed?', stage: 'menstrual-cycle', ids: ['pmid-37589624', 'pmid-29794670', 'pmid-30024653'] },
+  { q: 'Will losing weight help my PCOS?', stage: 'menstrual-cycle', ids: ['pmid-30921477', 'pmid-37589624', 'pmid-30024653'] },
+  { q: 'Does inositol work for PCOS?', stage: 'menstrual-cycle', ids: ['pmid-38163998', 'pmid-30570133', 'pmid-36703143'] },
+  // Endometriosis
+  { q: 'How do doctors diagnose endometriosis, do I need surgery?', stage: 'menstrual-cycle', ids: ['pmid-38555044', 'pmid-39373298', 'pmid-27405583'] },
+  { q: 'What hormone treatments are there for endometriosis pain?', stage: 'menstrual-cycle', ids: ['pmid-41065045', 'pmid-42746927', 'pmid-37341141'] },
+  { q: 'Can I still get pregnant with endometriosis?', stage: 'conception', ids: ['pmid-33095458', 'pmid-32106991', 'pmid-36948440'] },
+  // Trying to conceive
+  { q: 'How long does it usually take to get pregnant?', stage: 'conception', ids: [], gap: true },
+  { q: 'Do ovulation tests actually help you conceive faster?', stage: 'conception', ids: ['pmid-37709293', 'pmid-31139458'] },
+  { q: 'Does letrozole work better than clomid for PCOS?', stage: 'conception', ids: ['pmid-36735392', 'pmid-36165742', 'pmid-29797697'] },
+  { q: "When should we see a fertility doctor if we're not getting pregnant?", stage: 'conception', ids: [], gap: true },
+  // IVF
+  { q: 'What are the IVF success rates at 40?', stage: 'ivf', ids: ['pmid-40803331', 'pmid-36878347', 'pmid-35907969'] },
+  { q: 'What is OHSS and how do I avoid it during IVF?', stage: 'ivf', ids: ['pmid-41996998', 'pmid-28111738', 'pmid-26597569', 'pmid-27577848'] },
+  { q: 'Is a frozen embryo transfer better than fresh?', stage: 'ivf', ids: ['pmid-33539543', 'pmid-41950579'] },
+  { q: 'Does progesterone support after embryo transfer matter?', stage: 'ivf', ids: ['pmid-36574915', 'pmid-41475299', 'pmid-36303972', 'pmid-34384594'] },
+  // Pregnancy medicines and safety
+  { q: 'Is it safe to take antihistamines for hay fever while pregnant?', stage: 'pregnancy', ids: ['pmid-27878468', 'pmid-33433020'] },
+  { q: 'Can I keep taking my thyroid medication (levothyroxine) in pregnancy?', stage: 'pregnancy', ids: ['pmid-42219800', 'pmid-32443080', 'pmid-35523752'] },
+  { q: 'What can I take for heartburn when pregnant?', stage: 'pregnancy', ids: ['pmid-26384956', 'pmid-31909512'] },
+  { q: 'Are antibiotics for a UTI safe in pregnancy?', stage: 'pregnancy', ids: ['pmid-31765489', 'pmid-30895288'] },
+  { q: 'Should I take vitamin D during pregnancy?', stage: 'pregnancy', ids: ['pmid-43012372', 'pmid-39077939', 'pmid-38828931'] },
+  { q: 'Is it safe to exercise while pregnant?', stage: 'pregnancy', ids: ['pmid-30297272', 'pmid-32217980', 'pmid-34478617', 'pmid-30337460'] },
+  // Postpartum and breastfeeding
+  { q: 'How can I tell if I have postpartum depression?', stage: 'postpartum', ids: ['pmid-30629567', 'pmid-35416478', 'pmid-40566968', 'pmid-33177069'] },
+  { q: 'When can I start exercising again after a C-section?', stage: 'postpartum', ids: ['pmid-32217980', 'pmid-40335351'] },
+  { q: 'How soon after birth can I get pregnant again, and what contraception is safe?', stage: 'postpartum', ids: ['pmid-37124160', 'pmid-27155443', 'pmid-25793657', 'pmid-36302159'] },
+  { q: 'Is ibuprofen safe while breastfeeding?', stage: 'postpartum', ids: [], gap: true },
+  { q: 'Can I take the combined pill while breastfeeding?', stage: 'postpartum', ids: ['pmid-26002804', 'pmid-25793657'] },
+  { q: 'How do I increase my breast milk supply?', stage: 'postpartum', ids: ['pmid-32421208'] },
+  // Perimenopause and HRT
+  { q: 'What are the first signs of perimenopause?', stage: 'menopause', ids: ['pmid-41082911', 'pmid-42743436', 'pmid-30182804'] },
+  { q: 'Can perimenopause cause anxiety and low mood?', stage: 'menopause', ids: ['pmid-41902367', 'pmid-39856668', 'pmid-30182804'] },
+  { q: "Is HRT safe if I'm over 60?", stage: 'post-menopause', ids: ['pmid-42695385', 'pmid-30358733', 'pmid-26444994'] },
+  { q: 'Does HRT patch or pill have a different blood clot risk?', stage: 'menopause', ids: ['pmid-35713694', 'pmid-40488293'] },
+  { q: 'What non-hormonal treatments help hot flashes?', stage: 'menopause', ids: ['pmid-42832802', 'pmid-43049482'] },
+  { q: 'Is vaginal estrogen safe long term?', stage: 'post-menopause', ids: ['pmid-40298120', 'pmid-39250810', 'pmid-40569036'] },
+  // Bone health
+  { q: 'Should I get a bone density scan after menopause?', stage: 'post-menopause', ids: ['pmid-39808425', 'pmid-30324412', 'pmid-32427503'] },
+  { q: 'Do calcium and vitamin D supplements prevent fractures?', stage: 'post-menopause', ids: ['pmid-42161415', 'pmid-29677309'] },
+  // Contraception
+  { q: 'Which contraception is most effective?', stage: 'contraception', ids: ['pmid-29064972', 'pmid-29064966', 'pmid-31051299', 'pmid-26280888'] },
+  { q: 'Does the contraceptive implant cause weight gain or irregular bleeding?', stage: 'contraception', ids: ['pmid-41297751', 'pmid-27567593', 'pmid-33407632'] },
+];
+
+/** Share of scored (non-gap) audit questions with an expected item in the top k. */
+export function scoreAudit(runs: { question: AuditQuestion; ranked: ResearchItem[] }[], k = 3): { hit: number; n: number; misses: string[] } {
+  const scored = runs.filter((r) => !r.question.gap);
+  const misses = scored.filter((r) => !r.ranked.slice(0, k).some((it) => r.question.ids.includes(it.id))).map((r) => r.question.q);
+  return { hit: (scored.length - misses.length) / scored.length, n: scored.length, misses };
+}

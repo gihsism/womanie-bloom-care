@@ -117,7 +117,7 @@ const STOPWORDS = new Set(
     'me my of on or our should so than that the their them then there these they this to too was we were what ' +
     'when where which while who why will with would you your am im ok okay safe much many any some get got ' +
     'about after before during still just really need want know tell time day days week weeks thing things ' +
-    'result results help good bad better best normal mean means explain okay'
+    'result results help good bad better best normal mean means explain okay keep keeping continue continuing carry'
   ).split(' '),
 );
 
@@ -199,7 +199,45 @@ const SYNONYMS: Record<string, string[]> = {
   pate: ['listeria'],
   deli: ['listeria'],
   undercooked: ['raw', 'toxoplasmosis'],
+  // Citation audit (Nov 2026): everyday or abbreviated words the library
+  // spells differently, found by questions whose best sources ranked low.
+  ohss: ['ovarian', 'hyperstimulation'],
+  hyperstimulation: ['ohss'],
+  amenorrhea: ['amenorrhoea'],
+  amenorrhoea: ['amenorrhea'],
+  diagnose: ['diagnosis'],
+  diagnosed: ['diagnosis'],
+  exercising: ['exercise'],
+  exercised: ['exercise'],
+  'c-section': ['caesarean', 'cesarean'],
+  csection: ['caesarean', 'cesarean'],
+  caesarean: ['cesarean'],
+  cesarean: ['caesarean'],
+  heartburn: ['reflux'],
+  reflux: ['heartburn'],
+  thyroxine: ['levothyroxine'],
+  estrogen: ['oestrogen'],
+  oestrogen: ['estrogen'],
 };
+
+/**
+ * Everyday phrases -> library words, matched on the lowercased question
+ * (word boundaries). "My periods stopped" never says amenorrhoea, and
+ * "how can I tell if I have ..." asks for the signs and screening, not
+ * for treatment trials. The extra words count like synonyms (0.7x).
+ */
+const PHRASE_SYNONYMS: [RegExp, string[]][] = [
+  [/\b(periods? (has |have )?(stopped|stop|disappeared|gone)|(no|missed|missing|lost my|absent) periods?|not had (a|my) period|periods? (has |have )?not come)\b/, ['amenorrhea', 'amenorrhoea']],
+  [/\b(how (can|do|would|will) i (tell|know)|signs? of|symptoms? of|first signs?)\b/, ['symptom', 'screening', 'diagnosis']],
+];
+
+/**
+ * An age in a fertility or IVF question ("IVF success rates at 40", "I'm
+ * 38") is about age, not the number: adds 'age'. Numbers
+ * followed by a unit (weeks, days, mg, ...) are not ages.
+ */
+const AGE_NUMBER = /\b(3[5-9]|4[0-9])\b(?!\s*(\+|weeks?|wks?|days?|mg|mcg|hours?|hrs?|minutes?|mins?|months?|%|kg|lbs?|cm|mm|years? ago))/;
+const AGE_STAGES = new Set<LifeStage>(['conception', 'ivf']);
 
 // Medicines and supplements (stemmed query tokens). When a question names
 // one, items about that substance (in their title, or failing that their
@@ -240,6 +278,18 @@ export function isAfterBirthTitle(title: string): boolean {
   return AFTER_BIRTH_TITLE.test(title) && !PREGNANCY_TITLE.test(title);
 }
 
+/**
+ * Citation audit (Nov 2026): "Can I keep taking my levothyroxine in
+ * pregnancy?" got a review of women having IVF as its first source. When
+ * neither the question nor the user's stage is about fertility treatment,
+ * an item whose title is about IVF/ICSI/assisted reproduction studied a
+ * different group of women and gets this factor.
+ */
+export const IVF_TITLE_FACTOR = 0.85;
+const IVF_TITLE = /\b(in vitro fertili[sz]ation|ivf|icsi|intracytoplasmic|assisted reproduct\w*|art cycles?|embryo transfers?)\b/i;
+const IVF_QUERY = /\b(ivf|icsi|in vitro|embryos?|egg retrieval|transfer|assisted reproduct\w*|fertility treatment|iui|insemination)\b/i;
+const IVF_STAGES = new Set<string>(['ivf', 'conception']);
+
 function stem(w: string): string {
   if (w.length > 5 && w.endsWith('ies')) return w.slice(0, -3) + 'y';
   if (w.length > 4 && w.endsWith('s') && !w.endsWith('ss') && !w.endsWith('us') && !w.endsWith('is')) return w.slice(0, -1);
@@ -254,7 +304,7 @@ export function tokenize(text: string): string[] {
     .filter((w) => !STOPWORDS.has(w));
 }
 
-function expandQuery(tokens: string[]): { token: string; weight: number }[] {
+function expandQuery(tokens: string[], extra: string[] = []): { token: string; weight: number }[] {
   const out = new Map<string, number>();
   for (const t of tokens) {
     out.set(t, Math.max(out.get(t) ?? 0, 1));
@@ -263,7 +313,20 @@ function expandQuery(tokens: string[]): { token: string; weight: number }[] {
       if (!out.has(s)) out.set(s, 0.7);
     }
   }
+  for (const e of extra) {
+    const s = stem(e);
+    if (!out.has(s)) out.set(s, 0.7);
+  }
   return [...out].map(([token, weight]) => ({ token, weight }));
+}
+
+/** Library words implied by the question's phrasing (PHRASE_SYNONYMS, ages). */
+export function phraseExpansions(query: string, stage: LifeStage | null): string[] {
+  const q = query.toLowerCase();
+  const out: string[] = [];
+  for (const [re, words] of PHRASE_SYNONYMS) if (re.test(q)) out.push(...words);
+  if (stage && AGE_STAGES.has(stage) && AGE_NUMBER.test(q)) out.push('age');
+  return out;
 }
 
 interface IndexedItem {
@@ -297,6 +360,48 @@ export function splitTopicLabel(label: string): { head: string; aside: string } 
 }
 
 const indexCache = new WeakMap<ResearchItem[], IndexedItem[]>();
+const focusDfCache = new WeakMap<ResearchItem[], Map<string, number>>();
+
+/**
+ * Rare query words are the subject of the question (citation audit, Nov
+ * 2026). For "What is OHSS and how do I avoid it during IVF?" every word
+ * used to count alike, so IVF reviews that only mention OHSS in passing
+ * (and also say "avoid") outranked the OHSS guideline. A query word that
+ * at most FOCUS_MAX_DF items carry in their title or own keywords now
+ * lifts those items like a named medicine does (substanceFactor). Only
+ * for a real library: in a handful of fixture items every word is rare.
+ */
+export const FOCUS_MAX_DF = 40;
+export const FOCUS_MIN_ITEMS = 200;
+
+/**
+ * A question word that names one of our curated topics ("endometriosis",
+ * "pcos", "osteoporosis") is its anchor. An item that never mentions any
+ * anchor of the question, not even in its summary, matched only the side
+ * words ("how do doctors diagnose ... surgery" pulled a bleeding-disorder
+ * guideline into an endometriosis answer): it gets this factor.
+ */
+export const ANCHOR_MISS_FACTOR = 0.8;
+const topicVocabCache = new WeakMap<ResearchItem[], Set<string>>();
+
+function topicVocabulary(items: ResearchItem[], idx: IndexedItem[]): Set<string> {
+  const hit = topicVocabCache.get(items);
+  if (hit) return hit;
+  const vocab = new Set<string>();
+  for (const it of idx) for (const t of it.topic) vocab.add(t);
+  topicVocabCache.set(items, vocab);
+  return vocab;
+}
+
+/** How many items carry each word in their title or own keywords/tags. */
+function focusFrequency(items: ResearchItem[], idx: IndexedItem[]): Map<string, number> {
+  const hit = focusDfCache.get(items);
+  if (hit) return hit;
+  const df = new Map<string, number>();
+  for (const it of idx) for (const t of new Set([...it.title, ...it.own])) df.set(t, (df.get(t) ?? 0) + 1);
+  focusDfCache.set(items, df);
+  return df;
+}
 
 function indexItems(items: ResearchItem[], topics: ResearchTopic[]): IndexedItem[] {
   const hit = indexCache.get(items);
@@ -421,6 +526,53 @@ const EVIDENCE_BOOST: Record<EvidenceLevel, number> = { guideline: 1.15, 'system
 // Cochrane reviews are the most rigorous reviews in the library.
 const COCHRANE_BOOST = 1.1;
 
+/**
+ * Guidelines replaced by a newer version of the same guideline that is
+ * also in the library (citation audit, Nov 2026): the 2018 international
+ * PCOS guideline was the third source for "How is PCOS diagnosed?" next to
+ * its 2023 update. Old id -> newer id. The old one only steps back while
+ * its successor is in the searched items.
+ */
+export const SUPERSEDED: Record<string, string> = {
+  'pmid-30024653': 'pmid-37589624', // International PCOS guideline 2018 -> 2023
+  'pmid-30453865': 'pmid-37589624', // Australian PCOS guideline summary 2018 -> 2023 international
+  'pmid-29064964': 'pmid-30681543', // ACOG VBAC PB 184 (2017) -> PB 205 (2019)
+  'pmid-29064970': 'pmid-30681543',
+  'pmid-27333357': 'pmid-30134424', // ACOG obstetric lacerations PB 165 (2016) -> PB 198 (2018)
+  'pmid-28333811': 'pmid-30801474', // ACOG obstetric analgesia PB 177 (2017) -> PB 209 (2019)
+  'pmid-27214185': 'pmid-29794673', // ACOG aromatase inhibitors CO 663 (2016) -> CO 738 (2018)
+  'pmid-29232273': 'pmid-29470343', // ACOG tubal ectopic PB 191 -> PB 193 (2018)
+  'pmid-26813211': 'pmid-37338872', // USPSTF depression screening 2016 -> 2023
+  'pmid-34014910': 'pmid-39106301', // US SPR 2021 update -> US SPR 2024
+};
+/**
+ * Factor for a superseded guideline, and for an ACOG "Summary:" record
+ * whose full version is also in the library (two slots, one guideline).
+ */
+export const SUPERSEDED_FACTOR = 0.6;
+const demoteCache = new WeakMap<ResearchItem[], Set<string>>();
+
+/** Normalised title without the leading "Summary" marker, for duplicate checks. */
+function titleKey(title: string): string {
+  return title.toLowerCase().replace(/\bsummary:\s*/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+/** Ids of items that step back for a newer or fuller record in `items`. */
+export function demotedIds(items: ResearchItem[]): Set<string> {
+  const hit = demoteCache.get(items);
+  if (hit) return hit;
+  const ids = new Set(items.map((i) => i.id));
+  const full = new Set(items.filter((i) => !/\bsummary:/i.test(i.title)).map((i) => titleKey(i.title)));
+  const out = new Set<string>();
+  for (const it of items) {
+    const newer = SUPERSEDED[it.id];
+    if (newer && ids.has(newer)) out.add(it.id);
+    else if (/\bsummary:/i.test(it.title) && full.has(titleKey(it.title))) out.add(it.id);
+  }
+  demoteCache.set(items, out);
+  return out;
+}
+
 function stageAllowed(item: ResearchItem, stage: LifeStage | null, opts: SearchOptions): boolean {
   if (!stage || !opts.strictStage) return true;
   if (item.lifeStages.includes(stage)) return true;
@@ -463,6 +615,10 @@ function stageFactor(item: ResearchItem, stage: LifeStage | null): number {
  * the question names lifts items with it in the title (x1.3) or own
  * keywords (x1.1); "pregnant" in the question lifts pregnancy items (x1.1)
  * and lowers items whose title is about after birth or the baby (x0.85).
+ * Citation-audit factors (Nov 2026): rare subject words lift items naming
+ * them (focus terms, like medicines); items that miss every topic word of
+ * the question x0.8; IVF-population titles x0.85 outside fertility
+ * questions; superseded guidelines and duplicate "Summary:" records x0.6.
  */
 export function searchItems(
   items: ResearchItem[],
@@ -472,17 +628,36 @@ export function searchItems(
 ): ScoredItem[] {
   const stage = normalizeLifeStage(opts.lifeStage);
   const qTokens = tokenize(query);
-  const expanded = expandQuery(qTokens);
+  const expanded = expandQuery(qTokens, phraseExpansions(query, stage));
   const qLower = ` ${query.toLowerCase().replace(/[^a-z0-9 -]+/g, ' ').replace(/\s+/g, ' ')} `;
   const nowYear = new Date().getFullYear();
   const results: ScoredItem[] = [];
   const sem = query.trim() ? opts.semantic ?? null : null;
-  const substances = expanded.map((e) => e.token).filter((t) => SUBSTANCES.has(t));
+  const indexed = indexItems(items, topics);
+  const focusDf = items.length >= FOCUS_MIN_ITEMS ? focusFrequency(items, indexed) : null;
+  // Named medicines, plus rare subject words of the question (focus terms)
+  // together with their synonyms: "coffee" is rare in titles, but an item
+  // titled "caffeine intake in pregnancy" answers it just as well.
+  const focus = qTokens.filter((t) => {
+    if (!focusDf || SUBJECT_CONTEXT_WORDS.has(t) || PREGNANCY_WORDS.has(t) || /^\d+$/.test(t)) return false;
+    const n = focusDf.get(t) ?? 0;
+    return n > 0 && n <= FOCUS_MAX_DF;
+  });
+  const substances = [
+    ...new Set([
+      ...expanded.map((e) => e.token).filter((t) => SUBSTANCES.has(t)),
+      ...focus.flatMap((t) => [t, ...(SYNONYMS[t] ?? []).map(stem)]),
+    ]),
+  ];
   const asksPregnancy = qTokens.some((t) => PREGNANCY_WORDS.has(t));
+  const vocab = topicVocabulary(items, indexed);
+  const demoted = demotedIds(items);
+  const anchors = qTokens.filter((t) => vocab.has(t) && !SUBJECT_CONTEXT_WORDS.has(t) && !PREGNANCY_WORDS.has(t) && !/^\d+$/.test(t));
+  const fertilityTreatmentContext = (stage !== null && IVF_STAGES.has(stage)) || IVF_QUERY.test(query);
   const subjectTokens = opts.requireSubject ? qTokens.filter((t) => !SUBJECT_CONTEXT_WORDS.has(t) && !/^\d+$/.test(t)) : [];
-  const candidates: { it: IndexedItem; base: number; strength: number; cos: number; subject: boolean }[] = [];
+  const candidates: { it: IndexedItem; base: number; strength: number; cos: number; subject: boolean; anchored: boolean }[] = [];
 
-  for (const it of indexItems(items, topics)) {
+  for (const it of indexed) {
     if (opts.topic && !it.item.topics.includes(opts.topic)) continue;
     if (!stageAllowed(it.item, stage, opts)) continue;
 
@@ -501,6 +676,7 @@ export function searchItems(
     for (const p of it.phrases) if (qLower.includes(` ${p} `)) raw += 2;
 
     const subject = subjectTokens.some((t) => matched.has(t) || (SYNONYMS[t] ?? []).some((x) => matched.has(stem(x))));
+    const anchored = anchors.length === 0 || anchors.some((t) => matched.has(t) || (SYNONYMS[t] ?? []).some((x) => matched.has(stem(x))));
     const coverage = qTokens.length
       ? qTokens.filter((t) => matched.has(t) || (SYNONYMS[t] ?? []).some((s) => matched.has(stem(s)))).length / qTokens.length
       : 1;
@@ -510,11 +686,11 @@ export function searchItems(
       const cos = doc ? dotProduct(sem.query, doc) : 0;
       const strength = doc ? semanticStrength(cos, sem.floor, sem.ceil) : 0;
       if (raw === 0 && strength === 0) continue;
-      candidates.push({ it, base: raw === 0 ? 0 : base, strength, cos, subject });
+      candidates.push({ it, base: raw === 0 ? 0 : base, strength, cos, subject, anchored });
       continue;
     }
     if (qTokens.length > 0 && raw === 0) continue;
-    candidates.push({ it, base, strength: 0, cos: 0, subject });
+    candidates.push({ it, base, strength: 0, cos: 0, subject, anchored });
   }
   // Relevance floor: no item mentions any subject word of the question,
   // so every candidate only shares its life stage or a loose semantic
@@ -530,10 +706,11 @@ export function searchItems(
   // Hybrid: normalise the keyword part against the best keyword match of
   // this query (at least KEYWORD_REF) and blend in the semantic strength.
   const ref = sem ? Math.max(KEYWORD_REF, ...candidates.map((c) => c.base)) : 0;
-  for (const { it, base: kwBase, strength } of candidates) {
+  for (const { it, base: kwBase, strength, anchored } of candidates) {
     const base = sem ? blendScores(kwBase, strength, sem.weight, ref) : kwBase;
     const recency = 1 + Math.max(0, 10 - (nowYear - it.item.year)) * 0.005;
     const cochrane = /cochrane/i.test(it.item.journal) ? COCHRANE_BOOST : 1;
+    const current = demoted.has(it.item.id) ? SUPERSEDED_FACTOR : 1;
     const substance = substanceFactor(it, substances);
     const pregnancy = !asksPregnancy
       ? 1
@@ -542,8 +719,10 @@ export function searchItems(
         : it.item.lifeStages.includes('pregnancy')
           ? PREGNANCY_QUERY_BOOST
           : 1;
+    const ivf = !fertilityTreatmentContext && IVF_TITLE.test(it.item.title) ? IVF_TITLE_FACTOR : 1;
+    const anchor = anchored ? 1 : ANCHOR_MISS_FACTOR;
     const score =
-      base * stageFactor(it.item, stage) * EVIDENCE_BOOST[it.item.evidenceLevel] * cochrane * recency * substance * pregnancy;
+      base * stageFactor(it.item, stage) * EVIDENCE_BOOST[it.item.evidenceLevel] * cochrane * recency * substance * pregnancy * ivf * anchor * current;
     if (opts.minScore && score < opts.minScore) continue;
     results.push({ item: it.item, score: Math.round(score * 100) / 100 });
   }
