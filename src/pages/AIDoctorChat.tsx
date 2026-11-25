@@ -20,6 +20,7 @@ import { db } from '@/integrations/db/client';
 import { computeCyclePhase } from '@/lib/cycle-phase';
 import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
+import { NO_REMOTE_IMAGES } from '@/lib/safeMarkdown';
 import {
   Send,
   ChevronRight,
@@ -810,7 +811,7 @@ export default function AIDoctorChat() {
                         return (
                           <>
                             <div className="prose dark:prose-invert max-w-none text-[16px] leading-relaxed [&>p]:mb-2.5 [&>p:last-child]:mb-0 [&>ul]:mb-2 [&>ol]:mb-2 [&>h1]:text-base [&>h2]:text-sm [&>h3]:text-sm [&_a]:text-stage-accent [&_a]:no-underline [&_a]:font-semibold [&_a]:text-[0.75em] [&_a]:align-super">
-                              <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{linkCitations(body, cited)}</ReactMarkdown>
+                              <ReactMarkdown rehypePlugins={[rehypeSanitize]} disallowedElements={NO_REMOTE_IMAGES}>{linkCitations(body, cited)}</ReactMarkdown>
                             </div>
                             {cited.length > 0 && <ChatSources sources={cited} onBrowse={() => navigate('/library')} />}
                           </>
@@ -880,6 +881,7 @@ export default function AIDoctorChat() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask about your health records..."
+                maxLength={8000}
                 className="min-h-[52px] max-h-[120px] resize-none text-[16px] rounded-[1.625rem] border-stage-accent/60 pl-5 pr-14 py-3.5 focus-visible:ring-stage-accent"
                 rows={1}
                 disabled={isStreaming}

@@ -166,7 +166,7 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
   if (s.setup && s.setup.done < s.setup.total) {
     items.push(
       s.setup.nameMissing
-        ? { id: 'setup', label: 'Add your name', target: ME }
+        ? { id: 'setup', label: 'Add your name', target: `${ME}#profile` }
         : { id: 'setup', label: `Finish setting up (${s.setup.done} of ${s.setup.total} done)`, target: s.setup.nextTarget ?? RECORDS },
     );
   }

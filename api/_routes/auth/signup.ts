@@ -21,7 +21,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     (typeof req.headers['x-forwarded-for'] === 'string'
       ? req.headers['x-forwarded-for'].split(',')[0].trim()
       : null) || req.socket?.remoteAddress || 'unknown';
-  const rl = checkAndConsume('signup-ip', ip, SIGNUPS_PER_IP_PER_DAY);
+  const rl = await checkAndConsume('signup-ip', ip, SIGNUPS_PER_IP_PER_DAY);
   if (!rl.ok) {
     return res.status(429).json({
       error: 'Too many signup attempts. Please try again later.',

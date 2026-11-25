@@ -119,7 +119,11 @@ export function useTodaySignals(
   useEffect(() => onHealthDataChange(load), [load]);
 
   // Stage tasks: medicines due today and the contraceptive pill tick.
-  const loadTasks = useCallback(async () => {
+  // Two loaders: medicines don't depend on the stage or on the synced
+  // device keys, so they load once per user (plus on data changes / every
+  // 5 min) instead of again when the profile's stage and the account sync
+  // arrive — that used to fire the same two queries three times on Home.
+  const loadMeds = useCallback(async () => {
     if (!uid) return;
     try {
       const now = new Date();
@@ -144,7 +148,16 @@ export function useTodaySignals(
         const due = dueReminders(Array.isArray(times) ? times : [], taken.get(m.id) ?? 0, now);
         if (due.length) medicinesDue.push({ name: m.name, time: due[0] });
       }
+      setTasks(t => ({ ...t, medicinesDue }));
+    } catch {
+      // Keep the last known state.
+    }
+  }, [uid]);
 
+  const loadPill = useCallback(async () => {
+    if (!uid) return;
+    try {
+      const now = new Date();
       let pill: TodaySignals['pill'] = null;
       const method = readJSON<string>(`contraception:${uid}:method`);
       if (mode === 'contraception' && (method == null || method === 'pill')) {
@@ -164,19 +177,21 @@ export function useTodaySignals(
           packDay: pillPackDay(readJSON<string>(`contraception:${uid}:packStartDate`), now),
         };
       }
-      setTasks({ medicinesDue, pill });
+      setTasks(t => ({ ...t, pill }));
     } catch {
       // Keep the last known state.
     }
   }, [uid, mode]);
 
-  useEffect(() => { void loadTasks(); }, [loadTasks, accountVersion]);
-  useEffect(() => onHealthDataChange(loadTasks), [loadTasks]);
+  useEffect(() => { void loadMeds(); }, [loadMeds]);
+  // The pill method lives in an account-synced device key: re-read on sync.
+  useEffect(() => { void loadPill(); }, [loadPill, accountVersion]);
+  useEffect(() => onHealthDataChange(() => { void loadMeds(); void loadPill(); }), [loadMeds, loadPill]);
   // Reminder times pass while Home stays open.
   useEffect(() => {
-    const t = window.setInterval(() => { void loadTasks(); }, 5 * 60_000);
+    const t = window.setInterval(() => { void loadMeds(); void loadPill(); }, 5 * 60_000);
     return () => window.clearInterval(t);
-  }, [loadTasks]);
+  }, [loadMeds, loadPill]);
 
   // Pregnancy vaccinations and the EPDS mood check live in account-synced
   // device keys; re-read whenever the sync refreshes them.

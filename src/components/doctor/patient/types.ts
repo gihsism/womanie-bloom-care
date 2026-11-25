@@ -20,7 +20,8 @@ export interface HealthSignal {
 export interface HealthDocument {
   id: string;
   file_name: string;
-  file_path?: string | null;
+  /** Whether there is an original file to open (via /api/docs/file). */
+  has_file?: boolean;
   document_type: string;
   ai_summary: string | null;
   ai_suggested_name: string | null;

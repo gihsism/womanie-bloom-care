@@ -67,7 +67,7 @@ describe('todayItems', () => {
 
   it('flagged results go to Records; setup asks for the name first', () => {
     expect(todayItems('menopause', { now: NOW, flaggedResults: 1 })[0]).toMatchObject({ label: '1 result to talk to your doctor about', target: RECORDS });
-    expect(todayItems('menopause', { now: NOW, setup: { done: 1, total: 3, nameMissing: true } })[0].label).toBe('Add your name');
+    expect(todayItems('menopause', { now: NOW, setup: { done: 1, total: 3, nameMissing: true } })[0]).toMatchObject({ label: 'Add your name', target: '/dashboard/settings#profile' });
     expect(todayItems('menopause', { now: NOW, setup: { done: 2, total: 3 } })[0].label).toBe('Finish setting up (2 of 3 done)');
     expect(todayItems('menopause', { now: NOW, setup: { done: 3, total: 3 } })).toEqual([]);
   });

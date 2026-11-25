@@ -60,6 +60,11 @@ const Settings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedStage, setSelectedStage] = useState<LifeStage>('menstrual-cycle');
+  // Her name (profiles.full_name): the Home greeting and Ask AI use it,
+  // and Home's "Add your name" row leads here.
+  const [savedName, setSavedName] = useState<string | null>(null);
+  const [nameInput, setNameInput] = useState('');
+  const [savingName, setSavingName] = useState(false);
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -326,7 +331,7 @@ const Settings = () => {
     try {
       const { data, error } = await db
         .from('profiles')
-        .select('life_stage')
+        .select('life_stage, full_name')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -334,6 +339,9 @@ const Settings = () => {
       if (data?.life_stage) {
         setSelectedStage(normalizeLifeStage(data.life_stage));
       }
+      const name = (data as { full_name?: string | null } | null)?.full_name?.trim() || null;
+      setSavedName(name);
+      setNameInput(name ?? '');
     } catch (error) {
       console.error('Error loading settings:', error);
     }
@@ -342,6 +350,25 @@ const Settings = () => {
   useEffect(() => {
     loadSettings();
   }, [loadSettings]);
+
+  const saveName = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = nameInput.trim().slice(0, 80);
+    if (!user || !trimmed || trimmed === savedName) return;
+    setSavingName(true);
+    try {
+      const { error } = await db.from('profiles').update({ full_name: trimmed }).eq('id', user.id);
+      if (error) throw error;
+      setSavedName(trimmed);
+      setNameInput(trimmed);
+      toast({ title: 'Name saved', description: `We'll call you ${trimmed.split(' ')[0]}.` });
+    } catch (err) {
+      console.error('Save name failed:', err);
+      toast({ variant: 'destructive', title: 'Could not save your name', description: 'Please try again.' });
+    } finally {
+      setSavingName(false);
+    }
+  };
 
   // One tap on a stage card reaches this twice (the radio's onValueChange
   // and the card's onClick); live that was two saves per tap. Skip a
@@ -410,7 +437,7 @@ const Settings = () => {
       {!section && (
         <div className="w-full max-w-3xl mx-auto px-4 py-6 space-y-6" data-testid="me-list">
           <MeGroup>
-            <MeRow icon={User} label={user?.name || 'Your profile'} value={user?.name ? 'Profile' : user?.email} onClick={() => openSection('profile')} testId="me-row-profile" />
+            <MeRow icon={User} label={savedName || user?.name || 'Your profile'} value={savedName || user?.name ? 'Profile' : user?.email} onClick={() => openSection('profile')} testId="me-row-profile" />
             <MeRow icon={Calendar} label="Life stage" value={LIFE_STAGE_LABELS[selectedStage]} onClick={() => openSection('life-stage')} testId="me-row-life-stage" />
           </MeGroup>
           <MeGroup>
@@ -511,6 +538,24 @@ const Settings = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
+            <form className="space-y-1.5" onSubmit={saveName}>
+              <Label htmlFor="profile-name">Your name</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="profile-name"
+                  value={nameInput}
+                  onChange={(e) => setNameInput(e.target.value)}
+                  placeholder="What should we call you?"
+                  maxLength={80}
+                  autoComplete="given-name"
+                />
+                <Button type="submit" variant="outline" disabled={savingName || !nameInput.trim() || nameInput.trim() === savedName}>
+                  {savingName ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : 'Save name'}
+                </Button>
+              </div>
+              <p className="text-[11px] text-muted-foreground">Used in your Home greeting and by Ask AI.</p>
+            </form>
+            <Separator />
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Email</span>
               <span className="text-sm font-medium">{user?.email || '—'}</span>

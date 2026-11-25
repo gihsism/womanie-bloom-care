@@ -50,7 +50,7 @@ const VALID_BODY = {
 
 describe('auth/doctor-signup security invariants', () => {
   beforeEach(() => {
-    vi.mocked(checkAndConsume).mockReturnValue({ ok: true, remaining: 9, retryInSec: 0 });
+    vi.mocked(checkAndConsume).mockResolvedValue({ ok: true, remaining: 9, limit: 10, retryInSec: 0 });
     vi.mocked(bcrypt.hash).mockResolvedValue('$2b$10$hashedPassword' as never);
     query.mockReset();
     query.mockResolvedValue([]); // email pre-check: no conflict
@@ -100,7 +100,7 @@ describe('auth/doctor-signup security invariants', () => {
   });
 
   it('returns 429 when the IP rate limit is exceeded', async () => {
-    vi.mocked(checkAndConsume).mockReturnValue({ ok: false, remaining: 0, retryInSec: 3600 });
+    vi.mocked(checkAndConsume).mockResolvedValue({ ok: false, remaining: 0, limit: 10, retryInSec: 3600 });
     const res = mockRes();
     await handler(mockReq(VALID_BODY), res);
     expect(res._status).toBe(429);
@@ -111,7 +111,7 @@ describe('auth/doctor-signup security invariants', () => {
   // who hasn't exhausted the limit yet could enumerate registered emails via
   // different response codes (409 vs 400) before the counter saturates.
   it('does not query the database when the rate limit fires', async () => {
-    vi.mocked(checkAndConsume).mockReturnValue({ ok: false, remaining: 0, retryInSec: 3600 });
+    vi.mocked(checkAndConsume).mockResolvedValue({ ok: false, remaining: 0, limit: 10, retryInSec: 3600 });
     const res = mockRes();
     await handler(mockReq(VALID_BODY), res);
     expect(res._status).toBe(429);

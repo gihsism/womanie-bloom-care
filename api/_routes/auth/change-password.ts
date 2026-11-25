@@ -16,7 +16,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   if (!auth) return res.status(401).json({ error: 'Not signed in' });
 
   // Cap retries so a stolen session can't grind through password guesses.
-  const limit = checkAndConsume('change-password', auth.id, 10);
+  const limit = await checkAndConsume('change-password', auth.id, 10);
   if (!limit.ok) {
     return res.status(429).json({
       error: `Too many attempts. Try again in ${Math.ceil(limit.retryInSec / 60)} minutes.`,

@@ -5,6 +5,15 @@ import { getAuthSecret } from '../../_lib/auth.js';
 import { withSentry } from '../../_lib/sentry.js';
 import { readCookie, safeEqual, clearStateCookie, STATE_COOKIE } from '../../_lib/oauth-state.js';
 
+// Fields read from Google's v2 userinfo response.
+interface GoogleUserInfo {
+  id?: string;
+  email?: string;
+  verified_email?: boolean;
+  name?: string;
+  picture?: string;
+}
+
 async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const { code, state } = req.query;
@@ -40,7 +49,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       return res.redirect(302, '/auth/login?error=token_failed');
     }
 
-    const tokens = await tokenResp.json();
+    const tokens = (await tokenResp.json()) as { access_token?: string };
 
     // Get user info
     const userResp = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
@@ -51,7 +60,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       return res.redirect(302, '/auth/login?error=userinfo_failed');
     }
 
-    const googleUser = await userResp.json();
+    const googleUser = (await userResp.json()) as GoogleUserInfo;
+    // The email is used to find (and link to) an existing account below, so
+    // it must be one Google has verified; an unverified address would let
+    // its holder sign into someone else's Womanie account.
+    if (!googleUser?.id || !googleUser?.email || googleUser.verified_email === false) {
+      return res.redirect(302, '/auth/login?error=unverified_email');
+    }
     const sql = neon(process.env.DATABASE_URL!);
 
     // Find or create user

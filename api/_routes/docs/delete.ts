@@ -3,6 +3,7 @@ import { del } from '@vercel/blob';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from '../../_lib/auth.js';
 import { withSentry } from '../../_lib/sentry.js';
+import { isOwnBlobUrl } from '../../_lib/blob-url.js';
 
 // Atomic document deletion.
 //
@@ -55,11 +56,14 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     // Best-effort blob cleanup. If the blob is already gone or the
     // token is mis-scoped we don't want to surface a 500 to the user —
     // the DB is already consistent.
-    if (filePath && filePath.startsWith('http')) {
+    // Only a blob in the caller's own upload folder: file_path is
+    // client-writable, and the store token can delete ANY blob. The URL
+    // is the file's only access key, so it isn't logged either.
+    if (filePath && isOwnBlobUrl(filePath, user.id)) {
       try {
         await del(filePath, { token: process.env.BLOB_READ_WRITE_TOKEN });
       } catch (e) {
-        console.warn('Blob delete failed for', filePath, e);
+        console.warn('Blob delete failed for document', documentId, e);
       }
     }
 

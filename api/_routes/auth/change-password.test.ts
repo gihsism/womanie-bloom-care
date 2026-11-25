@@ -41,7 +41,7 @@ function mockReq(b: unknown): VercelRequest {
 describe('auth/change-password security invariants', () => {
   beforeEach(() => {
     vi.mocked(getAuthUser).mockResolvedValue(SESSION_USER);
-    vi.mocked(checkAndConsume).mockReturnValue({ ok: true, remaining: 9, retryInSec: 0 });
+    vi.mocked(checkAndConsume).mockResolvedValue({ ok: true, remaining: 9, limit: 10, retryInSec: 0 });
     vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
     vi.mocked(bcrypt.hash).mockResolvedValue('$2b$10$newHash' as never);
     query.mockReset();
@@ -58,7 +58,7 @@ describe('auth/change-password security invariants', () => {
   });
 
   it('returns 429 when the per-user rate limit is exceeded', async () => {
-    vi.mocked(checkAndConsume).mockReturnValue({ ok: false, remaining: 0, retryInSec: 3600 });
+    vi.mocked(checkAndConsume).mockResolvedValue({ ok: false, remaining: 0, limit: 10, retryInSec: 3600 });
     const res = mockRes();
     await handler(mockReq({ currentPassword: 'old_pass', newPassword: 'new_pass_8' }), res);
     expect(res._status).toBe(429);

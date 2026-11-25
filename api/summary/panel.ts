@@ -3,7 +3,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from '../_lib/auth.js';
 import { checkAndConsume } from '../_lib/ratelimit.js';
 import { withSentry } from '../_lib/sentry.js';
-import { callAnthropicWithRetry, SONNET_MODEL, SONNET_NO_THINKING, replyText } from '../_lib/anthropic.js';
+import { callAnthropicWithRetry, SONNET_MODEL, SONNET_NO_THINKING, replyText, type ClaudeReply } from '../_lib/anthropic.js';
 
 // Per-panel narrative summary.
 //
@@ -45,7 +45,7 @@ async function callClaude(apiKey: string, userContent: string): Promise<string> 
     messages: [{ role: 'user', content: userContent }],
     thinking: SONNET_NO_THINKING,
   });
-  const data = await resp.json();
+  const data = (await resp.json()) as ClaudeReply;
   const text: string | undefined = replyText(data);
   if (!text) throw new Error('Empty Claude response');
   return text;
@@ -69,7 +69,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (force === true) {
-    const rate = checkAndConsume('panel-summary-force', user.id, 15);
+    const rate = await checkAndConsume('panel-summary-force', user.id, 15);
     if (!rate.ok) {
       return res.status(429).json({
         error: `Too many refreshes — try again in ${Math.ceil(rate.retryInSec / 60)} minutes.`,
@@ -121,8 +121,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const lines: string[] = [];
     lines.push(`Panel: ${panel}.`);
     if (typeof profile.life_stage === 'string') lines.push(`Life stage: ${profile.life_stage}.`);
-    if (typeof profile.pregnancy_due_date === 'string') lines.push(`Pregnant, due ${profile.pregnancy_due_date}.`);
-    if (typeof profile.ivf_phase === 'string') lines.push(`IVF phase: ${profile.ivf_phase}.`);
+    if (profile.life_stage === 'pregnancy' && typeof profile.pregnancy_due_date === 'string') lines.push(`Pregnant, due ${profile.pregnancy_due_date}.`);
+    if (profile.life_stage === 'ivf' && typeof profile.ivf_phase === 'string') lines.push(`IVF phase: ${profile.ivf_phase}.`);
     lines.push('', `## ${panel} readings (${matching.length})`);
     for (const r of matching.slice(0, 80)) {
       const val = r.value ?? '';

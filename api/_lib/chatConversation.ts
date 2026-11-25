@@ -14,7 +14,8 @@ export function isMissingColumnError(err: unknown): boolean {
   return (err as { code?: string } | null)?.code === '42703';
 }
 
-type Sql = ReturnType<typeof import('@neondatabase/serverless').neon>;
+// neon(url) without options: rows as objects, no full results.
+type Sql = import('@neondatabase/serverless').NeonQueryFunction<false, false>;
 
 /**
  * Store one Ask AI turn: the user's question (when there is one) and the

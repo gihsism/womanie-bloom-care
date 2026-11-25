@@ -38,8 +38,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check session on mount
-    fetch('/api/auth/me', { credentials: 'include' })
+    // Check session on mount. index.html already started this exact request
+    // before the JS bundle downloaded (saves a full round trip on a cold
+    // load over mobile data); use it once, else fetch as usual.
+    const w = window as unknown as { __womanieMe?: Promise<Response> };
+    const early = w.__womanieMe;
+    w.__womanieMe = undefined;
+    (early ?? fetch('/api/auth/me', { credentials: 'include' }))
       .then(r => r.json())
       .then(data => {
         if (data.user) {

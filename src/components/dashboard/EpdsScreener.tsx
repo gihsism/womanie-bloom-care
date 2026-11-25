@@ -9,6 +9,7 @@ import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 import EvidenceNote from '@/components/research/EvidenceNote';
 import { healthTone } from '@/lib/medical-utils';
 import { evidenceSpec } from '@/lib/evidenceTopics';
+import { scoreEpds } from '@/lib/epdsScore';
 
 // Edinburgh Postnatal Depression Scale (EPDS) — a 10-item validated
 // screening tool for postpartum and antenatal depression. Each item
@@ -38,13 +39,12 @@ interface EpdsResult {
 
 const STORAGE_KEY = (userId: string) => `womanie_epds_history_${userId}`;
 
-// EPDS question + 4-option scale per item. Items 1, 2, 4 are
-// positive-worded (reverse-scored, options in 0..3 ascending);
-// items 3, 5–10 are negative-worded (descending 3..0).
+// EPDS question + 4-option scale per item. Every item lists its options
+// best -> worst, so an answer scores its position 0..3 (lib/epdsScore).
 interface Question {
   text: string;
   options: string[]; // index 0 (best) → 3 (worst) in NATURAL reading order
-  reverse: boolean; // if true, score = index; if false, score = 3 - index
+  reverse: boolean; // the paper form's wording direction; not used for scoring
 }
 
 const QUESTIONS: Question[] = [
@@ -100,9 +100,6 @@ const QUESTIONS: Question[] = [
   },
 ];
 
-function scoreQuestion(q: Question, optionIndex: number): number {
-  return q.reverse ? optionIndex : (3 - optionIndex);
-}
 
 function interpretation(total: number, item10Flag: boolean): {
   band: 'low' | 'borderline' | 'possible' | 'likely';
@@ -156,7 +153,11 @@ export default function EpdsScreener({ mode }: EpdsScreenerProps) {
       const raw = window.localStorage.getItem(STORAGE_KEY(user.id));
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) setHistory(parsed.filter(r => r?.date && typeof r?.total === 'number' && Array.isArray(r?.answers)));
+        // Re-score from the stored answers: results saved before the
+        // scoring fix carry a wrong total and item-10 flag.
+        if (Array.isArray(parsed)) setHistory(parsed
+          .filter(r => r?.date && typeof r?.total === 'number' && Array.isArray(r?.answers))
+          .map(r => ({ ...r, ...scoreEpds(r.answers) })));
       }
     } catch { /* ignore */ }
   }, [user, accountVersion]);
@@ -174,8 +175,7 @@ export default function EpdsScreener({ mode }: EpdsScreenerProps) {
       return;
     }
     const final = answers as number[];
-    const total = QUESTIONS.reduce((sum, q, i) => sum + scoreQuestion(q, final[i]), 0);
-    const flaggedItem10 = scoreQuestion(QUESTIONS[9], final[9]) > 0;
+    const { total, flaggedItem10 } = scoreEpds(final);
     const result: EpdsResult = {
       date: format(new Date(), 'yyyy-MM-dd'),
       answers: final,

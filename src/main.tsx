@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/react';
 import App from './App.tsx';
 import './index.css';
 import { reloadOnceForStaleChunk } from './lib/staleChunk';
+import { scrubBreadcrumb, scrubErrorEvent, scrubTransaction } from './lib/sentryScrub';
 import { initStageTheme } from './lib/stageTheme';
 import { initColorScheme } from './lib/colorScheme';
 
@@ -20,6 +21,11 @@ if (import.meta.env.VITE_SENTRY_DSN) {
     replaysSessionSampleRate: 0,
     replaysOnErrorSampleRate: 0,
     integrations: [Sentry.browserTracingIntegration()],
+    // No console breadcrumbs, no request bodies, no query strings or
+    // fragments in any URL (they can carry health data). See sentryScrub.ts.
+    beforeBreadcrumb: scrubBreadcrumb,
+    beforeSend: scrubErrorEvent,
+    beforeSendTransaction: scrubTransaction,
   });
 }
 

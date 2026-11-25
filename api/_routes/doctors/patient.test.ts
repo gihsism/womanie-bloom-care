@@ -101,20 +101,24 @@ describe('doctors/patient security invariants', () => {
     const res = mockRes();
     await handler(mockReq(PATIENT_ID), res);
     expect(res._status).toBe(200);
-    const auditCalls = query.mock.calls.filter(([sql]: [string]) =>
+    const auditCalls = query.mock.calls.filter(([sql]) =>
       /chart_access_log/i.test(sql)
     );
     expect(auditCalls.length).toBeGreaterThanOrEqual(1);
   });
 
-  // Regression: the doctor's "Open document" button needs file_path; the
-  // select used to omit it, so every click failed. It must be scoped to
-  // the patient id that passed the consent gate.
-  it('documents query returns file_path, scoped to the consented patient', async () => {
+  // The Blob URL never leaves the server: the doctor's "Open document"
+  // button goes through /api/docs/file?id=. The documents query may only
+  // derive has_file from file_path, and must be scoped to the patient id
+  // that passed the consent gate.
+  it('documents query exposes has_file but never the raw file_path, scoped to the consented patient', async () => {
     const res = mockRes();
     await handler(mockReq(PATIENT_ID), res);
-    const docCall = query.mock.calls.find(([sql]: [string]) => /FROM health_documents/i.test(sql)) as [string, unknown[]];
-    expect(docCall[0]).toMatch(/file_path/);
+    const docCall = query.mock.calls.find(([sql]) => /FROM health_documents/i.test(sql)) as [string, unknown[]];
+    expect(docCall[0]).toMatch(/AS has_file/);
+    // Every mention of file_path is inside the has_file expression.
+    const stripped = docCall[0].replace(/\(file_path IS NOT NULL AND file_path <> ''\) AS has_file/, '');
+    expect(stripped).not.toMatch(/file_path/);
     expect(docCall[1]).toEqual([PATIENT_ID]);
   });
 
@@ -124,7 +128,7 @@ describe('doctors/patient security invariants', () => {
     const res = mockRes();
     await handler(mockReq(PATIENT_ID), res);
     expect(res._status).toBe(403);
-    expect(query.mock.calls.some(([sql]: [string]) => /health_documents|daily_health_signals|doctor_notes/i.test(sql))).toBe(false);
+    expect(query.mock.calls.some(([sql]) => /health_documents|daily_health_signals|doctor_notes/i.test(sql))).toBe(false);
   });
 
   it('returns 200 with the full patient data shape on success', async () => {
@@ -147,7 +151,7 @@ describe('doctors/patient security invariants', () => {
   it('visit questions are read after the consent gate, scoped to this doctor and patient', async () => {
     const res = mockRes();
     await handler(mockReq(PATIENT_ID), res);
-    const idx = query.mock.calls.findIndex(([sql]: [string]) => /FROM visit_questions/i.test(sql));
+    const idx = query.mock.calls.findIndex(([sql]) => /FROM visit_questions/i.test(sql));
     expect(idx).toBeGreaterThan(0);
     const [vqSql, params] = query.mock.calls[idx] as [string, unknown[]];
     expect(vqSql).toMatch(/^\s*SELECT/i);
@@ -175,6 +179,6 @@ describe('doctors/patient security invariants', () => {
     query.mockResolvedValue([]);
     const res = mockRes();
     await handler(mockReq(PATIENT_ID), res);
-    expect(query.mock.calls.some(([sql]: [string]) => /visit_questions/i.test(sql))).toBe(false);
+    expect(query.mock.calls.some(([sql]) => /visit_questions/i.test(sql))).toBe(false);
   });
 });

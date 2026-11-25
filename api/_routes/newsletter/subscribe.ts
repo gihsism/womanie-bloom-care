@@ -23,7 +23,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       ? req.headers['x-forwarded-for'].split(',')[0].trim()
       : null) || req.socket.remoteAddress || 'unknown';
 
-  const rl = checkAndConsume('newsletter-subscribe', ip, SIGNUPS_PER_IP_PER_DAY);
+  const rl = await checkAndConsume('newsletter-subscribe', ip, SIGNUPS_PER_IP_PER_DAY);
   if (!rl.ok) {
     return res.status(429).json({ error: 'Too many requests', retryInSec: rl.retryInSec });
   }

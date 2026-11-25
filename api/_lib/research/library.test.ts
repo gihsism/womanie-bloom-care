@@ -240,6 +240,39 @@ describe('chat source selection and injection', () => {
     expect(buildSourcesPrompt([])).toMatch(/Do not cite any sources/);
   });
 
+  it('relevance floor: no sources when nothing mentions the subject, only the life stage', () => {
+    const q = 'can I eat kombucha while pregnant';
+    // Without the floor the pregnancy items match on "pregnant" alone.
+    expect(searchItems(FIXTURES, q, { lifeStage: 'pregnancy' }).length).toBeGreaterThan(0);
+    expect(searchItems(FIXTURES, q, { lifeStage: 'pregnancy', requireSubject: true })).toEqual([]);
+    expect(selectChatSources(q, 'pregnancy', FIXTURES)).toEqual([]);
+    // A question whose subject some item names is unaffected.
+    expect(selectChatSources('can I drink coffee while pregnant', 'pregnancy', FIXTURES)[0].pmid).toBe('1');
+  });
+
+  it('relevance floor keeps semantically close items when nothing mentions the subject', () => {
+    const v = (x: number) => new Float32Array([x, Math.sqrt(1 - x * x)]);
+    const semantic = {
+      query: new Float32Array([1, 0]),
+      docs: new Map(FIXTURES.map((it) => [it.id, v(it.pmid === '1' ? 0.6 : 0.3)])),
+      weight: 0.5,
+      floor: 0.2,
+      ceil: 0.4,
+    };
+    const q = 'can I eat kombucha while pregnant';
+    expect(searchItems(FIXTURES, q, { lifeStage: 'pregnancy', semantic }).length).toBeGreaterThan(1);
+    expect(searchItems(FIXTURES, q, { lifeStage: 'pregnancy', semantic, requireSubject: true }).map((r) => r.item.pmid)).toEqual(['1']);
+  });
+
+  it('only lets the model report doses and safety verdicts a source states', () => {
+    for (const prompt of [buildSourcesPrompt(FIXTURES.slice(0, 2)), buildSourcesPrompt([])]) {
+      expect(prompt).toMatch(/Never give a dose, amount or schedule that no source above states/);
+      expect(prompt).toMatch(/check the label or with a pharmacist or doctor/);
+      expect(prompt).toMatch(/do not give a safety verdict of your own/);
+    }
+    expect(buildSourcesPrompt(FIXTURES.slice(0, 2))).toMatch(/If none does, say so plainly/);
+  });
+
   it('stores only the sources the answer cited', () => {
     const sources = toChatSources(FIXTURES.slice(0, 3));
     expect(citedNumbers('Coffee is fine in moderation [1][3]. See [9].', 3)).toEqual([1, 3]);

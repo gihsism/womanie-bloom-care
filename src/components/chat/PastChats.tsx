@@ -4,6 +4,8 @@ import type { PastChat } from '@/lib/chatSessions';
 
 // The "Past chats" list on Ask AI. Every stored message is still on the
 // server; this only lists them grouped into chats. Tapping one reopens it.
+// The install banner stays away: it sat over "Show older chats" at the
+// end of the list (Ask AI already hides it while the chat input shows).
 export function PastChats({
   chats,
   loading,
@@ -27,7 +29,7 @@ export function PastChats({
     );
   }
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-4" data-testid="past-chats">
+    <div className="flex-1 overflow-y-auto px-4 py-4" data-testid="past-chats" data-hide-install-banner>
       {chats.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-10">No past chats yet.</p>
       ) : (

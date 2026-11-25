@@ -5,8 +5,9 @@ import { normalizeTestTitle } from './_lib/normalize-test-title.js';
 import { normalizeUnit } from './_lib/normalize-unit.js';
 import { checkAndConsume } from './_lib/ratelimit.js';
 import { isBlobUrl } from './_lib/blob-url.js';
+import { readBlobBuffer } from './_lib/blob-read.js';
 import { withSentry } from './_lib/sentry.js';
-import { callAnthropicWithRetry, SONNET_MODEL, SONNET_NO_THINKING, replyText } from './_lib/anthropic.js';
+import { callAnthropicWithRetry, SONNET_MODEL, SONNET_NO_THINKING, replyText, type ClaudeReply } from './_lib/anthropic.js';
 import heicConvert from 'heic-convert';
 
 // Allow longer execution for AI analysis. Claude PDF analysis on a full
@@ -45,7 +46,10 @@ async function hashRequest(data: string): Promise<string> {
 // Best-effort parse of a Claude reply into our expected analysis shape.
 // Returns null if the content can't be coaxed into valid JSON at all, so
 // the caller can decide whether to retry or fail loudly.
-function tryParseAnalysisJson(raw: string): Record<string, unknown> | null {
+// The model's JSON is read field by field below without a schema.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnalysisJson = Record<string, any>;
+function tryParseAnalysisJson(raw: string): AnalysisJson | null {
   if (!raw) return null;
   const cleaned = raw.replace(/^```json?\s*/i, '').replace(/```\s*$/i, '').trim();
   try {
@@ -79,7 +83,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const sessionUser = await getAuthUser(req);
   if (!sessionUser) return res.status(401).json({ error: 'Unauthorized' });
 
-  const rate = checkAndConsume('analyze-document', sessionUser.id, 25);
+  const rate = await checkAndConsume('analyze-document', sessionUser.id, 25);
   if (!rate.ok) {
     return res.status(429).json({
       error: `Daily analysis limit reached (${rate.limit}). Try again in ${Math.ceil(rate.retryInSec / 60)} minutes.`,
@@ -136,13 +140,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       return t.toISOString().split('T')[0];
     };
 
-    // Download file from Vercel Blob URL
+    // Download file from Vercel Blob (server-side, with the store token, so
+    // private blobs work as well as the older public ones).
     let documentText = '';
     if (filePath && isBlobUrl(filePath)) {
       try {
-        const fileResp = await fetch(filePath);
-        if (fileResp.ok) {
-          const buffer = await fileResp.arrayBuffer();
+        const buffer = await readBlobBuffer(filePath);
+        if (buffer) {
 
           // iPhone HEIC/HEIF: Claude vision can't read it, so decode to
           // JPEG first (pure-JS, ~1-3s per photo — acceptable inside a
@@ -171,7 +175,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           let patientContext = '';
           if (profile) {
             if (profile.life_stage) patientContext += `Patient life stage: ${profile.life_stage}. `;
-            if (profile.pregnancy_due_date) patientContext += `Currently pregnant, due date: ${profile.pregnancy_due_date}. `;
+            if (profile.life_stage === 'pregnancy' && profile.pregnancy_due_date) patientContext += `Currently pregnant, due date: ${profile.pregnancy_due_date}. `;
           }
 
           const today = resolveToday(timezone);
@@ -192,7 +196,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
               { type: 'text', text: `Analyze this medical document image "${fileName}". Extract EVERY test result you can see in the image.\n\n${patientContext}` },
             ];
           } else {
-            documentText = await fileResp.text();
+            documentText = buffer.toString('utf8');
             // Fall through to text processing below
             userContent = [];
           }
@@ -216,7 +220,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     let patientContext = '';
     if (profile) {
       if (profile.life_stage) patientContext += `Patient life stage: ${profile.life_stage}. `;
-      if (profile.pregnancy_due_date) patientContext += `Currently pregnant, due date: ${profile.pregnancy_due_date}. `;
+      if (profile.life_stage === 'pregnancy' && profile.pregnancy_due_date) patientContext += `Currently pregnant, due date: ${profile.pregnancy_due_date}. `;
     }
 
     const today = resolveToday(timezone);
@@ -505,7 +509,8 @@ ${patientContext || ''}`;
 
 // neon() returns a tagged-template sql client; we type it loosely here
 // to avoid importing the internal types from @neondatabase/serverless.
-type NeonSql = ReturnType<typeof import('@neondatabase/serverless').neon>;
+// neon(url) without options: rows as objects, no full results.
+type NeonSql = import('@neondatabase/serverless').NeonQueryFunction<false, false>;
 
 async function processWithAI(
   sql: NeonSql, apiKey: string, dynamicHeader: string,
@@ -562,8 +567,10 @@ async function processWithAI(
       thinking: SONNET_NO_THINKING,
     });
 
-    const aiData = await aiResponse.json();
-    aiContent = replyText(aiData);
+    const aiData = (await aiResponse.json()) as ClaudeReply;
+    // Typed as before the api type-check existed; an empty reply is not
+    // handled here yet (see the security round-2 notes).
+    aiContent = replyText(aiData) as string;
     const usage = aiData.usage || {};
     logStage(documentId, 'anthropic_ok', anthropicStart, {
       inputTokens: usage.input_tokens,
@@ -608,7 +615,7 @@ async function processWithAI(
       ],
       thinking: SONNET_NO_THINKING,
     });
-    const fixData = await fixResp.json();
+    const fixData = (await fixResp.json()) as ClaudeReply;
     const fixContent: string = replyText(fixData) ?? '';
     analysis = tryParseAnalysisJson(fixContent);
     if (analysis) {
@@ -679,7 +686,7 @@ async function processWithAI(
   // document.
   const rows: unknown[][] = [];
   if (Array.isArray(analysis.extracted_data)) {
-    for (const item of analysis.extracted_data as Array<Record<string, unknown>>) {
+    for (const item of analysis.extracted_data as AnalysisJson[]) {
       rows.push([
         userId, documentId, analysisId,
         item.data_type || 'other', normalizeTestTitle(item.title) || 'Unknown',

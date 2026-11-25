@@ -3,6 +3,7 @@ import { del, list } from '@vercel/blob';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from '../../_lib/auth.js';
 import { withSentry } from '../../_lib/sentry.js';
+import { hashSubject } from '../../_lib/ratelimit.js';
 
 // GDPR right-to-erasure.
 //
@@ -51,16 +52,23 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     // table exists, so a deploy that lands before the migration can't make
     // the whole deletion transaction fail.
     // Same for visit_questions (migration 012).
+    // Same for pending_jobs (005; also cascades from health_documents) and
+    // rate_limit_counters (014).
     const appDataRows = await sql.query(
-      "SELECT to_regclass('public.user_app_data') IS NOT NULL AS present, to_regclass('public.visit_questions') IS NOT NULL AS visit_questions"
-    ) as Array<{ present?: boolean; visit_questions?: boolean }>;
+      "SELECT to_regclass('public.user_app_data') IS NOT NULL AS present, to_regclass('public.visit_questions') IS NOT NULL AS visit_questions, to_regclass('public.pending_jobs') IS NOT NULL AS pending_jobs, to_regclass('public.rate_limit_counters') IS NOT NULL AS rate_limit_counters"
+    ) as Array<{ present?: boolean; visit_questions?: boolean; pending_jobs?: boolean; rate_limit_counters?: boolean }>;
     const hasAppData = appDataRows[0]?.present === true;
     const hasVisitQuestions = appDataRows[0]?.visit_questions === true;
+    const hasPendingJobs = appDataRows[0]?.pending_jobs === true;
+    const hasRateLimits = appDataRows[0]?.rate_limit_counters === true;
+    // Rate-limit rows are keyed by hashed user id / sign-in email.
+    const rateLimitSubjects = [user.id, ...(canonicalEmail ? [canonicalEmail.toLowerCase()] : [])].map(hashSubject);
 
     // Tables to wipe, in dependency order: children first, parents
     // last. The transaction commits atomically so we never leave a
     // half-deleted user behind.
     await sql.transaction([
+      ...(hasPendingJobs ? [sql`DELETE FROM pending_jobs WHERE user_id = ${user.id}`] : []),
       sql`DELETE FROM medical_extracted_data WHERE user_id = ${user.id}`,
       sql`DELETE FROM document_analyses WHERE user_id = ${user.id}`,
       sql`DELETE FROM health_documents WHERE user_id = ${user.id}`,
@@ -92,6 +100,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       // in the key and may be shared with other users, so we leave them.
       sql`DELETE FROM llm_cache WHERE request_hash LIKE ${'summary_v1:' + user.id + ':%'}`,
       sql`DELETE FROM llm_cache WHERE request_hash LIKE ${'panel_summary_v1:' + user.id + ':%'}`,
+      ...(hasRateLimits ? [sql`DELETE FROM rate_limit_counters WHERE subject_hash = ANY(${rateLimitSubjects})`] : []),
       sql`DELETE FROM auth_users WHERE id = ${user.id}`,
     ]);
 
@@ -102,10 +111,17 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     try {
       const token = process.env.BLOB_READ_WRITE_TOKEN;
       if (token) {
-        const result = await list({ prefix: `${user.id}/`, token });
-        const urls = result.blobs.map(b => b.url);
-        if (urls.length > 0) {
-          await del(urls, { token });
+        // list() returns one page (up to 1000 blobs); walk every page so a
+        // heavy uploader's older files don't outlive her account.
+        let cursor: string | undefined;
+        for (let page = 0; page < 100; page++) {
+          const result = await list({ prefix: `${user.id}/`, token, cursor });
+          const urls = result.blobs.map(b => b.url);
+          if (urls.length > 0) {
+            await del(urls, { token });
+          }
+          if (!result.hasMore || !result.cursor) break;
+          cursor = result.cursor;
         }
       }
     } catch (e) {

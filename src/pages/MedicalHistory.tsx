@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,8 +16,6 @@ import ResultSparkline from '@/components/dashboard/ResultSparkline';
 import NewDocInsights from '@/components/dashboard/NewDocInsights';
 import ShareWithDoctor from '@/components/dashboard/ShareWithDoctor';
 import StageLabCards from '@/components/records/StageLabCards';
-import MyCharts from '@/components/records/MyCharts';
-import TestTrend from '@/components/records/TestTrend';
 import type { LifeStage } from '@/components/dashboard/DashboardHeader';
 import { normalizeLifeStage } from '@/lib/lifeStage';
 import { pregnancyStart } from '@/lib/labWindow';
@@ -76,6 +74,13 @@ import {
   // import and won at runtime. Importing it too was a conflicting no-op.
 } from '@/lib/medical-utils';
 
+// The chart views pull in recharts (~110 KB gzip); they only show on the
+// 'My charts' tab or after tapping a test's Trend, so they load on demand
+// (and are prefetched once the page has settled, so taps stay instant).
+const loadMyCharts = () => import('@/components/records/MyCharts');
+const loadTestTrend = () => import('@/components/records/TestTrend');
+const MyCharts = lazy(loadMyCharts);
+const TestTrend = lazy(loadTestTrend);
 
 // Specific explanations for common tests — what the result means when high or low
 const testExplanations: Record<string, { high: string; low: string; normal: string }> = {
@@ -647,6 +652,12 @@ export default function MedicalHistory() {
   const [justUploaded, setJustUploaded] = useState(false);
   const [openTrend, setOpenTrend] = useState<string | null>(null);
 
+  // Warm the on-demand chart chunks once first paint is done.
+  useEffect(() => {
+    const t = setTimeout(() => { loadTestTrend().catch(() => {}); loadMyCharts().catch(() => {}); }, 2500);
+    return () => clearTimeout(t);
+  }, []);
+
   // Deep-link support: when arriving with ?doc=<id>, auto-expand that
   // doc and scroll it into view. Fired once per distinct ?doc= value
   // after the documents list has loaded, and keyed so a user can click
@@ -724,7 +735,7 @@ export default function MedicalHistory() {
     try {
       const [medRes, docRes, profileRes] = await Promise.all([
         db.from('current_extracted_data').select('*').eq('user_id', user!.id).order('date_recorded', { ascending: false, nullsFirst: false }),
-        db.from('health_documents').select('id, file_name, file_path, mime_type, ai_suggested_name, ai_summary, ai_suggested_category, uploaded_at, document_type').eq('user_id', user!.id).order('uploaded_at', { ascending: false }),
+        db.from('health_documents').select('id, file_name, mime_type, ai_suggested_name, ai_summary, ai_suggested_category, uploaded_at, document_type').eq('user_id', user!.id).order('uploaded_at', { ascending: false }),
         db.from('profiles').select('life_stage, pregnancy_due_date').eq('id', user!.id).single(),
       ]);
       if (medRes.data) setMedicalData(medRes.data as MedicalDataItem[]);
@@ -771,7 +782,7 @@ export default function MedicalHistory() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               documentId: r.documentId, userId: user.id,
-              filePath: r.filePath, fileName: r.fileName,
+              fileName: r.fileName,
               mimeType: r.mimeType, timezone: tz,
             }),
             keepalive: true,
@@ -858,7 +869,7 @@ export default function MedicalHistory() {
     }
   };
 
-  const deleteDocument = async (docId: string, _filePath: string) => {
+  const deleteDocument = async (docId: string) => {
     if (!user) return;
     try {
       // Delegate the whole cascade to /api/docs/delete — it runs the
@@ -893,7 +904,7 @@ export default function MedicalHistory() {
       // document_analyses row and only flips the current flag on success.
       // Prior analyses stay queryable as history.
       await db.functions.invoke('analyze-document', {
-        body: { documentId: doc.id, userId: user.id, filePath: doc.file_path, fileName: doc.file_name, mimeType: doc.mime_type, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone },
+        body: { documentId: doc.id, userId: user.id, fileName: doc.file_name, mimeType: doc.mime_type, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone },
       });
       toast({ title: 'Analysis complete', description: doc.ai_suggested_name || doc.file_name });
       await fetchData();
@@ -932,7 +943,7 @@ export default function MedicalHistory() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               documentId: doc.id, userId: user.id,
-              filePath: doc.file_path, fileName: doc.file_name,
+              fileName: doc.file_name,
               mimeType: doc.mime_type, timezone: tz,
             }),
           }).then(r => ({ ok: r.ok, status: r.status }))
@@ -1144,7 +1155,7 @@ export default function MedicalHistory() {
   const trendPanel = (lab: MedicalDataItem) => {
     const info = trendInfoFor(lab);
     if (!info || openTrend !== lab.id) return null;
-    return <div className="mt-2"><TestTrend info={info} summary={trendSummaries.get(lab.title)} /></div>;
+    return <div className="mt-2"><Suspense fallback={null}><TestTrend info={info} summary={trendSummaries.get(lab.title)} /></Suspense></div>;
   };
 
   const handleUploaded = () => {
@@ -1265,7 +1276,7 @@ export default function MedicalHistory() {
           </Card>
         )}
 
-        {segment === 'charts' && <MyCharts mode={mode} />}
+        <Suspense fallback={null}>{segment === 'charts' && <MyCharts mode={mode} />}</Suspense>
         {segment === 'charts' && uploadButton}
 
         {segment === 'documents' && hasDocuments && (
@@ -1497,7 +1508,7 @@ export default function MedicalHistory() {
                             onClick={(e) => {
                               e.stopPropagation();
                               if (window.confirm(`Delete "${doc.ai_suggested_name || doc.file_name}"?`)) {
-                                deleteDocument(doc.id, doc.file_path);
+                                deleteDocument(doc.id);
                               }
                             }}
                           >
