@@ -54,13 +54,13 @@ describe('client Sentry scrubbing', () => {
     expect(out.spans?.[0].data).toEqual({ url: 'https://womanie.info/api/me/export' });
   });
 
-  it('Sentry.init (lib/monitoring.ts, started from main.tsx) wires the scrubbers in', () => {
+  it('Sentry.init (lib/sentryClient.ts, started from main.tsx via lib/monitoring.ts) wires the scrubbers in', () => {
     const main = readFileSync(new URL('../main.tsx', import.meta.url), 'utf8');
     expect(main).toMatch(/initMonitoring\(import\.meta\.env\.VITE_SENTRY_DSN/);
-    const src = readFileSync(new URL('./monitoring.ts', import.meta.url), 'utf8');
-    expect(src).toMatch(/beforeBreadcrumb:\s*scrub\.scrubBreadcrumb/);
-    expect(src).toMatch(/beforeSend:\s*scrub\.scrubErrorEvent/);
-    expect(src).toMatch(/beforeSendTransaction:\s*scrub\.scrubTransaction/);
+    const src = readFileSync(new URL('./sentryClient.ts', import.meta.url), 'utf8');
+    expect(src).toMatch(/beforeBreadcrumb:\s*scrubBreadcrumb/);
+    expect(src).toMatch(/beforeSend:\s*scrubErrorEvent/);
+    expect(src).toMatch(/beforeSendTransaction:\s*scrubTransaction/);
     expect(src).toMatch(/sendDefaultPii:\s*false/);
   });
 });
