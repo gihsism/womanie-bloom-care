@@ -73,8 +73,8 @@ export function visitSummary<T extends VisitRow>(visits: T[], now: number): { la
   return { last, next };
 }
 
-export type PatientTab = 'summary' | 'results' | 'documents' | 'notes' | 'visits';
-export const PATIENT_TABS: readonly PatientTab[] = ['summary', 'results', 'documents', 'notes', 'visits'];
+export type PatientTab = 'summary' | 'trends' | 'results' | 'documents' | 'notes' | 'visits';
+export const PATIENT_TABS: readonly PatientTab[] = ['summary', 'trends', 'results', 'documents', 'notes', 'visits'];
 
 // ?tab= deep links. Old names keep working: overview/health -> summary,
 // labs -> results.
@@ -84,6 +84,7 @@ export function normalizePatientTab(raw: string | null): PatientTab | null {
   if (v === 'overview' || v === 'health') return 'summary';
   if (v === 'labs') return 'results';
   if (v === 'appointments') return 'visits';
+  if (v === 'charts' || v === 'trend') return 'trends';
   return null;
 }
 
