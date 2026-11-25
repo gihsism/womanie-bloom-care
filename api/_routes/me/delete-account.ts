@@ -55,12 +55,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     // Same for pending_jobs (005; also cascades from health_documents) and
     // rate_limit_counters (014).
     const appDataRows = await sql.query(
-      "SELECT to_regclass('public.user_app_data') IS NOT NULL AS present, to_regclass('public.visit_questions') IS NOT NULL AS visit_questions, to_regclass('public.pending_jobs') IS NOT NULL AS pending_jobs, to_regclass('public.rate_limit_counters') IS NOT NULL AS rate_limit_counters"
-    ) as Array<{ present?: boolean; visit_questions?: boolean; pending_jobs?: boolean; rate_limit_counters?: boolean }>;
+      "SELECT to_regclass('public.user_app_data') IS NOT NULL AS present, to_regclass('public.visit_questions') IS NOT NULL AS visit_questions, to_regclass('public.pending_jobs') IS NOT NULL AS pending_jobs, to_regclass('public.rate_limit_counters') IS NOT NULL AS rate_limit_counters, to_regclass('public.push_subscriptions') IS NOT NULL AS push_subscriptions"
+    ) as Array<{ present?: boolean; visit_questions?: boolean; pending_jobs?: boolean; rate_limit_counters?: boolean; push_subscriptions?: boolean }>;
     const hasAppData = appDataRows[0]?.present === true;
     const hasVisitQuestions = appDataRows[0]?.visit_questions === true;
     const hasPendingJobs = appDataRows[0]?.pending_jobs === true;
     const hasRateLimits = appDataRows[0]?.rate_limit_counters === true;
+    const hasPush = appDataRows[0]?.push_subscriptions === true; // migration 015
     // Rate-limit rows are keyed by hashed user id / sign-in email.
     const rateLimitSubjects = [user.id, ...(canonicalEmail ? [canonicalEmail.toLowerCase()] : [])].map(hashSubject);
 
@@ -81,6 +82,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       sql`DELETE FROM babies WHERE user_id = ${user.id}`,
       ...(hasAppData ? [sql`DELETE FROM user_app_data WHERE user_id = ${user.id}`] : []),
       ...(hasVisitQuestions ? [sql`DELETE FROM visit_questions WHERE user_id = ${user.id}`] : []),
+      ...(hasPush ? [sql`DELETE FROM push_subscriptions WHERE user_id = ${user.id}`, sql`DELETE FROM push_sent_log WHERE user_id = ${user.id}`] : []),
       sql`DELETE FROM chat_messages WHERE user_id = ${user.id}`,
       sql`DELETE FROM patient_access_codes WHERE patient_id = ${user.id}`,
       sql`DELETE FROM doctor_patient_connections WHERE patient_id = ${user.id} OR doctor_id = ${user.id}`,
