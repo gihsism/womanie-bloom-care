@@ -57,6 +57,7 @@ const CompareDocs = lazy(() => import("./pages/dashboard/CompareDocs"));
 const PanelDetail = lazy(() => import("./pages/dashboard/PanelDetail"));
 const PrintDoc = lazy(() => import("./pages/dashboard/PrintDoc"));
 const PrintHealthRecord = lazy(() => import("./pages/dashboard/PrintHealthRecord"));
+const PrintVisitSummary = lazy(() => import("./pages/dashboard/PrintVisitSummary"));
 const Appointments = lazy(() => import("./pages/dashboard/Appointments"));
 const BirthRecord = lazy(() => import("./pages/dashboard/BirthRecord"));
 const BabyPage = lazy(() => import("./pages/dashboard/BabyPage"));
@@ -137,6 +138,7 @@ const App = () => (
                   <Route path="/dashboard/panel/:slug" element={<PanelDetail />} />
                   <Route path="/dashboard/doc/:id/print" element={<PrintDoc />} />
                   <Route path="/dashboard/health-record/print" element={<PrintHealthRecord />} />
+                  <Route path="/dashboard/visit-summary/print" element={<PrintVisitSummary />} />
                   <Route path="/dashboard/appointments" element={<Appointments />} />
                   <Route path="/dashboard/birth" element={<BirthRecord />} />
                   <Route path="/dashboard/baby" element={<BabyPage />} />

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Shield, Bell, User, Download, Loader2, Trash2, Wand2, KeyRound, Eye, EyeOff, Pill, Inbox, Phone, Smartphone, Users, HelpCircle, Info, LogOut, UserCog } from 'lucide-react';
+import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Shield, Bell, User, Download, Loader2, Trash2, Wand2, KeyRound, Eye, EyeOff, Pill, Inbox, Phone, Smartphone, Users, HelpCircle, Info, LogOut, UserCog, FileText } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { scorePassword } from '@/lib/password-strength';
 import { Button } from '@/components/ui/button';
@@ -442,6 +442,7 @@ const Settings = () => {
           <MeGroup>
             <MeRow icon={Pill} label="Medicines & supplements" onClick={() => openSection('medicines')} testId="me-row-medicines" />
             <MeRow icon={Bell} label="Reminders" onClick={() => openSection('reminders')} testId="me-row-reminders" />
+            <MeRow icon={FileText} label="Prepare a visit summary" value="For any doctor" onClick={() => navigate('/dashboard/visit-summary/print')} testId="me-row-visit-summary" />
             <MeRow icon={Inbox} label="Needs your attention" badge={attention.total} onClick={() => navigate('/dashboard/notifications')} testId="me-row-attention" />
             <MeRow icon={Phone} label="Emergency contacts" onClick={() => navigate('/dashboard/emergency')} testId="me-row-emergency" />
             <MeRow icon={Smartphone} label="Connected devices" onClick={() => navigate('/dashboard/devices')} testId="me-row-devices" />
