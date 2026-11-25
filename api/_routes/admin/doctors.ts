@@ -86,8 +86,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         // Already-approved doctor turned bad: flip is_verified off,
         // mark verification_status='revoked' so the history is kept,
         // and strip the doctor role. Future patients won't see them
-        // in the directory; existing approved connections stay unless
-        // patients revoke individually.
+        // in the directory. Existing approved connection rows stay (so a
+        // re-approval restores them), but every chart read and note write
+        // also requires the 'doctor' role, so they open nothing meanwhile.
         // Both writes must commit together: the role without is_verified
         // being false lets the doctor keep redeeming access codes.
         await sql.transaction([

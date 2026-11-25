@@ -201,6 +201,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           `SELECT 1 FROM doctor_notes n
              JOIN doctor_patient_connections c
                ON c.doctor_id = n.doctor_id AND c.patient_id = n.patient_id AND c.status = 'approved'
+             JOIN user_roles r ON r.user_id = n.doctor_id AND r.role = 'doctor'
             WHERE n.id = $1 AND n.doctor_id = $2
             LIMIT 1`,
           [idFilter[2], user.id]
@@ -217,8 +218,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           return res.status(400).json({ error: 'patient_id required' });
         }
         const conn = await sql.query(
-          `SELECT 1 FROM doctor_patient_connections
-            WHERE doctor_id = $1 AND patient_id = $2 AND status = 'approved' LIMIT 1`,
+          `SELECT 1 FROM doctor_patient_connections c
+             JOIN user_roles r ON r.user_id = c.doctor_id AND r.role = 'doctor'
+            WHERE c.doctor_id = $1 AND c.patient_id = $2 AND c.status = 'approved' LIMIT 1`,
           [user.id, patientId]
         );
         if (conn.length === 0) {
