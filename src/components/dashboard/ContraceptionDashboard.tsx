@@ -324,10 +324,10 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
 
           {!pillsTakenToday ? (
             <div className="space-y-2">
-              <Button onClick={() => handleTakePill('on-time')} className="w-full gap-2 h-12 text-base">
+              <button type="button" onClick={() => handleTakePill('on-time')} className="btn-stage w-full">
                 <Pill className="h-5 w-5" />
-                Mark as Taken
-              </Button>
+                Took my pill
+              </button>
               <div className="flex gap-2">
                 <Button onClick={() => handleTakePill('late')} variant="outline" size="sm" className="flex-1 text-xs">
                   Took it late
@@ -471,7 +471,7 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
                 </div>
                 {unlogged > 0 && (
                   <p className="text-[10px] text-muted-foreground">
-                    {unlogged} {unlogged === 1 ? 'day' : 'days'} not logged. Tap "Mark as Taken"
+                    {unlogged} {unlogged === 1 ? 'day' : 'days'} not logged. Tap "Took my pill"
                     each day to keep the streak meaningful.
                   </p>
                 )}
