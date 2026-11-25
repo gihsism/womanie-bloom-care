@@ -694,7 +694,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
           <img
             src={getWeekImage(weeksPregnant)}
             alt="Baby development"
-            className="w-32 h-32 sm:w-36 sm:h-36 object-contain flex-shrink-0 cursor-pointer hover:scale-105 transition-transform rounded-lg"
+            className="w-32 h-32 sm:w-36 sm:h-36 object-contain flex-shrink-0 cursor-pointer hover:scale-105 transition-transform rounded-lg dark:rounded-full"
             onClick={() => setShowFullImage(true)}
             title="Tap to see this week in 3D"
           />

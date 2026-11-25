@@ -1,4 +1,5 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { ChevronDown } from 'lucide-react';
 import SubPageHeader from '@/components/SubPageHeader';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -41,10 +42,38 @@ import { evidenceSpec } from '@/lib/evidenceTopics';
 // #kick-counter, #contraction-timer, #medicines, #guides …). Home keeps
 // only the hero, Today, one button and "More for <stage>".
 
-const anchor = 'scroll-mt-4 md:scroll-mt-28';
+const anchor = 'scroll-mt-20 md:scroll-mt-28';
 
-function Section({ id, children }: { id?: string; children: ReactNode }) {
-  return <div id={id} className={`mb-6 ${anchor}`}>{children}</div>;
+// Idea 4 "much more straightforward": the stage's main tracker is shown
+// open; everything else is ONE row each ("Weight", "Blood pressure", …)
+// that opens in place when tapped. A Home link to #weight opens that row.
+// Closed rows don't mount their tracker, so the page also loads lighter.
+function Section({ id, title, children }: { id?: string; title?: string; children: ReactNode }) {
+  const { hash } = useLocation();
+  const [open, setOpen] = useState(() => !title || (!!id && hash === `#${id}`));
+  useEffect(() => {
+    if (id && hash === `#${id}`) setOpen(true);
+  }, [hash, id]);
+  if (!title) return <div id={id} className={`mb-6 ${anchor}`}>{children}</div>;
+  return (
+    <div id={id} className={`mb-2 ${anchor}`}>
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen(o => !o)}
+        className="flex min-h-[3.5rem] w-full items-center gap-3 rounded-[1.25rem] border border-line bg-card px-4 text-left text-[17px] font-semibold hover:bg-muted/40"
+      >
+        <span className="flex-1">{title}</span>
+        <ChevronDown className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+      </button>
+      {open && <div className="mt-2 mb-4">{children}</div>}
+    </div>
+  );
+}
+
+/** "More to track" heading between the open tracker and the rows. */
+function MoreTitle() {
+  return <h2 className="section-title mt-2 mb-3">More to track</h2>;
 }
 
 export default function StagePage() {
@@ -52,7 +81,6 @@ export default function StagePage() {
   const { user, loading } = useAuth();
   const p = useStageProfile();
   const { hash } = useLocation();
-  const guidesOpen = hash === '#guides';
   const mode = p.selectedMode;
   usePageTitle(mode ? stageLabel(mode) : 'Your stage');
   useScrollToHash(!!mode);
@@ -85,9 +113,9 @@ export default function StagePage() {
             <Section id="ivf-tracker">
               <IVFTracker ivfStartDate={p.ivfStartDate} ivfPhase={p.ivfPhase} onSetIVFStart={p.setIVFStart} onUpdatePhase={p.updateIVFPhase} />
             </Section>
-            <FertilityOutlookCard mode={mode} />
-            <Section id="guides">
-              <GuidesSection defaultOpen={guidesOpen} title="Guides: nutrition during IVF">
+            <MoreTitle />
+            <Section id="guides" title="Food during IVF">
+              <GuidesSection defaultOpen title="Guides: nutrition during IVF">
                 <IVFNutrition phase={(p.ivfPhase as Parameters<typeof IVFNutrition>[0]['phase']) ?? null} />
               </GuidesSection>
             </Section>
@@ -104,16 +132,17 @@ export default function StagePage() {
                 onSwitchToPostpartum={p.switchToPostpartum}
               />
             </Section>
-            <Section id="weight"><PregnancyWeightTracker dueDate={p.pregnancyDueDate} /></Section>
-            <Section id="blood-pressure"><BloodPressureTracker mode="pregnancy" /></Section>
-            <Section id="vaccinations"><PregnancyVaccinations dueDate={p.pregnancyDueDate} /></Section>
-            <Section id="mood-check"><EpdsScreener mode="pregnancy" /></Section>
+            <MoreTitle />
+            <Section id="weight" title="Weight"><PregnancyWeightTracker dueDate={p.pregnancyDueDate} /></Section>
+            <Section id="blood-pressure" title="Blood pressure"><BloodPressureTracker mode="pregnancy" /></Section>
+            <Section id="vaccinations" title="Vaccinations"><PregnancyVaccinations dueDate={p.pregnancyDueDate} /></Section>
+            <Section id="mood-check" title="Mood check"><EpdsScreener mode="pregnancy" /></Section>
             {p.pregnancyDueDate && (
-              <Section id="calendar"><CycleCalendar selectedMode={mode} pregnancyDueDate={p.pregnancyDueDate} /></Section>
+              <Section id="calendar" title="Calendar"><CycleCalendar selectedMode={mode} pregnancyDueDate={p.pregnancyDueDate} /></Section>
             )}
             {p.pregnancyDueDate && (
-              <Section id="guides">
-                <GuidesSection defaultOpen={guidesOpen} title="Pregnancy guides: food & movement">
+              <Section id="guides" title="Food & movement">
+                <GuidesSection defaultOpen title="Pregnancy guides: food & movement">
                   <PregnancyNutrition weeksPregnant={weeks} />
                   <PregnancyExercise weeksPregnant={weeks} />
                 </GuidesSection>
@@ -129,7 +158,8 @@ export default function StagePage() {
         {mode === 'postpartum' && (
           <>
             <Section id="recovery"><PostpartumDashboard onNavigateToDoctorChat={toChat} /></Section>
-            <Section id="mood-check"><EpdsScreener mode="postpartum" /></Section>
+            <MoreTitle />
+            <Section id="mood-check" title="Mood check"><EpdsScreener mode="postpartum" /></Section>
           </>
         )}
 
@@ -137,12 +167,13 @@ export default function StagePage() {
           <>
             <Section><PerimenopauseStageCard mode={mode} /></Section>
             <Section id="symptoms"><MenopauseSymptomCalendar mode={mode} /></Section>
-            <Section id="blood-pressure"><BloodPressureTracker mode={mode} /></Section>
-            <Section id="menopause-stage">
+            <MoreTitle />
+            <Section id="blood-pressure" title="Blood pressure"><BloodPressureTracker mode={mode} /></Section>
+            <Section id="menopause-stage" title={mode === 'post-menopause' ? 'Life after menopause' : 'About menopause'}>
               <MenopauseDashboard isPostMenopause={mode === 'post-menopause'} onNavigateToDoctorChat={toChat} />
             </Section>
-            <Section id="guides">
-              <GuidesSection defaultOpen={guidesOpen} title="Guides: nutrition in menopause">
+            <Section id="guides" title="Food">
+              <GuidesSection defaultOpen title="Guides: nutrition in menopause">
                 <MenopauseNutrition postmenopausal={mode === 'post-menopause'} />
               </GuidesSection>
             </Section>
@@ -152,6 +183,7 @@ export default function StagePage() {
         {mode === 'contraception' && (
           <Section id="contraception"><ContraceptionDashboard onNavigateToDoctorChat={toChat} /></Section>
         )}
+        {(mode === 'pre-menstrual' || mode === 'contraception') && <MoreTitle />}
 
         {cycleMode && (
           <>
@@ -163,10 +195,11 @@ export default function StagePage() {
                 selectedMode={mode}
               />
             </Section>
-            <div id="pms" className={anchor}><PMSForecastCard mode={mode} /></div>
-            <FertilityOutlookCard mode={mode} />
+            <MoreTitle />
+            <Section id="pms" title="Before your period"><PMSForecastCard mode={mode} /></Section>
+            {mode === 'conception' && <Section title="Your chances"><FertilityOutlookCard mode={mode} /></Section>}
             {p.periodData && (
-              <Section id="next-cycles">
+              <Section id="next-cycles" title="Next cycles">
                 <FertilityForecast lastPeriodStart={p.periodData.lastPeriodStart} cycleLengthFallback={p.periodData.cycleLength} />
               </Section>
             )}
@@ -175,8 +208,8 @@ export default function StagePage() {
 
         {/* Cycle-phase guides for the stages that track a cycle. */}
         {p.periodData && (cycleMode || mode === 'pre-menstrual' || mode === 'contraception') && (
-          <Section id="guides">
-            <GuidesSection defaultOpen={guidesOpen} title="Guides for this cycle phase: food & movement">
+          <Section id="guides" title="Food & movement">
+            <GuidesSection defaultOpen title="Guides for this cycle phase: food & movement">
               <CyclePhaseNutrition mode={mode} />
               <CyclePhaseExercise mode={mode} />
             </GuidesSection>
@@ -194,7 +227,7 @@ export default function StagePage() {
           </Section>
         )}
 
-        <Section id="medicines"><MedicineLog stage={mode} /></Section>
+        <Section id="medicines" title="Medicines & supplements"><MedicineLog stage={mode} /></Section>
         {/* Room below the last sections, so a #medicines / #guides link can
             scroll its section to the top instead of leaving it under the
             tab bar at the bottom of a page that cannot scroll further. */}

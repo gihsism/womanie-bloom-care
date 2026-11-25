@@ -515,13 +515,7 @@ const Settings = () => {
         {/* Account Info */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Account
-            </CardTitle>
-            <CardDescription>
-              Your account details
-            </CardDescription>
+            <CardTitle>Name and email</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <form className="space-y-1.5" onSubmit={saveName}>
@@ -564,12 +558,9 @@ const Settings = () => {
             the place to view + edit what you entered then. */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Personal info
-            </CardTitle>
+            <CardTitle>About you</CardTitle>
             <CardDescription>
-              These show up in your health summary and help personalize insights. Saved to your account.
+              Used in your health summary. All optional.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -839,13 +830,7 @@ const Settings = () => {
         {/* Privacy & Security */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              Privacy & Security
-            </CardTitle>
-            <CardDescription>
-              Manage your data and privacy settings
-            </CardDescription>
+            <CardTitle>Your data</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button variant="outline" className="w-full" onClick={() => navigate('/dashboard/privacy')}>

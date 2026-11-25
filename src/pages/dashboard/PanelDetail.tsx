@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import SubPageHeader from '@/components/SubPageHeader';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Loader2, MessageCircle, Sparkles, RefreshCw } from 'lucide-react';
+import { Loader2, MessageCircle, RefreshCw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { NO_REMOTE_IMAGES } from '@/lib/safeMarkdown';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -240,7 +240,6 @@ export default function PanelDetail() {
     );
   }
 
-  const totalReadings = series.reduce((n, s) => n + s.readings.length, 0);
   const totalFlagged = series.reduce((n, s) => n + s.flagged, 0);
 
   const askAboutPanel = () => {
@@ -280,7 +279,14 @@ export default function PanelDetail() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SubPageHeader title={panelDisplayName} backTo="/dashboard/medical-history" backLabel="Records" action={series.length > 0 && (
+      <SubPageHeader title={panelDisplayName} backTo="/dashboard/medical-history" backLabel="Records"
+        subtitle={series.length > 0 ? (
+          <>
+            {series.length} {series.length === 1 ? 'test' : 'tests'}
+            {totalFlagged > 0 && <span className="font-semibold text-destructive"> · {totalFlagged} to talk about</span>}
+          </>
+        ) : undefined}
+        action={series.length > 0 && (
           <button type="button" onClick={askAboutPanel} className="inline-flex h-10 items-center gap-1.5 rounded-full border border-line px-4 text-[15px] font-semibold text-stage-accent hover:bg-muted">
             <MessageCircle className="h-4 w-4" aria-hidden="true" />
             Ask AI
@@ -294,66 +300,50 @@ export default function PanelDetail() {
           </Card>
         ) : (
           <>
-            <Card className="p-4">
-              <p className="text-xs text-muted-foreground">
-                {series.length} {series.length === 1 ? 'test' : 'tests'} · {totalReadings} {totalReadings === 1 ? 'reading' : 'readings'}
-                {totalFlagged > 0 && (
-                  <span className="text-amber-600 dark:text-amber-400 font-medium"> · {totalFlagged} flagged</span>
-                )}
-              </p>
-            </Card>
 
             {/* AI panel narrative — three-section markdown read of
                 this panel's history. Manual generate so we don't burn
                 Anthropic on every panel page view; cached server-side
                 in llm_cache so repeated clicks within the cache
                 window come back instantly. */}
-            <Card className="p-4 border-l-4 border-l-primary">
-              <div className="flex items-start justify-between gap-3 mb-2">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  <p className="text-sm font-semibold">AI panel insight</p>
-                </div>
-                {!aiSummary && !aiLoading && (
-                  <Button size="sm" variant="outline" onClick={() => generateAiSummary(false)}>
-                    Generate
-                  </Button>
-                )}
+            <section className="panel p-4 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-[17px] font-bold">What these results mean</h2>
                 {aiSummary && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 gap-1"
+                  <button
+                    type="button"
+                    className="tap-target inline-flex items-center gap-1 text-[14px] font-semibold text-stage-accent disabled:opacity-50"
                     onClick={() => generateAiSummary(true)}
                     disabled={aiLoading}
                     aria-label="Regenerate AI insight"
                   >
-                    <RefreshCw className={`h-3 w-3 ${aiLoading ? 'animate-spin' : ''}`} />
-                    <span className="text-xs">Refresh</span>
-                  </Button>
+                    <RefreshCw className={`h-3.5 w-3.5 ${aiLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
+                    Refresh
+                  </button>
                 )}
               </div>
               {aiLoading && !aiSummary && (
-                <p className="text-xs text-muted-foreground">
-                  Reading your {panelDisplayName} history…
-                </p>
+                <p className="text-[15px] text-muted-foreground">Reading your {panelDisplayName} history…</p>
               )}
               {aiError && (
-                <p className="text-xs text-destructive">
-                  Could not generate summary: {aiError}
-                </p>
+                <p className="text-[15px] text-destructive">Could not explain them right now: {aiError}</p>
               )}
-              {!aiSummary && !aiLoading && !aiError && (
-                <p className="text-xs text-muted-foreground">
-                  Click <span className="font-medium">Generate</span> for a 3-section narrative across your {panelDisplayName} readings: what the panel is for, what your readings show (with trends), and what to bring to your next appointment.
-                </p>
+              {!aiSummary && !aiLoading && (
+                <>
+                  <p className="text-[15px] text-muted-foreground">
+                    A short read of all your {panelDisplayName} results: what the test is for, how yours have changed, and what to ask at your next visit.
+                  </p>
+                  <button type="button" className="btn-stage w-full" onClick={() => generateAiSummary(false)}>
+                    Explain my results
+                  </button>
+                </>
               )}
               {aiSummary && (
-                <div className="prose prose-sm dark:prose-invert max-w-none">
-                  <ReactMarkdown>{aiSummary.summary}</ReactMarkdown>
+                <div className="prose prose-sm dark:prose-invert max-w-none text-[15px]">
+                  <ReactMarkdown disallowedElements={NO_REMOTE_IMAGES}>{aiSummary.summary}</ReactMarkdown>
                 </div>
               )}
-            </Card>
+            </section>
 
             <div className="space-y-3">
               {series.map(s => {
