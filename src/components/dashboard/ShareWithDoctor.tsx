@@ -134,9 +134,10 @@ export default function ShareWithDoctor() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5">
+        <Button variant="outline" size="sm" className="gap-1.5 h-8 sm:h-9" aria-label="Share with doctor">
           <Share2 className="h-3.5 w-3.5" />
-          Share with doctor
+          <span className="sm:hidden">Share</span>
+          <span className="hidden sm:inline">Share with doctor</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[460px]">

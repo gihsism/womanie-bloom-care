@@ -1124,9 +1124,7 @@ export default function MedicalHistory() {
             <h1 className="text-base sm:font-display text-xl font-medium truncate">Records</h1>
             <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Your results explained in plain language</p>
           </div>
-          <div className="hidden sm:block">
-            <ShareWithDoctor />
-          </div>
+          <ShareWithDoctor />
           {/* Less-used actions live behind "⋯". Log out lives only in Me. */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
