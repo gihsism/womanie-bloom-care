@@ -93,6 +93,8 @@ export default defineConfig(() => ({
         ],
       },
       workbox: {
+        // Phone reminders: push + notification-tap handlers (public/push-sw.js).
+        importScripts: ["/push-sw.js"],
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         // Bundled illustrations/photos (pregnancy week art ~0.9 MB each,
