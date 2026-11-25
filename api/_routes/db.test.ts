@@ -456,6 +456,24 @@ describe('health_documents.file_path never reaches the client', () => {
   });
 });
 
+describe('api/_routes/db: table allow-list', () => {
+  beforeEach(() => {
+    vi.mocked(getAuthUser).mockResolvedValue(SESSION_USER);
+    query.mockReset();
+    query.mockResolvedValue([]);
+  });
+
+  // OWNER_COLUMN is a plain object: 'constructor', 'toString', '__proto__'
+  // resolve through Object.prototype and used to pass the allow-list,
+  // reaching SQL with a function's source text as the "owner column".
+  it.each(['constructor', 'toString', '__proto__', 'hasOwnProperty'])('rejects inherited key %s as a table', async (table) => {
+    const res = mockRes();
+    await handler(mockReq({ table, operation: 'select' }), res);
+    expect(res._status).toBe(403);
+    expect(query).not.toHaveBeenCalled();
+  });
+});
+
 describe('api/_routes/db: doctor_notes by a revoked doctor', () => {
   beforeEach(() => {
     vi.mocked(getAuthUser).mockResolvedValue(SESSION_USER);

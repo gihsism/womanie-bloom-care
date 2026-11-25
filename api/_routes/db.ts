@@ -103,6 +103,9 @@ function maskRows(table: string, rows: unknown[]): unknown[] {
 }
 
 function ownerCols(table: string): string[] | null {
+  // Own keys only: 'constructor', '__proto__' etc. must not resolve
+  // through Object.prototype and pass as a table.
+  if (typeof table !== 'string' || !Object.prototype.hasOwnProperty.call(OWNER_COLUMN, table)) return null;
   const o = OWNER_COLUMN[table];
   if (!o) return null;
   return Array.isArray(o) ? o : [o];
