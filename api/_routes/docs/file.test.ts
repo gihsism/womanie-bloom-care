@@ -231,3 +231,21 @@ describe('resolveContentType / contentDisposition', () => {
     expect(contentDisposition('', false)).toBe(`attachment; filename="document"; filename*=UTF-8''document`);
   });
 });
+
+describe('GET /api/docs/file: revoked doctor', () => {
+  it('404 and no file when the connection is approved but the doctor role was revoked', async () => {
+    vi.mocked(getAuthUser).mockResolvedValue(DOCTOR);
+    query.mockReset();
+    get.mockReset();
+    get.mockResolvedValue(blobOk());
+    query.mockImplementation(async (sql: string) => {
+      if (/FROM health_documents/.test(sql)) return [DOC];
+      if (/doctor_patient_connections/.test(sql)) return /user_roles/.test(sql) ? [] : [{ id: 'conn' }];
+      return [];
+    });
+    const res = mockRes();
+    await handler(mockReq('doc_a'), res);
+    expect(res._status).toBe(404);
+    expect(get).not.toHaveBeenCalled();
+  });
+});

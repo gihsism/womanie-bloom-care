@@ -55,4 +55,27 @@ describe('auth/callback', () => {
     await handler(mockReq(), res);
     expect(res._redirect).toBe('/dashboard');
   });
+
+  // Pre-account takeover: email+password signup never verifies the address,
+  // so anyone can register victim@example.com with their own password
+  // before the victim ever signs in. When the real owner later uses Google
+  // (which has verified the address) and the account is linked, the
+  // squatter's password and sessions must not survive the link.
+  it('linking Google to an existing password account drops the unverified password and its sessions', async () => {
+    globalThis.fetch = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ access_token: 't' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ id: 'g9', email: 'victim@example.com', verified_email: true, name: 'V' }) }) as unknown as typeof fetch;
+    query.mockImplementation(async (sql: string) => {
+      if (/WHERE google_id = \$1/.test(sql)) return [];
+      if (/WHERE email = \$1/.test(sql)) return [{ id: 'user_sq', email: 'victim@example.com', name: 'Squatter', password_hash: '$2a$10$x', google_id: null }];
+      return [];
+    });
+    transaction.mockResolvedValue([]);
+    const res = mockRes();
+    await handler(mockReq(), res);
+    expect(res._redirect).toBe('/dashboard');
+    const all = [...query.mock.calls, ...transaction.mock.calls.flat()].map(c => JSON.stringify(c));
+    expect(all.some(s => /password_hash\s*=\s*NULL/i.test(s))).toBe(true);
+    expect(all.some(s => /DELETE FROM auth_sessions WHERE user_id/.test(s) && s.includes('user_sq'))).toBe(true);
+  });
 });

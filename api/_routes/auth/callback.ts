@@ -93,6 +93,20 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         ]);
         users = [{ id: userId, email: googleUser.email, name: googleUser.name, avatar_url: googleUser.picture, google_id: googleUser.id }];
         isNewUser = true;
+      } else if (users[0].password_hash) {
+        // Link Google ID to an existing email+password account. Password
+        // signup never verified that address, so the password may belong
+        // to someone who registered it before its real owner (pre-account
+        // takeover). Google has verified it: the owner is the one signing
+        // in now. Drop the unverified password and every existing session
+        // in the same transaction; she can set a new password in Settings.
+        await sql.transaction([
+          sql.query(
+            'UPDATE auth_users SET google_id = $1, name = $2, avatar_url = $3, password_hash = NULL WHERE id = $4',
+            [googleUser.id, googleUser.name, googleUser.picture, users[0].id]
+          ),
+          sql.query('DELETE FROM auth_sessions WHERE user_id = $1', [users[0].id]),
+        ]);
       } else {
         // Link Google ID to existing email user
         await sql.query('UPDATE auth_users SET google_id = $1, name = $2, avatar_url = $3 WHERE id = $4',

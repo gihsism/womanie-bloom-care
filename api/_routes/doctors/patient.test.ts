@@ -220,3 +220,21 @@ describe('doctors/patient security invariants', () => {
     expect(query.mock.calls.some(([sql]) => /visit_questions/i.test(sql))).toBe(false);
   });
 });
+
+// A doctor whose approval the admin revoked (user_roles 'doctor' row
+// deleted) still has her old 'approved' connection rows. Those must stop
+// opening the chart: consent was given to a verified doctor.
+describe('doctors/patient: revoked doctor', () => {
+  it('403 when the connection is approved but the account no longer has the doctor role', async () => {
+    vi.mocked(getAuthUser).mockResolvedValue(DOCTOR);
+    query.mockReset();
+    query.mockImplementation(async (sql: string) => {
+      if (/doctor_patient_connections/.test(sql)) return /user_roles/.test(sql) ? [] : CONN_ROW;
+      return []; // user_roles: no 'doctor' row any more
+    });
+    const res = mockRes();
+    await handler(mockReq(PATIENT_ID), res);
+    expect(res._status).toBe(403);
+    expect(query.mock.calls.some(([s]) => /chart_access_log|health_documents/.test(String(s)))).toBe(false);
+  });
+});

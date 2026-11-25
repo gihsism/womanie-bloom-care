@@ -10,6 +10,15 @@ export const config = {
   },
 };
 
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
+const AVATAR_TYPES: Record<string, string> = {
+  'image/jpeg': 'image/jpeg',
+  'image/jpg': 'image/jpeg',
+  'image/png': 'image/png',
+  'image/webp': 'image/webp',
+};
+const AVATAR_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp']);
+
 async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
@@ -81,7 +90,23 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Legacy direct server-side upload via PUT. Kept for emergencies and to
   // avoid breaking any external caller, but also scoped to the session user.
+  // Its only caller is the doctor avatar upload (JPG/PNG/WebP, max 5 MB),
+  // and it hands back a public Blob URL, so it takes nothing else: no HTML,
+  // SVG or scripts hosted on the store's domain, no unbounded sizes.
   if (req.method === 'PUT') {
+    const requestedName = (req.query.filename as string) || '';
+    const declaredType = String(req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
+    const ext = (requestedName.split('.').pop() || '').toLowerCase();
+    if (!AVATAR_TYPES[declaredType] || !AVATAR_EXTENSIONS.has(ext)) {
+      return res.status(400).json({ error: 'Only JPG, PNG or WebP images can be uploaded here' });
+    }
+    const length = Number(req.headers['content-length']);
+    if (!req.headers['content-length'] || !Number.isFinite(length)) {
+      return res.status(411).json({ error: 'Content-Length required' });
+    }
+    if (length > MAX_AVATAR_BYTES) {
+      return res.status(413).json({ error: 'Image must be 5 MB or smaller' });
+    }
     try {
       // Per-call UUID avoids collisions when two uploads land in the
       // same millisecond — `Date.now()` produced identical paths under
@@ -92,13 +117,14 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       const blob = await put(filename, req, {
         access: documentUploadAccess(),
         addRandomSuffix: true,
+        contentType: AVATAR_TYPES[declaredType],
         token: process.env.BLOB_READ_WRITE_TOKEN,
       });
 
       return res.status(200).json({ url: blob.url, pathname: blob.pathname });
     } catch (error) {
       console.error('PUT upload error:', error);
-      return res.status(500).json({ error: error instanceof Error ? error.message : 'Upload failed' });
+      return res.status(500).json({ error: 'Upload failed' });
     }
   }
 

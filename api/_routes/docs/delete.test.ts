@@ -147,4 +147,12 @@ describe('docs/delete security invariants', () => {
     await handler(mockReq({ documentId: DOC_ID }), res2);
     expect(del).toHaveBeenCalledWith(`${base}/user_1/my-scan.pdf`, expect.anything());
   });
+
+  it('500 replies carry no internal error text (Postgres errors echo values)', async () => {
+    transaction.mockRejectedValueOnce(new Error('invalid input syntax for type uuid: "doc_abc123" at neon host ep-secret-123'));
+    const res = mockRes();
+    await handler(mockReq({ documentId: DOC_ID }), res);
+    expect(res._status).toBe(500);
+    expect(JSON.stringify(res._body)).not.toMatch(/uuid|ep-secret/);
+  });
 });

@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, FlaskConical, Loader2, MessageCircle, Sparkles, RefreshCw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { NO_REMOTE_IMAGES } from '@/lib/safeMarkdown';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -362,7 +363,7 @@ export default function PanelDetail() {
               )}
               {aiSummary && (
                 <div className="prose prose-sm dark:prose-invert max-w-none">
-                  <ReactMarkdown>{aiSummary.summary}</ReactMarkdown>
+                  <ReactMarkdown disallowedElements={NO_REMOTE_IMAGES}>{aiSummary.summary}</ReactMarkdown>
                 </div>
               )}
             </Card>

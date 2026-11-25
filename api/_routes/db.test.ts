@@ -455,3 +455,52 @@ describe('health_documents.file_path never reaches the client', () => {
     expect((res._body as { rows: Record<string, unknown>[] }).rows[0].file_path).toBe('kept');
   });
 });
+
+describe('api/_routes/db: table allow-list', () => {
+  beforeEach(() => {
+    vi.mocked(getAuthUser).mockResolvedValue(SESSION_USER);
+    query.mockReset();
+    query.mockResolvedValue([]);
+  });
+
+  // OWNER_COLUMN is a plain object: 'constructor', 'toString', '__proto__'
+  // resolve through Object.prototype and used to pass the allow-list,
+  // reaching SQL with a function's source text as the "owner column".
+  it.each(['constructor', 'toString', '__proto__', 'hasOwnProperty'])('rejects inherited key %s as a table', async (table) => {
+    const res = mockRes();
+    await handler(mockReq({ table, operation: 'select' }), res);
+    expect(res._status).toBe(403);
+    expect(query).not.toHaveBeenCalled();
+  });
+});
+
+describe('api/_routes/db: doctor_notes by a revoked doctor', () => {
+  beforeEach(() => {
+    vi.mocked(getAuthUser).mockResolvedValue(SESSION_USER);
+    query.mockReset();
+    // Approved connection row still exists, but the 'doctor' role is gone.
+    query.mockImplementation(async (sql: string) => {
+      if (/doctor_patient_connections/.test(sql)) return /user_roles/.test(sql) ? [] : [{ '?column?': 1 }];
+      if (/^(INSERT|UPDATE)/.test(sql)) return [{ id: 'n1' }];
+      return [];
+    });
+  });
+
+  it('cannot insert a note for a patient', async () => {
+    const res = mockRes();
+    await handler(
+      mockReq({ table: 'doctor_notes', operation: 'insert', insertData: { patient_id: 'p1', title: 't', content: 'c' } }),
+      res,
+    );
+    expect(res._status).toBe(403);
+  });
+
+  it('cannot edit a note the patient can read', async () => {
+    const res = mockRes();
+    await handler(
+      mockReq({ table: 'doctor_notes', operation: 'update', updateData: { content: 'changed' }, filters: [['id', 'eq', 'n1']] }),
+      res,
+    );
+    expect(res._status).toBe(403);
+  });
+});
