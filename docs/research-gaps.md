@@ -40,18 +40,26 @@ exists but is old or narrow.
 
 ## Data-quality notes found during the audit
 
-These are not gaps. They are tagging problems in existing items, which the
-next `build-library.mjs` / `topics.mjs` run should fix:
+These are not gaps. They are tagging problems in existing items. **Fixed
+on 2026-11-26** in `library.json` metadata only (topics, tags, keywords,
+life stages; ids unchanged; embeddings re-built offline). Candidate sources
+for the gaps are in `docs/research-gap-candidates.md`.
 
 - `pmid-28675776` (vitamin D for allergy prevention) is tagged
   `antihistamines-pregnancy`, so it is the second source for a hay-fever
-  antihistamine question.
+  antihistamine question. Now `vitamin-d-pregnancy` + `vitamin-d`, without
+  the "hay fever" tag and keywords.
 - `pmid-26642102` (AACE/ACE/AE-PCOS Society PCOS guideline, 2015) is tagged
-  only `iui`; it should also carry `pcos`.
+  only `iui`; it should also carry `pcos`. Now `pcos` only (it is not
+  about IUI), life stage `ivf` dropped.
 - `pmid-26457821` (lactational amenorrhoea method) carries `irregular-cycles`
   and `medicines-breastfeeding`, so it ranks first for "my periods stopped".
+  Both topics, the `menstrual-cycle` stage and the keyword "no periods
+  breastfeeding" removed.
 - `pmid-35618358` (assisted hatching guideline) ranks in the top five for
-  "frozen vs fresh embryo transfer".
+  "frozen vs fresh embryo transfer". Topic `ivf-outcomes`, the tag "frozen
+  embryo transfer" and the keywords "frozen embryo" / "fresh transfer"
+  removed.
 - The library has no retracted items (checked on publication types and titles).
 
 ## Retrieval fixes made in this audit
@@ -84,3 +92,37 @@ questions still get no sources).
 
 The 40 questions and their expected items are regression tests in
 `api/_lib/research/search-eval.test.ts`.
+
+## Dose / safety audit of the citation check (November 2026)
+
+19 wrong answers built for 15 tricky questions (doses in pregnancy and
+breastfeeding, HRT contraindications, emergency signs), cited to sources the
+chat's retrieval really returns, run through
+`api/_lib/research/citation-check.ts`. 9 were caught before; 10 were missed
+and are now caught. Regression tests:
+`api/_lib/research/citation-check-safety.test.ts`.
+
+| Missed before | Fix |
+|---|---|
+| "400 µg (4 mg) folic acid": bracketed numbers were never checked | A bracketed number in the same kind of unit must equal the one before it, otherwise it is checked like any other |
+| "Ask your doctor, but you can take 4 g", "increase your dose by 50%", "if your blood pressure is 180/110" | The "your ..." exemption (the patient's own figures) no longer covers advice, doses or thresholds |
+| "180/110 mmHg": only the 110 was read | Both values of a blood-pressure reading are checked |
+| Codeine (and tramadol, morphine, valproate, lamotrigine, lithium, isotretinoin, warfarin, methotrexate, antihistamines, HRT ...) not recognised as medicines | Added to the medicine list, with their class names as accepted synonyms |
+| "Codeine is safe while breastfeeding" cited to a source that says it is contraindicated | New safety check: "X is safe / can be used" loses a citation whose source only warns against X (contraindicated, should be avoided, not recommended) and never calls it safe |
+| "Transdermal estrogen increases clot risk" vs a source saying it "was not linked to an increased clot risk" | A plain denial in the source ("did not raise", "no increase") now counts as the opposite |
+| "MHT" not read as HRT; "2 to 4 times the risk" not read as an increase; "compared with women who did not use it" read as a negation | All three fixed |
+
+Also fixed a false alarm: "600 units" of vitamin D now matches "600 IU". On
+19,310 summary sentences cited to another item of the same topic, the
+new rules added no safety or denial removals. Removals were 2,030 numbers
+(old 2,041), 1,812 medicines (old 1,717, the new names) and 20 directions
+(old 18).
+
+Still out of reach for a deterministic check:
+- a wrong number with no unit ("10 kicks", "3 tablets");
+- a wrong dose within 10% after "about";
+- a statistic quoted with the wrong meaning ("87% detectable" when the source says 87% undetectable);
+- "safe" claims against a source that only advises caution without a warning word.
+
+The check also only judges cited sentences. An uncited wrong dose is left
+to the prompt rules (`MEDICINE_RULES`).
