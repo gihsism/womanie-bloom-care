@@ -1,0 +1,20 @@
+name: Push reminders
+# Calls the reminder sender every 15 minutes (Vercel Hobby crons run at most daily).
+# The sender is idempotent: each reminder goes out once however often this runs.
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+permissions: {}
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Send due reminders
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          code=$(curl -s -o /tmp/out.json -w "%{http_code}" -H "Authorization: Bearer $CRON_SECRET" https://womanie.info/api/push/send-due)
+          cat /tmp/out.json; echo
+          test "$code" = "200"

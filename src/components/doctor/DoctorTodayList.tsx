@@ -10,8 +10,8 @@ import {
   type TodayItem,
 } from '@/lib/doctorDashboard';
 
-// The doctor's "Today": one ranked list of what needs her (visits today,
-// visits to close, patient cancellations, new uploads). Shows 3 rows and
+// "Needs you": one ranked list of what needs the doctor besides her
+// schedule (visits to close, patient cancellations, new uploads). Shows 3 rows and
 // a "Show N more" link. Replaces DoctorTodayBanner + DoctorCancellationsBanner.
 
 const MAX_ROWS = 3;
@@ -73,7 +73,10 @@ const DoctorTodayList = ({ appointments, patients, onOpenAppointments }: Props) 
     return () => clearInterval(t);
   }, []);
 
-  const items = doctorTodayItems({ appointments, patients, now, dismissedCancellations: dismissed });
+  // Visits live in "Your day" (DoctorDaySchedule) above; this list keeps
+  // what needs closing or noticing.
+  const items = doctorTodayItems({ appointments, patients, now, dismissedCancellations: dismissed })
+    .filter(i => i.kind !== 'visit');
   const visible = expanded ? items : items.slice(0, MAX_ROWS);
 
   const open = (item: TodayItem) => {
@@ -84,7 +87,7 @@ const DoctorTodayList = ({ appointments, patients, onOpenAppointments }: Props) 
 
   return (
     <section aria-labelledby="doctor-today-heading" className="space-y-2">
-      <h2 id="doctor-today-heading" className="section-title">Today</h2>
+      <h2 id="doctor-today-heading" className="section-title">Needs you</h2>
       {items.length === 0 ? (
         <p className="row-group px-4 py-4 text-[15px] text-muted-foreground">Nothing needs you right now.</p>
       ) : (

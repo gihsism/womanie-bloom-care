@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { db } from '@/integrations/db/client';
@@ -44,7 +44,9 @@ function generateCode(): string {
   return out;
 }
 
-export default function ShareWithDoctor() {
+// `trigger` swaps the compact header button for another element (e.g. a
+// full-width button in Find a Doctor's empty state). Rendered asChild.
+export default function ShareWithDoctor({ trigger }: { trigger?: ReactElement } = {}) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -134,11 +136,13 @@ export default function ShareWithDoctor() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5 h-8 sm:h-9" aria-label="Share with doctor">
-          <Share2 className="h-3.5 w-3.5" />
-          <span className="sm:hidden">Share</span>
-          <span className="hidden sm:inline">Share with doctor</span>
-        </Button>
+        {trigger ?? (
+          <Button variant="outline" size="sm" className="gap-1.5 h-8 sm:h-9" aria-label="Share with doctor">
+            <Share2 className="h-3.5 w-3.5" />
+            <span className="sm:hidden">Share</span>
+            <span className="hidden sm:inline">Share with doctor</span>
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[460px]">
         <DialogHeader>

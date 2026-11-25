@@ -14,9 +14,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { doctorDisplayName } from '@/lib/doctorName';
 import { db } from '@/integrations/db/client';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Search, Star, Clock, Video, Calendar as CalendarIcon, CheckCircle, User, Loader2 } from 'lucide-react';
+import { ArrowLeft, Search, Star, Clock, Video, Calendar as CalendarIcon, CheckCircle, User, Loader2, Printer, Share2 } from 'lucide-react';
 import { format, setHours, setMinutes } from 'date-fns';
 import { computeFreeSlots } from '@/lib/timeSlots';
+import ShareWithDoctor from '@/components/dashboard/ShareWithDoctor';
 
 interface Doctor {
   id: string;
@@ -46,6 +47,36 @@ interface Doctor {
   }[];
 }
 
+// Shown while the directory has no verified, bookable doctor at all. Honest
+// about why (doctors are still joining) and points to the two things that
+// work today with her own doctor: a share code and a printable summary.
+export const DoctorsJoiningEmptyState = ({ onPrint }: { onPrint: () => void }) => (
+  <div className="panel px-5 py-8 sm:px-10 text-center max-w-xl mx-auto" data-testid="find-doctor-empty">
+    <User className="h-10 w-10 mx-auto text-stage-accent mb-3" strokeWidth={1.7} aria-hidden="true" />
+    <h2 className="section-title mb-2">Doctors are joining Womanie</h2>
+    <p className="text-muted-foreground text-[15px]">
+      There is no doctor to book here yet. Each doctor's licence is checked before she or he appears in this list.
+    </p>
+    <p className="text-muted-foreground text-[15px] mt-2">
+      You can still share your records with your own doctor: create a one-time code for her to enter, or print a visit summary to bring along.
+    </p>
+    <div className="mt-6 flex flex-col sm:flex-row gap-2.5 justify-center">
+      <ShareWithDoctor
+        trigger={
+          <button type="button" className="btn-stage">
+            <Share2 className="h-4 w-4" aria-hidden="true" />
+            Share a code with my doctor
+          </button>
+        }
+      />
+      <Button variant="outline" className="gap-2 min-h-[3.25rem] rounded-full px-5 text-[16px]" onClick={onPrint}>
+        <Printer className="h-4 w-4" aria-hidden="true" />
+        Print a visit summary
+      </Button>
+    </div>
+  </div>
+);
+
 const FindDoctor = () => {
   const navigate = useNavigate();
   usePageTitle('Find a Doctor');
@@ -53,6 +84,7 @@ const FindDoctor = () => {
   const { user, loading } = useAuth();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loadingDoctors, setLoadingDoctors] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [specialtyFilter, setSpecialtyFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'name' | 'rating' | 'experience' | 'price_low'>('name');
@@ -87,7 +119,9 @@ const FindDoctor = () => {
       if (!resp.ok) throw new Error('Failed to load doctors');
       const payload = await resp.json();
       setDoctors(payload.doctors ?? []);
+      setLoadFailed(false);
     } catch (error) {
+      setLoadFailed(true);
       console.error('Error fetching doctors:', error);
       toast({
         title: 'Error',
@@ -328,8 +362,8 @@ const FindDoctor = () => {
       </header>
 
       <div className="max-w-3xl mx-auto px-4 py-5">
-        {/* Search and Filters */}
-        <div className="flex flex-col sm:flex-row gap-2.5 mb-6">
+        {/* Search and Filters (hidden while there is no one to search) */}
+        <div className={`flex flex-col sm:flex-row gap-2.5 mb-6 ${!loadingDoctors && doctors.length === 0 ? 'hidden' : ''}`}>
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" aria-hidden="true" />
             <Input
@@ -386,15 +420,18 @@ const FindDoctor = () => {
               </Card>
             ))}
           </div>
+        ) : loadFailed ? (
+          <div className="panel px-5 py-10 text-center">
+            <p className="text-[15px] text-muted-foreground mb-4">We couldn't load the doctor list.</p>
+            <Button variant="outline" onClick={() => { setLoadingDoctors(true); fetchDoctors(); }} className="min-h-11 rounded-full px-5">Try again</Button>
+          </div>
+        ) : doctors.length === 0 ? (
+          <DoctorsJoiningEmptyState onPrint={() => navigate('/dashboard/visit-summary/print')} />
         ) : filteredDoctors.length === 0 ? (
           <div className="panel px-5 py-10 text-center">
             <User className="h-10 w-10 mx-auto text-muted-foreground mb-3" aria-hidden="true" />
-            <h2 className="text-[17px] font-bold mb-1">No doctors found</h2>
-            <p className="text-[15px] text-muted-foreground">
-              {searchQuery || specialtyFilter !== 'all' 
-                ? 'No doctors match your search criteria. Try adjusting your filters.'
-                : 'No verified doctors are taking bookings right now. Please check back later.'}
-            </p>
+            <h2 className="text-[17px] font-bold mb-1">No doctors match</h2>
+            <p className="text-[15px] text-muted-foreground">Try a different search or specialty.</p>
           </div>
         ) : (
           <div className="space-y-3">

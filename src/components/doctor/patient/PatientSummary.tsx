@@ -16,9 +16,11 @@ import type {
 } from './types';
 import PatientVisitQuestions from './PatientVisitQuestions';
 import PatientVisitBrief from './PatientVisitBrief';
+import PatientNewSince from './PatientNewSince';
 
 // Summary tab: one screen that answers "what do I need to know?". First
-// the "Before the visit" brief (stage, medicines, mood, questions), then four
+// the "Before the visit" brief (stage, medicines, mood, questions), then
+// "New since last visit", then four
 // rows (results out of range, visits, documents, notes), each opening its
 // tab, then what the patient tracked herself, then her daily logs folded.
 
@@ -99,6 +101,15 @@ const PatientSummary = ({ medicalData, documents, notes, appointments, signals, 
         signals={signals}
         medicines={medicines}
         visitQuestions={visitQuestions}
+      />
+
+      <PatientNewSince
+        appointments={appointments}
+        documents={documents}
+        medicalData={medicalData}
+        notes={notes}
+        signals={signals}
+        onOpenTab={onOpenTab}
       />
 
       <div className="row-group">

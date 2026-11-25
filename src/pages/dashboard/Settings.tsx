@@ -21,6 +21,7 @@ import { normalizeLifeStage } from '@/lib/lifeStage';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 import { LIFE_STAGE_LABELS, LIFE_STAGE_DESCRIPTIONS } from '@/lib/lifeStageLabels';
 import MedicineLog from '@/components/dashboard/MedicineLog';
+import PhoneNotifications from '@/components/dashboard/PhoneNotifications';
 import { useAttentionCount } from '@/hooks/useAttentionCount';
 import { MeRow, MeGroup } from './me/MeRow';
 import { ME_SECTIONS, meSectionFromHash } from './me/sections';
@@ -657,7 +658,8 @@ const Settings = () => {
         </>)}
 
         {/* Notifications */}
-        {section === 'reminders' && (
+        {section === 'reminders' && (<>
+        <PhoneNotifications />
         <Card>
           <CardHeader>
             <CardDescription>
@@ -708,7 +710,7 @@ const Settings = () => {
             </div>
           </CardContent>
         </Card>
-        )}
+        </>)}
 
         {/* Password */}
         {section === 'password' && (

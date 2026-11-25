@@ -12,14 +12,18 @@
 //   - numbers with units (mg, µg, %, weeks, IU, mmol/L ...): each must be
 //     in one of the cited sources (unit conversions and rounding allowed);
 //   - direction: the source must not clearly state the opposite effect
-//     (raises vs lowers) for the same terms. Kept conservative: negated,
-//     two-way and unmatched clauses are never judged.
+//     (raises vs lowers, or "did not raise") for the same terms. Kept
+//     conservative: negated claims, two-way and unmatched clauses are
+//     never judged;
+//   - safety: a claim that a medicine is safe / can be used must not be
+//     cited to a source that only says to avoid it (contraindicated, not
+//     recommended) and never calls it safe.
 // A failing [n] is removed from the sentence (the sentence stays, now
 // uncited). Everything here errs towards keeping a citation.
 
 import type { ResearchItem } from './library.js';
 
-export type CitationIssue = 'drug' | 'number' | 'direction';
+export type CitationIssue = 'drug' | 'number' | 'direction' | 'safety';
 
 export interface RemovedCitation {
   n: number;
@@ -82,6 +86,7 @@ function normalise(text: string): string {
     .replace(/ovarian hyperstimulation syndrome/g, 'ohss')
     .replace(/polycystic ovary syndrome|polycystic ovarian syndrome/g, 'pcos')
     .replace(/(?:hormone replacement|menopausal hormone) therapy/g, 'hrt')
+    .replace(/\bmht\b/g, 'hrt')
     .replace(/urinary tract infections?/g, 'uti')
     .replace(/venous thromboembolism/g, 'vte')
     .replace(/in vitro fertili[sz]ation/g, 'ivf')
@@ -109,6 +114,9 @@ const ESTROGENS = ['estrogen', 'estradiol', 'estriol', 'estrone', 'ethinylestrad
 const BISPHOS = ['bisphosphonate'];
 const HORMONAL = ['combined oral', 'combined hormonal', 'combined pill', 'hrt', 'hormone therapy', 'hormonal contracept'];
 const GNRH = ['gnrh', 'gonadotrophin-releasing', 'gonadotropin-releasing'];
+const OPIOID = ['opioid', 'opiate'];
+const ANTIEPILEPTIC = ['antiepileptic', 'anti-epileptic', 'anticonvulsant', 'antiseizure', 'anti-seizure'];
+const ANTIHISTAMINE = ['antihistamine'];
 
 const DRUGS: DrugEntry[] = [
   { names: ['folic acid', 'folate', 'methylfolate', 'l-methylfolate', 'vitamin b9'], accept: ['folic', 'folate', 'methylfolate'] },
@@ -209,6 +217,28 @@ const DRUGS: DrugEntry[] = [
   { names: ['elagolix'], accept: ['elagolix', ...GNRH] },
   { names: ['relugolix'], accept: ['relugolix', ...GNRH] },
   { names: ['lidocaine', 'lignocaine'], accept: ['lidocaine', 'lignocaine'] },
+  // Added after the dose/safety audit (Nov 2026): medicines patients ask
+  // about in pregnancy and breastfeeding that the list did not spot.
+  { names: ['hrt'], accept: ['hrt', 'hormone therapy', ...ESTROGENS, ...PROGESTOGENS] },
+  { names: ['codeine', 'dihydrocodeine'], accept: ['codeine', ...OPIOID] },
+  { names: ['tramadol'], accept: ['tramadol', ...OPIOID] },
+  { names: ['morphine'], accept: ['morphine', ...OPIOID] },
+  { names: ['oxycodone'], accept: ['oxycodone', ...OPIOID] },
+  { names: ['valproate', 'valproic acid', 'sodium valproate'], accept: ['valpro', ...ANTIEPILEPTIC] },
+  { names: ['lamotrigine'], accept: ['lamotrigine', ...ANTIEPILEPTIC] },
+  { names: ['levetiracetam'], accept: ['levetiracetam', ...ANTIEPILEPTIC] },
+  { names: ['carbamazepine'], accept: ['carbamazepine', ...ANTIEPILEPTIC] },
+  { names: ['topiramate'], accept: ['topiramate', ...ANTIEPILEPTIC] },
+  { names: ['lithium'] },
+  { names: ['isotretinoin'], accept: ['isotretinoin', 'retinoid'] },
+  { names: ['warfarin'], accept: ['warfarin', 'vitamin k antagonist', 'anticoagula'] },
+  { names: ['methotrexate'] },
+  { names: ['hydroxychloroquine'] },
+  { names: ['cetirizine'], accept: ['cetirizine', ...ANTIHISTAMINE] },
+  { names: ['loratadine'], accept: ['loratadine', ...ANTIHISTAMINE] },
+  { names: ['chlorphenamine', 'chlorpheniramine'], accept: ['chlorphenamine', 'chlorpheniramine', ...ANTIHISTAMINE] },
+  { names: ['famotidine'], accept: ['famotidine', 'h2 blocker', 'h2-receptor', 'h2 receptor'] },
+  { names: ['cefalexin', 'cephalexin'], accept: ['cefalexin', 'cephalexin', 'cephalosporin'] },
 ];
 
 /** Generic drug-name endings for medicines not in the list above. */
@@ -298,6 +328,11 @@ function unitOf(groups: (string | undefined)[]): UnitDef | null {
 
 function quantities(normText: string): Quantity[] {
   const out: Quantity[] = [];
+  // "160/110 mmHg": the regex below only sees the 110; add the systolic.
+  for (const m of normText.matchAll(/(?<![\d.])(\d{2,3})\s*\/\s*(\d{2,3})\s*mm\s*hg/g)) {
+    const value = Number(m[1]);
+    out.push({ value, family: 'conc:mmhg', base: value, raw: m[0].trim(), index: m.index!, end: m.index! + m[0].length });
+  }
   for (const m of normText.matchAll(QUANTITY_RE)) {
     const unit = unitOf(m.slice(3));
     if (!unit) continue;
@@ -307,7 +342,7 @@ function quantities(normText: string): Quantity[] {
       out.push({ value, family: unit.family, base: value * unit.factor, raw: m[0].trim(), index: m.index!, end: m.index! + m[0].length });
     }
   }
-  return out;
+  return out.sort((a, b) => a.index - b.index);
 }
 
 /** Extra values a source states without a unit we parse: "1 in 100" = 1 %, "RR 0.70" = 30 %. */
@@ -335,9 +370,12 @@ function sameValue(a: number, s: number, approx: boolean): boolean {
   return approx && s !== 0 && Math.abs(a - s) / Math.abs(s) <= 0.1;
 }
 
+/** "600 units" of vitamin D and "600 IU" are the same quantity. */
+const sameFamily = (a: Family, b: Family) => a === b || (a === 'iu' && b === 'units') || (a === 'units' && b === 'iu');
+
 function quantitySupported(q: Quantity, approx: boolean, src: Quantity[], extraPercents: number[]): boolean {
   for (const s of src) {
-    if (s.family !== q.family) continue;
+    if (!sameFamily(s.family, q.family)) continue;
     if (sameValue(q.value, s.value, approx)) return true;
     // Different unit of the same kind: 0.4 mg = 400 µg, 72 hours = 3 days,
     // 3 months ~ 12 weeks.
@@ -350,12 +388,28 @@ function quantitySupported(q: Quantity, approx: boolean, src: Quantity[], extraP
   return false;
 }
 
+/** "400 µg (0.4 mg)", "72 hours (3 days)", "50 nmol/L (20 ng/mL)". */
+function isConversion(a: Quantity, b: Quantity): boolean {
+  if (!sameFamily(a.family, b.family)) return true; // different kinds: not judged
+  const tol = a.family === 'time' ? 0.1 : 0.02;
+  return a.base !== 0 && Math.abs(a.base - b.base) / Math.abs(a.base) <= tol;
+}
+
+/** Words that make a "your ..." stretch advice rather than the patient's own figure. */
+const YOUR_ADVICE = /\b(?:dose|doses|dosage|doctor|midwife|gp|pharmacist|nurse|team|take|taking|need|needs|should|can|could|may|might|must|increase|increased|raise|lower|reduce|limit|maximum|max|intake|up to|start|stop|use|first|but|above|below|over|under|more than|less than|at least|reach\w*|exceed\w*)\b/;
+
 // ── Direction ─────────────────────────────────────────────────────────
 
-const UP = /\b(?:increas\w*|rais(?:e|es|ed|ing)|higher|greater|elevat\w*|doubl\w*|tripl\w*|ris(?:e|es|ing)|rose|more likely|worsen\w*)\b/g;
+const UP = /\b(?:increas\w*|rais(?:e|es|ed|ing)|higher|greater|elevat\w*|doubl\w*|tripl\w*|ris(?:e|es|ing)|rose|more likely|worsen\w*|times (?:the|as|higher|greater|more)|\d+[- ]?fold)\b/g;
 const DOWN = /\b(?:decreas\w*|reduc\w*|lower(?:s|ed|ing)?|less likely|fewer|declin\w*|drop\w*|cuts?|halv\w*|diminish\w*|prevent\w*|eliminat\w*|lessen\w*|minimi[sz]\w*)\b/g;
 const NEGATION = /\b(?:not|no|never|neither|nor|without|unlikely|cannot|n't|did not|does not|do not|unclear|uncertain|similar|comparable|no difference)\b|n't\b/;
 const COMPARATIVE = /\b(?:than|compared|versus|vs|relative to)\b/;
+// "... compared with women who did not use it", "than non-users": the
+// "not" names the comparison group, it does not negate the finding.
+const COMPARATOR_NEG = /\b(?:compared (?:with|to)|than|versus|vs)\s+(?:[a-z]+\s+){0,3}?(?:not|no|non-?)\s*[a-z]+(?:\s+(?:it|them|any|one))?/g;
+// "did not raise", "was not linked to an increased", "no increase": the
+// source denies that effect. Usable against a claim that asserts it.
+const DENIED = new RegExp(`\\b(?:not|no|never|without)\\s+(?:[a-z]+\\s+){0,3}?(?:${UP.source.slice(5, -3)}|${DOWN.source.slice(5, -3)})\\b`);
 // "Poor sleep -> more depression" and "better sleep -> less depression" agree:
 // a quality word flips the meaning, so such clauses are not compared.
 const POLARITY = /\b(?:poor|bad|worse|good|better|best|lack|insufficient|inadequate|adequate|untreated|treated|low|high|short|long)\b/;
@@ -378,15 +432,32 @@ function stem(w: string): string {
 
 const DIRECTION_WORDS = new RegExp(`${UP.source}|${DOWN.source}`, 'g');
 
-interface DirClause { dir: 'up' | 'down'; before: Set<string>; after: Set<string>; terms: Set<string>; comparative: boolean }
+interface DirClause {
+  dir: 'up' | 'down';
+  before: Set<string>;
+  after: Set<string>;
+  terms: Set<string>;
+  comparative: boolean;
+  /** The clause denies the effect ("did not raise"): only ever used on the source side. */
+  denied?: boolean;
+}
 
 function directionClauses(normText: string): DirClause[] {
   const out: DirClause[] = [];
-  for (const clause of normText.replace(/[()[\]]/g, ' ').split(/(?<=[.!?])\s+|\n/).flatMap((s) => s.split(CLAUSE_SPLIT))) {
+  for (const raw of normText.replace(/[()[\]]/g, ' ').split(/(?<=[.!?])\s+|\n/).flatMap((s) => s.split(CLAUSE_SPLIT))) {
+    const clause = raw.replace(COMPARATOR_NEG, (m) => m.replace(/\b(?:not|no)\b/g, ' '));
     const ups = clause.match(UP)?.length ?? 0;
     const downs = clause.match(DOWN)?.length ?? 0;
     if ((ups > 0) === (downs > 0)) continue; // none, or both ways: not judged
-    if (NEGATION.test(clause) || POLARITY.test(clause)) continue;
+    if (POLARITY.test(clause)) continue;
+    let denied = false;
+    if (NEGATION.test(clause)) {
+      // One plain denial ("X was not linked to an increased Y") is kept,
+      // marked; anything vaguer (unclear, similar, "not only") is skipped.
+      const rest = clause.replace(DENIED, ' ');
+      if (!DENIED.test(clause) || /\bnot only\b/.test(clause) || NEGATION.test(rest)) continue;
+      denied = true;
+    }
     DIRECTION_WORDS.lastIndex = 0;
     const at = DIRECTION_WORDS.exec(clause)?.index ?? 0;
     const words = (s: string) => new Set(
@@ -394,7 +465,7 @@ function directionClauses(normText: string): DirClause[] {
         .filter((w) => w.length > 2 && !STOP.has(w))
         .map(stem),
     );
-    out.push({ dir: ups ? 'up' : 'down', before: words(clause.slice(0, at)), after: words(clause.slice(at)), terms: words(clause), comparative: COMPARATIVE.test(clause) });
+    out.push({ dir: ups ? 'up' : 'down', before: words(clause.slice(0, at)), after: words(clause.slice(at)), terms: words(clause), comparative: COMPARATIVE.test(clause), ...(denied ? { denied } : {}) });
   }
   return out;
 }
@@ -411,8 +482,10 @@ const overlap = (a: Set<string>, b: Set<string>) => [...a].filter((x) => b.has(x
 /** A clause of the claim that the source clearly contradicts, as "up:term,term". */
 function contradiction(claim: DirClause[], source: DirClause[]): string | null {
   for (const c of claim) {
+    if (c.denied) continue;
     for (const s of source) {
-      if (s.dir === c.dir) continue;
+      // Opposite: the other direction, or the same direction denied.
+      if (s.denied ? s.dir !== c.dir : s.dir === c.dir) continue;
       const shared = overlap(c.terms, s.terms);
       if (shared.length < 2) continue;
       // Both what acts and what changes must match: "PGT-A with single-embryo
@@ -423,9 +496,46 @@ function contradiction(claim: DirClause[], source: DirClause[]): string | null {
       // comparison, the subjects (words before the verb) must match too.
       if ((c.comparative || s.comparative) && overlap(c.before, s.before).length === 0) continue;
       // The source also says it the claim's way somewhere: not a clear opposite.
-      const agrees = source.some((o) => o.dir === c.dir && overlap(c.terms, o.terms).filter((t) => shared.includes(t)).length >= 2);
+      // Against a denial, the agreeing clause must carry every shared term
+      // ("oral estrogen raised clot risk" does not undo "transdermal
+      // estrogen was not linked to an increased clot risk").
+      const agrees = source.some((o) => !o.denied && o.dir === c.dir && (s.denied
+        ? shared.every((t) => o.terms.has(t))
+        : overlap(c.terms, o.terms).filter((t) => shared.includes(t)).length >= 2));
       if (agrees) continue;
-      return `${c.dir}:${shared.slice(0, 3).join(',')}`;
+      return `${s.denied ? 'not-' : ''}${c.dir}:${shared.slice(0, 3).join(',')}`;
+    }
+  }
+  return null;
+}
+
+// ── Safety ────────────────────────────────────────────────────────────
+
+const SAFE = /\b(?:safe|safely|compatible|suitable|fine|okay|ok|no problem|can (?:be )?(?:taken?|used?|given|continued?))\b/;
+// "Avoid" only as advice ("should be avoided", "avoid taking"), not as the
+// thing studied ("the benefit of avoiding caffeine").
+const UNSAFE = /(?:^\s*avoid\b|\b(?:contraindicat\w*|(?:should|must|best|to) (?:be )?avoid(?:ed)?|be avoided|avoid (?:using|taking|it|them)|not (?:be )?recommended|should not be (?:used|taken|given)|must not|do not (?:use|take)|unsafe|not safe)\b)/;
+// "There is no need to avoid ...", "not contraindicated": not a warning.
+const UNSAFE_LIFTED = /\b(?:no need|not need|need not|needn't|unnecessary|not necessary|not contraindicat\w*|not be avoided|without avoiding)\b/;
+
+const clausesOf = (normText: string) =>
+  normText.split(/(?<=[.!?])\s+|\n/).flatMap((x) => x.split(/[;:]|\b(?:but|while|whereas|although|though|however|yet)\b/));
+
+/**
+ * A medicine the claim calls safe / usable that the source only warns
+ * against: the source names it in a contraindicated / avoid / not
+ * recommended clause and never in a clause calling it safe.
+ */
+function safetyConflict(normClaim: string, normSource: string): string | null {
+  const safeClaims = clausesOf(normClaim).filter((c) => SAFE.test(c) && !NEGATION.test(c) && !UNSAFE.test(c));
+  if (!safeClaims.length) return null;
+  const srcClauses = clausesOf(normSource);
+  for (const c of safeClaims) {
+    for (const d of drugMentions(c)) {
+      const names = srcClauses.filter((x) => sourceMentions(x, d.accept));
+      const warns = names.some((x) => UNSAFE.test(x) && !UNSAFE_LIFTED.test(x));
+      const reassures = names.some((x) => SAFE.test(x) && !UNSAFE.test(x) && !NEGATION.test(x));
+      if (warns && !reassures) return `unsafe:${d.label}`;
     }
   }
   return null;
@@ -508,9 +618,16 @@ export function checkCitations(answer: string, sources: ReadonlyMap<number, stri
       const q = qty[i];
       const before = claim.slice(0, q.index);
       // "50 nmol/L (20 ng/mL)": the bracketed conversion is the model's own.
-      if (i > 0 && qty[i - 1].end <= q.index && /^\s*\(\s*(?:about|approximately|around|~|≈|or)?\s*$/.test(claim.slice(qty[i - 1].end, q.index))) continue;
-      // The patient's own figures (records, question), not the source's.
-      if (/\byour\b[^.]{0,40}$/.test(before)) continue;
+      // In the same kind of unit it must really be equal: "400 µg (4 mg)"
+      // is a wrong dose and is checked like any other number.
+      if (i > 0 && qty[i - 1].end <= q.index && /^\s*\(\s*(?:about|approximately|around|~|≈|or)?\s*$/.test(claim.slice(qty[i - 1].end, q.index))
+        && isConversion(qty[i - 1], q)) continue;
+      // The patient's own figures (records, question), not the source's:
+      // "your AMH of 1.2 ng/mL". Not advice or thresholds: "increase your
+      // dose by 50%", "ask your doctor, but you can take 4 g", "if your
+      // blood pressure is 160/110 mmHg".
+      const yours = /\byour\b([^.]{0,40})$/.exec(before);
+      if (yours && !YOUR_ADVICE.test(yours[0]) && !/\b(?:if|when|once|until|unless)\s+$/.test(before.slice(0, yours.index))) continue;
       if (exemptQty.some((e) => e.family === q.family && sameValue(q.value, e.value, false))) continue;
       const approx = APPROX_BEFORE.test(before);
       if (!nums.some((n) => quantitySupported(q, approx, src(n).qty, src(n).pct))) {
@@ -526,6 +643,13 @@ export function checkCitations(answer: string, sources: ReadonlyMap<number, stri
         const c = contradiction(claimDirs, src(n).dirs);
         if (c) drop.set(n, { n, issue: 'direction', token: c });
       }
+    }
+
+    // 4. Safety: "X is safe" must not cite a source that only says avoid X.
+    for (const n of nums) {
+      if (drop.has(n)) continue;
+      const c = safetyConflict(claim, src(n).text);
+      if (c) drop.set(n, { n, issue: 'safety', token: c });
     }
 
     if (drop.size === 0) continue;

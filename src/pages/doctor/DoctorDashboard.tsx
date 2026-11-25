@@ -17,6 +17,7 @@ import { useClinicTheme } from '@/hooks/useClinicTheme';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle, ArrowRightLeft, LogOut, Menu, UserPlus } from 'lucide-react';
 import DoctorTodayList from '@/components/doctor/DoctorTodayList';
+import DoctorDaySchedule from '@/components/doctor/DoctorDaySchedule';
 import DoctorPatientList from '@/components/doctor/DoctorPatientList';
 import AddPatientForm from '@/components/doctor/AddPatientForm';
 import DoctorAppointments from '@/components/doctor/DoctorAppointments';
@@ -24,8 +25,8 @@ import DoctorProfileEditor from '@/components/doctor/DoctorProfileEditor';
 import ConsultationSettings from '@/components/doctor/ConsultationSettings';
 import type { DoctorAppointment, DoctorPatientConnection } from '@/lib/doctorDashboard';
 
-// Doctor home. Above the fold: name, "Today" (max 3 rows of things that
-// need her), ONE primary action ("Add a patient") and the patient list
+// Doctor home. Above the fold: name, "Your day" (today's and tomorrow's
+// visits), "Needs you" (max 3 rows of things to close or notice), ONE primary action ("Add a patient") and the patient list
 // with search. Appointments and Profile & settings sit behind tabs; log
 // out and patient view sit in the Menu.
 //
@@ -132,7 +133,7 @@ const DoctorDashboard = () => {
       ? { tone: 'bad', text: 'Your licence was not verified. Email support@womanie.info with updated details.' }
       : status === 'revoked'
       ? { tone: 'bad', text: 'Your verification was revoked, so patients cannot find you. Email support@womanie.info.' }
-      : { tone: 'wait', text: 'We are checking your licence (1–3 working days). Patients can find you once it is approved.' };
+      : { tone: 'wait', text: 'We are checking your licence (1–3 working days). Patients can find you once it is approved and "Accept new bookings" is on in Profile & settings.' };
 
   return (
     <div className="min-h-screen bg-background">
@@ -193,6 +194,8 @@ const DoctorDashboard = () => {
           </TabsList>
 
           <TabsContent value="home" className="space-y-7">
+            <DoctorDaySchedule appointments={appointments} patients={patients} />
+
             <DoctorTodayList
               appointments={appointments}
               patients={patients}
