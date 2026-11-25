@@ -62,6 +62,11 @@ interface PersonalContext {
   cyclePhase?: string | null;
 }
 
+function localToday(d = new Date()): string {
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
 export async function streamChat({
   messages,
   model,
@@ -88,7 +93,9 @@ export async function streamChat({
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages, model, personalContext, conversationId }),
+    // Her own calendar date, so "days to go" / "week N" are counted in
+    // her timezone, not the server's UTC.
+    body: JSON.stringify({ messages, model, personalContext, conversationId, today: localToday() }),
   });
 
   if (!resp.ok) {

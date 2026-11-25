@@ -6,14 +6,39 @@
 
 type Row = Record<string, unknown>;
 
-export function buildProfileContext(profile: Row, now: Date): string {
+const DAY = 86_400_000;
+
+// A date as a whole-day number (UTC calendar date). Profile dates come
+// back from the database as 'YYYY-MM-DD' or as a Date at UTC midnight.
+function dayNumber(v: unknown): number | null {
+  const d = v instanceof Date ? v : new Date(String(v));
+  if (Number.isNaN(d.getTime())) return null;
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) / DAY;
+}
+
+// "Today" as her calendar date. The app sends her local date; it is
+// trusted only when it is within a day of the server clock, otherwise
+// the server's UTC date is used. Counting from the current UTC time
+// instead made "days to go" one short every evening in Europe.
+export function todayNumber(now: Date, clientToday?: unknown): number {
+  const server = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) / DAY;
+  if (typeof clientToday === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(clientToday)) {
+    const c = dayNumber(clientToday);
+    if (c != null && Math.abs(c - server) <= 1) return c;
+  }
+  return server;
+}
+
+export function buildProfileContext(profile: Row, now: Date, clientToday?: unknown): string {
+  const today = todayNumber(now, clientToday);
   const stage = typeof profile.life_stage === 'string' ? profile.life_stage : '';
   let out = `Patient: ${profile.full_name || 'Unknown'}, Life stage: ${stage || 'Not specified'}`;
 
   if (stage === 'pregnancy' && profile.pregnancy_due_date) {
     const due = new Date(profile.pregnancy_due_date as string);
-    if (!Number.isNaN(due.getTime())) {
-      const daysUntilDue = Math.round((due.getTime() - now.getTime()) / 86_400_000);
+    const dueDay = dayNumber(profile.pregnancy_due_date);
+    if (dueDay != null) {
+      const daysUntilDue = dueDay - today;
       const totalDays = 280 - daysUntilDue;
       const weeksPregnant = Math.max(0, Math.min(42, Math.floor(totalDays / 7)));
       const daysExtra = Math.max(0, totalDays % 7);
@@ -23,9 +48,9 @@ export function buildProfileContext(profile: Row, now: Date): string {
   if (stage === 'ivf' && profile.ivf_phase) {
     out += `\nIVF phase: ${profile.ivf_phase}`;
     if (profile.ivf_start_date) {
-      const startDate = new Date(profile.ivf_start_date as string);
-      if (!Number.isNaN(startDate.getTime())) {
-        const days = Math.max(0, Math.floor((now.getTime() - startDate.getTime()) / 86_400_000));
+      const startDay = dayNumber(profile.ivf_start_date);
+      if (startDay != null) {
+        const days = Math.max(0, today - startDay);
         out += ` (day ${days + 1} of journey)`;
       }
     }

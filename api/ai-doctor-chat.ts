@@ -42,7 +42,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
   if (!ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured');
 
-  const { messages: rawMessages, model: requestedModel, personalContext, conversationId: rawConversationId } = req.body || {};
+  const { messages: rawMessages, model: requestedModel, personalContext, conversationId: rawConversationId, today: clientToday } = req.body || {};
   // Groups this turn with the rest of its chat in "Past chats". Only a
   // well-formed UUID is kept; the rows are still owned by user.id.
   const conversationId = parseConversationId(rawConversationId);
@@ -153,7 +153,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   let medicalContext = '';
   if (profile) {
     // Stage anchors ("what week am I?") only for the stage she is in now.
-    medicalContext += buildProfileContext(profile, new Date());
+    medicalContext += buildProfileContext(profile, new Date(), clientToday);
   }
 
   type Row = Record<string, unknown>;
