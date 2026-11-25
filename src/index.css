@@ -326,3 +326,14 @@ body::before {
 :is(h1, h2, h3).font-extrabold {
   font-weight: 500;
 }
+
+/* Pinch-zoom is allowed (index.html viewport). iOS zooms the whole page into
+   any focused field whose text is smaller than 16px, so on touch screens form
+   fields stay at 16px. (:not() raises specificity above text-sm/text-xs.) */
+@media (hover: none) and (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  textarea:not([hidden]),
+  select:not([hidden]) {
+    font-size: 16px;
+  }
+}
