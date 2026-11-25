@@ -17,6 +17,9 @@ import { callAnthropicWithRetry, SONNET_MODEL, SONNET_NO_THINKING, replyText, ty
 
 export const config = { maxDuration: 60 };
 
+// Fresh (uncached) panel summaries per user per day (across all panels).
+const FRESH_PER_DAY = 60;
+
 async function hashRequest(data: string): Promise<string> {
   const enc = new TextEncoder();
   const buf = await crypto.subtle.digest('SHA-256', enc.encode(data));
@@ -158,6 +161,16 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
+    // Every fresh generation is metered, not only force=true: editing her
+    // own data changes the cache key, so misses alone were unlimited.
+    const fresh = await checkAndConsume('panel-summary', user.id, FRESH_PER_DAY);
+    if (!fresh.ok) {
+      return res.status(429).json({
+        error: `Daily summary limit reached — try again in ${Math.ceil(fresh.retryInSec / 60)} minutes.`,
+        retryInSec: fresh.retryInSec,
+      });
+    }
+
     const summary = await callClaude(apiKey, userContent);
     await sql.query(
       `INSERT INTO llm_cache (request_hash, response_text, model)
@@ -174,7 +187,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     });
   } catch (error) {
     console.error('summary/panel error:', error);
-    return res.status(500).json({ error: error instanceof Error ? error.message : 'Failed to generate panel summary' });
+    return res.status(500).json({ error: 'Failed to generate panel summary' });
   }
 }
 
