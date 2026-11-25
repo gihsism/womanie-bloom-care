@@ -15,6 +15,8 @@ import PatientResults from '@/components/doctor/patient/PatientResults';
 import PatientDocuments from '@/components/doctor/patient/PatientDocuments';
 import PatientNotes from '@/components/doctor/patient/PatientNotes';
 import PatientVisits from '@/components/doctor/patient/PatientVisits';
+import PatientTrends from '@/components/doctor/patient/PatientTrends';
+import type { TrendsPayload } from '@/lib/patientTrends';
 import {
   EMPTY_DRAFT,
   type NoteDraft,
@@ -31,7 +33,7 @@ import {
 
 // The doctor's view of one patient. Header: who she is and where she is
 // (stage, pregnancy week, IVF phase) + ONE primary action, "Write a note".
-// Below: tabs Summary · Results · Documents · Notes · Visits.
+// Below: tabs Summary · Trends · Results · Documents · Notes · Visits.
 //
 // All data comes from the consent-gated /api/doctors/patient, which 403s
 // unless this doctor has an APPROVED connection and logs every fetch to
@@ -60,6 +62,8 @@ const PatientDetails = () => {
   const [periodRecords, setPeriodRecords] = useState<PeriodRecord[]>([]);
   const [visitQuestions, setVisitQuestions] = useState<PatientVisitQuestions[]>([]);
   const [medicines, setMedicines] = useState<PatientMedicine[]>([]);
+  // Trends load on first open of the tab (own consent-gated endpoint).
+  const [trends, setTrends] = useState<{ patientId: string; data: TrendsPayload } | null>(null);
   // Skeleton only until the first answer; a refresh after saving a note
   // keeps the page in place.
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -193,8 +197,10 @@ const PatientDetails = () => {
 
       <div className="p-4 md:p-6 max-w-3xl mx-auto">
         <Tabs value={activeTab} onValueChange={v => setActiveTab(v as PatientTab)} className="space-y-4">
-          <TabsList className="w-full grid grid-cols-5 h-auto">
+          {/* Six tabs: two rows of three on a phone, one row from sm up. */}
+          <TabsList className="w-full grid grid-cols-3 sm:grid-cols-6 h-auto gap-y-1">
             <TabsTrigger value="summary" className="text-xs sm:text-sm px-1">Summary</TabsTrigger>
+            <TabsTrigger value="trends" className="text-xs sm:text-sm px-1">Trends</TabsTrigger>
             <TabsTrigger value="results" className="text-xs sm:text-sm px-1">Results</TabsTrigger>
             <TabsTrigger value="documents" className="text-xs sm:text-sm px-1">Documents</TabsTrigger>
             <TabsTrigger value="notes" className="text-xs sm:text-sm px-1">Notes</TabsTrigger>
@@ -215,6 +221,17 @@ const PatientDetails = () => {
               profile={patient}
               onOpenTab={setActiveTab}
             />
+          </TabsContent>
+
+          <TabsContent value="trends">
+            {patientId && (
+              <PatientTrends
+                key={patientId}
+                patientId={patientId}
+                cached={trends?.patientId === patientId ? trends.data : null}
+                onLoaded={data => setTrends({ patientId, data })}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="results">
