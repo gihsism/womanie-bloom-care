@@ -2,8 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import SubPageHeader from '@/components/SubPageHeader';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, MessageCircle, Loader2 } from 'lucide-react';
+import { ArrowRight, MessageCircle, Loader2 } from 'lucide-react';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -167,14 +166,14 @@ export default function CompareDocs() {
 
   if (!aId || !bId) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <Card className="p-6 max-w-md w-full text-center space-y-3">
-          <p className="text-sm">Pick two documents to compare from Records.</p>
-          <Button variant="outline" onClick={() => navigate('/dashboard/medical-history')}>
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Records
-          </Button>
-        </Card>
+      <div className="min-h-screen bg-background">
+        <SubPageHeader title="Compare documents" backTo="/dashboard/medical-history" backLabel="Records" />
+        <div className="px-4 py-10 max-w-md mx-auto text-center space-y-4">
+          <p className="text-[16px] text-muted-foreground">In Records, open a document and tap “Compare to…” to pick a second one.</p>
+          <button type="button" className="btn-stage w-full" onClick={() => navigate('/dashboard/medical-history')}>
+            Go to Records
+          </button>
+        </div>
       </div>
     );
   }
@@ -189,14 +188,14 @@ export default function CompareDocs() {
 
   if (!docA || !docB) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <Card className="p-6 max-w-md w-full text-center space-y-3">
-          <p className="text-sm">One or both documents weren't found in your account.</p>
-          <Button variant="outline" onClick={() => navigate('/dashboard/medical-history')}>
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to Records
-          </Button>
-        </Card>
+      <div className="min-h-screen bg-background">
+        <SubPageHeader title="Compare documents" backTo="/dashboard/medical-history" backLabel="Records" />
+        <div className="px-4 py-10 max-w-md mx-auto text-center space-y-4">
+          <p className="text-[16px] text-muted-foreground">One or both documents weren&apos;t found in your account.</p>
+          <button type="button" className="btn-stage w-full" onClick={() => navigate('/dashboard/medical-history')}>
+            Go to Records
+          </button>
+        </div>
       </div>
     );
   }

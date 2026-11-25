@@ -510,10 +510,10 @@ export default function BabyTracker({ initialTab = 'feed', openAdd = false }: { 
         <div className="space-y-2">
           <p className="text-xs text-muted-foreground">Add your baby to start logging feeds, sleep, nappies and growth.</p>
           <div className="grid grid-cols-2 gap-2">
-            <div><Label htmlFor="b-name" className="text-xs">Name</Label><Input id="b-name" value={newName} onChange={e => setNewName(e.target.value)} placeholder="Baby" /></div>
-            <div><Label htmlFor="b-date" className="text-xs">Birth date</Label><Input id="b-date" type="date" value={newDate} onChange={e => setNewDate(e.target.value)} /></div>
+            <div><Label htmlFor="b-name" className="text-sm">Name</Label><Input id="b-name" value={newName} onChange={e => setNewName(e.target.value)} placeholder="Baby" /></div>
+            <div><Label htmlFor="b-date" className="text-sm">Birth date</Label><Input id="b-date" type="date" value={newDate} onChange={e => setNewDate(e.target.value)} /></div>
           </div>
-          <Button size="sm" onClick={addBaby}>Add baby</Button>
+          <button type="button" className="btn-stage w-full" onClick={addBaby}>Add baby</button>
         </div>
       )}
 

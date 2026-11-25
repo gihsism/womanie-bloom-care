@@ -205,8 +205,7 @@ export default function BirthRecord() {
 
       <div className="max-w-3xl mx-auto px-4 py-6 space-y-5">
         <p className="text-sm text-muted-foreground">
-          Keep your birth story in one place: the details, medicines you were given, contractions you timed,
-          and your hospital reports. Fill in what you know; everything is optional and you can come back any time.
+          Your birth story in one place. Fill in what you know; all of it is optional.
         </p>
         {error && <p className="text-sm text-destructive">{error}</p>}
 
