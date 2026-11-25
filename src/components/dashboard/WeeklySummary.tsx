@@ -138,7 +138,7 @@ export default function WeeklySummary() {
           className="h-7 gap-1"
           onClick={() => load(true)}
           disabled={loading}
-          aria-label="Regenerate summary"
+          aria-label="Refresh summary"
         >
           <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
           <span className="text-xs">Refresh</span>
