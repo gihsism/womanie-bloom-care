@@ -49,7 +49,9 @@ describe('PatientDetails', () => {
     global.fetch = vi.fn().mockResolvedValue({ status: 200, ok: true, json: async () => chart }) as unknown as typeof fetch;
     renderAt('/doctor/patient/p1');
     expect(await screen.findByText('Anna Muster')).toBeTruthy();
-    expect(screen.getByText(/Trying to conceive/)).toBeTruthy();
+    // Plain stage name in the header and again in the "Before the visit" brief.
+    expect(screen.getAllByText(/Trying to conceive/).length).toBe(2);
+    expect(screen.getByText('Before the visit')).toBeTruthy();
     expect(screen.getByText('1 result out of range')).toBeTruthy();
   });
 

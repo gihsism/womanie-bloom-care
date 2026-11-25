@@ -9,7 +9,7 @@ import { useRequireRole } from '@/hooks/useRequireRole';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, PenLine } from 'lucide-react';
 import { stageLabel } from '@/lib/doctorDashboard';
-import { normalizePatientTab, pregnancyWeek, type PatientTab } from '@/lib/doctorPatient';
+import { cycleDay, normalizePatientTab, pregnancyWeek, type PatientTab } from '@/lib/doctorPatient';
 import PatientSummary from '@/components/doctor/patient/PatientSummary';
 import PatientResults from '@/components/doctor/patient/PatientResults';
 import PatientDocuments from '@/components/doctor/patient/PatientDocuments';
@@ -23,6 +23,7 @@ import {
   type HealthSignal,
   type MedicalDataRow,
   type PatientAppointment,
+  type PatientMedicine,
   type PatientProfile,
   type PeriodRecord,
   type PatientVisitQuestions,
@@ -39,6 +40,7 @@ import {
 // Stable empty list: a fresh [] on every chart load would re-render forever
 // when the auth user object is recreated (see PatientDetails.test).
 const NO_VISIT_QUESTIONS: PatientVisitQuestions[] = [];
+const NO_MEDICINES: PatientMedicine[] = [];
 
 const PatientDetails = () => {
   const navigate = useNavigate();
@@ -57,6 +59,7 @@ const PatientDetails = () => {
   const [medicalData, setMedicalData] = useState<MedicalDataRow[]>([]);
   const [periodRecords, setPeriodRecords] = useState<PeriodRecord[]>([]);
   const [visitQuestions, setVisitQuestions] = useState<PatientVisitQuestions[]>([]);
+  const [medicines, setMedicines] = useState<PatientMedicine[]>([]);
   // Skeleton only until the first answer; a refresh after saving a note
   // keeps the page in place.
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -111,6 +114,7 @@ const PatientDetails = () => {
       setMedicalData(payload.medicalData || []);
       setPeriodRecords(payload.periodRecords || []);
       setVisitQuestions(Array.isArray(payload.visitQuestions) ? payload.visitQuestions : NO_VISIT_QUESTIONS);
+      setMedicines(Array.isArray(payload.medicines) ? payload.medicines : NO_MEDICINES);
     } catch (error) {
       console.error('Error loading patient data:', error);
       toast({ variant: 'destructive', title: 'Could not load this chart', description: 'Please try again.' });
@@ -153,11 +157,13 @@ const PatientDetails = () => {
   }
 
   const preg = pregnancyWeek(patient?.pregnancy_due_date ?? null, Date.now());
+  const day = preg ? null : cycleDay(periodRecords, patient?.life_stage ?? null, Date.now());
   const facts = [
     stageLabel(patient?.life_stage) ?? 'Life stage not set',
     preg
       ? `Week ${preg.week} (${preg.daysToDue > 0 ? `${preg.daysToDue} days to due date` : preg.daysToDue === 0 ? 'due today' : `${-preg.daysToDue} days past due`})`
       : null,
+    day ? `Cycle day ${day}` : null,
     patient?.ivf_phase ? `IVF: ${patient.ivf_phase}` : null,
   ].filter(Boolean);
 
@@ -205,6 +211,8 @@ const PatientDetails = () => {
               periodRecords={periodRecords}
               lifeStage={patient?.life_stage ?? null}
               visitQuestions={visitQuestions}
+              medicines={medicines}
+              profile={patient}
               onOpenTab={setActiveTab}
             />
           </TabsContent>
