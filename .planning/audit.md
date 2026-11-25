@@ -189,6 +189,28 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-25 — Test coverage: added security-invariant tests for connections/approved and connections/pending
+connections/approved.ts and connections/pending.ts are the two patient-facing endpoints
+that list which doctors have approved access to a patient's records (approved) and which
+doctors have sent a request the patient hasn't yet acted on (pending). Both carry the same
+critical ownership invariant: the SQL must bind the session user's id as $1 (patient_id)
+so a patient can only see connections that belong to them. Without this filter, any
+authenticated user could supply a different patient_id — via a crafted query param or
+refactored call site — and enumerate another patient's doctor relationships: a direct
+privacy breach revealing who is treating them and what access requests are pending.
+Added api/_routes/connections/approved.test.ts (8 tests) and
+api/_routes/connections/pending.test.ts (8 tests) covering: 401 when getAuthUser returns
+null; 405 for non-GET methods (POST, PUT, DELETE, PATCH rejected — these are read-only
+views and no client should ever be able to write connection state through them); an
+ownership invariant confirming $1 is bound to the session user's id — not any
+client-supplied value; a regression guard confirming the WHERE clause references
+patient_id = $1 (dropping this filter would return every connection in the table in a
+single authenticated request); a status filter guard confirming the SQL gates on
+c.status = 'approved' (or 'pending') so the two lists stay distinct; 200 with the
+correct response array key (approved / pending); an empty array when no connections exist;
+and 500 on a database error.
+Verified: tsc 0, eslint 0, 1200/1200 tests pass, vite build clean.
+
 ### 2026-11-24 — Test coverage: added security-invariant tests for me/chart-access
 me/chart-access.ts is the patient-side view of the chart access log — it shows
 which doctors have opened a patient's private medical records and when. It had no
