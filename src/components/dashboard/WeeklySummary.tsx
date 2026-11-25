@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,6 +17,12 @@ import { errorMessage } from '@/lib/errors';
 // `force: true` to bypass the cache — handy when the user has
 // just uploaded something new and wants the narrative to include
 // it immediately.
+
+// The markdown renderer (~35 KB gzip) is only needed once a summary exists,
+// so it is not part of the Records page's first download. Its fetch starts
+// when this card mounts, in parallel with the (much slower) summary request.
+const loadMarkdown = () => import('react-markdown');
+const ReactMarkdown = lazy(loadMarkdown);
 
 interface ApiResponse {
   summary: string | null;
@@ -70,6 +75,8 @@ export default function WeeklySummary() {
   useEffect(() => {
     if (user) load(false);
   }, [user, load]);
+
+  useEffect(() => { loadMarkdown().catch(() => {}); }, []);
 
   // When a new analysis lands, nudge the summary to refresh so it
   // reflects the new data instead of showing a stale weekly cache.
@@ -142,7 +149,9 @@ export default function WeeklySummary() {
         ref={contentRef}
         className={`prose prose-sm dark:prose-invert max-w-none ${overflows && !expanded ? 'max-h-60 overflow-hidden relative' : ''}`}
       >
-        <ReactMarkdown>{data.summary}</ReactMarkdown>
+        <Suspense fallback={<p className="whitespace-pre-wrap">{data.summary}</p>}>
+          <ReactMarkdown>{data.summary}</ReactMarkdown>
+        </Suspense>
         {overflows && !expanded && (
           <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-card pointer-events-none" />
         )}
