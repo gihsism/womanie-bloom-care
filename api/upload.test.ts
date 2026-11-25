@@ -13,10 +13,9 @@ const USER = { id: 'user_1', email: 'd@test.com', sessionId: 's1' };
 
 function mockRes() {
   const r = { _status: 200, _body: null as unknown } as unknown as VercelResponse & { _status: number; _body: unknown };
-  r.setHeader = vi.fn() as unknown as VercelResponse['setHeader'];
+  Object.assign(r, { setHeader: vi.fn(), end: vi.fn() });
   r.status = ((c: number) => { r._status = c; return r; }) as VercelResponse['status'];
   r.json = ((d: unknown) => { r._body = d; return r; }) as VercelResponse['json'];
-  r.end = vi.fn() as unknown as VercelResponse['end'];
   return r;
 }
 
