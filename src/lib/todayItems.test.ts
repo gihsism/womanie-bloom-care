@@ -48,8 +48,11 @@ describe('todayItems', () => {
     expect(soon.label).toBe('Visit on Thursday at 08:00');
     const [tom] = todayItems('ivf', { now: NOW, nextVisit: at(1, 8, 0) });
     expect(tom.label).toBe('Visit tomorrow at 08:00');
-    const [pms] = todayItems('menstrual-cycle', { now: NOW, periodDaysUntil: 5 });
-    expect(pms.label).toBe('PMS likely from Thursday');
+    // PMS window = the 5 days before the period, as on the stage page's PMS card.
+    const [pms] = todayItems('menstrual-cycle', { now: NOW, periodDaysUntil: 7 });
+    expect(pms.label).toBe('PMS likely from Wednesday');
+    expect(todayItems('menstrual-cycle', { now: NOW, periodDaysUntil: 6 })[0].label).toBe('PMS likely from tomorrow');
+    expect(todayItems('menstrual-cycle', { now: NOW, periodDaysUntil: 4 })[0].label).toBe('PMS days: period in 4 days');
   });
 
   it('period rows only for cycle stages, only within 2 days or when late', () => {

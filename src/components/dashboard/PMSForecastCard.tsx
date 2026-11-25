@@ -5,7 +5,7 @@ import { CloudRain, Info } from 'lucide-react';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
-import { addDays, differenceInDays, format, parseISO, subDays } from 'date-fns';
+import { addDays, differenceInCalendarDays, format, parseISO, startOfDay, subDays } from 'date-fns';
 import type { LifeStage } from './DashboardHeader';
 
 // Forward-looking PMS-window forecast for cycle modes.
@@ -114,12 +114,15 @@ export default function PMSForecastCard({ mode }: Props) {
     const cycleLength = sorted[0].cycle_length ?? 28;
     if (cycleLength < MIN_VALID_CYCLE || cycleLength > MAX_VALID_CYCLE) return null;
 
-    const today = new Date();
+    // Whole calendar days from the start of today: comparing against the
+    // current time made the predicted day itself roll over to the next
+    // cycle, and counted one day short every afternoon/evening.
+    const today = startOfDay(new Date());
     let nextStart = addDays(lastStart, cycleLength);
-    // Roll forward if today >= predicted next start.
-    while (nextStart <= today) nextStart = addDays(nextStart, cycleLength);
+    // Roll forward only once the predicted day is in the past.
+    while (nextStart < today) nextStart = addDays(nextStart, cycleLength);
 
-    const daysToNext = differenceInDays(nextStart, today);
+    const daysToNext = differenceInCalendarDays(nextStart, today);
     const pmsStart = addDays(nextStart, -PMS_WINDOW_LEN);
     const phase = classifyDay(daysToNext);
 
