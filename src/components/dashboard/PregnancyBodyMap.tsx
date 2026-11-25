@@ -1,4 +1,4 @@
-import { format, differenceInDays } from 'date-fns';
+import { format, differenceInCalendarDays } from 'date-fns';
 import { fmtGrams } from '@/lib/bodyMap';
 import { getWeekData } from './pregnancyWeekData';
 import { DetailsLink } from '@/components/dashboard/HomeBlocks';
@@ -18,7 +18,7 @@ export default function PregnancyBodyMap({ dueDate }: { dueDate: Date; name?: st
   const now = new Date();
   const conception = dueDate.getTime() - 280 * 86400000;
   const week = Math.min(42, Math.max(0, Math.floor((now.getTime() - conception) / (7 * 86400000))));
-  const daysLeft = Math.max(0, differenceInDays(dueDate, now));
+  const daysLeft = Math.max(0, differenceInCalendarDays(dueDate, now));
   const wk = getWeekData(Math.max(4, Math.min(40, week)));
   const grams = wk.weightG?.median ?? null;
   const size = grams != null ? fmtGrams(grams) : null;

@@ -14,7 +14,7 @@ import {
   Flower2,
   ThermometerSun,
 } from 'lucide-react';
-import { addDays, differenceInDays, subDays, format } from 'date-fns';
+import { addDays, differenceInCalendarDays, differenceInDays, startOfDay, subDays, format } from 'date-fns';
 import { DetailsLink } from '@/components/dashboard/HomeBlocks';
 
 // Mode-aware "today at a glance" hero stat. Single row at the top of
@@ -199,8 +199,8 @@ const ModeHeroStat = ({
         else if (cycleDay >= periodData.cycleLength - 4) phase = 'PMS days likely';
 
         let nextPeriod = addDays(periodData.lastPeriodStart, periodData.cycleLength);
-        while (nextPeriod < today) nextPeriod = addDays(nextPeriod, periodData.cycleLength);
-        const daysToPeriod = differenceInDays(nextPeriod, today);
+        while (nextPeriod < startOfDay(today)) nextPeriod = addDays(nextPeriod, periodData.cycleLength);
+        const daysToPeriod = differenceInCalendarDays(nextPeriod, today);
 
         return {
           icon: <Sparkles className="h-5 w-5 text-primary" />,
@@ -259,7 +259,7 @@ const ModeHeroStat = ({
             tone: 'bg-pink-50/70 dark:bg-pink-950/20 border-pink-200/60 dark:border-pink-800/40',
           };
         }
-        const daysToDue = differenceInDays(pregnancyDueDate, today);
+        const daysToDue = differenceInCalendarDays(pregnancyDueDate, today);
         const totalDays = 280 - daysToDue; // ~40 weeks gestation
         const week = Math.max(0, Math.min(42, Math.floor(totalDays / 7)));
         const daysIntoWeek = Math.max(0, totalDays % 7);

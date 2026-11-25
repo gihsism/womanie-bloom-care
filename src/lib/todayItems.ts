@@ -68,6 +68,8 @@ export const MAX_TODAY = 3;
 export const MAX_MORE = 4;
 const DAY = 86_400_000;
 export const MAX_LATE_DAYS = 14;
+/** PMSForecastCard's window: the 5 days before the predicted period. */
+export const PMS_WINDOW_DAYS = 5;
 /** The EPDS card asks to "check in again in 2 weeks". */
 export const MOOD_CHECK_EVERY_DAYS = 14;
 const MOOD_STAGES: readonly string[] = ['pregnancy', 'postpartum'];
@@ -171,9 +173,12 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
     }
   }
   // 5. Time-limited heads-ups: PMS in the next few days, a visit within 7 days
+  // Same window as the PMS card on the stage page: the 5 days before the period.
   if (mode === 'menstrual-cycle' && pd != null && pd >= 3 && pd <= 7) {
-    const pmsFrom = new Date(startOfDay(now) + (pd - 2) * DAY);
-    items.push({ id: 'pms-soon', label: `PMS likely from ${dayName(now, pmsFrom)}`, target: `${STAGE_PAGE}#pms` });
+    const label = pd > PMS_WINDOW_DAYS
+      ? `PMS likely from ${dayName(now, new Date(now.getFullYear(), now.getMonth(), now.getDate() + pd - PMS_WINDOW_DAYS))}`
+      : `PMS days: period in ${pd} days`;
+    items.push({ id: 'pms-soon', label, target: `${STAGE_PAGE}#pms` });
   }
   if (s.nextVisit) {
     const n = daysBetween(now, s.nextVisit);
