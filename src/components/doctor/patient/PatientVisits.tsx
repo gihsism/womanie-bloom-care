@@ -1,9 +1,13 @@
 import { Card } from '@/components/ui/card';
 import { Calendar, Video } from 'lucide-react';
-import type { PatientAppointment } from './types';
+import { parseQuestions } from '@/lib/visitQuestions';
+import { QuestionList } from './PatientVisitQuestions';
+import type { PatientAppointment, PatientVisitQuestions } from './types';
 
 // Visits tab: every visit with this doctor, newest first (the API already
-// orders scheduled_at DESC). Status in plain words, shown once.
+// orders scheduled_at DESC). Status in plain words, shown once. Under an
+// upcoming visit: the questions she saved for it (read-only; the API only
+// returns them for this doctor's own, not-cancelled, upcoming visits).
 
 const STATUS: Record<string, string> = {
   completed: 'Completed',
@@ -12,11 +16,12 @@ const STATUS: Record<string, string> = {
   scheduled: 'Booked',
 };
 
-const PatientVisits = ({ appointments }: { appointments: PatientAppointment[] }) => {
+const PatientVisits = ({ appointments, visitQuestions = [] }: { appointments: PatientAppointment[]; visitQuestions?: PatientVisitQuestions[] }) => {
   if (appointments.length === 0) {
     return <Card className="p-6 text-center text-sm text-muted-foreground">No visits with this patient yet.</Card>;
   }
   const now = Date.now();
+  const questionsFor = new Map(visitQuestions.map(r => [String(r.appointment_id), parseQuestions(r.questions)]));
   return (
     <Card className="divide-y">
       {appointments.map(apt => {
@@ -24,6 +29,7 @@ const PatientVisits = ({ appointments }: { appointments: PatientAppointment[] })
         const s = (apt.status || 'scheduled').toLowerCase();
         const label = s === 'scheduled' && when.getTime() < now ? 'Not closed yet' : STATUS[s] ?? apt.status;
         const Icon = apt.consultation_type === 'video' ? Video : Calendar;
+        const questions = s === 'cancelled' ? [] : questionsFor.get(String(apt.id)) ?? [];
         return (
           <div key={apt.id} className={`flex items-start gap-3 p-3 ${s === 'cancelled' ? 'opacity-60' : ''}`}>
             <Icon className="h-4 w-4 mt-0.5 shrink-0 text-primary" aria-hidden="true" />
@@ -35,6 +41,12 @@ const PatientVisits = ({ appointments }: { appointments: PatientAppointment[] })
                 {apt.consultation_type === 'video' ? 'Video' : 'In person'} · {label}
               </p>
               {apt.notes && <p className="text-xs text-muted-foreground mt-1">{apt.notes}</p>}
+              {questions.length > 0 && (
+                <div className="mt-2 rounded-md bg-muted/50 p-2" aria-label="Questions she's bringing to this visit">
+                  <p className="text-xs font-medium mb-1">Questions she's bringing ({questions.length}) · written by the patient</p>
+                  <QuestionList list={questions} />
+                </div>
+              )}
             </div>
           </div>
         );

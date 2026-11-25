@@ -12,13 +12,16 @@ import { dueReminders } from '@/lib/medicine';
 import { parsePillStatus, pillPackDay } from '@/lib/pillLog';
 import { PREG_VACCINES_KEY, gestationalWeek, vaccinesDueNow, type VaccineState } from '@/lib/pregnancyVaccines';
 import { useAccountDataVersion } from '@/lib/account-data';
+import { babyVaccineReminders, type BabyForVaccines } from '@/lib/babyVaccines';
 
 // Reads the few facts Home's "Today" list ranks (lib/todayItems.ts):
 // visits (today / within a week), recent doctor notes, results marked
 // critical, getting-started progress, the next predicted period, and the
 // stage tasks: medicines due (medications + today's med_dose ticks),
 // an unticked contraceptive pill, pregnancy vaccinations in their window
-// and the 2-weekly EPDS mood check.
+// and the 2-weekly EPDS mood check; postpartum, a baby at a common
+// vaccination age (babies + baby_vaccine events); other stages, the last
+// mood ticked in the daily log (weekly mood prompt).
 // Read-only; the same endpoints and tables the old Home cards used
 // (AppointmentTodayBanner, UpcomingAppointments, DoctorNotesCard,
 // useAttentionCount, GettingStarted).
@@ -53,6 +56,25 @@ export function lastMoodCheckFrom(history: unknown): Date | null {
   return new Date(y, m - 1, d);
 }
 
+/** Last local day with a mood ticked in the daily log; null = none in the rows. */
+export function lastMoodLogFrom(rows: unknown): Date | null {
+  if (!Array.isArray(rows)) return null;
+  let best: string | null = null;
+  for (const r of rows) {
+    if (!r || typeof r !== 'object') continue;
+    const { signal_date, mood } = r as { signal_date?: unknown; mood?: unknown };
+    let m = mood;
+    if (typeof m === 'string') { try { m = JSON.parse(m); } catch { m = null; } }
+    if (!Array.isArray(m) || m.length === 0) continue;
+    const day = String(signal_date ?? '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) continue;
+    if (best === null || day > best) best = day;
+  }
+  if (!best) return null;
+  const [y, mo, d] = best.split('-').map(Number);
+  return new Date(y, mo - 1, d);
+}
+
 export function periodDaysUntil(period: PeriodData | null, now = new Date()): number | null {
   if (!period || !period.cycleLength) return null;
   const start = new Date(period.lastPeriodStart.getFullYear(), period.lastPeriodStart.getMonth(), period.lastPeriodStart.getDate());
@@ -71,7 +93,7 @@ export function useTodaySignals(
   const { user } = useAuth();
   const prefs = useNotificationPrefs();
   const [s, setS] = useState<Omit<TodaySignals, 'periodDaysUntil'>>({});
-  const [tasks, setTasks] = useState<Pick<TodaySignals, 'medicinesDue' | 'pill'>>({});
+  const [tasks, setTasks] = useState<Pick<TodaySignals, 'medicinesDue' | 'pill' | 'babyVaccines' | 'lastMoodLog'>>({});
   const { mode, pregnancyDueDate } = stage;
   const uid = user?.id;
   // Device copies of account data (synced in lib/account-data.ts).
@@ -183,7 +205,43 @@ export function useTodaySignals(
     }
   }, [uid, mode]);
 
+  // Postpartum: babies at a common vaccination age. Other stages (not the
+  // EPDS ones): the last mood ticked in the daily log, for the weekly row.
+  const loadStageExtras = useCallback(async () => {
+    if (!uid || !mode) return;
+    try {
+      const now = new Date();
+      if (mode === 'postpartum') {
+        const [babiesRes, vaxRes] = await Promise.all([
+          db.from('babies').select('id, name, birth_date').eq('user_id', uid),
+          db.from('life_events').select('baby_id, occurred_at').eq('user_id', uid).eq('kind', 'baby_vaccine')
+            .order('occurred_at', { ascending: false }).limit(200),
+        ]);
+        const last = new Map<string, Date>();
+        for (const v of (Array.isArray(vaxRes.data) ? vaxRes.data : []) as Array<{ baby_id: string | null; occurred_at: string }>) {
+          if (!v.baby_id) continue;
+          const at = new Date(v.occurred_at);
+          const prev = last.get(v.baby_id);
+          if (!prev || at > prev) last.set(v.baby_id, at);
+        }
+        const babies: BabyForVaccines[] = ((Array.isArray(babiesRes.data) ? babiesRes.data : []) as Array<{ id: string; name: string | null; birth_date: string | null }>)
+          .map(b => ({ name: b.name, birth_date: b.birth_date ? String(b.birth_date).slice(0, 10) : null, lastVaccineAt: last.get(b.id) ?? null }));
+        setTasks(t => ({ ...t, babyVaccines: babyVaccineReminders(babies, now), lastMoodLog: undefined }));
+      } else if (mode === 'pregnancy') {
+        setTasks(t => ({ ...t, babyVaccines: [], lastMoodLog: undefined }));
+      } else {
+        const { data } = await db.from('daily_health_signals').select('signal_date, mood')
+          .eq('user_id', uid).gte('signal_date', format(subDays(now, 35), 'yyyy-MM-dd'));
+        setTasks(t => ({ ...t, babyVaccines: [], lastMoodLog: lastMoodLogFrom(data) }));
+      }
+    } catch {
+      // Keep the last known state.
+    }
+  }, [uid, mode]);
+
   useEffect(() => { void loadMeds(); }, [loadMeds]);
+  useEffect(() => { void loadStageExtras(); }, [loadStageExtras]);
+  useEffect(() => onHealthDataChange(() => { void loadStageExtras(); }), [loadStageExtras]);
   // The pill method lives in an account-synced device key: re-read on sync.
   useEffect(() => { void loadPill(); }, [loadPill, accountVersion]);
   useEffect(() => onHealthDataChange(() => { void loadMeds(); void loadPill(); }), [loadMeds, loadPill]);
