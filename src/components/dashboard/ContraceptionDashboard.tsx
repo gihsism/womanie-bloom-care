@@ -263,7 +263,7 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
   return (
     <div className="space-y-5">
       {/* Current Method Card */}
-      <Card className="p-5 bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5">
+      <Card className="p-5 bg-stage-tint border-transparent">
         <div className="flex items-start gap-4">
           <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0 text-3xl">
             {currentMethod?.emoji || '💊'}
@@ -581,7 +581,7 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
 
       {/* Doctor Chat CTA */}
       <Card
-        className="p-4 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20 cursor-pointer"
+        className="p-4 bg-stage-tint border-transparent cursor-pointer"
         onClick={onNavigateToDoctorChat}
       >
         <div className="flex items-center gap-4">

@@ -261,8 +261,8 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
       {/* Welcome Card */}
       {!withHero && <Card className={`p-5 border ${
         isPostMenopause
-          ? 'bg-gradient-to-br from-muted/60 via-card to-primary/5 border-border'
-          : 'bg-gradient-to-br from-primary/10 via-card to-muted/50 border-primary/20'
+          ? 'bg-muted/60 border-transparent'
+          : 'bg-stage-tint border-transparent'
       }`}>
         <div className="flex items-start gap-4">
           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${
@@ -370,7 +370,7 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all"
+                  className="h-full bg-stage-accent rounded-full transition-all"
                   style={{ width: `${progressPct}%` }}
                 />
               </div>
@@ -440,11 +440,11 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
       )}
 
       {/* Myth Buster */}
-      <Card className="p-4 border-purple-200/60 dark:border-purple-800/30 bg-purple-50/50 dark:bg-purple-950/20">
+      <Card className="p-4 bg-stage-tint border-transparent">
         <div className="flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 text-purple-500 flex-shrink-0 mt-0.5" />
+          <AlertTriangle className="h-5 w-5 text-stage-accent flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="text-xs font-semibold text-purple-700 dark:text-purple-400 uppercase tracking-wide mb-1">Myth vs Fact</p>
+            <p className="text-xs font-semibold text-stage-accent uppercase tracking-wide mb-1">Myth vs Fact</p>
             <p className="text-sm font-medium text-destructive line-through mb-1">{currentMyths[currentMythIndex].myth}</p>
             <p className="text-sm text-foreground">{currentMyths[currentMythIndex].fact}</p>
           </div>
@@ -593,7 +593,7 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
 
       {/* CTA */}
       <Card
-        className="p-5 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20 cursor-pointer"
+        className="p-5 bg-stage-tint border-transparent cursor-pointer"
         onClick={onNavigateToDoctorChat}
       >
         <div className="flex items-center gap-4">

@@ -1,20 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import UserMenu from '@/components/UserMenu';
+import SubPageHeader from '@/components/SubPageHeader';
 import {
-  ArrowLeft,
   Phone,
-  Plus,
   Trash2,
-  AlertTriangle,
-  Siren,
 } from 'lucide-react';
 import { errorMessage } from '@/lib/errors';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
@@ -64,7 +58,6 @@ function saveToStorage(key: string, contacts: Contact[]) {
 }
 
 export default function Emergency() {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   usePageTitle('Emergency Contacts');
@@ -114,68 +107,49 @@ export default function Emergency() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="px-4 py-3 flex items-center gap-3 max-w-2xl mx-auto">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/dashboard')}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex-1 flex items-center gap-2">
-            <Phone className="h-4 w-4 text-primary" />
-            <h1 className="text-base font-bold">Emergency Contacts</h1>
-          </div>
-          <UserMenu />
-        </div>
-      </div>
+      <SubPageHeader title="Emergency contacts" backTo="/dashboard/settings" backLabel="Me" />
 
-      <div className="px-4 py-6 max-w-2xl mx-auto space-y-6">
-        <Card className="p-4 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
-          <div className="flex items-start gap-3">
-            <Siren className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-semibold mb-1">In a real emergency, call your local emergency number.</p>
-              <p className="text-xs text-muted-foreground">
-                This list is a personal reminder of who to reach — Womanie does not place calls or notify them on your behalf. It's saved to your account.
-              </p>
-            </div>
-          </div>
-        </Card>
+      <div className="px-4 py-5 max-w-2xl mx-auto space-y-6">
+        <p className="page-intro">
+          <span className="font-semibold text-foreground">In an emergency, call your local emergency number.</span>{' '}
+          This list reminds you who to call next. Womanie never calls anyone for you. Saved to your account, so it is on a new phone too.
+        </p>
 
-        <Card className="p-4">
-          <p className="text-sm font-semibold mb-3">Your contacts</p>
-          {contacts.length === 0 ? (
-            <p className="text-xs text-muted-foreground">None saved yet. Add the people you'd want to call first.</p>
-          ) : (
-            <ul className="space-y-2">
-              {contacts.map(c => (
-                <li key={c.id} className="flex items-center gap-3 p-3 rounded-lg border bg-muted/20">
-                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Phone className="h-4 w-4 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{c.name}</p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {c.relationship ? `${c.relationship} · ` : ''}
-                      <a href={`tel:${c.phone}`} className="hover:text-primary hover:underline">{c.phone}</a>
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                    onClick={() => handleRemove(c.id)}
-                    aria-label={`Remove ${c.name}`}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
+        {contacts.length === 0 ? (
+          <p className="text-[15px] text-muted-foreground">No contacts yet. Add the people you would call first.</p>
+        ) : (
+          <ul className="row-group">
+            {contacts.map(c => (
+              <li key={c.id} className="flex items-center gap-3 px-4 py-3">
+                <a href={`tel:${c.phone}`} className="flex min-w-0 flex-1 items-center gap-3" aria-label={`Call ${c.name}`}>
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-stage-tint text-stage-accent">
+                    <Phone className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-[16px] font-semibold">{c.name}</span>
+                    <span className="block truncate text-[14px] text-muted-foreground">
+                      {c.relationship ? `${c.relationship} · ` : ''}{c.phone}
+                    </span>
+                  </span>
+                </a>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-10 w-10 p-0 text-muted-foreground hover:text-destructive"
+                  onClick={() => handleRemove(c.id)}
+                  aria-label={`Remove ${c.name}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
 
         {contacts.length < MAX_CONTACTS && (
-          <Card className="p-4">
-            <p className="text-sm font-semibold mb-3">Add a contact</p>
+          <section className="space-y-3">
+            <h2 className="section-title">Add a contact</h2>
+            <div className="panel p-4">
             <div className="space-y-3">
               <div>
                 <Label htmlFor="contact-name" className="text-xs">Name</Label>
@@ -208,22 +182,14 @@ export default function Emergency() {
                   maxLength={30}
                 />
               </div>
-              <Button onClick={handleAdd} className="w-full gap-1.5">
-                <Plus className="h-4 w-4" />
+              <button type="button" onClick={handleAdd} className="btn-stage w-full">
                 Save contact
-              </Button>
+              </button>
             </div>
-          </Card>
+            </div>
+          </section>
         )}
 
-        <Card className="p-4 border-dashed">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-muted-foreground">
-              Contacts are saved to your account, so they are there on a new phone too.
-            </p>
-          </div>
-        </Card>
       </div>
     </div>
   );

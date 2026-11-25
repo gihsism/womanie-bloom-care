@@ -140,6 +140,20 @@ const PAGES = [
   ['records-flag-open', '/dashboard/medical-history', async (p) => { await p.getByRole('button', { name: /Ferritin · 12/ }).click(); }],
   ['visits', '/dashboard/appointments'],
   ['me', '/dashboard/settings'],
+  // Sub-pages (one level below a tab): the stage page ("Track"), Me's rows,
+  // and the pages Records links to.
+  ['track', '/dashboard/stage'],
+  ['me-profile', '/dashboard/settings#profile'],
+  ['me-reminders', '/dashboard/settings#reminders'],
+  ['attention', '/dashboard/notifications'],
+  ['emergency', '/dashboard/emergency'],
+  ['devices', '/dashboard/devices'],
+  ['help', '/dashboard/help'],
+  ['privacy', '/dashboard/privacy'],
+  ['compare', '/dashboard/compare'],
+  ['panel', '/dashboard/panel/iron'],
+  ['baby', '/dashboard/baby'],
+  ['birth', '/dashboard/birth'],
 ];
 
 // ---- Doctor side: Dr. Laura Meier, three patients, a day of visits ----

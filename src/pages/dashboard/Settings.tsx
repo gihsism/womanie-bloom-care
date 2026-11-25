@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import SubPageHeader from '@/components/SubPageHeader';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Shield, Bell, User, Download, Loader2, Trash2, Wand2, KeyRound, Eye, EyeOff, Pill, Inbox, Phone, Smartphone, Users, HelpCircle, Info, LogOut, UserCog } from 'lucide-react';
+import { Baby, Calendar, Heart, Flower2, Sunset, Shield, Bell, User, Download, Loader2, Trash2, Wand2, KeyRound, Eye, EyeOff, Pill, Inbox, Phone, Smartphone, Users, HelpCircle, Info, LogOut, UserCog } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { scorePassword } from '@/lib/password-strength';
 import { Button } from '@/components/ui/button';
@@ -408,31 +409,16 @@ const Settings = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="page-head sticky top-0 z-10">
-        <div className="w-full px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {section && (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate('/dashboard/settings')}
-                    className="gap-2"
-                    aria-label="Back to Me"
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                    Me
-                  </Button>
-                  <div className="h-6 w-px bg-border" />
-                </>
-              )}
-              <h1 className="page-title">{section ? ME_SECTIONS[section] : 'Me'}</h1>
-            </div>
+      {/* Header: the tab title on Me, the shared sub-page header on a section. */}
+      {section ? (
+        <SubPageHeader title={ME_SECTIONS[section]} backTo="/dashboard/settings" backLabel="Me" />
+      ) : (
+        <div className="page-head sticky top-0 z-10">
+          <div className="w-full px-4 py-4">
+            <h1 className="page-title">Me</h1>
           </div>
         </div>
-      </div>
+      )}
 
       {!section && (
         <div className="w-full max-w-3xl mx-auto px-4 py-6 space-y-6" data-testid="me-list">

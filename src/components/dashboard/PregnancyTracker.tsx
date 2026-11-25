@@ -747,7 +747,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
               </div>
               <div className="relative h-6 bg-muted rounded-full overflow-hidden">
                 <div
-                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-500"
+                  className="absolute inset-y-0 left-0 bg-stage-accent rounded-full transition-all duration-500"
                   style={{ width: `${Math.max(visibleFraction * 100, 2)}%` }}
                 />
                 {ticks.map((mm) => (
@@ -954,7 +954,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
           const persp = getNearestPerspectives(weeksPregnant);
           if (!persp) return null;
           const sections = [
-            { key: 'baby', label: 'For the baby', tone: 'bg-pink-50/60 dark:bg-pink-950/20 border-pink-200/60 dark:border-pink-800/40', emoji: '👶', text: persp.baby },
+            { key: 'baby', label: 'For the baby', tone: 'bg-stage-tint border-transparent', emoji: '👶', text: persp.baby },
             { key: 'mother', label: 'For you', tone: 'bg-primary/5 border-primary/20', emoji: '💗', text: persp.mother },
             { key: 'partner', label: 'For your partner', tone: 'bg-secondary/10 border-secondary/30', emoji: '🤝', text: persp.partner },
             { key: 'employer', label: 'At work', tone: 'bg-muted/60 border-border', emoji: '💼', text: persp.employer },
@@ -996,7 +996,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
                 <div key={week} className="flex flex-col items-center flex-shrink-0" style={{ width: '20px' }}>
                   <div className={`w-full h-3 rounded-sm ${
                     isCurrent ? 'bg-primary ring-2 ring-primary/30' :
-                    isPast ? (week <= 13 ? 'bg-pink-300' : week <= 27 ? 'bg-violet-300' : 'bg-indigo-300') :
+                    isPast ? (week <= 13 ? 'bg-stage-accent/35' : week <= 27 ? 'bg-stage-accent/60' : 'bg-stage-accent/85') :
                     'bg-muted'
                   }`} />
                   {(week === 1 || week === 13 || week === 27 || week === 40 || isCurrent) && (
@@ -1007,9 +1007,9 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
             })}
           </div>
           <div className="flex gap-4 text-[10px] text-muted-foreground">
-            <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-pink-300" /> 1st trimester</span>
-            <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-violet-300" /> 2nd trimester</span>
-            <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-indigo-300" /> 3rd trimester</span>
+            <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-stage-accent/35" /> 1st trimester</span>
+            <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-stage-accent/60" /> 2nd trimester</span>
+            <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-stage-accent/85" /> 3rd trimester</span>
           </div>
         </Card>
         {/* Trimester symptoms */}

@@ -1,21 +1,17 @@
 import { useNavigate } from 'react-router-dom';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import {
-  ArrowLeft,
+  ChevronDown,
   HelpCircle,
   Upload,
   Sparkles,
   Shield,
-  Mail,
-  MessageCircle,
   Stethoscope,
   Activity,
   Download,
   Trash2,
 } from 'lucide-react';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import UserMenu from '@/components/UserMenu';
+import SubPageHeader from '@/components/SubPageHeader';
 
 // Static help / FAQ page. Covers the things a patient is most likely
 // to need to know: what Womanie does, what it doesn't (we're not your
@@ -91,78 +87,52 @@ const FAQS: Array<{ question: string; icon: typeof HelpCircle; answer: string | 
 
 export default function Help() {
   const navigate = useNavigate();
-  usePageTitle('Help & Support');
+  usePageTitle('Help');
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="px-4 py-3 flex items-center gap-3 max-w-3xl mx-auto">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/dashboard')}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex-1 flex items-center gap-2">
-            <HelpCircle className="h-4 w-4 text-primary" />
-            <h1 className="text-base font-bold">Help & Support</h1>
-          </div>
-          <UserMenu />
+      <SubPageHeader title="Help" backTo="/dashboard/settings" backLabel="Me" />
+
+      <div className="px-4 py-5 max-w-3xl mx-auto space-y-5">
+        <p className="page-intro">Tap a question to see the answer.</p>
+
+        {/* One list, answers folded away: the page reads as a few plain questions. */}
+        <div className="row-group">
+          {FAQS.map(faq => (
+            <details key={faq.question} className="group">
+              <summary className="flex min-h-[3.25rem] cursor-pointer list-none items-center gap-3 px-4 py-3 text-[16px] font-semibold [&::-webkit-details-marker]:hidden">
+                <span className="flex-1">{faq.question}</span>
+                <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden="true" />
+              </summary>
+              <div className="px-4 pb-4 -mt-1">
+                {Array.isArray(faq.answer) ? (
+                  <ul className="space-y-2">
+                    {faq.answer.map((line, i) => (
+                      <li key={i} className="text-[15px] leading-relaxed text-muted-foreground">{line}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-[15px] leading-relaxed text-muted-foreground">{faq.answer}</p>
+                )}
+              </div>
+            </details>
+          ))}
         </div>
-      </div>
 
-      <div className="px-4 py-6 max-w-3xl mx-auto space-y-6">
-        <Card className="p-4 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
-          <p className="text-sm font-semibold mb-1">Can't find an answer here?</p>
-          <p className="text-sm text-muted-foreground mb-3">
-            Ask the AI assistant or reach us directly. We read every message.
+        <section className="space-y-3 pt-2">
+          <h2 className="section-title">Still stuck?</h2>
+          <button type="button" className="btn-stage w-full" onClick={() => navigate('/dashboard/ai-doctor')}>
+            Ask AI
+          </button>
+          <p className="text-center text-[15px]">
+            or email <a className="font-semibold text-stage-accent underline-offset-2 hover:underline" href="mailto:support@womanie.info">support@womanie.info</a>
           </p>
-          <div className="flex flex-wrap gap-2">
-            <Button size="sm" onClick={() => navigate('/dashboard/ai-doctor')} className="gap-1.5">
-              <MessageCircle className="h-3.5 w-3.5" />
-              Open AI assistant
-            </Button>
-            <Button size="sm" variant="outline" asChild className="gap-1.5">
-              <a href="mailto:support@womanie.info">
-                <Mail className="h-3.5 w-3.5" />
-                Email support
-              </a>
-            </Button>
-          </div>
-        </Card>
-
-        <section className="space-y-3">
-          {FAQS.map(faq => {
-            const Icon = faq.icon;
-            return (
-              <Card key={faq.question} className="p-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Icon className="h-4 w-4 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold mb-2">{faq.question}</p>
-                    {Array.isArray(faq.answer) ? (
-                      <ul className="space-y-1.5">
-                        {faq.answer.map((line, i) => (
-                          <li key={i} className="text-[13px] leading-relaxed text-muted-foreground">
-                            {line}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-[13px] leading-relaxed text-muted-foreground">{faq.answer}</p>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
         </section>
 
-        <Card className="p-4 border-dashed">
-          <p className="text-xs text-muted-foreground text-center">
-            Womanie is not a medical device and does not replace professional medical advice,
-            diagnosis, or treatment. In emergencies, call your local emergency number.
-          </p>
-        </Card>
+        <p className="text-xs text-muted-foreground text-center pt-2">
+          Womanie is not a medical device and does not replace professional medical advice,
+          diagnosis, or treatment. In emergencies, call your local emergency number.
+        </p>
       </div>
     </div>
   );

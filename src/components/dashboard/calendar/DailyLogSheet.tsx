@@ -178,7 +178,7 @@ const DailyLogSheet = ({
             {/* Intimacy Section */}
             <section id="daily-log-intimacy" className="space-y-3">
               <h4 className="font-semibold text-sm flex items-center gap-2">
-                <Heart className="h-4 w-4 text-pink-500" />
+                <Heart className="h-4 w-4 text-stage-accent" />
                 Intimacy
               </h4>
               
@@ -187,10 +187,10 @@ const DailyLogSheet = ({
                   {signal.intercourse.map((entry, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center justify-between p-3 bg-pink-500/10 rounded-xl"
+                      className="flex items-center justify-between p-3 bg-stage-tint rounded-xl"
                     >
                       <div className="flex items-center gap-2">
-                        <Heart className="h-4 w-4 text-pink-500" />
+                        <Heart className="h-4 w-4 text-stage-accent" />
                         <span className="text-sm font-medium">
                           {entry.protected ? 'Protected' : 'Unprotected'}
                         </span>

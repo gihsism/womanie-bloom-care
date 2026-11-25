@@ -38,10 +38,10 @@ const MOOD_OPTIONS = [
 
 const FLOW_OPTIONS = [
   { label: 'None', value: 'none', color: 'bg-muted' },
-  { label: 'Spotting', value: 'spotting', color: 'bg-pink-200' },
-  { label: 'Light', value: 'light', color: 'bg-pink-300' },
-  { label: 'Medium', value: 'medium', color: 'bg-pink-400' },
-  { label: 'Heavy', value: 'heavy', color: 'bg-pink-500' },
+  { label: 'Spotting', value: 'spotting', color: 'bg-stage-accent/30' },
+  { label: 'Light', value: 'light', color: 'bg-stage-accent/55' },
+  { label: 'Medium', value: 'medium', color: 'bg-stage-accent/80' },
+  { label: 'Heavy', value: 'heavy', color: 'bg-stage-accent' },
 ];
 
 // Postpartum bleeding (lochia) progresses bright-red → pink/brown →

@@ -275,7 +275,7 @@ const FertileWindowTimingCard = ({ userId, cycleLength, periodLength }: FertileW
                   <div
                     key={i}
                     className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full border-2 border-white dark:border-card ${
-                      entry.isProtected ? 'bg-muted-foreground' : 'bg-pink-500'
+                      entry.isProtected ? 'bg-muted-foreground' : 'bg-stage-accent'
                     }`}
                     style={{ left: `calc(${((entry.day + 0.5) / renderDays) * 100}% - 4px)` }}
                     title={`${format(addDays(cycle.cycleStart, entry.day), 'MMM d')} — ${
@@ -304,7 +304,7 @@ const FertileWindowTimingCard = ({ userId, cycleLength, periodLength }: FertileW
           Ovulation
         </div>
         <div className="flex items-center gap-1">
-          <span className="inline-block w-2 h-2 rounded-full bg-pink-500" />
+          <span className="inline-block w-2 h-2 rounded-full bg-stage-accent" />
           Unprotected
         </div>
         <div className="flex items-center gap-1">

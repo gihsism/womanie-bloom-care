@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import SubPageHeader from '@/components/SubPageHeader';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
-import { ArrowLeft, Baby, Pill, FileText, Timer, Plus, Trash2, Check } from 'lucide-react';
+import { Baby, Pill, FileText, Timer, Plus, Trash2, Check } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
 // Labour & birth record: birth details (birth_records + babies), medicines
@@ -200,15 +201,7 @@ export default function BirthRecord() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <div className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="w-full px-4 py-4 flex items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')} className="gap-2">
-            <ArrowLeft className="h-4 w-4" /> Back
-          </Button>
-          <div className="h-6 w-px bg-border" />
-          <h1 className="font-display text-xl font-medium">Labour & birth</h1>
-        </div>
-      </div>
+      <SubPageHeader title="Labour & birth" backTo="/dashboard" backLabel="Home" />
 
       <div className="max-w-3xl mx-auto px-4 py-6 space-y-5">
         <p className="text-sm text-muted-foreground">

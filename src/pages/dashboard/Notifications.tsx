@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Bell, FileText, AlertTriangle, CalendarX, Search } from 'lucide-react';
+import SubPageHeader from '@/components/SubPageHeader';
+import { ChevronRight } from 'lucide-react';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -65,7 +64,7 @@ function doctorCancelReason(notes: string | null): string | null {
 const CANCEL_WINDOW_MS = 14 * 24 * 60 * 60 * 1000;
 
 export default function Notifications() {
-  usePageTitle('Notifications');
+  usePageTitle('Needs your attention');
   const navigate = useNavigate();
   const { user } = useAuth();
   const [stalled, setStalled] = useState<StalledDoc[]>([]);
@@ -119,132 +118,88 @@ export default function Notifications() {
     return onHealthDataChange(load);
   }, [user]);
 
+  // One row style for every item: the whole row is the button.
+  const Row = ({ title, detail, onClick, label }: { title: string; detail?: string; onClick: () => void; label: string }) => (
+    <li>
+      <button type="button" onClick={onClick} aria-label={label} className="flex min-h-[3.25rem] w-full items-center gap-3 px-4 py-3 text-left hover:bg-muted/50">
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[16px] font-semibold">{title}</span>
+          {detail && <span className="block truncate text-[14px] text-muted-foreground">{detail}</span>}
+        </span>
+        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+      </button>
+    </li>
+  );
+
   return (
     <div className="min-h-screen bg-background">
-      <div className="border-b border-border bg-card">
-        <div className="px-4 py-3 flex items-center gap-3 max-w-3xl mx-auto">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/dashboard')}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex items-center gap-2">
-            <Bell className="h-4 w-4 text-primary" />
-            <h1 className="text-base font-bold">Notifications</h1>
-          </div>
-        </div>
-      </div>
+      <SubPageHeader title="Needs your attention" backTo="/dashboard/settings" backLabel="Me" />
 
-      <div className="px-4 py-6 max-w-3xl mx-auto space-y-6">
+      <div className="px-4 py-5 max-w-3xl mx-auto space-y-6">
         <PendingConnections />
-
         <DoctorNotesCard />
 
         {stalled.length > 0 && (
-          <Card className="p-4 border-l-4 border-l-destructive">
-            <div className="flex items-center gap-2 mb-3">
-              <FileText className="h-4 w-4 text-destructive" />
-              <p className="text-sm font-semibold">
-                {stalled.length === 1 ? '1 analysis appears stalled' : `${stalled.length} analyses appear stalled`}
-              </p>
-            </div>
-            <ul className="space-y-1.5">
+          <section className="space-y-3">
+            <h2 className="section-title">Documents not read yet</h2>
+            <ul className="row-group">
               {stalled.map(d => {
-                const age = d.uploaded_at
-                  ? formatDistanceToNow(new Date(d.uploaded_at), { addSuffix: true })
-                  : '';
+                const age = d.uploaded_at ? formatDistanceToNow(new Date(d.uploaded_at), { addSuffix: true }) : '';
+                const name = d.ai_suggested_name || d.file_name;
                 return (
-                  <li key={d.id} className="flex items-center justify-between gap-2 text-xs">
-                    <span className="truncate">
-                      <span className="font-medium">{d.ai_suggested_name || d.file_name}</span>
-                      {age && <span className="text-muted-foreground"> · uploaded {age}</span>}
-                    </span>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-7 text-xs flex-shrink-0"
-                      onClick={() => navigate(`/dashboard/medical-history?doc=${d.id}`)}
-                    >
-                      Open
-                    </Button>
-                  </li>
+                  <Row
+                    key={d.id}
+                    title={name}
+                    detail={age ? `Uploaded ${age} · tap to try again` : 'Tap to try again'}
+                    label={`Open ${name}`}
+                    onClick={() => navigate(`/dashboard/medical-history?doc=${d.id}`)}
+                  />
                 );
               })}
             </ul>
-          </Card>
+          </section>
         )}
 
         {critical.length > 0 && (
-          <Card className="p-4 border-l-4 border-l-amber-500">
-            <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle className="h-4 w-4 text-amber-600" />
-              <p className="text-sm font-semibold">
-                {critical.length === 1 ? '1 critical finding' : `${critical.length} critical findings`}
-              </p>
-            </div>
-            <ul className="space-y-1.5">
+          <section className="space-y-3">
+            <h2 className="section-title">Results to show a doctor soon</h2>
+            <ul className="row-group">
               {critical.slice(0, 8).map(f => (
-                <li key={f.id} className="flex items-center justify-between gap-2 text-xs">
-                  <span className="truncate">
-                    <span className="font-medium">{f.title}</span>
-                    {f.value && (
-                      <span className="text-muted-foreground">
-                        {' '}— {f.value}{f.unit ? ` ${f.unit}` : ''}
-                      </span>
-                    )}
-                  </span>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-7 text-xs flex-shrink-0"
-                    onClick={() => navigate(f.document_id ? `/dashboard/medical-history?doc=${f.document_id}` : '/dashboard/medical-history')}
-                  >
-                    Open
-                  </Button>
-                </li>
+                <Row
+                  key={f.id}
+                  title={f.title}
+                  detail={f.value ? `${f.value}${f.unit ? ` ${f.unit}` : ''}` : undefined}
+                  label={`Open ${f.title}`}
+                  onClick={() => navigate(f.document_id ? `/dashboard/medical-history?doc=${f.document_id}` : '/dashboard/medical-history')}
+                />
               ))}
             </ul>
-          </Card>
+          </section>
         )}
 
         {cancellations.length > 0 && (
-          <Card className="p-4 border-l-4 border-l-destructive">
-            <div className="flex items-center gap-2 mb-3">
-              <CalendarX className="h-4 w-4 text-destructive" />
-              <p className="text-sm font-semibold">
-                {cancellations.length === 1
-                  ? 'A doctor cancelled your appointment'
-                  : `${cancellations.length} appointments were cancelled by your doctor`}
-              </p>
-            </div>
-            <ul className="space-y-2">
+          <section className="space-y-3">
+            <h2 className="section-title">
+              {cancellations.length === 1 ? 'A doctor cancelled your visit' : 'Visits your doctor cancelled'}
+            </h2>
+            <ul className="row-group">
               {cancellations.map(apt => {
                 const when = new Date(apt.scheduled_at);
                 const reason = doctorCancelReason(apt.notes);
                 const doctor = [apt.doctor_title, apt.doctor_name].filter(Boolean).join(' ') || 'Your doctor';
+                const time = `${when.toLocaleDateString()} at ${when.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
                 return (
-                  <li key={apt.id} className="text-xs space-y-0.5 border-l-2 border-destructive/40 pl-2.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <span>
-                        <span className="font-medium">{doctor}</span>
-                        <span className="text-muted-foreground"> · {when.toLocaleDateString()} at {when.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      </span>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 text-xs flex-shrink-0 gap-1"
-                        onClick={() => navigate('/find-doctor')}
-                      >
-                        <Search className="h-3 w-3" />
-                        Rebook
-                      </Button>
-                    </div>
-                    {reason && (
-                      <p className="text-muted-foreground italic">"{reason}"</p>
-                    )}
-                  </li>
+                  <Row
+                    key={apt.id}
+                    title={`${doctor} · ${time}`}
+                    detail={reason ? `"${reason}" · tap to book again` : 'Tap to book again'}
+                    label={`Book again after ${doctor} cancelled`}
+                    onClick={() => navigate('/find-doctor')}
+                  />
                 );
               })}
             </ul>
-          </Card>
+          </section>
         )}
 
         <ConnectedDoctors />
@@ -253,8 +208,8 @@ export default function Notifications() {
             momentarily claim "nothing to flag" while the data is still
             in flight. */}
         {loaded && stalled.length === 0 && critical.length === 0 && cancellations.length === 0 && (
-          <div className="text-center text-sm text-muted-foreground py-8">
-            Nothing else to flag right now.
+          <div className="text-center text-[15px] text-muted-foreground py-8">
+            Nothing else needs you right now.
           </div>
         )}
       </div>

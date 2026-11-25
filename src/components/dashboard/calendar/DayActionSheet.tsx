@@ -216,8 +216,8 @@ const DayActionSheet = ({
                 <span className="text-xs text-muted-foreground">Mood</span>
               </button>
               <button onClick={onLogIntimacy} className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-muted/50 transition-colors">
-                <div className="w-10 h-10 rounded-full bg-pink-500/10 flex items-center justify-center">
-                  <Heart className="h-5 w-5 text-pink-500" />
+                <div className="w-10 h-10 rounded-full bg-stage-tint flex items-center justify-center">
+                  <Heart className="h-5 w-5 text-stage-accent" />
                 </div>
                 <span className="text-xs text-muted-foreground">Intimacy</span>
               </button>

@@ -75,7 +75,7 @@ const PPD_FLAGS = [
 const WELLNESS_TIPS = [
   { icon: Apple, label: 'Eat regularly — your body needs more calories during recovery, especially while breastfeeding.', color: 'text-primary' },
   { icon: Moon, label: 'Nap when you can, even 20-minute stretches. Sleep deprivation is the single biggest postpartum risk factor.', color: 'text-indigo-500' },
-  { icon: Heart, label: 'Accept help — meals, errands, baby-holding. The "village" is a real thing and not optional.', color: 'text-pink-500' },
+  { icon: Heart, label: 'Accept help — meals, errands, baby-holding. The "village" is a real thing and not optional.', color: 'text-stage-accent' },
   { icon: Droplet, label: 'Hydrate. Especially if breastfeeding (aim 2.5–3 L/day).', color: 'text-blue-500' },
 ];
 
@@ -270,7 +270,7 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
   return (
     <div className="space-y-4">
       {/* Hero */}
-      <Card className="p-4 bg-gradient-to-br from-pink-50 via-primary/5 to-muted/40 dark:from-pink-900/10 dark:via-primary/10 dark:to-muted/20">
+      <Card className="p-4 bg-stage-tint border-transparent">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
             <Baby className="h-6 w-6 text-primary" />
@@ -444,7 +444,7 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
 const CATEGORY_TONE: Record<RecoveryItem['category'], string> = {
   visit: 'text-primary',
   physical: 'text-foreground/70',
-  emotional: 'text-pink-600',
+  emotional: 'text-stage-accent',
   baby: 'text-muted-foreground',
 };
 

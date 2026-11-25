@@ -182,7 +182,7 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase, with
       )}
 
       {/* Current phase status */}
-      {!withHero && <div className="bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 rounded-2xl p-5">
+      {!withHero && <div className="bg-stage-tint rounded-2xl p-5">
         <div className="text-center mb-4">
           <div className="text-5xl mb-2">{currentPhaseData.icon}</div>
           <div className="text-2xl font-semibold text-foreground mb-1">{currentPhaseData.label}</div>

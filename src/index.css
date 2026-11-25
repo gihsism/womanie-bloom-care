@@ -425,6 +425,21 @@
     color: hsl(var(--foreground));
   }
   /* One quiet line under the page title ("Last blood test · 12 Nov"). */
+  /* Sub-pages (components/SubPageHeader): same face, one step smaller. */
+  .subpage-title {
+    font-family: theme('fontFamily.display');
+    font-size: 1.375rem;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: hsl(var(--foreground));
+  }
+  /* A plain intro sentence under a sub-page header (no tinted box). */
+  .page-intro {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: hsl(var(--muted-foreground));
+  }
   .page-sub {
     font-size: 0.9375rem;
     line-height: 1.35;

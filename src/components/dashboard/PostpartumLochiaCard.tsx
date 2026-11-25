@@ -31,7 +31,7 @@ type LochiaLevel = 'none' | 'spotting' | 'light-red' | 'heavy-red' | 'pink-brown
 
 const COLOR: Record<LochiaLevel, string> = {
   none: 'bg-muted/40',
-  spotting: 'bg-pink-200',
+  spotting: 'bg-stage-accent/30',
   'light-red': 'bg-red-300',
   'heavy-red': 'bg-red-500',
   'pink-brown': 'bg-amber-300',

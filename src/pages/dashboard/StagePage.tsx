@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import SubPageHeader from '@/components/SubPageHeader';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
@@ -77,12 +77,7 @@ export default function StagePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card px-4 py-4 flex items-center gap-2">
-        <Link to="/dashboard" aria-label="Back to Home" className="flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted">
-          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
-        </Link>
-        <h1 className="font-display text-[24px] font-normal leading-tight">{stageLabel(mode)}</h1>
-      </header>
+      <SubPageHeader title={stageLabel(mode)} backTo="/dashboard" backLabel="Home" />
 
       <main className="w-full max-w-3xl mx-auto px-4 py-6">
         {mode === 'ivf' && (

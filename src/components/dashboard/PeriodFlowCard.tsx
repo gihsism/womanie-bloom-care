@@ -27,10 +27,10 @@ interface PeriodFlowCardProps {
 type FlowLevel = 'spotting' | 'light' | 'medium' | 'heavy';
 
 const FLOW_TONE: Record<FlowLevel, { dot: string; label: string }> = {
-  spotting: { dot: 'bg-pink-200 dark:bg-pink-900/60', label: 'Spotting' },
-  light:    { dot: 'bg-pink-300 dark:bg-pink-800/80', label: 'Light' },
-  medium:   { dot: 'bg-pink-500',                    label: 'Medium' },
-  heavy:    { dot: 'bg-pink-700 dark:bg-pink-500',   label: 'Heavy' },
+  spotting: { dot: 'bg-stage-accent/30', label: 'Spotting' },
+  light:    { dot: 'bg-stage-accent/55', label: 'Light' },
+  medium:   { dot: 'bg-stage-accent/80',              label: 'Medium' },
+  heavy:    { dot: 'bg-stage-accent',   label: 'Heavy' },
 };
 
 
@@ -159,7 +159,7 @@ const PeriodFlowCard = ({ lastPeriodStart }: PeriodFlowCardProps) => {
     <Card className="p-4 space-y-3">
       <div className="flex items-center justify-between">
         <h4 className="font-semibold flex items-center gap-2">
-          <Droplet className="h-4 w-4 text-pink-500" />
+          <Droplet className="h-4 w-4 text-stage-accent" />
           Period flow
         </h4>
         {latestStats && (

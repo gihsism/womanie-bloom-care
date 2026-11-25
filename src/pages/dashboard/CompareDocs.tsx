@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import SubPageHeader from '@/components/SubPageHeader';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, ArrowUpDown, MessageCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, MessageCircle, Loader2 } from 'lucide-react';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { format } from 'date-fns';
 import { getFriendlyName } from '@/lib/medical-utils';
-import UserMenu from '@/components/UserMenu';
 
 // Side-by-side comparison of two documents.
 //
@@ -218,22 +218,12 @@ export default function CompareDocs() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="px-4 py-3 flex items-center gap-3 max-w-4xl mx-auto">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/dashboard/medical-history')}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex-1 flex items-center gap-2">
-            <ArrowUpDown className="h-4 w-4 text-primary" />
-            <h1 className="text-base font-bold">Compare documents</h1>
-          </div>
-          <Button size="sm" variant="outline" onClick={askAboutComparison} className="gap-1.5">
-            <MessageCircle className="h-3.5 w-3.5" />
+      <SubPageHeader title="Compare documents" backTo="/dashboard/medical-history" backLabel="Records" action={
+          <button type="button" onClick={askAboutComparison} className="inline-flex h-10 items-center gap-1.5 rounded-full border border-line px-4 text-[15px] font-semibold text-stage-accent hover:bg-muted">
+            <MessageCircle className="h-4 w-4" aria-hidden="true" />
             Ask AI
-          </Button>
-          <UserMenu />
-        </div>
-      </div>
+          </button>
+        } />
 
       <div className="px-4 py-6 max-w-4xl mx-auto space-y-4">
         <Card className="p-4">

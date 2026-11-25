@@ -119,7 +119,7 @@ describe('Me (Settings as a list of rows)', () => {
     renderAt('/dashboard/settings#privacy');
     expect(screen.getByText('Delete my account')).toBeInTheDocument();
     expect(screen.getByText('access-log')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Back to Me' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Back to Me' }));
     expect(screen.getByTestId('where')).toHaveTextContent(/^\/dashboard\/settings$/);
   });
 

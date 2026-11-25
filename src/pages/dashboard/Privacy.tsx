@@ -1,8 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import {
-  ArrowLeft,
+  ChevronDown,
   Shield,
   Database,
   Lock,
@@ -10,10 +8,9 @@ import {
   Users,
   Download,
   Trash2,
-  Mail,
 } from 'lucide-react';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import UserMenu from '@/components/UserMenu';
+import SubPageHeader from '@/components/SubPageHeader';
 
 // Concrete privacy overview, so the user knows exactly where their
 // data lives and what controls they have. This is the page behind
@@ -76,79 +73,42 @@ export default function Privacy() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="px-4 py-3 flex items-center gap-3 max-w-3xl mx-auto">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/dashboard')}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex-1 flex items-center gap-2">
-            <Shield className="h-4 w-4 text-primary" />
-            <h1 className="text-base font-bold">Privacy & Security</h1>
-          </div>
-          <UserMenu />
+      <SubPageHeader title="Privacy" backTo="/dashboard/settings" backLabel="Me" />
+
+      <div className="px-4 py-5 max-w-3xl mx-auto space-y-5">
+        <p className="page-intro">
+          Your data is yours. Here is where it lives, who can see it, and what you can do with it.
+        </p>
+
+        {/* One list, details folded away. */}
+        <div className="row-group">
+          {SECTIONS.map(section => (
+            <details key={section.title} className="group">
+              <summary className="flex min-h-[3.25rem] cursor-pointer list-none items-center gap-3 px-4 py-3 text-[16px] font-semibold [&::-webkit-details-marker]:hidden">
+                <span className="flex-1">{section.title}</span>
+                <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden="true" />
+              </summary>
+              <div className="px-4 pb-4 -mt-1">
+                {Array.isArray(section.body) ? (
+                  <ul className="space-y-2 list-disc ml-4">
+                    {section.body.map((line, i) => (
+                      <li key={i} className="text-[15px] leading-relaxed text-muted-foreground">{line}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-[15px] leading-relaxed text-muted-foreground">{section.body}</p>
+                )}
+              </div>
+            </details>
+          ))}
         </div>
-      </div>
 
-      <div className="px-4 py-6 max-w-3xl mx-auto space-y-6">
-        <Card className="p-4 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
-          <p className="text-sm font-semibold mb-1">Your data is yours.</p>
-          <p className="text-sm text-muted-foreground mb-3">
-            Womanie exists to help you understand your health. Here's exactly where your data lives, who can see it, and what controls you have.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <Button size="sm" onClick={() => navigate('/dashboard/settings')} className="gap-1.5">
-              <Download className="h-3.5 w-3.5" />
-              Download my data
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => navigate('/dashboard/settings')} className="gap-1.5 text-destructive hover:text-destructive">
-              <Trash2 className="h-3.5 w-3.5" />
-              Delete my account
-            </Button>
-          </div>
-        </Card>
-
-        <section className="space-y-3">
-          {SECTIONS.map(section => {
-            const Icon = section.icon;
-            return (
-              <Card key={section.title} className="p-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Icon className="h-4 w-4 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold mb-2">{section.title}</p>
-                    {Array.isArray(section.body) ? (
-                      <ul className="space-y-1.5 list-disc ml-4">
-                        {section.body.map((line, i) => (
-                          <li key={i} className="text-[13px] leading-relaxed text-muted-foreground">
-                            {line}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-[13px] leading-relaxed text-muted-foreground">{section.body}</p>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
-        </section>
-
-        <Card className="p-4 border-dashed">
-          <p className="text-xs text-muted-foreground text-center mb-3">
-            Questions or concerns about your data?
-          </p>
-          <div className="flex justify-center">
-            <Button size="sm" variant="outline" asChild className="gap-1.5">
-              <a href="mailto:privacy@womanie.info">
-                <Mail className="h-3.5 w-3.5" />
-                privacy@womanie.info
-              </a>
-            </Button>
-          </div>
-        </Card>
+        <button type="button" className="btn-stage w-full" onClick={() => navigate('/dashboard/settings#privacy')}>
+          Download or delete my data
+        </button>
+        <p className="text-center text-[15px]">
+          Questions? <a className="font-semibold text-stage-accent underline-offset-2 hover:underline" href="mailto:privacy@womanie.info">privacy@womanie.info</a>
+        </p>
       </div>
     </div>
   );

@@ -137,7 +137,7 @@ const SleepTrendCard = () => {
     <Card className="p-4 space-y-3">
       <div className="flex items-center justify-between">
         <h4 className="font-semibold flex items-center gap-2">
-          <Moon className="h-4 w-4 text-indigo-500" />
+          <Moon className="h-4 w-4 text-stage-accent" />
           Sleep trend
         </h4>
         <Badge variant="outline" className="text-[10px]">

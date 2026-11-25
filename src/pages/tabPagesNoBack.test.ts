@@ -33,8 +33,8 @@ describe('tab pages have no back arrow', () => {
 
   it('Me shows its back arrow only on a section sub-page', () => {
     const me = read('./dashboard/Settings.tsx');
-    expect(me).toMatch(/\{section && \(\s*<>\s*<Button[\s\S]*?aria-label="Back to Me"/);
-    expect(me.match(/<ArrowLeft\b/g) ?? []).toHaveLength(1);
+    expect(me).toMatch(/\{section \? \(\s*<SubPageHeader[^>]*backLabel="Me"/);
+    expect(me).not.toMatch(/<ArrowLeft\b/);
   });
 
   it('a sub-view keeps its back arrow', () => {

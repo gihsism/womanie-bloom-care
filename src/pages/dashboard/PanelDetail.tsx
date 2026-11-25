@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import SubPageHeader from '@/components/SubPageHeader';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, FlaskConical, Loader2, MessageCircle, Sparkles, RefreshCw } from 'lucide-react';
+import { Loader2, MessageCircle, Sparkles, RefreshCw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,7 +11,6 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import { format } from 'date-fns';
 import { getFriendlyName } from '@/lib/medical-utils';
 import ResultSparkline from '@/components/dashboard/ResultSparkline';
-import UserMenu from '@/components/UserMenu';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 import { hormoneKeyForTitle, assessAmh, getPhaseRange } from '@/lib/hormone-reference';
 
@@ -280,24 +280,12 @@ export default function PanelDetail() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="px-4 py-3 flex items-center gap-3 max-w-4xl mx-auto">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex-1 flex items-center gap-2">
-            <FlaskConical className="h-4 w-4 text-primary" />
-            <h1 className="text-base font-bold truncate">{panelDisplayName}</h1>
-          </div>
-          {series.length > 0 && (
-            <Button size="sm" variant="outline" onClick={askAboutPanel} className="gap-1.5">
-              <MessageCircle className="h-3.5 w-3.5" />
-              Ask AI
-            </Button>
-          )}
-          <UserMenu />
-        </div>
-      </div>
+      <SubPageHeader title={panelDisplayName} backTo="/dashboard/medical-history" backLabel="Records" action={series.length > 0 && (
+          <button type="button" onClick={askAboutPanel} className="inline-flex h-10 items-center gap-1.5 rounded-full border border-line px-4 text-[15px] font-semibold text-stage-accent hover:bg-muted">
+            <MessageCircle className="h-4 w-4" aria-hidden="true" />
+            Ask AI
+          </button>
+        )} />
 
       <div className="px-4 py-6 max-w-4xl mx-auto space-y-4">
         {series.length === 0 ? (

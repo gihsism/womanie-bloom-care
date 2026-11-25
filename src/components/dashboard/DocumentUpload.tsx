@@ -180,7 +180,7 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
         <DialogTrigger asChild>
           <Card className="p-5 cursor-pointer hover:bg-primary/5 hover:border-primary/30 transition-all border-dashed border-2">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/10 flex items-center justify-center flex-shrink-0">
+              <div className="w-14 h-14 rounded-2xl bg-stage-tint flex items-center justify-center flex-shrink-0">
                 <Upload className="h-7 w-7 text-primary" />
               </div>
               <div className="flex-1">

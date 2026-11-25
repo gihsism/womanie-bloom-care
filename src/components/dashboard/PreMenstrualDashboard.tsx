@@ -33,7 +33,7 @@ const wellnessTips = [
   { icon: Apple, title: 'Nutrition', tip: 'Eat iron-rich foods like leafy greens, lean meat, and beans to prepare your body.', color: 'text-primary' },
   { icon: Moon, title: 'Sleep', tip: 'Aim for 9–11 hours of sleep. Your body is growing and needs plenty of rest.', color: 'text-indigo-500' },
   { icon: Activity, title: 'Exercise', tip: 'Stay active with activities you enjoy — dance, swimming, cycling, or yoga.', color: 'text-primary' },
-  { icon: Heart, title: 'Emotional Health', tip: 'Journaling and talking to trusted friends or family can help with big emotions.', color: 'text-pink-500' },
+  { icon: Heart, title: 'Emotional Health', tip: 'Journaling and talking to trusted friends or family can help with big emotions.', color: 'text-stage-accent' },
   { icon: Shield, title: 'Hygiene', tip: 'Use gentle unscented products. Learn about period products so you feel prepared.', color: 'text-blue-500' },
   { icon: Sun, title: 'Self-Care', tip: 'Take time for things that make you happy. Your mental health matters just as much.', color: 'text-primary' },
 ];
@@ -116,13 +116,13 @@ export default function PreMenstrualDashboard() {
   return (
     <div className="space-y-5">
       {/* Welcome Card */}
-      <Card className="p-5 bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 dark:from-pink-950/30 dark:via-purple-950/30 dark:to-indigo-950/30 border-pink-200/50 dark:border-pink-800/30">
+      <Card className="p-5 bg-stage-tint border-transparent">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-pink-100 dark:bg-pink-900/40 flex items-center justify-center flex-shrink-0">
-            <Flower2 className="h-6 w-6 text-pink-500" />
+          <div className="w-12 h-12 rounded-2xl bg-stage-chip flex items-center justify-center flex-shrink-0">
+            <Flower2 className="h-6 w-6 text-stage-accent" />
           </div>
           <div className="flex-1">
-            <h2 className="text-lg font-bold mb-1">Your Body, Your Journey 🌸</h2>
+            <h2 className="text-lg font-bold mb-1">Your body, your journey</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Your body is getting ready for an amazing change. Here you'll learn what to expect, 
               how to feel prepared, and why everything you're experiencing is perfectly normal.
@@ -154,10 +154,10 @@ export default function PreMenstrualDashboard() {
           moment a young user actually needs it — discreet, calm,
           step-by-step. Always rendered (not behind a section toggle)
           so it's the first thing they find. */}
-      <Card className="p-4 border-pink-200/60 dark:border-pink-800/30 bg-gradient-to-br from-pink-50/60 to-purple-50/30 dark:from-pink-950/20 dark:to-purple-950/10">
+      <Card className="p-4 bg-stage-tint border-transparent">
         <div className="flex items-start gap-3 mb-3">
-          <div className="w-9 h-9 rounded-xl bg-pink-100 dark:bg-pink-900/40 flex items-center justify-center flex-shrink-0">
-            <Flower2 className="h-4 w-4 text-pink-500" />
+          <div className="w-9 h-9 rounded-xl bg-stage-chip flex items-center justify-center flex-shrink-0">
+            <Flower2 className="h-4 w-4 text-stage-accent" />
           </div>
           <div className="flex-1">
             <h3 className="text-sm font-bold">If your period starts today — here's what to do</h3>
@@ -205,7 +205,7 @@ export default function PreMenstrualDashboard() {
             </li>
           ))}
         </ol>
-        <div className="mt-4 pt-3 border-t border-pink-200/40 dark:border-pink-800/20">
+        <div className="mt-4 pt-3 border-t border-line">
           <p className="text-[11px] text-muted-foreground leading-relaxed">
             <span className="font-medium">When to ask for help right away:</span> very heavy bleeding (soaking
             a pad in under an hour), severe cramps you can’t stand, or bleeding before age 8 or after a
