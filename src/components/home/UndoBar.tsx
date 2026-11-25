@@ -31,7 +31,7 @@ export default function UndoBar({ msg, onClose }: { msg: UndoMessage | null; onC
       </span>
       <div className="flex-1 min-w-0">
         <p className="text-[16px] font-semibold leading-tight truncate">{msg.title}</p>
-        <p className="text-[13px] opacity-80 leading-tight mt-0.5">Hold a tile to add details</p>
+        <p className="text-[13px] opacity-80 leading-tight mt-0.5">Saved under Today</p>
       </div>
       {msg.undo && (
         <button

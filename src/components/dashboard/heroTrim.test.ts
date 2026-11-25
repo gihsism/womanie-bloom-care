@@ -3,9 +3,9 @@ import { resolve } from 'node:path';
 import { describe, it, expect } from 'vitest';
 
 // Idea 4 replaced the per-stage Home heroes (figures, dials, rings) with
-// one coloured stage header. The header keeps the same trim the heroes had:
-// one fact (the big line), one sentence, two small facts, no buttons of
-// its own (the tiles do the acting) and a single link (the stage chip).
+// one coloured stage header. Round 6 trims it further: one fact (the big
+// line), one sentence, no fact boxes, no buttons of its own (Home passes
+// its one action in as children) and a single link (the stage chip).
 // The wording rules — no spelled-out duplicate of the number, no cycle
 // jargon or lab abbreviations — are checked on every stage in
 // src/lib/stageHeader.test.ts.
@@ -28,11 +28,11 @@ describe('Home header is trimmed', () => {
     expect(header.match(/<Link\b/g)).toHaveLength(1);
   });
 
-  it('shows one big line, one sentence and the two facts', () => {
+  it('shows one big line and one sentence, no fact boxes', () => {
     expect(header.match(/<h1\b/g)).toHaveLength(1);
     expect(header).toContain('{model.big}');
     expect(header).toContain('{model.sentence}');
-    expect(header).toMatch(/model\.facts\.map/);
+    expect(header).not.toMatch(/model\.facts/);
   });
 
   it.each(OLD_HEROES)('the old hero %s is gone (no second status block on Home)', (f) => {

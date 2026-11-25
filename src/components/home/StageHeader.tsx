@@ -1,12 +1,19 @@
+import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import type { HeaderModel } from '@/lib/stageHeader';
 import TileIcon from './TileIcon';
 
-// Idea 4 header: the stage's calm colour, full-bleed, rounded at the
-// bottom. Chip (taps through to change the life stage), one big status
-// line, one sentence, two small fact boxes. Colours are the stage tokens.
+// Idea 4 header, round 6 ("much more straightforward"): the stage's calm
+// colour, full-bleed, rounded at the bottom. A chip (taps through to change
+// the life stage), ONE big fact ("Week 31", "Day 14", "Period in 3 days")
+// and one short sentence. The page's one action sits at the bottom of the
+// header (passed in as children); everything else lives off Home.
 
-export default function StageHeader({ model }: { model: HeaderModel }) {
+/** Short facts ("Week 31", "Day 6") get the really big size. */
+export const bigSize = (big: string) =>
+  big.length <= 9 ? 'text-[60px] sm:text-[64px]' : big.length <= 14 ? 'text-[46px] sm:text-[50px]' : 'text-[38px] sm:text-[42px]';
+
+export default function StageHeader({ model, children }: { model: HeaderModel; children?: ReactNode }) {
   return (
     <header className="-mx-4 bg-stage-head text-stage-ink rounded-b-[32px] px-5 pt-5 pb-5 sm:mx-0 sm:rounded-[32px]">
       <Link
@@ -17,16 +24,9 @@ export default function StageHeader({ model }: { model: HeaderModel }) {
         <TileIcon name={model.chipIcon} className="h-[18px] w-[18px]" />
         {model.chip}
       </Link>
-      <h1 className="mt-4 text-[40px] sm:text-[44px] leading-[1.05] font-extrabold tracking-[-0.02em] tabular-nums">{model.big}</h1>
-      <p className="mt-1.5 text-[18px] font-semibold text-stage-muted">{model.sentence}</p>
-      <dl className="mt-5 grid grid-cols-2 gap-2 tabular-nums">
-        {model.facts.map(f => (
-          <div key={f.label} className="rounded-2xl bg-stage-chip/70 px-3 py-2.5 min-w-0">
-            <dt className="text-[14px] font-semibold text-stage-muted truncate">{f.label}</dt>
-            <dd className="text-[18px] font-extrabold truncate">{f.value}</dd>
-          </div>
-        ))}
-      </dl>
+      <h1 className={`mt-6 ${bigSize(model.big)} leading-[1.02] font-extrabold tracking-[-0.03em] tabular-nums`}>{model.big}</h1>
+      <p className="mt-2 text-[18px] font-semibold text-stage-muted">{model.sentence}</p>
+      {children && <div className="mt-6">{children}</div>}
     </header>
   );
 }

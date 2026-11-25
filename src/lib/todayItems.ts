@@ -128,9 +128,9 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
     const due = minutesOf(pill.reminderTime);
     const nowMin = now.getHours() * 60 + now.getMinutes();
     if (!pill.takenToday && due != null && nowMin >= due) {
-      items.push({ id: 'pill-missed', label: `Today's pill not ticked yet (due ${pill.reminderTime})`, target: `${STAGE_PAGE}#contraception` });
+      items.push({ id: 'pill-missed', label: `Pill not taken yet (due ${pill.reminderTime})`, target: `${STAGE_PAGE}#contraception` });
     } else if (pill.takenYesterday === false && !(pill.packDay != null && pill.packDay === 1)) {
-      items.push({ id: 'pill-missed', label: "Yesterday's pill not ticked. Missed it?", target: `${STAGE_PAGE}#contraception` });
+      items.push({ id: 'pill-missed', label: "Yesterday's pill: taken or missed?", target: `${STAGE_PAGE}#contraception` });
     }
   }
   const meds = s.medicinesDue ?? [];
@@ -152,7 +152,7 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
     if (last === null) {
       items.push({ id: 'mood-check', label: 'Take the 2-minute mood check', target: `${STAGE_PAGE}#mood-check` });
     } else if (daysBetween(last, now) >= MOOD_CHECK_EVERY_DAYS) {
-      items.push({ id: 'mood-check', label: 'Mood check due (every 2 weeks)', target: `${STAGE_PAGE}#mood-check` });
+      items.push({ id: 'mood-check', label: 'Time for your mood check', target: `${STAGE_PAGE}#mood-check` });
     }
   }
   const babies = mode === 'postpartum' ? s.babyVaccines ?? [] : [];

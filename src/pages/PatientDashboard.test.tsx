@@ -4,11 +4,11 @@ import { MemoryRouter } from 'react-router-dom';
 import type { LifeStage } from '@/components/dashboard/DashboardHeader';
 import { EMPTY_STATE } from '@/lib/quickLog/state';
 
-// Renders Home (idea 4) with its data hooks stubbed, to check the short
-// template: the stage header (chip that changes the stage, one big line,
-// one sentence, two facts), one-tap tiles 3 per row that LOG on tap with
-// an Undo, Today (needs-you rows ≤3 + what was logged), "More for
-// <stage>" (≤4 rows) — and nothing else.
+// Renders Home (idea 4, round 6 "much more straightforward") with its data
+// hooks stubbed: the stage header (chip that changes the stage, ONE big
+// fact, one sentence), ONE primary action ("Log today", which opens the
+// one-tap tiles in a sheet), Today (at most 3 rows, "Show all" for the
+// rest) — and nothing else.
 
 const state = vi.hoisted(() => ({
   mode: 'conception' as string,
@@ -61,28 +61,34 @@ beforeEach(() => {
 
 const STAGES: LifeStage[] = ['pre-menstrual', 'menstrual-cycle', 'contraception', 'conception', 'ivf', 'pregnancy', 'postpartum', 'menopause', 'post-menopause'];
 
-describe('Home template (idea 4)', () => {
-  it.each(STAGES)('%s: header, tiles, Today, More — and nothing else', (mode) => {
+const openLog = () => fireEvent.click(screen.getByRole('button', { name: 'Log today' }));
+
+describe('Home template (idea 4, round 6)', () => {
+  it.each(STAGES)('%s: header with one fact, one action, Today — and nothing else', (mode) => {
     const { container } = renderHome(mode, 20);
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
     expect(screen.getByRole('link', { name: /change life stage/i })).toHaveAttribute('href', '/dashboard/settings#life-stage');
-    expect(container.querySelectorAll('header dd')).toHaveLength(2);
-    const tiles = within(screen.getByRole('region', { name: 'Tap to log' })).getAllByRole('listitem');
-    expect(tiles.length).toBeGreaterThanOrEqual(4);
-    expect(tiles.length).toBeLessThanOrEqual(6);
+    expect(container.querySelectorAll('header dd')).toHaveLength(0);
+    // the one action; the tiles are not on Home until she taps it
+    expect(screen.getAllByTestId('home-primary')).toHaveLength(1);
+    expect(screen.queryByRole('region', { name: 'Tap to log' })).toBeNull();
     expect(screen.getByRole('heading', { name: 'Today' })).toBeInTheDocument();
-    expect(screen.getByText('Nothing logged yet today')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /^More for / })).toBeInTheDocument();
-    // no greeting, no single filled "primary" button, no old clutter
+    expect(screen.getByTestId('today-empty')).toHaveTextContent('Nothing logged yet today');
+    expect(screen.queryByRole('heading', { name: /^More for / })).toBeNull();
     expect(container.textContent).not.toMatch(/Good (morning|afternoon|evening)|\bMenu\b|Upload|Devices|Community|Daily Reminders|Quick Access/);
   });
 
-  it('the tile grid is three per row', () => {
+  it('"Log today" opens the tiles, three per row', () => {
     renderHome('pregnancy', 30);
-    expect(screen.getByRole('region', { name: 'Tap to log' }).querySelector('ul')!.className).toContain('grid-cols-3');
+    openLog();
+    const region = screen.getByRole('region', { name: 'Tap to log' });
+    expect(region.querySelector('ul')!.className).toContain('grid-cols-3');
+    const tiles = within(region).getAllByRole('listitem');
+    expect(tiles.length).toBeGreaterThanOrEqual(4);
+    expect(tiles.length).toBeLessThanOrEqual(6);
   });
 
-  it('caps the needs-you rows at three', () => {
+  it('shows at most three Today rows, the rest behind "Show all"', () => {
     state.signals = {
       appointmentToday: new Date(new Date().setHours(23, 0, 0, 0)),
       newDoctorNotes: 1,
@@ -91,11 +97,13 @@ describe('Home template (idea 4)', () => {
     };
     renderHome('menstrual-cycle');
     const today = screen.getByRole('heading', { name: 'Today' }).closest('section')!;
-    expect(within(today).getAllByRole('button')).toHaveLength(3);
+    expect(within(today).getAllByRole('listitem')).toHaveLength(3);
+    expect(within(today).queryByRole('button', { name: /Show all/ })).toBeNull();
   });
 
-  it('pregnancy week 30: tapping Kick logs at once and Undo deletes it', async () => {
+  it('pregnancy week 30: Log today → Kick logs at once and Undo deletes it', async () => {
     renderHome('pregnancy', 30);
+    openLog();
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Kick' })); });
     expect(state.log).toHaveBeenCalledWith(expect.objectContaining({ id: 'kick' }), undefined);
     expect(screen.getByRole('status')).toHaveTextContent('Kick logged · 10:42');
@@ -104,8 +112,9 @@ describe('Home template (idea 4)', () => {
     expect(screen.queryByRole('status')).toBeNull();
   });
 
-  it('"…" opens the details instead of logging; Note opens the Log sheet', () => {
+  it('"…" opens the details instead of logging; "Add more detail" opens the Log sheet', () => {
     renderHome('pregnancy', 30);
+    openLog();
     fireEvent.click(screen.getByRole('button', { name: 'Nausea: details' }));
     expect(state.log).not.toHaveBeenCalled();
     expect(screen.getByRole('dialog')).toHaveTextContent('Log sheet: log');
@@ -113,9 +122,17 @@ describe('Home template (idea 4)', () => {
 
   it('a two-choice tile asks first, then logs the choice', async () => {
     renderHome('menstrual-cycle');
+    openLog();
     fireEvent.click(screen.getByRole('button', { name: 'Sex' }));
     expect(state.log).not.toHaveBeenCalled();
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Protected' })); });
     expect(state.log).toHaveBeenCalledWith(expect.objectContaining({ id: 'sex' }), { label: 'Protected', value: 'yes-protected' });
+  });
+
+  it('birth control: an untaken pill IS the one action', async () => {
+    renderHome('contraception');
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Took my pill' })); });
+    expect(state.log).toHaveBeenCalledWith(expect.objectContaining({ id: 'pill' }), undefined);
+    expect(screen.getByRole('button', { name: 'Log something else' })).toBeInTheDocument();
   });
 });

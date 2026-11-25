@@ -35,9 +35,10 @@ describe('general lab card placement', () => {
     expect(records.match(new RegExp(`<${card}\\b`, 'g')) ?? []).toHaveLength(1);
   });
 
-  it('Home keeps a route to Records (a "More for" row)', () => {
+  it('the stage page keeps the "More for" rows that lead off it (Records, labour & birth); Home links there', () => {
     expect(read('../lib/todayItems.ts')).toContain("RECORDS = '/dashboard/medical-history'");
-    expect(home).toContain('moreFor(');
+    expect(read('./dashboard/StagePage.tsx')).toContain('moreFor(');
+    expect(read('../components/home/HomeView.tsx')).toContain('go(STAGE_PAGE)');
   });
 });
 
@@ -63,14 +64,15 @@ describe('Home stays short', () => {
     expect(home).not.toContain('withHero');
   });
 
-  it('renders the idea-4 template: stage header, tiles, Today, More (no filled primary button)', () => {
+  it('renders the round-6 template: stage header with one action, Today, tiles in a sheet (no More list)', () => {
     expect(home).toContain('<HomeView');
     const view = read('../components/home/HomeView.tsx');
-    for (const block of ['<StageHeader', '<TileGrid', '<TodayLog', '<MoreForStage']) {
+    for (const block of ['<StageHeader', '<TodayLog', '<LogTodaySheet']) {
       expect(view).toContain(block);
     }
-    expect(view).not.toContain('PrimaryButton');
-    expect(home).not.toContain('PrimaryButton');
+    expect(view).not.toContain('<MoreForStage');
+    expect(view).not.toContain('<TileGrid');
+    expect(view.match(/data-testid="home-primary"/g)).toHaveLength(2); // "Log today", or the timer / pill in its place
   });
 
   it('header has no Upload / Devices / Community pills or mode dropdown; its chip changes the stage', () => {

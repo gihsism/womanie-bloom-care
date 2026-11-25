@@ -9,19 +9,21 @@ import { useStageProfile } from '@/hooks/useStageProfile';
 import { useTodaySignals } from '@/hooks/useTodaySignals';
 import { useQuickLog } from '@/hooks/useQuickLog';
 import { useHeaderFacts } from '@/hooks/useHeaderFacts';
-import { todayItems, moreFor } from '@/lib/todayItems';
+import { todayItems } from '@/lib/todayItems';
 import { tilesFor } from '@/lib/quickLog/tiles';
 import { headerFor } from '@/lib/stageHeader';
 import { stageLabel } from '@/lib/stageLabels';
 import { usePageTitle } from '@/hooks/usePageTitle';
 
-// Home, idea 4 "Colour by stage" — the same template for every life stage:
-//   1. the stage's coloured header: chip, one big status line, one
-//      sentence, two small facts (lib/stageHeader.ts)
-//   2. one-tap tiles, 3 per row: tapping LOGS (lib/quickLog), with an
-//      Undo snackbar; hold or "…" opens the full form
-//   3. Today: what needs her (lib/todayItems.ts) + what she logged, with times
-//   4. "More for <stage>": at most 4 links to detail pages
+// Home, idea 4 "Colour by stage", round 6 ("much more straightforward") —
+// the same template for every life stage (components/home/HomeView.tsx):
+//   1. the stage's coloured header: chip, ONE big fact, one sentence
+//      (lib/stageHeader.ts), with the page's ONE action at its foot:
+//      "Log today" (opens the one-tap tiles, lib/quickLog), or a running
+//      timer / an untaken daily pill in its place
+//   2. Today: what needs her (lib/todayItems.ts) + what she logged, at most
+//      three rows showing, "Show all" for the rest
+//   3. one "Trackers & guides" row to /dashboard/stage
 // Everything else lives one tap away: the stage's trackers and guides on
 // /dashboard/stage, results and charts on Records, visits on Visits,
 // settings and medicines on Me.
@@ -83,8 +85,6 @@ const PatientDashboard = () => {
           tiles={tiles}
           state={quick.state}
           items={todayItems(mode, signals)}
-          stage={stageLabel(mode)}
-          more={moreFor(mode, { weeksPregnant })}
           go={go}
           log={quick.log}
         />

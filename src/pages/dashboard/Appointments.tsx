@@ -389,8 +389,9 @@ const Appointments = () => {
           ) : nextVisit ? (
             <ul className="space-y-2">{renderAppointment(nextVisit, 'upcoming')}</ul>
           ) : (
-            <Card className="rounded-[1.25rem] border-line shadow-none p-6 text-center">
-              <p className="text-[16px] text-muted-foreground">No visits yet.</p>
+            <Card className="rounded-[1.25rem] border-line shadow-none p-6 text-center" data-testid="visits-empty">
+              <p className="text-[17px] font-bold">No visits yet</p>
+              <p className="mt-1 text-[15px] text-muted-foreground">Book one below and it shows up here.</p>
             </Card>
           )}
           {/* Questions to bring: hides itself when there is nothing to ask. */}
@@ -403,11 +404,11 @@ const Appointments = () => {
           <button
             type="button"
             onClick={() => navigate('/dashboard/visit-summary/print')}
-            className="mt-3 inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+            className="mt-3 inline-flex min-h-11 items-center gap-2 text-left text-[15px] font-semibold text-stage-accent hover:underline"
             data-testid="visits-visit-summary"
           >
-            <FileText className="h-4 w-4" />
-            Seeing a doctor who isn't on Womanie? Prepare a visit summary
+            <FileText className="h-4 w-4 shrink-0" aria-hidden="true" />
+            Doctor not on Womanie? Print a visit summary
           </button>
         </section>
 

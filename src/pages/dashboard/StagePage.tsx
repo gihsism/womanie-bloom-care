@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import SubPageHeader from '@/components/SubPageHeader';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -9,6 +9,7 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import { useScrollToHash } from '@/hooks/useScrollToHash';
 import { useStageProfile } from '@/hooks/useStageProfile';
 import { stageLabel } from '@/lib/stageLabels';
+import { moreFor, STAGE_PAGE } from '@/lib/todayItems';
 import CycleCalendar from '@/components/dashboard/CycleCalendar';
 import PregnancyTracker from '@/components/dashboard/PregnancyTracker';
 import PregnancyWeightTracker from '@/components/dashboard/PregnancyWeightTracker';
@@ -40,7 +41,8 @@ import { evidenceSpec } from '@/lib/evidenceTopics';
 // stacked on Home: the stage's big tracker (unchanged), its guides and the
 // anchors Home links to (#cycle-calendar, #weight, #mood-check, #symptoms,
 // #kick-counter, #contraction-timer, #medicines, #guides …). Home keeps
-// only the hero, Today, one button and "More for <stage>".
+// only the hero with its one action, Today, and one "Trackers & guides"
+// row that leads here.
 
 const anchor = 'scroll-mt-20 md:scroll-mt-28';
 
@@ -228,6 +230,20 @@ export default function StagePage() {
         )}
 
         <Section id="medicines" title="Medicines & supplements"><MedicineLog stage={mode} /></Section>
+        {/* Round 6: Home lost its "More for <stage>" list. The rows that
+            lead off this page (results, charts, labour & birth) live here. */}
+        {moreFor(mode, { weeksPregnant: p.weeksPregnant }).filter(r => !r.target.startsWith(STAGE_PAGE)).map(r => (
+          <div key={r.label} className="mb-2">
+            <button
+              type="button"
+              onClick={() => navigate(r.target)}
+              className="flex min-h-[3.5rem] w-full items-center gap-3 rounded-[1.25rem] border border-line bg-card px-4 text-left text-[17px] font-semibold hover:bg-muted/40"
+            >
+              <span className="flex-1">{r.label}</span>
+              <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+            </button>
+          </div>
+        ))}
         {/* Room below the last sections, so a #medicines / #guides link can
             scroll its section to the top instead of leaving it under the
             tab bar at the bottom of a page that cannot scroll further. */}

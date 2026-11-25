@@ -59,7 +59,7 @@ describe('Home non-health cards use neutral tokens', () => {
 // Idea 4: Home's own components take every colour from the tokens (the
 // stage set in index.css, switched by <html data-stage>), never a hex or a
 // named Tailwind palette colour of their own.
-const HOME = ['StageHeader.tsx', 'TileGrid.tsx', 'TodayLog.tsx', 'HomeView.tsx', 'UndoBar.tsx', 'ChoiceSheet.tsx', 'TileIcon.tsx'];
+const HOME = ['StageHeader.tsx', 'TileGrid.tsx', 'TodayLog.tsx', 'HomeView.tsx', 'UndoBar.tsx', 'ChoiceSheet.tsx', 'TileIcon.tsx', 'LogTodaySheet.tsx'];
 const PALETTE = /\b(?:text|bg|border|from|via|to|fill|stroke|ring)-(?:red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|slate|gray|zinc|neutral|stone)-\d{2,3}\b/g;
 
 describe('Home (idea 4) uses only tokens', () => {

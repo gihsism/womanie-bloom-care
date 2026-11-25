@@ -429,7 +429,7 @@ const Settings = () => {
           <MeGroup>
             <MeRow icon={Pill} label="Medicines & supplements" onClick={() => openSection('medicines')} testId="me-row-medicines" />
             <MeRow icon={Bell} label="Reminders" onClick={() => openSection('reminders')} testId="me-row-reminders" />
-            <MeRow icon={FileText} label="Prepare a visit summary" value="For any doctor" onClick={() => navigate('/dashboard/visit-summary/print')} testId="me-row-visit-summary" />
+            <MeRow icon={FileText} label="Visit summary" value="For any doctor" onClick={() => navigate('/dashboard/visit-summary/print')} testId="me-row-visit-summary" />
             <MeRow icon={Inbox} label="Needs your attention" badge={attention.total} onClick={() => navigate('/dashboard/notifications')} testId="me-row-attention" />
             <MeRow icon={Phone} label="Emergency contacts" onClick={() => navigate('/dashboard/emergency')} testId="me-row-emergency" />
             <MeRow icon={Smartphone} label="Connected devices" onClick={() => navigate('/dashboard/devices')} testId="me-row-devices" />

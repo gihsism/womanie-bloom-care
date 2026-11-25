@@ -11,13 +11,13 @@ import TileIcon from './TileIcon';
 
 const HOLD_MS = 500;
 
-const elapsed = (since: number, now: number) => {
+export const elapsed = (since: number, now: number) => {
   const s = Math.max(0, Math.floor((now - since) / 1000));
   const h = Math.floor(s / 3600); const m = Math.floor((s % 3600) / 60); const r = s % 60;
   return h ? `${h}:${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}` : `${m}:${String(r).padStart(2, '0')}`;
 };
 
-function useNow(active: boolean) {
+export function useNow(active: boolean) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
     if (!active) return;
@@ -111,7 +111,7 @@ export default function TileGrid({ tiles, badges, busyId, onTap, onDetails }: Ti
   const anyRunning = Object.values(badges).some(b => b.runningSince != null);
   const now = useNow(anyRunning);
   return (
-    <section aria-label="Tap to log" className="mt-5">
+    <section aria-label="Tap to log">
       <ul className="grid grid-cols-3 gap-2.5">
         {tiles.map(t => (
           <TileButton key={t.id} tile={t} badge={badges[t.id] ?? {}} busy={busyId === t.id} now={now} onTap={onTap} onDetails={onDetails} />

@@ -7,9 +7,11 @@ import type { LifeStage } from '@/components/dashboard/DashboardHeader';
 import type { CycleDialData } from '@/lib/bodyMap';
 import type { IconKey } from '@/lib/quickLog/tiles';
 
-// The coloured header on Home (idea 4): a stage chip, ONE big status line
-// ("Week 30 of 40", "Day 18 of 28"), one short sentence, and two small fact
-// boxes. Pure: the page gathers the facts, this turns them into words.
+// The coloured header on Home (idea 4, round 6): a stage chip, ONE big
+// fact ("Week 30", "Day 18", "Period in 3 days") and one short sentence.
+// `facts` (two small label/value pairs) stay in the model for other views;
+// Home no longer shows them. Pure: the page gathers the facts, this turns
+// them into words.
 
 export interface HeaderFacts {
   now?: Date;
@@ -89,7 +91,7 @@ export function headerFor(mode: LifeStage, f: HeaderFacts): HeaderModel {
 
   switch (mode) {
     case 'pregnancy': {
-      if (!f.dueDate) return m('Your pregnancy', 'Add your due date to see your week.', visit, logged);
+      if (!f.dueDate) return m('Your pregnancy', 'Add your due date in Me to see your week.', visit, logged);
       const daysLeft = daysBetween(now, f.dueDate);
       // A due date more than 40 weeks away, or long past, is a typo or an
       // old pregnancy: never show "Week 0" or "Week 42 of 40".
@@ -100,7 +102,7 @@ export function headerFor(mode: LifeStage, f: HeaderFacts): HeaderModel {
       const sentence = left > 0 ? `${left} day${left === 1 ? '' : 's'} to go · due ${format(f.dueDate, 'd MMM')}` : 'Due date reached · any day now';
       const second: Fact = week >= 28 ? { label: 'Kicks today', value: String(f.kicksToday ?? 0) }
         : f.babySize ? { label: 'Baby is about', value: f.babySize } : logged;
-      return m(`Week ${week} of 40`, sentence, visit, second);
+      return m(`Week ${week}`, sentence, visit, second);
     }
     case 'menstrual-cycle':
     case 'conception':
@@ -113,7 +115,7 @@ export function headerFor(mode: LifeStage, f: HeaderFacts): HeaderModel {
           const last: Fact = s ? { label: 'Last symptom', value: shortName(s.name) } : logged;
           return m('No period yet', 'Log your first period when it comes.', last, visit);
         }
-        return m('Log your period', 'Tap Period below when it starts.', visit, logged);
+        return m('Log your period', 'Tap Log today when it starts.', visit, logged);
       }
       // A period well past its expected day: count on instead of wrapping
       // round to a new "Day 3 of 28" nobody logged.
@@ -122,25 +124,36 @@ export function headerFor(mode: LifeStage, f: HeaderFacts): HeaderModel {
         const late = elapsed - c.length + 1;
         const lastFact: Fact = { label: 'Last period', value: format(f.cycleStart!, 'd MMM') };
         if (late > 60) return m('Log your period', `Last one logged ${elapsed} days ago`, lastFact, visit);
-        return m(`Day ${elapsed + 1}`, `Period ${late} day${late === 1 ? '' : 's'} later than expected`, lastFact, visit);
+        return m(`Day ${elapsed + 1}`, `Period ${late} day${late === 1 ? '' : 's'} late`, lastFact, visit);
       }
-      const sentence = c.phase === 'period' ? `Period day ${c.day}`
-        : c.daysToPeriod <= 1 ? `Period likely ${inDays(c.daysToPeriod)}`
-        : `Period in about ${c.daysToPeriod} days`;
       const fertile = c.daysToFertile === 0 ? (c.fertileEnd - c.day <= 0 ? 'Ends today' : 'Now')
         : c.daysToFertile != null ? (c.daysToFertile === 1 ? 'Tomorrow' : `In ${c.daysToFertile} days`) : 'Ended';
       const next: Fact = { label: 'Next period', value: `~${format(c.nextPeriod, 'EEE d MMM')}` };
       const win: Fact = { label: 'Fertile window', value: fertile };
-      return m(`Day ${c.day} of ${c.length}`, sentence, mode === 'conception' ? win : next, mode === 'conception' ? next : (mode === 'pre-menstrual' ? visit : win));
+      const a = mode === 'conception' ? win : next;
+      const b = mode === 'conception' ? next : (mode === 'pre-menstrual' ? visit : win);
+      const ofLen = `Day ${c.day} of ${c.length}`;
+      // ONE big fact: the period while it's on, the period when it's close,
+      // the fertile window when trying, otherwise the cycle day.
+      if (c.phase === 'period') return m(`Period day ${c.day}`, `Usually lasts about ${c.periodDays} days`, a, b);
+      if (mode === 'conception' && c.daysToFertile === 0) return m('Fertile today', `${ofLen} · a good day to try`, a, b);
+      if (c.daysToPeriod <= 7) {
+        const big = c.daysToPeriod <= 0 ? 'Period today' : c.daysToPeriod === 1 ? 'Period tomorrow' : `Period in ${c.daysToPeriod} days`;
+        return m(big, c.daysToPeriod <= 1 ? `${ofLen} · likely, not certain` : ofLen, a, b);
+      }
+      if (mode === 'conception' && c.daysToFertile != null) {
+        return m(`Day ${c.day}`, `Fertile window ${inDays(c.daysToFertile)}`, a, b);
+      }
+      return m(`Day ${c.day}`, `Period in about ${c.daysToPeriod} days`, a, b);
     }
     case 'contraception': {
       const p = f.pill;
       if (!p || !p.isPill) return m('Your method', 'Log spotting or anything unusual.', visit, logged);
       const sentence = p.takenToday === 'taken' ? "Today's pill is taken"
-        : p.takenToday === 'late' ? "Today's pill is taken, a little late"
+        : p.takenToday === 'late' ? "Taken today, a little late"
         : p.takenToday === 'missed' ? "Today's pill is marked missed"
         : 'Not taken yet today';
-      return m(p.packDay ? `Pill ${p.packDay} of 28` : 'Your pill', sentence,
+      return m(p.packDay ? `Pack day ${p.packDay}` : 'Your pill', sentence,
         { label: 'Streak', value: `${p.streak} day${p.streak === 1 ? '' : 's'}` }, visit);
     }
     case 'ivf': {
@@ -150,26 +163,30 @@ export function headerFor(mode: LifeStage, f: HeaderFacts): HeaderModel {
       const doses: Fact = f.doses && f.doses.total > 0
         ? { label: 'Doses today', value: `${f.doses.taken} of ${f.doses.total}` }
         : { label: 'Doses today', value: 'None set up' };
-      return m(`${f.ivf.phase} · day ${f.ivf.day}`, f.ivf.next ? `Next: ${f.ivf.next}` : 'The last step of this cycle', doses, visit);
+      return m(`Day ${f.ivf.day}`, f.ivf.next ? `${f.ivf.phase} · next: ${f.ivf.next}` : `${f.ivf.phase} · the last step`, doses, visit);
     }
     case 'postpartum': {
       const b = f.baby;
       if (!b) return m('After birth', 'Add your baby to log feeds and nappies.', visit, logged);
-      const age = b.dayOfLife == null || b.dayOfLife < 1 ? b.name : b.dayOfLife < 15 ? `${b.name} · day ${b.dayOfLife}` : `${b.name} · ${Math.floor((b.dayOfLife - 1) / 7)} weeks`;
-      const sentence = b.lastFeedMin != null ? `Last feed ${ago(b.lastFeedMin)} · ${b.feedsToday} today` : 'No feeds logged yet';
+      const unborn = b.dayOfLife == null || b.dayOfLife < 1;
+      const age = unborn ? b.name : b.dayOfLife! < 15 ? `Day ${b.dayOfLife}` : `${Math.floor((b.dayOfLife! - 1) / 7)} weeks`;
+      const who = unborn ? '' : `${shortName(b.name)} · `;
+      const cap = (t: string) => (who ? `${who}${t}` : t.charAt(0).toUpperCase() + t.slice(1));
+      const sentence = cap(b.lastFeedMin != null ? `last feed ${ago(b.lastFeedMin)}` : 'no feeds logged yet');
       return m(age, sentence, { label: 'Nappies today', value: `${b.wet} wet · ${b.dirty} dirty` }, { label: 'Sleep today', value: hm(b.sleepMin) });
     }
     case 'menopause':
     case 'post-menopause': {
       const t = f.hotFlushesToday ?? 0;
       const w = f.hotFlushes7 ?? 0;
-      const big = t > 0 ? `${t} hot flush${t === 1 ? '' : 'es'} today` : w > 0 ? `${w} hot flush${w === 1 ? '' : 'es'} this week` : 'No hot flushes today';
+      const big = t > 0 ? `${t} hot flush${t === 1 ? '' : 'es'}` : 'No hot flushes';
       const months: Fact = { label: 'Since last period', value: f.monthsSincePeriod == null ? 'Not logged' : `${f.monthsSincePeriod} month${f.monthsSincePeriod === 1 ? '' : 's'}` };
       // A period logged within 12 months after menopause is a bleed worth a doctor's look.
-      const sentence = postMenopauseBleed(mode, f.monthsSincePeriod ?? null) ? POST_MENOPAUSE_BLEED_SHORT : 'Tap Hot flush each time one comes.';
+      const sentence = postMenopauseBleed(mode, f.monthsSincePeriod ?? null) ? POST_MENOPAUSE_BLEED_SHORT
+        : w > 0 ? `Today · ${w} this week` : 'Today · log each one as it comes';
       return m(big, sentence, mode === 'menopause' ? months : { label: 'Hot flushes', value: `${w} this week` }, visit);
     }
     default:
-      return m(chip, 'Tap a tile to log how you are.', visit, logged);
+      return m(chip, 'Tap Log today to note how you are.', visit, logged);
   }
 }

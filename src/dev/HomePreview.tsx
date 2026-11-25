@@ -6,7 +6,7 @@ import { cycleDial } from '@/lib/bodyMap';
 import { applyStageTheme } from '@/lib/stageTheme';
 import { headerFor, type HeaderFacts } from '@/lib/stageHeader';
 import { stageLabel } from '@/lib/stageLabels';
-import { moreFor, todayItems, type TodaySignals } from '@/lib/todayItems';
+import { todayItems, type TodaySignals } from '@/lib/todayItems';
 import { EMPTY_STATE, tapKey, type QuickLogState, type TodayEvent } from '@/lib/quickLog/state';
 import { loggedWord, tilesFor, type Tile } from '@/lib/quickLog/tiles';
 import { symptomEdit, moodEdit, hotFlushEdit, segmentEdit } from '@/lib/quickLog/daily';
@@ -15,6 +15,7 @@ import { symptomEdit, moodEdit, hotFlushEdit, segmentEdit } from '@/lib/quickLog
 // import.meta.env.DEV). Renders Home's idea-4 view for any stage with
 // fixture data, so the design can be checked without logging in:
 //   /dashboard/dev-home?stage=pregnancy
+//   /dashboard/dev-home?stage=menstrual-cycle&fresh=1   (a brand-new account)
 // Taps update the fixture in memory, Undo puts it back.
 
 const STAGES: LifeStage[] = ['pre-menstrual', 'menstrual-cycle', 'contraception', 'conception', 'ivf', 'pregnancy', 'postpartum', 'menopause', 'post-menopause'];
@@ -87,7 +88,8 @@ function fixture(mode: LifeStage): Fixture {
 export default function HomePreview() {
   const [params, setParams] = useSearchParams();
   const mode = (STAGES.includes(params.get('stage') as LifeStage) ? params.get('stage') : 'pregnancy') as LifeStage;
-  const fx = useMemo(() => fixture(mode), [mode]);
+  const fresh = params.get('fresh') === '1';
+  const fx = useMemo<Fixture>(() => (fresh ? { state: { ...EMPTY_STATE, row: { symptoms: null, mood: null, notes: null } }, facts: {}, signals: {} } : fixture(mode)), [mode, fresh]);
   const [state, setState] = useState<QuickLogState>(fx.state);
   useEffect(() => { setState(fx.state); applyStageTheme(mode); }, [fx, mode]);
 
@@ -115,8 +117,6 @@ export default function HomePreview() {
           tiles={tiles}
           state={state}
           items={todayItems(mode, fx.signals)}
-          stage={stageLabel(mode)}
-          more={moreFor(mode, { weeksPregnant: fx.weeks })}
           go={(t) => { if (t.startsWith('?')) setParams(t.slice(1)); }}
           log={log}
         />

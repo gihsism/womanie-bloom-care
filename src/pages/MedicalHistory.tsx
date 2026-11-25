@@ -1196,7 +1196,7 @@ export default function MedicalHistory() {
           <div className="flex-1 min-w-0">
             <h1 className="page-title truncate">Records</h1>
             <p className="page-sub truncate">
-              {lastResultDate ? `Last result · ${format(lastResultDate, 'd MMMM')}` : 'Your results explained in plain language'}
+              {lastResultDate ? `Last result · ${format(lastResultDate, 'd MMMM')}` : 'Your results, explained simply'}
             </p>
           </div>
           <ShareWithDoctor />
@@ -1263,8 +1263,9 @@ export default function MedicalHistory() {
               <div className="w-16 h-16 rounded-full bg-stage-tint flex items-center justify-center mb-4">
                 <FileText className="h-8 w-8 text-stage-accent" strokeWidth={1.75} />
               </div>
-              <p className="text-[16px] text-muted-foreground text-center max-w-sm mb-5">
-                No documents yet. Upload a lab result, prescription or report and we'll explain it in plain language.
+              <p className="text-[17px] font-bold text-center">Nothing here yet</p>
+              <p className="mt-1 text-[15px] text-muted-foreground text-center max-w-sm mb-5">
+                Add a lab result, prescription or doctor's letter. We'll explain it in plain words.
               </p>
               <button type="button" className="btn-stage" onClick={() => setUploadOpen(true)}>
                 <Upload className="h-5 w-5" aria-hidden="true" />
@@ -1327,7 +1328,7 @@ export default function MedicalHistory() {
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                   <input
                     type="search"
-                    placeholder="Search by name, category, or what's inside the analysis…"
+                    placeholder="Search your documents"
                     value={docSearch}
                     onChange={(e) => setDocSearch(e.target.value)}
                     className="w-full pl-8 pr-3 py-1.5 text-xs rounded-md border border-border bg-background focus:outline-none focus:ring-1 focus:ring-primary"
@@ -1827,7 +1828,7 @@ export default function MedicalHistory() {
                         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                         <input
                           type="text"
-                          placeholder="Search results..."
+                          placeholder="Search results"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           className="h-9 w-full pl-8 pr-3 text-[14px] rounded-full border border-line bg-background focus:outline-none focus:ring-2 focus:ring-stage-accent/40"

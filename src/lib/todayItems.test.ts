@@ -89,13 +89,13 @@ describe('todayItems', () => {
     it('missed pill: today unticked once her reminder time has passed', () => {
       expect(ids('contraception', { pill: pill({ reminderTime: '09:30' }) })).toEqual([]); // 09:00 < 09:30
       const [row] = todayItems('contraception', { now: NOW, pill: pill() });
-      expect(row).toEqual({ id: 'pill-missed', label: "Today's pill not ticked yet (due 08:30)", target: `${STAGE_PAGE}#contraception` });
+      expect(row).toEqual({ id: 'pill-missed', label: 'Pill not taken yet (due 08:30)', target: `${STAGE_PAGE}#contraception` });
       expect(ids('contraception', { pill: pill({ takenToday: true }) })).toEqual([]);
     });
 
     it('missed pill: yesterday unticked, only for someone who ticks, never in the pill-free week', () => {
       const late = pill({ reminderTime: '21:00', takenYesterday: false });
-      expect(todayItems('contraception', { now: NOW, pill: late })[0].label).toBe("Yesterday's pill not ticked. Missed it?");
+      expect(todayItems('contraception', { now: NOW, pill: late })[0].label).toBe("Yesterday's pill: taken or missed?");
       expect(ids('contraception', { pill: { ...late, takenYesterday: null } })).toEqual([]);
       expect(ids('contraception', { pill: { ...late, packDay: 1 } })).toEqual([]); // yesterday was day 28
       expect(ids('contraception', { pill: pill({ packDay: 23 }) })).toEqual([]);
@@ -113,7 +113,7 @@ describe('todayItems', () => {
       expect(todayItems('postpartum', { now: NOW, lastMoodCheck: null })[0])
         .toEqual({ id: 'mood-check', label: 'Take the 2-minute mood check', target: `${STAGE_PAGE}#mood-check` });
       expect(ids('pregnancy', { lastMoodCheck: at(-13) })).toEqual([]);
-      expect(todayItems('pregnancy', { now: NOW, lastMoodCheck: at(-14) })[0].label).toBe('Mood check due (every 2 weeks)');
+      expect(todayItems('pregnancy', { now: NOW, lastMoodCheck: at(-14) })[0].label).toBe('Time for your mood check');
       expect(ids('postpartum', { lastMoodCheck: undefined })).toEqual([]); // not loaded yet
       expect(ids('menopause', { lastMoodCheck: null })).toEqual([]);
     });
