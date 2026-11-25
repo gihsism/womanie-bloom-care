@@ -188,6 +188,27 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       if (operation === 'update' && updateData && typeof updateData === 'object' && 'patient_id' in updateData) {
         return res.status(403).json({ error: 'Column(s) not writable via /api/db: patient_id' });
       }
+      // Editing a note the patient can already read also needs the
+      // connection to still be approved: once she removes the doctor, the
+      // doctor can no longer change what she sees (deleting stays possible,
+      // so a doctor can still withdraw a note). One note per update, by id.
+      if (operation === 'update') {
+        const idFilter = filters.find(f => f[0] === 'id' && f[1] === 'eq');
+        if (!idFilter || typeof idFilter[2] !== 'string' || !idFilter[2]) {
+          return res.status(400).json({ error: 'Note id required' });
+        }
+        const ok = await sql.query(
+          `SELECT 1 FROM doctor_notes n
+             JOIN doctor_patient_connections c
+               ON c.doctor_id = n.doctor_id AND c.patient_id = n.patient_id AND c.status = 'approved'
+            WHERE n.id = $1 AND n.doctor_id = $2
+            LIMIT 1`,
+          [idFilter[2], user.id]
+        );
+        if (ok.length === 0) {
+          return res.status(403).json({ error: 'No approved connection to this patient' });
+        }
+      }
       if (operation === 'insert' || operation === 'upsert') {
         const raw = operation === 'insert' ? insertData : upsertData;
         const row = (Array.isArray(raw) ? raw[0] : raw) as Record<string, unknown> | undefined;

@@ -298,6 +298,62 @@ describe('api/_routes/db security invariants', () => {
     expect(res._status).toBe(403);
     expect(query).not.toHaveBeenCalled();
   });
+
+  // Once the patient removes the doctor, the doctor can no longer change a
+  // note she can read. The check joins the note to an APPROVED connection
+  // for the note's own patient, bound to the session doctor.
+  it('doctor_notes update needs an approved connection to the note\'s patient', async () => {
+    query.mockResolvedValueOnce([]); // note + approved connection lookup: none
+    const res = mockRes();
+    await handler(
+      mockReq({ table: 'doctor_notes', operation: 'update', updateData: { title: 'x', content: 'y' }, filters: [['id', 'eq', 'n1']] }),
+      res,
+    );
+    expect(res._status).toBe(403);
+    expect(query).toHaveBeenCalledTimes(1);
+    const [checkSql, params] = query.mock.calls[0] as [string, unknown[]];
+    expect(checkSql).toMatch(/JOIN doctor_patient_connections/i);
+    expect(checkSql).toMatch(/c\.patient_id\s*=\s*n\.patient_id/i);
+    expect(checkSql).toMatch(/status\s*=\s*'approved'/i);
+    expect(params).toEqual(['n1', SESSION_USER.id]);
+
+    query.mockReset();
+    query.mockResolvedValueOnce([{ '?column?': 1 }]).mockResolvedValueOnce([{ id: 'n1' }]);
+    const ok = mockRes();
+    await handler(
+      mockReq({ table: 'doctor_notes', operation: 'update', updateData: { title: 'x', content: 'y' }, filters: [['id', 'eq', 'n1']] }),
+      ok,
+    );
+    expect(ok._status).toBe(200);
+    expect(query.mock.calls[1][0]).toMatch(/^UPDATE doctor_notes/);
+    expect(query.mock.calls[1][0]).toMatch(/doctor_id = \$\d/);
+  });
+
+  it('doctor_notes update without a note id is refused before any query', async () => {
+    const res = mockRes();
+    await handler(
+      mockReq({ table: 'doctor_notes', operation: 'update', updateData: { title: 'x' }, filters: [] }),
+      res,
+    );
+    expect(res._status).toBe(400);
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('a doctor can still delete her own note after the connection ends', async () => {
+    query.mockResolvedValueOnce([{ id: 'n1' }]);
+    const res = mockRes();
+    await handler(mockReq({ table: 'doctor_notes', operation: 'delete', filters: [['id', 'eq', 'n1']] }), res);
+    expect(res._status).toBe(200);
+    expect(query).toHaveBeenCalledTimes(1);
+    expect(query.mock.calls[0][0]).toMatch(/^DELETE FROM doctor_notes WHERE id = \$1 AND doctor_id = \$2/);
+  });
+
+  it('medications stay owner-only: a doctor cannot read a patient\'s medicines through /api/db', async () => {
+    const res = mockRes();
+    await handler(mockReq({ table: 'medications', operation: 'select', filters: [['user_id', 'eq', 'patient_1']] }), res);
+    expect(res._status).toBe(403);
+    expect(query).not.toHaveBeenCalled();
+  });
 });
 
 describe('api/_routes/db error responses', () => {

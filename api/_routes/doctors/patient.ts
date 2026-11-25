@@ -133,6 +133,24 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       console.error('doctors/patient: visit_questions read failed (non-fatal):', vqErr);
     }
 
+    // Medicines she is currently taking (her own Medicine log, active rows
+    // only). Read-only, scoped to the patient that passed the consent gate.
+    // Best-effort like visit_questions: a read failure leaves the list
+    // empty rather than blocking the chart.
+    let medicines: unknown[] = [];
+    try {
+      medicines = await sql.query(
+        `SELECT id, name, dose, times_per_day, started_on
+           FROM medications
+          WHERE user_id = $1 AND active IS NOT FALSE
+          ORDER BY created_at ASC
+          LIMIT 50`,
+        [patientId]
+      ) as unknown[];
+    } catch (medErr) {
+      console.error('doctors/patient: medications read failed (non-fatal):', medErr);
+    }
+
     return res.status(200).json({
       profile: profileRows[0] ?? null,
       healthSignals: signalRows,
@@ -142,6 +160,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       appointments: apptRows,
       periodRecords: periodRows,
       visitQuestions,
+      medicines,
     });
   } catch (error) {
     console.error('doctors/patient error:', error);
