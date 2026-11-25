@@ -81,7 +81,7 @@ const PatientDashboard = () => {
     : <ModeHeroStat selectedMode={mode} periodData={periodData} pregnancyDueDate={pregnancyDueDate} ivfStartDate={ivfStartDate} ivfPhase={ivfPhase} />;
 
   return (
-    <div className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background">
       <div className="w-full max-w-2xl mx-auto px-4 pt-6 pb-8">
         <header className="mb-5">
           <DashboardHeader userName={firstName} selectedMode={mode} />
@@ -97,7 +97,7 @@ const PatientDashboard = () => {
       </div>
 
       <LogSheet open={sheet} onOpenChange={(o) => { if (!o) setSheet(null); }} mode={mode} weeksPregnant={weeksPregnant} />
-    </div>
+    </main>
   );
 };
 

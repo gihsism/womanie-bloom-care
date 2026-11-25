@@ -1115,7 +1115,7 @@ export default function MedicalHistory() {
   const hasDocuments = documents.length > 0;
 
   return (
-    <div className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="px-3 py-3 sm:px-4 sm:py-4 flex items-center gap-2 sm:gap-3">
@@ -1980,6 +1980,6 @@ export default function MedicalHistory() {
       </div>
 
       <DocumentUpload open={uploadOpen} onOpenChange={setUploadOpen} showTrigger={false} onUploaded={handleUploaded} />
-    </div>
+    </main>
   );
 }

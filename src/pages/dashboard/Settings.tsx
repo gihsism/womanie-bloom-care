@@ -406,7 +406,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="w-full px-4 py-4">
@@ -918,7 +918,7 @@ const Settings = () => {
         </>)}
       </div>
       )}
-    </div>
+    </main>
   );
 };
 

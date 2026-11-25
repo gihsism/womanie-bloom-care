@@ -698,7 +698,7 @@ export default function AIDoctorChat() {
   return (
     // The mobile nav is a left rail now, so the pinned input only needs to
     // clear the phone's home-indicator safe area.
-    <div className="min-h-screen bg-background flex flex-col pb-[env(safe-area-inset-bottom)]">
+    <main className="min-h-screen bg-background flex flex-col pb-[env(safe-area-inset-bottom)]">
       {/* Header: title, Past chats / New chat, and a ⋯ menu for the rest */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="px-3 py-2.5 sm:px-4 sm:py-3 flex items-center gap-2">
@@ -913,6 +913,6 @@ export default function AIDoctorChat() {
           </div>
         </>
       )}
-    </div>
+    </main>
   );
 }
