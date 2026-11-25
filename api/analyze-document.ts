@@ -4,7 +4,7 @@ import { getAuthUser } from './_lib/auth.js';
 import { normalizeTestTitle } from './_lib/normalize-test-title.js';
 import { normalizeUnit } from './_lib/normalize-unit.js';
 import { checkAndConsume } from './_lib/ratelimit.js';
-import { isBlobUrl } from './_lib/blob-url.js';
+import { isOwnBlobUrl } from './_lib/blob-url.js';
 import { readBlobBuffer } from './_lib/blob-read.js';
 import { withSentry } from './_lib/sentry.js';
 import { callAnthropicWithRetry, SONNET_MODEL, SONNET_NO_THINKING, replyText, type ClaudeReply } from './_lib/anthropic.js';
@@ -141,9 +141,12 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     };
 
     // Download file from Vercel Blob (server-side, with the store token, so
-    // private blobs work as well as the older public ones).
+    // private blobs work as well as the older public ones). Only a file in
+    // the caller's own upload folder: file_path is client-writable at
+    // insert, so a row pointed at someone else's Blob URL must not pull
+    // their file into this account (same rule as /api/docs/file).
     let documentText = '';
-    if (filePath && isBlobUrl(filePath)) {
+    if (filePath && isOwnBlobUrl(filePath, sessionUser.id)) {
       try {
         const buffer = await readBlobBuffer(filePath);
         if (buffer) {
@@ -231,7 +234,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   } catch (error) {
     console.error('analyze-document error:', error);
-    return res.status(500).json({ error: error instanceof Error ? error.message : 'Internal error' });
+    // Full detail stays in the log; the client gets no internal text.
+    return res.status(500).json({ error: 'Analysis failed. Please try again.' });
   }
 }
 
