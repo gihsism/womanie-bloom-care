@@ -105,7 +105,7 @@ const PatientSignUp = () => {
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="At least 8 characters" className="pl-10 pr-10" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-muted-foreground hover:text-foreground" aria-label={showPassword ? 'Hide' : 'Show'}>
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-0 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-end pr-3 text-muted-foreground hover:text-foreground" aria-label={showPassword ? 'Hide password' : 'Show password'}>
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
@@ -148,10 +148,10 @@ const PatientSignUp = () => {
           )}
 
           <p className="text-center text-sm text-muted-foreground">
-            Already have an account? <a href="/auth/login" className="text-primary hover:underline font-medium">Log In</a>
+            Already have an account? <a href="/auth/login" className="text-primary underline underline-offset-2 font-medium">Log In</a>
           </p>
           <p className="text-center text-xs text-muted-foreground mt-2">
-            Are you a doctor? <a href="/auth/doctor-signup" className="text-primary hover:underline">Doctor sign up</a>
+            Are you a doctor? <a href="/auth/doctor-signup" className="text-primary underline underline-offset-2">Doctor sign up</a>
           </p>
         </Card>
       </div>
