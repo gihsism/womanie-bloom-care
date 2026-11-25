@@ -23,12 +23,17 @@ describe('DoctorPatientList', () => {
     expect(screen.getByText('Pregnancy')).toBeTruthy();
   });
 
-  it('gives one sentence when there are no patients', () => {
+  it('shows a new doctor how to add her first patient', () => {
     render(
       <MemoryRouter>
         <DoctorPatientList patients={[]} />
       </MemoryRouter>,
     );
-    expect(screen.getByText(/No patients yet/)).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /No patients yet/ })).toBeTruthy();
+    const steps = screen.getAllByRole('listitem').map(li => li.textContent);
+    expect(steps).toHaveLength(3);
+    expect(steps[0]).toMatch(/Share with doctor/);
+    expect(steps[1]).toMatch(/8-character code/);
+    expect(steps[2]).toMatch(/approves/);
   });
 });
