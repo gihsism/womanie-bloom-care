@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import type { LifeStage } from '@/components/dashboard/DashboardHeader';
+import { localDay } from '@/hooks/useStageProfile';
 import CyclePredictionInsights from '@/components/dashboard/CyclePredictionInsights';
 import CyclePredictionAccuracyCard from '@/components/dashboard/CyclePredictionAccuracyCard';
 import SleepCycleCorrelation from '@/components/dashboard/SleepCycleCorrelation';
@@ -46,7 +47,7 @@ export default function MyCharts({ mode }: { mode: LifeStage }) {
           .limit(1)
           .maybeSingle();
         if (cancelled) return;
-        setPeriodData(data ? { lastPeriodStart: new Date(data.period_start_date), cycleLength: data.cycle_length } : null);
+        setPeriodData(data ? { lastPeriodStart: localDay(data.period_start_date) ?? new Date(data.period_start_date), cycleLength: data.cycle_length } : null);
       } catch (error) {
         console.error('Error loading period data:', error);
       }
