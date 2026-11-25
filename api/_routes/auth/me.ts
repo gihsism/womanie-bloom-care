@@ -52,22 +52,20 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       console.error('me: session renewal failed', e); // non-fatal, the current session is still valid
     }
 
-    // JWT carries the name set at signup; users who added their name
-    // later through the inline profile form had a stale JWT. Fall back
-    // to profiles.full_name when the JWT name is blank.
-    let resolvedName = (payload.name as string | undefined) ?? null;
-    if (!resolvedName || !resolvedName.trim()) {
-      try {
-        const rows = await sql.query(
-          'SELECT full_name FROM profiles WHERE id = $1 LIMIT 1',
-          [payload.sub]
-        ) as Array<{ full_name: string | null }>;
-        const fromProfile = rows[0]?.full_name?.trim();
-        if (fromProfile) resolvedName = fromProfile;
-      } catch (e) {
-        // Non-fatal — keep the JWT name (which may be null).
-        console.error('me: profile name lookup failed', e);
-      }
+    // The name she set in Me > Your profile (profiles.full_name) wins over
+    // the name the JWT carried from signup, so a change shows at once;
+    // the JWT name is the fallback when the profile has none.
+    let resolvedName = (payload.name as string | undefined)?.trim() || null;
+    try {
+      const rows = await sql.query(
+        'SELECT full_name FROM profiles WHERE id = $1 LIMIT 1',
+        [payload.sub]
+      ) as Array<{ full_name: string | null }>;
+      const fromProfile = rows[0]?.full_name?.trim();
+      if (fromProfile) resolvedName = fromProfile;
+    } catch (e) {
+      // Non-fatal — keep the JWT name (which may be null).
+      console.error('me: profile name lookup failed', e);
     }
 
     // isAdmin is derived from the ADMIN_EMAILS env var (same rule as

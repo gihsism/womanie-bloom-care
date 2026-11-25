@@ -16,7 +16,7 @@ vi.mock('jose', () => ({
 
 import handler from './me';
 
-function run(expiresInDays: number) {
+function run(expiresInDays: number, profileName: string | null = null) {
   const headers: Record<string, string> = {};
   let body: unknown = null;
   const res = {
@@ -26,6 +26,7 @@ function run(expiresInDays: number) {
   query.mockImplementation(async (raw: unknown) => { const sql = String(raw ?? '');
     if (sql.startsWith('SELECT * FROM auth_sessions')) return [{ id: 'sess_1', expires_at: new Date(Date.now() + expiresInDays * 864e5).toISOString() }];
     if (sql.includes('password_hash')) return [{ has: true }];
+    if (sql.includes('FROM profiles')) return [{ full_name: profileName }];
     return [];
   });
   const req = { method: 'GET', headers: { cookie: 'womanie_session=old.jwt' } } as unknown as VercelRequest;
@@ -46,5 +47,15 @@ describe('GET /api/auth/me session renewal', () => {
     const { headers } = await run(28);
     expect(query.mock.calls.some(c => String(c[0]).startsWith('UPDATE'))).toBe(false);
     expect(headers['Set-Cookie']).toBeUndefined();
+  });
+
+  it('returns the name saved on the profile over the signup name in the JWT', async () => {
+    const { body } = await run(28, 'Lena');
+    expect((body as { user: { name: string } }).user.name).toBe('Lena');
+  });
+
+  it('falls back to the JWT name when the profile has none', async () => {
+    const { body } = await run(28, null);
+    expect((body as { user: { name: string } }).user.name).toBe('A');
   });
 });

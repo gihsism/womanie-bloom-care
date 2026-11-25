@@ -14,7 +14,7 @@ const update = vi.fn(() => ({ eq: () => Promise.resolve({ error: null }) }));
 vi.mock('@/integrations/db/client', () => ({
   db: {
     from: () => ({
-      select: () => ({ eq: () => ({ maybeSingle: () => Promise.resolve({ data: { life_stage: 'conception' }, error: null }) }) }),
+      select: () => ({ eq: () => ({ maybeSingle: () => Promise.resolve({ data: { life_stage: 'conception', full_name: 'Lena' }, error: null }) }) }),
       update,
     }),
   },
@@ -121,5 +121,15 @@ describe('Me (Settings as a list of rows)', () => {
     expect(screen.getByText('access-log')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Back to Me' }));
     expect(screen.getByTestId('where')).toHaveTextContent(/^\/dashboard\/settings$/);
+  });
+
+  it('Your profile lets her change her name (Home\'s "Add your name" leads here)', async () => {
+    renderAt('/dashboard/settings#profile');
+    const box = await screen.findByLabelText('Your name');
+    await waitFor(() => expect(box).toHaveValue('Lena'));
+    expect(screen.getByRole('button', { name: 'Save name' })).toBeDisabled();
+    fireEvent.change(box, { target: { value: '  Elena ' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save name' }));
+    await waitFor(() => expect(update).toHaveBeenCalledWith({ full_name: 'Elena' }));
   });
 });
