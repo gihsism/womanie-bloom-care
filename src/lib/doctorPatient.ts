@@ -86,15 +86,3 @@ export function normalizePatientTab(raw: string | null): PatientTab | null {
   if (v === 'appointments') return 'visits';
   return null;
 }
-
-// Only open real https links (health_documents.file_path is a Vercel
-// Blob URL). Anything else is refused rather than handed to window.open.
-export function safeDocumentUrl(raw: string | null | undefined): string | null {
-  if (!raw) return null;
-  try {
-    const u = new URL(raw);
-    return u.protocol === 'https:' ? u.toString() : null;
-  } catch {
-    return null;
-  }
-}

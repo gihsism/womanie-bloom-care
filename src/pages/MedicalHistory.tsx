@@ -674,7 +674,7 @@ export default function MedicalHistory() {
     try {
       const [medRes, docRes, profileRes] = await Promise.all([
         db.from('current_extracted_data').select('*').eq('user_id', user!.id).order('date_recorded', { ascending: false, nullsFirst: false }),
-        db.from('health_documents').select('id, file_name, file_path, mime_type, ai_suggested_name, ai_summary, ai_suggested_category, uploaded_at, document_type').eq('user_id', user!.id).order('uploaded_at', { ascending: false }),
+        db.from('health_documents').select('id, file_name, mime_type, ai_suggested_name, ai_summary, ai_suggested_category, uploaded_at, document_type').eq('user_id', user!.id).order('uploaded_at', { ascending: false }),
         db.from('profiles').select('life_stage, pregnancy_due_date').eq('id', user!.id).single(),
       ]);
       if (medRes.data) setMedicalData(medRes.data as MedicalDataItem[]);
@@ -721,7 +721,7 @@ export default function MedicalHistory() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               documentId: r.documentId, userId: user.id,
-              filePath: r.filePath, fileName: r.fileName,
+              fileName: r.fileName,
               mimeType: r.mimeType, timezone: tz,
             }),
             keepalive: true,
@@ -808,7 +808,7 @@ export default function MedicalHistory() {
     }
   };
 
-  const deleteDocument = async (docId: string, _filePath: string) => {
+  const deleteDocument = async (docId: string) => {
     if (!user) return;
     try {
       // Delegate the whole cascade to /api/docs/delete — it runs the
@@ -843,7 +843,7 @@ export default function MedicalHistory() {
       // document_analyses row and only flips the current flag on success.
       // Prior analyses stay queryable as history.
       await db.functions.invoke('analyze-document', {
-        body: { documentId: doc.id, userId: user.id, filePath: doc.file_path, fileName: doc.file_name, mimeType: doc.mime_type, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone },
+        body: { documentId: doc.id, userId: user.id, fileName: doc.file_name, mimeType: doc.mime_type, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone },
       });
       toast({ title: 'Analysis complete', description: doc.ai_suggested_name || doc.file_name });
       await fetchData();
@@ -882,7 +882,7 @@ export default function MedicalHistory() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               documentId: doc.id, userId: user.id,
-              filePath: doc.file_path, fileName: doc.file_name,
+              fileName: doc.file_name,
               mimeType: doc.mime_type, timezone: tz,
             }),
           }).then(r => ({ ok: r.ok, status: r.status }))
@@ -1439,7 +1439,7 @@ export default function MedicalHistory() {
                             onClick={(e) => {
                               e.stopPropagation();
                               if (window.confirm(`Delete "${doc.ai_suggested_name || doc.file_name}"?`)) {
-                                deleteDocument(doc.id, doc.file_path);
+                                deleteDocument(doc.id);
                               }
                             }}
                           >

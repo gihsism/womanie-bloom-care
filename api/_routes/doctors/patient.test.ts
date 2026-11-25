@@ -107,14 +107,18 @@ describe('doctors/patient security invariants', () => {
     expect(auditCalls.length).toBeGreaterThanOrEqual(1);
   });
 
-  // Regression: the doctor's "Open document" button needs file_path; the
-  // select used to omit it, so every click failed. It must be scoped to
-  // the patient id that passed the consent gate.
-  it('documents query returns file_path, scoped to the consented patient', async () => {
+  // The Blob URL never leaves the server: the doctor's "Open document"
+  // button goes through /api/docs/file?id=. The documents query may only
+  // derive has_file from file_path, and must be scoped to the patient id
+  // that passed the consent gate.
+  it('documents query exposes has_file but never the raw file_path, scoped to the consented patient', async () => {
     const res = mockRes();
     await handler(mockReq(PATIENT_ID), res);
     const docCall = query.mock.calls.find(([sql]) => /FROM health_documents/i.test(sql)) as [string, unknown[]];
-    expect(docCall[0]).toMatch(/file_path/);
+    expect(docCall[0]).toMatch(/AS has_file/);
+    // Every mention of file_path is inside the has_file expression.
+    const stripped = docCall[0].replace(/\(file_path IS NOT NULL AND file_path <> ''\) AS has_file/, '');
+    expect(stripped).not.toMatch(/file_path/);
     expect(docCall[1]).toEqual([PATIENT_ID]);
   });
 

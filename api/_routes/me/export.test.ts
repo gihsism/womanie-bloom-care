@@ -67,6 +67,16 @@ describe('me/export security invariants', () => {
     expect(authUsersCall![0]).not.toMatch(/password_hash/i);
   });
 
+  // The Blob URL stays server-side: documents export a same-origin
+  // /api/docs/file link instead of health_documents.file_path.
+  it('documents export file_url (proxy link), never the raw file_path', async () => {
+    const res = mockRes();
+    await handler(mockReq(), res);
+    const docCall = (query.mock.calls as [string, unknown[]][]).find(([sql]) => /FROM health_documents/i.test(sql));
+    expect(docCall![0]).not.toMatch(/file_path/);
+    expect(docCall![0]).toMatch(/'\/api\/docs\/file\?id=' \|\| id AS file_url/);
+  });
+
   // Ownership invariant: every SQL query in the Promise.all must bind the
   // session user's id as a parameter. A refactor that dropped the user_id
   // filter from any table (e.g. removing WHERE user_id = $1 from profiles)

@@ -25,9 +25,10 @@ const GRACE_MINUTES = 2;
 const LOOKBACK_DAYS = 14;
 const BATCH = 5;
 
+// No file URL: /api/analyze-document reads the file from the document row
+// itself, and the Blob URL stays server-side.
 interface RetryItem {
   documentId: string;
-  filePath: string | null;
   fileName: string | null;
   mimeType: string | null;
 }
@@ -49,7 +50,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     // filled and no current document_analyses row), old enough that an
     // in-flight run would have finished, and recent enough to still matter.
     const candidates = await sql.query(
-      `SELECT h.id, h.file_path, h.file_name, h.mime_type
+      `SELECT h.id, h.file_name, h.mime_type
          FROM health_documents h
         WHERE h.user_id = $1
           AND h.ai_summary IS NULL
@@ -85,7 +86,6 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         );
         retries.push({
           documentId,
-          filePath: doc.file_path ?? null,
           fileName: doc.file_name ?? null,
           mimeType: doc.mime_type ?? null,
         });
@@ -120,7 +120,6 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       );
       retries.push({
         documentId,
-        filePath: doc.file_path ?? null,
         fileName: doc.file_name ?? null,
         mimeType: doc.mime_type ?? null,
       });

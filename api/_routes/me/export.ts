@@ -45,7 +45,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       sql.query('SELECT * FROM profiles WHERE id = $1', [user.id]),
       sql.query('SELECT id, email, name, created_at FROM auth_users WHERE id = $1', [user.id]),
       sql.query(
-        `SELECT id, file_name, file_path, mime_type, document_type,
+        `SELECT id, file_name, '/api/docs/file?id=' || id AS file_url, mime_type, document_type,
                 ai_suggested_name, ai_suggested_category, ai_summary,
                 uploaded_at, file_size
            FROM health_documents WHERE user_id = $1
@@ -200,7 +200,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       consultation_settings: consultationSettings[0] ?? null,
       notes: {
         documents_note:
-          'The file_path field on each document is a Vercel Blob URL — fetch those separately to download the original upload.',
+          'The file_url field on each document downloads the original upload from Womanie while you are signed in (open https://womanie.info followed by that path).',
         retention_note:
           'To delete your account and erase this data from Womanie, use the Delete account action in Settings.',
       },

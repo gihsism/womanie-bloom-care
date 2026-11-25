@@ -81,6 +81,27 @@ const PROTECTED_COLUMNS: Record<string, string[]> = {
   doctor_profiles: ['is_verified', 'verification_status', 'rating', 'review_count'],
 };
 
+// Columns the client may set when CREATING a row but never read back or
+// change later. health_documents.file_path is the document's Blob URL: the
+// browser writes it once right after uploading, and from then on every read
+// goes through /api/docs/file by document id. Masking it here keeps the URL
+// off every /api/db response (select *, RETURNING *), and refusing updates
+// stops a row being re-pointed at someone else's file.
+const SERVER_ONLY_READ_COLUMNS: Record<string, string[]> = {
+  health_documents: ['file_path'],
+};
+
+function maskRows(table: string, rows: unknown[]): unknown[] {
+  const hidden = SERVER_ONLY_READ_COLUMNS[table];
+  if (!hidden) return rows;
+  return rows.map(r => {
+    if (!r || typeof r !== 'object') return r;
+    const copy = { ...(r as Record<string, unknown>) };
+    for (const c of hidden) delete copy[c];
+    return copy;
+  });
+}
+
 function ownerCols(table: string): string[] | null {
   const o = OWNER_COLUMN[table];
   if (!o) return null;
@@ -134,6 +155,16 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       const raw = operation === 'insert' ? insertData : operation === 'update' ? updateData : upsertData;
       const rows = Array.isArray(raw) ? raw : [raw];
       const blocked = (PROTECTED_COLUMNS[table] ?? []).filter(c =>
+        rows.some(r => r && typeof r === 'object' && c in r)
+      );
+      if (blocked.length) {
+        return res.status(403).json({ error: `Column(s) not writable via /api/db: ${blocked.join(', ')}` });
+      }
+    }
+    if ((operation === 'update' || operation === 'upsert') && SERVER_ONLY_READ_COLUMNS[table]) {
+      const raw = operation === 'update' ? updateData : upsertData;
+      const rows = Array.isArray(raw) ? raw : [raw];
+      const blocked = SERVER_ONLY_READ_COLUMNS[table].filter(c =>
         rows.some(r => r && typeof r === 'object' && c in r)
       );
       if (blocked.length) {
@@ -359,7 +390,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    const rows = await sql.query(query, params);
+    const rows = maskRows(table, await sql.query(query, params));
     return res.status(200).json({ rows, rowCount: rows.length });
   } catch (error) {
     // Postgres error text echoes the offending values ("Key (email)=(...)",

@@ -5,6 +5,7 @@ import { normalizeTestTitle } from './_lib/normalize-test-title.js';
 import { normalizeUnit } from './_lib/normalize-unit.js';
 import { checkAndConsume } from './_lib/ratelimit.js';
 import { isBlobUrl } from './_lib/blob-url.js';
+import { readBlobBuffer } from './_lib/blob-read.js';
 import { withSentry } from './_lib/sentry.js';
 import { callAnthropicWithRetry, SONNET_MODEL, SONNET_NO_THINKING, replyText, type ClaudeReply } from './_lib/anthropic.js';
 import heicConvert from 'heic-convert';
@@ -139,13 +140,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       return t.toISOString().split('T')[0];
     };
 
-    // Download file from Vercel Blob URL
+    // Download file from Vercel Blob (server-side, with the store token, so
+    // private blobs work as well as the older public ones).
     let documentText = '';
     if (filePath && isBlobUrl(filePath)) {
       try {
-        const fileResp = await fetch(filePath);
-        if (fileResp.ok) {
-          const buffer = await fileResp.arrayBuffer();
+        const buffer = await readBlobBuffer(filePath);
+        if (buffer) {
 
           // iPhone HEIC/HEIF: Claude vision can't read it, so decode to
           // JPEG first (pure-JS, ~1-3s per photo — acceptable inside a
@@ -195,7 +196,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
               { type: 'text', text: `Analyze this medical document image "${fileName}". Extract EVERY test result you can see in the image.\n\n${patientContext}` },
             ];
           } else {
-            documentText = await fileResp.text();
+            documentText = buffer.toString('utf8');
             // Fall through to text processing below
             userContent = [];
           }

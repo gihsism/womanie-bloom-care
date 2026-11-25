@@ -348,3 +348,54 @@ describe('api/_routes/db error responses', () => {
     log.mockRestore();
   });
 });
+
+describe('health_documents.file_path never reaches the client', () => {
+  const URL_ = 'https://abc.public.blob.vercel-storage.com/user_abc/scan-R4nd.pdf';
+  beforeEach(() => {
+    vi.mocked(getAuthUser).mockResolvedValue(SESSION_USER);
+    query.mockReset();
+  });
+
+  it('is stripped from select *, explicit selects, and insert/update/delete RETURNING rows', async () => {
+    for (const body of [
+      { operation: 'select' },
+      { operation: 'select', selectColumns: 'id, file_name, file_path' },
+      { operation: 'insert', insertData: { file_name: 'a.pdf', file_path: URL_ } },
+      { operation: 'update', updateData: { ai_suggested_name: 'x' }, filters: [['id', 'eq', 'd1']] },
+      { operation: 'delete', filters: [['id', 'eq', 'd1']] },
+    ]) {
+      query.mockResolvedValueOnce([{ id: 'd1', file_name: 'a.pdf', file_path: URL_ }]);
+      const res = mockRes();
+      await handler(mockReq({ table: 'health_documents', ...body }), res);
+      expect(res._status).toBe(200);
+      const rows = (res._body as { rows: Record<string, unknown>[] }).rows;
+      expect(rows[0].id).toBe('d1');
+      expect(rows[0]).not.toHaveProperty('file_path');
+      expect(JSON.stringify(res._body)).not.toContain('blob.vercel-storage.com');
+    }
+  });
+
+  it('can be set on insert (the upload flow) but never changed by update or upsert', async () => {
+    query.mockResolvedValue([]);
+    const ins = mockRes();
+    await handler(mockReq({ table: 'health_documents', operation: 'insert', insertData: { file_name: 'a.pdf', file_path: URL_ } }), ins);
+    expect(ins._status).toBe(200);
+    query.mockClear();
+    for (const body of [
+      { operation: 'update', updateData: { file_path: 'https://abc.public.blob.vercel-storage.com/victim/x.pdf' }, filters: [['id', 'eq', 'd1']] },
+      { operation: 'upsert', upsertData: { id: 'd1', file_path: 'https://abc.public.blob.vercel-storage.com/victim/x.pdf' } },
+    ]) {
+      const res = mockRes();
+      await handler(mockReq({ table: 'health_documents', ...body }), res);
+      expect(res._status).toBe(403);
+    }
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('leaves other tables untouched', async () => {
+    query.mockResolvedValueOnce([{ id: 'p1', file_path: 'kept' }]);
+    const res = mockRes();
+    await handler(mockReq({ table: 'medications', operation: 'select' }), res);
+    expect((res._body as { rows: Record<string, unknown>[] }).rows[0].file_path).toBe('kept');
+  });
+});

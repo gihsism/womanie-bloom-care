@@ -4,7 +4,6 @@ import {
   isFlagged,
   normalizePatientTab,
   pregnancyWeek,
-  safeDocumentUrl,
   statusRank,
   visitSummary,
 } from './doctorPatient';
@@ -70,11 +69,3 @@ describe('normalizePatientTab', () => {
   });
 });
 
-describe('safeDocumentUrl', () => {
-  it('only lets https links through', () => {
-    expect(safeDocumentUrl('https://x.public.blob.vercel-storage.com/a.pdf')).toBe('https://x.public.blob.vercel-storage.com/a.pdf');
-    expect(safeDocumentUrl('javascript:alert(1)')).toBeNull();
-    expect(safeDocumentUrl('http://example.com/a.pdf')).toBeNull();
-    expect(safeDocumentUrl(null)).toBeNull();
-  });
-});

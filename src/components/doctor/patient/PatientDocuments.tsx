@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { ChevronDown, ExternalLink, FileText } from 'lucide-react';
-import { safeDocumentUrl } from '@/lib/doctorPatient';
+import { openDocumentFile } from '@/lib/documentFiles';
 import type { HealthDocument } from './types';
 
 // Documents tab of the doctor's patient chart. Each row: name, type, date
@@ -32,12 +32,11 @@ const PatientDocuments = ({ documents }: { documents: HealthDocument[] }) => {
     : documents;
 
   const openDoc = (doc: HealthDocument) => {
-    const url = safeDocumentUrl(doc.file_path);
-    if (!url) {
+    if (doc.has_file === false) {
       toast({ variant: 'destructive', title: 'File not available', description: 'This document has no file to open.' });
       return;
     }
-    window.open(url, '_blank', 'noopener,noreferrer');
+    openDocumentFile(doc.id);
   };
 
   return (

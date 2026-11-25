@@ -11,6 +11,7 @@ import { db } from '@/integrations/db/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { emitHealthDataChange } from '@/lib/data-events';
+import { uploadDocumentBlob } from '@/lib/documentFiles';
 
 interface DocumentUploadProps {
   open?: boolean;
@@ -104,16 +105,7 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
     try {
       // Browser uploads directly to Vercel Blob via short-lived token.
       // Bypasses the 4.5 MB serverless gateway cap so large PDFs work.
-      const { upload } = await import('@vercel/blob/client');
-      const blob = await upload(
-        `${user.id}/${Date.now()}-${file.name}`,
-        file,
-        {
-          access: 'public',
-          handleUploadUrl: '/api/upload',
-          contentType: file.type,
-        }
-      );
+      const blob = await uploadDocumentBlob(`${user.id}/${Date.now()}-${file.name}`, file);
       const fileUrl = blob.url;
 
       // Save metadata to database
@@ -164,7 +156,6 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
         body: JSON.stringify({
           documentId: insertData.id,
           userId: user.id,
-          filePath: fileUrl,
           fileName: file.name,
           mimeType: file.type,
           timezone,
