@@ -60,7 +60,6 @@ const WhoItsFor = () => {
               key={index}
               onClick={() => navigate('/auth/select-type')}
               className="bg-gradient-to-br from-background to-muted/50 rounded-2xl p-6 border border-border hover:border-primary/50 transition-all duration-300 hover:-translate-y-2 group text-left"
-              aria-label={`Get started with ${journey.title} tracking`}
             >
               <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <journey.icon className="h-6 w-6 text-white" aria-hidden="true" />

@@ -148,7 +148,7 @@ const Navigation = () => {
             {/* Hamburger */}
             <button
               ref={toggleRef}
-              className="xl:hidden p-2 rounded-lg hover:bg-muted/50 transition-colors"
+              className="xl:hidden p-2.5 rounded-lg hover:bg-muted/50 transition-colors"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={isMobileMenuOpen}
@@ -164,7 +164,7 @@ const Navigation = () => {
           id="mobile-menu"
           ref={menuRef}
           className={`xl:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-            isMobileMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+            isMobileMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 invisible'
           }`}
           role="menu"
           aria-hidden={!isMobileMenuOpen}
