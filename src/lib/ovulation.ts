@@ -41,9 +41,12 @@ const addD = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.g
 const diffD = (a: Date, b: Date) => Math.round((dayStart(a).getTime() - dayStart(b).getTime()) / DAY);
 const parseYmd = (s: string) => { const [y, m, d] = s.slice(0, 10).split('-').map(Number); return new Date(y, m - 1, d); };
 
+// "peak" (strongest reading on digital tests, logged from the TTC card)
+// counts as positive.
 export function parseLH(notes: string | null | undefined): 'positive' | 'negative' | null {
-  const m = (notes ?? '').match(/LH test:\s*(positive|negative)/i);
-  return m ? (m[1].toLowerCase() as 'positive' | 'negative') : null;
+  const m = (notes ?? '').match(/LH test:\s*(positive|negative|peak)/i);
+  if (!m) return null;
+  return m[1].toLowerCase() === 'negative' ? 'negative' : 'positive';
 }
 
 /** BBT from a note, always returned in °C (unit guessed from range when missing). */

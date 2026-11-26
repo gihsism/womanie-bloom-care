@@ -8,6 +8,7 @@
 
 import { lifeStageLabel } from './lifeStageLabels';
 import { parseQuestions } from './visitQuestions';
+import { monthsBetween } from './ttc';
 
 export const SUMMARY_SECTIONS = {
   stage: 'Life stage and today',
@@ -55,6 +56,8 @@ export function localDate(d: Date, locale?: string): string {
 export interface StageInput {
   stage: string | null | undefined;
   dueDate?: string | null;
+  /** TTC stage: the day she started trying (yyyy-mm-dd). */
+  ttcStartDate?: string | null;
   /** Most recent period start (yyyy-mm-dd), any order of rows is fine upstream. */
   lastPeriodStart?: string | null;
   now?: Date;
@@ -90,6 +93,13 @@ export function stageLines(i: StageInput): string[] {
       } else if (day > 90) {
         lines.push(`Last recorded period started ${localDate(last, i.locale)}`);
       }
+    }
+  }
+  if (i.stage === 'conception') {
+    const since = parseDay(i.ttcStartDate);
+    if (since && since.getTime() <= now.getTime()) {
+      const months = monthsBetween(since, now);
+      lines.push(`Trying to conceive since ${localDate(since, i.locale)} (${months} ${months === 1 ? 'month' : 'months'})`);
     }
   }
   return lines;

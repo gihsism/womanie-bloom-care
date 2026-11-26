@@ -19,7 +19,7 @@ export interface HealthSignal {
 
 const FERTILE_MUCUS = /^(ewcm|watery)$|egg-?white|stretchy|fertile/i;
 const BBT_IN_NOTES = /BBT:\s*\d+(?:\.\d+)?/i;
-const LH_POSITIVE_IN_NOTES = /LH test:\s*positive/i;
+const LH_POSITIVE_IN_NOTES = /LH test:\s*(positive|peak)/i;
 
 export function extractIndicators(signals: HealthSignal[]): string[] {
   const indicators: string[] = [];

@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { getFriendlyName } from '@/lib/medical-utils';
 import { normalizeLifeStage } from '@/lib/lifeStage';
+import { readTtcStartLocal } from '@/hooks/useTtcStart';
 import {
   SUMMARY_SECTIONS, SECTION_ORDER, type SummarySection, defaultSelection, selectedSections,
   stageLines, lastCycles, medicineLines, summariseSignals, countSentence, openQuestions,
@@ -25,6 +26,8 @@ export interface VisitSummaryData {
   name: string | null;
   stage: string | null;
   dueDate: string | null;
+  /** Trying to conceive since (yyyy-mm-dd), TTC stage only. */
+  ttcStartDate?: string | null;
   periods: PeriodRow[];
   medicines: MedicineRow[];
   signals: SignalRow[];
@@ -53,7 +56,7 @@ export function VisitSummarySheet({ data, sections, now = new Date() }: {
   const body: Record<SummarySection, JSX.Element> = {
     stage: (
       <div className="text-sm space-y-0.5">
-        {stageLines({ stage: data.stage, dueDate: data.dueDate, lastPeriodStart: cycles[0] ? isoDay(cycles[0].start) : null, now })
+        {stageLines({ stage: data.stage, dueDate: data.dueDate, ttcStartDate: data.ttcStartDate, lastPeriodStart: cycles[0] ? isoDay(cycles[0].start) : null, now })
           .map(l => <p key={l}>{l}</p>)}
       </div>
     ),
@@ -153,7 +156,8 @@ export default function PrintVisitSummary() {
     const since = new Date(Date.now() - (SYMPTOM_WINDOW_DAYS + 1) * 86_400_000).toISOString().slice(0, 10);
     const rows = <T,>(r: { data: unknown }) => (Array.isArray(r.data) ? r.data : []) as T[];
     const [profileRes, periodRes, medsRes, signalRes, qRes, resultRes, docsRes] = await Promise.all([
-      db.from('profiles').select('full_name, life_stage, pregnancy_due_date').eq('id', user.id).maybeSingle(),
+      // '*': ttc_start_date exists only once migration 025 is applied; naming it would fail the read.
+      db.from('profiles').select('*').eq('id', user.id).maybeSingle(),
       db.from('period_tracking').select('period_start_date, period_end_date').eq('user_id', user.id)
         .order('period_start_date', { ascending: false }).limit(12),
       db.from('medications').select('name, dose, times_per_day, active').eq('user_id', user.id).eq('active', true),
@@ -164,11 +168,12 @@ export default function PrintVisitSummary() {
         .eq('user_id', user.id).eq('data_type', 'lab_result'),
       db.from('health_documents').select('file_name, ai_suggested_name, uploaded_at').eq('user_id', user.id),
     ]);
-    const p = (profileRes.data ?? null) as { full_name: string | null; life_stage: string | null; pregnancy_due_date: string | null } | null;
+    const p = (profileRes.data ?? null) as { full_name: string | null; life_stage: string | null; pregnancy_due_date: string | null; ttc_start_date?: string | null } | null;
     setData({
       name: p?.full_name || user.name || null,
       stage: p?.life_stage ? normalizeLifeStage(p.life_stage) : null,
       dueDate: p?.pregnancy_due_date ?? null,
+      ttcStartDate: p?.ttc_start_date ? String(p.ttc_start_date).slice(0, 10) : readTtcStartLocal(user.id),
       periods: rows<PeriodRow>(periodRes),
       medicines: rows<MedicineRow>(medsRes),
       signals: rows<SignalRow>(signalRes),

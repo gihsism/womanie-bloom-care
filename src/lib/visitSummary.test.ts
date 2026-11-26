@@ -25,6 +25,12 @@ describe('stageLines', () => {
       .toBe('Cycle day 1 (last period started 25 November 2026)');
     expect(stageLines({ stage: 'conception', lastPeriodStart: '2026-11-14', now: NOW, locale: L })[1]).toMatch(/^Cycle day 12 /);
   });
+  it('TTC: how long she has been trying, for the doctor', () => {
+    const lines = stageLines({ stage: 'conception', lastPeriodStart: '2026-11-14', ttcStartDate: '2025-10-01', now: NOW, locale: L });
+    expect(lines[2]).toBe('Trying to conceive since 1 October 2025 (13 months)');
+    expect(stageLines({ stage: 'menstrual-cycle', ttcStartDate: '2025-10-01', now: NOW })).toHaveLength(1);
+    expect(stageLines({ stage: 'conception', ttcStartDate: '2027-01-01', now: NOW })).toHaveLength(1);
+  });
   it('a very old period is not a cycle day', () => {
     expect(stageLines({ stage: 'menstrual-cycle', lastPeriodStart: '2026-01-01', now: NOW, locale: L })[1])
       .toBe('Last recorded period started 1 January 2026');

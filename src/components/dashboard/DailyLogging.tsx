@@ -124,7 +124,7 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
         // structured logs.
         const notes: string = existing.notes ?? '';
         const flow = notes.match(/Flow:\s*(spotting|light|medium|heavy)/i)?.[1] ?? '';
-        const lhTest = notes.match(/LH test:\s*(not-tested|positive|negative)/i)?.[1] ?? '';
+        const lhTest = notes.match(/LH test:\s*(not-tested|positive|negative|peak)/i)?.[1] ?? '';
         const intercourse = notes.match(/Intercourse:\s*(no|yes-protected|yes-unprotected)/i)?.[1] ?? '';
         const pillTaken = notes.match(/Pill:\s*(on-time|late|missed)/i)?.[1] ?? '';
         const medication = notes.match(/Medication:\s*(all-on-time|late|missed)/i)?.[1] ?? '';
@@ -144,7 +144,7 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
           .filter(s =>
             s &&
             !/^Flow:\s*(spotting|light|medium|heavy)$/i.test(s) &&
-            !/^LH test:\s*(not-tested|positive|negative)$/i.test(s) &&
+            !/^LH test:\s*(not-tested|positive|negative|peak)$/i.test(s) &&
             !/^Intercourse:\s*(no|yes-protected|yes-unprotected)$/i.test(s) &&
             !/^Pill:\s*(on-time|late|missed)$/i.test(s) &&
             !/^Medication:\s*(all-on-time|late|missed)$/i.test(s) &&
@@ -422,6 +422,7 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
                     <SelectItem value="not-tested">Not tested</SelectItem>
                     <SelectItem value="negative">Negative</SelectItem>
                     <SelectItem value="positive">Positive!</SelectItem>
+                    <SelectItem value="peak">Peak</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
