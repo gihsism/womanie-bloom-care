@@ -28,6 +28,7 @@ const TYPES: Array<{ key: keyof PushPrefs; label: string; hint: string }> = [
   { key: 'medicine', label: 'Medicine times', hint: 'At the times you set on each medicine, unless you already logged the dose' },
   { key: 'period', label: 'Period', hint: 'The day before your period is expected, and if it is a few days late' },
   { key: 'appointment', label: 'Visits', hint: 'The day before a visit' },
+  { key: 'documents', label: 'Documents from your doctor', hint: 'When a connected doctor adds a document to your Records (the name of the document is never shown)' },
 ];
 
 const BLOCKED_TEXT: Record<Exclude<PushSupport, 'ok'>, string> = {

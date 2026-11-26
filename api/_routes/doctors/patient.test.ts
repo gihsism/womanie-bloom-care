@@ -117,9 +117,12 @@ describe('doctors/patient security invariants', () => {
     const docCall = query.mock.calls.find(([sql]) => /FROM health_documents/i.test(sql)) as [string, unknown[]];
     expect(docCall[0]).toMatch(/AS has_file/);
     // Every mention of file_path is inside the has_file expression.
-    const stripped = docCall[0].replace(/\(file_path IS NOT NULL AND file_path <> ''\) AS has_file/, '');
+    const stripped = docCall[0].replace(/\(h\.file_path IS NOT NULL AND h\.file_path <> ''\) AS has_file/, '');
     expect(stripped).not.toMatch(/file_path/);
-    expect(docCall[1]).toEqual([PATIENT_ID]);
+    expect(docCall[1]).toEqual([PATIENT_ID, DOCTOR.id]);
+    // "Sent by you" compares against THIS doctor only; no sender id is selected.
+    expect(docCall[0]).toMatch(/AS sent_by_me/);
+    expect(stripped).not.toMatch(/uploaded_by_doctor_id\s*(,|AS|FROM)/);
   });
 
   it('returns no chart data at all when consent is missing', async () => {

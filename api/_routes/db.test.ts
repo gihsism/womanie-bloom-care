@@ -88,6 +88,22 @@ describe('api/_routes/db security invariants', () => {
     expect((res._body as Record<string, string>).error).toMatch(/not writable/i);
   });
 
+  // "From Dr X" is set only by /api/docs/from-doctor after its consent
+  // check: a patient can't label her own upload (or edit a row) as coming
+  // from a doctor.
+  it('refuses uploaded_by_doctor_id on health_documents insert, update and upsert', async () => {
+    for (const body of [
+      { operation: 'insert', insertData: { user_id: SESSION_USER.id, file_name: 'x.pdf', uploaded_by_doctor_id: 'doc_1' } },
+      { operation: 'update', updateData: { uploaded_by_doctor_id: 'doc_1' }, filters: [['id', 'eq', 'd1']] },
+      { operation: 'upsert', upsertData: { id: 'd1', user_id: SESSION_USER.id, uploaded_by_doctor_id: 'doc_1' } },
+    ]) {
+      const res = mockRes();
+      await handler(mockReq({ table: 'health_documents', ...body }), res);
+      expect(res._status).toBe(403);
+      expect((res._body as Record<string, string>).error).toMatch(/uploaded_by_doctor_id/);
+    }
+  });
+
   it('returns 403 when the client filters by another user\'s id (owner mismatch)', async () => {
     const res = mockRes();
     await handler(

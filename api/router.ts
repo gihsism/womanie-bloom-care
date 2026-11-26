@@ -20,6 +20,7 @@ import connectionsRespond from './_routes/connections/respond.js';
 import db from './_routes/db.js';
 import docsDelete from './_routes/docs/delete.js';
 import docsFile from './_routes/docs/file.js';
+import docsFromDoctor from './_routes/docs/from-doctor.js';
 import docsPendingRetries from './_routes/docs/pending-retries.js';
 import doctorsAvailability from './_routes/doctors/availability.js';
 import doctorsConnections from './_routes/doctors/connections.js';
@@ -78,6 +79,7 @@ export const ROUTES: Record<string, Handler> = {
   'db': db,
   'docs/delete': docsDelete,
   'docs/file': docsFile,
+  'docs/from-doctor': docsFromDoctor,
   'docs/pending-retries': docsPendingRetries,
   'doctors/availability': doctorsAvailability,
   'doctors/connections': doctorsConnections,

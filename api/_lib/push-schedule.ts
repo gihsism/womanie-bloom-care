@@ -26,9 +26,11 @@ export type ReminderType = 'medicine' | 'period' | 'appointment';
 // bookings: doctor side only (a patient booked / cancelled / moved a visit
 // with HER as the doctor); switched in the doctor's Profile & settings.
 // Sent at booking time by api/_lib/doctor-notify.ts, not by this planner.
-export interface PushPrefs { medicine: boolean; period: boolean; appointment: boolean; bookings: boolean }
+// documents: patient side, "Dr X added a document" (sent at upload time by
+// api/_lib/doctor-documents.ts, not by this planner).
+export interface PushPrefs { medicine: boolean; period: boolean; appointment: boolean; bookings: boolean; documents: boolean }
 
-export const DEFAULT_PREFS: PushPrefs = { medicine: true, period: true, appointment: true, bookings: true };
+export const DEFAULT_PREFS: PushPrefs = { medicine: true, period: true, appointment: true, bookings: true, documents: true };
 
 export interface SubscriptionRow {
   id: string;
@@ -134,6 +136,7 @@ export function parsePrefs(raw: SubscriptionRow['prefs']): PushPrefs {
     period: o.period !== false,
     appointment: o.appointment !== false,
     bookings: o.bookings !== false,
+    documents: o.documents !== false,
   };
 }
 

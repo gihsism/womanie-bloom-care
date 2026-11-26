@@ -3,6 +3,23 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from './_lib/auth.js';
 import { withSentry } from './_lib/sentry.js';
 import { documentUploadAccess } from './_lib/blob-read.js';
+import { DOCUMENT_UPLOAD_TYPES, MAX_DOCUMENT_BYTES, hasApprovedDoctorAccess } from './_lib/doctor-documents.js';
+
+// A doctor sending a document into a patient's Records uploads into the
+// PATIENT's folder (<patient id>/...), because /api/docs/file and
+// /api/docs/delete only serve or erase a blob inside the owner's folder.
+// She names the patient in the client payload; the token is only issued
+// when she still holds the doctor role AND her connection is approved.
+export function payloadPatientId(clientPayload: string | null | undefined): string | null {
+  if (!clientPayload) return null;
+  try {
+    const p = JSON.parse(clientPayload) as { forPatient?: unknown };
+    const id = typeof p?.forPatient === 'string' ? p.forPatient.trim() : '';
+    return id && id.length <= 100 && !/[/\\]|\.\./.test(id) ? id : null;
+  } catch {
+    return null;
+  }
+}
 
 export const config = {
   api: {
@@ -51,28 +68,31 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       const jsonResponse = await handleUpload({
         body,
         request: req as unknown as Request,
-        onBeforeGenerateToken: async (pathname: string) => {
-          if (!pathname.startsWith(`${user.id}/`)) {
+        onBeforeGenerateToken: async (pathname: string, clientPayload: string | null) => {
+          let ownerId = user.id;
+          const forPatient = payloadPatientId(clientPayload);
+          if (forPatient && forPatient !== user.id) {
+            const { neon } = await import('@neondatabase/serverless');
+            const sql = neon(process.env.DATABASE_URL!);
+            const query = (text: string, params: unknown[]) => sql.query(text, params) as Promise<unknown[]>;
+            if (!(await hasApprovedDoctorAccess(query, user.id, forPatient))) {
+              throw new Error('Forbidden: no approved connection to this patient');
+            }
+            ownerId = forPatient;
+          }
+          if (!pathname.startsWith(`${ownerId}/`) || pathname.includes('/../')) {
             throw new Error('Forbidden: pathname must be scoped to session user');
           }
           return {
-            allowedContentTypes: [
-              'application/pdf',
-              'image/jpeg',
-              'image/png',
-              'image/jpg',
-              'image/webp',
-              'image/heic',
-              'image/heif',
-              'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            ],
-            maximumSizeInBytes: 200 * 1024 * 1024,
+            // Same limits for a doctor's upload as for the patient's own.
+            allowedContentTypes: DOCUMENT_UPLOAD_TYPES,
+            maximumSizeInBytes: MAX_DOCUMENT_BYTES,
             // Older blobs are public (readable by anyone holding the URL),
             // so the URL must be unguessable: without a random suffix it was
             // <user id>/<ms timestamp>-<original file name>. The URL itself
             // never reaches a client again (reads go through /api/docs/file).
             addRandomSuffix: true,
-            tokenPayload: JSON.stringify({ userId: user.id }),
+            tokenPayload: JSON.stringify({ userId: user.id, ownerId }),
           };
         },
         onUploadCompleted: async ({ blob }) => {

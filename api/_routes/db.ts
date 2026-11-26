@@ -83,6 +83,9 @@ const UPDATABLE_COLUMNS: Record<string, string[]> = {
 // would put an unvetted "verified doctor" in every patient's directory.
 const PROTECTED_COLUMNS: Record<string, string[]> = {
   doctor_profiles: ['is_verified', 'verification_status', 'rating', 'review_count'],
+  // "From Dr X": set only by /api/docs/from-doctor after its consent check,
+  // so a patient can't label her own upload as coming from a doctor.
+  health_documents: ['uploaded_by_doctor_id'],
 };
 
 // Columns the client may set when CREATING a row but never read back or
