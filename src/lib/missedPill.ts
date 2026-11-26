@@ -71,6 +71,11 @@ export function classifyLate(pillType: PillType, hoursLate: number, packDay?: nu
   return 'missed';
 }
 
+/** Vomiting within this many hours of a pill counts like a missed pill (FSRH: CHC 2 h, POP 3 h). */
+export function vomitWindowHours(pillType: PillType): number {
+  return pillType === 'combined' ? 2 : 3;
+}
+
 /** Hours since the pill was due: due day (yyyy-MM-dd) at her usual time (HH:mm). */
 export function hoursLateSince(dueDay: string, usualTime: string, now = new Date()): number {
   const [y, m, d] = dueDay.split('-').map(Number);

@@ -127,8 +127,10 @@ const PostpartumRecoveryCheckin = ({ birthDate, now }: Props) => {
         <Badge variant="outline" className="text-[10px]">Week {week} of {CHECKIN_WEEKS}</Badge>
       </div>
 
-      {/* Red flags: while any applies, the call-now message stays up. */}
-      {shownUrgent.length > 0 && <UrgentBanner flags={shownUrgent} />}
+      {/* Red flags: while any applies, the call-now message stays up. In
+          the form it sits right under the red-flag boxes (below), where she
+          ticked them; at the top of the card it was off screen on a phone. */}
+      {!showForm && shownUrgent.length > 0 && <UrgentBanner flags={shownUrgent} />}
 
       {showForm ? (
         <div className="space-y-4">
@@ -183,6 +185,8 @@ const PostpartumRecoveryCheckin = ({ birthDate, now }: Props) => {
               </label>
             ))}
           </fieldset>
+
+          {shownUrgent.length > 0 && <UrgentBanner flags={shownUrgent} />}
 
           <div className="flex items-center gap-2">
             <Button size="sm" onClick={save} disabled={!isComplete(draft.answers)}>Save this week</Button>

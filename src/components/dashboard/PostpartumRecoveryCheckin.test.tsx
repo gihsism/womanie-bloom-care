@@ -47,6 +47,17 @@ describe('PostpartumRecoveryCheckin', () => {
     expect(screen.getByTestId('recovery-urgent')).toHaveTextContent('144');
   });
 
+  it('in the form, the call-now banner sits under the red-flag boxes she ticked, not at the top of the card', () => {
+    render(<PostpartumRecoveryCheckin birthDate={birth} now={now} />);
+    const box = screen.getByRole('checkbox', { name: /painful, swollen/ });
+    fireEvent.click(box);
+    const banner = screen.getByTestId('recovery-urgent');
+    expect(screen.getAllByTestId('recovery-urgent')).toHaveLength(1);
+    // DOCUMENT_POSITION_FOLLOWING: the banner comes after the box.
+    expect(box.compareDocumentPosition(banner) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(banner.compareDocumentPosition(screen.getByRole('button', { name: 'Save this week' })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it('self-harm thoughts show the urgent message and the 143 helpline', () => {
     render(<PostpartumRecoveryCheckin birthDate={birth} now={now} />);
     fireEvent.click(screen.getByRole('button', { name: 'I have thoughts of harming myself' }));

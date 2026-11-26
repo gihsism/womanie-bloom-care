@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTtcStart } from '@/hooks/useTtcStart';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
-import { ttcDoctorAdvice, ttcDoctorText, parseYmd } from '@/lib/ttc';
+import { ttcDoctorAdvice, ttcDoctorText, parseYmd, isTtcStartInput, ttcStartMin } from '@/lib/ttc';
 import { CalendarHeart, FileText, Stethoscope } from 'lucide-react';
 
 // TTC stage: "When did you start trying?" and, once it has been 12 months
@@ -40,12 +40,13 @@ export default function TtcDoctorCard() {
         <Input
           type="date"
           className="h-8 w-40"
+          min={ttcStartMin(todayIso)}
           max={todayIso}
           value={ttcStart ?? ''}
           onChange={e => {
             const v = e.target.value;
             if (!v) save(null);
-            else if (/^\d{4}-\d{2}-\d{2}$/.test(v) && v <= todayIso) save(v);
+            else if (isTtcStartInput(v, todayIso)) save(v);
           }}
         />
       </label>

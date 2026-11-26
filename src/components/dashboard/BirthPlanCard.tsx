@@ -73,7 +73,18 @@ const BirthPlanCard = () => {
     setSaveState(error ? 'device' : 'saved');
   }, [userId, serverOk]);
 
-  useEffect(() => () => { if (timer.current) window.clearTimeout(timer.current); }, []);
+  // A change still waiting for its debounce is saved now, not dropped:
+  // typing a note and tapping "Print or save PDF" (or leaving the page)
+  // within the debounce lost the note from the account and the printout.
+  const saveRef = useRef(saveToAccount);
+  saveRef.current = saveToAccount;
+  const flushPending = useCallback(async () => {
+    if (!timer.current) return;
+    window.clearTimeout(timer.current);
+    timer.current = null;
+    await saveRef.current();
+  }, []);
+  useEffect(() => () => { void flushPending(); }, [flushPending]);
 
   const update = (nextPlan: BirthPlan, nextShared = shared, delay = 800) => {
     setPlan(nextPlan);
@@ -82,7 +93,7 @@ const BirthPlanCard = () => {
     if (!userId) return;
     try { localStorage.setItem(BIRTH_PLAN_LOCAL_KEY(userId), JSON.stringify(nextPlan)); } catch { /* ignore */ }
     if (timer.current) window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => { void saveToAccount(); }, delay);
+    timer.current = window.setTimeout(() => { timer.current = null; void saveToAccount(); }, delay);
   };
 
   const progress = planProgress(plan);
@@ -188,7 +199,7 @@ const BirthPlanCard = () => {
         <span className="text-[11px] text-muted-foreground" aria-live="polite">
           {saveState === 'saving' ? 'Saving…' : saveState === 'saved' ? 'Saved' : saveState === 'device' ? 'Saved on this device' : ''}
         </span>
-        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => navigate('/dashboard/birth-plan/print')}>
+        <Button size="sm" variant="outline" className="gap-1.5" onClick={async () => { await flushPending(); navigate('/dashboard/birth-plan/print'); }}>
           <Printer className="h-3.5 w-3.5" />
           Print or save PDF
         </Button>

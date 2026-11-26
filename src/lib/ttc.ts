@@ -180,6 +180,20 @@ export function thresholdMonthsFor(age: number | null | undefined): number {
   return 12;
 }
 
+/**
+ * Earliest "started trying" date the picker accepts: 20 years back. A
+ * browser date field reports every keystroke of the year (0002, 0020,
+ * 0202, 2025), and each one used to be saved to the profile.
+ */
+export function ttcStartMin(todayIso: string): string {
+  return `${Number(todayIso.slice(0, 4)) - 20}${todayIso.slice(4, 10)}`;
+}
+
+/** A complete, plausible start date: not in the future, not before ttcStartMin. */
+export function isTtcStartInput(v: string, todayIso: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(v) && v <= todayIso && v >= ttcStartMin(todayIso);
+}
+
 export function ttcDoctorAdvice(ttcStart: string | null | undefined, age: number | null | undefined, now = new Date()): TtcDoctorAdvice | null {
   if (!ttcStart || !/^\d{4}-\d{2}-\d{2}/.test(ttcStart)) return null;
   const start = parseYmd(ttcStart);
