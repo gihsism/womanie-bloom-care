@@ -202,6 +202,23 @@ describe('computeCycleInsights: pregnancy break', () => {
     expect(r.doctorFlags.find(f => f.kind === 'no-period')).toBeUndefined();
   });
 
+  // QA 2026-11-26 (round 4): four periods logged, all around a birth, and
+  // the card said "You have one period logged so far".
+  it('several periods but no countable cycle: never says "one period logged"', () => {
+    const periods = periodsFrom('2026-08-12', [28, 28, 28]);
+    const breaks = pregnancyBreaksFromBirths(['2026-11-04']);
+    const r = computeCycleInsights({ periods, breaks, today: '2026-11-26' });
+    expect(r.cycleCount).toBe(0);
+    expect(r.confidenceNote).not.toMatch(/one period logged/);
+    expect(r.confidenceNote).toMatch(/None of the gaps/);
+    const gap = computeCycleInsights({
+      periods: [{ period_start_date: '2026-01-05' }, { period_start_date: '2026-05-20' }],
+      today: '2026-06-01',
+    });
+    expect(gap.cycleCount).toBe(0);
+    expect(gap.confidenceNote).toMatch(/None of the gaps/);
+  });
+
   it('builds breaks from birth dates and ignores empty ones', () => {
     expect(pregnancyBreaksFromBirths(['2025-05-01', null, '', undefined])).toEqual([
       { start: '2024-07-25', end: '2025-06-26' },

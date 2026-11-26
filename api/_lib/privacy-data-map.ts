@@ -49,6 +49,7 @@ export const PRIVACY_TABLES: Record<string, TableRule> = {
   babies: { export: 'rows', erase: 'delete' },
   birth_records: { export: 'rows', erase: 'delete' },
   birth_plans: { export: 'rows', erase: 'delete' },
+  ivf_plans: { export: 'rows', erase: 'delete' },
   user_app_data: { export: 'rows', erase: 'delete' },
   visit_questions: { export: 'rows', erase: 'delete' },
   chat_messages: { export: 'rows', erase: 'delete' },

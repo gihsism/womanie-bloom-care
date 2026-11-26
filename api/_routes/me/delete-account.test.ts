@@ -195,7 +195,7 @@ describe('me/delete-account security invariants', () => {
 
     query.mockImplementation(async (q: string) =>
       /to_regclass/.test(q)
-        ? [{ present: true, visit_questions: true, pending_jobs: true, rate_limit_counters: true, push_subscriptions: true, birth_plans: true, admin_audit_log: true, doctor_invites: true, consent_log: true }]
+        ? [{ present: true, visit_questions: true, pending_jobs: true, rate_limit_counters: true, push_subscriptions: true, birth_plans: true, ivf_plans: true, admin_audit_log: true, doctor_invites: true, consent_log: true }]
         : [{ email: 'User@Test.com' }]);
     const res = mockRes();
     await handler(mockReq({ confirm: CONFIRM_PHRASE }), res);

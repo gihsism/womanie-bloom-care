@@ -55,14 +55,15 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     // Same for pending_jobs (005; also cascades from health_documents) and
     // rate_limit_counters (014).
     const appDataRows = await sql.query(
-      "SELECT to_regclass('public.user_app_data') IS NOT NULL AS present, to_regclass('public.visit_questions') IS NOT NULL AS visit_questions, to_regclass('public.pending_jobs') IS NOT NULL AS pending_jobs, to_regclass('public.rate_limit_counters') IS NOT NULL AS rate_limit_counters, to_regclass('public.push_subscriptions') IS NOT NULL AS push_subscriptions, to_regclass('public.birth_plans') IS NOT NULL AS birth_plans, to_regclass('public.admin_audit_log') IS NOT NULL AS admin_audit_log, to_regclass('public.doctor_invites') IS NOT NULL AS doctor_invites, to_regclass('public.consent_log') IS NOT NULL AS consent_log"
-    ) as Array<{ present?: boolean; visit_questions?: boolean; pending_jobs?: boolean; rate_limit_counters?: boolean; push_subscriptions?: boolean; birth_plans?: boolean; admin_audit_log?: boolean; doctor_invites?: boolean; consent_log?: boolean }>;
+      "SELECT to_regclass('public.user_app_data') IS NOT NULL AS present, to_regclass('public.visit_questions') IS NOT NULL AS visit_questions, to_regclass('public.pending_jobs') IS NOT NULL AS pending_jobs, to_regclass('public.rate_limit_counters') IS NOT NULL AS rate_limit_counters, to_regclass('public.push_subscriptions') IS NOT NULL AS push_subscriptions, to_regclass('public.birth_plans') IS NOT NULL AS birth_plans, to_regclass('public.ivf_plans') IS NOT NULL AS ivf_plans, to_regclass('public.admin_audit_log') IS NOT NULL AS admin_audit_log, to_regclass('public.doctor_invites') IS NOT NULL AS doctor_invites, to_regclass('public.consent_log') IS NOT NULL AS consent_log"
+    ) as Array<{ present?: boolean; visit_questions?: boolean; pending_jobs?: boolean; rate_limit_counters?: boolean; push_subscriptions?: boolean; birth_plans?: boolean; ivf_plans?: boolean; admin_audit_log?: boolean; doctor_invites?: boolean; consent_log?: boolean }>;
     const hasAppData = appDataRows[0]?.present === true;
     const hasVisitQuestions = appDataRows[0]?.visit_questions === true;
     const hasPendingJobs = appDataRows[0]?.pending_jobs === true;
     const hasRateLimits = appDataRows[0]?.rate_limit_counters === true;
     const hasPush = appDataRows[0]?.push_subscriptions === true; // migration 015
     const hasBirthPlans = appDataRows[0]?.birth_plans === true; // migration 020
+    const hasIvfPlans = appDataRows[0]?.ivf_plans === true; // migration 022
     const hasAdminAudit = appDataRows[0]?.admin_audit_log === true; // migration 023
     const hasDoctorInvites = appDataRows[0]?.doctor_invites === true; // migration 023
     const hasConsentLog = appDataRows[0]?.consent_log === true; // migration 024
@@ -94,6 +95,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       ...(hasAppData ? [sql`DELETE FROM user_app_data WHERE user_id = ${user.id}`] : []),
       ...(hasVisitQuestions ? [sql`DELETE FROM visit_questions WHERE user_id = ${user.id}`] : []),
       ...(hasBirthPlans ? [sql`DELETE FROM birth_plans WHERE user_id = ${user.id}`] : []),
+      ...(hasIvfPlans ? [sql`DELETE FROM ivf_plans WHERE user_id = ${user.id}`] : []),
       ...(hasPush ? [sql`DELETE FROM push_subscriptions WHERE user_id = ${user.id}`, sql`DELETE FROM push_sent_log WHERE user_id = ${user.id}`] : []),
       ...(hasConsentLog ? [sql`DELETE FROM consent_log WHERE user_id = ${user.id}`] : []),
       ...(hasDoctorInvites ? [sql`DELETE FROM doctor_invites WHERE used_by_user_id = ${user.id} OR lower(email) = ${lowerEmail}`] : []),

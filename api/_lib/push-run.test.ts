@@ -3,7 +3,7 @@ import { runSendDue, type Query, type Sender } from './push-run';
 import type { SubscriptionRow } from './push-schedule';
 
 // In-memory stand-in for the tables the run reads; answers by SQL shape.
-function fakeDb(opts: { subs: SubscriptionRow[]; meds?: unknown[]; doses?: unknown[]; periods?: unknown[]; profiles?: unknown[]; appts?: unknown[] }) {
+function fakeDb(opts: { subs: SubscriptionRow[]; meds?: unknown[]; doses?: unknown[]; periods?: unknown[]; profiles?: unknown[]; appts?: unknown[]; triggers?: unknown[] | 'missing' }) {
   const sentLog = new Set<string>();
   let subs = [...opts.subs];
   const deletedSubs: string[] = [];
@@ -16,6 +16,10 @@ function fakeDb(opts: { subs: SubscriptionRow[]; meds?: unknown[]; doses?: unkno
     if (text.includes('FROM period_tracking')) return mine(opts.periods);
     if (text.includes('FROM profiles')) return mine(opts.profiles);
     if (text.includes('FROM appointments')) return mine(opts.appts);
+    if (text.includes('FROM ivf_plans')) {
+      if (opts.triggers === 'missing') throw new Error('relation "ivf_plans" does not exist');
+      return mine(opts.triggers);
+    }
     if (text.startsWith('INSERT INTO push_sent_log')) {
       const k = `${params[0]}|${params[1]}`;
       if (sentLog.has(k)) return [];
@@ -141,5 +145,24 @@ describe('runSendDue', () => {
     const send = vi.fn<Sender>();
     expect(await runSendDue(db.query, send, AT)).toMatchObject({ users: 0, sent: 0 });
     expect(send).not.toHaveBeenCalled();
+  });
+
+  it('sends the IVF trigger reminder to a device that opted in, once', async () => {
+    const T = '2026-11-20T20:30:00.000Z';
+    const db = fakeDb({ subs: [sub('A', { prefs: { ivf_trigger: true } }), sub('B')], triggers: [{ user_id: 'A', trigger_at: new Date(T) }, { user_id: 'B', trigger_at: T }] });
+    const sent: string[] = [];
+    const send: Sender = async (s, p) => { sent.push(`${s.user_id}:${p.tag}`); return 'sent'; };
+    const at = new Date(Date.parse(T) - 8 * 60_000);
+    await runSendDue(db.query, send, at);
+    await runSendDue(db.query, send, new Date(at.getTime() + 60_000));
+    expect(sent).toEqual(['A:ivf-trigger']); // B never opted in
+  });
+
+  it('keeps running every other reminder before migration 022 is applied', async () => {
+    const db = fakeDb({ subs: [sub('A')], meds: [{ id: 'mA', user_id: 'A', reminder_times: ['08:00'] }], triggers: 'missing' });
+    const sent: string[] = [];
+    const out = await runSendDue(db.query, async (_s, p) => { sent.push(p.tag); return 'sent'; }, AT);
+    expect(sent).toEqual(['med-mA-08:00']);
+    expect(out.sent).toBe(1);
   });
 });

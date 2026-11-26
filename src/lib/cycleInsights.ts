@@ -358,8 +358,12 @@ export function computeCycleInsights({ periods, symptoms = [], breaks = [], toda
   let confidenceNote: string | null = null;
   if (built.starts.length === 0) {
     confidenceNote = null;
-  } else if (cycleCount === 0) {
+  } else if (cycleCount === 0 && built.starts.length === 1) {
     confidenceNote = 'You have one period logged so far. Once your next one starts we can show your cycle length, and after 3 cycles the picture gets reliable.';
+  } else if (cycleCount === 0) {
+    // Several periods, but every gap between them was left out (a pregnancy
+    // or a long break in logging): "one period logged" would be untrue.
+    confidenceNote = 'None of the gaps between your logged periods can be counted as a cycle yet (a pregnancy or a long break in logging sits between them). Once your next period starts we can show your cycle length, and after 3 cycles the picture gets reliable.';
   } else if (cycleCount < 3) {
     confidenceNote = `Based on ${plural(cycleCount, 'cycle')} so far, so treat this as a first look. After 3 cycles it gets more reliable.`;
   }

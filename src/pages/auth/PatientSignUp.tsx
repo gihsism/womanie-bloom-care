@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { scorePassword } from '@/lib/password-strength';
 
@@ -21,6 +22,8 @@ const PatientSignUp = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  // Recorded in consent_log with the policy version (migration 024).
+  const [acceptPrivacy, setAcceptPrivacy] = useState(false);
 
   const strength = scorePassword(password);
 
@@ -31,6 +34,10 @@ const PatientSignUp = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
+    if (!acceptPrivacy) {
+      toast({ variant: 'destructive', title: 'Please accept the privacy policy', description: 'Tick the box to confirm you have read it.' });
+      return;
+    }
     if (password.length < 8) {
       toast({ variant: 'destructive', title: 'Password too short', description: 'Must be at least 8 characters' });
       return;
@@ -41,7 +48,7 @@ const PatientSignUp = () => {
       const resp = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name }),
+        body: JSON.stringify({ email, password, name, acceptPrivacyPolicy: acceptPrivacy }),
         credentials: 'include',
       });
       const data = await resp.json();
@@ -127,6 +134,12 @@ const PatientSignUp = () => {
                   </p>
                 </div>
               )}
+            </div>
+            <div className="flex items-start gap-2">
+              <Checkbox id="accept-privacy" checked={acceptPrivacy} onCheckedChange={v => setAcceptPrivacy(v === true)} className="mt-0.5" />
+              <Label htmlFor="accept-privacy" className="text-xs font-normal leading-relaxed text-muted-foreground">
+                I have read the <a href="/privacy" target="_blank" rel="noreferrer" className="text-primary underline underline-offset-2">privacy policy</a> and agree that Womanie stores and processes my health information as it describes.
+              </Label>
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Creating account...</> : 'Create Account'}

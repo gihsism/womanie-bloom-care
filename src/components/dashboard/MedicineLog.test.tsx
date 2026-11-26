@@ -92,6 +92,34 @@ describe('MedicineLog edit', () => {
     expect(screen.queryByLabelText('Name')).toBeNull(); // form closed
   });
 
+  // QA 2026-11-26 (round 4): the edit form showed "Started on" empty and
+  // ignored it, so a wrong HRT start date could never be corrected and the
+  // menopause trends / HRT questions kept the wrong date.
+  it('edit shows the saved start date and saves a corrected one', async () => {
+    h.rows = [{ ...IRON, started_on: '2026-11-06' }];
+    render(<MedicineLog stage="menopause" />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit Iron' }));
+    const started = screen.getByLabelText('Started on (optional)') as HTMLInputElement;
+    expect(started.value).toBe('2026-11-06');
+    fireEvent.change(started, { target: { value: '2026-11-01' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(h.updates).toHaveLength(1));
+    expect(h.updates[0].values).toMatchObject({ started_on: '2026-11-01' });
+    expect(h.lifeEvents[0].data).toMatchObject({
+      before: { started_on: '2026-11-06' }, after: { started_on: '2026-11-01' },
+    });
+  });
+
+  it('edit without touching the start date does not rewrite it', async () => {
+    h.rows = [{ ...IRON, started_on: '2026-11-06' }];
+    render(<MedicineLog stage="menopause" />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit Iron' }));
+    fireEvent.change(screen.getByLabelText('Dose (optional)'), { target: { value: '50 mg' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(h.updates).toHaveLength(1));
+    expect(h.updates[0].values).not.toHaveProperty('started_on');
+  });
+
   it('Cancel leaves the medicine unchanged', async () => {
     h.rows = [IRON];
     render(<MedicineLog stage="pregnancy" />);
