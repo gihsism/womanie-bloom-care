@@ -4,6 +4,7 @@ import * as jose from 'jose';
 import { getAuthSecret } from '../../_lib/auth.js';
 import { withSentry } from '../../_lib/sentry.js';
 import { isVerifiedAdmin } from '../../_lib/admin.js';
+import { isMaintenanceOn } from '../../_lib/maintenance.js';
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -40,7 +41,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     // cookie (same session id, so logout / delete-account still revoke it).
     try {
       const expiresAt = new Date(String((sessions[0] as { expires_at: string | Date }).expires_at)).getTime();
-      if (Number.isFinite(expiresAt) && expiresAt - Date.now() < 20 * 24 * 60 * 60 * 1000) {
+      // Skipped in maintenance (read-only) mode: no writes to a database
+      // that is being copied.
+      if (!isMaintenanceOn() && Number.isFinite(expiresAt) && expiresAt - Date.now() < 20 * 24 * 60 * 60 * 1000) {
         const renewed = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
         await sql.query('UPDATE auth_sessions SET expires_at = $1 WHERE id = $2 AND user_id = $3', [renewed.toISOString(), payload.sid, payload.sub]);
         const fresh = await new jose.SignJWT({ sub: payload.sub, sid: payload.sid, email: payload.email, name: payload.name })

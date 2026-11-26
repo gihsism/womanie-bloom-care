@@ -191,6 +191,8 @@ export default defineConfig(() => ({
       // The api/ layer is pure-Node serverless handlers; its dependency-free
       // utils (lab title/unit normalisation, etc.) are worth unit-testing too.
       "api/**/*.{test,spec}.{ts,tsx}",
+      // Operational scripts with pure logic (e.g. db-verify-copy.mjs).
+      "scripts/*.{test,spec}.ts",
     ],
     // Playwright end-to-end specs run with `npm run e2e`, never in vitest.
     exclude: ["**/node_modules/**", "e2e/**"],

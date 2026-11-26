@@ -20,6 +20,7 @@ import connectionsPending from './_routes/connections/pending.js';
 import connectionsRedeemCode from './_routes/connections/redeem-code.js';
 import connectionsRespond from './_routes/connections/respond.js';
 import db from './_routes/db.js';
+import maintenance from './_routes/maintenance.js';
 import docsDelete from './_routes/docs/delete.js';
 import docsFile from './_routes/docs/file.js';
 import docsFromDoctor from './_routes/docs/from-doctor.js';
@@ -46,6 +47,7 @@ import pushSendDue from './_routes/push/send-due.js';
 import pushSubscription from './_routes/push/subscription.js';
 import pushTest from './_routes/push/test.js';
 import researchLibrary from './_routes/research/library.js';
+import { blockIfMaintenance } from './_lib/maintenance.js';
 
 // Single entry point for the API routes that need no per-function config.
 //
@@ -82,6 +84,7 @@ export const ROUTES: Record<string, Handler> = {
   'connections/redeem-code': connectionsRedeemCode,
   'connections/respond': connectionsRespond,
   'db': db,
+  'maintenance': maintenance,
   'docs/delete': docsDelete,
   'docs/file': docsFile,
   'docs/from-doctor': docsFromDoctor,
@@ -118,7 +121,10 @@ export function routeKey(url: string | undefined, rewritten?: unknown): string {
 export default function handler(req: VercelRequest, res: VercelResponse) {
   const rewritten = req.query?.__route;
   if (req.query) delete req.query.__route;
-  const route = ROUTES[routeKey(req.url, rewritten)];
+  const key = routeKey(req.url, rewritten);
+  const route = ROUTES[key];
   if (!route) return res.status(404).json({ error: 'Not found' });
+  // Maintenance (read-only) mode, OFF unless MAINTENANCE_MODE is set.
+  if (blockIfMaintenance(key, req, res)) return;
   return route(req, res);
 }

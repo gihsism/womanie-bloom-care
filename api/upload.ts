@@ -2,6 +2,7 @@ import { put } from '@vercel/blob';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from './_lib/auth.js';
 import { withSentry } from './_lib/sentry.js';
+import { withMaintenance } from './_lib/maintenance.js';
 import { documentUploadAccess } from './_lib/blob-read.js';
 import { DOCUMENT_UPLOAD_TYPES, MAX_DOCUMENT_BYTES, hasApprovedDoctorAccess } from './_lib/doctor-documents.js';
 
@@ -151,4 +152,4 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   return res.status(405).json({ error: 'Method not allowed' });
 }
 
-export default withSentry(handler);
+export default withMaintenance('upload', withSentry(handler));

@@ -3,6 +3,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from '../_lib/auth.js';
 import { checkAndConsume } from '../_lib/ratelimit.js';
 import { withSentry } from '../_lib/sentry.js';
+import { withMaintenance } from '../_lib/maintenance.js';
 import { callAnthropicWithRetry, SONNET_MODEL, SONNET_NO_THINKING, replyText, type ClaudeReply } from '../_lib/anthropic.js';
 
 // On-demand narrative summary across the patient's documents.
@@ -228,4 +229,4 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
 }
 
-export default withSentry(handler);
+export default withMaintenance('summary/generate', withSentry(handler));

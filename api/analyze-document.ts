@@ -8,6 +8,7 @@ import { checkAndConsume } from './_lib/ratelimit.js';
 import { isOwnBlobUrl } from './_lib/blob-url.js';
 import { readBlobBuffer } from './_lib/blob-read.js';
 import { withSentry } from './_lib/sentry.js';
+import { withMaintenance } from './_lib/maintenance.js';
 import { callAnthropicWithRetry, SONNET_MODEL, SONNET_NO_THINKING, replyText, type ClaudeReply } from './_lib/anthropic.js';
 import heicConvert from 'heic-convert';
 
@@ -797,4 +798,4 @@ async function processWithAI(
   });
 }
 
-export default withSentry(handler);
+export default withMaintenance('analyze-document', withSentry(handler));

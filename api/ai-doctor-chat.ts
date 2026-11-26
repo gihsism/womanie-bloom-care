@@ -3,6 +3,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from './_lib/auth.js';
 import { checkAndConsume } from './_lib/ratelimit.js';
 import { withSentry } from './_lib/sentry.js';
+import { withMaintenance } from './_lib/maintenance.js';
 import { applyChatLimits } from './_lib/chat-limits.js';
 import { parseConversationId, persistChatTurn } from './_lib/chatConversation.js';
 import { buildLifeContext } from './_lib/life-context.js';
@@ -340,4 +341,4 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
 }
 
-export default withSentry(handler);
+export default withMaintenance('ai-doctor-chat', withSentry(handler));

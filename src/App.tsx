@@ -10,6 +10,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { InstallBanner } from "@/components/InstallBanner";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
+import { MaintenanceBanner } from "@/components/MaintenanceBanner";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { BottomNav } from "@/components/BottomNav";
 import { Loader2 } from "lucide-react";
@@ -94,6 +95,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <OfflineIndicator />
+          <MaintenanceBanner />
           <BrowserRouter>
             <ScrollToTop />
             <InstallBanner />
