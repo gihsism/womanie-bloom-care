@@ -32,6 +32,13 @@ export function initMonitoring(dsn: string | undefined, environment: string): vo
   enabled = true;
   window.addEventListener('error', onEarlyError);
   window.addEventListener('unhandledrejection', onEarlyRejection);
+  // Wait for the page's own code (route chunk, fonts) to finish loading, so
+  // the SDK download does not compete with it for a slow mobile connection.
+  if (document.readyState === 'complete') load(dsn, environment);
+  else window.addEventListener('load', () => load(dsn, environment), { once: true });
+}
+
+function load(dsn: string, environment: string): void {
   import('./sentryClient')
     .then((c) => {
       c.startSentry(dsn, environment);

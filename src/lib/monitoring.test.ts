@@ -6,6 +6,7 @@ vi.mock('./sentryClient', () => ({ startSentry, captureException: captured }));
 
 // node environment: give the module the bits of `window` it touches.
 vi.stubGlobal('window', { addEventListener: vi.fn(), removeEventListener: vi.fn() });
+vi.stubGlobal('document', { readyState: 'complete' });
 
 describe('lazy monitoring', () => {
   it('does nothing without a DSN', async () => {
