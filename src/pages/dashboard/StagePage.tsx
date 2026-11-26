@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, type ReactNode } from 'react';
+import { lazy, Suspense, useDeferredValue, useEffect, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -26,8 +26,6 @@ import { evidenceSpec } from '@/lib/evidenceTopics';
 // Each life stage renders a different set of trackers, and one person only
 // ever sees one stage — so the stage-specific trackers load on demand
 // instead of shipping all of them (~280 KB) to everyone who opens this page.
-// The <Section> wrappers (and their #anchor ids) render immediately; only
-// their contents wait for the tracker's code.
 const CycleCalendar = lazy(() => import('@/components/dashboard/CycleCalendar'));
 const PregnancyTracker = lazy(() => import('@/components/dashboard/PregnancyTracker'));
 const PregnancyWeightTracker = lazy(() => import('@/components/dashboard/PregnancyWeightTracker'));
@@ -50,11 +48,7 @@ const ContraceptionDashboard = lazy(() => import('@/components/dashboard/Contrac
 const anchor = 'scroll-mt-4 md:scroll-mt-28';
 
 function Section({ id, children }: { id?: string; children: ReactNode }) {
-  return (
-    <div id={id} className={`mb-6 ${anchor}`}>
-      <Suspense fallback={<Skeleton className="h-40 w-full rounded-xl" />}>{children}</Suspense>
-    </div>
-  );
+  return <div id={id} className={`mb-6 ${anchor}`}>{children}</div>;
 }
 
 export default function StagePage() {
@@ -63,7 +57,10 @@ export default function StagePage() {
   const p = useStageProfile();
   const { hash } = useLocation();
   const guidesOpen = hash === '#guides';
-  const mode = p.selectedMode;
+  // Deferred: when the stage changes after first paint (cached profile ->
+  // server profile), keep showing the current trackers until the new
+  // stage's code has loaded, instead of flashing the fallback (layout shift).
+  const mode = useDeferredValue(p.selectedMode);
   usePageTitle(mode ? stageLabel(mode) : 'Your stage');
   useScrollToHash(!!mode);
 
@@ -95,6 +92,10 @@ export default function StagePage() {
       </header>
 
       <main className="w-full max-w-3xl mx-auto px-4 py-6">
+        {/* One boundary for the whole stage: the trackers appear together
+            once their code is in, instead of one by one pushing each other
+            down (layout shift). useScrollToHash waits for the #anchor. */}
+        <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
         {mode === 'ivf' && (
           <>
             <Section id="ivf-tracker">
@@ -214,6 +215,7 @@ export default function StagePage() {
             scroll its section to the top instead of leaving it under the
             tab bar at the bottom of a page that cannot scroll further. */}
         {hash && <div aria-hidden="true" data-testid="anchor-spacer" className="h-[60vh]" />}
+        </Suspense>
       </main>
     </div>
   );
