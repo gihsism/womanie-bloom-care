@@ -1,10 +1,11 @@
-import { setHours, setMinutes } from 'date-fns';
+import { PRACTICE_TZ, dayOfWeek, parseHm, wallTimeToUtc } from './practiceTime';
 
 // Shared free-slot computation for the booking flow (FindDoctor) and
-// the reschedule dialog. Schedule times are HH:MM strings interpreted
-// in the viewer's local timezone — the convention the booking flow has
-// always used. Server-side conflict checks remain the source of truth
-// at write time; this only decides what to offer.
+// the reschedule dialog. Schedule times are HH:MM wall-clock times in
+// practice time (Europe/Zurich), whatever zone the patient's device is
+// in; the calendar day is the one she picked (its local Y-M-D). Server-
+// side checks (book/reschedule) remain the source of truth at write time;
+// this only decides what to offer.
 
 export interface ScheduleDay {
   day_of_week: number;
@@ -23,19 +24,17 @@ export function computeFreeSlots(opts: {
   schedule: ScheduleDay[] | null | undefined;
   durationMin: number;
   busy: BusySlot[];
+  timeZone?: string;
 }): Date[] {
   const { date, schedule, durationMin, busy } = opts;
-  const daySchedule = schedule?.find(
-    s => s.day_of_week === date.getDay() && s.is_active !== false
-  );
-  if (!daySchedule) return [];
-
-  const [startHour, startMin] = daySchedule.start_time.split(':').map(Number);
-  const [endHour, endMin] = daySchedule.end_time.split(':').map(Number);
-  if ([startHour, startMin, endHour, endMin].some(Number.isNaN)) return [];
-
-  let currentTime = setMinutes(setHours(date, startHour), startMin);
-  const endTime = setMinutes(setHours(date, endHour), endMin);
+  const tz = opts.timeZone ?? PRACTICE_TZ;
+  const y = date.getFullYear();
+  const mo = date.getMonth() + 1;
+  const d = date.getDate();
+  const dow = dayOfWeek(y, mo, d);
+  // Each active row for the weekday is its own window.
+  const windows = (schedule ?? []).filter(s => s.day_of_week === dow && s.is_active !== false);
+  if (windows.length === 0 || !(durationMin > 0)) return [];
 
   // Busy intervals as [startMs, endMs) so overlap is a tight check.
   const busyIntervals = busy.map(b => {
@@ -45,25 +44,43 @@ export function computeFreeSlots(opts: {
   });
 
   const nowMs = Date.now();
+  const seen = new Set<number>();
   const slots: Date[] = [];
 
-  while (currentTime < endTime) {
-    const slotStart = currentTime.getTime();
-    const slotEnd = slotStart + durationMin * 60000;
-    const overlapsBusy = busyIntervals.some(([bs, be]) => slotStart < be && slotEnd > bs);
-    // Don't offer a slot that would run past the end of the doctor's
-    // hours — only happens when the duration doesn't divide the window
-    // evenly (e.g. a 45-min slot in a window that ends at 10:00).
-    const overrunsWindow = slotEnd > endTime.getTime();
-    // Hide slots that have already started — picking 10:00 at 10:15
-    // would just produce a server-side error. (Keyed on slotStart, not
-    // slotEnd: a slot already in progress is no longer bookable.)
-    const inPast = slotStart <= nowMs;
-    if (!overlapsBusy && !inPast && !overrunsWindow) {
-      slots.push(new Date(currentTime));
+  for (const w of windows) {
+    const open = parseHm(w.start_time);
+    const close = parseHm(w.end_time);
+    if (open === null || close === null || close <= open) continue;
+    // Step in wall-clock minutes and convert each start on its own, so a
+    // DST change never shifts the grid. A slot that would run past closing
+    // time is not offered (45-min visits in a window ending at 10:00).
+    for (let m = open; m + durationMin <= close; m += durationMin) {
+      const start = wallTimeToUtc(y, mo, d, Math.floor(m / 60), m % 60, tz);
+      const slotStart = start.getTime();
+      const slotEnd = slotStart + durationMin * 60000;
+      const overlapsBusy = busyIntervals.some(([bs, be]) => slotStart < be && slotEnd > bs);
+      // Hide slots that have already started: picking 10:00 at 10:15
+      // would just produce a server-side error.
+      const inPast = slotStart <= nowMs;
+      if (!overlapsBusy && !inPast && !seen.has(slotStart)) {
+        seen.add(slotStart);
+        slots.push(start);
+      }
     }
-    currentTime = new Date(currentTime.getTime() + durationMin * 60000);
   }
 
-  return slots;
+  return slots.sort((a, b) => a.getTime() - b.getTime());
+}
+
+/** Is the device's clock showing a different time than Zurich right now? */
+export function viewerOutsidePracticeTz(now: Date = new Date()): boolean {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (!tz || tz === PRACTICE_TZ) return false;
+    const fmt = (z: string) =>
+      new Intl.DateTimeFormat('en-GB', { timeZone: z, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(now);
+    return fmt(tz) !== fmt(PRACTICE_TZ);
+  } catch {
+    return false;
+  }
 }

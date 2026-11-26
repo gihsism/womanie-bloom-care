@@ -14,8 +14,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/integrations/db/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Search, Star, Clock, Video, Calendar as CalendarIcon, CheckCircle, User, Loader2, Printer, Share2 } from 'lucide-react';
-import { format, setHours, setMinutes } from 'date-fns';
-import { computeFreeSlots } from '@/lib/timeSlots';
+import { format } from 'date-fns';
+import { computeFreeSlots, viewerOutsidePracticeTz } from '@/lib/timeSlots';
+import { formatPracticeTime, wallTimeToUtc } from '@/lib/practiceTime';
 import ShareWithDoctor from '@/components/dashboard/ShareWithDoctor';
 
 interface Doctor {
@@ -32,6 +33,7 @@ interface Doctor {
   languages: string[] | null;
   rating: number | null;
   review_count: number | null;
+  practice_address?: string | null;
   consultation_settings?: {
     consultation_price: number | null;
     currency: string;
@@ -155,7 +157,7 @@ const FindDoctor = () => {
       schedule: doctor.schedule,
       durationMin: doctor.consultation_settings?.consultation_duration || 30,
       busy: busySlots,
-    }).map(d => format(d, 'HH:mm'));
+    }).map(d => formatPracticeTime(d));
   };
 
   // Reload busy slots whenever the doctor or date changes inside the booking dialog.
@@ -192,7 +194,11 @@ const FindDoctor = () => {
     setBookingLoading(true);
     try {
       const [hours, minutes] = selectedTime.split(':').map(Number);
-      const scheduledAt = setMinutes(setHours(selectedDate, hours), minutes);
+      // The picked day + the slot's Swiss wall time (opening hours are in
+      // Europe/Zurich, whatever zone this device is in).
+      const scheduledAt = wallTimeToUtc(
+        selectedDate.getFullYear(), selectedDate.getMonth() + 1, selectedDate.getDate(), hours, minutes,
+      );
 
       // Routed through /api/appointments/book so the server can run a
       // conflict-guarded INSERT — without it, two patients hitting the
@@ -495,6 +501,12 @@ const FindDoctor = () => {
                     <p className="text-sm text-muted-foreground line-clamp-2">{doctor.bio}</p>
                   )}
 
+                  {doctor.practice_address && (
+                    <p className="text-[12px] text-muted-foreground">
+                      <span className="sr-only">Practice address: </span>{doctor.practice_address}
+                    </p>
+                  )}
+
                   {Array.isArray(doctor.languages) && doctor.languages.length > 0 && (
                     <div className="flex flex-wrap items-center gap-1">
                       <span className="text-[11px] text-muted-foreground">Languages:</span>
@@ -599,6 +611,9 @@ const FindDoctor = () => {
                                       </Button>
                                     ))}
                                   </div>
+                                  {viewerOutsidePracticeTz() && (
+                                    <p className="text-[11px] text-muted-foreground mt-1.5">Times are Swiss time (Zurich).</p>
+                                  )}
                                   {busySlots.length > 0 && (
                                     <p className="text-[11px] text-muted-foreground mt-1.5">
                                       {busySlots.length} slot{busySlots.length === 1 ? '' : 's'} already booked are hidden.
