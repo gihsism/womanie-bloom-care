@@ -3,7 +3,8 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { test as base, expect, type APIRequestContext, type Page } from '@playwright/test';
 
-export const TEST_EMAIL = 'ux-review@womanie.test';
+/** The test account: E2E_EMAIL (the nightly CI run sets it), else ux-review@womanie.test. */
+export const TEST_EMAIL = process.env.E2E_EMAIL?.trim() || 'ux-review@womanie.test';
 
 /**
  * The test account's password: E2E_PASSWORD, else ~/.cache/womanie-ux/.pw,

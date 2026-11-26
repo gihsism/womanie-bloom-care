@@ -1,4 +1,4 @@
-import { test, expect } from './helpers';
+import { test, expect, TEST_EMAIL } from './helpers';
 
 // Flows 6 and 7 — the Documents list (Records -> Documents) and the Me
 // profile open from the bottom navigation / Me menu. Read-only.
@@ -23,5 +23,5 @@ test('open the Me profile', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1, name: 'Me' })).toBeVisible();
   await page.getByTestId('me-row-profile').click();
   await expect(page).toHaveURL(/#profile$/);
-  await expect(page.getByText('ux-review@womanie.test').first()).toBeVisible();
+  await expect(page.getByText(TEST_EMAIL).first()).toBeVisible();
 });

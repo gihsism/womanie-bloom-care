@@ -13,6 +13,8 @@ export default defineConfig({
   testDir: './e2e',
   testMatch: /.*\.spec\.ts$/,
   globalSetup: './e2e/global-setup.ts',
+  // CI only: logs every session out at the end (report artifacts are public).
+  globalTeardown: './e2e/global-teardown.ts',
   fullyParallel: false,
   workers: 1,
   forbidOnly: !!process.env.CI,

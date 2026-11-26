@@ -17,7 +17,8 @@ First time on a machine: `npx playwright install chromium`.
 
 ## Account and password
 
-All tests use the test account `ux-review@womanie.test` only. The password
+All tests use the test account `ux-review@womanie.test` only (`E2E_EMAIL`
+overrides the address; the nightly run sets it from a secret). The password
 comes from `E2E_PASSWORD`, or else is read at runtime from
 `~/.cache/womanie-ux/.pw`. It is typed only in `e2e/global-setup.ts`, which
 runs outside Playwright's tracing, so it never appears in traces,
@@ -29,6 +30,22 @@ per day (UTC), shared with every other tool that uses this account. A normal
 run costs one login (the iphone project logs out at the end; the desktop
 session is kept). `E2E_FRESH_LOGIN=1` forces new logins. If setup fails with
 `HTTP 429 Too many sign-in attempts`, wait for the time it reports.
+
+## Nightly run (GitHub Actions)
+
+`.github/workflows/nightly-e2e.yml` runs `npm run e2e` against
+https://womanie.info every day at 05:30 UTC (and on demand: Actions ->
+Nightly smoke (e2e) -> Run workflow). It needs four repository secrets:
+`E2E_EMAIL`, `E2E_PASSWORD` (the test account) and `TG_BOT_TOKEN`,
+`TG_CHAT_ID` (Telegram). On failure it uploads `e2e/.report` and
+`e2e/.results` as the artifact `e2e-report-<run id>` (14 days) and sends a
+Telegram message with the run link; open the report with
+`npx playwright show-report <unzipped folder>`.
+
+In CI every run logs in fresh (2 sign-ins: iphone + desktop) and
+`e2e/global-teardown.ts` logs both sessions out at the end, so a session
+cookie inside an uploaded trace is already dead (the repo is public).
+`CI=true` also gives each test one retry.
 
 ## What it covers
 
