@@ -1,4 +1,6 @@
 import { useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { shouldShowConsentGate } from "@/lib/consentGate";
 import { NavLink, useLocation } from "react-router-dom";
 import { Home, FileText, MessageCircle, Calendar, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -38,7 +40,9 @@ function shouldShow(pathname: string): boolean {
 
 export function BottomNav() {
   const { pathname } = useLocation();
-  const visible = shouldShow(pathname);
+  const { user } = useAuth();
+  // Hidden while the one-time privacy consent screen covers the page.
+  const visible = shouldShow(pathname) && !shouldShowConsentGate(user, pathname);
 
   useEffect(() => {
     document.body.classList.toggle("has-bottom-nav", visible);

@@ -21,7 +21,7 @@ interface Current {
 }
 
 const LABELS: Record<string, string> = { privacy_policy: 'Privacy policy', terms: 'Terms of service' };
-const SOURCES: Record<string, string> = { signup: 'when you signed up', me_privacy: 'in Me → Privacy' };
+const SOURCES: Record<string, string> = { signup: 'when you signed up', me_privacy: 'in Me → Privacy', consent_gate: 'when you signed in' };
 
 export default function ConsentLog() {
   const [history, setHistory] = useState<ConsentRow[]>([]);

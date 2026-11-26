@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { scorePassword } from '@/lib/password-strength';
+import { PRIVACY_POLICY_VERSION } from '@/lib/policyVersion';
 
 const PatientSignUp = () => {
   usePageTitle('Sign Up');
@@ -22,7 +23,8 @@ const PatientSignUp = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  // Recorded in consent_log with the policy version (migration 024).
+  // Required by the server and recorded in consent_log, in the same
+  // transaction as the account, with the policy version (migration 024).
   const [acceptPrivacy, setAcceptPrivacy] = useState(false);
 
   const strength = scorePassword(password);
@@ -48,7 +50,7 @@ const PatientSignUp = () => {
       const resp = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name, acceptPrivacyPolicy: acceptPrivacy }),
+        body: JSON.stringify({ email, password, name, acceptPrivacyPolicy: acceptPrivacy, privacyPolicyVersion: PRIVACY_POLICY_VERSION }),
         credentials: 'include',
       });
       const data = await resp.json();

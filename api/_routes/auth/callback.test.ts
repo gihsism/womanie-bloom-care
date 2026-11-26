@@ -78,4 +78,21 @@ describe('auth/callback', () => {
     expect(all.some(s => /password_hash\s*=\s*NULL/i.test(s))).toBe(true);
     expect(all.some(s => /DELETE FROM auth_sessions WHERE user_id/.test(s) && s.includes('user_sq'))).toBe(true);
   });
+
+  // Consent (2026-11-26): Google sign-up skips the form's privacy tick, so
+  // the callback must NOT record a consent on her behalf. The new account
+  // has no consent_log row, /api/auth/me reports consentRequired, and the
+  // app shows the one-time consent screen on /welcome before anything else.
+  it('a new Google account goes to /welcome with no consent recorded for her', async () => {
+    globalThis.fetch = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ access_token: 't' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ id: 'gNew', email: 'new@example.com', verified_email: true, name: 'N' }) }) as unknown as typeof fetch;
+    query.mockResolvedValue([]);
+    transaction.mockResolvedValue([]);
+    const res = mockRes();
+    await handler(mockReq(), res);
+    expect(res._redirect).toBe('/welcome');
+    const all = [...query.mock.calls, ...transaction.mock.calls.flat()].map(c => JSON.stringify(c));
+    expect(all.some(s => /consent_log/.test(s))).toBe(false);
+  });
 });

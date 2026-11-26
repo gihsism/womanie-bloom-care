@@ -19,6 +19,9 @@ vi.mock('jose', () => ({
 import handler from './signup';
 import { checkAndConsume } from '../../_lib/ratelimit.js';
 import bcrypt from 'bcryptjs';
+import { POLICY_VERSIONS } from '../../_lib/policy-versions.js';
+
+const CURRENT = POLICY_VERSIONS.privacy_policy!.version;
 
 function mockRes() {
   let status = 200;
@@ -42,7 +45,11 @@ function mockReq(b: unknown, ip = '1.2.3.4'): VercelRequest {
   return {
     method: 'POST',
     headers: { 'x-forwarded-for': ip },
-    body: b,
+    // Bodies without an explicit consent field get the valid tick for the
+    // current version, so the non-consent tests exercise what they name.
+    body: b && typeof b === 'object' && !('acceptPrivacyPolicy' in b)
+      ? { acceptPrivacyPolicy: true, privacyPolicyVersion: CURRENT, ...(b as object) }
+      : b,
     socket: { remoteAddress: ip },
   } as unknown as VercelRequest;
 }
@@ -118,13 +125,15 @@ describe('auth/signup security invariants', () => {
   // fails, the user's email is registered but their token would be rejected by
   // getAuthUser's session-existence check (added 2026-10-25), making the account
   // inaccessible without a re-registration path.
-  it('wraps all three inserts inside a single transaction (atomicity guard)', async () => {
+  // Since 2026-11-26 the consent_log row is the fourth statement of the
+  // same transaction: no account can exist without her recorded consent.
+  it('wraps all four inserts (user, profile, session, consent) inside a single transaction', async () => {
     const res = mockRes();
     await handler(mockReq({ email: 'user@test.com', password: 'password123' }), res);
     expect(transaction).toHaveBeenCalledOnce();
     const [txArgs] = transaction.mock.calls[0] as [unknown[]];
     expect(Array.isArray(txArgs)).toBe(true);
-    expect(txArgs).toHaveLength(3);
+    expect(txArgs).toHaveLength(4);
   });
 
   // Documents that auth_sessions is included in the transaction. Without this row
@@ -161,23 +170,61 @@ describe('auth/signup security invariants', () => {
     expect(user.email).toBe('user@test.com');
   });
 
-  // Consent log (migration 024): the privacy-policy tick is recorded with
-  // the server's current version; a missing table never fails the signup.
-  it('records privacy-policy acceptance only when ticked, best-effort', async () => {
+  // Consent is enforced (2026-11-26): no tick, no account.
+  describe('privacy-policy consent', () => {
     const consentCalls = () => (query.mock.calls as [string, unknown[]][]).filter(([q]) => /INSERT INTO consent_log/.test(q));
-    let res = mockRes();
-    await handler(mockReq({ email: 'a@b.com', password: 'longpassword' }), res);
-    expect(res._status).toBe(200);
-    expect(consentCalls()).toHaveLength(0);
 
-    query.mockImplementation(async (q: string) => {
-      if (/consent_log/.test(q)) throw Object.assign(new Error('relation "consent_log" does not exist'), { code: '42P01' });
-      return [];
+    it('refuses a sign-up without the privacy tick and creates nothing', async () => {
+      const res = mockRes();
+      await handler(mockReq({ email: 'a@b.com', password: 'longpassword', acceptPrivacyPolicy: false }), res);
+      expect(res._status).toBe(400);
+      expect((res._body as Record<string, string>).code).toBe('consent_required');
+      expect(transaction).not.toHaveBeenCalled();
+      expect(query).not.toHaveBeenCalled();
     });
-    res = mockRes();
-    await handler(mockReq({ email: 'c@d.com', password: 'longpassword', acceptPrivacyPolicy: true }), res);
-    expect(res._status).toBe(200);
-    expect(consentCalls()).toHaveLength(1);
-    expect(consentCalls()[0][1][1]).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+
+    it('refuses a tick sent as a string rather than true', async () => {
+      const res = mockRes();
+      await handler(mockReq({ email: 'a@b.com', password: 'longpassword', acceptPrivacyPolicy: 'yes', privacyPolicyVersion: CURRENT }), res);
+      expect(res._status).toBe(400);
+      expect(transaction).not.toHaveBeenCalled();
+    });
+
+    it('refuses acceptance of an old policy version (out-of-date app) with 409 policy_outdated', async () => {
+      const res = mockRes();
+      await handler(mockReq({ email: 'a@b.com', password: 'longpassword', acceptPrivacyPolicy: true, privacyPolicyVersion: '2020-01-01' }), res);
+      expect(res._status).toBe(409);
+      expect((res._body as Record<string, string>).code).toBe('policy_outdated');
+      expect((res._body as Record<string, string>).currentVersion).toBe(CURRENT);
+      expect(transaction).not.toHaveBeenCalled();
+    });
+
+    it('refuses a tick without any version', async () => {
+      const res = mockRes();
+      await handler(mockReq({ email: 'a@b.com', password: 'longpassword', acceptPrivacyPolicy: true }), res);
+      expect(res._status).toBe(409);
+      expect(transaction).not.toHaveBeenCalled();
+    });
+
+    it('writes the consent row with the server version inside the account transaction', async () => {
+      const res = mockRes();
+      await handler(mockReq({ email: 'c@d.com', password: 'longpassword', acceptPrivacyPolicy: true, privacyPolicyVersion: CURRENT }), res);
+      expect(res._status).toBe(200);
+      expect(consentCalls()).toHaveLength(1);
+      expect(consentCalls()[0][0]).toMatch(/'signup'/);
+      expect(consentCalls()[0][1][1]).toBe(CURRENT);
+      // The consent statement is one of the transaction's arguments.
+      const [txArgs] = transaction.mock.calls[0] as [unknown[]];
+      const consentIdx = (query.mock.calls as [string][]).findIndex(([q]) => /INSERT INTO consent_log/.test(q));
+      expect(txArgs).toContain(query.mock.results[consentIdx].value);
+    });
+
+    it('fails the whole sign-up (no cookie) when the consent insert fails', async () => {
+      transaction.mockRejectedValue(new Error('consent_log insert failed'));
+      const res = mockRes();
+      await handler(mockReq({ email: 'c@d.com', password: 'longpassword' }), res);
+      expect(res._status).toBe(500);
+      expect(res._headers['Set-Cookie']).toBeUndefined();
+    });
   });
 });

@@ -28,6 +28,23 @@ async function sessionStillValid(browser: Browser, statePath: string, baseURL: s
   }
 }
 
+// The app covers every page with the one-time privacy consent screen while
+// the account has not accepted the CURRENT policy version (2026-11-26; it
+// asks again after every version bump). Accept it once for the test account
+// so the flows see the app, exactly as she would after ticking the box.
+async function ensureConsent(browser: Browser, statePath: string, baseURL: string): Promise<void> {
+  const context = await browser.newContext({ storageState: statePath, baseURL });
+  try {
+    const me = await (await context.request.get('/api/auth/me')).json();
+    if (me?.user?.consentRequired) {
+      const r = await context.request.post('/api/me/consents', { data: { document: 'privacy_policy', context: 'gate' } });
+      if (!r.ok()) throw new Error(`accepting the privacy policy for ${TEST_EMAIL} failed: HTTP ${r.status()}`);
+    }
+  } finally {
+    await context.close();
+  }
+}
+
 export default async function globalSetup(config: FullConfig) {
   const browser = await chromium.launch();
   try {
@@ -36,7 +53,10 @@ export default async function globalSetup(config: FullConfig) {
       if (typeof storageState !== 'string' || typeof baseURL !== 'string') continue;
       const statePath = resolve(config.configFile ? dirname(config.configFile) : process.cwd(), storageState);
       mkdirSync(dirname(statePath), { recursive: true });
-      if (await sessionStillValid(browser, statePath, baseURL)) continue;
+      if (await sessionStillValid(browser, statePath, baseURL)) {
+        await ensureConsent(browser, statePath, baseURL);
+        continue;
+      }
 
       const context = await browser.newContext({ ...(device as object), baseURL });
       const page = await context.newPage();
@@ -57,6 +77,7 @@ export default async function globalSetup(config: FullConfig) {
       }
       await context.storageState({ path: statePath });
       await context.close();
+      await ensureConsent(browser, statePath, baseURL);
     }
   } finally {
     await browser.close();

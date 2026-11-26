@@ -5,6 +5,8 @@ import { getAuthSecret } from '../../_lib/auth.js';
 import { withSentry } from '../../_lib/sentry.js';
 import { isVerifiedAdmin } from '../../_lib/admin.js';
 import { isMaintenanceOn } from '../../_lib/maintenance.js';
+import { POLICY_VERSIONS } from '../../_lib/policy-versions.js';
+import { privacyConsentStatus, type ConsentStatus } from '../../_lib/consent-status.js';
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -104,6 +106,26 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       console.error('me: created_at lookup failed', e);
     }
 
+    // Privacy consent (consent_log, migration 024): has she accepted the
+    // CURRENT policy version? If not, the app shows the one-time consent
+    // screen before anything else (src/components/ConsentGate.tsx): a
+    // Google sign-up, an account from before the log, or a version bump.
+    // A failed lookup does not lock her out (the session itself is valid);
+    // the screen simply shows on the next load.
+    let consent: ConsentStatus = { required: false, reason: null };
+    const privacy = POLICY_VERSIONS.privacy_policy;
+    if (privacy) {
+      try {
+        const rows = await sql.query(
+          "SELECT version FROM consent_log WHERE user_id = $1 AND document = 'privacy_policy'",
+          [payload.sub]
+        ) as Array<{ version: string }>;
+        consent = privacyConsentStatus(rows, privacy.version);
+      } catch (e) {
+        console.error('me: consent lookup failed', e);
+      }
+    }
+
     return res.status(200).json({
       user: {
         id: payload.sub,
@@ -112,6 +134,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         isAdmin,
         hasPassword,
         created_at: createdAt,
+        consentRequired: consent.required,
+        consentReason: consent.reason,
+        privacyPolicyVersion: privacy?.version ?? null,
       },
     });
   } catch (error) {

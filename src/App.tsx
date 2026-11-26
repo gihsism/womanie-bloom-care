@@ -13,6 +13,7 @@ import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { MaintenanceBanner } from "@/components/MaintenanceBanner";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { BottomNav } from "@/components/BottomNav";
+import { ConsentGate } from "@/components/ConsentGate";
 import { Loader2 } from "lucide-react";
 
 // Custom auth — no third-party dependency
@@ -101,6 +102,7 @@ const App = () => (
             <InstallBanner />
             <ErrorBoundary>
               <Suspense fallback={<PageLoader />}>
+                <ConsentGate>
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/product" element={<Product />} />
@@ -160,6 +162,7 @@ const App = () => (
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
+                </ConsentGate>
               </Suspense>
             </ErrorBoundary>
             <BottomNav />

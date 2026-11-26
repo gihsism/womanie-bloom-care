@@ -36,14 +36,32 @@ describe('me/consents', () => {
     expect(res._status).toBe(401);
   });
 
-  it('records the CURRENT server version, ignoring any version in the body', async () => {
+  it('records the CURRENT server version (Me -> Privacy, no version sent)', async () => {
     query.mockResolvedValue([{ document: 'privacy_policy', version: POLICY_VERSIONS.privacy_policy!.version }]);
     const res = mockRes();
-    await handler(req('POST', { document: 'privacy_policy', version: '1999-01-01' }), res);
+    await handler(req('POST', { document: 'privacy_policy' }), res);
     expect(res._status).toBe(200);
     const [text, params] = query.mock.calls[0] as [string, unknown[]];
     expect(text).toMatch(/INSERT INTO consent_log/);
-    expect(params).toEqual([USER.id, 'privacy_policy', POLICY_VERSIONS.privacy_policy!.version]);
+    expect(params).toEqual([USER.id, 'privacy_policy', POLICY_VERSIONS.privacy_policy!.version, 'me_privacy']);
+  });
+
+  // A stale app showing old wording can't record acceptance of it.
+  it('refuses an old version sent by an out-of-date app (409 policy_outdated), writes nothing', async () => {
+    const res = mockRes();
+    await handler(req('POST', { document: 'privacy_policy', version: '1999-01-01' }), res);
+    expect(res._status).toBe(409);
+    expect((res._body as { code: string }).code).toBe('policy_outdated');
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('records an acceptance from the login consent screen as source consent_gate', async () => {
+    query.mockResolvedValue([{ document: 'privacy_policy' }]);
+    const res = mockRes();
+    const v = POLICY_VERSIONS.privacy_policy!.version;
+    await handler(req('POST', { document: 'privacy_policy', version: v, context: 'gate' }), res);
+    expect(res._status).toBe(200);
+    expect((query.mock.calls[0] as [string, unknown[]])[1]).toEqual([USER.id, 'privacy_policy', v, 'consent_gate']);
   });
 
   it('rejects unknown and unpublished documents', async () => {

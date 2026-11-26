@@ -31,13 +31,31 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { email, password, name, acceptPrivacyPolicy } = req.body;
+    const { email, password, name, acceptPrivacyPolicy, privacyPolicyVersion } = req.body ?? {};
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
     }
     if (password.length < 8) {
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+
+    // Consent is required, not optional: no account without the privacy
+    // tick, and the tick must be for the version in force. An out-of-date
+    // app (cached PWA) sends an older version and gets 409 policy_outdated,
+    // so nobody is recorded as accepting wording she was not shown.
+    const privacy = POLICY_VERSIONS.privacy_policy;
+    if (privacy) {
+      if (acceptPrivacyPolicy !== true) {
+        return res.status(400).json({ error: 'Please accept the privacy policy to create an account', code: 'consent_required' });
+      }
+      if (privacyPolicyVersion !== privacy.version) {
+        return res.status(409).json({
+          error: 'The privacy policy was updated. Please reload the page and review it before signing up.',
+          code: 'policy_outdated',
+          currentVersion: privacy.version,
+        });
+      }
     }
 
     const sql = neon(process.env.DATABASE_URL!);
@@ -55,10 +73,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const sessionId = 'sess_' + crypto.randomUUID().replace(/-/g, '').slice(0, 20);
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
-    // User, profile and session in one transaction: if any insert fails the
-    // email isn't left registered without a profile (which would also block
-    // a retry with the 409 above).
-    await sql.transaction([
+    // User, profile, session and consent in one transaction: if any insert
+    // fails the email isn't left registered without a profile (which would
+    // also block a retry with the 409 above), and no account ever exists
+    // without the record of her accepting the privacy policy (024 applied).
+    const statements = [
       sql.query(
         'INSERT INTO auth_users (id, email, name, password_hash) VALUES ($1, $2, $3, $4)',
         [userId, email.toLowerCase(), name || null, passwordHash]
@@ -71,19 +90,14 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         'INSERT INTO auth_sessions (id, user_id, expires_at) VALUES ($1, $2, $3)',
         [sessionId, userId, expiresAt.toISOString()]
       ),
-    ]);
-
-    // Consent log (migration 024): she ticked "I have read the privacy
-    // policy" on the form. Recorded after the account exists and outside the
-    // transaction, best-effort, so signup still works before 024 is applied;
-    // a missing row shows as "not recorded yet - accept" in Me -> Privacy.
-    const privacy = POLICY_VERSIONS.privacy_policy;
-    if (acceptPrivacyPolicy === true && privacy) {
-      await Promise.resolve(sql.query(
+    ];
+    if (privacy) {
+      statements.push(sql.query(
         "INSERT INTO consent_log (user_id, document, version, source) VALUES ($1, 'privacy_policy', $2, 'signup')",
         [userId, privacy.version]
-      )).catch((e: unknown) => console.warn('consent_log insert skipped:', (e as Error)?.message));
+      ));
     }
+    await sql.transaction(statements);
 
     // Create JWT
     const token = await new jose.SignJWT({ sub: userId, sid: sessionId, email: email.toLowerCase(), name })
