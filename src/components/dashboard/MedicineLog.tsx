@@ -186,7 +186,7 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
             </div>
           </div>
           <div className="flex gap-2 pt-1">
-            <Button size="sm" variant="outline" className="flex-1" onClick={() => { setAdding(false); setName(''); setDose(''); }}>
+            <Button size="sm" variant="outline" className="flex-1" onClick={() => { setAdding(false); setName(''); setDose(''); setTimes(['08:00']); }}>
               Cancel
             </Button>
             <Button size="sm" className="flex-1" onClick={save} disabled={!name.trim()}>Save</Button>

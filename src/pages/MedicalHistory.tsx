@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { localDay } from '@/hooks/useStageProfile';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -681,7 +682,7 @@ export default function MedicalHistory() {
       if (docRes.data) setDocuments(docRes.data);
       if (profileRes.data) {
         setLifeStage(profileRes.data.life_stage);
-        setPregnancyDueDate(profileRes.data.pregnancy_due_date ? new Date(profileRes.data.pregnancy_due_date) : null);
+        setPregnancyDueDate(localDay(profileRes.data.pregnancy_due_date));
       }
     } catch (error) {
       console.error('Error fetching medical history:', error);

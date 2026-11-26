@@ -20,7 +20,7 @@ import { db } from '@/integrations/db/client';
 import { computeCyclePhase } from '@/lib/cycle-phase';
 import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
-import { NO_REMOTE_IMAGES } from '@/lib/safeMarkdown';
+import { NO_REMOTE_IMAGES, tablesToLists } from '@/lib/safeMarkdown';
 import {
   Send,
   Bot,
@@ -809,7 +809,7 @@ export default function AIDoctorChat() {
                         return (
                           <>
                             <div className="prose prose-sm dark:prose-invert max-w-none text-sm [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&>h1]:text-base [&>h2]:text-sm [&>h3]:text-sm [&_a]:text-primary [&_a]:no-underline [&_a]:font-medium">
-                              <ReactMarkdown rehypePlugins={[rehypeSanitize]} disallowedElements={NO_REMOTE_IMAGES}>{linkCitations(body, cited)}</ReactMarkdown>
+                              <ReactMarkdown rehypePlugins={[rehypeSanitize]} disallowedElements={NO_REMOTE_IMAGES}>{tablesToLists(linkCitations(body, cited))}</ReactMarkdown>
                             </div>
                             {cited.length > 0 && <ChatSources sources={cited} onBrowse={() => navigate('/library')} />}
                           </>
