@@ -216,3 +216,25 @@ The 15 web-only pages (marked "no": NICE, NICE CKS, NHS, CDC, WHO, HFEA,
 LactMed acetaminophen, Goom) cannot be added with the existing pipeline at
 any cost. LactMed ibuprofen (PMID 30000045) and the BJSM running infographic
 (PMID 32376675) can go in only if their PubMed records carry an abstract.
+
+---
+
+## Guideline-page path (dry run, 26 Nov 2026)
+
+`node scripts/research/guideline-pages.mjs` fetches pages listed in
+`scripts/research/guideline-pages.config.mjs`, checks robots.txt and the
+publisher's licence (`PUBLISHERS` in `api/_lib/research/guideline-page.ts`),
+extracts and chunks the main text, writes a free extractive summary
+(`--summariser claude --allow-paid` for the paid one) and embeds locally.
+Output goes to `api/_lib/research/staging/guideline-pages.json` only, never
+to `library.json`. Preview: `RESEARCH_STAGED=1 npx vitest run api/_lib/research/staged-retrieval.test.ts`.
+
+First run: 3 pages staged (NHS ibuprofen, NHS infertility, CDC contraception).
+Not staged:
+- **NICE** (NG257, CKS): NICE terms 18.2/18.3 forbid use in a retrieval
+  system outside the UK, and any AI use, without a NICE licence. Not fetched.
+- **WHO**: CC BY-NC-SA (non-commercial). Not fetched.
+- **LactMed on NCBI Bookshelf**: NCBI answered with a reCAPTCHA bot check,
+  which the script does not bypass. Use NLM's LactMed bulk download instead.
+- The NHS ibuprofen breastfeeding sub-page now redirects to the main
+  ibuprofen page; the item cites the page that holds the text.
