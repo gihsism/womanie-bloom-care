@@ -141,6 +141,7 @@ const HospitalBagChecklist = ({ weeksPregnant }: HospitalBagChecklistProps) => {
                     <button
                       type="button"
                       onClick={() => persist(toggleItem(state, item.id))}
+                      aria-pressed={isPacked}
                       className={`flex-1 flex items-start gap-2 p-2 rounded-lg text-left transition-colors ${
                         isPacked ? 'bg-primary/5' : 'hover:bg-muted/40'
                       }`}

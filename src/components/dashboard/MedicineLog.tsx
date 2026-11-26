@@ -35,6 +35,7 @@ export interface Medication {
   stage: string | null;
   notes: string | null;
   active: boolean;
+  started_on?: string | null;
 }
 
 interface DoseData { medication_id: string; name: string; dose: string | null }
@@ -96,6 +97,10 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
     return m;
   }, [doses.events]);
 
+  // A yyyy-mm-dd start date that is not in the future, else null.
+  const validStart = (v: string) =>
+    /^\d{4}-\d{2}-\d{2}$/.test(v) && v <= format(new Date(), 'yyyy-MM-dd') ? v : null;
+
   const closeForm = () => {
     setAdding(false); setEditing(null); setName(''); setDose(''); setTimes(['08:00']); setStartedOn('');
   };
@@ -105,24 +110,32 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
     setName(m.name);
     setDose(m.dose ?? '');
     setTimes([...(m.reminder_times ?? [])]);
+    // The start date lines symptom changes up with this medicine (menopause
+    // trends, HRT questions), so a wrong one has to be correctable here.
+    setStartedOn(m.started_on ? String(m.started_on).slice(0, 10) : '');
     setAdding(true);
     setError(null);
   };
 
   const saveEdit = async (m: Medication, n: string, cleanTimes: string[]) => {
+    const prevStart = m.started_on ? String(m.started_on).slice(0, 10) : null;
+    const nextStart = validStart(startedOn);
     const changes = {
       name: n,
       dose: dose.trim() || null,
       times_per_day: cleanTimes.length || null,
       reminder_times: cleanTimes,
+      // Only a valid, changed date is written; clearing the box keeps the old one.
+      ...(nextStart && nextStart !== prevStart ? { started_on: nextStart } : {}),
     };
     const { error: err } = await db.from('medications')
       .update({ ...changes, updated_at: new Date().toISOString() }).eq('id', m.id).eq('user_id', userId);
     if (err) { setError('Could not save. Check your connection and try again.'); return; }
     setMeds(prev => prev.map(x => (x.id === m.id ? { ...x, ...changes } : x)));
     // History: what it was before and after (doses keep their own name/dose).
-    const before = { name: m.name, dose: m.dose, reminder_times: m.reminder_times ?? [] };
-    const after = { name: changes.name, dose: changes.dose, reminder_times: cleanTimes };
+    const before: Record<string, unknown> = { name: m.name, dose: m.dose, reminder_times: m.reminder_times ?? [] };
+    const after: Record<string, unknown> = { name: changes.name, dose: changes.dose, reminder_times: cleanTimes };
+    if ('started_on' in changes) { before.started_on = prevStart; after.started_on = changes.started_on; }
     if (JSON.stringify(before) !== JSON.stringify(after)) {
       void insertLifeEvent(userId, 'med_change', { occurred_at: new Date().toISOString(), data: { medication_id: m.id, before, after } });
     }
@@ -143,9 +156,7 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
       times_per_day: cleanTimes.length || null,
       reminder_times: cleanTimes,
       stage: stage ?? null,
-      started_on: /^\d{4}-\d{2}-\d{2}$/.test(startedOn) && startedOn <= format(new Date(), 'yyyy-MM-dd')
-        ? startedOn
-        : format(new Date(), 'yyyy-MM-dd'),
+      started_on: validStart(startedOn) ?? format(new Date(), 'yyyy-MM-dd'),
     }).select('*');
     if (err) { setError('Could not save. Check your connection and try again.'); return; }
     const row = (Array.isArray(data) ? data[0] : data) as Medication | undefined;
