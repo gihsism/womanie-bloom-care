@@ -44,7 +44,7 @@ export default async function globalSetup(config: FullConfig) {
       await page.getByRole('textbox', { name: 'Email' }).fill(TEST_EMAIL);
       await page.getByRole('textbox', { name: 'Password' }).fill(readPassword());
       const loginResp = page.waitForResponse((r) => r.url().includes('/api/auth/login'), { timeout: 30_000 }).catch(() => null);
-      await page.getByRole('button', { name: 'Log In', exact: true }).click();
+      await page.getByRole('button', { name: /^Log in$/i }).click(); // 'Log In' (classic) / 'Log in' (idea 4)
       const login = await loginResp;
       if (login && !login.ok()) {
         throw new Error(`[${project.name}] login as ${TEST_EMAIL} failed: HTTP ${login.status()} ${(await login.text()).slice(0, 200)}`);

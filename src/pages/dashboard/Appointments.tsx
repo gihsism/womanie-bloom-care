@@ -260,9 +260,9 @@ const Appointments = () => {
           <div className="flex items-center gap-1.5 flex-wrap">
             <Link
               to={`/doctors/${encodeURIComponent(apt.doctor_id)}`}
-              className="text-[17px] font-bold truncate hover:underline underline-offset-2"
+              className="relative hit-44 min-w-0 max-w-full text-[17px] font-bold hover:underline underline-offset-2"
             >
-              {name}
+              <span className="block truncate">{name}</span>
             </Link>
             {apt.doctor_verified && (
               <span className="inline-flex items-center gap-1 text-[12px] text-green-700 dark:text-green-300">

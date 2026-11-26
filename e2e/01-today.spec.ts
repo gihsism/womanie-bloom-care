@@ -5,7 +5,8 @@ import { test, expect } from './helpers';
 test('Today loads with no console errors', async ({ page, consoleErrors }) => {
   await page.goto('/dashboard');
   await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(page.getByRole('heading', { level: 1, name: /^Good (morning|afternoon|evening)/ })).toBeVisible();
+  // The greeting (classic Home) or the stage header's one big fact (idea 4).
+  await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
   await expect(page.getByRole('region', { name: 'Today' })).toBeVisible();
   await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible();
   await expect(page.getByRole('link', { name: /^Change life stage/ })).toBeVisible();

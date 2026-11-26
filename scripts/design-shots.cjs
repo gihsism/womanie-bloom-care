@@ -59,6 +59,13 @@ const FIX = {
     { id: 'd3', file_name: 'prescription.jpg', file_path: 'x/d3.jpg', mime_type: 'image/jpeg', ai_suggested_name: 'Prescription · iron tablets', ai_summary: 'Ferrous sulfate 200 mg once a day.', ai_suggested_category: 'prescription', uploaded_at: day(-10).toISOString(), document_type: 'prescription' },
   ],
   user_roles: [{ role: 'patient' }],
+  // Round 8 (main's new screens): IVF clinic dates, a birth plan, medicines.
+  ivf_plans: [{ plan: { v: 1, downregStart: null, stimStart: ymd(day(-6)), triggerAt: day(3, 21, 30).toISOString(), triggerTz: 'Europe/Zurich', retrieval: ymd(day(5)), transfer: ymd(day(10)), testDate: ymd(day(21)) } }],
+  birth_plans: [{ plan: { v: 1, choices: { place: ['hospital'], companions: ['partner', 'students'], pain: ['natural', 'water'] }, notes: { pain: 'I would like to stay mobile as long as possible.' } } }],
+  medications: [
+    { id: 'm1', name: 'Ferrous sulfate', dose: '200 mg', times_per_day: 1, reminder_times: ['08:00'], stage: null, notes: null, active: true, started_on: ymd(day(-10)) },
+    { id: 'm2', name: 'Vitamin D', dose: '1000 IU', times_per_day: 1, reminder_times: ['08:00'], stage: null, notes: null, active: true, started_on: ymd(day(-90)) },
+  ],
 };
 FIX.medical_extracted_data = FIX.current_extracted_data;
 
@@ -72,6 +79,17 @@ const APPTS = [
 // Extra answers per API path (filled in as the pages need them).
 const API = {
   '/api/me/appointments': { appointments: APPTS },
+  '/api/doctors/availability': { busy: [] },
+  '/api/admin/doctors': () => ({
+    pending: [
+      { user_id: 'nd1', email: 'n.weber@example.com', created_at: day(-2).toISOString(), full_name: 'Nina Weber', specialties: ['Gynaecology & obstetrics'], license_number: '7601000000000', bio: 'Gynaecologist, Bern.', is_verified: false, verification_status: 'pending', gln_check: 'valid' },
+      { user_id: 'nd2', email: 'mara@example.com', created_at: day(-1).toISOString(), full_name: 'Mara Gerber', specialties: ['Midwife'], license_number: '12345', bio: null, is_verified: false, verification_status: 'pending', gln_check: 'not_a_gln' },
+    ],
+    approved: [{ user_id: 'doc1', email: 'laura.meier@example.com', created_at: day(-400).toISOString(), full_name: 'Laura Meier', specialties: ['Gynaecology & obstetrics'], license_number: '7601000000001', bio: null, is_verified: true, verification_status: 'approved', verified_at: day(-390).toISOString() }],
+    rejected: [],
+    log: [{ id: 'g1', admin_email: 'admin@womanie.info', action: 'approve', target_email: 'laura.meier@example.com', detail: null, created_at: day(-390).toISOString() }],
+  }),
+  '/api/admin/invites': { invites: [{ id: 'i1', email: 'dr.frei@example.com', note: 'Met at the Zürich midwife meeting', created_at: day(-1).toISOString(), expires_at: day(6).toISOString(), used_at: null, status: 'open' }] },
   '/api/me/doctor-notes': { notes: [
     { id: 'n1', doctor_id: 'doc1', title: 'Iron supplement', content: 'Take ferrous sulfate 200 mg once a day with orange juice; recheck ferritin in 6 weeks.', note_type: 'treatment_plan', created_at: day(-10).toISOString(), ...doctor },
   ] },
@@ -96,6 +114,9 @@ const DOCTORS = [
   { id: 'dp1', user_id: 'doc1', full_name: 'Laura Meier', title: 'Dr.', specialty: 'Gynaecology & obstetrics', specialties: ['Gynaecology & obstetrics'], bio: 'Gynaecologist in Zürich. Pregnancy care, cycle problems, menopause.', avatar_url: null, is_verified: true, years_experience: 14, languages: ['English', 'German'], rating: 4.9, review_count: 38, consultation_settings: { consultation_price: 120, currency: 'CHF', consultation_duration: 30, video_enabled: true, is_available: true } },
   { id: 'dp2', user_id: 'doc2', full_name: 'Sara Rossi', title: null, specialty: 'Midwife', specialties: ['Midwife'], bio: 'Midwife. Pregnancy, birth preparation and the weeks after birth.', avatar_url: null, is_verified: true, years_experience: 9, languages: ['English', 'Italian'], rating: 4.8, review_count: 21, consultation_settings: { consultation_price: 80, currency: 'CHF', consultation_duration: 20, video_enabled: true, is_available: true } },
 ];
+const SCHEDULE = [1, 2, 3, 4, 5].map((d) => ({ day_of_week: d, start_time: '08:00', end_time: '17:00', is_active: true }));
+for (const d of DOCTORS) { d.schedule = SCHEDULE; d.practice_address = 'Bahnhofstrasse 12, 8001 Zürich'; }
+API['/api/doctors/profile'] = { doctor: { ...DOCTORS[0], specialties: ['Gynaecology & obstetrics', 'Menopause'], credentials: ['FMH Gynaecology and obstetrics'], consultation_settings: { ...DOCTORS[0].consultation_settings, visit_types: ['in_person', 'video'] } }, next_slots: [day(1, 9, 0), day(1, 10, 30), day(2, 14, 0)].map((d) => d.toISOString()) };
 const LIB_ITEM = (id, title, source, year, evidenceLevel, summary) => ({ id, pmid: id, title, source, year, evidenceLevel, certainty: 'moderate', landmark: false, url: 'https://example.org/' + id, summary, keyPoints: [], lifeStages: ['pregnancy'], topics: ['nutrition'], tags: [] });
 const LIBRARY = { version: '1', disclaimer: '', stage: 'all', topic: null, total: 3,
   topics: [{ id: 'nutrition', label: 'Food and supplements', count: 2 }, { id: 'pain', label: 'Pain', count: 1 }],
@@ -104,6 +125,14 @@ const LIBRARY = { version: '1', disclaimer: '', stage: 'all', topic: null, total
     LIB_ITEM('102', 'Caffeine and pregnancy outcomes', 'BMJ', 2022, 'systematic review', 'Up to about 200 mg of caffeine a day (two cups of coffee) is not linked to harm.'),
     LIB_ITEM('103', 'Antenatal care for a positive pregnancy experience', 'WHO guideline', 2016, 'guideline', 'Eight contacts with a midwife or doctor during pregnancy are recommended.'),
   ] };
+
+// Two past chats (Past chats list, single-chat delete).
+const CHATS = [
+  { id: '00000000-0000-4000-8000-000000000001', role: 'user', content: 'Is my TSH normal?', created_at: day(-20, 9).toISOString() },
+  { id: '00000000-0000-4000-8000-000000000002', role: 'assistant', content: 'Your TSH of 4.8 is a little above the range on your report.', created_at: day(-20, 9, 1).toISOString() },
+  { id: '00000000-0000-4000-8000-000000000003', role: 'user', content: 'What about iron?', created_at: day(-12, 18).toISOString() },
+  { id: '00000000-0000-4000-8000-000000000004', role: 'assistant', content: 'Your ferritin of 12 is low.', created_at: day(-12, 18, 1).toISOString() },
+];
 
 const unknown = new Set();
 let anon = false; // log in / sign up / public pages: nobody is signed in
@@ -127,7 +156,7 @@ async function route(r) {
     return json({ rows });
   }
   if (p === '/api/ai-doctor-chat') return r.fulfill({ status: 200, contentType: 'text/event-stream', body: sse() });
-  if (p === '/api/chat/messages' && req.method() === 'GET') return json({ messages: [], hasMore: false });
+  if (p === '/api/chat/messages' && req.method() === 'GET') return json({ messages: CHATS, hasMore: false, earliestCursor: CHATS[0].created_at });
   if (API[p]) return json(typeof API[p] === 'function' ? API[p](req) : API[p]);
   unknown.add(`${req.method()} ${p}`);
   return json({});
@@ -163,6 +192,19 @@ const PAGES = [
   ['panel', '/dashboard/panel/iron'],
   ['baby', '/dashboard/baby'],
   ['birth', '/dashboard/birth'],
+  // Round 8: screens main gained (birth plan, booking, doctor profile,
+  // admin queue, medicine edit, past chats with delete, menopause trends).
+  ['new-trends', '/dashboard/stage#symptom-trends'],
+  ['new-birth-plan-print', '/dashboard/birth-plan/print'],
+  ['new-doctor-profile', '/doctors/doc1'],
+  ['new-book', '/find-doctor', async (p) => {
+    await p.getByRole('button', { name: /^Book$/ }).first().click();
+    await p.waitForTimeout(500);
+    await p.locator('[role="dialog"] button[role="gridcell"]:not([disabled])').nth(2).click().catch(() => {});
+  }],
+  ['new-medicine-edit', '/dashboard/settings#medicines', async (p) => { await p.getByRole('button', { name: /^Edit Ferrous/ }).click(); }],
+  ['new-past-chats', '/dashboard/ai-doctor', async (p) => { await p.getByRole('button', { name: /past chats/i }).first().click(); }],
+  ['new-admin-doctors', '/admin/doctors'],
 ];
 
 // ---- Doctor side: Dr. Laura Meier, three patients, a day of visits ----
@@ -311,6 +353,7 @@ const DOCTOR_PAGES = [
   ['patient-notes', '/doctor/patient/p1', tab('Notes')],
   ['patient-documents', '/doctor/patient/p1', tab('Documents')],
   ['patient-visits', '/doctor/patient/p1', tab('Visits')],
+  ['new-send-document', '/doctor/patient/p1', async (p) => { await tab('Documents')(p); await p.getByRole('button', { name: /Send a document/ }).click(); }],
   ['settings', '/doctor/dashboard', tab('Profile & settings')],
   ['login', '/auth/doctor-login'],
   ['for-doctors', '/for-doctors'],

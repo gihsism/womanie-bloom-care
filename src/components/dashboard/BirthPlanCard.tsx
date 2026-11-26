@@ -116,7 +116,7 @@ const BirthPlanCard = () => {
             <li key={section.id}>
               <button
                 type="button"
-                className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-left text-sm hover:bg-muted/40"
+                className="w-full min-h-12 flex items-center justify-between gap-2 px-3 py-2.5 text-left text-[15px] hover:bg-muted/40"
                 aria-expanded={isOpen}
                 onClick={() => setOpen(isOpen ? null : section.id)}
               >
@@ -166,7 +166,7 @@ const BirthPlanCard = () => {
       </ul>
 
       {serverOk ? (
-        <label className="flex items-start gap-2 text-sm cursor-pointer">
+        <label className="flex min-h-11 items-start gap-2 py-1 text-[15px] cursor-pointer">
           <Checkbox
             checked={shared}
             onCheckedChange={v => update(plan, v === true, 0)}

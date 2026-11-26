@@ -373,9 +373,9 @@ const FindDoctor = () => {
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <h2 className="text-[17px] font-bold leading-snug truncate">
-                          <Link to={`/doctors/${encodeURIComponent(doctor.user_id)}`} className="hover:underline underline-offset-2">
-                            {doctorDisplayName(doctor)}
+                        <h2 className="min-w-0 max-w-full text-[17px] font-bold leading-snug">
+                          <Link to={`/doctors/${encodeURIComponent(doctor.user_id)}`} className="relative hit-44 block hover:underline underline-offset-2">
+                            <span className="block truncate">{doctorDisplayName(doctor)}</span>
                           </Link>
                         </h2>
                         {doctor.is_verified && (

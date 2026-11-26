@@ -74,6 +74,28 @@ AUDIT=1 node scripts/design-shots.cjs http://localhost:8093 first-run
 `AUDIT=1` prints overflow, clipped text, tap targets under 44px, contrast
 under WCAG AA and missing focus rings. Expect no lines other than `shot ...`.
 
+The shots whose names start with `new-` are the screens main gained in round 8
+(menopause symptom trends, birth plan print page, doctor profile, booking
+dialog, medicine edit, past chats with single delete, admin doctor queue; on
+the doctor side `new-send-document`). Run only those with the third argument:
+`node scripts/design-shots.cjs <url> <stage> new-`.
+
+**e2e (Playwright) on the design.** `npm run e2e` logs in with the shared test
+account and writes (stage switch, today's log, a booking), so it is not run
+against a local preview. Its selectors were made to work on both designs in
+round 8 (they still pass on main):
+
+- login button `/^Log in$/i` (idea 4 says "Log in", classic "Log In");
+- Home: any level-1 heading (idea 4's h1 is the stage header's big fact, not
+  the greeting); the stage chip is labelled `Change life stage (now <stage>)`,
+  the same name the classic greeting link had;
+- the Log sheet: idea 4's "Log today" opens the one-tap tiles first, the test
+  taps "Add more detail or a note" to reach mood and symptoms;
+- Ask AI box: `/^Ask (about your health records|anything about your health)/`.
+
+Run the suite once against the switch-on **preview** deploy
+(`E2E_BASE_URL=https://<preview>.vercel.app npm run e2e`) before merging.
+
 ## 4. Caching and the service worker: what happens on deploy
 
 - `vercel.json` serves `/assets/*` with

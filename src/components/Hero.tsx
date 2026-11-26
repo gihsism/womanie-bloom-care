@@ -36,13 +36,13 @@ const Hero = () => {
             {user ? 'Go to Home' : 'Get started free'}
           </button>
           <p className="mt-3 text-[15px] text-muted-foreground">
-            <button type="button" onClick={() => navigate('/product')} className="font-semibold text-stage-accent hover:underline underline-offset-4 min-h-11">
+            <button type="button" onClick={() => navigate('/product')} className="font-semibold text-stage-accent hover:underline underline-offset-4 min-h-11 min-w-11">
               See how it works
             </button>
             {!user && (
               <>
                 {' · '}Have an account?{' '}
-                <button type="button" onClick={() => startLogin(navigate)} className="font-semibold text-stage-accent hover:underline underline-offset-4 min-h-11">
+                <button type="button" onClick={() => startLogin(navigate)} className="font-semibold text-stage-accent hover:underline underline-offset-4 min-h-11 min-w-11">
                   Log in
                 </button>
               </>

@@ -84,6 +84,14 @@ async function openLogSheet(page: Page): Promise<Locator> {
   await page.getByRole('button', { name: /^Log (today|symptoms)$/ }).click();
   const sheet = page.getByRole('dialog', { name: 'Log today' });
   await expect(sheet).toBeVisible();
+  // Idea 4: "Log today" opens the one-tap tiles first; mood and symptoms
+  // are in the full form behind "Add more detail or a note".
+  const more = sheet.getByRole('button', { name: 'Add more detail or a note' });
+  if (await more.isVisible()) {
+    await more.click();
+    await expect(page.getByRole('button', { name: 'Add more detail or a note' })).toHaveCount(0);
+    await expect(sheet.getByText('How are you feeling?', { exact: true })).toBeVisible();
+  }
   return sheet;
 }
 

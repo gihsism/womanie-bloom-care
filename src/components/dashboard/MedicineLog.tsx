@@ -233,17 +233,17 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
           <div>
             <Label htmlFor="med-started" className="text-xs">Started on (optional)</Label>
             <Input id="med-started" type="date" value={startedOn} max={format(now, 'yyyy-MM-dd')}
-              onChange={e => setStartedOn(e.target.value)} className="h-8 w-44" />
+              onChange={e => setStartedOn(e.target.value)} className="h-11 w-44" />
           </div>
           <div>
             <Label className="text-xs">Reminder times</Label>
             <div className="flex flex-wrap items-center gap-2 mt-1">
               {times.map((t, i) => (
                 <div key={i} className="flex items-center gap-1">
-                  <Input type="time" value={t} className="h-8 w-28"
+                  <Input type="time" value={t} className="h-11 w-28"
                     aria-label={`Reminder time ${i + 1}`}
                     onChange={e => setTimes(prev => prev.map((x, j) => j === i ? e.target.value : x))} />
-                  <button type="button" aria-label="Remove time" className="text-muted-foreground hover:text-destructive"
+                  <button type="button" aria-label="Remove time" className="tap-target text-muted-foreground hover:text-destructive"
                     onClick={() => setTimes(prev => prev.filter((_, j) => j !== i))}>
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -289,7 +289,7 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
             <li key={m.id} className={`rounded-lg border p-2.5 ${due.length ? 'border-primary/50 bg-primary/5' : ''}`}>
               <div className="flex items-center gap-2">
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium truncate">
+                  <div className="text-sm font-medium break-words">
                     {m.name}{m.dose ? <span className="text-muted-foreground font-normal"> · {m.dose}</span> : null}
                   </div>
                   <div className="text-[11px] text-muted-foreground flex items-center gap-1.5 flex-wrap">
@@ -305,11 +305,11 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
                 </Button>
                 <button type="button" onClick={() => startEdit(m)} aria-label={`Edit ${m.name}`}
                   disabled={adding}
-                  className="tap-target text-muted-foreground/60 hover:text-primary disabled:opacity-40">
+                  className="-mr-2 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground/60 hover:text-primary disabled:opacity-40">
                   <Pencil className="h-3.5 w-3.5" />
                 </button>
                 <button type="button" onClick={() => stop(m)} aria-label={`Stop tracking ${m.name}`}
-                  className="text-muted-foreground/60 hover:text-destructive">
+                  className="-mr-2 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground/60 hover:text-destructive">
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>

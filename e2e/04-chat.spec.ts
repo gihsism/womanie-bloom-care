@@ -23,7 +23,7 @@ test('send one question and get a streamed answer', async ({ page }, testInfo) =
 
   await page.goto('/dashboard/ai-doctor');
   await expect(page.getByRole('heading', { level: 1, name: 'Ask AI' })).toBeVisible();
-  const box = page.getByRole('textbox', { name: 'Ask about your health records...' });
+  const box = page.getByRole('textbox', { name: /^Ask (about your health records|anything about your health)/ });
   const send = page.getByRole('button', { name: 'Send' });
   await expect(send).toBeDisabled();
   const question = QUESTION;

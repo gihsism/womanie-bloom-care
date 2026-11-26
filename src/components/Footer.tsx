@@ -90,7 +90,7 @@ const Footer = () => {
                   <li key={link.label}>
                     <button
                       onClick={() => navigate(link.href)}
-                      className="min-h-11 text-[15px] text-muted-foreground hover:text-stage-accent transition-colors text-left"
+                      className="min-h-11 min-w-11 text-[15px] text-muted-foreground hover:text-stage-accent transition-colors text-left"
                     >
                       {link.label}
                     </button>

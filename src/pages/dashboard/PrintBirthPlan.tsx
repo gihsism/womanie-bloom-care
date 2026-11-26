@@ -73,7 +73,7 @@ export default function PrintBirthPlan() {
   if (!data) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
       </div>
     );
   }
@@ -82,14 +82,14 @@ export default function PrintBirthPlan() {
     <div className="min-h-screen bg-white text-black">
       <div className="border-b border-gray-200 print:hidden">
         <div className="px-4 py-3 flex items-center gap-3 max-w-3xl mx-auto">
-          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Back" onClick={() => navigate(-1)}>
+          <Button variant="ghost" size="icon" className="h-11 w-11 text-black hover:bg-gray-100 hover:text-black" aria-label="Back" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex-1">
-            <p className="text-sm font-medium">Birth plan</p>
-            <p className="text-[11px] text-muted-foreground">Print a copy for your Hebamme and the hospital bag, or save as PDF.</p>
+            <p className="text-[15px] font-bold">Birth plan</p>
+            <p className="text-[13px] text-gray-600">Print a copy for your Hebamme and the hospital bag, or save as PDF.</p>
           </div>
-          <Button size="sm" className="gap-1.5" onClick={() => window.print()} data-testid="birth-plan-print">
+          <Button className="gap-1.5 bg-black text-white hover:bg-black/85" onClick={() => window.print()} data-testid="birth-plan-print">
             <Printer className="h-3.5 w-3.5" />
             Print
           </Button>

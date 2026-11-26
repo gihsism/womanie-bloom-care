@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, CalendarIcon, CheckCircle, Clock, Languages, MapPin, Star, Video } from 'lucide-react';
+import { CalendarIcon, CheckCircle, Clock, Languages, MapPin, Star, Video } from 'lucide-react';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import SubPageHeader from '@/components/SubPageHeader';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -72,16 +72,11 @@ const DoctorProfile = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/find-doctor')} aria-label="Back to Find a Doctor">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-lg font-semibold truncate">
-            {state.kind === 'ready' ? doctorDisplayName(state.doctor) : 'Doctor'}
-          </h1>
-        </div>
-      </div>
+      <SubPageHeader
+        title={state.kind === 'ready' ? doctorDisplayName(state.doctor) : 'Doctor'}
+        backTo="/find-doctor"
+        backLabel="Find a doctor"
+      />
 
       <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
         {state.kind === 'loading' && (
@@ -97,15 +92,15 @@ const DoctorProfile = () => {
 
         {state.kind === 'gone' && (
           <Card className="p-8 text-center" data-testid="doctor-profile-gone">
-            <h2 className="text-lg font-semibold mb-2">This doctor is not taking bookings right now</h2>
-            <p className="text-sm text-muted-foreground mb-4">The doctor may have paused new bookings. Your existing visits are not affected.</p>
-            <Button asChild><Link to="/find-doctor">See other doctors</Link></Button>
+            <h2 className="text-[19px] font-bold mb-2">This doctor is not taking bookings right now</h2>
+            <p className="text-[15px] text-muted-foreground mb-5">The doctor may have paused new bookings. Your existing visits are not affected.</p>
+            <Link to="/find-doctor" className="btn-stage">See other doctors</Link>
           </Card>
         )}
 
         {state.kind === 'error' && (
           <Card className="p-8 text-center">
-            <p className="text-sm text-muted-foreground mb-4">We could not load this doctor's page.</p>
+            <p className="text-[15px] text-muted-foreground mb-4">We could not load this doctor's page.</p>
             <Button variant="outline" onClick={() => load()}>Try again</Button>
           </Card>
         )}
@@ -119,19 +114,17 @@ const DoctorProfile = () => {
               <section className="flex items-start gap-4" data-testid="doctor-profile">
                 <Avatar className="h-20 w-20">
                   <AvatarImage src={d.avatar_url || undefined} alt="" />
-                  <AvatarFallback className="bg-primary/10 text-primary text-xl">{initials(d.full_name)}</AvatarFallback>
+                  <AvatarFallback className="bg-stage-tint text-stage-accent text-xl font-bold">{initials(d.full_name)}</AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-xl font-semibold flex items-center gap-2 flex-wrap">
+                  <h2 className="text-[22px] font-extrabold leading-tight flex items-center gap-2 flex-wrap">
                     {doctorDisplayName(d)}
-                    <CheckCircle className="h-4 w-4 text-primary" aria-label="Licence checked by Womanie" />
+                    <CheckCircle className="h-5 w-5 text-stage-accent" aria-label="Licence checked by Womanie" />
                   </h2>
                   {d.specialties.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-1.5">
-                      {d.specialties.map((s, i) => <Badge key={s} variant={i === 0 ? 'secondary' : 'outline'}>{s}</Badge>)}
-                    </div>
+                    <p className="mt-1 text-[15px] font-semibold text-muted-foreground">{d.specialties.join(' · ')}</p>
                   )}
-                  <p className="text-xs text-muted-foreground mt-1.5 flex flex-wrap gap-x-3">
+                  <p className="text-[14px] text-muted-foreground mt-1 flex flex-wrap gap-x-3">
                     {d.years_experience ? <span>{d.years_experience} years' experience</span> : null}
                     {d.credentials.length > 0 && <span>{d.credentials.join(', ')}</span>}
                     {d.rating && d.review_count ? (
@@ -146,12 +139,12 @@ const DoctorProfile = () => {
 
               {d.bio && (
                 <section aria-labelledby="about-h">
-                  <h3 id="about-h" className="text-sm font-semibold text-muted-foreground mb-1.5">About</h3>
-                  <p className="text-sm whitespace-pre-line">{d.bio}</p>
+                  <h3 id="about-h" className="section-title mb-2">About</h3>
+                  <p className="text-[16px] leading-relaxed whitespace-pre-line">{d.bio}</p>
                 </section>
               )}
 
-              <section className="grid gap-3 sm:grid-cols-2 text-sm">
+              <section className="grid gap-3 sm:grid-cols-2 text-[15px]">
                 {d.languages.length > 0 && (
                   <p className="flex items-start gap-2"><Languages className="h-4 w-4 mt-0.5 text-muted-foreground" aria-hidden="true" />
                     <span><span className="sr-only">Languages: </span>{d.languages.join(', ')}</span></p>
@@ -169,25 +162,25 @@ const DoctorProfile = () => {
               </section>
 
               <Card className="p-4" data-testid="next-slots">
-                <h3 className="text-sm font-semibold mb-3">Next free times{swissSuffix()}</h3>
+                <h3 className="text-[17px] font-bold mb-3">Next free times{swissSuffix()}</h3>
                 {state.next.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No free time in the next four weeks. You can still look further ahead in the calendar.</p>
+                  <p className="text-[15px] text-muted-foreground">No free time in the next four weeks. You can still look further ahead in the calendar.</p>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {state.next.map(iso => {
                       const at = new Date(iso);
                       return (
-                        <Button key={iso} variant="outline" className="h-11" onClick={() => openBooking(iso)}>
+                        <Button key={iso} variant="outline" className="h-12 text-[16px] font-semibold" onClick={() => openBooking(iso)}>
                           {formatPracticeShortDate(at)}, {formatPracticeTime(at)}
                         </Button>
                       );
                     })}
                   </div>
                 )}
-                <Button className="w-full mt-3 gap-2" onClick={() => openBooking(null)}>
+                <button type="button" className="btn-stage w-full mt-3" onClick={() => openBooking(null)}>
                   <CalendarIcon className="h-4 w-4" aria-hidden="true" />
                   {state.next.length ? 'See all times' : 'Open the calendar'}
-                </Button>
+                </button>
               </Card>
 
               <BookingDialog

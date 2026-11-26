@@ -219,7 +219,7 @@ const BetaHcgTracker = ({ ivfPhase }: BetaHcgTrackerProps) => {
             value={date}
             onChange={(e) => setDate(e.target.value)}
             max={format(new Date(), 'yyyy-MM-dd')}
-            className="h-9"
+            className="h-11"
           />
         </div>
         <div className="space-y-1">
@@ -229,7 +229,7 @@ const BetaHcgTracker = ({ ivfPhase }: BetaHcgTrackerProps) => {
             type="time"
             value={time}
             onChange={(e) => setTime(e.target.value)}
-            className="h-9"
+            className="h-11"
           />
         </div>
         <div className="space-y-1">
@@ -242,10 +242,10 @@ const BetaHcgTracker = ({ ivfPhase }: BetaHcgTrackerProps) => {
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder="e.g. 187"
-            className="h-9"
+            className="h-11"
           />
         </div>
-        <Button onClick={addDraw} className="h-9 gap-1">
+        <Button onClick={addDraw} className="h-11 gap-1">
           <Plus className="h-3.5 w-3.5" />
           Log
         </Button>

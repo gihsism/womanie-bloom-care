@@ -18,7 +18,7 @@ export default function StageHeader({ model, children }: { model: HeaderModel; c
     <header className="-mx-4 bg-stage-head text-stage-ink rounded-b-[32px] px-5 pt-5 pb-5 sm:mx-0 sm:rounded-[32px]">
       <Link
         to="/dashboard/settings#life-stage"
-        aria-label={`${model.chip}: change life stage`}
+        aria-label={`Change life stage (now ${model.chip})`}
         className="relative hit-44 inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-stage-chip/60 text-[15px] font-bold hover:bg-stage-chip/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stage-ink"
       >
         <TileIcon name={model.chipIcon} className="h-[18px] w-[18px]" />
