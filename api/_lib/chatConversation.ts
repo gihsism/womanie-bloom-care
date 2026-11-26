@@ -22,38 +22,49 @@ type Sql = import('@neondatabase/serverless').NeonQueryFunction<false, false>;
  * reply, both under the same conversation_id, always owned by userId (the
  * session user, never a body field). Before migration 013 is applied the
  * column does not exist; the same rows are then written without it.
+ * Returns the stored reply's id (for answer feedback), or null.
  */
 export async function persistChatTurn(
   sql: Sql,
   turn: { userId: string; conversationId: string | null; userText: string | null; assistantText: string; model: string },
-): Promise<void> {
+): Promise<string | null> {
   const { userId, conversationId, userText, assistantText, model } = turn;
   const write = (withConversation: boolean) => {
     if (userText) {
       return withConversation
         ? sql.transaction([
             sql`INSERT INTO chat_messages (user_id, role, content, conversation_id) VALUES (${userId}, 'user', ${userText}, ${conversationId})`,
-            sql`INSERT INTO chat_messages (user_id, role, content, model, conversation_id) VALUES (${userId}, 'assistant', ${assistantText}, ${model}, ${conversationId})`,
+            sql`INSERT INTO chat_messages (user_id, role, content, model, conversation_id) VALUES (${userId}, 'assistant', ${assistantText}, ${model}, ${conversationId}) RETURNING id`,
           ])
         : sql.transaction([
             sql`INSERT INTO chat_messages (user_id, role, content) VALUES (${userId}, 'user', ${userText})`,
-            sql`INSERT INTO chat_messages (user_id, role, content, model) VALUES (${userId}, 'assistant', ${assistantText}, ${model})`,
+            sql`INSERT INTO chat_messages (user_id, role, content, model) VALUES (${userId}, 'assistant', ${assistantText}, ${model}) RETURNING id`,
           ]);
     }
     return withConversation
       ? sql.query(
-          'INSERT INTO chat_messages (user_id, role, content, model, conversation_id) VALUES ($1, $2, $3, $4, $5)',
+          'INSERT INTO chat_messages (user_id, role, content, model, conversation_id) VALUES ($1, $2, $3, $4, $5) RETURNING id',
           [userId, 'assistant', assistantText, model, conversationId],
         )
       : sql.query(
-          'INSERT INTO chat_messages (user_id, role, content, model) VALUES ($1, $2, $3, $4)',
+          'INSERT INTO chat_messages (user_id, role, content, model) VALUES ($1, $2, $3, $4) RETURNING id',
           [userId, 'assistant', assistantText, model],
         );
   };
+  let result: unknown;
   try {
-    await write(true);
+    result = await write(true);
   } catch (err) {
     if (!isMissingColumnError(err)) throw err;
-    await write(false);
+    result = await write(false);
   }
+  return assistantRowId(result);
+}
+
+// transaction([...]) -> [userRows, assistantRows]; query() -> rows.
+function assistantRowId(result: unknown): string | null {
+  if (!Array.isArray(result) || result.length === 0) return null;
+  const rows = Array.isArray(result[result.length - 1]) ? result[result.length - 1] : result;
+  const id = (rows as Array<{ id?: unknown }>)[0]?.id;
+  return typeof id === 'string' && id ? id : null;
 }

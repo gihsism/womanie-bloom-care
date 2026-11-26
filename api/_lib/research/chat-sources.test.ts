@@ -170,7 +170,9 @@ describe('ai-doctor-chat research sources', () => {
     const replace = res.written.find((w) => w.includes('"replace"'));
     expect(replace).toBeDefined();
     expect(JSON.parse(replace!.replace(/^data: /, '')).replace).toBe('Gabapentin can cause dizziness.');
-    expect(res.written.indexOf(replace!)).toBe(res.written.length - 2);
+    // ...followed only by the answer's extras (follow-ups, record chips).
+    expect(res.written.indexOf(replace!)).toBe(res.written.length - 3);
+    expect(res.written[res.written.length - 2]).toContain('"meta"');
 
     const stored = inserts.find((v) => typeof v[1] === 'string' && (v[1] as string).startsWith('Gabapentin'));
     expect(stored![1]).toBe('Gabapentin can cause dizziness.');

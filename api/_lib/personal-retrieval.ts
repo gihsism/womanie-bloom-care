@@ -25,10 +25,13 @@
 
 import { normalizeTestTitle } from './normalize-test-title.js';
 import { numberStylesByDocument, parseLabValue, type NumberStyle } from './lab-value.js';
+import type { RecordCandidate } from './record-citations.js';
 
 export type Row = Record<string, unknown>;
 
 export interface LabRow {
+  /** Row id, for the "From your records" chips (never shown to the model). */
+  id?: unknown;
   data_type?: unknown;
   title?: unknown;
   value?: unknown;
@@ -42,6 +45,7 @@ export interface LabRow {
 }
 
 export interface DocRow {
+  id?: unknown;
   file_name?: unknown;
   ai_suggested_name?: unknown;
   ai_summary?: unknown;
@@ -58,14 +62,14 @@ export const PERSONAL_LAB_CAP = 3000;
 export const PERSONAL_DOC_CAP = 200;
 
 export const PERSONAL_LAB_SQL =
-  `SELECT data_type, title, value, unit, reference_range, status, date_recorded, notes, document_id, raw_data
+  `SELECT id, data_type, title, value, unit, reference_range, status, date_recorded, notes, document_id, raw_data
      FROM medical_extracted_data
     WHERE user_id = $1
     ORDER BY date_recorded DESC NULLS LAST, id DESC
     LIMIT $2 OFFSET $3`;
 
 export const PERSONAL_DOC_SQL =
-  `SELECT file_name, ai_suggested_name, ai_summary, ai_suggested_category, document_type, uploaded_at
+  `SELECT id, file_name, ai_suggested_name, ai_summary, ai_suggested_category, document_type, uploaded_at
      FROM health_documents
     WHERE user_id = $1
     ORDER BY uploaded_at DESC
@@ -292,6 +296,11 @@ export interface PersonalSelection {
   /** Markdown block to append to the system prompt ('' when she has no records). */
   block: string;
   matchedAnalytes: string[];
+  /**
+   * The rows this block put in front of the model, for the "From your
+   * records" chips (see record-citations.ts). Rows without an id are left out.
+   */
+  candidates: RecordCandidate[];
   stats: { historyRows: number; docs: number; abnormal: number; baseline: number; omitted: number; tokens: number };
 }
 
@@ -318,7 +327,7 @@ export function selectPersonalContext(opts: SelectOptions): PersonalSelection {
   const question = str(opts.question);
   const labs = opts.labs ?? [];
   const docs = opts.docs ?? [];
-  const empty: PersonalSelection = { block: '', matchedAnalytes: [], stats: { historyRows: 0, docs: 0, abnormal: 0, baseline: 0, omitted: 0, tokens: 0 } };
+  const empty: PersonalSelection = { block: '', matchedAnalytes: [], candidates: [], stats: { historyRows: 0, docs: 0, abnormal: 0, baseline: 0, omitted: 0, tokens: 0 } };
   if (labs.length === 0 && docs.length === 0) return empty;
 
   let analytes = analytesInQuestion(question);
@@ -469,8 +478,45 @@ export function selectPersonalContext(opts: SelectOptions): PersonalSelection {
   }
 
   const block = out.join('\n') + '\n';
+
+  // ---- citation candidates: what the model was shown, by priority
+  const candidates: RecordCandidate[] = [];
+  const labCandidate = (canon: string, rows: LabRow[], requireValue = false) => {
+    const latest = [...rows].sort(byDateDesc).find((r) => str(r.id));
+    if (!latest) return;
+    const terms = [canon, ...(ANALYTE_SYNONYMS[canon] ?? []).filter((t) => t.length >= 3)];
+    candidates.push({
+      kind: 'lab',
+      id: str(latest.id),
+      documentId: str(latest.document_id) || null,
+      label: canon,
+      date: fmtDate(latest.date_recorded) || null,
+      terms,
+      count: rows.length,
+      ...(requireValue ? { requireValue: rows.map((r) => str(r.value)).filter(Boolean) } : {}),
+    });
+  };
+  for (const [canon, rows] of history) labCandidate(canon, rows);
+  const byCanon = (rows: LabRow[]) => {
+    const m = new Map<string, LabRow[]>();
+    for (const r of rows) { const c = canonOf(r); if (!m.has(c)) m.set(c, []); m.get(c)!.push(r); }
+    return m;
+  };
+  for (const [canon, rows] of byCanon(abnormal)) if (!history.has(canon)) labCandidate(canon, rows);
+  for (const [canon, rows] of byCanon(baseline)) if (!history.has(canon)) labCandidate(canon, rows, true);
+  for (const d of matchedDocs) {
+    const id = str(d.id);
+    if (!id) continue;
+    const name = docName(d);
+    const noExt = name.replace(/\.(pdf|jpe?g|png|heic|docx?|txt)$/i, '').replace(/[_]+/g, ' ').trim();
+    const noDate = noExt.replace(/\b(19|20)\d{2}([-./]\d{1,2}([-./]\d{1,2})?)?\b/g, '').replace(/\s+/g, ' ').trim();
+    const terms = Array.from(new Set([name, noExt, noDate].map((t) => t.toLowerCase()).filter((t) => t.length >= 6)));
+    candidates.push({ kind: 'document', id, documentId: id, label: noExt || name, date: fmtDate(d.uploaded_at) || null, terms });
+  }
+
   return {
     block,
+    candidates,
     matchedAnalytes: [...history.keys()],
     stats: { historyRows, docs: docCount, abnormal: abnormalCount, baseline: baselineCount, omitted, tokens: estimateTokens(block) },
   };

@@ -23,6 +23,7 @@ Vercel's default region (Washington D.C., `iad1`) unless the project settings sa
 | Sign-in sessions (`auth_sessions`) | Keep her signed in | Neon US | - | 30 days per session; expired rows are not cleaned up | Yes (without session id) | Deleted |
 | Profile: name, life stage (`profiles`), roles (`user_roles`) | App personalisation, patient/doctor access | Neon US | Approved doctors see the profile; Anthropic (life stage / name in AI prompts) | Until deletion | Yes | Deleted |
 | Consent log: policy version + time accepted (`consent_log`, migration 024) | Record of what she accepted | Neon US | - | Until deletion | Yes | Deleted |
+| Ask AI answer ratings: 👍/👎, reason from a fixed list, her optional comment (`chat_feedback`, migration 026; a copy stays in the browser until the server stores it) | Quality review of AI answers | Neon US (+ browser local storage) | - | Until deletion | Yes | Deleted |
 | Uploaded documents: files + metadata (`health_documents`, Vercel Blob) | Her health records | Neon US + Vercel Blob | Anthropic (text/images for analysis); approved doctors | Until she deletes them or the account | Yes (download link per file) | Deleted (files: best-effort by prefix) |
 | Documents a doctor sent her (`health_documents.uploaded_by_doctor_id`, 021) | Doctor shares a report into her Records | Neon US + Blob | The sending doctor | As above | Yes (with sender id) | Deleted with her account. If the DOCTOR deletes her account, the patient keeps the document and the doctor id stays on it (provenance of the patient's record) |
 | AI analyses and extracted lab values (`document_analyses`, `medical_extracted_data` and its view `current_extracted_data`, `pending_jobs`) | Explain results, trends | Neon US | Anthropic (produced by it); approved doctors | Until deletion | Yes | Deleted |
@@ -108,3 +109,6 @@ in Me → Privacy and can accept the new version.
 7. **Migration 024** is written but not applied:
    `node scripts/apply-migration.mjs db/migrations/024_consent_log.sql`. Until then Me → Privacy shows
    "Not available yet" and signups skip the consent row.
+8. **Migration 026** (Ask AI answer ratings, `chat_feedback`) is written but not applied:
+   `node scripts/apply-migration.mjs db/migrations/026_chat_feedback.sql`. Until then ratings stay in the
+   browser (marked unsent) and are sent the next time the chat opens after it is applied.

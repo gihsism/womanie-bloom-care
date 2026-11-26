@@ -14,6 +14,7 @@ import authLogout from './_routes/auth/logout.js';
 import authMe from './_routes/auth/me.js';
 import authSignup from './_routes/auth/signup.js';
 import chatConversation from './_routes/chat/conversation.js';
+import chatFeedback from './_routes/chat/feedback.js';
 import chatMessages from './_routes/chat/messages.js';
 import connectionsApproved from './_routes/connections/approved.js';
 import connectionsPending from './_routes/connections/pending.js';
@@ -78,6 +79,7 @@ export const ROUTES: Record<string, Handler> = {
   'auth/me': authMe,
   'auth/signup': authSignup,
   'chat/conversation': chatConversation,
+  'chat/feedback': chatFeedback,
   'chat/messages': chatMessages,
   'connections/approved': connectionsApproved,
   'connections/pending': connectionsPending,

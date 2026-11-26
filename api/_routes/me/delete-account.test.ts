@@ -195,7 +195,7 @@ describe('me/delete-account security invariants', () => {
 
     query.mockImplementation(async (q: string) =>
       /to_regclass/.test(q)
-        ? [{ present: true, visit_questions: true, pending_jobs: true, rate_limit_counters: true, push_subscriptions: true, birth_plans: true, ivf_plans: true, admin_audit_log: true, doctor_invites: true, consent_log: true }]
+        ? [{ present: true, visit_questions: true, pending_jobs: true, rate_limit_counters: true, push_subscriptions: true, birth_plans: true, ivf_plans: true, admin_audit_log: true, doctor_invites: true, consent_log: true, chat_feedback: true }]
         : [{ email: 'User@Test.com' }]);
     const res = mockRes();
     await handler(mockReq({ confirm: CONFIRM_PHRASE }), res);
@@ -230,6 +230,6 @@ describe('me/delete-account security invariants', () => {
     await handler(mockReq({ confirm: CONFIRM_PHRASE }), res);
     expect(res._status).toBe(200);
     const text = tagFn.mock.calls.map(c => (c[0] as string[]).join('?')).join('\n');
-    expect(text).not.toMatch(/admin_audit_log|doctor_invites|consent_log/);
+    expect(text).not.toMatch(/admin_audit_log|doctor_invites|consent_log|chat_feedback/);
   });
 });

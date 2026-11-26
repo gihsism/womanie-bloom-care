@@ -41,7 +41,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       consultationSettings, chartAccessLog,
       lifeEvents, medications, babies, birthRecords, appData, visitQuestions,
       roles, newsletter, analysisJobs, birthPlans, ivfPlan,
-      sessions, pushSubscriptions, pushSentLog, consents, aiSummaries,
+      sessions, pushSubscriptions, pushSentLog, chatFeedback, consents, aiSummaries,
       documentsSentAsDoctor, adminAuditAboutMe, doctorInvites,
     ] = await Promise.all([
       sql.query('SELECT * FROM profiles WHERE id = $1', [user.id]),
@@ -188,6 +188,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         'SELECT key, sent_at FROM push_sent_log WHERE user_id = $1 ORDER BY sent_at DESC',
         [user.id]
       )).catch(() => []),
+      // Ask AI answer ratings (migration 026): only what she chose or typed.
+      Promise.resolve(sql.query(
+        'SELECT rating, reason, comment, message_id, conversation_id, model, created_at, updated_at FROM chat_feedback WHERE user_id = $1 ORDER BY created_at',
+        [user.id]
+      )).catch(() => []),
       // Privacy policy / terms acceptances (migration 024).
       Promise.resolve(sql.query(
         'SELECT document, version, accepted_at, source FROM consent_log WHERE user_id = $1 ORDER BY accepted_at',
@@ -271,6 +276,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       sessions: sessions.map(r => r.session),
       push_subscriptions: pushSubscriptions,
       push_sent_log: pushSentLog,
+      // Her ratings of Ask AI answers (👍/👎, reason, optional comment).
+      chat_feedback: chatFeedback,
       // When she accepted which version of the privacy policy / terms.
       consents,
       // AI-written summaries of her records, cached so they are not regenerated.

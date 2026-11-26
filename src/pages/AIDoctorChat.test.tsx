@@ -76,11 +76,11 @@ describe('Ask AI', () => {
     expect(screen.queryByText('Real Doctor')).toBeNull();
   });
 
-  it('shows at most 3 suggestions, based on the life stage', async () => {
+  it('shows 4 suggestions, based on the life stage', async () => {
     renderChat();
     await waitFor(() => expect(screen.getByText('Is my pregnancy progressing normally?')).toBeInTheDocument());
     const chips = screen.getByTestId('suggestions').querySelectorAll('button');
-    expect(chips.length).toBeLessThanOrEqual(3);
+    expect(chips.length).toBe(4);
   });
 
   it('long suggestions wrap instead of widening the page (IVF chip was 403px on a 390px phone)', async () => {
@@ -142,6 +142,51 @@ describe('Ask AI', () => {
     expect(url).toBe('/api/chat/conversation');
     expect(JSON.parse(String(init.body))).toEqual({ messageIds: [withIds[0].id, withIds[1].id] });
     expect(screen.getByTestId('past-chats')).toHaveTextContent('What about iron?');
+  });
+
+  it('after an answer: record chips, follow-up chips and a rating, all from the meta event (none in the text)', async () => {
+    const MSG_ID = '3f2b8c1e-9a4d-4e6f-8b21-7c5d9e0a1b2c';
+    const sse = (events: unknown[]) => new Response(
+      events.map((e) => `data: ${typeof e === 'string' ? e : JSON.stringify(e)}\n\n`).join(''),
+      { status: 200, headers: { 'Content-Type': 'text/event-stream' } },
+    );
+    fetchSpy.mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url === '/api/ai-doctor-chat') {
+        return sse([
+          { choices: [{ delta: { content: 'Your ferritin of 9 is low.' } }] },
+          { meta: {
+            followUps: ['What foods raise my ferritin?', 'Should I retest?'],
+            records: [{ kind: 'lab', id: 'l1', label: 'Ferritin', date: '2026-06-01', href: '/dashboard/medical-history?doc=docB', count: 2 }],
+            messageId: MSG_ID,
+          } },
+          '[DONE]',
+        ]);
+      }
+      if (url === '/api/chat/feedback') return json({ stored: false, reason: 'not_available' });
+      if (url.startsWith('/api/chat/messages')) return json({ messages: [], hasMore: false, earliestCursor: null });
+      return json({});
+    });
+    renderChat();
+    fireEvent.change(screen.getByPlaceholderText(/ask about your health records/i), { target: { value: 'Is my ferritin ok?' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }));
+    await screen.findByText('Your ferritin of 9 is low.');
+    const followups = await screen.findByTestId('followups');
+    expect(followups).toHaveTextContent('What foods raise my ferritin?');
+    expect(screen.queryByText(/\[\[followups/)).toBeNull();
+
+    // Rating before the migration: kept in the browser, no error.
+    fireEvent.click(screen.getByRole('button', { name: 'Helpful answer' }));
+    await waitFor(() => expect(fetchSpy.mock.calls.some(([u]: [string]) => u === '/api/chat/feedback')).toBe(true));
+    const [, fbInit] = fetchSpy.mock.calls.find(([u]: [string]) => u === '/api/chat/feedback') as [string, RequestInit];
+    expect(JSON.parse(String(fbInit.body))).toMatchObject({ answerKey: MSG_ID, messageId: MSG_ID, rating: 1 });
+    await waitFor(() => expect(JSON.parse(window.localStorage.getItem('womanie_chat_feedback_u1') || '[]')).toHaveLength(1));
+
+    // The record chip opens the source report in Records.
+    const chips = screen.getByTestId('record-chips');
+    expect(chips).toHaveTextContent('Ferritin');
+    fireEvent.click(chips.querySelector('button')!);
+    expect(screen.getByTestId('where')).toHaveTextContent('/dashboard/medical-history');
   });
 
   it('offers a real doctor as one line under the input', () => {

@@ -39,12 +39,44 @@ import {
 import { ChatSources } from '@/components/chat/ChatSources';
 import { PastChats } from '@/components/chat/PastChats';
 import { chatDeleteTarget, groupIntoChats, newConversationId, type PastChat, type StoredChatMessage } from '@/lib/chatSessions';
-import { pickSuggestions } from '@/lib/chatSuggestions';
+import { pickSuggestions, type FlaggedLab } from '@/lib/chatSuggestions';
+import { pregnancyWeek } from '@/lib/doctorPatient';
+import type { RecordRef } from '@/lib/recordCitations';
+import { parseChatMeta, type ChatMeta } from '@/lib/chatMeta';
+import { flushPendingFeedback, newAnswerKey, readFeedback, saveFeedback, type FeedbackReason } from '@/lib/chatFeedback';
+import { AnswerFeedback, FollowUpChips, RecordChips } from '@/components/chat/AnswerExtras';
 import { citedSources, linkCitations, splitSourcesFooter, stripSourcesFooter, stripUnknownCitations, type ChatSource } from '@/lib/research-sources';
 
 // `sources`: research-library items the server gave the model for this
 // answer (live replies); reloaded replies carry them in a text footer.
-type Msg = { role: 'user' | 'assistant'; content: string; sources?: ChatSource[] };
+// `followUps` / `records` / `messageId`: structured extras sent after a
+// live answer (never in its text). `answerKey` keys her rating of it.
+type Msg = {
+  role: 'user' | 'assistant';
+  content: string;
+  sources?: ChatSource[];
+  followUps?: string[];
+  records?: RecordRef[];
+  messageId?: string | null;
+  answerKey?: string;
+};
+
+// Completed weeks since birth, from the date the postpartum page keeps
+// in this browser (no schema column yet); null when unknown.
+function readPostpartumWeeks(userId: string): number | null {
+  try {
+    const raw = window.localStorage.getItem(`womanie_postpartum_birth_${userId}`);
+    if (!raw) return null;
+    const d = new Date(raw);
+    if (Number.isNaN(d.getTime())) return null;
+    const weeks = Math.floor((Date.now() - d.getTime()) / (7 * 24 * 60 * 60 * 1000));
+    return weeks >= 0 && weeks <= 104 ? weeks : null;
+  } catch {
+    return null;
+  }
+}
+
+const FLAGGED_STATUSES = new Set(['low', 'high', 'abnormal', 'critical', 'elevated', 'decreased', 'out of range', 'borderline']);
 
 const CHAT_URL = '/api/ai-doctor-chat';
 
@@ -75,6 +107,7 @@ export async function streamChat({
   onDelta,
   onSources,
   onReplace,
+  onMeta,
   onDone,
   onError,
 }: {
@@ -86,6 +119,8 @@ export async function streamChat({
   onSources?: (sources: ChatSource[]) => void;
   /** Final text after the server's citation check; replaces the streamed text. */
   onReplace?: (text: string) => void;
+  /** Follow-ups, record chips and the stored reply id, after the answer. */
+  onMeta?: (meta: ChatMeta) => void;
   onDone: () => void;
   onError: (err: string) => void;
 }) {
@@ -135,6 +170,7 @@ export async function streamChat({
         const parsed = JSON.parse(jsonStr);
         if (Array.isArray(parsed.sources)) onSources?.(parsed.sources as ChatSource[]);
         if (typeof parsed.replace === 'string') onReplace?.(parsed.replace);
+        if (parsed.meta) { const meta = parseChatMeta(parsed.meta); if (meta) onMeta?.(meta); }
         const content = parsed.choices?.[0]?.delta?.content as string | undefined;
         if (content) onDelta(content);
       } catch {
@@ -155,6 +191,7 @@ export async function streamChat({
       try {
         const parsed = JSON.parse(jsonStr);
         if (typeof parsed.replace === 'string') onReplace?.(parsed.replace);
+        if (parsed.meta) { const meta = parseChatMeta(parsed.meta); if (meta) onMeta?.(meta); }
         const content = parsed.choices?.[0]?.delta?.content as string | undefined;
         if (content) onDelta(content);
       } catch { /* ignore */ }
@@ -220,6 +257,18 @@ export default function AIDoctorChat() {
     try { window.localStorage.setItem('womanie_chat_model', selectedModel); } catch { /* ignore */ }
   }, [selectedModel]);
   const [medicalContext, setMedicalContext] = useState<string | null>(null);
+  // Inputs for the starter questions (src/lib/chatSuggestions.ts).
+  const [starterInfo, setStarterInfo] = useState<{ dueDate: string | null; ivfPhase: string | null; flaggedLabs: FlaggedLab[] }>({ dueDate: null, ivfPhase: null, flaggedLabs: [] });
+  // Her rating per answer (answerKey -> 1 / -1), from this browser's copy.
+  const [ratings, setRatings] = useState<Record<string, 1 | -1>>({});
+  useEffect(() => {
+    if (!user) return;
+    const map: Record<string, 1 | -1> = {};
+    for (const f of readFeedback(user.id)) map[f.answerKey] = f.rating;
+    setRatings(map);
+    // Ratings kept here while the server could not store them.
+    void flushPendingFeedback(user.id);
+  }, [user]);
   // Recent periods, used only to derive a coarse current-cycle-phase
   // line for the chat context. computeCyclePhase stays silent when the
   // data is stale or implausible, so this is safe to load opportunistically.
@@ -250,7 +299,7 @@ export default function AIDoctorChat() {
       try {
         const { db } = await import('@/integrations/db/client');
         const [profileRes, docsRes, extractedRes, appointmentsResp, notesResp] = await Promise.all([
-          db.from('profiles').select('life_stage').eq('id', user.id).maybeSingle(),
+          db.from('profiles').select('life_stage, pregnancy_due_date, ivf_phase').eq('id', user.id).maybeSingle(),
           db.from('health_documents').select('ai_suggested_name, ai_summary, document_type').eq('user_id', user.id).order('uploaded_at', { ascending: false }).limit(5),
           db.from('medical_extracted_data').select('title, value, unit, status, data_type').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
           fetch('/api/me/appointments?upcoming=true').then(r => (r.ok ? r.json() : { appointments: [] })),
@@ -261,6 +310,14 @@ export default function AIDoctorChat() {
         type DocRow = { ai_suggested_name: string | null; ai_summary: string | null; document_type: string };
         const extractedRows = (extractedRes.data ?? []) as ExtractedRow[];
         const docRows = (docsRes.data ?? []) as DocRow[];
+        const profile = profileRes.data as { life_stage?: string | null; pregnancy_due_date?: string | null; ivf_phase?: string | null } | null;
+        setStarterInfo({
+          dueDate: profile?.pregnancy_due_date ?? null,
+          ivfPhase: profile?.ivf_phase ?? null,
+          flaggedLabs: extractedRows
+            .filter(d => d.data_type === 'lab_result' && FLAGGED_STATUSES.has(String(d.status || '').toLowerCase()))
+            .map(d => ({ title: d.title, status: d.status })),
+        });
 
         const parts: string[] = [];
         if (profileRes.data?.life_stage) {
@@ -427,15 +484,18 @@ export default function AIDoctorChat() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, historyLoaded, isStreaming, searchParams, setSearchParams]);
 
-  const handleSend = async () => {
-    const text = input.trim();
+  // `override`: a tapped follow-up chip, sent without touching the input.
+  const handleSend = async (override?: string) => {
+    const text = (override ?? input).trim();
     if (!text || isStreaming || !user) return;
 
     const userMsg: Msg = { role: 'user', content: text };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
-    setInput('');
+    if (override === undefined) setInput('');
     setIsStreaming(true);
+    // Keys her rating of this answer until the server hands back its id.
+    const answerKey = newAnswerKey();
 
     let assistantSoFar = '';
     let sourcesSoFar: ChatSource[] = [];
@@ -472,19 +532,7 @@ export default function AIDoctorChat() {
      // backend so Claude can ground time-bound questions ("is this
      // bleeding normal at 5 weeks?") in the actual postpartum
      // window rather than asking the user to repeat herself.
-    let postpartumWeeks: number | null = null;
-    if (user) {
-      try {
-        const raw = window.localStorage.getItem(`womanie_postpartum_birth_${user.id}`);
-        if (raw) {
-          const d = new Date(raw);
-          if (!Number.isNaN(d.getTime())) {
-            const weeks = Math.floor((Date.now() - d.getTime()) / (7 * 24 * 60 * 60 * 1000));
-            if (weeks >= 0 && weeks <= 104) postpartumWeeks = weeks;
-          }
-        }
-      } catch { /* ignore */ }
-    }
+    const postpartumWeeks = readPostpartumWeeks(user.id);
 
     // Current cycle phase, derived from recent periods. Suppressed for
     // postpartum users (their old period rows would read as a stale,
@@ -520,7 +568,7 @@ export default function AIDoctorChat() {
           if (last?.role === 'assistant' && last !== WELCOME_MESSAGE) {
             return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar, sources: sourcesSoFar } : m));
           }
-          return [...prev, { role: 'assistant', content: assistantSoFar, sources: sourcesSoFar }];
+          return [...prev, { role: 'assistant', content: assistantSoFar, sources: sourcesSoFar, answerKey }];
         });
       },
       onReplace: (clean) => {
@@ -533,6 +581,15 @@ export default function AIDoctorChat() {
             return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: clean, sources: sourcesSoFar } : m));
           }
           return prev;
+        });
+      },
+      onMeta: (meta) => {
+        setMessages((prev) => {
+          const last = prev[prev.length - 1];
+          if (last?.role !== 'assistant' || last === WELCOME_MESSAGE) return prev;
+          return prev.map((m, i) => (i === prev.length - 1
+            ? { ...m, followUps: meta.followUps, records: meta.records, messageId: meta.messageId }
+            : m));
         });
       },
       onDone: () => {
@@ -603,7 +660,14 @@ export default function AIDoctorChat() {
   const pastChats = groupIntoChats(history);
 
   const openPastChat = (chat: PastChat<StoredChatMessage & { sources?: ChatSource[] }>) => {
-    setMessages([WELCOME_MESSAGE, ...chat.messages.map(m => ({ role: m.role, content: m.content, sources: m.sources }))]);
+    setMessages([WELCOME_MESSAGE, ...chat.messages.map(m => ({
+      role: m.role,
+      content: m.content,
+      sources: m.sources,
+      messageId: m.id ?? null,
+      // A stored reply is rated under its id.
+      answerKey: m.role === 'assistant' && m.id ? m.id : undefined,
+    }))]);
     // Continue this chat under its id. Chats saved before ids existed
     // have none; their follow-ups start a fresh id.
     setConversationId(chat.conversationId ?? newConversationId());
@@ -718,12 +782,39 @@ export default function AIDoctorChat() {
   // Match the exact `Life stage: <key>` line the medicalContext builder emits.
   const lifeStageMatch = medicalContext?.match(/Life stage: ([\w-]+)/);
   const lifeStage = lifeStageMatch?.[1] ?? null;
+  const preg = lifeStage === 'pregnancy' ? pregnancyWeek(starterInfo.dueDate, Date.now()) : null;
   const suggestedQuestions = pickSuggestions({
     lifeStage,
-    hasContext,
+    // A bare life-stage line is not "records on file".
+    hasContext: hasContext && medicalContext !== `Life stage: ${lifeStage}`,
     hasFlaggedResults: Boolean(medicalContext?.includes('abnormal') || medicalContext?.includes('critical')),
     hasUpcomingVisit: Boolean(medicalContext?.includes('Upcoming appointments:')),
+    pregnancyWeek: preg?.week ?? null,
+    postpartumWeeks: lifeStage === 'postpartum' && user ? readPostpartumWeeks(user.id) : null,
+    ivfPhase: lifeStage === 'ivf' ? starterInfo.ivfPhase : null,
+    cyclePhase: computeCyclePhase(recentPeriods, Date.now())?.phase ?? null,
+    flaggedLabs: starterInfo.flaggedLabs,
   });
+
+  const rateAnswer = (msg: Msg, rating: 1 | -1, reason: FeedbackReason | null, comment: string | null) => {
+    const key = msg.messageId ?? msg.answerKey;
+    if (!user || !key) return;
+    setRatings(r => ({ ...r, [key]: rating }));
+    void saveFeedback(user.id, {
+      answerKey: key,
+      messageId: msg.messageId ?? null,
+      conversationId,
+      model: selectedModel,
+      rating,
+      reason,
+      comment,
+    });
+  };
+  // Follow-up chips belong to the latest answer only.
+  const lastAssistantIdx = (() => {
+    for (let i = messages.length - 1; i >= 0; i--) if (messages[i].role === 'assistant') return i;
+    return -1;
+  })();
 
   if (authLoading) {
     return (
@@ -815,8 +906,8 @@ export default function AIDoctorChat() {
           {/* Messages */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
             {messages.map((msg, i) => (
+              <div key={i} className="space-y-2">
               <div
-                key={i}
                 className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {msg.role === 'assistant' && (
@@ -845,7 +936,15 @@ export default function AIDoctorChat() {
                             <div className="prose prose-sm dark:prose-invert max-w-none text-sm [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&>h1]:text-base [&>h2]:text-sm [&>h3]:text-sm [&_a]:text-primary [&_a]:no-underline [&_a]:font-medium">
                               <ReactMarkdown rehypePlugins={[rehypeSanitize]} disallowedElements={NO_REMOTE_IMAGES}>{tablesToLists(linkCitations(body, cited))}</ReactMarkdown>
                             </div>
+                            {msg.records && msg.records.length > 0 && <RecordChips records={msg.records} onOpen={(href) => navigate(href)} />}
                             {cited.length > 0 && <ChatSources sources={cited} onBrowse={() => navigate('/library')} />}
+                            {msg !== WELCOME_MESSAGE && (msg.messageId || msg.answerKey) && msg.content.trim()
+                              && !(isStreaming && i === messages.length - 1) && (
+                              <AnswerFeedback
+                                rating={ratings[(msg.messageId ?? msg.answerKey) as string] ?? null}
+                                onRate={(rating, reason, comment) => rateAnswer(msg, rating, reason, comment)}
+                              />
+                            )}
                           </>
                         );
                       })()}
@@ -874,6 +973,10 @@ export default function AIDoctorChat() {
                     <User className="h-3.5 w-3.5 text-secondary" />
                   </div>
                 )}
+              </div>
+              {i === lastAssistantIdx && !isStreaming && msg.followUps && msg.followUps.length >= 2 && (
+                <FollowUpChips questions={msg.followUps} onAsk={(q) => { void handleSend(q); }} disabled={isStreaming} />
+              )}
               </div>
             ))}
 
@@ -926,7 +1029,7 @@ export default function AIDoctorChat() {
                 disabled={isStreaming}
               />
               <Button
-                onClick={handleSend}
+                onClick={() => { void handleSend(); }}
                 disabled={!input.trim() || isStreaming}
                 size="icon"
                 className="rounded-xl h-[44px] w-[44px] flex-shrink-0"

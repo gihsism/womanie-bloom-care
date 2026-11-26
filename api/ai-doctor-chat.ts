@@ -12,6 +12,8 @@ import { fetchPersonalRows, selectPersonalContext } from './_lib/personal-retrie
 import { SOURCES_FOOTER_MARK, formatSourcesFooter, stripUnknownCitations } from './_lib/research/library.js';
 import { buildChatSystemPrompt, selectChatEvidenceForTurn } from './_lib/research/chat-prompt.js';
 import { checkCitations, evidenceTexts } from './_lib/research/citation-check.js';
+import { FOLLOWUPS_PROMPT, parseFollowUps, visibleWhileStreaming } from './_lib/chat-followups.js';
+import { recordsUsedInAnswer } from './_lib/record-citations.js';
 
 export const config = {
   maxDuration: 60,
@@ -159,12 +161,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   // + latest 100 values" regardless of the question).
   const previousUserTurn = [...messages.slice(0, -1)].reverse()
     .find((m: { role?: unknown; content?: unknown }) => m?.role === 'user' && typeof m.content === 'string')?.content as string | undefined;
-  medicalContext += selectPersonalContext({
+  const personalSelection = selectPersonalContext({
     question: userTurnContent,
     previousQuestion: previousUserTurn,
     labs: personalRows.labs,
     docs: personalRows.docs,
-  }).block;
+  });
+  medicalContext += personalSelection.block;
 
   if (upcomingApts.length > 0) {
     medicalContext += '\n## Upcoming Appointments\n';
@@ -207,7 +210,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   // A follow-up that finds nothing on its own is searched together with
   // the question before it (see selectChatEvidenceForTurn).
   const { chatSources, researchItems, passages, block: evidenceBlock } = await selectChatEvidenceForTurn(userTurnContent, previousUserTurn, profile?.life_stage);
-  const systemPrompt = buildChatSystemPrompt(medicalContext, evidenceBlock);
+  // Follow-up chips come from a short tail block in the same reply (see
+  // api/_lib/chat-followups.ts); it is stripped before the citation check.
+  const systemPrompt = buildChatSystemPrompt(medicalContext, evidenceBlock) + FOLLOWUPS_PROMPT;
 
   const anthropicMessages = messages.map((m: { role: string; content: string }) => ({
     role: m.role === 'system' ? 'user' : m.role,
@@ -269,6 +274,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const decoder = new TextDecoder();
   let buffer = '';
   let assistantText = '';
+  // How much of the visible text (the reply minus its follow-up tail) the
+  // page has been sent: the tail is never streamed.
+  let sentChars = 0;
 
   try {
     while (true) {
@@ -284,10 +292,14 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         try {
           const event = JSON.parse(jsonStr);
           if (event.type === 'content_block_delta' && event.delta?.text) {
-            const text = event.delta.text;
-            assistantText += text;
-            const openaiChunk = { choices: [{ delta: { content: text } }] };
-            res.write(`data: ${JSON.stringify(openaiChunk)}\n\n`);
+            assistantText += event.delta.text;
+            const visible = visibleWhileStreaming(assistantText);
+            if (visible.length > sentChars) {
+              const text = visible.slice(sentChars);
+              sentChars = visible.length;
+              const openaiChunk = { choices: [{ delta: { content: text } }] };
+              res.write(`data: ${JSON.stringify(openaiChunk)}\n\n`);
+            }
           }
         } catch {
           // skip unparseable lines
@@ -299,12 +311,15 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     // text we also skip the user message — keeps chat history
     // internally consistent instead of half-logged conversations.
     if (assistantText) {
+      // The follow-up tail goes first, so the citation check and the saved
+      // reply see only the answer (a missing or broken tail = no chips).
+      const { text: answerText, followUps } = parseFollowUps(assistantText);
       // Drop any [n] that is not one of the sources we gave the model, so
       // the saved reply never points at a source that does not exist.
       // Then drop any [n] whose sentence names a medicine, a number or an
       // effect direction that source n does not support (deterministic,
       // no model call; see api/_lib/research/citation-check.ts).
-      let cleanText = stripUnknownCitations(assistantText, chatSources.map((s) => s.n));
+      let cleanText = stripUnknownCitations(answerText, chatSources.map((s) => s.n));
       try {
         const checked = checkCitations(cleanText, evidenceTexts(researchItems, passages), {
           exemptText: `${medicalContext}\n${userTurnContent ?? ''}`,
@@ -324,8 +339,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         } catch { /* client gone; the saved reply is still the clean one */ }
       }
       const storedText = cleanText + formatSourcesFooter(chatSources, cleanText);
+      let messageId: string | null = null;
       try {
-        await persistChatTurn(sql, {
+        messageId = await persistChatTurn(sql, {
           userId: user.id,
           conversationId,
           userText: userTurnContent,
@@ -334,6 +350,15 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         });
       } catch (err) {
         console.error('Chat persistence error:', err);
+      }
+      // Structured extras for the page, never in the prose: follow-up
+      // chips, the records of hers the answer used (row ids + labels, no
+      // values) and the stored reply's id for the 👍/👎 feedback.
+      try {
+        const records = recordsUsedInAnswer(cleanText, personalSelection.candidates);
+        res.write(`data: ${JSON.stringify({ meta: { followUps, records, messageId } })}\n\n`);
+      } catch (err) {
+        console.error('chat meta failed:', err);
       }
     }
     res.write('data: [DONE]\n\n');

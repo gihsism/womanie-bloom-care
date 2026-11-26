@@ -33,6 +33,7 @@ export const PRIVACY_TABLES: Record<string, TableRule> = {
   profiles: { export: 'rows', erase: 'delete' },
   user_roles: { export: 'rows', erase: 'delete' },
   consent_log: { export: 'rows', erase: 'delete', why: 'migration 024; deleted with the account (no processing remains to justify)' },
+  chat_feedback: { export: 'rows', erase: 'delete', why: 'migration 026; Ask AI ratings, reason and her optional comment, no chat text' },
   newsletter_subscribers: { export: 'rows', erase: 'delete', why: 'keyed by email, matched through auth_users' },
 
   // Health records
