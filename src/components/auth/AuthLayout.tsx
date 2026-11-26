@@ -11,7 +11,7 @@ export default function AuthLayout({ backHref, title, sub, children }: { backHre
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           <span className="text-[15px] font-medium">Back</span>
         </a>
-        <a href="/" className="text-xl font-extrabold text-stage-accent hover:opacity-80">Womanie</a>
+        <a href="/" className="relative hit-44 text-xl font-extrabold text-stage-accent hover:opacity-80">Womanie</a>
       </div>
       <main className="flex-1 w-full max-w-md mx-auto px-4 pt-8 pb-16">
         <h1 className="page-title text-[2rem]">{title}</h1>

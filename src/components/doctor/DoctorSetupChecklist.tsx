@@ -17,39 +17,40 @@ export default function DoctorSetupChecklist({ steps, onGo }: Props) {
   const pct = Math.round((p.done / p.total) * 100);
 
   return (
-    <Card aria-labelledby="setup-title">
+    <Card aria-labelledby="setup-title" className="overflow-hidden">
       <CardHeader className="pb-3">
-        <CardTitle id="setup-title" className="text-base">Get ready for bookings</CardTitle>
-        <CardDescription>
+        <CardTitle id="setup-title">Get ready for bookings</CardTitle>
+        <CardDescription className="text-[15px] leading-snug">
           {p.bookable
             ? 'Patients can find and book you now. A few details will make your profile more helpful.'
             : 'Patients cannot find you in Find a Doctor yet. The steps marked "needed" make you bookable.'}
         </CardDescription>
         <div className="pt-2 space-y-1">
-          <Progress value={pct} aria-label={`Setup ${p.done} of ${p.total} done`} />
-          <p className="text-xs text-muted-foreground">{p.done} of {p.total} done</p>
+          <Progress value={pct} className="h-2" aria-label={`Setup ${p.done} of ${p.total} done`} />
+          <p className="text-[13px] font-semibold text-muted-foreground">{p.done} of {p.total} done</p>
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
-        <ul className="divide-y divide-border">
+      <CardContent className="p-0">
+        <ul className="border-t border-line divide-y divide-line">
           {steps.map(step => {
             const waiting = step.id === 'licence' && !step.done;
             const Icon = step.done ? CheckCircle2 : waiting ? Clock : Circle;
             const body = (
               <>
                 <Icon
-                  className={`h-5 w-5 shrink-0 mt-0.5 ${step.done ? 'text-secondary' : 'text-muted-foreground'}`}
+                  className={`h-5 w-5 shrink-0 mt-0.5 ${step.done ? 'text-stage-accent' : 'text-muted-foreground'}`}
+                  strokeWidth={1.9}
                   aria-hidden="true"
                 />
                 <span className="flex-1 min-w-0">
-                  <span className={`block text-sm font-medium ${step.done ? 'text-muted-foreground line-through' : ''}`}>
+                  <span className={`block text-[17px] font-medium ${step.done ? 'text-muted-foreground line-through' : ''}`}>
                     {step.label}
                     {step.required && !step.done && (
-                      <span className="ml-2 text-[11px] font-normal uppercase tracking-wide text-destructive">needed</span>
+                      <span className="ml-2 rounded-full bg-destructive/10 px-2 py-0.5 align-middle text-[12px] font-semibold text-destructive">needed</span>
                     )}
                     <span className="sr-only">{step.done ? ' (done)' : ' (not done)'}</span>
                   </span>
-                  {!step.done && <span className="block text-xs text-muted-foreground mt-0.5">{step.hint}</span>}
+                  {!step.done && <span className="block text-[14px] text-muted-foreground mt-0.5">{step.hint}</span>}
                 </span>
                 {!step.done && step.anchor && <ChevronRight className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground" aria-hidden="true" />}
               </>
@@ -60,12 +61,12 @@ export default function DoctorSetupChecklist({ steps, onGo }: Props) {
                   <button
                     type="button"
                     onClick={() => onGo(step.anchor!)}
-                    className="w-full flex items-start gap-3 py-3 text-left hover:bg-muted/50 rounded-md px-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+                    className="w-full flex items-start gap-3 min-h-14 px-6 py-3 text-left hover:bg-muted/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-stage-accent"
                   >
                     {body}
                   </button>
                 ) : (
-                  <div className="flex items-start gap-3 py-3 px-1">{body}</div>
+                  <div className="flex items-start gap-3 min-h-14 px-6 py-3">{body}</div>
                 )}
               </li>
             );

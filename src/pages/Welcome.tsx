@@ -41,7 +41,7 @@ const Welcome = () => {
         <button
           type="button"
           onClick={() => { window.location.href = '/'; }}
-          className="text-xl font-extrabold text-stage-accent hover:opacity-80"
+          className="relative hit-44 text-xl font-extrabold text-stage-accent hover:opacity-80"
         >
           Womanie
         </button>

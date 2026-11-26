@@ -402,6 +402,7 @@ async function audit(p) {
   await p.evaluate(() => { document.activeElement?.blur?.(); window.scrollTo(0, 0); });
   for (let i = 0; i < 25; i++) {
     await p.keyboard.press('Tab');
+    await p.waitForTimeout(220); // let a transition-all ring finish growing
     const f = await p.evaluate(() => {
       const el = document.activeElement; if (!el || el === document.body) return null;
       const cs = getComputedStyle(el);
@@ -411,6 +412,7 @@ async function audit(p) {
     if (f) found.push(f);
   }
   await p.keyboard.press('Escape');
+  await p.evaluate(() => { document.activeElement?.blur?.(); window.scrollTo(0, 0); }); // no ring left in the next shot
   return [...new Set(found)];
 }
 
@@ -421,7 +423,9 @@ async function audit(p) {
   // the doctor pages switch to the clinic colours anyway.
   // First run / public: nothing remembered on the device.
   if (!FLOW_SIDE) await ctx.addInitScript((s) => { try { localStorage.setItem('womanie_stage_theme', s); } catch { /* blocked */ } }, DOCTOR_SIDE ? 'pregnancy' : STAGE);
-  await ctx.route('**/api/**', DOCTOR_SIDE ? doctorRoute : route);
+  // Only real API calls: source modules under /api/_lib (shared with the
+  // client, e.g. practice-time) must still load from the dev server.
+  await ctx.route((u) => u.pathname.startsWith('/api/'), DOCTOR_SIDE ? doctorRoute : route);
   const p = await ctx.newPage();
   p.on('pageerror', (e) => console.log('PAGEERROR', String(e).slice(0, 300)));
   const list = DOCTOR_SIDE ? DOCTOR_PAGES : STAGE === 'first-run' ? FIRST_RUN_PAGES : STAGE === 'public' ? PUBLIC_PAGES : PAGES;

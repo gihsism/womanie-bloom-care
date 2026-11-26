@@ -73,16 +73,14 @@ export default function CycleExplainedCard() {
   const avgPeriod = insights.avgPeriodLength != null ? Math.round(insights.avgPeriodLength) : null;
 
   return (
-    <Card className="p-4 mb-6" data-testid="cycle-explained">
-      <div className="flex items-center gap-2 mb-3">
-        <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
-          <BookOpen className="h-4 w-4 text-primary" aria-hidden="true" />
-        </div>
-        <div>
-          <h2 className="text-sm font-semibold">Your cycle, explained</h2>
-          <p className="text-[11px] text-muted-foreground">From the periods and symptoms you have logged</p>
-        </div>
-      </div>
+    <Card className="p-4" data-testid="cycle-explained">
+      {/* Idea 4: the Track page row above already says "Your cycle,
+          explained"; the heading stays for screen readers. */}
+      <h2 className="sr-only">Your cycle, explained</h2>
+      <p className="flex items-center gap-2 mb-3 text-[14px] text-muted-foreground">
+        <BookOpen className="h-4 w-4 shrink-0 text-stage-accent" aria-hidden="true" />
+        From the periods and symptoms you have logged
+      </p>
 
       {(avgCycle != null || avgPeriod != null) && (
         <div className="grid grid-cols-3 gap-2 mb-3">
@@ -92,22 +90,22 @@ export default function CycleExplainedCard() {
         </div>
       )}
 
-      {insights.summary && <p className="text-sm leading-relaxed mb-3">{insights.summary}</p>}
+      {insights.summary && <p className="text-[15px] leading-relaxed mb-3">{insights.summary}</p>}
 
       {insights.symptomSentences.length > 0 && (
         <ul className="mb-3 space-y-1">
           {insights.symptomSentences.map(s => (
-            <li key={s.key} className="text-sm leading-relaxed">{s.sentence}</li>
+            <li key={s.key} className="text-[15px] leading-relaxed">{s.sentence}</li>
           ))}
         </ul>
       )}
 
       {phaseRows.length > 0 && (
         <div className="mb-3">
-          <p className="text-[11px] text-muted-foreground mb-1.5">Most common symptoms in each part of your cycle</p>
+          <p className="text-[13px] text-muted-foreground mb-1.5">Most common symptoms in each part of your cycle</p>
           <dl className="space-y-1">
             {phaseRows.map(ph => (
-              <div key={ph} className="flex flex-wrap gap-x-2 text-xs">
+              <div key={ph} className="flex flex-wrap gap-x-2 text-[14px]">
                 <dt className="font-medium text-foreground/80">{PHASE_LABEL[ph]}:</dt>
                 <dd className="text-muted-foreground">
                   {insights.symptomsByPhase[ph]!.map(r => `${r.label} (${r.count} ${r.count === 1 ? 'day' : 'days'})`).join(', ')}
@@ -132,9 +130,9 @@ export default function CycleExplainedCard() {
       )}
 
       {insights.doctorLine && (
-        <div className="mt-2 rounded-lg border border-border bg-muted/40 p-3" data-testid="cycle-doctor-line">
-          <p className="text-xs flex items-start gap-1.5">
-            <Stethoscope className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-primary" aria-hidden="true" />
+        <div className="mt-2 rounded-xl bg-stage-tint p-3" data-testid="cycle-doctor-line">
+          <p className="text-[14px] flex items-start gap-1.5">
+            <Stethoscope className="h-4 w-4 mt-0.5 flex-shrink-0 text-stage-accent" aria-hidden="true" />
             <span>
               {insights.doctorFlags.map(f => f.text).join(' ')} {insights.doctorLine}
             </span>
@@ -142,7 +140,7 @@ export default function CycleExplainedCard() {
         </div>
       )}
 
-      <p className="text-[10px] text-muted-foreground mt-3 leading-relaxed">
+      <p className="text-[12px] text-muted-foreground mt-3 leading-relaxed">
         Typical ranges follow FIGO (the international gynaecology federation): cycles of 24–38 days, varying by up to 7–9 days, and periods of up to 8 days. A general guide, not a diagnosis.
       </p>
     </Card>
@@ -151,9 +149,9 @@ export default function CycleExplainedCard() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="p-2.5 rounded-lg border bg-card">
-      <p className="text-[11px] text-muted-foreground">{label}</p>
-      <p className="text-sm font-semibold">{value}</p>
+    <div className="p-2.5 rounded-xl border border-line bg-card">
+      <p className="text-[12px] text-muted-foreground">{label}</p>
+      <p className="text-[15px] font-bold">{value}</p>
     </div>
   );
 }

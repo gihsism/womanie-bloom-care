@@ -77,7 +77,7 @@ export default function BookingAlerts() {
   return (
     <Card id="setup-alerts" className="scroll-mt-24">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><BellRing className="h-5 w-5" /> Booking alerts</CardTitle>
+        <CardTitle className="flex items-center gap-2.5"><BellRing className="h-5 w-5 text-stage-accent" strokeWidth={1.9} aria-hidden="true" /> Booking alerts</CardTitle>
         <CardDescription>
           A notification on this phone or computer when a patient books, moves or cancels a visit with you.
           It shows only the time, never the patient's name.
@@ -86,14 +86,14 @@ export default function BookingAlerts() {
       <CardContent>
         {state.kind === 'loading' && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-label="Loading" />}
         {state.kind === 'unavailable' && (
-          <p className="text-sm text-muted-foreground">Booking alerts are not available yet. New bookings always appear under Appointments.</p>
+          <p className="text-[15px] text-muted-foreground">Booking alerts are not available yet. New bookings always appear under Appointments.</p>
         )}
-        {state.kind === 'blocked' && <p className="text-sm text-muted-foreground">{BLOCKED[state.why]}</p>}
+        {state.kind === 'blocked' && <p className="text-[15px] text-muted-foreground">{BLOCKED[state.why]}</p>}
         {state.kind === 'ready' && (
-          <div className="flex items-center justify-between gap-4 p-4 border rounded-lg">
+          <div className="flex min-h-14 items-center justify-between gap-4 rounded-[1.25rem] border border-line px-4 py-3">
             <div>
-              <Label htmlFor="booking-alerts">Alert me on this device</Label>
-              <p className="text-sm text-muted-foreground">Switch it on separately on each device you use.</p>
+              <Label htmlFor="booking-alerts" className="text-[17px] font-medium">Alert me on this device</Label>
+              <p className="text-[14px] text-muted-foreground">Switch it on separately on each device you use.</p>
             </div>
             <div className="flex items-center gap-2">
               {busy && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-hidden="true" />}
