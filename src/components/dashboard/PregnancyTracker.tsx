@@ -854,9 +854,8 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
 
       {/* Hospital bag checklist — packing reminders surface from week
           32 onward (most providers recommend having it ready by week
-          36). 27 items grouped into for-you / for-baby / for-partner /
-          documents, with per-item hints that turn into "what to bring
-          and why" guidance. */}
+          36). Swiss-context default list (src/lib/hospitalBag.ts) she
+          can edit: add her own items, remove ones she doesn't need. */}
       {weeksPregnant >= 32 && <HospitalBagChecklist weeksPregnant={weeksPregnant} />}
 
       {/* Contraction timer — only relevant from ~week 36 onward when
