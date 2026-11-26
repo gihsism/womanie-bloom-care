@@ -1,10 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const query = vi.fn();
 vi.mock('@neondatabase/serverless', () => ({ neon: () => ({ query }) }));
 vi.mock('../_lib/auth.js', () => ({ getAuthUser: vi.fn() }));
 vi.mock('../_lib/sentry.js', () => ({ withSentry: (h: unknown) => h }));
+const sendPush = vi.fn();
+vi.mock('../_lib/push-send.js', async (orig) => ({ ...(await orig<object>()), sendPush: (...a: unknown[]) => sendPush(...a) }));
 
 import handler from './db';
 import { getAuthUser } from '../_lib/auth.js';
@@ -502,5 +504,58 @@ describe('api/_routes/db: doctor_notes by a revoked doctor', () => {
       res,
     );
     expect(res._status).toBe(403);
+  });
+});
+
+describe('api/_routes/db: doctor booking alerts on a patient cancel', () => {
+  const VAPID = { VAPID_PUBLIC_KEY: 'BPub', VAPID_PRIVATE_KEY: 'priv', VAPID_SUBJECT: 'mailto:hello@womanie.info' };
+  const APT = { id: 'a1', patient_id: SESSION_USER.id, doctor_id: 'd1', scheduled_at: '2099-01-06T09:00:00Z', duration: 30, notes: null };
+  const subs = [
+    { id: 's1', user_id: 'd1', endpoint: 'https://p/d1', p256dh: 'k', auth: 'a', prefs: { bookings: true } },
+    { id: 's2', user_id: 'other', endpoint: 'https://p/x', p256dh: 'k', auth: 'a', prefs: {} },
+  ];
+  function wire(caller: 'patient' | 'doctor', newStatus: string) {
+    vi.mocked(getAuthUser).mockResolvedValue(caller === 'patient' ? SESSION_USER : { ...SESSION_USER, id: 'd1' });
+    query.mockReset();
+    query.mockImplementation(async (text: string) => {
+      if (/FROM appointments WHERE id = \$1/.test(text)) return [{ ...APT, status: 'scheduled' }];
+      if (/^UPDATE appointments/.test(text)) return [{ ...APT, status: newStatus }];
+      if (/FROM push_subscriptions/.test(text)) return subs;
+      return [];
+    });
+  }
+  beforeEach(() => {
+    for (const [k, v] of Object.entries(VAPID)) vi.stubEnv(k, v);
+    sendPush.mockReset(); sendPush.mockResolvedValue('sent');
+  });
+  afterEach(() => { vi.unstubAllEnvs(); });
+
+  it('a patient cancel alerts only the visit\'s doctor, without the patient\'s name', async () => {
+    wire('patient', 'cancelled');
+    const res = mockRes();
+    await handler(mockReq({ table: 'appointments', operation: 'update', updateData: { status: 'cancelled' }, filters: [['id', 'eq', 'a1']] }), res);
+    expect(res._status).toBe(200);
+    const subQ = query.mock.calls.find(c => /FROM push_subscriptions/.test(c[0] as string))!;
+    expect(subQ[1]).toEqual(['d1']);
+    expect(sendPush).toHaveBeenCalledTimes(1);
+    expect(sendPush.mock.calls[0][1].endpoint).toBe('https://p/d1');
+    expect(sendPush.mock.calls[0][2].body).toBe('A patient cancelled the visit on Tue 6 Jan, 10:00');
+  });
+
+  it('the doctor\'s own cancel is not echoed back to her', async () => {
+    wire('doctor', 'cancelled');
+    const res = mockRes();
+    await handler(mockReq({ table: 'appointments', operation: 'update', updateData: { status: 'cancelled', notes: 'Cancelled by doctor: ill' }, filters: [['id', 'eq', 'a1']] }), res);
+    expect(res._status).toBe(200);
+    expect(sendPush).not.toHaveBeenCalled();
+  });
+
+  it('nothing is sent and no subscription is read while push is off', async () => {
+    vi.stubEnv('VAPID_PRIVATE_KEY', '');
+    wire('patient', 'cancelled');
+    const res = mockRes();
+    await handler(mockReq({ table: 'appointments', operation: 'update', updateData: { status: 'cancelled' }, filters: [['id', 'eq', 'a1']] }), res);
+    expect(res._status).toBe(200);
+    expect(query.mock.calls.some(c => /push_subscriptions/.test(c[0] as string))).toBe(false);
   });
 });

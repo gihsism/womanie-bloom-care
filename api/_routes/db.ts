@@ -5,6 +5,7 @@ import { withSentry } from '../_lib/sentry.js';
 import { isIdent, isIdentList } from '../_lib/sql-ident.js';
 import { checkAppointmentUpdate } from '../_lib/appointment-update.js';
 import { DOCTOR_ONLY_WRITE_TABLES, hasDoctorRole } from '../_lib/doctor-account.js';
+import { notifyDoctorOfBooking } from '../_lib/doctor-notify.js';
 
 // Which column identifies "mine" for each table accessible via /api/db.
 // - string: single owner column; its value must equal the session user id.
@@ -417,6 +418,25 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const rows = maskRows(table, await sql.query(query, params));
+
+    // A patient cancelled her visit (or undid her cancellation): tell the
+    // doctor on her phone if she switched Booking alerts on. Only when the
+    // session user is the visit's PATIENT; doctors' own close-outs are not
+    // echoed back to them. Best effort, never fails the update.
+    if (table === 'appointments' && operation === 'update' && rows.length === 1
+        && updateData && typeof updateData === 'object' && 'status' in updateData) {
+      const apt = rows[0] as { id?: string; patient_id?: string; doctor_id?: string; status?: string | null; scheduled_at?: string };
+      if (apt.patient_id === user.id && apt.doctor_id && apt.doctor_id !== user.id && apt.id && apt.scheduled_at) {
+        const event = apt.status === 'cancelled' ? 'cancelled' : apt.status === 'scheduled' ? 'booked' : null;
+        if (event) {
+          await notifyDoctorOfBooking(
+            (text, p) => sql.query(text, p) as Promise<unknown[]>,
+            apt.doctor_id, event, apt.scheduled_at, apt.id,
+          );
+        }
+      }
+    }
+
     return res.status(200).json({ rows, rowCount: rows.length });
   } catch (error) {
     // Postgres error text echoes the offending values ("Key (email)=(...)",

@@ -10,7 +10,8 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { computeFreeSlots, type BusySlot, type ScheduleDay } from '@/lib/timeSlots';
+import { computeFreeSlots, viewerOutsidePracticeTz, type BusySlot, type ScheduleDay } from '@/lib/timeSlots';
+import { formatPracticeTime } from '@/lib/practiceTime';
 
 // One-step reschedule for an upcoming appointment. Same slot rules as
 // the FindDoctor booking dialog (shared computeFreeSlots), with the
@@ -200,9 +201,12 @@ const RescheduleDialog = ({ appointment, open, onOpenChange, onRescheduled }: Re
                       disabled={submitting}
                       onClick={() => submit(slot)}
                     >
-                      {format(slot, 'HH:mm')}
+                      {formatPracticeTime(slot)}
                     </Button>
                   ))}
+                  {viewerOutsidePracticeTz() && (
+                    <p className="col-span-3 text-[11px] text-muted-foreground">Times are Swiss time (Zurich).</p>
+                  )}
                 </div>
               )}
             </div>
