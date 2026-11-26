@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import { getAuthSecret } from '../../_lib/auth.js';
 import { withSentry } from '../../_lib/sentry.js';
 import { checkAndConsume } from '../../_lib/ratelimit.js';
+import { POLICY_VERSIONS } from '../../_lib/policy-versions.js';
 
 // Cap signups per source IP so scripts can't mass-create accounts or
 // probe which emails are registered via the 409 conflict response.
@@ -30,7 +31,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, acceptPrivacyPolicy } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
@@ -71,6 +72,18 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         [sessionId, userId, expiresAt.toISOString()]
       ),
     ]);
+
+    // Consent log (migration 024): she ticked "I have read the privacy
+    // policy" on the form. Recorded after the account exists and outside the
+    // transaction, best-effort, so signup still works before 024 is applied;
+    // a missing row shows as "not recorded yet - accept" in Me -> Privacy.
+    const privacy = POLICY_VERSIONS.privacy_policy;
+    if (acceptPrivacyPolicy === true && privacy) {
+      await Promise.resolve(sql.query(
+        "INSERT INTO consent_log (user_id, document, version, source) VALUES ($1, 'privacy_policy', $2, 'signup')",
+        [userId, privacy.version]
+      )).catch((e: unknown) => console.warn('consent_log insert skipped:', (e as Error)?.message));
+    }
 
     // Create JWT
     const token = await new jose.SignJWT({ sub: userId, sid: sessionId, email: email.toLowerCase(), name })

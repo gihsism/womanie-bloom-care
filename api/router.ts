@@ -34,6 +34,7 @@ import doctorsProfile from './_routes/doctors/profile.js';
 import doctorsSchedule from './_routes/doctors/schedule.js';
 import meAppointments from './_routes/me/appointments.js';
 import meChartAccess from './_routes/me/chart-access.js';
+import meConsents from './_routes/me/consents.js';
 import meDeleteAccount from './_routes/me/delete-account.js';
 import meDoctorNotes from './_routes/me/doctor-notes.js';
 import meExport from './_routes/me/export.js';
@@ -95,6 +96,7 @@ export const ROUTES: Record<string, Handler> = {
   'doctors/schedule': doctorsSchedule,
   'me/appointments': meAppointments,
   'me/chart-access': meChartAccess,
+  'me/consents': meConsents,
   'me/delete-account': meDeleteAccount,
   'me/doctor-notes': meDoctorNotes,
   'me/export': meExport,

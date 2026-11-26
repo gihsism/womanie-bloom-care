@@ -160,4 +160,24 @@ describe('auth/signup security invariants', () => {
     const user = body.user as Record<string, string>;
     expect(user.email).toBe('user@test.com');
   });
+
+  // Consent log (migration 024): the privacy-policy tick is recorded with
+  // the server's current version; a missing table never fails the signup.
+  it('records privacy-policy acceptance only when ticked, best-effort', async () => {
+    const consentCalls = () => (query.mock.calls as [string, unknown[]][]).filter(([q]) => /INSERT INTO consent_log/.test(q));
+    let res = mockRes();
+    await handler(mockReq({ email: 'a@b.com', password: 'longpassword' }), res);
+    expect(res._status).toBe(200);
+    expect(consentCalls()).toHaveLength(0);
+
+    query.mockImplementation(async (q: string) => {
+      if (/consent_log/.test(q)) throw Object.assign(new Error('relation "consent_log" does not exist'), { code: '42P01' });
+      return [];
+    });
+    res = mockRes();
+    await handler(mockReq({ email: 'c@d.com', password: 'longpassword', acceptPrivacyPolicy: true }), res);
+    expect(res._status).toBe(200);
+    expect(consentCalls()).toHaveLength(1);
+    expect(consentCalls()[0][1][1]).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
 });

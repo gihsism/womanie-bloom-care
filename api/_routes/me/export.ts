@@ -41,14 +41,18 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       consultationSettings, chartAccessLog,
       lifeEvents, medications, babies, birthRecords, appData, visitQuestions,
       roles, newsletter, analysisJobs, birthPlans,
+      sessions, pushSubscriptions, pushSentLog, consents, aiSummaries,
+      documentsSentAsDoctor, adminAuditAboutMe, doctorInvites,
     ] = await Promise.all([
       sql.query('SELECT * FROM profiles WHERE id = $1', [user.id]),
       sql.query('SELECT id, email, name, created_at FROM auth_users WHERE id = $1', [user.id]),
       sql.query(
         `SELECT id, file_name, '/api/docs/file?id=' || id AS file_url, mime_type, document_type,
                 ai_suggested_name, ai_suggested_category, ai_summary,
-                uploaded_at, file_size
-           FROM health_documents WHERE user_id = $1
+                uploaded_at, file_size,
+                -- set when a connected doctor sent it (migration 021)
+                to_jsonb(h)->>'uploaded_by_doctor_id' AS uploaded_by_doctor_id
+           FROM health_documents h WHERE user_id = $1
            ORDER BY uploaded_at DESC`,
         [user.id]
       ),
@@ -162,6 +166,66 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       // Birth plan (migration 020); empty until it is applied.
       Promise.resolve(sql.query('SELECT plan, shared_with_doctor, created_at, updated_at FROM birth_plans WHERE user_id = $1', [user.id]))
         .catch(() => []),
+      // Sign-in sessions, without the session id (it identifies a live session).
+      sql.query(
+        `SELECT to_jsonb(s) - 'id' - 'user_id' AS session FROM auth_sessions s
+          WHERE user_id = $1`,
+        [user.id]
+      ),
+      // Phone-notification devices (migration 015). The endpoint URL and the
+      // p256dh/auth keys are secrets that let anyone push to her phone, so
+      // only the settings and the push service's host are exported.
+      Promise.resolve(sql.query(
+        `SELECT substring(endpoint from '^https?://([^/]+)') AS push_service, timezone, prefs,
+                user_agent, created_at, updated_at, last_sent_at
+           FROM push_subscriptions WHERE user_id = $1 ORDER BY created_at`,
+        [user.id]
+      )).catch(() => []),
+      Promise.resolve(sql.query(
+        'SELECT key, sent_at FROM push_sent_log WHERE user_id = $1 ORDER BY sent_at DESC',
+        [user.id]
+      )).catch(() => []),
+      // Privacy policy / terms acceptances (migration 024).
+      Promise.resolve(sql.query(
+        'SELECT document, version, accepted_at, source FROM consent_log WHERE user_id = $1 ORDER BY accepted_at',
+        [user.id]
+      )).catch(() => []),
+      // AI summaries of her records cached under a key that embeds her id.
+      Promise.resolve(sql.query(
+        `SELECT split_part(request_hash, ':', 1) AS kind, response_text, model, created_at
+           FROM llm_cache
+          WHERE request_hash LIKE 'summary_v1:' || $1 || ':%'
+             OR request_hash LIKE 'panel_summary_v1:' || $1 || ':%'
+          ORDER BY created_at DESC`,
+        [user.id]
+      )).catch(() => []),
+      // Doctor accounts: documents she sent into a patient's Records
+      // (migration 021). The document itself belongs to the patient, so
+      // only what she sent and when is listed.
+      Promise.resolve(sql.query(
+        `SELECT id, user_id AS patient_id, file_name, uploaded_at
+           FROM health_documents WHERE uploaded_by_doctor_id = $1
+          ORDER BY uploaded_at DESC`,
+        [user.id]
+      )).catch(() => []),
+      // Admin decisions about her (doctor licence approved / rejected,
+      // invite created or redeemed; migration 023). The deciding admin's
+      // identity is not hers to export.
+      Promise.resolve(sql.query(
+        `SELECT action, target_email, detail, created_at FROM admin_audit_log
+          WHERE target_user_id = $1
+             OR lower(target_email) = (SELECT lower(email) FROM auth_users WHERE id = $1)
+          ORDER BY created_at DESC`,
+        [user.id]
+      )).catch(() => []),
+      // Doctor invitation links addressed to her (never the token hash).
+      Promise.resolve(sql.query(
+        `SELECT email, note, created_at, expires_at, used_at, revoked_at FROM doctor_invites
+          WHERE used_by_user_id = $1
+             OR lower(email) = (SELECT lower(email) FROM auth_users WHERE id = $1)
+          ORDER BY created_at DESC`,
+        [user.id]
+      )).catch(() => []),
     ]) as Row[][];
 
     const payload = {
@@ -198,11 +262,24 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       visit_questions: visitQuestions,
       // Birth plan wishes (shared with a connected doctor only if she chose to).
       birth_plan: birthPlans[0] ?? null,
+      // Sign-in sessions (expiry), phone-notification devices and the
+      // reminders already sent to them.
+      sessions: sessions.map(r => r.session),
+      push_subscriptions: pushSubscriptions,
+      push_sent_log: pushSentLog,
+      // When she accepted which version of the privacy policy / terms.
+      consents,
+      // AI-written summaries of her records, cached so they are not regenerated.
+      ai_summaries: aiSummaries,
+      // Admin decisions about her account and invitation links sent to her.
+      admin_actions_about_me: adminAuditAboutMe,
+      doctor_invites: doctorInvites,
       // Doctor-specific sections; empty arrays for patient-only accounts.
       doctor_profile: doctorProfile[0] ?? null,
       doctor_authored_notes: doctorNotes,
       doctor_schedule: doctorSchedule,
       consultation_settings: consultationSettings[0] ?? null,
+      documents_sent_to_patients: documentsSentAsDoctor,
       notes: {
         documents_note:
           'The file_url field on each document downloads the original upload from Womanie while you are signed in (open https://womanie.info followed by that path).',

@@ -183,11 +183,9 @@ describe('me/delete-account security invariants', () => {
       [...readFileSync(new URL(f, migDir), 'utf8').matchAll(/CREATE TABLE IF NOT EXISTS ([a-z_]+)/gi)].map(m => m[1]));
     const NOT_USER_ROWS = new Set([
       'current_extracted_data', // a VIEW over medical_extracted_data (migration 002)
-      // Admin records (migration 023), not the user's own data: who approved
-      // or rejected which doctor licence, and which invite links an admin
-      // sent. The accountability trail must survive the account's deletion.
+      // Admin accountability trail (migration 023): kept, but pseudonymised
+      // (asserted below), so it is not in the DELETE set.
       'admin_audit_log',
-      'doctor_invites',
     ]);
     const expected = new Set(
       [...whitelist, ...migrated, 'chat_messages', 'auth_sessions', 'auth_users', 'llm_cache']
@@ -197,7 +195,7 @@ describe('me/delete-account security invariants', () => {
 
     query.mockImplementation(async (q: string) =>
       /to_regclass/.test(q)
-        ? [{ present: true, visit_questions: true, pending_jobs: true, rate_limit_counters: true, push_subscriptions: true, birth_plans: true }]
+        ? [{ present: true, visit_questions: true, pending_jobs: true, rate_limit_counters: true, push_subscriptions: true, birth_plans: true, admin_audit_log: true, doctor_invites: true, consent_log: true }]
         : [{ email: 'User@Test.com' }]);
     const res = mockRes();
     await handler(mockReq({ confirm: CONFIRM_PHRASE }), res);
@@ -211,5 +209,27 @@ describe('me/delete-account security invariants', () => {
     // Rate-limit rows are matched by the hashed id and hashed lower-case email.
     const rl = tagFn.mock.calls.find(c => /DELETE FROM rate_limit_counters/.test((c[0] as string[]).join('?')));
     expect(rl?.[1]).toEqual([hashSubject(SESSION_USER.id), hashSubject('user@test.com')]);
+
+    // The admin audit log about her is pseudonymised, not deleted: her id
+    // becomes a one-way hash, her email and licence number are dropped.
+    const audit = tagFn.mock.calls.find(c => /UPDATE admin_audit_log\s+SET target_user_id/.test((c[0] as string[]).join('?')));
+    expect(audit).toBeTruthy();
+    const auditSql = (audit![0] as string[]).join('?');
+    expect(auditSql).toMatch(/target_email = NULL/);
+    expect(auditSql).toMatch(/'license_number'/);
+    expect(audit![1]).toBe('erased:' + hashSubject(SESSION_USER.id));
+    expect(audit!.slice(1)).not.toContain('User@Test.com');
+    expect(audit!.slice(1)).toContain('user@test.com');
+    expect(deleted.has('admin_audit_log')).toBe(false);
+  });
+
+  it('skips the migration-023/024 tables when they do not exist yet', async () => {
+    query.mockImplementation(async (q: string) =>
+      /to_regclass/.test(q) ? [{ present: true }] : [{ email: 'user@test.com' }]);
+    const res = mockRes();
+    await handler(mockReq({ confirm: CONFIRM_PHRASE }), res);
+    expect(res._status).toBe(200);
+    const text = tagFn.mock.calls.map(c => (c[0] as string[]).join('?')).join('\n');
+    expect(text).not.toMatch(/admin_audit_log|doctor_invites|consent_log/);
   });
 });

@@ -3,17 +3,126 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 // Request bodies here are health data (chat turns, lab values, notes) and
 // cookies carry the session JWT. sendDefaultPii:false already drops
-// cookies/IP, but request `data` is not PII-gated, so strip it (and any
-// cookie/authorization header) from every event as a second lock.
-export function scrubEvent<E extends { request?: { data?: unknown; cookies?: unknown; headers?: Record<string, string> } }>(event: E): E {
+// cookies/IP, but request `data` is not PII-gated, so every event passes
+// through scrubEvent before it leaves the server:
+//   - request: body, cookies and query string dropped; the URL keeps only
+//     its path; cookie / authorization / API-key / forwarded-IP headers go
+//   - user: only an opaque id may stay (no email, IP or name)
+//   - breadcrumbs: console lines dropped (handlers log DB and AI errors that
+//     can quote values), URLs cut to the path, bodies dropped
+//   - extra / contexts / tags: any key that names a health field or a
+//     secret is replaced by [Filtered], at any depth
+//   - message and exception text: email addresses are masked
+// The test in sentry.test.ts is the contract.
+
+const SECRET_HEADER = /^(cookie|authorization|proxy-authorization|x-api-key|x-forwarded-for|x-real-ip|x-vercel-forwarded-for|x-vercel-proxy-signature|referer)$/i;
+
+// Keys that hold (or describe) health data, personal details or secrets.
+export const SENSITIVE_KEY = new RegExp(
+  '^(' + [
+    'content', 'messages?', 'prompt', 'body', 'data', 'text', 'notes?', 'question', 'answer',
+    'value', 'values', 'result', 'results', 'unit', 'test_name', 'title', 'summary', 'ai_summary',
+    'symptoms?', 'mood', 'flow', 'pain', 'temperature', 'weight', 'blood_?pressure', 'bbt',
+    'medications?', 'dose', 'diagnosis', 'plan', 'cycle', 'period.*', 'pregnan.*', 'ivf.*', 'birth.*',
+    'date_of_birth', 'dob', 'full_name', 'name', 'email', 'phone', 'address', 'ip_address',
+    'password.*', 'token', 'secret', 'session', 'cookies?', 'authorization', 'api_?key', 'p256dh', 'auth',
+    'file_name', 'file_path', 'license_number',
+  ].join('|') + ')$',
+  'i',
+);
+
+const SDK_CONTEXTS = new Set(['os', 'runtime', 'device', 'app', 'trace', 'culture', 'cloud_resource', 'otel']);
+
+const EMAIL = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
+
+export function stripUrl(url: unknown): unknown {
+  if (typeof url !== 'string') return url;
+  const cut = url.search(/[?#]/);
+  return cut === -1 ? url : url.slice(0, cut);
+}
+
+function maskText(v: unknown): unknown {
+  return typeof v === 'string' ? v.replace(EMAIL, '[email]') : v;
+}
+
+export function redactDeep(value: unknown, depth = 0): unknown {
+  if (depth > 6 || value === null || typeof value !== 'object') return maskText(value);
+  if (Array.isArray(value)) return value.map(v => redactDeep(v, depth + 1));
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+    out[k] = SENSITIVE_KEY.test(k) ? '[Filtered]' : redactDeep(v, depth + 1);
+  }
+  return out;
+}
+
+type Crumb = { category?: string; message?: string; data?: Record<string, unknown> };
+type ScrubbableEvent = {
+  message?: string;
+  transaction?: string;
+  request?: { url?: string; data?: unknown; cookies?: unknown; query_string?: unknown; headers?: Record<string, string> };
+  user?: Record<string, unknown>;
+  breadcrumbs?: Crumb[];
+  extra?: Record<string, unknown>;
+  contexts?: Record<string, unknown>;
+  tags?: Record<string, unknown>;
+  exception?: { values?: Array<{ value?: string }> };
+  spans?: Array<{ description?: string; data?: Record<string, unknown> }>;
+};
+
+export function scrubEvent<E extends ScrubbableEvent>(event: E): E {
   const r = event.request;
   if (r) {
     delete r.data;
     delete r.cookies;
+    delete r.query_string;
+    if (r.url) r.url = stripUrl(r.url) as string;
     if (r.headers) {
       for (const k of Object.keys(r.headers)) {
-        if (/^(cookie|authorization)$/i.test(k)) delete r.headers[k];
+        if (SECRET_HEADER.test(k)) delete r.headers[k];
       }
+    }
+  }
+  if (event.user) {
+    const id = event.user.id;
+    event.user = id === undefined ? {} : { id };
+  }
+  if (event.breadcrumbs) {
+    event.breadcrumbs = event.breadcrumbs
+      .filter(b => b.category !== 'console')
+      .map(b => ({
+        ...b,
+        message: b.message === undefined ? undefined : String(maskText(stripUrl(b.message))),
+        data: b.data ? (redactDeep(Object.fromEntries(
+          Object.entries(b.data).map(([k, v]) => [k, /url|^to$|^from$/i.test(k) ? stripUrl(v) : v]),
+        )) as Record<string, unknown>) : undefined,
+      }));
+  }
+  if (event.extra) event.extra = redactDeep(event.extra) as Record<string, unknown>;
+  if (event.contexts) {
+    // The SDK's own environment contexts (os, runtime, trace, ...) carry no
+    // user data and are needed to read an error; everything else is redacted.
+    for (const k of Object.keys(event.contexts)) {
+      if (!SDK_CONTEXTS.has(k)) event.contexts[k] = redactDeep(event.contexts[k]);
+    }
+  }
+  if (event.tags) {
+    for (const k of Object.keys(event.tags)) {
+      event.tags[k] = /url|path/i.test(k) ? stripUrl(event.tags[k]) : SENSITIVE_KEY.test(k) ? '[Filtered]' : event.tags[k];
+    }
+  }
+  if (event.message) event.message = String(maskText(event.message));
+  if (event.transaction) event.transaction = String(stripUrl(event.transaction));
+  for (const ex of event.exception?.values ?? []) {
+    if (ex.value) ex.value = String(maskText(ex.value));
+  }
+  for (const span of event.spans ?? []) {
+    if (span.description) span.description = span.description.replace(/[?#]\S*/g, '');
+    if (span.data) {
+      for (const k of Object.keys(span.data)) {
+        if (/url/i.test(k)) span.data[k] = stripUrl(span.data[k]);
+      }
+      delete span.data['http.query'];
+      delete span.data['http.fragment'];
     }
   }
   return event;
@@ -29,6 +138,8 @@ function ensureInit() {
     sendDefaultPii: false,
     tracesSampleRate: 0.1,
     beforeSend: scrubEvent,
+    beforeSendTransaction: scrubEvent,
+    beforeBreadcrumb: (crumb) => (crumb.category === 'console' ? null : crumb),
   });
   initialized = true;
 }
@@ -53,15 +164,15 @@ export function withSentry(handler: Handler): Handler {
       return await handler(req, res);
     } catch (error) {
       Sentry.captureException(error, {
-        tags: { path: req.url, method: req.method },
+        tags: { path: stripUrl(req.url) as string, method: req.method },
       });
       await Sentry.flush(2000).catch(() => {});
       throw error;
     } finally {
       if (saw5xx !== null) {
-        Sentry.captureMessage(`Handled HTTP ${saw5xx}: ${req.method} ${req.url}`, {
+        Sentry.captureMessage(`Handled HTTP ${saw5xx}: ${req.method} ${stripUrl(req.url)}`, {
           level: 'error',
-          tags: { path: req.url, method: req.method },
+          tags: { path: stripUrl(req.url) as string, method: req.method },
         });
         await Sentry.flush(2000).catch(() => {});
       }
