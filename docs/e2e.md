@@ -41,7 +41,7 @@ account.
 | `global-setup.ts` | Log in through the login form | — |
 | `01-today.spec.ts` | Home (Today) loads with no console errors | none |
 | `02-stage-and-log.spec.ts` | Me -> Life stage: switch to Period tracking (or Menopause), Home follows; on that stage open the Log sheet, tick a mood and a symptom, save, reopen, untick, save; switch back | `afterAll` restores today's mood/symptoms (or deletes today's row if there was none) and puts `profiles.life_stage` back, unless another tool changed it meanwhile |
-| `04-chat.spec.ts` | Ask AI: one question, a streamed (`text/event-stream`) answer appears | iphone only = 1 model call per run. Chats can only be deleted all at once, so the test deletes them only if the account had no chats before; otherwise its one exchange stays in Past chats |
+| `04-chat.spec.ts` | Ask AI: one question, a streamed (`text/event-stream`) answer appears; Past chats -> delete that one chat (cancel, then confirm) | iphone only = 1 model call per run. The test deletes its own chat in the UI; `afterAll` deletes it by `conversation_id` if the test stopped earlier. Other chats on the account are never touched |
 | `05-records-me.spec.ts` | Records -> Documents tab; Me -> Profile | none |
 | `99-logout.spec.ts` | Me -> Log out; session is gone, `/dashboard` sends you away | iphone only |
 

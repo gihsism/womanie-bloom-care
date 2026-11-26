@@ -8,6 +8,8 @@
 export const CHAT_GAP_MS = 3 * 60 * 60 * 1000; // 3 hours
 
 export interface StoredChatMessage {
+  /** Server row id (chat_messages.id); absent for turns not yet reloaded. */
+  id?: string | null;
   role: 'user' | 'assistant';
   content: string;
   created_at?: string | null;
@@ -103,4 +105,17 @@ export function groupIntoChats<T extends StoredChatMessage>(messages: T[], gapMs
         messages: g.messages,
       };
     });
+}
+
+/**
+ * What DELETE /api/chat/conversation needs to delete this one chat:
+ * its conversation_id, or (old chats without one) the ids of its rows.
+ * null when the chat cannot be named to the server yet (rows without ids,
+ * e.g. just imported); it can then only go with "Delete all chats".
+ */
+export function chatDeleteTarget(chat: PastChat): { conversationId: string } | { messageIds: string[] } | null {
+  if (chat.conversationId) return { conversationId: chat.conversationId };
+  const ids = chat.messages.map((m) => m.id);
+  if (ids.length === 0 || ids.some((id) => !id)) return null;
+  return { messageIds: ids as string[] };
 }

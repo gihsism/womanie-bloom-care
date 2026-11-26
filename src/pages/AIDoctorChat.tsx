@@ -38,7 +38,7 @@ import {
 } from 'lucide-react';
 import { ChatSources } from '@/components/chat/ChatSources';
 import { PastChats } from '@/components/chat/PastChats';
-import { groupIntoChats, newConversationId, type PastChat, type StoredChatMessage } from '@/lib/chatSessions';
+import { chatDeleteTarget, groupIntoChats, newConversationId, type PastChat, type StoredChatMessage } from '@/lib/chatSessions';
 import { pickSuggestions } from '@/lib/chatSuggestions';
 import { citedSources, linkCitations, splitSourcesFooter, stripSourcesFooter, stripUnknownCitations, type ChatSource } from '@/lib/research-sources';
 
@@ -357,7 +357,8 @@ export default function AIDoctorChat() {
         const resp = await fetch('/api/chat/messages', { credentials: 'include' });
         if (!resp.ok) return;
         const data = await resp.json();
-        const serverMessages: StoredChatMessage[] = (data.messages || []).map((m: { role: string; content: string; created_at?: string | null; conversation_id?: string | null }) => ({
+        const serverMessages: StoredChatMessage[] = (data.messages || []).map((m: { id?: string | null; role: string; content: string; created_at?: string | null; conversation_id?: string | null }) => ({
+          id: m.id ?? null,
           role: m.role as 'user' | 'assistant',
           content: m.content,
           created_at: m.created_at ?? null,
@@ -582,7 +583,8 @@ export default function AIDoctorChat() {
       );
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const data = await resp.json();
-      const older: StoredChatMessage[] = (data.messages || []).map((m: { role: string; content: string; created_at?: string | null; conversation_id?: string | null }) => ({
+      const older: StoredChatMessage[] = (data.messages || []).map((m: { id?: string | null; role: string; content: string; created_at?: string | null; conversation_id?: string | null }) => ({
+        id: m.id ?? null,
         role: m.role as 'user' | 'assistant',
         content: m.content,
         created_at: m.created_at ?? null,
@@ -615,6 +617,37 @@ export default function AIDoctorChat() {
     setInput('');
     setShowPast(false);
     setTimeout(() => textareaRef.current?.focus(), 0);
+  };
+
+  // Delete one chat from Past chats (DELETE /api/chat/conversation; the
+  // server only deletes the session user's own rows). Removed from the
+  // list only once the server confirms, so a failure loses nothing.
+  const deletePastChat = async (chat: PastChat<StoredChatMessage & { sources?: ChatSource[] }>) => {
+    const target = chatDeleteTarget(chat);
+    if (!target) return;
+    if (!window.confirm(`Delete the chat "${chat.title}"? This cannot be undone.`)) return;
+    try {
+      const resp = await fetch('/api/chat/conversation', {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(target),
+      });
+      // 404 = already gone (e.g. deleted on another device): drop it too.
+      if (!resp.ok && resp.status !== 404) throw new Error(`HTTP ${resp.status}`);
+      const gone = new Set(chat.messages);
+      setHistory(h => h.filter(m => !gone.has(m)));
+      // The chat on screen was this one: start fresh, so a follow-up
+      // does not revive it under the deleted id.
+      if (chat.conversationId && chat.conversationId === conversationId) {
+        setMessages([WELCOME_MESSAGE]);
+        setConversationId(newConversationId());
+      }
+      toast({ title: 'Chat deleted' });
+    } catch (err) {
+      console.error('Delete chat failed:', err);
+      toast({ title: 'Could not delete the chat', description: 'Please try again.', variant: 'destructive' });
+    }
   };
 
   const clearChat = async () => {
@@ -774,6 +807,7 @@ export default function AIDoctorChat() {
           hasMore={hasMoreHistory && Boolean(earliestCursor)}
           loadingEarlier={loadingEarlier}
           onOpen={openPastChat}
+          onDelete={deletePastChat}
           onLoadEarlier={loadEarlier}
         />
       ) : (
