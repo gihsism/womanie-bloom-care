@@ -11,6 +11,7 @@ test('open the Documents list', async ({ page }) => {
   const tab = page.getByRole('tab', { name: 'Documents' });
   await tab.click();
   await expect(tab).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tabpanel', { name: 'Documents' })).toBeVisible();
   // Either the list (with an Upload button) or the empty state with its own.
   await expect(page.getByRole('button', { name: /Upload/ }).first()).toBeVisible();
 });

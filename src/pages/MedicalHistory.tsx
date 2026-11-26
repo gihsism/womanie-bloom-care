@@ -582,6 +582,11 @@ export default function MedicalHistory() {
   // Three segments: Results (default) | Documents | My charts.
   // ?tab=documents|charts opens one directly; ?doc=<id> opens Documents.
   type Segment = 'results' | 'documents' | 'charts';
+  const SEGMENTS = [
+    ['results', 'Results'],
+    ['documents', 'Documents'],
+    ['charts', 'My charts'],
+  ] as const satisfies ReadonlyArray<readonly [Segment, string]>;
   const [segment, setSegment] = useState<Segment>(() => {
     const t = searchParams.get('tab');
     if (searchParams.get('doc') || t === 'documents') return 'documents';
@@ -1154,17 +1159,30 @@ export default function MedicalHistory() {
             upload button sits in the empty state instead, so there is
             never a second upload banner. */}
         <div className="flex items-center gap-2">
-          <div role="tablist" aria-label="Records sections" className="flex flex-1 min-w-0 gap-1 rounded-full bg-muted p-1">
-            {([
-              ['results', 'Results'],
-              ['documents', 'Documents'],
-              ['charts', 'My charts'],
-            ] as const).map(([key, label]) => (
+          {/* WAI-ARIA tabs: one panel below shows the selected segment;
+              arrow keys / Home / End move between tabs (roving tabindex). */}
+          <div role="tablist" aria-label="Records sections" className="flex flex-1 min-w-0 gap-1 rounded-full bg-muted p-1"
+            onKeyDown={(e) => {
+              const i = SEGMENTS.findIndex(([k]) => k === segment);
+              const next = e.key === 'ArrowRight' ? (i + 1) % SEGMENTS.length
+                : e.key === 'ArrowLeft' ? (i - 1 + SEGMENTS.length) % SEGMENTS.length
+                : e.key === 'Home' ? 0
+                : e.key === 'End' ? SEGMENTS.length - 1
+                : -1;
+              if (next < 0) return;
+              e.preventDefault();
+              setSegment(SEGMENTS[next][0]);
+              document.getElementById(`records-tab-${SEGMENTS[next][0]}`)?.focus();
+            }}>
+            {SEGMENTS.map(([key, label]) => (
               <button
                 key={key}
+                id={`records-tab-${key}`}
                 type="button"
                 role="tab"
                 aria-selected={segment === key}
+                aria-controls="records-panel"
+                tabIndex={segment === key ? 0 : -1}
                 onClick={() => setSegment(key)}
                 className={`tap-target flex-1 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                   segment === key ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
@@ -1182,6 +1200,7 @@ export default function MedicalHistory() {
             </Button>
           )}
         </div>
+        <div id="records-panel" role="tabpanel" aria-labelledby={`records-tab-${segment}`} tabIndex={0} className="space-y-6 focus-visible:outline-none">
         {reanalyzing && (
           <Progress value={reanalyzeProgress.total > 0 ? (reanalyzeProgress.done / reanalyzeProgress.total) * 100 : 0} aria-label="Re-analysis progress" className="h-1.5 bg-muted" />
         )}
@@ -1976,6 +1995,7 @@ export default function MedicalHistory() {
               </>
           </div>
         )}
+        </div>
       </div>
 
       <DocumentUpload open={uploadOpen} onOpenChange={setUploadOpen} showTrigger={false} onUploaded={handleUploaded} />
