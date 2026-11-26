@@ -2,6 +2,8 @@ import { addDays, format } from 'date-fns';
 import { db } from '@/integrations/db/client';
 import type { OnboardingData } from '@/contexts/OnboardingContext';
 import { pushAccountData } from '@/lib/account-data';
+import { ttcStartFromDuration } from '@/lib/ttc';
+import { saveTtcStart } from '@/hooks/useTtcStart';
 
 // Persists everything the user told us during the 3-step onboarding flow
 // into the database. Was previously dropped on the floor:
@@ -86,6 +88,13 @@ export async function commitOnboarding(user: UserShape, data: OnboardingData): P
       console.error('onboarding: profile upsert failed', e);
     }
   }
+
+  // --- TTC start (profiles.ttc_start_date, migration 025) ---
+  // Separate from the profile upsert above, so a database without the
+  // column yet cannot fail the life-stage save. Approximate: the answer is
+  // a range ("3-6 months"); she can set the exact day on the stage page.
+  const ttcStart = lifeStage === 'conception' ? ttcStartFromDuration(data.tryingToConceive?.tryingDuration) : null;
+  if (ttcStart) await saveTtcStart(user.id, ttcStart);
 
   // --- period_tracking seed ---
   // Take whichever last-period field is set across the relevant forms,

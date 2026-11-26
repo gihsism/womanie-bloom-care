@@ -24,7 +24,10 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
-import { parsePillStatus, yesterdayPillUnanswered, type PillStatus } from '@/lib/pillLog';
+import { parsePillStatus, yesterdayPillUnanswered, pillPackDay, type PillStatus } from '@/lib/pillLog';
+import { PILL_TYPES, DEFAULT_PILL_TYPE, isPillType, hoursLateSince, type PillType } from '@/lib/missedPill';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import MissedPillGuidance from './MissedPillGuidance';
 
 const CONTRACEPTION_METHODS = [
   { id: 'pill', label: 'Birth Control Pill', emoji: '💊', effectiveness: '91-99%', schedule: 'Daily', description: 'Take at the same time every day for best protection.' },
@@ -62,8 +65,9 @@ interface SignalRow {
 
 function setPillInNotes(notes: string | null, status: PillStatus | null): string | null {
   // Strip any existing "Pill: ..." segment, then append the new one if non-null.
+  // Split only on ". " (how notes are joined) so "BBT: 36.6°C" stays whole.
   const stripped = (notes || '')
-    .split('.')
+    .split(/\.\s+|\.$/)
     .map((s) => s.trim())
     .filter((s) => s && !/^Pill:\s*(on-time|late|missed)$/i.test(s))
     .join('. ');
@@ -102,11 +106,15 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
   const [showMethodPicker, setShowMethodPicker] = useState(false);
   const [reminderTime, setReminderTime] = useState('21:00');
   const [packStartDate, setPackStartDate] = useState<string | null>(null);
+  // Which pill (combined / mini-pill type): the missed-pill rules differ.
+  const [pillType, setPillType] = useState<PillType>(DEFAULT_PILL_TYPE);
+  const [pillTypeSet, setPillTypeSet] = useState(false);
+  const [guidance, setGuidance] = useState<{ open: boolean; hours: number; packDay: number | null }>({ open: false, hours: 0, packDay: null });
 
   const [signals, setSignals] = useState<SignalRow[]>([]);
   const [isLoadingSignals, setIsLoadingSignals] = useState(true);
 
-  const accountVersion = useAccountDataVersion(userId ? ['method', 'sideEffects', 'reminderTime', 'packStartDate'].map(k => lsKey(userId, k)) : []);
+  const accountVersion = useAccountDataVersion(userId ? ['method', 'sideEffects', 'reminderTime', 'packStartDate', 'pillType'].map(k => lsKey(userId, k)) : []);
   // ─── Persisted preferences via localStorage ───
   useEffect(() => {
     if (!userId) return;
@@ -114,7 +122,27 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
     setTrackedSideEffects(new Set(readLS<string[]>(userId, 'sideEffects', [])));
     setReminderTime(readLS<string>(userId, 'reminderTime', '21:00'));
     setPackStartDate(readLS<string | null>(userId, 'packStartDate', null));
+    const storedType = readLS<unknown>(userId, 'pillType', null);
+    setPillType(isPillType(storedType) ? storedType : DEFAULT_PILL_TYPE);
+    setPillTypeSet(isPillType(storedType));
   }, [userId, accountVersion]);
+
+  const choosePillType = (t: string) => {
+    if (!userId || !isPillType(t)) return;
+    setPillType(t);
+    setPillTypeSet(true);
+    writeLS(userId, 'pillType', t);
+  };
+
+  /** Open the what-to-do sheet for a late / missed pill due on `day`. */
+  const openGuidance = (day: string) => {
+    const [y, m, d] = day.split('-').map(Number);
+    setGuidance({
+      open: true,
+      hours: hoursLateSince(day, reminderTime),
+      packDay: pillPackDay(packStartDate, new Date(y, m - 1, d)),
+    });
+  };
 
   useEffect(() => {
     if (!userId || selectedMethod === null) return;
@@ -236,6 +264,8 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
       if (!packStartDate && day === today) setPackStartDate(today);
 
       emitHealthDataChange();
+      // A late or missed daily pill: show what to do now, by pill type.
+      if (selectedMethod === 'pill' && status !== 'on-time') openGuidance(day);
       toast({
         title: status === 'missed' ? 'Logged as missed' : '✅ Logged!',
         description: `${currentMethod?.label || 'Contraception'} marked ${status} for ${day === today ? 'today' : 'yesterday'}.`,
@@ -364,6 +394,34 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
                   Missed it
                 </Button>
               </div>
+            </div>
+          )}
+
+          {selectedMethod === 'pill' && (todayStatus === 'late' || todayStatus === 'missed') && (
+            <Button variant="outline" size="sm" className="w-full mt-3 text-xs gap-1.5" onClick={() => openGuidance(today)}>
+              <Info className="h-3.5 w-3.5" />
+              What to do after a {todayStatus} pill
+            </Button>
+          )}
+
+          {/* Pill type: the late / missed rules depend on it (lib/missedPill.ts). */}
+          {selectedMethod === 'pill' && (
+            <div id="pill-type" className="flex items-center justify-between gap-2 mt-3 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <Pill className="h-3.5 w-3.5" />
+                Pill type{!pillTypeSet && <span className="text-primary"> · please check</span>}
+              </span>
+              <Select value={pillType} onValueChange={choosePillType}>
+                <SelectTrigger className="h-8 w-52 text-xs" aria-label="Pill type"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {PILL_TYPES.map(t => (
+                    <SelectItem key={t.id} value={t.id} className="text-xs">
+                      <span className="block">{t.label}</span>
+                      <span className="block text-[10px] text-muted-foreground">{t.hint}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
 
@@ -566,7 +624,17 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
           </div>
           <div className="flex items-start gap-2">
             <span className="text-primary">•</span>
-            <span>If you miss a pill, take it as soon as you remember. Check your pill pack instructions.</span>
+            <span>
+              If you miss a pill, take it as soon as you remember. Check your pill pack instructions.
+              {selectedMethod === 'pill' && (
+                <>
+                  {' '}
+                  <button type="button" className="text-primary underline" onClick={() => openGuidance(yesterday)}>
+                    Missed-pill steps for your pill
+                  </button>
+                </>
+              )}
+            </span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-primary">•</span>
@@ -578,6 +646,20 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
           </div>
         </div>
       </Card>
+
+      {selectedMethod === 'pill' && (
+        <MissedPillGuidance
+          open={guidance.open}
+          onOpenChange={(open) => setGuidance(g => ({ ...g, open }))}
+          pillType={pillType}
+          estimatedHours={guidance.hours}
+          packDay={guidance.packDay}
+          onChangePillType={() => {
+            setGuidance(g => ({ ...g, open: false }));
+            document.getElementById('pill-type')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }}
+        />
+      )}
 
       {/* Doctor Chat CTA */}
       <Card

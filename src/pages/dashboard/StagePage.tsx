@@ -19,6 +19,8 @@ import CyclePhaseNutrition from '@/components/dashboard/CyclePhaseNutrition';
 import CyclePhaseExercise from '@/components/dashboard/CyclePhaseExercise';
 import PMSForecastCard from '@/components/dashboard/PMSForecastCard';
 import FertilityOutlookCard from '@/components/dashboard/FertilityOutlookCard';
+import OvulationTestsCard from '@/components/dashboard/OvulationTestsCard';
+import TtcDoctorCard from '@/components/dashboard/TtcDoctorCard';
 import FertilityForecast from '@/components/dashboard/FertilityForecast';
 import CycleExplainedCard from '@/components/dashboard/CycleExplainedCard';
 import EvidenceNote from '@/components/research/EvidenceNote';
@@ -182,6 +184,14 @@ export default function StagePage() {
                 selectedMode={mode}
               />
             </Section>
+            {mode === 'conception' && (
+              <>
+                <Section id="ovulation-tests">
+                  <OvulationTestsCard lastPeriodStart={p.periodData?.lastPeriodStart} cycleLength={p.periodData?.cycleLength ?? 28} />
+                </Section>
+                <Section id="trying-since"><TtcDoctorCard /></Section>
+              </>
+            )}
             <div id="cycle-explained" className={anchor}><CycleExplainedCard /></div>
             <div id="pms" className={anchor}><PMSForecastCard mode={mode} /></div>
             <FertilityOutlookCard mode={mode} />
