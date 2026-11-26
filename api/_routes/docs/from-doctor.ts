@@ -72,7 +72,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         })),
       });
     } catch (err) {
-      // Before migration 020 nothing can have been sent: an empty list.
+      // Before migration 021 nothing can have been sent: an empty list.
       if (missingColumn(err)) return res.status(200).json({ documents: [] });
       console.error('docs/from-doctor GET failed:', (err as Error)?.message);
       return res.status(500).json({ error: 'Could not load documents' });

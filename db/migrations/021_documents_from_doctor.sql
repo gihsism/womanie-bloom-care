@@ -16,7 +16,7 @@
 -- column through to_jsonb (NULL when missing), and sending a document
 -- answers "not available yet" until it exists.
 --
--- Apply with:  node scripts/apply-migration.mjs db/migrations/020_documents_from_doctor.sql
+-- Apply with:  node scripts/apply-migration.mjs db/migrations/021_documents_from_doctor.sql
 -- Idempotent: safe to run twice.
 
 ALTER TABLE health_documents

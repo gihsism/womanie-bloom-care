@@ -74,7 +74,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       // the approved connection and logs the read. has_file only says
       // whether there is anything to open. sent_by_me marks a document
       // this doctor sent into her Records ("Sent by you"); read through
-      // to_jsonb so the chart works before migration 020 adds the column,
+      // to_jsonb so the chart works before migration 021 adds the column,
       // and other doctors' ids never leave the server.
       sql.query(
         `SELECT h.id, h.file_name, (h.file_path IS NOT NULL AND h.file_path <> '') AS has_file,

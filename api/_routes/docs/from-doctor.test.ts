@@ -195,7 +195,7 @@ describe('POST /api/docs/from-doctor: the file', () => {
     expect(String(db.inserted[0][6]).length).toBe(500);
   });
 
-  it('answers "not available yet" before migration 020 is applied', async () => {
+  it('answers "not available yet" before migration 021 is applied', async () => {
     db.insertError = new Error('column "uploaded_by_doctor_id" of relation "health_documents" does not exist');
     const res = mockRes();
     await handler(post(BODY), res);
