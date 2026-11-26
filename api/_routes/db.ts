@@ -28,6 +28,9 @@ const OWNER_COLUMN: Record<string, string | string[]> = {
   // Questions to bring, saved per upcoming visit (migration 012). The
   // patient owns them; the visit's doctor reads them via /api/doctors/patient.
   visit_questions: 'user_id',
+  // Her birth plan (migration 020), one row per patient. A connected doctor
+  // reads it only through /api/doctors/patient, and only when she shared it.
+  birth_plans: 'user_id',
   patient_access_codes: 'patient_id',
   user_roles: 'user_id',
   document_analyses: 'user_id',

@@ -212,6 +212,43 @@ describe('doctors/patient security invariants', () => {
     expect((res._body as Record<string, unknown>).medicines).toEqual([]);
   });
 
+  it('returns her birth plan only when she shared it, scoped to this patient', async () => {
+    query.mockReset();
+    query.mockResolvedValueOnce(CONN_ROW);
+    query.mockResolvedValueOnce([]);
+    const plan = { plan: { v: 1, choices: { pain: ['epidural'] }, notes: {} }, updated_at: '2026-11-20T10:00:00Z' };
+    query.mockImplementation(async (sql: string) => (/FROM birth_plans/i.test(sql) ? [plan] : []));
+    const res = mockRes();
+    await handler(mockReq(PATIENT_ID), res);
+    expect(res._status).toBe(200);
+    expect((res._body as Record<string, unknown>).birthPlan).toEqual(plan);
+    const call = query.mock.calls.find(([sql]) => /FROM birth_plans/i.test(sql)) as [string, unknown[]];
+    expect(call[0]).toMatch(/shared_with_doctor = true/);
+    expect(call[1]).toEqual([PATIENT_ID]);
+  });
+
+  it('a birth plan read failure (table not migrated yet) does not break the chart', async () => {
+    query.mockReset();
+    query.mockResolvedValueOnce(CONN_ROW);
+    query.mockResolvedValueOnce([]);
+    query.mockImplementation(async (sql: string) => {
+      if (/FROM birth_plans/i.test(sql)) throw new Error('relation "birth_plans" does not exist');
+      return [];
+    });
+    const res = mockRes();
+    await handler(mockReq(PATIENT_ID), res);
+    expect(res._status).toBe(200);
+    expect((res._body as Record<string, unknown>).birthPlan).toBeNull();
+  });
+
+  it('no birth plan is read without consent', async () => {
+    query.mockReset();
+    query.mockResolvedValue([]);
+    const res = mockRes();
+    await handler(mockReq(PATIENT_ID), res);
+    expect(query.mock.calls.some(([sql]) => /birth_plans/i.test(sql))).toBe(false);
+  });
+
   it('no visit questions are read without consent', async () => {
     query.mockReset();
     query.mockResolvedValue([]);

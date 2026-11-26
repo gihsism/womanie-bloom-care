@@ -7,6 +7,8 @@ import KickCounter from './KickCounter';
 import GuidesSection from './GuidesSection';
 import ContractionTimer from './ContractionTimer';
 import HospitalBagChecklist from './HospitalBagChecklist';
+import BirthPlanCard from './BirthPlanCard';
+import { birthPlanVisible } from '@/lib/birthPlan';
 
 // Baby development illustrations
 import babyWeek04 from '@/assets/baby-week-04.png';
@@ -851,6 +853,11 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
       {/* Daily kick counter — only relevant from ~week 28 onward, when
           fetal movement-counting becomes part of standard self-monitoring. */}
       {weeksPregnant >= 28 && <div id="kick-counter" className="scroll-mt-4 md:scroll-mt-28"><KickCounter /></div>}
+
+      {/* Birth plan — from week 28: her wishes for the birth (Swiss
+          context), printable and shareable read-only with a connected
+          doctor (src/lib/birthPlan.ts, table birth_plans). */}
+      {birthPlanVisible(weeksPregnant) && <div id="birth-plan" className="scroll-mt-4 md:scroll-mt-28"><BirthPlanCard /></div>}
 
       {/* Hospital bag checklist — packing reminders surface from week
           32 onward (most providers recommend having it ready by week

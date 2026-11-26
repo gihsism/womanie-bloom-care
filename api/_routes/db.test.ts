@@ -356,6 +356,23 @@ describe('api/_routes/db security invariants', () => {
     expect(res._status).toBe(403);
     expect(query).not.toHaveBeenCalled();
   });
+
+  it('birth_plans stay owner-only: a doctor cannot read a patient\'s plan through /api/db', async () => {
+    const res = mockRes();
+    await handler(mockReq({ table: 'birth_plans', operation: 'select', filters: [['user_id', 'eq', 'patient_1']] }), res);
+    expect(res._status).toBe(403);
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('birth_plans upsert is pinned to the session user', async () => {
+    const res = mockRes();
+    await handler(mockReq({
+      table: 'birth_plans', operation: 'upsert',
+      upsertData: { user_id: 'someone_else', plan: '{}' }, upsertOptions: { onConflict: 'user_id' },
+    }), res);
+    expect(res._status).toBe(403);
+    expect(query).not.toHaveBeenCalled();
+  });
 });
 
 describe('api/_routes/db error responses', () => {

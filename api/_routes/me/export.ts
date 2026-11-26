@@ -40,7 +40,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       doctorProfile, doctorNotes, doctorSchedule,
       consultationSettings, chartAccessLog,
       lifeEvents, medications, babies, birthRecords, appData, visitQuestions,
-      roles, newsletter, analysisJobs,
+      roles, newsletter, analysisJobs, birthPlans,
     ] = await Promise.all([
       sql.query('SELECT * FROM profiles WHERE id = $1', [user.id]),
       sql.query('SELECT id, email, name, created_at FROM auth_users WHERE id = $1', [user.id]),
@@ -159,6 +159,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         'SELECT document_id, status, attempts, created_at, updated_at FROM pending_jobs WHERE user_id = $1 ORDER BY created_at DESC',
         [user.id]
       )).catch(() => []),
+      // Birth plan (migration 020); empty until it is applied.
+      Promise.resolve(sql.query('SELECT plan, shared_with_doctor, created_at, updated_at FROM birth_plans WHERE user_id = $1', [user.id]))
+        .catch(() => []),
     ]) as Row[][];
 
     const payload = {
@@ -193,6 +196,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       app_data: appData,
       // Questions saved for upcoming visits (shared with that visit's doctor).
       visit_questions: visitQuestions,
+      // Birth plan wishes (shared with a connected doctor only if she chose to).
+      birth_plan: birthPlans[0] ?? null,
       // Doctor-specific sections; empty arrays for patient-only accounts.
       doctor_profile: doctorProfile[0] ?? null,
       doctor_authored_notes: doctorNotes,
