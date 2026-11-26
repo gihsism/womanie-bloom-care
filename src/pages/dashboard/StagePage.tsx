@@ -32,6 +32,7 @@ import CyclePhaseExercise from '@/components/dashboard/CyclePhaseExercise';
 import PMSForecastCard from '@/components/dashboard/PMSForecastCard';
 import FertilityOutlookCard from '@/components/dashboard/FertilityOutlookCard';
 import FertilityForecast from '@/components/dashboard/FertilityForecast';
+import CycleExplainedCard from '@/components/dashboard/CycleExplainedCard';
 import EvidenceNote from '@/components/research/EvidenceNote';
 import { evidenceSpec } from '@/lib/evidenceTopics';
 
@@ -168,6 +169,7 @@ export default function StagePage() {
                 selectedMode={mode}
               />
             </Section>
+            <div id="cycle-explained" className={anchor}><CycleExplainedCard /></div>
             <div id="pms" className={anchor}><PMSForecastCard mode={mode} /></div>
             <FertilityOutlookCard mode={mode} />
             {p.periodData && (

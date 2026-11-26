@@ -29,6 +29,7 @@ const FILES = [
   'DailyLogging.tsx',
   'LHSurgeCard.tsx',
   'PMSForecastCard.tsx',
+  'CycleExplainedCard.tsx',
   'ModeHeroStat.tsx',
   'MenopauseDashboard.tsx',
   'PostpartumDashboard.tsx',
