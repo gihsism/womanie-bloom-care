@@ -74,7 +74,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           });
           // Bring device-only personal data into the account (only where
           // the account has nothing yet) and refresh the local copy from it.
-          void syncAccountData(data.user.id);
+          // Not before she accepted the privacy policy: copying health data
+          // up to the server is processing she has not agreed to yet, so the
+          // consent screen starts the sync once she ticks (markConsentAccepted).
+          if (data.user.consentRequired !== true) void syncAccountData(data.user.id);
         }
       })
       .catch(() => {})
@@ -83,7 +86,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const markConsentAccepted = useCallback(() => {
     setUser(u => (u ? { ...u, consentRequired: false, consentReason: null } : u));
-  }, []);
+    // The account sync held back until now (see the session check above).
+    if (user?.id) void syncAccountData(user.id);
+  }, [user?.id]);
 
   const session = user ? { access_token: user.id } : null;
 
