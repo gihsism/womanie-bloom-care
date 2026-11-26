@@ -243,7 +243,7 @@ const KickCounter = () => {
             <div className="text-xs text-muted-foreground mt-2">
               Started {formatDistanceToNowStrict(new Date(current.startedAt))} ago
               {' · '}
-              <span className={reassuring ? '' : 'text-destructive/80 font-medium'}>
+              <span className={reassuring ? '' : 'text-destructive font-medium'}>
                 {formatDuration(elapsedMs)} elapsed
               </span>
             </div>
@@ -260,7 +260,7 @@ const KickCounter = () => {
 
           {!reassuring && current.count < TARGET_KICKS && (
             <div className={attentionBanner}>
-              <AlertCircle className="h-4 w-4 text-destructive/80 mt-0.5 flex-shrink-0" />
+              <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
               <p className="text-xs">
                 Fewer than {TARGET_KICKS} movements in 2 hours. If movement feels reduced
                 compared to your baby's usual pattern, call your provider — they may want

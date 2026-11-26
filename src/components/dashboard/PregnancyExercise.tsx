@@ -113,7 +113,7 @@ export default function PregnancyExercise({ weeksPregnant }: Props) {
         ))}
       </ul>
 
-      <p className="text-[11px] uppercase tracking-wide text-destructive/80 mb-1.5">Pause or modify</p>
+      <p className="text-[11px] uppercase tracking-wide text-destructive mb-1.5">Pause or modify</p>
       <ul className="space-y-1 mb-3">
         {tips.caution.map((line, i) => (
           <li key={i} className="text-xs text-foreground/90 flex items-start gap-1.5">

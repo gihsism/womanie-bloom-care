@@ -84,19 +84,19 @@ export default function HealthSummaryWidget({ since = null, showViewAll = true }
           {healthScore !== null && (
             <div className="flex-shrink-0 text-center">
               <p className={`font-display text-2xl font-medium ${
-                healthScore >= 80 ? 'text-muted-foreground' : healthScore >= 50 ? 'text-destructive/80' : 'text-destructive'
+                healthScore >= 80 ? 'text-muted-foreground' : healthScore >= 50 ? 'text-destructive' : 'text-destructive'
               }`}>{healthScore}%</p>
               <p className="text-[9px] text-muted-foreground">wellness</p>
             </div>
           )}
           <div className="flex-1 space-y-1.5">
-            {healthScore !== null && <Progress value={healthScore} className="h-1.5 bg-muted" indicatorClassName={healthScore >= 80 ? "bg-foreground/35" : healthScore >= 50 ? "bg-destructive/70" : "bg-destructive"} />}
+            {healthScore !== null && <Progress value={healthScore} aria-label="Wellness score" className="h-1.5 bg-muted" indicatorClassName={healthScore >= 80 ? "bg-foreground/35" : healthScore >= 50 ? "bg-destructive/70" : "bg-destructive"} />}
             <div className="flex gap-3 text-[10px]">
               <span className="flex items-center gap-1 text-muted-foreground">
                 <CheckCircle2 className="h-3 w-3" /> {normalCount} healthy
               </span>
               {abnormalCount > 0 && (
-                <span className="flex items-center gap-1 text-destructive/80">
+                <span className="flex items-center gap-1 text-destructive">
                   <AlertTriangle className="h-3 w-3" /> {abnormalCount} to discuss
                 </span>
               )}
@@ -116,7 +116,7 @@ export default function HealthSummaryWidget({ since = null, showViewAll = true }
               <div key={i} className={`flex items-center gap-2 text-xs px-2.5 py-1.5 rounded-lg ${
                 item.status === 'critical'
                   ? 'bg-destructive/10 text-destructive'
-                  : 'bg-destructive/5 text-destructive/80'
+                  : 'bg-destructive/5 text-destructive'
               }`}>
                 <span aria-hidden="true" className={`inline-block h-2 w-2 rounded-full flex-shrink-0 ${item.status === 'critical' ? 'bg-destructive' : 'bg-destructive/60'}`} />
                 <span className="font-medium">{item.title}</span>

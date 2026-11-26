@@ -35,7 +35,7 @@ export interface DocumentInfo {
 export const friendlyStatus: Record<string, { label: string; emoji: string; color: string; bgColor: string; dot: string; description: string }> = {
   normal: { label: 'All good', emoji: '✅', color: 'text-muted-foreground', bgColor: 'bg-muted/60 border-border', dot: 'bg-foreground/25', description: 'This result is within the healthy range.' },
   expected: { label: 'Normal for you', emoji: '💙', color: 'text-foreground/75', bgColor: 'bg-muted/40 border-border', dot: 'bg-foreground/50', description: 'This is outside the general range, but perfectly normal for your situation.' },
-  abnormal: { label: 'Worth discussing', emoji: '⚠️', color: 'text-destructive/80', bgColor: 'bg-destructive/5 border-destructive/20', dot: 'bg-destructive/60', description: 'This result is outside the normal range. Talk to your doctor about it.' },
+  abnormal: { label: 'Worth discussing', emoji: '⚠️', color: 'text-destructive', bgColor: 'bg-destructive/5 border-destructive/20', dot: 'bg-destructive/60', description: 'This result is outside the normal range. Talk to your doctor about it.' },
   critical: { label: 'Needs attention', emoji: '🔴', color: 'text-destructive', bgColor: 'bg-destructive/10 border-destructive/30', dot: 'bg-destructive', description: 'This needs urgent medical attention.' },
   informational: { label: 'For reference', emoji: 'ℹ️', color: 'text-muted-foreground', bgColor: 'bg-muted/50 border-border', dot: 'bg-muted-foreground/40', description: 'Tracked for your records.' },
   active: { label: 'Current', emoji: '📌', color: 'text-primary', bgColor: 'bg-primary/5 border-primary/20', dot: 'bg-primary', description: '' },
@@ -55,7 +55,7 @@ export function getStatusInfo(status: string | null) {
 export type HealthTone = 'ok' | 'watch' | 'alert';
 export const healthTone: Record<HealthTone, { text: string; badge: string; dot: string; tint: string }> = {
   ok: { text: 'text-foreground/75', badge: 'bg-muted/60 text-muted-foreground border-border', dot: 'bg-foreground/25', tint: 'bg-muted/40 border-border' },
-  watch: { text: 'text-destructive/80', badge: 'bg-destructive/5 text-destructive/80 border-destructive/20', dot: 'bg-destructive/60', tint: 'bg-destructive/5 border-destructive/20' },
+  watch: { text: 'text-destructive', badge: 'bg-destructive/5 text-destructive border-destructive/20', dot: 'bg-destructive/60', tint: 'bg-destructive/5 border-destructive/20' },
   alert: { text: 'text-destructive', badge: 'bg-destructive/10 text-destructive border-destructive/30', dot: 'bg-destructive', tint: 'bg-destructive/10 border-destructive/30' },
 };
 

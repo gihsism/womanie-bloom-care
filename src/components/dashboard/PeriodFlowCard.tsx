@@ -221,7 +221,7 @@ const PeriodFlowCard = ({ lastPeriodStart }: PeriodFlowCardProps) => {
 
       {latestStats && latestStats.heavyDays > 3 && (
         <div className={attentionBanner}>
-          <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-destructive/80" />
+          <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-destructive" />
           <p className="text-xs">
             {latestStats.heavyDays} heavy-flow days this period. Persistent heavy bleeding
             (menorrhagia) can lead to iron deficiency — worth raising at your next visit if

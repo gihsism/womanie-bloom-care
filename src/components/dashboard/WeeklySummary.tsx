@@ -135,7 +135,7 @@ export default function WeeklySummary() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 gap-1"
+          className="tap-target h-7 gap-1"
           onClick={() => load(true)}
           disabled={loading}
           aria-label="Refresh summary"
@@ -160,7 +160,7 @@ export default function WeeklySummary() {
         <Button
           variant="ghost"
           size="sm"
-          className="mt-1 h-7 text-xs"
+          className="tap-target mt-1 h-7 text-xs"
           onClick={() => setExpanded(e => !e)}
         >
           {expanded ? 'Show less' : 'Read more'}

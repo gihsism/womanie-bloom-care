@@ -213,7 +213,7 @@ export default function NewDocInsights({ documents, medicalData }: Props) {
               const tone =
                 ins.kind === 'improved' ? 'text-muted-foreground' :
                 ins.kind === 'worsened' ? 'text-destructive' :
-                'text-destructive/80';
+                'text-destructive';
               return (
                 <li key={idx} className="flex items-start gap-2 text-xs group">
                   <Icon className={`h-3.5 w-3.5 mt-0.5 flex-shrink-0 ${tone}`} />

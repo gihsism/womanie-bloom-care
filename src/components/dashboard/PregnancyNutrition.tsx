@@ -165,7 +165,7 @@ export default function PregnancyNutrition({ weeksPregnant }: Props) {
       {/* Foods to avoid — same across trimesters, easy to forget */}
       <details className="border-t border-border/40 pt-3">
         <summary className="text-xs font-medium flex items-center gap-1.5 cursor-pointer">
-          <AlertCircle className="h-3.5 w-3.5 text-destructive/80" />
+          <AlertCircle className="h-3.5 w-3.5 text-destructive" />
           Foods + drinks to avoid
         </summary>
         <ul className="mt-2 space-y-1">
