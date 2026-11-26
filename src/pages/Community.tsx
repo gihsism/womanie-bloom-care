@@ -100,7 +100,7 @@ const socialLinks = [
   {
     platform: 'Website & Blog',
     icon: Globe,
-    handle: 'womanie.com/blog',
+    handle: 'womanie.info/blog',
     url: '/blog',
     description: 'In-depth articles and health guides',
     color: 'hover:bg-green-50 hover:border-green-200',

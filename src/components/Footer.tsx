@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -57,12 +56,6 @@ const Footer = () => {
     ],
   };
 
-  const socialLinks = [
-    { icon: Facebook, href: 'https://facebook.com', label: 'Facebook' },
-    { icon: Twitter, href: 'https://twitter.com', label: 'Twitter' },
-    { icon: Instagram, href: 'https://instagram.com', label: 'Instagram' },
-    { icon: Linkedin, href: 'https://linkedin.com', label: 'LinkedIn' },
-  ];
 
   return (
     <footer className="bg-muted/30 border-t border-border">
@@ -123,20 +116,6 @@ const Footer = () => {
             </span>
           </div>
 
-          <div className="flex gap-4">
-            {socialLinks.map((social) => (
-              <a
-                key={social.label}
-                href={social.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Follow us on ${social.label}`}
-                className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-primary hover:text-white transition-colors"
-              >
-                <social.icon className="h-5 w-5" aria-hidden="true" />
-              </a>
-            ))}
-          </div>
         </div>
       </div>
     </footer>

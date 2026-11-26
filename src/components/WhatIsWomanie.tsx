@@ -1,4 +1,4 @@
-import { Shield, Lock, Award, Upload, Brain, TrendingUp } from 'lucide-react';
+import { Shield, Upload, Brain, TrendingUp } from 'lucide-react';
 
 const WhatIsWomanie = () => {
   const steps = [
@@ -24,8 +24,6 @@ const WhatIsWomanie = () => {
 
   const badges = [
     { icon: Shield, label: 'Encrypted & Private' },
-    { icon: Lock, label: 'Bank-Level Encryption' },
-    { icon: Award, label: 'Medical Board Reviewed' },
   ];
 
   return (
