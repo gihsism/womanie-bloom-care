@@ -86,9 +86,24 @@ describe('Home template', () => {
     expect(screen.getByRole('dialog')).toHaveTextContent('Log sheet: log');
   });
 
-  it('pregnancy week 30 shows "Count kicks" as the one button', () => {
+  it('pregnancy week 30: "Count kicks" is the filled button, and a quiet "Log today" still opens the log', () => {
     renderHome('pregnancy', 30);
-    expect(screen.getByRole('button', { name: 'Count kicks' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Log today' })).toBeNull();
+    const kicks = screen.getByRole('button', { name: 'Count kicks' });
+    const log = screen.getByRole('button', { name: 'Log today' });
+    expect(kicks.className).not.toMatch(/underline-offset/);
+    expect(log.className).toMatch(/underline-offset/); // link variant, not a second filled button
+    fireEvent.click(log);
+    expect(screen.getByRole('dialog')).toHaveTextContent('Log sheet: log');
+  });
+
+  it.each([[28], [37]])('pregnancy week %i keeps a way into the log', (w) => {
+    renderHome('pregnancy', w);
+    fireEvent.click(screen.getByRole('button', { name: 'Log today' }));
+    expect(screen.getByRole('dialog')).toHaveTextContent('Log sheet: log');
+  });
+
+  it('stages whose filled button is the log get no extra link', () => {
+    renderHome('pregnancy', 20);
+    expect(screen.getAllByRole('button', { name: 'Log today' })).toHaveLength(1);
   });
 });

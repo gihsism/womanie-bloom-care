@@ -1,0 +1,70 @@
+name: Nightly smoke (e2e)
+# Runs the Playwright smoke suite (npm run e2e, docs/e2e.md) against the
+# live site every day at 05:30 UTC, and on demand (Actions -> Run workflow).
+# On failure: the HTML report + traces are uploaded as an artifact and a
+# Telegram message links to the run.
+#
+# Secrets (set in the repo settings, only referenced here):
+#   E2E_EMAIL, E2E_PASSWORD   the test account (ux-review@womanie.test)
+#   TG_BOT_TOKEN, TG_CHAT_ID  where the failure message goes
+# The password is typed only in e2e/global-setup.ts, outside tracing, so it
+# never lands in the report artifact.
+on:
+  schedule:
+    - cron: "30 5 * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: read
+concurrency:
+  group: nightly-e2e
+  cancel-in-progress: false
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run the smoke suite against womanie.info
+        env:
+          CI: "true"
+          E2E_BASE_URL: https://womanie.info
+          E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+        run: |
+          if [ -z "$E2E_EMAIL" ] || [ -z "$E2E_PASSWORD" ]; then
+            echo "::error::E2E_EMAIL / E2E_PASSWORD secrets are not set"; exit 1
+          fi
+          npm run e2e
+      - name: Upload the report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report-${{ github.run_id }}
+          path: |
+            e2e/.report/
+            e2e/.results/
+          retention-days: 14
+          if-no-files-found: ignore
+      - name: Tell Telegram
+        if: failure()
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$TG_BOT_TOKEN" ] || [ -z "$TG_CHAT_ID" ]; then
+            echo "::warning::TG_BOT_TOKEN / TG_CHAT_ID not set; no Telegram message"; exit 0
+          fi
+          text="Womanie nightly smoke test FAILED on womanie.info ($(date -u +%Y-%m-%d)). Report (artifact) and log: $RUN_URL"
+          curl -sS --fail-with-body -o /dev/null -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TG_CHAT_ID}" \
+            --data-urlencode "text=${text}" \
+            --data-urlencode "disable_web_page_preview=true"

@@ -68,6 +68,15 @@ export async function runSendDue(query: Query, send: Sender, now: Date): Promise
         [uid, r.key],
       );
       if (!claimed.length) { summary.skippedAlreadySent++; continue; }
+      // Medicine: the dose slot must be new as well (an edited time is a
+      // new key, but the same dose of the day). The time key stays claimed.
+      if (r.slotKey) {
+        const slot = await query(
+          'INSERT INTO push_sent_log (user_id, key) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING key',
+          [uid, r.slotKey],
+        );
+        if (!slot.length) { summary.skippedAlreadySent++; continue; }
+      }
       let delivered = 0;
       let failed = 0;
       for (const s of r.subscriptions) {
@@ -86,6 +95,7 @@ export async function runSendDue(query: Query, send: Sender, now: Date): Promise
       } else if (failed) {
         // Temporary failure everywhere: release the claim so the next run retries.
         await query('DELETE FROM push_sent_log WHERE user_id = $1 AND key = $2', [uid, r.key]);
+        if (r.slotKey) await query('DELETE FROM push_sent_log WHERE user_id = $1 AND key = $2', [uid, r.slotKey]);
       }
     }
   }

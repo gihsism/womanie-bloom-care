@@ -83,6 +83,36 @@ describe('runSendDue', () => {
     expect(sent).toHaveLength(2);
   });
 
+  // Editing a medicine (MedicineLog) updates the same row in place: the
+  // next run reads the new times, and a dose already reminded of is never
+  // pinged again just because its time moved.
+  it('an edited reminder time takes effect, without a second ping for a dose already reminded', async () => {
+    const meds = [{ id: 'mA', user_id: 'A', reminder_times: ['08:00'] }];
+    const db = fakeDb({ subs: [sub('A')], meds });
+    const send = vi.fn<Sender>(async () => 'sent');
+    await runSendDue(db.query, send, AT); // 08:05: the 08:00 dose
+    expect(send).toHaveBeenCalledTimes(1);
+    meds[0].reminder_times = ['08:30', '09:00']; // she edits: 08:00 -> 08:30, adds 09:00
+    const at0835 = new Date(AT.getTime() + 30 * 60_000);
+    const moved = await runSendDue(db.query, send, at0835);
+    expect(send).toHaveBeenCalledTimes(1); // same first dose: no repeat
+    expect(moved.skippedAlreadySent).toBe(1);
+    await runSendDue(db.query, send, new Date(AT.getTime() + 60 * 60_000)); // 09:05
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(send.mock.calls[1][1].tag).toBe('med-mA-09:00'); // the new second time is sent
+    await runSendDue(db.query, send, new Date(AT.getTime() + 75 * 60_000));
+    expect(send).toHaveBeenCalledTimes(2);
+  });
+
+  it('a temporary failure releases both claims, so the next run retries', async () => {
+    const db = fakeDb({ subs: [sub('A')], meds: [{ id: 'mA', user_id: 'A', reminder_times: ['08:00'] }] });
+    await runSendDue(db.query, async () => 'failed', AT);
+    expect([...db.sentLog]).toEqual([]);
+    const send = vi.fn<Sender>(async () => 'sent');
+    await runSendDue(db.query, send, new Date(AT.getTime() + 15 * 60_000));
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
   it('respects opt-out', async () => {
     const db = fakeDb({ subs: [sub('A', { prefs: { medicine: false } })], meds: [{ id: 'mA', user_id: 'A', reminder_times: ['08:00'] }] });
     const send = vi.fn<Sender>(async () => 'sent');

@@ -14,7 +14,7 @@ import { TodayList, PrimaryButton, MoreForStage, useGo, type SheetKind } from '@
 import LogSheet from '@/components/dashboard/LogSheet';
 import { useStageProfile } from '@/hooks/useStageProfile';
 import { useTodaySignals } from '@/hooks/useTodaySignals';
-import { todayItems, primaryActionFor, moreFor } from '@/lib/todayItems';
+import { todayItems, primaryActionFor, secondaryActionFor, moreFor } from '@/lib/todayItems';
 import { stageLabel } from '@/lib/stageLabels';
 import { usePageTitle } from '@/hooks/usePageTitle';
 
@@ -22,7 +22,9 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 //   1. greeting, with the stage as a quiet "· change" link (to Me)
 //   2. one hero: one fact, one sentence, one "Details" link
 //   3. Today: at most 3 ranked one-line rows (lib/todayItems.ts)
-//   4. one filled button (opens the Log sheet or the stage's main tool)
+//   4. one filled button (opens the Log sheet or the stage's main tool;
+//      in the latter case a quiet "Log today" link sits under it, so every
+//      stage keeps one tap into today's mood/symptom log)
 //   5. "More for <stage>": at most 4 links to detail pages
 // Everything else lives one tap away: the stage's trackers and guides on
 // /dashboard/stage, results and charts on Records, visits on Visits,
@@ -69,6 +71,7 @@ const PatientDashboard = () => {
 
   const name = profile?.full_name;
   const firstName = name ? name.split(' ')[0] : 'there';
+  const primaryOpts = { weeksPregnant, dailyPill: hasDailyPill(user.id) };
 
   const hero =
     mode === 'pregnancy' && pregnancyDueDate ? <PregnancyBodyMap dueDate={pregnancyDueDate} name={name} />
@@ -91,7 +94,11 @@ const PatientDashboard = () => {
 
         <TodayList items={todayItems(mode, signals)} go={go} />
 
-        <PrimaryButton action={primaryActionFor(mode, { weeksPregnant, dailyPill: hasDailyPill(user.id) })} go={go} />
+        <PrimaryButton
+          action={primaryActionFor(mode, primaryOpts)}
+          secondary={secondaryActionFor(mode, primaryOpts)}
+          go={go}
+        />
 
         <MoreForStage stage={stageLabel(mode)} rows={moreFor(mode, { weeksPregnant })} go={go} />
       </div>

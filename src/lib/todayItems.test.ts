@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { LifeStage } from '@/components/dashboard/DashboardHeader';
 import { LIFE_STAGES } from './lifeStage';
-import { todayItems, primaryActionFor, moreFor, MAX_TODAY, MAX_MORE, VISITS, RECORDS, RECORDS_CHARTS, STAGE_PAGE, type TodaySignals } from './todayItems';
+import { todayItems, primaryActionFor, secondaryActionFor, moreFor, MAX_TODAY, MAX_MORE, VISITS, RECORDS, RECORDS_CHARTS, STAGE_PAGE, type TodaySignals } from './todayItems';
 
 // Monday 2026-11-23, 09:00 local
 const NOW = new Date(2026, 10, 23, 9, 0);
@@ -163,6 +163,22 @@ describe('todayItems: baby vaccinations and weekly mood', () => {
   it('weekly mood ranks after heads-ups, before setup', () => {
     expect(ids('menstrual-cycle', { lastMoodLog: at(-8), nextVisit: at(2), setup: { done: 1, total: 3 } }))
       .toEqual(['visit-soon', 'mood-weekly', 'setup']);
+  });
+});
+
+describe('secondaryActionFor', () => {
+  it('every stage reaches the Log sheet from Home: the filled button or the quiet link opens it', () => {
+    for (const m of LIFE_STAGES) for (const w of [null, 10, 28, 33, 37, 41]) for (const dailyPill of [true, false]) {
+      const opts = { weeksPregnant: w, dailyPill };
+      const targets = [primaryActionFor(m, opts).target, secondaryActionFor(m, opts)?.target];
+      expect(targets.some((t) => t?.startsWith('sheet:')), `${m} w${w} pill=${dailyPill}`).toBe(true);
+    }
+  });
+
+  it('pregnancy from week 28 gets "Log today" under Count kicks / Time contractions; before 28 none', () => {
+    expect(secondaryActionFor('pregnancy', { weeksPregnant: 27 })).toBeNull();
+    expect(secondaryActionFor('pregnancy', { weeksPregnant: 28 })).toEqual({ label: 'Log today', target: 'sheet:log' });
+    expect(secondaryActionFor('pregnancy', { weeksPregnant: 38 })).toEqual({ label: 'Log today', target: 'sheet:log' });
   });
 });
 

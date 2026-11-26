@@ -62,6 +62,13 @@ export interface PlannedReminder {
   type: ReminderType;
   /** Unique per user: the sender claims it once in push_sent_log. */
   key: string;
+  /**
+   * Medicine only: the dose slot (the n-th reminder time of her day). The
+   * sender claims it too and sends only when BOTH keys are new, so editing
+   * a medicine's times never re-sends a dose she was already reminded of
+   * (08:00 sent, time moved to 08:30 -> no second ping for that dose).
+   */
+  slotKey?: string;
   payload: PushPayload;
   /** Only this user's devices that opted in to this type. */
   subscriptions: SubscriptionRow[];
@@ -163,9 +170,9 @@ export function planUserReminders(data: UserData, allSubs: SubscriptionRow[], no
   const { date: today, minutes } = localParts(now, tz);
   const out: PlannedReminder[] = [];
 
-  const push = (type: ReminderType, key: string, payload: PushPayload) => {
+  const push = (type: ReminderType, key: string, payload: PushPayload, slotKey?: string) => {
     const targets = subs.filter(s => parsePrefs(s.prefs)[type]);
-    if (targets.length) out.push({ userId: data.userId, type, key, payload, subscriptions: targets });
+    if (targets.length) out.push({ userId: data.userId, type, key, payload, subscriptions: targets, ...(slotKey ? { slotKey } : {}) });
   };
 
   // Medicine times.
@@ -178,15 +185,19 @@ export function planUserReminders(data: UserData, allSubs: SubscriptionRow[], no
       localParts(new Date(d.occurred_at), tz).date === today,
     ).length;
     const passed = times.filter(t => toMin(t) <= minutes);
-    for (const t of passed.slice(dosesToday)) {
-      if (minutes - toMin(t) > MED_LOOKBACK_MIN) continue;
+    // Times are read fresh each run (an edit takes effect at the next run);
+    // the medicine keeps its id when edited, so its keys and today's doses
+    // stay attached to it.
+    passed.forEach((t, slot) => {
+      if (slot < dosesToday) return;
+      if (minutes - toMin(t) > MED_LOOKBACK_MIN) return;
       push('medicine', `med:${med.id}:${today}:${t}`, {
         title: 'Medicine reminder',
         body: `It's ${t} - time for your medicine. Tap to log it.`,
         url: '/dashboard',
         tag: `med-${med.id}-${t}`,
-      });
-    }
+      }, `med:${med.id}:${today}:slot${slot}`);
+    });
   }
 
   if (!inDayWindow(minutes)) return out;

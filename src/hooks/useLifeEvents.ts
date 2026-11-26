@@ -16,6 +16,7 @@ export type LifeEventKind =
   | 'nappy'
   | 'baby_growth'
   | 'med_dose'
+  | 'med_change'
   | 'labour_med'
   | 'baby_vaccine';
 
