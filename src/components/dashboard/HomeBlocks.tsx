@@ -48,11 +48,25 @@ export function TodayList({ items, go }: { items: TodayItem[]; go: (t: Target) =
   );
 }
 
-export function PrimaryButton({ action, go }: { action: PrimaryAction; go: (t: Target) => void }) {
+// The one filled button; `secondary` adds a quiet text link under it
+// (today's log, when the filled button opens a stage tool instead).
+export function PrimaryButton({ action, secondary, go }: { action: PrimaryAction; secondary?: PrimaryAction | null; go: (t: Target) => void }) {
+  if (!secondary) {
+    return (
+      <Button type="button" size="lg" className="w-full mb-8" onClick={() => go(action.target)}>
+        {action.label}
+      </Button>
+    );
+  }
   return (
-    <Button type="button" size="lg" className="w-full mb-8" onClick={() => go(action.target)}>
-      {action.label}
-    </Button>
+    <div className="mb-8 flex flex-col items-center gap-1">
+      <Button type="button" size="lg" className="w-full" onClick={() => go(action.target)}>
+        {action.label}
+      </Button>
+      <Button type="button" variant="link" size="sm" className="tap-target text-[15px]" onClick={() => go(secondary.target)}>
+        {secondary.label}
+      </Button>
+    </div>
   );
 }
 

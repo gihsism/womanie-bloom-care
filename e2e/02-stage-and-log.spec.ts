@@ -7,8 +7,9 @@ import { test, expect, apiDb, currentUserId, localDate } from './helpers';
 //   b) on that stage, log a mood and a symptom in Home's Log sheet, check
 //      they were stored, and remove them again;
 //   c) switch back to the original stage.
-// The Log sheet is not on Home in every stage (pregnancy from week 28 shows
-// "Count kicks" instead), which is why (b) runs on the stage (a) chose.
+// The filled button is not the Log sheet in every stage (pregnancy from
+// week 28 shows "Count kicks", with a quiet "Log today" link under it),
+// which is why (b) runs on the stage (a) chose.
 //
 // afterAll puts back the life stage and today's log row exactly as they
 // were (the row is deleted if there was none). Other tools sometimes use
