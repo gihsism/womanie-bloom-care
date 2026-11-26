@@ -1,10 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import adminDocs from './_routes/admin/docs.js';
 import adminDoctors from './_routes/admin/doctors.js';
+import adminInvites from './_routes/admin/invites.js';
 import appointmentsBook from './_routes/appointments/book.js';
 import appointmentsReschedule from './_routes/appointments/reschedule.js';
 import authCallback from './_routes/auth/callback.js';
 import authChangePassword from './_routes/auth/change-password.js';
+import authDoctorInvite from './_routes/auth/doctor-invite.js';
 import authDoctorSignup from './_routes/auth/doctor-signup.js';
 import authGoogle from './_routes/auth/google.js';
 import authLogin from './_routes/auth/login.js';
@@ -60,10 +62,12 @@ type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 export const ROUTES: Record<string, Handler> = {
   'admin/docs': adminDocs,
   'admin/doctors': adminDoctors,
+  'admin/invites': adminInvites,
   'appointments/book': appointmentsBook,
   'appointments/reschedule': appointmentsReschedule,
   'auth/callback': authCallback,
   'auth/change-password': authChangePassword,
+  'auth/doctor-invite': authDoctorInvite,
   'auth/doctor-signup': authDoctorSignup,
   'auth/google': authGoogle,
   'auth/login': authLogin,

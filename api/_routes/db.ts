@@ -82,7 +82,11 @@ const UPDATABLE_COLUMNS: Record<string, string[]> = {
 // are flipped by /api/admin/doctors on approval; letting the owner set them
 // would put an unvetted "verified doctor" in every patient's directory.
 const PROTECTED_COLUMNS: Record<string, string[]> = {
-  doctor_profiles: ['is_verified', 'verification_status', 'rating', 'review_count'],
+  doctor_profiles: [
+    'is_verified', 'verification_status', 'rating', 'review_count',
+    // The admin's licence decision (migration 023): server-only.
+    'verification_note', 'verified_at', 'verified_by',
+  ],
   // "From Dr X": set only by /api/docs/from-doctor after its consent check,
   // so a patient can't label her own upload as coming from a doctor.
   health_documents: ['uploaded_by_doctor_id'],

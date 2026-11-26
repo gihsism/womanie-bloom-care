@@ -71,3 +71,26 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Admins and onboarding doctors
+
+Admin pages (`/admin/doctors`) and admin API routes (`/api/admin/*`) accept an
+account only when BOTH hold (see `api/_lib/admin.ts`):
+
+1. its email is listed in the `ADMIN_EMAILS` env var (comma-separated), and
+2. it has signed in with Google at least once (`auth_users.google_id` set).
+
+Password signup never verifies an email address and there is no
+`email_verified` column, so a Google link is the proof that the admin owns the
+listed address. A password-only account on an admin email is not an admin.
+
+Doctor onboarding (needs migration `db/migrations/023_doctor_onboarding.sql`):
+
+- **Queue**: pending doctors with licence/GLN (format hint), a link to MedReg
+  (medregom.admin.ch, link only), approve, or reject/revoke with a reason the
+  doctor sees on the doctor login screen. Every action is written to
+  `admin_audit_log` (who, when, reason) in the same transaction.
+- **Invite**: "Invite a doctor" creates a one-time link for one email (random
+  token, stored as a SHA-256 hash, single use, expires after 7 days). The
+  doctor registers with the pre-filled email, the account is approved at once
+  and she lands on the dashboard setup checklist. Check her in MedReg first.

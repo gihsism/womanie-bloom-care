@@ -3,6 +3,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import * as jose from 'jose';
 import { getAuthSecret } from '../../_lib/auth.js';
 import { withSentry } from '../../_lib/sentry.js';
+import { isVerifiedAdmin } from '../../_lib/admin.js';
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -68,17 +69,17 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       console.error('me: profile name lookup failed', e);
     }
 
-    // isAdmin is derived from the ADMIN_EMAILS env var (same rule as
-    // api/_lib/admin.ts). We expose it here so the client can decide
-    // whether to render admin-only nav entries without a second
-    // round-trip; the actual authorization still lives at each admin
-    // endpoint.
-    const adminList = (process.env.ADMIN_EMAILS || '')
-      .split(',')
-      .map(s => s.trim().toLowerCase())
-      .filter(Boolean);
-    const email = (payload.email as string | undefined)?.toLowerCase();
-    const isAdmin = Boolean(email && adminList.includes(email));
+    // isAdmin: the same rule as api/_lib/admin.ts (ADMIN_EMAILS + an
+    // account Google has verified), so the admin menu only shows for
+    // someone the admin endpoints will actually accept. Display only; the
+    // real check still lives at each admin endpoint.
+    let isAdmin = false;
+    try {
+      const q = (t: string, p: unknown[]) => sql.query(t, p) as Promise<unknown[]>;
+      isAdmin = (await isVerifiedAdmin(q, String(payload.sub))).ok;
+    } catch (e) {
+      console.error('me: admin check failed', e);
+    }
 
     // Whether the account has a password (Google-only accounts don't), so
     // Settings can offer "Set a password" instead of "Change password".

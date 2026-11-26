@@ -183,6 +183,11 @@ describe('me/delete-account security invariants', () => {
       [...readFileSync(new URL(f, migDir), 'utf8').matchAll(/CREATE TABLE IF NOT EXISTS ([a-z_]+)/gi)].map(m => m[1]));
     const NOT_USER_ROWS = new Set([
       'current_extracted_data', // a VIEW over medical_extracted_data (migration 002)
+      // Admin records (migration 023), not the user's own data: who approved
+      // or rejected which doctor licence, and which invite links an admin
+      // sent. The accountability trail must survive the account's deletion.
+      'admin_audit_log',
+      'doctor_invites',
     ]);
     const expected = new Set(
       [...whitelist, ...migrated, 'chat_messages', 'auth_sessions', 'auth_users', 'llm_cache']

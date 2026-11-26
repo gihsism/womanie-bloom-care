@@ -72,7 +72,9 @@ const DoctorLogIn = () => {
           .maybeSingle(),
         db
           .from('doctor_profiles')
-          .select('verification_status, is_verified')
+          // '*' so verification_note (migration 023) comes back when it
+          // exists without breaking the query before it is applied.
+          .select('*')
           .maybeSingle(),
       ]);
 
@@ -89,6 +91,10 @@ const DoctorLogIn = () => {
       // and surface the right next step. Always clear the session so
       // the user isn't left half-authenticated in the doctor URL.
       const status = profileData?.verification_status as string | undefined;
+      // The admin's reason for a reject / revoke: the in-app notice of the
+      // decision (there is no email provider).
+      const note = typeof profileData?.verification_note === 'string' ? profileData.verification_note.trim() : '';
+      const reason = note ? ` Reason: ${note}.` : '';
 
       let title = 'Not a doctor account';
       let description = 'This account is not registered as a doctor. Log in as a patient, or register as a doctor.';
@@ -97,10 +103,10 @@ const DoctorLogIn = () => {
         description = 'This takes 1–3 working days. You can log in once it is approved.';
       } else if (profileData && status === 'rejected') {
         title = 'Licence not verified';
-        description = 'Email support@womanie.info with updated licence details and we will check again.';
+        description = `We could not verify your licence.${reason} Email support@womanie.info with updated licence details and we will check again.`;
       } else if (profileData && status === 'revoked') {
         title = 'Verification revoked';
-        description = 'Email support@womanie.info to discuss reinstating your account.';
+        description = `${reason.trim() ? reason.trim() + ' ' : ''}Email support@womanie.info to discuss reinstating your account.`;
       } else if (profileData && profileData.is_verified && !roleData) {
         // Defensive: should be unreachable in normal flows (admin
         // approve always inserts the user_roles row), but if it ever
