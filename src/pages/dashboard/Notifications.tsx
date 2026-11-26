@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Bell, FileText, AlertTriangle, CalendarX, Search } from 'lucide-react';
+import { ArrowLeft, Bell, FileText, AlertTriangle, CalendarX, CalendarCheck, Search } from 'lucide-react';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -11,6 +11,7 @@ import PendingConnections from '@/components/dashboard/PendingConnections';
 import ConnectedDoctors from '@/components/dashboard/ConnectedDoctors';
 import DoctorNotesCard from '@/components/dashboard/DoctorNotesCard';
 import { formatDistanceToNow } from 'date-fns';
+import { recentlyBooked, formatVisitWhen, visitTypeLabel } from '@/lib/booking';
 
 // Notifications / "needs your attention" page.
 //
@@ -54,6 +55,8 @@ interface CancelledAppt {
   notes: string | null;
   doctor_name: string | null;
   doctor_title: string | null;
+  booked_at?: string | null;
+  consultation_type?: string | null;
 }
 
 function doctorCancelReason(notes: string | null): string | null {
@@ -71,6 +74,8 @@ export default function Notifications() {
   const [stalled, setStalled] = useState<StalledDoc[]>([]);
   const [critical, setCritical] = useState<CriticalFinding[]>([]);
   const [cancellations, setCancellations] = useState<CancelledAppt[]>([]);
+  // Her own bookings from the last 7 days: the in-app booking confirmation.
+  const [confirmed, setConfirmed] = useState<CancelledAppt[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -113,6 +118,7 @@ export default function Notifications() {
           )
           .slice(0, 10)
       );
+      setConfirmed(recentlyBooked(appts).slice(0, 5));
       setLoaded(true);
     };
     load();
@@ -247,12 +253,39 @@ export default function Notifications() {
           </Card>
         )}
 
+        {confirmed.length > 0 && (
+          <Card className="p-4 border-l-4 border-l-primary" data-testid="booking-confirmations">
+            <div className="flex items-center gap-2 mb-3">
+              <CalendarCheck className="h-4 w-4 text-primary" aria-hidden="true" />
+              <p className="text-sm font-semibold">
+                {confirmed.length === 1 ? 'Booking confirmed' : `${confirmed.length} bookings confirmed`}
+              </p>
+            </div>
+            <ul className="space-y-2">
+              {confirmed.map(apt => {
+                const doctor = [apt.doctor_title, apt.doctor_name].filter(Boolean).join(' ') || 'Your doctor';
+                return (
+                  <li key={apt.id} className="flex items-center justify-between gap-2 text-xs">
+                    <span>
+                      <span className="font-medium">{doctor}</span>
+                      <span className="text-muted-foreground"> · {formatVisitWhen(new Date(apt.scheduled_at))} · {visitTypeLabel(apt.consultation_type)}</span>
+                    </span>
+                    <Button size="sm" variant="outline" className="h-7 text-xs flex-shrink-0" onClick={() => navigate('/dashboard/appointments')}>
+                      View
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
+          </Card>
+        )}
+
         <ConnectedDoctors />
 
         {/* Empty-state — only after the fetch has resolved, so we don't
             momentarily claim "nothing to flag" while the data is still
             in flight. */}
-        {loaded && stalled.length === 0 && critical.length === 0 && cancellations.length === 0 && (
+        {loaded && stalled.length === 0 && critical.length === 0 && cancellations.length === 0 && confirmed.length === 0 && (
           <div className="text-center text-sm text-muted-foreground py-8">
             Nothing else to flag right now.
           </div>

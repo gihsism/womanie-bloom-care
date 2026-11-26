@@ -40,7 +40,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'scheduled_at is not a valid ISO timestamp' });
   }
   if (newStart.getTime() < Date.now()) {
-    return res.status(400).json({ error: 'Cannot reschedule into the past' });
+    return res.status(400).json({ error: 'Cannot reschedule into the past', code: 'past' });
   }
 
   try {
@@ -50,6 +50,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     // it, and only while it's still an upcoming scheduled appointment.
     const rows = await sql.query(
       `SELECT a.id, a.doctor_id, a.duration, a.status,
+              (SELECT cs.is_available FROM consultation_settings cs
+                WHERE cs.doctor_id = a.doctor_id LIMIT 1) AS bookings_on,
               (SELECT COALESCE(json_agg(json_build_object(
                         'day_of_week', ds.day_of_week, 'start_time', ds.start_time,
                         'end_time', ds.end_time, 'is_active', ds.is_active)), '[]'::json)
@@ -58,7 +60,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
          FROM appointments a
         WHERE a.id = $1 AND a.patient_id = $2`,
       [body.appointment_id, user.id]
-    ) as Array<{ id: string; doctor_id: string; duration: number | null; status: string | null; schedule?: ScheduleWindow[] | string | null }>;
+    ) as Array<{ id: string; doctor_id: string; duration: number | null; status: string | null; bookings_on?: boolean | null; schedule?: ScheduleWindow[] | string | null }>;
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Appointment not found' });
     }
@@ -66,6 +68,14 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const status = (apt.status ?? 'scheduled').toLowerCase();
     if (status !== 'scheduled') {
       return res.status(400).json({ error: `Cannot reschedule a ${status} appointment` });
+    }
+    // Moving a visit takes a new slot, so it follows the doctor's "Accept
+    // new bookings" switch. The visit itself stays booked as it was.
+    if (apt.bookings_on === false) {
+      return res.status(400).json({
+        error: 'Your doctor has paused new bookings, so this visit cannot be moved right now. It is still booked at the original time.',
+        code: 'bookings_off',
+      });
     }
 
     const duration = apt.duration && apt.duration > 0 ? apt.duration : 30;
@@ -116,6 +126,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     if (updated.length === 0) {
       return res.status(409).json({
         error: 'That slot was just taken. Pick a different time.',
+        code: 'slot_taken',
       });
     }
 

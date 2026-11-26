@@ -64,6 +64,7 @@ const BabyPage = lazy(() => import("./pages/dashboard/BabyPage"));
 const StagePage = lazy(() => import("./pages/dashboard/StagePage"));
 const ResearchLibrary = lazy(() => import("./pages/ResearchLibrary"));
 const FindDoctor = lazy(() => import("./pages/FindDoctor"));
+const DoctorProfile = lazy(() => import("./pages/DoctorProfile"));
 const Settings = lazy(() => import("./pages/dashboard/Settings"));
 const HealthStatistics = lazy(() => import("./pages/HealthStatistics"));
 const MedicalHistory = lazy(() => import("./pages/MedicalHistory"));
@@ -113,6 +114,7 @@ const App = () => (
                   <Route path="/dashboard" element={<PatientDashboard />} />
                   <Route path="/dashboard/settings" element={<Settings />} />
                   <Route path="/find-doctor" element={<FindDoctor />} />
+                  <Route path="/doctors/:doctorId" element={<DoctorProfile />} />
                   <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
                   <Route path="/doctor/patient/:patientId" element={<PatientDetails />} />
                   <Route path="/health-statistics" element={<HealthStatistics />} />

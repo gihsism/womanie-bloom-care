@@ -65,6 +65,24 @@ describe('runSendDue', () => {
     expect(second.skippedAlreadySent).toBe(1);
   });
 
+  it('reminds the patient the day before a visit she booked, and again after she moves it', async () => {
+    // A row exactly as /api/appointments/book writes it (status 'scheduled').
+    const booked = { id: 'apt_9', user_id: 'A', scheduled_at: '2026-11-27T09:30:00Z', status: 'scheduled' };
+    const db = fakeDb({ subs: [sub('A'), sub('B')], appts: [booked] });
+    const sent: Array<[string, string, string]> = [];
+    const send: Sender = async (s, p) => { sent.push([s.endpoint, p.tag, p.body]); return 'sent'; };
+    const TEN = new Date(AT.getTime() + 2 * 3_600_000); // 10:05 Zurich, inside the day window
+    await runSendDue(db.query, send, TEN);
+    expect(sent).toEqual([['https://push.example/A', 'appt-apt_9', 'You have a visit tomorrow at 10:30. Tap to prepare your questions.']]);
+    const apptQuery = vi.mocked(db.query).mock.calls.find(c => String(c[0]).includes('FROM appointments'))!;
+    expect(String(apptQuery[0])).toMatch(/patient_id = ANY\(\$1\)/);
+    expect(String(apptQuery[0])).toMatch(/<> 'cancelled'/);
+    // Rescheduled to another time tomorrow: a new reminder (the key carries the time).
+    booked.scheduled_at = '2026-11-27T13:00:00Z';
+    await runSendDue(db.query, send, new Date(TEN.getTime() + 15 * 60_000));
+    expect(sent).toHaveLength(2);
+  });
+
   it('respects opt-out', async () => {
     const db = fakeDb({ subs: [sub('A', { prefs: { medicine: false } })], meds: [{ id: 'mA', user_id: 'A', reminder_times: ['08:00'] }] });
     const send = vi.fn<Sender>(async () => 'sent');
