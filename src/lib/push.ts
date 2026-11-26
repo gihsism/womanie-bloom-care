@@ -4,8 +4,10 @@
 // bookings = doctor side: a patient booked, moved or cancelled a visit with
 // her (switched in the doctor's Profile & settings, not in Me -> Reminders).
 // documents = patient side: "Dr X added a document" to her Records.
-export interface PushPrefs { medicine: boolean; period: boolean; appointment: boolean; bookings: boolean; documents: boolean }
-export const DEFAULT_PUSH_PREFS: PushPrefs = { medicine: true, period: true, appointment: true, bookings: true, documents: true };
+// ivf_trigger = IVF trigger shot, 1 h and 10 min before; opt-in (off when
+// missing, so older callers that build prefs without it keep it off).
+export interface PushPrefs { medicine: boolean; period: boolean; appointment: boolean; bookings: boolean; documents: boolean; ivf_trigger?: boolean }
+export const DEFAULT_PUSH_PREFS: PushPrefs = { medicine: true, period: true, appointment: true, bookings: true, documents: true, ivf_trigger: false };
 
 export type PushSupport =
   | 'native-app'      // Capacitor iOS/Android shell: Web Push does not run there

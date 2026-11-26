@@ -1,6 +1,10 @@
+import { useMemo } from 'react';
 import { format, differenceInDays } from 'date-fns';
 import { IVF_PHASES } from './ivfPhases';
 import { DetailsLink } from '@/components/dashboard/HomeBlocks';
+import { useIvfPlan } from '@/hooks/useIvfPlan';
+import { daysBetween, ivfStatus, localDate, nextKeyDate } from '@/lib/ivfJourney';
+import { deviceTz, fmtDay, fmtMoment, inDays } from './ivf/ivfFormat';
 
 // Version 8 hero for IVF: the protocol as one vertical scale, like a
 // museum timeline. Done phases are solid ink, the current phase has the
@@ -8,12 +12,22 @@ import { DetailsLink } from '@/components/dashboard/HomeBlocks';
 // day), one sentence (what comes next) and one Details link; the phase
 // picker and medicines live on the stage page and the Log sheet.
 
-export default function IVFTimelineHero({ startDate, phase }: { startDate: Date | null; phase: string | null; name?: string | null }) {
+// When she has entered her clinic's dates (ivf_plans), the phase, stim day
+// and next key date come from them (src/lib/ivfJourney.ts); otherwise from
+// the phase she picked by hand.
+export default function IVFTimelineHero({ startDate, phase: pickedPhase }: { startDate: Date | null; phase: string | null; name?: string | null }) {
   const now = new Date();
+  const tz = useMemo(() => deviceTz(), []);
+  const { plan } = useIvfPlan();
+  const status = ivfStatus(plan, now, tz);
+  const next = nextKeyDate(plan, now, tz);
+  const phase = status.phase ?? pickedPhase;
   const idx = Math.max(0, IVF_PHASES.findIndex(p => p.key === phase));
   const current = IVF_PHASES[idx];
-  const day = startDate ? Math.max(0, differenceInDays(now, startDate)) + 1 : null;
-  if (!phase || !startDate) {
+  const day = status.stimDay
+    ?? (status.phaseStart ? daysBetween(status.phaseStart, localDate(now, tz)) + 1
+      : startDate ? Math.max(0, differenceInDays(now, startDate)) + 1 : null);
+  if (!phase || day == null) {
     return (
       <section className="mb-6 border-t border-foreground pt-4" aria-label="Your IVF cycle">
         <p className="label-mono">IVF</p>
@@ -26,14 +40,16 @@ export default function IVFTimelineHero({ startDate, phase }: { startDate: Date 
 
   const ROW = 34;
   const label = (k: number) => IVF_PHASES[k].label.replace(' (TWW)', '');
-  const next = idx < IVF_PHASES.length - 1 ? `This phase usually lasts ${current.duration}. Next: ${label(idx + 1)}.` : 'The last step of this cycle.';
+  const nextLine = next
+    ? `Next: ${next.label}, ${next.at ? fmtMoment(next.at, tz) : fmtDay(next.date)} (${inDays(next.daysUntil)}).`
+    : idx < IVF_PHASES.length - 1 ? `This phase usually lasts ${current.duration}. Next: ${label(idx + 1)}.` : 'The last step of this cycle.';
   return (
     <section className="mb-6" aria-label="Your IVF cycle at a glance">
       <p className="label-mono">{format(now, 'EEE d MMM')}</p>
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
-        {label(idx)} <span className="text-muted-foreground">· day {day}</span>
+        {label(idx)} <span className="text-muted-foreground">· {status.stimDay != null ? 'stim ' : ''}day {day}</span>
       </h2>
-      <p className="mt-1 text-[15px]">{next}</p>
+      <p className="mt-1 text-[15px]">{nextLine}</p>
 
       <div className="mt-4 grid grid-cols-[1fr_auto_1fr] gap-x-3">
         {/* left: phase names (done = muted, current = ink) */}
