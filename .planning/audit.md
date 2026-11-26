@@ -189,6 +189,33 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-26 — Test coverage: added security-invariant tests for me/normalize-titles
+me/normalize-titles.ts is the per-user lab-value backfill endpoint: when triggered
+from Settings it renormalizes every medical_extracted_data row for the session user,
+aligning test names and unit strings to the canonical forms the alias maps in
+normalize-test-title.ts and normalize-unit.ts define. It had no tests despite carrying
+two critical ownership invariants. First, the SELECT must bind the session user's id as
+$1 so a user can only scan their own lab rows; a refactor substituting a body parameter
+would let any authenticated user enumerate (and trigger mutations on) another user's
+extracted medical data. Second — the double-ownership defence — every UPDATE also binds
+the session user's id as a WHERE condition (AND user_id = $N). The SELECT fence alone is
+not enough: if that filter were ever dropped or bypassed, the UPDATE's own user_id check
+ensures a stray document_id cannot silently mutate another user's row. Without both
+guards, one authenticated user could rename or reunit another patient's lab values,
+corrupting their HealthTrends sparklines, NewDocInsights diffs, and ResultSparkline plots.
+Added api/_routes/me/normalize-titles.test.ts with 9 tests covering: 401 when
+getAuthUser returns null (no DB query fires); 405 for non-POST methods (GET, PUT,
+DELETE, PATCH all rejected); SELECT binds session user id as $1 (not any client-
+supplied value); SQL filters medical_extracted_data by user_id = $1 (the ownership WHERE
+clause); UPDATE also binds session user id in its parameters (double-ownership defence:
+using the known 'Hb' → 'Hemoglobin' alias to trigger an UPDATE and verifying user.id
+appears in every update call's parameter array); no UPDATE issued when rows are already
+normalized (idempotency guard — running the endpoint twice must not double-count);
+correct response counts (scanned, titlesUpdated, unitsUpdated, updated back-compat field)
+after two rows are normalized; scanned=0 and no counts when no rows exist; and 500 on a
+database error.
+Verified: tsc 0, eslint 0, 2172/2172 tests pass (3 pre-existing skips), vite build clean.
+
 ### 2026-11-25 — Test coverage: added security-invariant tests for connections/approved and connections/pending
 connections/approved.ts and connections/pending.ts are the two patient-facing endpoints
 that list which doctors have approved access to a patient's records (approved) and which
