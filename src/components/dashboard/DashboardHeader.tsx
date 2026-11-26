@@ -46,7 +46,7 @@ const DashboardHeader = ({ userName, selectedMode }: DashboardHeaderProps) => {
       <p className="mt-1 text-sm text-muted-foreground">
         {stageLabel(selectedMode)}
         {' · '}
-        <Link to="/dashboard/settings#life-stage" className="text-primary hover:underline" aria-label={`Change life stage (now ${stageLabel(selectedMode)})`}>
+        <Link to="/dashboard/settings#life-stage" className="text-primary underline underline-offset-2" aria-label={`Change life stage (now ${stageLabel(selectedMode)})`}>
           change
         </Link>
       </p>

@@ -511,9 +511,9 @@ const CycleCalendar = ({
                   </DialogHeader>
                   <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Average Cycle Length</label>
+                      <label htmlFor="cc-cycle-length" className="text-sm font-medium">Average Cycle Length</label>
                       <Select value={tempCycleLength.toString()} onValueChange={(v) => setTempCycleLength(parseInt(v))}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger id="cc-cycle-length"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {Array.from({ length: 24 }, (_, i) => i + 21).map((days) => (
                             <SelectItem key={days} value={days.toString()}>
@@ -527,9 +527,9 @@ const CycleCalendar = ({
                       </p>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Average Period Length</label>
+                      <label htmlFor="cc-period-length" className="text-sm font-medium">Average Period Length</label>
                       <Select value={tempPeriodLength.toString()} onValueChange={(v) => setTempPeriodLength(parseInt(v))}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger id="cc-period-length"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {Array.from({ length: 10 }, (_, i) => i + 2).map((days) => (
                             <SelectItem key={days} value={days.toString()}>

@@ -23,6 +23,9 @@ import AddPatientForm from '@/components/doctor/AddPatientForm';
 import DoctorAppointments from '@/components/doctor/DoctorAppointments';
 import DoctorProfileEditor from '@/components/doctor/DoctorProfileEditor';
 import ConsultationSettings from '@/components/doctor/ConsultationSettings';
+import DoctorSetupChecklist from '@/components/doctor/DoctorSetupChecklist';
+import BookingAlerts from '@/components/doctor/BookingAlerts';
+import { computeSetupSteps, type SetupScheduleRow, type SetupSettings } from '@/lib/doctorSetup';
 import type { DoctorAppointment, DoctorPatientConnection } from '@/lib/doctorDashboard';
 
 // Doctor home. Above the fold: name, "Your day" (today's and tomorrow's
@@ -40,6 +43,10 @@ interface DoctorProfile {
   specialty: string | null;
   is_verified: boolean;
   verification_status: string | null;
+  avatar_url?: string | null;
+  specialties?: string[] | null;
+  languages?: string[] | null;
+  practice_address?: string | null;
 }
 
 type View = 'home' | 'appointments' | 'settings';
@@ -58,6 +65,27 @@ const DoctorDashboard = () => {
   const [hasLoaded, setHasLoaded] = useState(false);
   const [view, setView] = useState<View>('home');
   const [addingPatient, setAddingPatient] = useState(false);
+  const [setupSettings, setSetupSettings] = useState<SetupSettings | null>(null);
+  const [setupSchedule, setSetupSchedule] = useState<SetupScheduleRow[]>([]);
+
+  // The setup checklist's own rows (owner-scoped through /api/db). Reloaded
+  // whenever the doctor comes back to Home, so a step she just finished in
+  // Profile & settings ticks off without a page reload.
+  const loadSetup = useCallback(async () => {
+    if (!user) return;
+    try {
+      const [{ data: profile }, { data: cs }, { data: sched }] = await Promise.all([
+        db.from('doctor_profiles').select('*').eq('user_id', user.id).maybeSingle(),
+        db.from('consultation_settings').select('*').eq('doctor_id', user.id).maybeSingle(),
+        db.from('doctor_schedule').select('*').eq('doctor_id', user.id),
+      ]);
+      if (profile) setDoctorProfile(profile);
+      setSetupSettings((cs as SetupSettings | null) ?? null);
+      setSetupSchedule((sched as SetupScheduleRow[] | null) ?? []);
+    } catch (error) {
+      console.error('Error loading setup state:', error);
+    }
+  }, [user]);
 
   const loadDoctorData = useCallback(async () => {
     if (!user) return;
@@ -106,6 +134,30 @@ const DoctorDashboard = () => {
   useEffect(() => {
     loadDoctorData();
   }, [loadDoctorData]);
+
+  useEffect(() => {
+    if (view === 'home') void loadSetup();
+  }, [view, loadSetup]);
+
+  // A checklist step: open Profile & settings and bring that setting into view.
+  const goToSetting = useCallback((anchor: string) => {
+    setView('settings');
+    let tries = 0;
+    const tick = () => {
+      const el = document.getElementById(anchor);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const focusable = el.matches('input,button,textarea,select,[role="switch"]')
+          ? el
+          : el.querySelector<HTMLElement>('input,button,textarea,select,[role="switch"]');
+        (focusable as HTMLElement | null)?.focus({ preventScroll: true });
+      } else if (tries++ < 20) {
+        // The settings cards load their rows first; wait for them.
+        setTimeout(tick, 100);
+      }
+    };
+    setTimeout(tick, 50);
+  }, []);
 
   if (loading || !hasLoaded) {
     return (
@@ -194,6 +246,11 @@ const DoctorDashboard = () => {
           </TabsList>
 
           <TabsContent value="home" className="space-y-7">
+            <DoctorSetupChecklist
+              steps={computeSetupSteps(doctorProfile, setupSettings, setupSchedule)}
+              onGo={goToSetting}
+            />
+
             <DoctorDaySchedule appointments={appointments} patients={patients} />
 
             <DoctorTodayList
@@ -221,6 +278,7 @@ const DoctorDashboard = () => {
           <TabsContent value="settings" className="space-y-6">
             <DoctorProfileEditor doctorId={user.id} />
             <ConsultationSettings doctorId={user.id} />
+            <BookingAlerts />
           </TabsContent>
         </Tabs>
       </div>

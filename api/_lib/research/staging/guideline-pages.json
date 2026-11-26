@@ -1,0 +1,535 @@
+{
+  "version": 1,
+  "generatedAt": "2026-11-26T00:04:46.139Z",
+  "dryRun": true,
+  "note": "CANDIDATES ONLY. Not in library.json and not used by the app. Adding any of them needs the founder's approval.",
+  "sourceType": "guideline-page",
+  "summariser": "extractive-v1",
+  "embedding": {
+    "model": "all-MiniLM-L6-v2",
+    "modelId": "Xenova/all-MiniLM-L6-v2",
+    "dims": 384,
+    "recipe": "v1:title+summary+keyPoints+tags"
+  },
+  "items": [
+    {
+      "id": "gp-nhs-ibuprofen-for-adults-483c70",
+      "pmid": "",
+      "doi": null,
+      "title": "Ibuprofen for adults: painkiller that also treats inflammation",
+      "source": "NHS",
+      "journal": "NHS",
+      "organisation": "NHS",
+      "year": 2025,
+      "publicationTypes": [
+        "Patient information page"
+      ],
+      "evidenceLevel": "guideline",
+      "url": "https://www.nhs.uk/medicines/ibuprofen-for-adults/",
+      "summary": "Ibuprofen is a painkiller that helps relieve pain and reduce swelling (inflammation). You can buy most types from shops and pharmacies, but some types are only available with a prescription. Covers: What ibuprofen is for; How to take ibuprofen and how much to take (dose); Side effects of ibuprofen; Who can and cannot use ibuprofen; Taking ibuprofen with other medicines, food and drink; Find out more about your medicine.",
+      "keyPoints": [
+        "Breastfeeding and ibuprofen: If you're breastfeeding, check with a pharmacist or doctor before using ibuprofen.",
+        "Taking ibuprofen with other painkillers: Adults can take ibuprofen at the same time as paracetamol if needed, but it's a good idea to try them on their own first to see if they relieve your pain.",
+        "What ibuprofen is for: Ibuprofen is a type of painkiller called a non-steroidal anti-inflammatory drug (NSAID).",
+        "How to take ibuprofen and how much to take (dose): There are several different types of ibuprofen, including: tablets and capsules; gels and sprays; liquid.",
+        "How to take common types of ibuprofen: For most 200mg tablets and capsules: swallow 1 or 2 tablets or capsules whole with water (ideally with or after food); take them up to 3 times a day if you're still in pain; wait at least 4 hours between each dose.",
+        "Important: To reduce the risk of side effects, take the smallest dose you need for the shortest time you need it."
+      ],
+      "certainty": "not stated",
+      "lifeStages": [
+        "postpartum",
+        "pregnancy",
+        "conception"
+      ],
+      "topics": [
+        "medicines-breastfeeding",
+        "nsaids-pregnancy"
+      ],
+      "tags": [
+        "ibuprofen",
+        "breastfeeding",
+        "painkillers",
+        "nsaids"
+      ],
+      "keywords": [
+        "ibuprofen",
+        "nurofen",
+        "advil",
+        "breastfeeding",
+        "nursing",
+        "painkiller",
+        "pain relief",
+        "lactation",
+        "nsaid"
+      ],
+      "sourceType": "guideline-page",
+      "page": {
+        "publisher": "NHS",
+        "url": "https://www.nhs.uk/medicines/ibuprofen-for-adults/",
+        "fetchedAt": "2026-11-26T00:02:57.100Z",
+        "published": null,
+        "lastUpdated": null,
+        "lastReviewed": "2025-08-27",
+        "nextReview": "2028-08-27",
+        "licence": {
+          "name": "Open Government Licence v3.0",
+          "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+          "termsUrl": "https://www.nhs.uk/our-policies/terms-and-conditions/",
+          "notes": "NHS website content is released under the OGL v3.0, commercial use included (terms 3.3-3.4). Must show \"Information from the NHS website is licensed under the Open Government Licence v3.0\" with a link. Unchanged copies must show the date copied or be refreshed at least every 7 days (terms 3.6). Excluded from the OGL: logos, images with people, third-party content, medical devices (terms 3.5).",
+          "pageCopyright": "© Crown copyright"
+        },
+        "attribution": "Information from the NHS website is licensed under the Open Government Licence v3.0.",
+        "refreshDays": 7,
+        "robots": {
+          "allowed": true,
+          "rule": null,
+          "checkedAt": "2026-11-26T00:02:57.100Z"
+        },
+        "contentHash": "bc024a28",
+        "summariser": "extractive-v1",
+        "chunks": 21,
+        "requestedUrl": "https://www.nhs.uk/medicines/ibuprofen-for-adults/pregnancy-breastfeeding-and-fertility-while-taking-ibuprofen/"
+      }
+    },
+    {
+      "id": "gp-nhs-infertility-025315",
+      "pmid": "",
+      "doi": null,
+      "title": "Infertility",
+      "source": "NHS",
+      "journal": "NHS",
+      "organisation": "NHS",
+      "year": 2023,
+      "publicationTypes": [
+        "Patient information page"
+      ],
+      "evidenceLevel": "guideline",
+      "url": "https://www.nhs.uk/conditions/infertility/",
+      "summary": "Infertility is when a couple cannot get pregnant (conceive) despite having regular unprotected sex. Around 1 in 7 couples may have difficulty conceiving. Covers: Getting help; Treating infertility; What causes infertility?.",
+      "keyPoints": [
+        "Getting help: Some people get pregnant quickly, but for others it can take longer.",
+        "Treating infertility: Fertility treatments include: medical treatment for lack of regular ovulation; surgical procedures such as treatment for endometriosis, repair of the fallopian tubes, or removal of scarring (adhesions) within the womb or abdominal cavity; assisted conception such as…",
+        "What causes infertility?: There are many possible causes of infertility, and fertility problems can affect either partner.",
+        "Risk factors: There are also several factors that can affect fertility."
+      ],
+      "certainty": "not stated",
+      "lifeStages": [
+        "conception"
+      ],
+      "topics": [
+        "infertility-evaluation",
+        "age-fertility"
+      ],
+      "tags": [
+        "infertility",
+        "time to pregnancy",
+        "when to see a doctor",
+        "fertility tests"
+      ],
+      "keywords": [
+        "infertility",
+        "trying to conceive",
+        "getting pregnant",
+        "how long",
+        "fertility doctor",
+        "gp",
+        "fertility tests",
+        "conceive",
+        "not getting pregnant"
+      ],
+      "sourceType": "guideline-page",
+      "page": {
+        "publisher": "NHS",
+        "url": "https://www.nhs.uk/conditions/infertility/",
+        "fetchedAt": "2026-11-26T00:03:07.475Z",
+        "published": null,
+        "lastUpdated": null,
+        "lastReviewed": "2023-08-09",
+        "nextReview": "2026-08-09",
+        "licence": {
+          "name": "Open Government Licence v3.0",
+          "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+          "termsUrl": "https://www.nhs.uk/our-policies/terms-and-conditions/",
+          "notes": "NHS website content is released under the OGL v3.0, commercial use included (terms 3.3-3.4). Must show \"Information from the NHS website is licensed under the Open Government Licence v3.0\" with a link. Unchanged copies must show the date copied or be refreshed at least every 7 days (terms 3.6). Excluded from the OGL: logos, images with people, third-party content, medical devices (terms 3.5).",
+          "pageCopyright": "© Crown copyright"
+        },
+        "attribution": "Information from the NHS website is licensed under the Open Government Licence v3.0.",
+        "refreshDays": 7,
+        "robots": {
+          "allowed": true,
+          "rule": null,
+          "checkedAt": "2026-11-26T00:03:07.475Z"
+        },
+        "contentHash": "049a9084",
+        "summariser": "extractive-v1",
+        "chunks": 7
+      }
+    },
+    {
+      "id": "gp-cdc-index-html-ccd319",
+      "pmid": "",
+      "doi": null,
+      "title": "Contraception and Birth Control Methods",
+      "source": "CDC",
+      "journal": "CDC",
+      "organisation": "CDC",
+      "year": 2024,
+      "publicationTypes": [
+        "Public health guidance page"
+      ],
+      "evidenceLevel": "guideline",
+      "url": "https://www.cdc.gov/contraception/about/index.html",
+      "summary": "Below is information for you on the different kinds of birth control methods. If you are a health care provider, see links for information on contraceptive guidance and resources below. Covers: At a glance; Birth control methods; Reversible methods of birth control; Permanent methods of birth control; Resources.",
+      "keyPoints": [
+        "Birth control methods: A person might consider different things when choosing a contraceptive method.",
+        "Intrauterine Contraception: Levonorgestrel intrauterine system (LNG IUD)—The LNG IUD is a small T-shaped device like the Copper T IUD.",
+        "Hormonal Methods: Implant—The implant is a single, thin rod that is inserted under the skin of a women’s upper arm.",
+        "Barrier Methods: Diaphragm or cervical cap—Before sexual intercourse, the diaphragm or cap is inserted in the vagina with spermicide to block or kill sperm.",
+        "Fertility Awareness-Based Methods: Fertility awareness-based methods—Understanding your monthly fertility pattern can help you plan to get pregnant or avoid getting pregnant.",
+        "Permanent methods of birth control: Tubal surgery or “tying tubes”—The fallopian tubes are tied (or closed) or cut so that sperm and eggs cannot meet for fertilization."
+      ],
+      "certainty": "not stated",
+      "lifeStages": [
+        "contraception"
+      ],
+      "topics": [
+        "contraception-effectiveness"
+      ],
+      "tags": [
+        "contraception",
+        "effectiveness",
+        "typical use",
+        "birth control"
+      ],
+      "keywords": [
+        "contraception",
+        "birth control",
+        "most effective",
+        "implant",
+        "iud",
+        "coil",
+        "pill",
+        "condom",
+        "failure rate"
+      ],
+      "sourceType": "guideline-page",
+      "page": {
+        "publisher": "CDC",
+        "url": "https://www.cdc.gov/contraception/about/index.html",
+        "fetchedAt": "2026-11-26T00:03:10.944Z",
+        "published": null,
+        "lastUpdated": "2024-08-06",
+        "lastReviewed": "2024-08-06",
+        "nextReview": null,
+        "licence": {
+          "name": "Public domain (US Government work)",
+          "url": "https://www.cdc.gov/other/agencymaterials.html",
+          "termsUrl": "https://www.cdc.gov/other/agencymaterials.html",
+          "notes": "Most CDC web content is in the public domain and may be reused without permission; credit CDC, do not imply endorsement, and do not reuse CDC logos or third-party images marked as copyrighted.",
+          "pageCopyright": null
+        },
+        "attribution": "Source: Centers for Disease Control and Prevention (CDC).",
+        "refreshDays": null,
+        "robots": {
+          "allowed": true,
+          "rule": null,
+          "checkedAt": "2026-11-26T00:03:10.944Z"
+        },
+        "contentHash": "ccff7be9",
+        "summariser": "extractive-v1",
+        "chunks": 14
+      }
+    }
+  ],
+  "chunks": {
+    "gp-nhs-ibuprofen-for-adults-483c70": [
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#1",
+        "n": 1,
+        "section": "",
+        "text": "Ibuprofen is a painkiller that helps relieve pain and reduce swelling (inflammation). You can buy most types from shops and pharmacies, but some types are only available with a prescription.\nThis information is for adults aged 18 or over. There's separate information about ibuprofen for children."
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#2",
+        "n": 2,
+        "section": "What ibuprofen is for",
+        "text": "Ibuprofen is a type of painkiller called a non-steroidal anti-inflammatory drug (NSAID).\nIbuprofen and other NSAIDs can help with lots of types of pain, including:\n- headaches and migraines\n- joint and muscle pain\n- pain after an injury\n- toothache\n- period pain\nIbuprofen can also help reduce a high temperature (fever).\nIbuprofen can cause more side effects than paracetamol. If you can take paracetamol, it's a good idea to try it before taking ibuprofen."
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#3",
+        "n": 3,
+        "section": "How to take ibuprofen and how much to take (dose)",
+        "text": "There are several different types of ibuprofen, including:\n- tablets and capsules\n- gels and sprays\n- liquid\n- granules you mix with water\nHow you use your medicine and how much to use depends on which type it is and how much ibuprofen it contains.\nAlways check the packet or leaflet that comes with your medicine. Ask a pharmacist or doctor for advice if you're not sure how to use it or have any problems using it.\nIf a doctor prescribes ibuprofen for you, follow the advice they give you about how to use it and how much to use."
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#4",
+        "n": 4,
+        "section": "How to take ibuprofen and how much to take (dose) > How to take common types of ibuprofen",
+        "text": "200mg tablets and capsules\nFor most 200mg tablets and capsules:\n- swallow 1 or 2 tablets or capsules whole with water (ideally with or after food)\n- take them up to 3 times a day if you're still in pain\n- wait at least 4 hours between each dose\n- do not take more than 6 tablets or capsules in 24 hours\nThere are also some tablets and capsules that you take in a different way, such as tablets that dissolve on your tongue or \"long-lasting\" capsules that should be taken less often.\nFollow the instructions on the packet or leaflet that comes with your medicine to make sure you're taking it correctly.\n400mg tablets and capsules\nIf you're taking 400mg ibuprofen tablets or capsules:\n- swallow 1 tablet or capsule whole with water (ideally with or after food)\n- take it up to 3 times a day if you're still in pain"
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#5",
+        "n": 5,
+        "section": "How to take ibuprofen and how much to take (dose) > How to take common types of ibuprofen",
+        "text": "- do not take more than 3 tablets or capsules in 24 hours\nGel or spray\nIf you're using ibuprofen gel or spray:\n- apply the gel or spray to the painful area and gently rub it into your skin – check the packet or leaflet to see how much to use\n- take care to avoid getting it into your eyes, mouth or on any broken skin, and wash your hands after using it\n- use it up to 3 or 4 times a day if you're still in pain – check the packet or leaflet to see how many times you can use it\n- wait at least 4 hours between each use\n- do not use it more than 4 times in 24 hours\n- do not smoke or go near naked flames, as clothes that have been in contact with ibuprofen gel or spray can burn more easily"
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#6",
+        "n": 6,
+        "section": "How to take ibuprofen and how much to take (dose) > Important",
+        "text": "To reduce the risk of side effects, take the smallest dose you need for the shortest time you need it.\nDo not take ibuprofen tablets and capsules for more than 10 days unless advised to by a doctor.\nFor other types of ibuprofen, check the packet or leaflet to see how long you can use it for.\nSee a GP if your pain gets worse or does not go away."
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#7",
+        "n": 7,
+        "section": "How to take ibuprofen and how much to take (dose) > If you take too much ibuprofen",
+        "text": "Taking an extra dose of ibuprofen is unlikely to cause problems, but it's important to get medical advice if you take too much as it can sometimes be dangerous."
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#8",
+        "n": 8,
+        "section": "How to take ibuprofen and how much to take (dose) > If you take too much ibuprofen > Urgent advice: Get help from NHS 111 if:",
+        "text": "- you've taken more ibuprofen tablets, capsules, liquid or granules than it says on the packet or leaflet\n- you've accidentally swallowed ibuprofen gel or spray and feel unwell\nYou can call 111 or get help from 111 online.\nIf you're told to go to A&E, do not drive. Ask someone to drive you or call 999 and ask for an ambulance.\nBring the ibuprofen packet or leaflet inside it, any remaining medicine, and any other medicines you take."
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#9",
+        "n": 9,
+        "section": "Side effects of ibuprofen",
+        "text": "Like all medicines, ibuprofen can cause side effects, although not everyone gets them."
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#10",
+        "n": 10,
+        "section": "Side effects of ibuprofen > Common side effects",
+        "text": "Common side effects of ibuprofen tablets, capsules, liquid and granules include:\n- indigestion and stomach aches\n- feeling sick (nausea) and being sick (vomiting)\n- headaches\n- a rash\n- dizziness\n- diarrhoea or constipation\nYou're less likely to get side effects from ibuprofen gel or spray.\nIbuprofen will not usually affect your ability to drive, ride a bike or use machinery, but if you feel dizzy after taking it, wait until the dizziness stops."
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#11",
+        "n": 11,
+        "section": "Side effects of ibuprofen > Common side effects > Non-urgent advice: Speak to a pharmacist or doctor if:",
+        "text": "- you have any side effects that bother you or do not go away\nThey may be able to give you advice about how you can reduce the side effects.\nFind a pharmacy"
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#12",
+        "n": 12,
+        "section": "Side effects of ibuprofen > Serious side effects",
+        "text": "Ibuprofen can sometimes cause serious side effects, although most of them are rare.\nPossible serious side effects of ibuprofen include:\n- stomach ulcers or bleeding inside your stomach – causing symptoms such as tummy pain, shortness of breath, pale skin, vomiting blood or poo that's black, sticky and tar-like\n- an allergic reaction (anaphylaxis) – causing symptoms such as a swollen throat or tongue, a raised, itchy rash or difficulty breathing\n- a problem with your kidneys – causing symptoms such as shortness of breath, blood in your pee or swelling in your ankles, feet or hands\nThe risk of serious side effects is higher if you're taking a high dose of ibuprofen or taking it for a long time."
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#13",
+        "n": 13,
+        "section": "Side effects of ibuprofen > Serious side effects > Urgent advice: Call NHS 111 if:",
+        "text": "- you're taking ibuprofen and think you might be having serious side effects"
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#14",
+        "n": 14,
+        "section": "Side effects of ibuprofen > More about side effects",
+        "text": "These are not all the side effects of ibuprofen.\nFor a full list, see the leaflet that comes with your medicine or search for your medicine leaflet on the electronic medicines compendium website.\nYou can report any side effects you get on the Yellow Card website"
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#15",
+        "n": 15,
+        "section": "Who can and cannot use ibuprofen",
+        "text": "Most adults can use ibuprofen.\nBut ibuprofen is not suitable for everyone. For example, it may not be suitable if:\n- you've had an allergic reaction to ibuprofen, aspirin or another non-steroidal anti-inflammatory drug (NSAID)\n- you have a stomach ulcer or you've had them before\n- you have asthma or allergies (such as hay fever)\n- you have chickenpox\n- you have a heart, liver or kidney condition\n- you have problems with blood clotting\n- you've had a stroke\n- you're pregnant or trying to get pregnant\nCheck the packet or leaflet that comes with your medicine to see if it's suitable for you. Speak to a pharmacist or doctor if you're not sure if you can use it."
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#16",
+        "n": 16,
+        "section": "Who can and cannot use ibuprofen > Breastfeeding and ibuprofen",
+        "text": "If you're breastfeeding, check with a pharmacist or doctor before using ibuprofen.\nParacetamol is usually the best painkiller to take if you're breastfeeding, but ibuprofen can often be used if needed.\nIf you use the gel or spray, use it on the smallest area of skin you need to and try to avoid your baby's skin touching the area where you applied it, if you can.\nIt's rare for breastfed babies to get any side effects from medicine you're taking, but speak to a healthcare professional if you have any concerns about your baby."
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#17",
+        "n": 17,
+        "section": "Who can and cannot use ibuprofen > Pregnancy and ibuprofen",
+        "text": "You should avoid using ibuprofen during pregnancy unless you're advised to by a doctor or pharmacist.\nParacetamol is usually the best painkiller to take if you're pregnant.\nFind out more about taking ibuprofen during pregnancy on the Bumps (Best Use of Medicines in Pregnancy) website"
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#18",
+        "n": 18,
+        "section": "Taking ibuprofen with other medicines, food and drink",
+        "text": "There are some medicines, remedies and supplements that may not mix well with ibuprofen.\nThese include some types of:\n- anticoagulants (such as warfarin)\n- steroid medicines\n- antidepressants\n- medicines to lower blood pressure\nCheck the packet or leaflet that comes with your medicine to see if it's suitable for you. Speak to a pharmacist or doctor if you're not sure if you can take it."
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#19",
+        "n": 19,
+        "section": "Taking ibuprofen with other medicines, food and drink > Taking ibuprofen with other painkillers",
+        "text": "Adults can take ibuprofen at the same time as paracetamol if needed, but it's a good idea to try them on their own first to see if they relieve your pain.\nDo not take ibuprofen at the same time as other non-steroidal anti-inflammatory drugs (NSAIDs), such as naproxen or aspirin. This can increase the risk of serious side effects like stomach ulcers."
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#20",
+        "n": 20,
+        "section": "Taking ibuprofen with other medicines, food and drink > Food, drink and alcohol with ibuprofen",
+        "text": "You can eat and drink normally while taking ibuprofen, but try to avoid drinking a lot of alcohol because this can increase the risk of side effects."
+      },
+      {
+        "id": "gp-nhs-pregnancy-breastfeeding-and-fertility-wh-dd9b35#21",
+        "n": 21,
+        "section": "Find out more about your medicine",
+        "text": "To find out more about your medicine, you can:\n- check the leaflet that comes with it\n- search for your medicine leaflet on the electronic medicines compendium website\n- speak to a pharmacist for advice\nPage last reviewed: 27 August 2025 Next review due: 27 August 2028"
+      }
+    ],
+    "gp-nhs-infertility-025315": [
+      {
+        "id": "gp-nhs-infertility-025315#1",
+        "n": 1,
+        "section": "",
+        "text": "Infertility is when a couple cannot get pregnant (conceive) despite having regular unprotected sex.\nAround 1 in 7 couples may have difficulty conceiving.\nMore than 8 out of 10 couples, where the woman is under 40, will conceive naturally within a year if they have regular unprotected sex (every 2 or 3 days).\nFor couples who have been trying to conceive for more than 3 years without success, the likelihood of getting pregnant naturally within the next year is 1 in 4, or less."
+      },
+      {
+        "id": "gp-nhs-infertility-025315#2",
+        "n": 2,
+        "section": "Getting help",
+        "text": "Some people get pregnant quickly, but for others it can take longer. It's a good idea to see a GP if you have not conceived after a year of trying.\nWomen aged 36 and over, and anyone who's already aware they may have fertility problems, should see their GP sooner.\nThey can check for common causes of fertility problems and suggest treatments that could help.\nInfertility is usually only diagnosed and treated when a couple have not managed to conceive after 2 years of trying through regular unprotected sex.\nThere are 2 types of infertility:\n- primary infertility – where someone who's never conceived a child in the past has difficulty conceiving\n- secondary infertility – where someone has had 1 or more pregnancies in the past, but is having difficulty conceiving again\nRead more about how infertility is diagnosed."
+      },
+      {
+        "id": "gp-nhs-infertility-025315#3",
+        "n": 3,
+        "section": "Treating infertility",
+        "text": "Fertility treatments include:\n- medical treatment for lack of regular ovulation\n- surgical procedures such as treatment for endometriosis, repair of the fallopian tubes, or removal of scarring (adhesions) within the womb or abdominal cavity\n- assisted conception such as intrauterine insemination (IUI) or IVF\nThe treatment offered will depend on what's causing the fertility problems and what's available from your local integrated care board (ICB).\nPrivate treatment is also available, but it can be expensive and there's no guarantee it will be successful.\nIt's important to choose a private clinic carefully. You can ask a GP for advice, and should make sure you choose a clinic that's licensed by the Human Fertilisation and Embryology Authority (HFEA).\nSome treatments for infertility, such as IVF, can cause complications."
+      },
+      {
+        "id": "gp-nhs-infertility-025315#4",
+        "n": 4,
+        "section": "Treating infertility",
+        "text": "For example:\n- multiple pregnancy – if more than 1 embryo is placed in the womb as part of IVF treatment there's an increased chance of having twins; this may not seem like a bad thing, but it significantly increases the risk of complications for you and your babies\n- ectopic pregnancy – the risk of having an ectopic pregnancy is slightly increased if you have IVF\nRead more about how infertility is treated."
+      },
+      {
+        "id": "gp-nhs-infertility-025315#5",
+        "n": 5,
+        "section": "What causes infertility?",
+        "text": "There are many possible causes of infertility, and fertility problems can affect either partner. But in a quarter of cases it is not possible to identify the cause.\nCommon causes of infertility include:\n- lack of regular ovulation (the monthly release of an egg)\n- poor quality semen\n- blocked or damaged fallopian tubes\n- endometriosis – a condition where tissue, similar to the lining of the womb (the endometrium), grows in other places outside the womb"
+      },
+      {
+        "id": "gp-nhs-infertility-025315#6",
+        "n": 6,
+        "section": "What causes infertility? > Risk factors",
+        "text": "There are also several factors that can affect fertility.\nThese include:\n- age – fertility declines with age\n- weight – being overweight or obese (having a BMI of 30 or over) reduces fertility; in women, being overweight or severely underweight can affect ovulation\n- sexually transmitted infections (STIs) – several STIs, including chlamydia, can affect fertility\n- smoking – can affect fertility: smoking (including passive smoking) affects your chance of conceiving and can reduce semen quality; read more about quitting smoking\n- alcohol – the safest approach is not to drink alcohol at all to keep risks to your baby to a minimum. Drinking too much alcohol can also affect the quality of sperm (the chief medical officers for the UK recommend adults should drink no more than 14 units of alcohol a week, which should be spread evenly over 3 days or more)"
+      },
+      {
+        "id": "gp-nhs-infertility-025315#7",
+        "n": 7,
+        "section": "What causes infertility? > Risk factors",
+        "text": "- environmental factors – exposure to certain pesticides, solvents and metals has been shown to affect fertility, particularly in men\n- stress – can affect your relationship with your partner and cause a loss of sex drive; in severe cases, stress may also affect ovulation and sperm production\nPage last reviewed: 09 August 2023 Next review due: 09 August 2026"
+      }
+    ],
+    "gp-cdc-index-html-ccd319": [
+      {
+        "id": "gp-cdc-index-html-ccd319#1",
+        "n": 1,
+        "section": "",
+        "text": "August 6, 2024"
+      },
+      {
+        "id": "gp-cdc-index-html-ccd319#2",
+        "n": 2,
+        "section": "At a glance",
+        "text": "- Below is information for you on the different kinds of birth control methods.\n- If you are a health care provider, see links for information on contraceptive guidance and resources below."
+      },
+      {
+        "id": "gp-cdc-index-html-ccd319#3",
+        "n": 3,
+        "section": "Birth control methods",
+        "text": "A person might consider different things when choosing a contraceptive method. These include safety, effectiveness1, availability (including accessibility and affordability), side effects, user control, reversibility, and ease of removal or discontinuation. Contraceptive methods should be chosen through voluntary, informed choice.\nMost contraceptive methods do not protect against sexually transmitted infections (STIs), including human immunodeficiency virus (HIV) infection. Using condoms (alone or with another contraceptive method) can help to protect against HIV and other STIs. Also, pre-exposure prophylaxis (PrEP) can help to protect against HIV. For more information on STI/HIV prevention visit: How to Prevent STIs and Preventing HIV."
+      },
+      {
+        "id": "gp-cdc-index-html-ccd319#4",
+        "n": 4,
+        "section": "Birth control methods > Resources for Health Care Providers",
+        "text": "An overview of the 2024 U.S. Medical Eligibility Criteria for Contraceptive Use (U.S. MEC), the 2024 U.S. Selected Practice Recommendations for Contraceptive Use (U.S. SPR), and where the latest guidance documents can be found.\nCDC Contraceptive Guidance for Health Care Providers"
+      },
+      {
+        "id": "gp-cdc-index-html-ccd319#5",
+        "n": 5,
+        "section": "Reversible methods of birth control > Intrauterine Contraception",
+        "text": "Levonorgestrel intrauterine system (LNG IUD)—The LNG IUD is a small T-shaped device like the Copper T IUD. It is placed inside the uterus by a doctor. It releases a small amount of progestin each day to keep you from getting pregnant. The LNG IUD stays in your uterus for up to 3 to 8 years, depending on the device. Typical use failure rate: 0.1-0.4%.1 Copper T intrauterine device (IUD)—This IUD is a small device that is shaped in the form of a “T.” Your doctor places it inside the uterus to prevent pregnancy. It can stay in your uterus for up to 10 years. Typical use failure rate: 0.8%.1"
+      },
+      {
+        "id": "gp-cdc-index-html-ccd319#6",
+        "n": 6,
+        "section": "Reversible methods of birth control > Hormonal Methods",
+        "text": "Implant—The implant is a single, thin rod that is inserted under the skin of a women’s upper arm. The rod contains a progestin that is released into the body over 3 years. Typical use failure rate: 0.1%.1\nInjection or “shot”—Women get shots of the hormone progestin in the buttocks or arm every three months. The shot can be self-injected or given by a health care provider. Typical use failure rate: 4%.1\nCombined oral contraceptives—Also called “the pill,” combined oral contraceptives contain the hormones estrogen and progestin. It is prescribed by a doctor. A pill is taken at the same time each day. If you are older than 35 years and smoke, have a history of blood clots or breast cancer, your doctor may advise you not to take the pill. Typical use failure rate: 7%.1 Progestin-only pill—Unlike the combined pill, the progestin-only pill (sometimes called the mini-pill) only has one hormone, progestin, instead of both estrogen and progestin. It is prescribed by a doctor. It is taken at the same time each day. It may be a good option for women who can’t take estrogen. Typical use failure rate: 7%.1"
+      },
+      {
+        "id": "gp-cdc-index-html-ccd319#7",
+        "n": 7,
+        "section": "Reversible methods of birth control > Hormonal Methods",
+        "text": "Patch—This skin patch is worn on the lower abdomen, buttocks, or upper body (but not on the breasts). This method is prescribed by a doctor. It releases hormones progestin and estrogen into the bloodstream. You put on a new patch once a week for three weeks. During the fourth week, you do not wear a patch, so you can have a menstrual period. Typical use failure rate: 7%.1\nHormonal vaginal contraceptive ring—The ring releases the hormones progestin and estrogen. You place the ring inside your vagina. You wear the ring for three weeks, take it out for the week you have your period, and then put in a new ring. Typical use failure rate: 7%1"
+      },
+      {
+        "id": "gp-cdc-index-html-ccd319#8",
+        "n": 8,
+        "section": "Reversible methods of birth control > Barrier Methods",
+        "text": "Diaphragm or cervical cap—Before sexual intercourse, the diaphragm or cap is inserted in the vagina with spermicide to block or kill sperm. These methods are prescribed by a health care provider. Typical use failure rate for the diaphragm: 17%.1 Typical use failure rate for the cervical cap: 22%.1 Sponge—The contraceptive sponge contains spermicide and is placed in the vagina where it fits over the cervix. The sponge works for up to 24 hours and must be left in the vagina for at least 6 hours after the last act of intercourse, at which time it is removed and discarded. Typical use failure rate: 17%.1\nMale condom—External (male) condoms help prevent sperm from entering a partner's body. Latex condoms, the most common type, also help prevent HIV and other STIs. \"Natural\" or \"lambskin\" condoms help prevent pregnancy, but may not provide protection against STIs, including HIV. Condoms are available over the counter. Typical use failure rate: 13%.1"
+      },
+      {
+        "id": "gp-cdc-index-html-ccd319#9",
+        "n": 9,
+        "section": "Reversible methods of birth control > Barrier Methods",
+        "text": "Female condom—Internal (female) condoms help prevent pregnancy by blocking sperm from getting to the egg. It is packaged with a lubricant and is available over the counter. It can be inserted up to 8 hours before sexual intercourse. Internal (female) condoms might help prevent STIs. Typical use failure rate: 21%.1\nSpermicides—These products include spermicides and vaginal pH regulators and work by killing sperm or making it difficult for sperm to reach the egg. They come in several forms—foam, gel, cream, film, suppository, or tablet. They are placed in the vagina no more than 1 hour before intercourse. They are left in place at least 6 to 8 hours after intercourse. Spermicide can be used with an external (male) condom, diaphragm, or cervical cap. They can be purchased over the counter or prescribed by a health care provider. Typical use failure rate: 21%.1"
+      },
+      {
+        "id": "gp-cdc-index-html-ccd319#10",
+        "n": 10,
+        "section": "Reversible methods of birth control > Fertility Awareness-Based Methods",
+        "text": "Fertility awareness-based methods—Understanding your monthly fertility pattern can help you plan to get pregnant or avoid getting pregnant. Your fertility pattern is the number of days in the month when you are fertile (able to get pregnant), days when you are infertile, and days when fertility is unlikely, but possible. If you have a regular menstrual cycle, you have about nine or more fertile days each month. If you do not want to get pregnant, you do not have sex on the days you are fertile, or you use a barrier method of birth control on those days. Failure rates vary across these methods.1 Range of typical use failure rates: 2-23%.1"
+      },
+      {
+        "id": "gp-cdc-index-html-ccd319#11",
+        "n": 11,
+        "section": "Reversible methods of birth control > Lactational Amenorrhea Methods",
+        "text": "Breastfeeding can be used as birth control (called Lactational Amenorrhea Method or LAM) when three conditions are met: (1) amenorrhea (not having any menstrual periods after delivering a baby), (2) fully or nearly fully breastfeeding, and it is (3) less than 6 months after delivering a baby. LAM is a temporary method of birth control, and another birth control method should be used when any of the three conditions are not met."
+      },
+      {
+        "id": "gp-cdc-index-html-ccd319#12",
+        "n": 12,
+        "section": "Reversible methods of birth control > Emergency Contraception",
+        "text": "Emergency contraception is not a regular method of birth control. Emergency contraception can be used after no birth control was used during sex, or if the birth control method failed, such as if a condom broke.\nCopper IUD—The copper IUD can be inserted within 5 days of unprotected sex. Emergency contraceptive pills—Emergency contraceptive pills can be taken up to 5 days after unprotected sex, but the sooner the pills are taken, the better they will work. There are three different types of pills that can be used for emergency contraception. Some emergency contraceptive pills are available over the counter, and some are available only by prescription within the United States."
+      },
+      {
+        "id": "gp-cdc-index-html-ccd319#13",
+        "n": 13,
+        "section": "Permanent methods of birth control",
+        "text": "Tubal surgery or “tying tubes”—The fallopian tubes are tied (or closed) or cut so that sperm and eggs cannot meet for fertilization. The procedure can be done in a hospital or in an outpatient surgical center. The patient can go home the same day of the surgery and resume normal activities within a few days. This method is effective immediately. Typical use failure rate: 0.5%.1 Vasectomy—This procedure is done to keep sperm from going to the penis, so the ejaculate never has any sperm in it that can fertilize an egg. The procedure is typically done at an outpatient surgical center. The patient can go home the same day. Recovery time is less than 1 week. After the operation, it is important to visit a health care provider to make sure the sperm count has dropped to zero; this takes about 12 weeks. Another form of birth control should be used until the sperm count has dropped to zero. Typical use failure rate: 0.15%.1"
+      },
+      {
+        "id": "gp-cdc-index-html-ccd319#14",
+        "n": 14,
+        "section": "Resources",
+        "text": "Birth Control Methods\nMétodos anticonceptivos\nEmergency contraception (emergency birth control)\nAnticoncepci&oacute;n de emergencia\nClinic Locator | HHS Office of Population Affairs\nCondom + Birth Control Graphic\nDownload\nKnow Your Condom DOs & DON'Ts\nKnow Your Condom DOs & DON'Ts En espa&ntilde;ol\nSources\nContent Source:\nNational Center for Chronic Disease Prevention and Health Promotion (NCCDPHP); Division of Reproductive Health\nReferences\n- Bradley SEK, Polis CB, Micks EA, Steiner MJ. Effectiveness, safety, and comparative side effects. In: Cason P, Cwiak C, Edelman A, et al, eds. Contraceptive Technology. 22nd ed. Jones & Bartlett Learning; 2023:130–131."
+      }
+    ]
+  },
+  "embeddings": {
+    "gp-nhs-ibuprofen-for-adults-483c70": {
+      "h": "86bc2323",
+      "s": 0.00147788,
+      "v": "HMH1KfAC70UA99cN7zAFHBscNPbj/uYa4iT28fY7JuA+5+UDzQMS5u0fz+pTBw4sJzcdB+RTEefM9Rogrfo3B+EbGQ0zG/YLSgzt7lfy/QDvAAQYCe464gIeRCsXGzL1vhmu5d68zQbkDvu/DTXrEckjxO9L8Br86QAI+RgbGgDZ/g/9BhvuGtYI9/YOCRYj+A8jDw/45TbbFg7mBOjWge4Anf8GGr/h3xDZID3axOUF5wW9+OfXG+0FPgLrrB4JJyfn8/jg3BUGNvkqJCsfEvfCMUIr8KMTHe73C98QJwDwGOTx0A/iwELYuwYG2sfy//zbCtsQHsUQBiECDz0U5ELdBjbk09oN7i/mztwS1AklMewG/BgA4wT0EPEVGfTv0gvb4+XnzwMXKgMKOtYYCTgWCxLW+zEs6BQh6O8aDgAQBA3l3fHI4N7l+Qv68wXrC+HqMMjy9NU5/fnM5vQWAyj5Cf/8HucE5MIO+OcBDvboXyrhJeHxH+24NuQE2BYs"
+    },
+    "gp-nhs-infertility-025315": {
+      "h": "01413a09",
+      "s": 0.00112051,
+      "v": "0fjzOzct9j8IMgwV2wEXBCGazzkf3M3xG6Og+9wAL2Le6b4fuVc92x76yjPi0jLABP+j/TXpB5rzFfrd9fXo0CYPLUMLMzgq901nI/8OBNdT8fHI8hxQ/evY5xYvyTQ1/8nT7uwPDCXYN87HDB0XxDMQ1QThzD87tfkKAenQIQD10RcmqEkgzxvNP8Mhv+joHd/Ff/Ts0/zr4eEe6vYgK96i6LQK8frvkePwOP/q8MTN5/Yt380I9yP7oATgmd3tybZdG6Amz8ga4wIB3L301wsmOPfaNSVKEf5ZQtUMZQD1HP7sLDdAwu3V2dZWI9nl20xHBz4ODt3S/NLaFDwLUBX6IR/yBADQ3RY1ntghWSk+bUTw2xsmtSL5NTfeDyUm+/vqNUXa4+j/Ejcqye72DfIEHkSS8T7WFu/kCSIsMgAyuc/TE9sSED8dkO0HCTIB5DX57Q/gyCXbcTkTCdr7vhoXsSHXHCjoBirqHegQESC4K73P997tNQkCfAv7Jjzn"
+    },
+    "gp-cdc-index-html-ccd319": {
+      "h": "7ed7c6fc",
+      "s": 0.00127427,
+      "v": "6ib349UoBH8KSFgQ8sX6/TTxERxaEPcB5/voGTDPI/Sb1Ln4zBkR8A/HwuFoIOIh2A8LBT8s3Zz2JAYR6SLgDdosHgNNE/f91h0Y61oT4g8FJSUR41ENDgbN+zDr+RjgzhHzASn5w+nh4AnJ+vX9AcQtAqUWPl3x+vcbwtLZAQAVAicFzj/04iEeIcbNEUjGBPj9MhftPu8pB/Hsrh3u0vrV/xPQ3vfv7OYFIxQI7vTV8xID5tYDOr/HBBbb1QsB9RzkxA3OoQcoENgAJTsZwys9+e85AAdRDtIk9CHiMwAL/SL0Bvo4ovzg3x8UAv3fGezWENMBMcwK6ssYKAbeDCLV6Dce8UG/3hberdA3BCfgSvD+6uwpuSnECgD4AxQeBO8PIvzU3ytd3iTfAKrk5hPB3RH1/fXnww7QBwB8OwAe2EQI+xDjzQ2+5WQu19YZITDyzv3A0fxGRS8UPvkr6y0o0hcRQB8OKv4lMbAsOvvTPs78JiUJKB/JHRSu6iog"
+    }
+  },
+  "skipped": [
+    {
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK500986/",
+      "reason": "on hold: NCBI answered with a reCAPTCHA bot challenge on 2026-11-26 (not bypassed). Use the NLM LactMed bulk download or E-utilities instead of page scraping."
+    },
+    {
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK501194/",
+      "reason": "on hold: NCBI answered with a reCAPTCHA bot challenge on 2026-11-26 (not bypassed). Use the NLM LactMed bulk download or E-utilities instead of page scraping."
+    },
+    {
+      "url": "https://www.nice.org.uk/guidance/ng257/chapter/initial-advice-to-people-concerned-about-delays-in-conception",
+      "reason": "licence: © NICE, all rights reserved (NICE UK Open Content Licence: UK only). NICE terms 18.2: outside the UK, NICE content may not be \"used in any information or retrieval system\" without NICE's prior written agreement (licence and fee possible). Terms 18.3: any use for artificial-intelligence purposes needs approval, a licence and (internationally) a fee. Womanie serves users outside the UK, so NICE pages are not fetched until NICE grants a licence."
+    }
+  ]
+}

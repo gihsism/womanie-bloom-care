@@ -149,7 +149,7 @@ export default function HealthCategories({ medicalData }: HealthCategoriesProps)
                     }`}>{cat.score}%</span>
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <Progress value={cat.score} className="h-1 flex-1 bg-muted" indicatorClassName={cat.score >= 80 ? 'bg-foreground/35' : cat.score >= 50 ? 'bg-destructive/70' : 'bg-destructive'} />
+                    <Progress value={cat.score} aria-label={`${cat.name} score`} className="h-1 flex-1 bg-muted" indicatorClassName={cat.score >= 80 ? 'bg-foreground/35' : cat.score >= 50 ? 'bg-destructive/70' : 'bg-destructive'} />
                     <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                       {cat.normal}/{cat.total} ok
                       {flagged.length > 0 && ` · ${flagged.length} flagged`}

@@ -165,6 +165,6 @@ describe('opt-out and ownership', () => {
   });
 
   it('defaults every type on', () => {
-    expect(parsePrefs(null)).toEqual({ medicine: true, period: true, appointment: true });
+    expect(parsePrefs(null)).toEqual({ medicine: true, period: true, appointment: true, bookings: true });
   });
 });

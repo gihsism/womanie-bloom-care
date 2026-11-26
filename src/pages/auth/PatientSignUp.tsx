@@ -122,9 +122,9 @@ const PatientSignUp = () => {
       </form>
 
       <p className="mt-8 text-center text-[15px] text-muted-foreground">
-        Have an account? <a href="/auth/login" className="font-semibold text-stage-accent hover:underline">Log in</a>
+        Have an account? <a href="/auth/login" className="font-semibold text-stage-accent underline underline-offset-2">Log in</a>
         {' · '}
-        <a href="/auth/doctor-signup" className="font-semibold text-stage-accent hover:underline">I'm a doctor</a>
+        <a href="/auth/doctor-signup" className="font-semibold text-stage-accent underline underline-offset-2">I'm a doctor</a>
       </p>
     </AuthLayout>
   );

@@ -164,7 +164,7 @@ const Navigation = () => {
           id="mobile-menu"
           ref={menuRef}
           className={`xl:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-            isMobileMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+            isMobileMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 invisible'
           }`}
           role="menu"
           aria-hidden={!isMobileMenuOpen}

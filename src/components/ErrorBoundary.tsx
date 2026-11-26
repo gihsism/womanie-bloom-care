@@ -1,5 +1,5 @@
 import { Component, type ReactNode } from 'react';
-import * as Sentry from '@sentry/react';
+import { captureException } from '@/lib/monitoring';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import { hardReload, isStaleChunkError, reloadOnceForStaleChunk } from '@/lib/staleChunk';
@@ -31,7 +31,7 @@ export class ErrorBoundary extends Component<Props, State> {
     // Forward to Sentry so renders that crash the tree show up in the
     // dashboard alongside the API errors. componentStack lands on the
     // event as the React component stack context.
-    Sentry.captureException(error, {
+    captureException(error, {
       contexts: { react: { componentStack: info.componentStack } },
     });
   }

@@ -1188,7 +1188,7 @@ export default function MedicalHistory() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background">
       {/* Header */}
       <div className="page-head sticky top-0 z-10">
         <div className="px-3 py-3 sm:px-4 sm:py-4 flex items-center gap-2 sm:gap-3">
@@ -1203,7 +1203,7 @@ export default function MedicalHistory() {
           {/* Less-used actions live behind "⋯". Log out lives only in Me. */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9" aria-label="More actions">
+              <Button variant="ghost" size="icon" className="tap-target h-8 w-8 sm:h-9 sm:w-9" aria-label="More actions">
                 <MoreHorizontal className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </DropdownMenuTrigger>
@@ -1250,7 +1250,7 @@ export default function MedicalHistory() {
           </div>
         </div>
         {reanalyzing && (
-          <Progress value={reanalyzeProgress.total > 0 ? (reanalyzeProgress.done / reanalyzeProgress.total) * 100 : 0} className="h-1.5 bg-muted" />
+          <Progress value={reanalyzeProgress.total > 0 ? (reanalyzeProgress.done / reanalyzeProgress.total) * 100 : 0} aria-label="Re-analysis progress" className="h-1.5 bg-muted" />
         )}
 
         {/* What changed with the document just uploaded */}
@@ -2043,6 +2043,6 @@ export default function MedicalHistory() {
       </div>
 
       <DocumentUpload open={uploadOpen} onOpenChange={setUploadOpen} showTrigger={false} onUploaded={handleUploaded} />
-    </div>
+    </main>
   );
 }

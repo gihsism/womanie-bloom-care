@@ -88,7 +88,7 @@ export default function HealthSummaryWidget({ since = null, showViewAll = true }
             </div>
           )}
           <div className="flex-1 space-y-1.5">
-            {healthScore !== null && <Progress value={healthScore} className="h-1.5 bg-muted" indicatorClassName={healthScore >= 80 ? "bg-foreground/35" : healthScore >= 50 ? "bg-destructive/70" : "bg-destructive"} />}
+            {healthScore !== null && <Progress value={healthScore} aria-label="Wellness score" className="h-1.5 bg-muted" indicatorClassName={healthScore >= 80 ? "bg-foreground/35" : healthScore >= 50 ? "bg-destructive/70" : "bg-destructive"} />}
             <div className="flex gap-3 text-[10px]">
               <span className="flex items-center gap-1 text-muted-foreground">
                 <CheckCircle2 className="h-3 w-3" /> {normalCount} healthy

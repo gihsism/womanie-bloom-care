@@ -1,8 +1,10 @@
 // Browser side of phone reminders (Web Push). The server half lives in
 // api/_routes/push/*; the service worker half in public/push-sw.js.
 
-export interface PushPrefs { medicine: boolean; period: boolean; appointment: boolean }
-export const DEFAULT_PUSH_PREFS: PushPrefs = { medicine: true, period: true, appointment: true };
+// bookings = doctor side: a patient booked, moved or cancelled a visit with
+// her (switched in the doctor's Profile & settings, not in Me -> Reminders).
+export interface PushPrefs { medicine: boolean; period: boolean; appointment: boolean; bookings: boolean }
+export const DEFAULT_PUSH_PREFS: PushPrefs = { medicine: true, period: true, appointment: true, bookings: true };
 
 export type PushSupport =
   | 'native-app'      // Capacitor iOS/Android shell: Web Push does not run there

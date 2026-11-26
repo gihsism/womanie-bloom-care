@@ -2,6 +2,7 @@ import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from '../../_lib/auth.js';
 import { withSentry } from '../../_lib/sentry.js';
+import { dayWindowUtc } from '../../_lib/practice-time.js';
 
 // Doctor availability for a single date: returns the start times (ISO)
 // of every non-cancelled appointment that doctor has booked that day, so
@@ -26,27 +27,27 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const doctorId = typeof req.query.doctor_id === 'string' ? req.query.doctor_id : null;
   const dateStr = typeof req.query.date === 'string' ? req.query.date : null;
   if (!doctorId) return res.status(400).json({ error: 'Missing doctor_id' });
-  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+  // The day is a calendar day in Swiss time (Europe/Zurich), the zone the
+  // doctor's opening hours are in: [Zurich 00:00, next Zurich 00:00).
+  // Until 2026-11-26 it was cut at UTC midnight, so a visit between 00:00
+  // and 01:00/02:00 Zurich was missing from the busy list.
+  const day = dateStr ? dayWindowUtc(dateStr) : null;
+  if (!dateStr || !day) {
     return res.status(400).json({ error: 'date must be YYYY-MM-DD' });
   }
 
   try {
     const sql = neon(process.env.DATABASE_URL!);
-
-    // [date 00:00, date+1 00:00). Computed in UTC so the day boundary
-    // matches the ISO date string the patient picked — front-end
-    // converts to local time for display.
-    const dayStart = `${dateStr}T00:00:00Z`;
-    const dayEndDate = new Date(`${dateStr}T00:00:00Z`);
-    dayEndDate.setUTCDate(dayEndDate.getUTCDate() + 1);
-    const dayEnd = dayEndDate.toISOString();
+    const dayStart = day.start.toISOString();
+    const dayEnd = day.end.toISOString();
 
     const rows = await sql.query(
       `SELECT scheduled_at, duration
          FROM appointments
         WHERE doctor_id = $1
-          AND scheduled_at >= $2
           AND scheduled_at < $3
+          AND scheduled_at > $2::timestamptz - INTERVAL '1 day'
+          AND scheduled_at + (COALESCE(duration, 30) * INTERVAL '1 minute') > $2
           AND COALESCE(status, 'scheduled') <> 'cancelled'
         ORDER BY scheduled_at ASC`,
       [doctorId, dayStart, dayEnd]

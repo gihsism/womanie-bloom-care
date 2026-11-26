@@ -2,15 +2,21 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const query = vi.fn();
-vi.mock('@neondatabase/serverless', () => ({ neon: () => ({ query }) }));
+vi.mock('@neondatabase/serverless', () => ({
+  neon: () => ({ query, transaction: (qs: Promise<unknown>[]) => Promise.all(qs) }),
+}));
 vi.mock('../../_lib/auth.js', () => ({ getAuthUser: vi.fn() }));
 vi.mock('../../_lib/sentry.js', () => ({ withSentry: (h: unknown) => h }));
 
 import handler from './reschedule';
 import { getAuthUser } from '../../_lib/auth.js';
+import { wallTimeToUtc } from '../../_lib/practice-time.js';
 
 const SESSION_USER = { id: 'user_p1', email: 'p@test.com', sessionId: 'sess_1' };
-const FUTURE = new Date(Date.now() + 7 * 24 * 3600_000).toISOString();
+// Tuesday 2099-01-06 10:00 Swiss time, inside the doctor's Tuesday hours.
+const FUTURE = wallTimeToUtc(2099, 1, 6, 10, 0).toISOString();
+const SCHEDULE = [{ day_of_week: 2, start_time: '09:00:00', end_time: '17:00:00', is_active: true }];
+const LOCK = [{ pg_advisory_xact_lock: '' }];
 
 function mockRes() {
   let status = 200;
@@ -33,7 +39,7 @@ function mockReq(b: unknown): VercelRequest {
   } as unknown as VercelRequest;
 }
 
-const SCHEDULED_APT = [{ id: 'apt_1', doctor_id: 'doc_1', duration: 30, status: 'scheduled' }];
+const SCHEDULED_APT = [{ id: 'apt_1', doctor_id: 'doc_1', duration: 30, status: 'scheduled', schedule: SCHEDULE }];
 const UPDATED_APT = [{ id: 'apt_1', scheduled_at: FUTURE, duration: 30, consultation_type: 'in_person', status: 'scheduled' }];
 
 describe('appointments/reschedule security invariants', () => {
@@ -41,7 +47,7 @@ describe('appointments/reschedule security invariants', () => {
     vi.mocked(getAuthUser).mockResolvedValue(SESSION_USER);
     query.mockReset();
     // Default success path: ownership SELECT returns scheduled apt, UPDATE succeeds.
-    query.mockResolvedValueOnce(SCHEDULED_APT).mockResolvedValueOnce(UPDATED_APT);
+    query.mockResolvedValueOnce(SCHEDULED_APT).mockResolvedValueOnce(LOCK).mockResolvedValueOnce(UPDATED_APT);
   });
 
   it('returns 401 when the session is invalid', async () => {
@@ -95,6 +101,7 @@ describe('appointments/reschedule security invariants', () => {
   it('returns 409 when UPDATE returns 0 rows (slot taken or status changed atomically)', async () => {
     query.mockReset();
     query.mockResolvedValueOnce(SCHEDULED_APT); // ownership SELECT passes
+    query.mockResolvedValueOnce(LOCK);
     query.mockResolvedValueOnce([]);             // UPDATE finds no matching row
     const res = mockRes();
     await handler(mockReq({ appointment_id: 'apt_1', scheduled_at: FUTURE }), res);
@@ -106,7 +113,7 @@ describe('appointments/reschedule security invariants', () => {
   it('UPDATE SQL includes atomic status re-check to prevent TOCTOU with concurrent cancel', async () => {
     const res = mockRes();
     await handler(mockReq({ appointment_id: 'apt_1', scheduled_at: FUTURE }), res);
-    const [updateSql] = query.mock.calls[1] as [string, unknown[]];
+    const [updateSql] = query.mock.calls[2] as [string, unknown[]];
     expect(updateSql).toMatch(/COALESCE\(status,\s*'scheduled'\)\s*=\s*'scheduled'/i);
   });
 
@@ -115,5 +122,28 @@ describe('appointments/reschedule security invariants', () => {
     await handler(mockReq({ appointment_id: 'apt_1', scheduled_at: FUTURE }), res);
     expect(res._status).toBe(200);
     expect((res._body as Record<string, unknown>).appointment).toBeTruthy();
+  });
+
+  it('refuses a time outside the doctor\'s opening hours (Swiss time)', async () => {
+    const res = mockRes();
+    await handler(mockReq({ appointment_id: 'apt_1', scheduled_at: wallTimeToUtc(2099, 1, 6, 3, 0).toISOString() }), res);
+    expect(res._status).toBe(400);
+    expect(query.mock.calls.some(c => /^\s*UPDATE appointments/.test(c[0] as string))).toBe(false);
+  });
+
+  it('moves the visit behind the per-doctor advisory lock', async () => {
+    const res = mockRes();
+    await handler(mockReq({ appointment_id: 'apt_1', scheduled_at: FUTURE }), res);
+    expect(query.mock.calls[1][0]).toMatch(/pg_advisory_xact_lock/);
+    expect(query.mock.calls[1][1]).toEqual(['appointments:doc_1']);
+  });
+
+  it('a unique-index clash (23505) is a clean 409', async () => {
+    query.mockReset();
+    query.mockResolvedValueOnce(SCHEDULED_APT).mockResolvedValueOnce(LOCK)
+      .mockRejectedValueOnce(Object.assign(new Error('dup'), { code: '23505' }));
+    const res = mockRes();
+    await handler(mockReq({ appointment_id: 'apt_1', scheduled_at: FUTURE }), res);
+    expect(res._status).toBe(409);
   });
 });

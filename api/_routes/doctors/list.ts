@@ -27,7 +27,10 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   // Public-surface columns only: no email, phone, or internal notes.
   const doctorsPromise = sql.query(
     `SELECT user_id, full_name, title, specialties, years_experience, bio,
-            avatar_url, rating, review_count, is_verified, languages, credentials
+            avatar_url, rating, review_count, is_verified, languages, credentials,
+            -- practice_address arrives with migration 017; read through
+            -- to_jsonb so the directory keeps working before it is applied.
+            to_jsonb(doctor_profiles) ->> 'practice_address' AS practice_address
        FROM doctor_profiles
       WHERE is_verified = true`,
     []

@@ -409,7 +409,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background">
       {/* Header: the tab title on Me, the shared sub-page header on a section. */}
       {section ? (
         <SubPageHeader title={ME_SECTIONS[section]} backTo="/dashboard/settings" backLabel="Me" />
@@ -894,7 +894,7 @@ const Settings = () => {
         </>)}
       </div>
       )}
-    </div>
+    </main>
   );
 };
 

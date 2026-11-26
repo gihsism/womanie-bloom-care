@@ -31,6 +31,8 @@ interface ProfileRow {
   years_experience: number | null;
   languages: string[] | null;
   avatar_url: string | null;
+  // Only present once migration 017 is applied.
+  practice_address?: string | null;
 }
 
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
@@ -54,6 +56,10 @@ const DoctorProfileEditor = ({ doctorId }: DoctorProfileEditorProps) => {
   const [yearsExperience, setYearsExperience] = useState<string>('');
   const [languagesText, setLanguagesText] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [practiceAddress, setPracticeAddress] = useState('');
+  // The address field appears once the column exists (migration 017), so
+  // a save never sends a column the database does not have yet.
+  const [hasAddressColumn, setHasAddressColumn] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -61,7 +67,7 @@ const DoctorProfileEditor = ({ doctorId }: DoctorProfileEditorProps) => {
     const load = async () => {
       const { data } = await db
         .from('doctor_profiles')
-        .select('full_name, title, specialty, specialties, bio, years_experience, languages, avatar_url')
+        .select('*')
         .eq('user_id', doctorId)
         .maybeSingle();
       const row = (data as ProfileRow | null) ?? null;
@@ -75,6 +81,8 @@ const DoctorProfileEditor = ({ doctorId }: DoctorProfileEditorProps) => {
       );
       setLanguagesText(Array.isArray(row?.languages) ? row.languages.join(', ') : '');
       setAvatarUrl(row?.avatar_url ?? null);
+      setHasAddressColumn(!!row && Object.prototype.hasOwnProperty.call(row, 'practice_address'));
+      setPracticeAddress(row?.practice_address ?? '');
       setLoaded(true);
     };
     load();
@@ -180,6 +188,7 @@ const DoctorProfileEditor = ({ doctorId }: DoctorProfileEditorProps) => {
           bio: bio.trim() || null,
           years_experience: yearsParsed,
           languages: splitList(languagesText).length > 0 ? splitList(languagesText) : null,
+          ...(hasAddressColumn ? { practice_address: practiceAddress.trim() || null } : {}),
         })
         .eq('user_id', doctorId);
       if (error) throw error;
@@ -230,7 +239,7 @@ const DoctorProfileEditor = ({ doctorId }: DoctorProfileEditorProps) => {
         {/* Avatar uploader. Saves on file pick (not on Save profile), so
             the new image is live whether or not the doctor scrolls
             down to hit Save below. */}
-        <div className="flex items-center gap-4">
+        <div id="setup-photo" className="flex items-center gap-4 scroll-mt-24">
           {avatarUrl ? (
             <img
               src={avatarUrl}
@@ -319,7 +328,7 @@ const DoctorProfileEditor = ({ doctorId }: DoctorProfileEditorProps) => {
             />
           </div>
         </div>
-        <div className="space-y-1.5">
+        <div id="setup-specialty" className="space-y-1.5 scroll-mt-24">
           <Label htmlFor="specialty">Primary specialty</Label>
           <Input
             id="specialty"
@@ -358,7 +367,7 @@ const DoctorProfileEditor = ({ doctorId }: DoctorProfileEditorProps) => {
               placeholder="e.g. 12"
             />
           </div>
-          <div className="space-y-1.5">
+          <div id="setup-languages" className="space-y-1.5 scroll-mt-24">
             <Label htmlFor="languages">Languages</Label>
             <Input
               id="languages"
@@ -369,6 +378,20 @@ const DoctorProfileEditor = ({ doctorId }: DoctorProfileEditorProps) => {
             <p className="text-[11px] text-muted-foreground">Comma-separated.</p>
           </div>
         </div>
+        {hasAddressColumn && (
+          <div id="setup-address" className="space-y-1.5 scroll-mt-24">
+            <Label htmlFor="practice-address">Practice address</Label>
+            <Input
+              id="practice-address"
+              value={practiceAddress}
+              onChange={(e) => setPracticeAddress(e.target.value)}
+              placeholder="Street and number, postcode, city"
+              maxLength={200}
+              autoComplete="street-address"
+            />
+            <p className="text-[11px] text-muted-foreground">Where in-person visits take place. Shown on your directory card.</p>
+          </div>
+        )}
         <div className="space-y-1.5">
           <Label htmlFor="bio">Bio</Label>
           <Textarea

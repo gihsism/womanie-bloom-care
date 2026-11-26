@@ -101,10 +101,10 @@ const ConsultationSettings = ({ doctorId }: { doctorId: string }) => {
         </CardHeader>
         <CardContent className="p-4 pt-0 space-y-6">
           {/* Availability Toggle */}
-          <div className="flex items-center justify-between p-4 border rounded-lg">
+          <div id="setup-bookings" className="flex items-center justify-between p-4 border rounded-lg scroll-mt-24">
             <div>
               <p className="font-medium">Accept new bookings</p>
-              <p className="text-sm text-muted-foreground">Patients can book you only while this is on</p>
+              <p className="text-sm text-muted-foreground">Patients can find and book you only while this is on (and once your licence is verified). Remember to press Save.</p>
             </div>
             <Switch
               checked={settings.is_available}
@@ -114,7 +114,7 @@ const ConsultationSettings = ({ doctorId }: { doctorId: string }) => {
           </div>
 
           {/* Pricing */}
-          <div className="space-y-4">
+          <div id="setup-price" className="space-y-4 scroll-mt-24">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium flex items-center gap-1.5">
@@ -185,13 +185,13 @@ const ConsultationSettings = ({ doctorId }: { doctorId: string }) => {
       </Card>
 
       {/* Schedule Card */}
-      <Card className="panel rounded-[1.25rem] border-line bg-card shadow-none">
+      <Card id="setup-hours" className="scroll-mt-24 panel rounded-[1.25rem] border-line bg-card shadow-none">
         <CardHeader className="p-4 pb-3">
           <CardTitle className="section-title flex items-center gap-2">
             <Clock className="h-5 w-5 text-stage-accent" strokeWidth={1.9} aria-hidden="true" />
             Opening hours
           </CardTitle>
-          <CardDescription>Patients can book you inside these hours</CardDescription>
+          <CardDescription>Patients can book you inside these hours. Times are Swiss time (Zurich), also for patients abroad.</CardDescription>
         </CardHeader>
         <CardContent className="p-4 pt-0">
           <ScheduleEditor doctorId={doctorId} />
