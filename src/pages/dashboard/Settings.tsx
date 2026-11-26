@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Shield, Bell, User, Download, Loader2, Trash2, Wand2, KeyRound, Eye, EyeOff, Pill, Inbox, Phone, Smartphone, Users, HelpCircle, Info, LogOut, UserCog, FileText } from 'lucide-react';
+import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Shield, Bell, User, Download, Loader2, Trash2, Wand2, KeyRound, Eye, EyeOff, Pill, Inbox, Phone, Smartphone, Users, HelpCircle, Info, LogOut, UserCog, FileText, Activity } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { scorePassword } from '@/lib/password-strength';
 import { Button } from '@/components/ui/button';
@@ -446,6 +446,7 @@ const Settings = () => {
             <MeRow icon={Calendar} label="Life stage" value={LIFE_STAGE_LABELS[selectedStage]} onClick={() => openSection('life-stage')} testId="me-row-life-stage" />
           </MeGroup>
           <MeGroup>
+            <MeRow icon={Activity} label="Health overview" value="Your numbers over time" onClick={() => navigate('/dashboard/health-overview')} testId="me-row-health-overview" />
             <MeRow icon={Pill} label="Medicines & supplements" onClick={() => openSection('medicines')} testId="me-row-medicines" />
             <MeRow icon={Bell} label="Reminders" onClick={() => openSection('reminders')} testId="me-row-reminders" />
             <MeRow icon={FileText} label="Prepare a visit summary" value="For any doctor" onClick={() => navigate('/dashboard/visit-summary/print')} testId="me-row-visit-summary" />

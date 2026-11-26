@@ -55,6 +55,7 @@ const Notifications = lazy(() => import("./pages/dashboard/Notifications"));
 const Help = lazy(() => import("./pages/dashboard/Help"));
 const Privacy = lazy(() => import("./pages/dashboard/Privacy"));
 const Emergency = lazy(() => import("./pages/dashboard/Emergency"));
+const HealthOverview = lazy(() => import("./pages/dashboard/HealthOverview"));
 const CompareDocs = lazy(() => import("./pages/dashboard/CompareDocs"));
 const PanelDetail = lazy(() => import("./pages/dashboard/PanelDetail"));
 const PrintDoc = lazy(() => import("./pages/dashboard/PrintDoc"));
@@ -141,6 +142,7 @@ const App = () => (
                   {/* Public URL for the App Store / Play listing privacy-policy link. */}
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/dashboard/emergency" element={<Emergency />} />
+                  <Route path="/dashboard/health-overview" element={<HealthOverview />} />
                   <Route path="/dashboard/compare" element={<CompareDocs />} />
                   <Route path="/dashboard/panel/:slug" element={<PanelDetail />} />
                   <Route path="/dashboard/doc/:id/print" element={<PrintDoc />} />
