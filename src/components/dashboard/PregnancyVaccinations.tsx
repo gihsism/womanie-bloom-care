@@ -110,7 +110,7 @@ export default function PregnancyVaccinations({ dueDate }: PregnancyVaccinations
     return {
       key: 'due_now',
       label: 'Due now',
-      color: 'bg-primary/15 text-primary',
+      color: 'bg-primary/5 text-primary',
     };
   };
 
@@ -165,11 +165,11 @@ export default function PregnancyVaccinations({ dueDate }: PregnancyVaccinations
               <p className="text-[11px] text-muted-foreground mb-2">{v.rationale}</p>
               {status.key !== 'received' && status.key !== 'declined' && (
                 <div className="flex gap-1.5">
-                  <Button size="sm" className="h-7 text-[11px]" onClick={() => markReceived(v.key)}>
+                  <Button size="sm" className="tap-target h-7 text-[11px]" onClick={() => markReceived(v.key)}>
                     <Check className="h-3 w-3 mr-1" />
                     Mark received
                   </Button>
-                  <Button size="sm" variant="ghost" className="h-7 text-[11px]" onClick={() => markDeclined(v.key)}>
+                  <Button size="sm" variant="ghost" className="tap-target h-7 text-[11px]" onClick={() => markDeclined(v.key)}>
                     Not now
                   </Button>
                 </div>

@@ -42,7 +42,7 @@ function ShiftBadge({ shift }: { shift: TrendRow['statusShift'] }) {
   }
   if (shift === 'worsened') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/5 text-destructive/80 text-[10px] font-medium uppercase tracking-wide">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/5 text-destructive text-[10px] font-medium uppercase tracking-wide">
         Worsening
       </span>
     );

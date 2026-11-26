@@ -182,7 +182,7 @@ export default function PostpartumLochiaCard({ birthDate }: Props) {
 
       {(reBleed || persistentRed) && (
         <div className={attentionBanner}>
-          <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-destructive/80" />
+          <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-destructive" />
           <div className="text-xs">
             {persistentRed && (
               <p className="leading-snug">

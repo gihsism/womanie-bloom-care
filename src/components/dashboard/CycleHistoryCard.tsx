@@ -241,7 +241,7 @@ const CycleHistoryCard = ({ enabled = true }: CycleHistoryCardProps) => {
 
       {stats.regularity === 'Irregular' && (
         <div className={attentionBanner}>
-          <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-destructive/80" />
+          <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-destructive" />
           <p className="text-xs">
             Cycles vary by more than ±8 days. Conditions like PCOS, thyroid issues, or stress
             can drive irregularity — worth flagging at your next visit.

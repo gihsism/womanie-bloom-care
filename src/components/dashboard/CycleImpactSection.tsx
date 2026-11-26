@@ -385,7 +385,7 @@ function generateHormoneInsights(labResults: LabResult[], lifeStage?: string | n
 const severityConfig = {
   good: { bg: 'bg-muted/60', border: 'border-border', text: 'text-muted-foreground', icon: '✅', dot: 'bg-foreground/25' },
   info: { bg: 'bg-primary/5', border: 'border-primary/20', text: 'text-primary', icon: 'ℹ️', dot: 'bg-primary/60' },
-  caution: { bg: 'bg-destructive/5', border: 'border-destructive/20', text: 'text-destructive/80', icon: '⚠️', dot: 'bg-destructive/60' },
+  caution: { bg: 'bg-destructive/5', border: 'border-destructive/20', text: 'text-destructive', icon: '⚠️', dot: 'bg-destructive/60' },
   warning: { bg: 'bg-destructive/10', border: 'border-destructive/30', text: 'text-destructive', icon: '🔴', dot: 'bg-destructive' },
 };
 

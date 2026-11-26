@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { lazy, Suspense, useDeferredValue, useEffect, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -8,25 +8,13 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import { useScrollToHash } from '@/hooks/useScrollToHash';
 import { useStageProfile } from '@/hooks/useStageProfile';
 import { stageLabel } from '@/lib/stageLabels';
-import CycleCalendar from '@/components/dashboard/CycleCalendar';
-import PregnancyTracker from '@/components/dashboard/PregnancyTracker';
-import PregnancyWeightTracker from '@/components/dashboard/PregnancyWeightTracker';
-import BloodPressureTracker from '@/components/dashboard/BloodPressureTracker';
 import PregnancyVaccinations from '@/components/dashboard/PregnancyVaccinations';
 import PregnancyNutrition from '@/components/dashboard/PregnancyNutrition';
 import PregnancyExercise from '@/components/dashboard/PregnancyExercise';
 import MenopauseNutrition from '@/components/dashboard/MenopauseNutrition';
 import IVFNutrition from '@/components/dashboard/IVFNutrition';
-import IVFTracker from '@/components/dashboard/IVFTracker';
-import PreMenstrualDashboard from '@/components/dashboard/PreMenstrualDashboard';
-import MenopauseDashboard from '@/components/dashboard/MenopauseDashboard';
-import PostpartumDashboard from '@/components/dashboard/PostpartumDashboard';
-import EpdsScreener from '@/components/dashboard/EpdsScreener';
 import MedicineLog from '@/components/dashboard/MedicineLog';
 import GuidesSection from '@/components/dashboard/GuidesSection';
-import MenopauseSymptomCalendar from '@/components/dashboard/MenopauseSymptomCalendar';
-import PerimenopauseStageCard from '@/components/dashboard/PerimenopauseStageCard';
-import ContraceptionDashboard from '@/components/dashboard/ContraceptionDashboard';
 import CyclePhaseNutrition from '@/components/dashboard/CyclePhaseNutrition';
 import CyclePhaseExercise from '@/components/dashboard/CyclePhaseExercise';
 import PMSForecastCard from '@/components/dashboard/PMSForecastCard';
@@ -35,6 +23,22 @@ import FertilityForecast from '@/components/dashboard/FertilityForecast';
 import CycleExplainedCard from '@/components/dashboard/CycleExplainedCard';
 import EvidenceNote from '@/components/research/EvidenceNote';
 import { evidenceSpec } from '@/lib/evidenceTopics';
+
+// Each life stage renders a different set of trackers, and one person only
+// ever sees one stage — so the stage-specific trackers load on demand
+// instead of shipping all of them (~280 KB) to everyone who opens this page.
+const CycleCalendar = lazy(() => import('@/components/dashboard/CycleCalendar'));
+const PregnancyTracker = lazy(() => import('@/components/dashboard/PregnancyTracker'));
+const PregnancyWeightTracker = lazy(() => import('@/components/dashboard/PregnancyWeightTracker'));
+const BloodPressureTracker = lazy(() => import('@/components/dashboard/BloodPressureTracker'));
+const IVFTracker = lazy(() => import('@/components/dashboard/IVFTracker'));
+const PreMenstrualDashboard = lazy(() => import('@/components/dashboard/PreMenstrualDashboard'));
+const MenopauseDashboard = lazy(() => import('@/components/dashboard/MenopauseDashboard'));
+const PostpartumDashboard = lazy(() => import('@/components/dashboard/PostpartumDashboard'));
+const EpdsScreener = lazy(() => import('@/components/dashboard/EpdsScreener'));
+const MenopauseSymptomCalendar = lazy(() => import('@/components/dashboard/MenopauseSymptomCalendar'));
+const PerimenopauseStageCard = lazy(() => import('@/components/dashboard/PerimenopauseStageCard'));
+const ContraceptionDashboard = lazy(() => import('@/components/dashboard/ContraceptionDashboard'));
 
 // /dashboard/stage — everything for the current life stage that used to be
 // stacked on Home: the stage's big tracker (unchanged), its guides and the
@@ -54,7 +58,10 @@ export default function StagePage() {
   const p = useStageProfile();
   const { hash } = useLocation();
   const guidesOpen = hash === '#guides';
-  const mode = p.selectedMode;
+  // Deferred: when the stage changes after first paint (cached profile ->
+  // server profile), keep showing the current trackers until the new
+  // stage's code has loaded, instead of flashing the fallback (layout shift).
+  const mode = useDeferredValue(p.selectedMode);
   usePageTitle(mode ? stageLabel(mode) : 'Your stage');
   useScrollToHash(!!mode);
 
@@ -79,13 +86,17 @@ export default function StagePage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card px-4 py-4 flex items-center gap-2">
-        <Link to="/dashboard" aria-label="Back to Home" className="flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted">
+        <Link to="/dashboard" aria-label="Back to Home" className="tap-target flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted">
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
         <h1 className="font-display text-[24px] font-normal leading-tight">{stageLabel(mode)}</h1>
       </header>
 
       <main className="w-full max-w-3xl mx-auto px-4 py-6">
+        {/* One boundary for the whole stage: the trackers appear together
+            once their code is in, instead of one by one pushing each other
+            down (layout shift). useScrollToHash waits for the #anchor. */}
+        <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
         {mode === 'ivf' && (
           <>
             <Section id="ivf-tracker">
@@ -206,6 +217,7 @@ export default function StagePage() {
             scroll its section to the top instead of leaving it under the
             tab bar at the bottom of a page that cannot scroll further. */}
         {hash && <div aria-hidden="true" data-testid="anchor-spacer" className="h-[60vh]" />}
+        </Suspense>
       </main>
     </div>
   );

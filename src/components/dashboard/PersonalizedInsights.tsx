@@ -638,7 +638,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
 const severityStyles = {
   positive: { bg: 'bg-muted/60', border: 'border-border', badge: 'bg-muted/60 text-muted-foreground' },
   neutral: { bg: 'bg-primary/5', border: 'border-primary/20', badge: 'bg-primary/5 text-primary' },
-  attention: { bg: 'bg-destructive/5', border: 'border-destructive/20', badge: 'bg-destructive/5 text-destructive/80' },
+  attention: { bg: 'bg-destructive/5', border: 'border-destructive/20', badge: 'bg-destructive/5 text-destructive' },
   urgent: { bg: 'bg-destructive/10', border: 'border-destructive/30', badge: 'bg-destructive/10 text-destructive' },
 };
 

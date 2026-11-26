@@ -364,7 +364,7 @@ function ValueGauge({ value, unit, refRange, status }: { value: string | null; u
               <>
                 <span className={
                   status === 'critical' ? 'text-destructive font-medium' :
-                  status === 'abnormal' ? 'text-destructive/80 font-medium' :
+                  status === 'abnormal' ? 'text-destructive font-medium' :
                   ''
                 }>
                   {deviationLabel}
@@ -428,7 +428,7 @@ function renderEnhancedSummary(summary: string) {
               <ul className="space-y-2">
                 {items.map((item, j) => (
                   <li key={j} className="text-sm leading-relaxed flex items-start gap-2">
-                    <span className="text-destructive/80 mt-0.5 flex-shrink-0">→</span>
+                    <span className="text-destructive mt-0.5 flex-shrink-0">→</span>
                     <span>{item.replace(/^[•-]\s*/, '')}</span>
                   </li>
                 ))}
@@ -534,7 +534,7 @@ function ResultCard({ item, history = [] }: { item: MedicalDataItem; history?: M
               <span key={idx} className={`text-xs px-2.5 py-1 rounded-full border ${
                 item.status === 'critical'
                   ? 'bg-destructive/10 text-destructive border-destructive/30'
-                  : 'bg-destructive/5 text-destructive/80 border-destructive/20'
+                  : 'bg-destructive/5 text-destructive border-destructive/20'
               }`}>
                 {condition}
               </span>
@@ -556,7 +556,7 @@ function ResultCard({ item, history = [] }: { item: MedicalDataItem; history?: M
 
 const riskColor = (status: string | null) => {
   if (status === 'critical') return 'bg-destructive/10 text-destructive border-destructive/30';
-  if (status === 'abnormal') return 'bg-destructive/5 text-destructive/80 border-destructive/20';
+  if (status === 'abnormal') return 'bg-destructive/5 text-destructive border-destructive/20';
   return 'bg-muted/60 text-muted-foreground border-border';
 };
 
@@ -1115,7 +1115,7 @@ export default function MedicalHistory() {
   const hasDocuments = documents.length > 0;
 
   return (
-    <div className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="px-3 py-3 sm:px-4 sm:py-4 flex items-center gap-2 sm:gap-3">
@@ -1128,7 +1128,7 @@ export default function MedicalHistory() {
           {/* Less-used actions live behind "⋯". Log out lives only in Me. */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9" aria-label="More actions">
+              <Button variant="ghost" size="icon" className="tap-target h-8 w-8 sm:h-9 sm:w-9" aria-label="More actions">
                 <MoreHorizontal className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </DropdownMenuTrigger>
@@ -1165,7 +1165,7 @@ export default function MedicalHistory() {
                 role="tab"
                 aria-selected={segment === key}
                 onClick={() => setSegment(key)}
-                className={`flex-1 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                className={`tap-target flex-1 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                   segment === key ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -1182,7 +1182,7 @@ export default function MedicalHistory() {
           )}
         </div>
         {reanalyzing && (
-          <Progress value={reanalyzeProgress.total > 0 ? (reanalyzeProgress.done / reanalyzeProgress.total) * 100 : 0} className="h-1.5 bg-muted" />
+          <Progress value={reanalyzeProgress.total > 0 ? (reanalyzeProgress.done / reanalyzeProgress.total) * 100 : 0} aria-label="Re-analysis progress" className="h-1.5 bg-muted" />
         )}
 
         {/* What changed with the document just uploaded */}
@@ -1475,8 +1475,8 @@ export default function MedicalHistory() {
                           return (
                             <div className="bg-gradient-to-br from-destructive/5 via-destructive/5 to-destructive/5 dark:from-destructive/10 dark:to-transparent rounded-xl p-4 border border-destructive/20 mb-3">
                               <div className="flex items-center gap-2 mb-2">
-                                <AlertTriangle className="h-4 w-4 text-destructive/80" />
-                                <p className="label-mono !text-destructive/80">
+                                <AlertTriangle className="h-4 w-4 text-destructive" />
+                                <p className="label-mono !text-destructive">
                                   Read this first — top {flagged.length} {flagged.length === 1 ? 'finding' : 'findings'}
                                 </p>
                               </div>
@@ -1496,7 +1496,7 @@ export default function MedicalHistory() {
                                           {valueBit && (
                                             <span className={`text-xs font-mono ${
                                               f.status === 'critical' ? 'text-destructive' :
-                                              'text-destructive/80'
+                                              'text-destructive'
                                             }`}>
                                               {valueBit}
                                             </span>
@@ -1662,7 +1662,7 @@ export default function MedicalHistory() {
                     <p className="text-muted-foreground">
                       <span className="font-medium text-foreground">{stats.labResults.length} result{stats.labResults.length !== 1 ? 's' : ''}</span>
                       {stats.abnormalLabs + stats.criticalLabs > 0
-                        ? <> · <span className="font-medium text-destructive/80">{stats.abnormalLabs + stats.criticalLabs} to talk about with your doctor</span></>
+                        ? <> · <span className="font-medium text-destructive">{stats.abnormalLabs + stats.criticalLabs} to talk about with your doctor</span></>
                         : ' · nothing flagged'}
                     </p>
                   </div>
@@ -1672,7 +1672,7 @@ export default function MedicalHistory() {
                 {flaggedItems.length > 0 && (
                   <div id="attention" className="scroll-mt-20">
                     <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-                      <Eye className="h-4 w-4 text-destructive/80" />
+                      <Eye className="h-4 w-4 text-destructive" />
                       Talk to your doctor about
                     </h3>
                     <div className="space-y-3">
@@ -1959,7 +1959,7 @@ export default function MedicalHistory() {
                           <p className="text-sm">
                             {differenceInDays(stats.nextCheckupEstimate, new Date()) > 0
                               ? <>🗓️ Your next checkup might be around <span className="font-medium text-primary">{format(stats.nextCheckupEstimate, 'MMMM d, yyyy')}</span></>
-                              : <>⏰ You might be <span className="font-medium text-destructive/80">{Math.abs(differenceInDays(stats.nextCheckupEstimate, new Date()))} days overdue</span> for a checkup</>
+                              : <>⏰ You might be <span className="font-medium text-destructive">{Math.abs(differenceInDays(stats.nextCheckupEstimate, new Date()))} days overdue</span> for a checkup</>
                             }
                           </p>
                         )}
@@ -1978,6 +1978,6 @@ export default function MedicalHistory() {
       </div>
 
       <DocumentUpload open={uploadOpen} onOpenChange={setUploadOpen} showTrigger={false} onUploaded={handleUploaded} />
-    </div>
+    </main>
   );
 }

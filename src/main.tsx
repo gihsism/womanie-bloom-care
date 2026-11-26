@@ -1,26 +1,11 @@
 import { createRoot } from 'react-dom/client';
-import * as Sentry from '@sentry/react';
 import App from './App.tsx';
 import './index.css';
 import { reloadOnceForStaleChunk } from './lib/staleChunk';
-import { scrubBreadcrumb, scrubErrorEvent, scrubTransaction } from './lib/sentryScrub';
+import { initMonitoring } from './lib/monitoring';
 
-if (import.meta.env.VITE_SENTRY_DSN) {
-  Sentry.init({
-    dsn: import.meta.env.VITE_SENTRY_DSN,
-    environment: import.meta.env.MODE,
-    sendDefaultPii: false,
-    tracesSampleRate: 0.1,
-    replaysSessionSampleRate: 0,
-    replaysOnErrorSampleRate: 0,
-    integrations: [Sentry.browserTracingIntegration()],
-    // No console breadcrumbs, no request bodies, no query strings or
-    // fragments in any URL (they can carry health data). See sentryScrub.ts.
-    beforeBreadcrumb: scrubBreadcrumb,
-    beforeSend: scrubErrorEvent,
-    beforeSendTransaction: scrubTransaction,
-  });
-}
+// Sentry loads in parallel with the first render (see lib/monitoring.ts).
+initMonitoring(import.meta.env.VITE_SENTRY_DSN, import.meta.env.MODE);
 
 // Prevent stale PWA Service Worker caches from breaking the dev preview
 if (import.meta.env.DEV && "serviceWorker" in navigator) {

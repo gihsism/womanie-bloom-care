@@ -705,7 +705,7 @@ export default function AIDoctorChat() {
   return (
     // The mobile nav is a left rail now, so the pinned input only needs to
     // clear the phone's home-indicator safe area.
-    <div className="min-h-screen bg-background flex flex-col pb-[env(safe-area-inset-bottom)]">
+    <main className="min-h-screen bg-background flex flex-col pb-[env(safe-area-inset-bottom)]">
       {/* Header: title, Past chats / New chat, and a ⋯ menu for the rest */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="px-3 py-2.5 sm:px-4 sm:py-3 flex items-center gap-2">
@@ -724,14 +724,14 @@ export default function AIDoctorChat() {
             </Button>
           )}
           {!showPast && (
-            <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-xs shrink-0" onClick={() => setShowPast(true)} disabled={isStreaming}>
+            <Button variant="ghost" size="sm" className="tap-target h-8 gap-1.5 text-xs shrink-0" onClick={() => setShowPast(true)} disabled={isStreaming}>
               <History className="h-3.5 w-3.5" aria-hidden="true" />
               Past chats
             </Button>
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="More options">
+              <Button variant="ghost" size="icon" className="tap-target h-8 w-8 shrink-0" aria-label="More options">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -920,6 +920,6 @@ export default function AIDoctorChat() {
           </div>
         </>
       )}
-    </div>
+    </main>
   );
 }
