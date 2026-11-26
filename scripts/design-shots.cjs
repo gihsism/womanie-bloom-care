@@ -425,7 +425,7 @@ async function audit(p) {
   if (!FLOW_SIDE) await ctx.addInitScript((s) => { try { localStorage.setItem('womanie_stage_theme', s); } catch { /* blocked */ } }, DOCTOR_SIDE ? 'pregnancy' : STAGE);
   // Only real API calls: source modules under /api/_lib (shared with the
   // client, e.g. practice-time) must still load from the dev server.
-  await ctx.route((u) => u.pathname.startsWith('/api/'), DOCTOR_SIDE ? doctorRoute : route);
+  await ctx.route((u) => u.pathname.startsWith('/api/') && !u.pathname.startsWith('/api/_lib/'), DOCTOR_SIDE ? doctorRoute : route);
   const p = await ctx.newPage();
   p.on('pageerror', (e) => console.log('PAGEERROR', String(e).slice(0, 300)));
   const list = DOCTOR_SIDE ? DOCTOR_PAGES : STAGE === 'first-run' ? FIRST_RUN_PAGES : STAGE === 'public' ? PUBLIC_PAGES : PAGES;
