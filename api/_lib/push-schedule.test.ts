@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
+import { dueTriggerPush } from '../../src/lib/ivfJourney';
 import {
-  planUserReminders, localParts, isQuietHours, inDayWindow, parsePrefs, userTimeZone,
+  planUserReminders, triggerPushDue, localParts, isQuietHours, inDayWindow, parsePrefs, userTimeZone,
   type SubscriptionRow, type UserData,
 } from './push-schedule';
 
@@ -164,7 +165,49 @@ describe('opt-out and ownership', () => {
     expect(planUserReminders(data({ meds: [MED] }), [other], at)).toEqual([]);
   });
 
-  it('defaults every type on', () => {
-    expect(parsePrefs(null)).toEqual({ medicine: true, period: true, appointment: true, bookings: true });
+  it('defaults every type on except the opt-in IVF trigger reminder', () => {
+    expect(parsePrefs(null)).toEqual({ medicine: true, period: true, appointment: true, bookings: true, documents: true, ivf_trigger: false });
+  });
+});
+
+describe('IVF trigger-shot reminders', () => {
+  // Trigger at 21:30 Zurich on 20 Nov 2026 = 20:30Z.
+  const T = '2026-11-20T20:30:00.000Z';
+  const before = (min: number) => new Date(Date.parse(T) - min * 60_000);
+  const optIn = (over: Partial<SubscriptionRow> = {}) => sub({ prefs: { ivf_trigger: true }, ...over });
+
+  it('is opt-in: nothing without the switch', () => {
+    expect(planUserReminders(data({ lifeStage: 'ivf', ivfTriggerAt: T }), [sub()], before(60))).toEqual([]);
+  });
+
+  it('reminds about an hour before and in the last 15 minutes, in her local time', () => {
+    const hour = planUserReminders(data({ lifeStage: 'ivf', ivfTriggerAt: T }), [optIn()], before(60));
+    expect(hour.map(r => r.key)).toEqual([`ivf-trigger:${T}:hour`]);
+    expect(hour[0].payload.body).toBe('Your timed injection is at 21:30, in about 1 hour.');
+    expect(hour[0].payload.url).toBe('/dashboard/stage#ivf-trigger');
+    const ten = planUserReminders(data({ lifeStage: 'ivf', ivfTriggerAt: T }), [optIn()], before(10));
+    expect(ten.map(r => r.key)).toEqual([`ivf-trigger:${T}:ten`]);
+    expect(ten[0].payload.body).toBe('Your timed injection is at 21:30, in 10 minutes.');
+    expect(planUserReminders(data({ ivfTriggerAt: T }), [optIn()], before(0))).toEqual([]);
+  });
+
+  it('is sent in quiet hours (the clinic chose the time) and stays discreet', () => {
+    const late = '2026-11-20T22:30:00.000Z'; // 23:30 Zurich
+    const r = planUserReminders(data({ ivfTriggerAt: late }), [optIn()], new Date(Date.parse(late) - 10 * 60_000));
+    expect(r).toHaveLength(1);
+    expect(`${r[0].payload.title} ${r[0].payload.body}`).not.toMatch(/ivf|trigger|ovitrelle|hcg/i);
+  });
+
+  it('a new time is a new reminder (keys carry the moment)', () => {
+    const moved = '2026-11-20T21:00:00.000Z';
+    const r = planUserReminders(data({ ivfTriggerAt: moved }), [optIn()], new Date(Date.parse(moved) - 60 * 60_000));
+    expect(r[0].key).toBe(`ivf-trigger:${moved}:hour`);
+  });
+
+  it('uses the same windows as the app (src/lib/ivfJourney.ts)', () => {
+    for (let m = 130; m >= -20; m--) {
+      expect(triggerPushDue(T, before(m))).toEqual(dueTriggerPush(T, before(m)));
+    }
+    expect(triggerPushDue('garbage', before(10))).toBeNull();
   });
 });

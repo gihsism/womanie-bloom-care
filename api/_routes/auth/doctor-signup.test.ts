@@ -183,3 +183,76 @@ describe('auth/doctor-signup security invariants', () => {
     expect(b.pending).toBe(true);
   });
 });
+
+describe('auth/doctor-signup with a one-time invite', () => {
+  const TOKEN = 'A'.repeat(43);
+  const INVITE = { id: 'inv_1', email: 'doctor@clinic.com', created_by: 'admin_1', created_by_email: 'founder@womanie.info' };
+
+  beforeEach(() => {
+    process.env.AUTH_SECRET = 'x'.repeat(40);
+    vi.mocked(checkAndConsume).mockResolvedValue({ ok: true, remaining: 9, limit: 10, retryInSec: 0 });
+    vi.mocked(bcrypt.hash).mockResolvedValue('$2b$10$hashedPassword' as never);
+    query.mockReset();
+    query.mockImplementation(async (text: string) => (/FROM doctor_invites/.test(text) ? [INVITE] : []));
+    transaction.mockReset();
+    transaction.mockResolvedValue([]);
+  });
+
+  const sqls = () => query.mock.calls.map((c: unknown[]) => String(c[0]));
+
+  it('creates an approved doctor, signs her in, and sends her to the dashboard', async () => {
+    const res = mockRes();
+    await handler(mockReq({ ...VALID_BODY, inviteToken: TOKEN }), res);
+    expect(res._status).toBe(200);
+    expect(res._body).toMatchObject({ success: true, pending: false, redirect: '/doctor/dashboard' });
+    expect(String(res._headers['Set-Cookie'])).toMatch(/^womanie_session=/);
+    expect(transaction).toHaveBeenCalledOnce();
+    const all = sqls();
+    expect(all.some(s => /INSERT INTO doctor_profiles/.test(s) && /true, 'approved'/.test(s))).toBe(true);
+    expect(all.some(s => /INSERT INTO user_roles/.test(s))).toBe(true);
+    expect(all.some(s => /INSERT INTO admin_audit_log/.test(s))).toBe(true);
+  });
+
+  // Single use: the FIRST statement of the transaction consumes the invite
+  // and divides by the rows it changed, so a second use rolls everything back.
+  it('consumes the invite inside the same transaction, first', async () => {
+    await handler(mockReq({ ...VALID_BODY, inviteToken: TOKEN }), mockRes());
+    const calls = query.mock.calls as unknown[][];
+    const i = calls.findIndex(c => /UPDATE doctor_invites/.test(String(c[0])));
+    const consume = String(calls[i][0]);
+    expect(consume).toMatch(/UPDATE doctor_invites SET used_at = now\(\)/);
+    expect(consume).toMatch(/used_at IS NULL AND revoked_at IS NULL AND expires_at > now\(\)/);
+    expect(consume).toMatch(/1 \/ \(SELECT count\(\*\)/);
+    expect(String(calls[i + 1][0])).toMatch(/INSERT INTO auth_users/);
+  });
+
+  it('answers 410 when the invite was used in a race (division_by_zero rollback)', async () => {
+    transaction.mockRejectedValue(Object.assign(new Error('division by zero'), { code: '22012' }));
+    const res = mockRes();
+    await handler(mockReq({ ...VALID_BODY, inviteToken: TOKEN }), res);
+    expect(res._status).toBe(410);
+    expect(res._headers['Set-Cookie']).toBeUndefined();
+  });
+
+  it('answers 410 for a used / expired / revoked invite', async () => {
+    query.mockResolvedValue([]);
+    const res = mockRes();
+    await handler(mockReq({ ...VALID_BODY, inviteToken: TOKEN }), res);
+    expect(res._status).toBe(410);
+    expect(transaction).not.toHaveBeenCalled();
+  });
+
+  it('refuses a different email than the one invited', async () => {
+    const res = mockRes();
+    await handler(mockReq({ ...VALID_BODY, email: 'other@clinic.com', inviteToken: TOKEN }), res);
+    expect(res._status).toBe(400);
+    expect(transaction).not.toHaveBeenCalled();
+  });
+
+  it('refuses a malformed token', async () => {
+    const res = mockRes();
+    await handler(mockReq({ ...VALID_BODY, inviteToken: 'short' }), res);
+    expect(res._status).toBe(410);
+    expect(transaction).not.toHaveBeenCalled();
+  });
+});

@@ -21,6 +21,22 @@ describe('Records segments', () => {
     expect(records).toContain("return t === 'charts' ? 'charts' : 'results';");
   });
 
+  // WAI-ARIA tabs pattern (QA round 3): tabs point at one tabpanel that is
+  // labelled by the selected tab; only the selected tab is in the Tab
+  // order, arrow keys / Home / End move between tabs.
+  it('segments are proper tabs with a tabpanel and keyboard support', () => {
+    expect(records).toContain('role="tablist" aria-label="Records sections"');
+    expect(records).toContain('id={`records-tab-${key}`}');
+    expect(records).toContain('aria-controls="records-panel"');
+    expect(records).toContain('tabIndex={segment === key ? 0 : -1}');
+    expect(count(records, /role="tabpanel"/)).toBe(1);
+    expect(records).toContain('id="records-panel" role="tabpanel" aria-labelledby={`records-tab-${segment}`}');
+    for (const k of ['ArrowRight', 'ArrowLeft', 'Home', 'End']) expect(records).toContain(`e.key === '${k}'`);
+    // Every segment's content sits inside the panel.
+    const panel = records.slice(records.indexOf('id="records-panel"'), records.indexOf('<DocumentUpload open'));
+    for (const seg of ["segment === 'charts'", "segment === 'documents'", "segment === 'results'"]) expect(panel).toContain(seg);
+  });
+
   it('a ?doc= deep link opens the Documents segment', () => {
     expect(records).toContain("setSegment('documents');");
   });

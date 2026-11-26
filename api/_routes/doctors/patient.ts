@@ -72,15 +72,20 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       // The Blob URL (file_path) stays server-side: the chart's "Open"
       // button reads the file through /api/docs/file?id=, which re-checks
       // the approved connection and logs the read. has_file only says
-      // whether there is anything to open.
+      // whether there is anything to open. sent_by_me marks a document
+      // this doctor sent into her Records ("Sent by you"); read through
+      // to_jsonb so the chart works before migration 021 adds the column,
+      // and other doctors' ids never leave the server.
       sql.query(
-        `SELECT id, file_name, (file_path IS NOT NULL AND file_path <> '') AS has_file,
-                mime_type, ai_suggested_name, ai_summary,
-                ai_suggested_category, uploaded_at, document_type
-           FROM health_documents
-          WHERE user_id = $1
-          ORDER BY uploaded_at DESC`,
-        [patientId]
+        `SELECT h.id, h.file_name, (h.file_path IS NOT NULL AND h.file_path <> '') AS has_file,
+                h.mime_type, h.ai_suggested_name, h.ai_summary,
+                h.ai_suggested_category, h.uploaded_at, h.document_type,
+                COALESCE((to_jsonb(h) ->> 'uploaded_by_doctor_id') = $2, false) AS sent_by_me,
+                CASE WHEN (to_jsonb(h) ->> 'uploaded_by_doctor_id') = $2 THEN h.notes END AS sent_note
+           FROM health_documents h
+          WHERE h.user_id = $1
+          ORDER BY h.uploaded_at DESC`,
+        [patientId, doctor.id]
       ),
       sql.query(
         `SELECT id, document_id, title, value, unit, reference_range, status,
@@ -154,6 +159,22 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       console.error('doctors/patient: medications read failed (non-fatal):', medErr);
     }
 
+    // Her birth plan (migration 020), read-only, and only when she ticked
+    // "Show in my doctor's chart". Best-effort like visit_questions: until
+    // the migration is applied the table does not exist.
+    let birthPlan: unknown = null;
+    try {
+      const bp = await sql.query(
+        `SELECT plan, updated_at FROM birth_plans
+          WHERE user_id = $1 AND shared_with_doctor = true
+          LIMIT 1`,
+        [patientId]
+      ) as unknown[];
+      birthPlan = bp[0] ?? null;
+    } catch (bpErr) {
+      console.error('doctors/patient: birth_plans read failed (non-fatal):', bpErr);
+    }
+
     return res.status(200).json({
       profile: profileRows[0] ?? null,
       healthSignals: signalRows,
@@ -164,6 +185,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       periodRecords: periodRows,
       visitQuestions,
       medicines,
+      birthPlan,
     });
   } catch (error) {
     console.error('doctors/patient error:', error);

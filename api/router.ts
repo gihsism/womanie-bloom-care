@@ -1,16 +1,19 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import adminDocs from './_routes/admin/docs.js';
 import adminDoctors from './_routes/admin/doctors.js';
+import adminInvites from './_routes/admin/invites.js';
 import appointmentsBook from './_routes/appointments/book.js';
 import appointmentsReschedule from './_routes/appointments/reschedule.js';
 import authCallback from './_routes/auth/callback.js';
 import authChangePassword from './_routes/auth/change-password.js';
+import authDoctorInvite from './_routes/auth/doctor-invite.js';
 import authDoctorSignup from './_routes/auth/doctor-signup.js';
 import authGoogle from './_routes/auth/google.js';
 import authLogin from './_routes/auth/login.js';
 import authLogout from './_routes/auth/logout.js';
 import authMe from './_routes/auth/me.js';
 import authSignup from './_routes/auth/signup.js';
+import chatConversation from './_routes/chat/conversation.js';
 import chatMessages from './_routes/chat/messages.js';
 import connectionsApproved from './_routes/connections/approved.js';
 import connectionsPending from './_routes/connections/pending.js';
@@ -19,6 +22,7 @@ import connectionsRespond from './_routes/connections/respond.js';
 import db from './_routes/db.js';
 import docsDelete from './_routes/docs/delete.js';
 import docsFile from './_routes/docs/file.js';
+import docsFromDoctor from './_routes/docs/from-doctor.js';
 import docsPendingRetries from './_routes/docs/pending-retries.js';
 import doctorsAvailability from './_routes/doctors/availability.js';
 import doctorsConnections from './_routes/doctors/connections.js';
@@ -26,6 +30,7 @@ import doctorsDay from './_routes/doctors/day.js';
 import doctorsList from './_routes/doctors/list.js';
 import doctorsPatient from './_routes/doctors/patient.js';
 import doctorsPatientTrends from './_routes/doctors/patient-trends.js';
+import doctorsProfile from './_routes/doctors/profile.js';
 import doctorsSchedule from './_routes/doctors/schedule.js';
 import meAppointments from './_routes/me/appointments.js';
 import meChartAccess from './_routes/me/chart-access.js';
@@ -57,16 +62,19 @@ type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 export const ROUTES: Record<string, Handler> = {
   'admin/docs': adminDocs,
   'admin/doctors': adminDoctors,
+  'admin/invites': adminInvites,
   'appointments/book': appointmentsBook,
   'appointments/reschedule': appointmentsReschedule,
   'auth/callback': authCallback,
   'auth/change-password': authChangePassword,
+  'auth/doctor-invite': authDoctorInvite,
   'auth/doctor-signup': authDoctorSignup,
   'auth/google': authGoogle,
   'auth/login': authLogin,
   'auth/logout': authLogout,
   'auth/me': authMe,
   'auth/signup': authSignup,
+  'chat/conversation': chatConversation,
   'chat/messages': chatMessages,
   'connections/approved': connectionsApproved,
   'connections/pending': connectionsPending,
@@ -75,6 +83,7 @@ export const ROUTES: Record<string, Handler> = {
   'db': db,
   'docs/delete': docsDelete,
   'docs/file': docsFile,
+  'docs/from-doctor': docsFromDoctor,
   'docs/pending-retries': docsPendingRetries,
   'doctors/availability': doctorsAvailability,
   'doctors/connections': doctorsConnections,
@@ -82,6 +91,7 @@ export const ROUTES: Record<string, Handler> = {
   'doctors/list': doctorsList,
   'doctors/patient': doctorsPatient,
   'doctors/patient-trends': doctorsPatientTrends,
+  'doctors/profile': doctorsProfile,
   'doctors/schedule': doctorsSchedule,
   'me/appointments': meAppointments,
   'me/chart-access': meChartAccess,

@@ -57,6 +57,17 @@ describe('appointments/reschedule security invariants', () => {
     expect(res._status).toBe(401);
   });
 
+  it('refuses to move a visit while the doctor has paused bookings, and changes nothing', async () => {
+    query.mockReset();
+    query.mockResolvedValueOnce([{ ...SCHEDULED_APT[0], bookings_on: false }]);
+    const res = mockRes();
+    await handler(mockReq({ appointment_id: 'apt_1', scheduled_at: FUTURE }), res);
+    expect(res._status).toBe(400);
+    expect((res._body as Record<string, string>).code).toBe('bookings_off');
+    expect(query).toHaveBeenCalledTimes(1);
+    expect(query.mock.calls[0][1]).toEqual(['apt_1', 'user_p1']);
+  });
+
   it('returns 400 when required fields are missing', async () => {
     const res = mockRes();
     await handler(mockReq({}), res);

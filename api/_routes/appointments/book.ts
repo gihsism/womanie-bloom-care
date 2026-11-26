@@ -56,7 +56,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'scheduled_at is not a valid ISO timestamp' });
   }
   if (scheduledAt.getTime() < Date.now()) {
-    return res.status(400).json({ error: 'Cannot book in the past' });
+    return res.status(400).json({ error: 'That time has already passed. Pick one of the offered times.', code: 'past' });
   }
 
   try {
@@ -65,7 +65,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     // Confirm doctor exists + is verified + has bookable settings, and
     // load her opening hours and visit length in the same round-trip.
     const docRows = await sql.query(
-      `SELECT dp.user_id, dp.is_verified, cs.is_available, cs.consultation_duration, cs.video_enabled,
+      `SELECT dp.user_id, dp.is_verified, dp.verification_status, cs.is_available, cs.consultation_duration, cs.video_enabled,
               (SELECT COALESCE(json_agg(json_build_object(
                         'day_of_week', ds.day_of_week, 'start_time', ds.start_time,
                         'end_time', ds.end_time, 'is_active', ds.is_active)), '[]'::json)
@@ -76,19 +76,28 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         WHERE dp.user_id = $1`,
       [body.doctor_id]
     ) as Array<{
-      user_id: string; is_verified: boolean; is_available: boolean | null;
+      user_id: string; is_verified: boolean; verification_status?: string | null; is_available: boolean | null;
       consultation_duration?: number | null; video_enabled?: boolean | null;
       schedule?: ScheduleWindow[] | string | null;
     }>;
     if (docRows.length === 0) {
-      return res.status(404).json({ error: 'Doctor not found' });
+      return res.status(404).json({ error: 'Doctor not found', code: 'not_bookable' });
     }
     const doc = docRows[0];
-    if (!doc.is_verified) {
-      return res.status(400).json({ error: 'This doctor is not currently bookable' });
+    // Approved only: a revoked/rejected doctor stays unbookable even if a
+    // stale is_verified flag was left behind.
+    const status = (doc.verification_status ?? 'approved').toLowerCase();
+    if (!doc.is_verified || status !== 'approved') {
+      return res.status(400).json({ error: 'This doctor is not currently bookable', code: 'not_bookable' });
     }
+    // The doctor switched "Accept new bookings" off (possibly while this
+    // patient had the booking dialog open): a distinct code so the app can
+    // say so and drop the doctor from the list instead of a generic error.
     if (doc.is_available !== true) {
-      return res.status(400).json({ error: 'This doctor is not currently available for bookings' });
+      return res.status(400).json({
+        error: 'This doctor has just paused new bookings. Your visit was not booked.',
+        code: 'bookings_off',
+      });
     }
     const docDuration = typeof doc.consultation_duration === 'number' && doc.consultation_duration > 0
       ? Math.min(Math.floor(doc.consultation_duration), 240)
@@ -99,7 +108,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       schedule = Array.isArray(raw) ? raw : [];
     } catch { schedule = []; }
     if (!fitsSchedule(scheduledAt, docDuration, schedule)) {
-      return res.status(400).json({ error: 'That time is outside this doctor\'s opening hours. Pick one of the offered times.' });
+      return res.status(400).json({ error: 'That time is outside this doctor\'s opening hours. Pick one of the offered times.', code: 'outside_hours' });
     }
     const type = consultationType === 'video' && doc.video_enabled !== false ? 'video' : 'in_person';
 
@@ -141,6 +150,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     if (inserted.length === 0) {
       return res.status(409).json({
         error: 'This slot was just taken by another patient. Pick a different time.',
+        code: 'slot_taken',
       });
     }
 

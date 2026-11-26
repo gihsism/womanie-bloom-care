@@ -28,6 +28,8 @@ const TYPES: Array<{ key: keyof PushPrefs; label: string; hint: string }> = [
   { key: 'medicine', label: 'Medicine times', hint: 'At the times you set on each medicine, unless you already logged the dose' },
   { key: 'period', label: 'Period', hint: 'The day before your period is expected, and if it is a few days late' },
   { key: 'appointment', label: 'Visits', hint: 'The day before a visit' },
+  { key: 'documents', label: 'Documents from your doctor', hint: 'When a connected doctor adds a document to your Records (the name of the document is never shown)' },
+  { key: 'ivf_trigger', label: 'IVF trigger shot', hint: 'About 1 hour and 10 minutes before the trigger time you entered, also at night. Off unless you switch it on; the lock screen only says "timed injection"' },
 ];
 
 const BLOCKED_TEXT: Record<Exclude<PushSupport, 'ok'>, string> = {
@@ -96,7 +98,7 @@ export default function PhoneNotifications() {
     <Card data-testid="phone-notifications">
       <CardHeader>
         <CardTitle className="flex items-center gap-2.5"><BellRing className="h-5 w-5 text-stage-accent" strokeWidth={1.9} aria-hidden="true" /> Phone notifications</CardTitle>
-        <CardDescription className="text-[15px] leading-snug">Reminders that reach you when Womanie is closed. Nothing is sent between 22:00 and 07:00 except medicine times you set yourself.</CardDescription>
+        <CardDescription className="text-[15px] leading-snug">Reminders that reach you when Womanie is closed. Nothing is sent between 22:00 and 07:00 except medicine times you set yourself and an IVF trigger shot.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {state.kind === 'loading' && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
@@ -124,7 +126,7 @@ export default function PhoneNotifications() {
                     <Label htmlFor={`push-${t.key}`} className="text-[17px] font-medium">{t.label}</Label>
                     <p className="text-[14px] text-muted-foreground">{t.hint}</p>
                   </div>
-                  <Switch id={`push-${t.key}`} checked={state.prefs[t.key]} onCheckedChange={v => void setPref(t.key, v)} />
+                  <Switch id={`push-${t.key}`} checked={state.prefs[t.key] === true} onCheckedChange={v => void setPref(t.key, v)} />
                 </div>
               </div>
             ))}

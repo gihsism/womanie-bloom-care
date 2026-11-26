@@ -17,6 +17,7 @@ import PatientDocuments from '@/components/doctor/patient/PatientDocuments';
 import PatientNotes from '@/components/doctor/patient/PatientNotes';
 import PatientVisits from '@/components/doctor/patient/PatientVisits';
 import PatientTrends from '@/components/doctor/patient/PatientTrends';
+import PatientBirthPlan, { type PatientBirthPlanRow } from '@/components/doctor/patient/PatientBirthPlan';
 import type { TrendsPayload } from '@/lib/patientTrends';
 import {
   EMPTY_DRAFT,
@@ -68,6 +69,7 @@ const PatientDetails = () => {
   const [periodRecords, setPeriodRecords] = useState<PeriodRecord[]>([]);
   const [visitQuestions, setVisitQuestions] = useState<PatientVisitQuestions[]>([]);
   const [medicines, setMedicines] = useState<PatientMedicine[]>([]);
+  const [birthPlan, setBirthPlan] = useState<PatientBirthPlanRow | null>(null);
   // Trends load on first open of the tab (own consent-gated endpoint).
   const [trends, setTrends] = useState<{ patientId: string; data: TrendsPayload } | null>(null);
   // Skeleton only until the first answer; a refresh after saving a note
@@ -125,6 +127,7 @@ const PatientDetails = () => {
       setPeriodRecords(payload.periodRecords || []);
       setVisitQuestions(Array.isArray(payload.visitQuestions) ? payload.visitQuestions : NO_VISIT_QUESTIONS);
       setMedicines(Array.isArray(payload.medicines) ? payload.medicines : NO_MEDICINES);
+      setBirthPlan(payload.birthPlan && typeof payload.birthPlan === 'object' ? payload.birthPlan : null);
     } catch (error) {
       console.error('Error loading patient data:', error);
       toast({ variant: 'destructive', title: 'Could not load this chart', description: 'Please try again.' });
@@ -246,6 +249,7 @@ const PatientDetails = () => {
               profile={patient}
               onOpenTab={setActiveTab}
             />
+            {birthPlan && <div className="mt-4"><PatientBirthPlan row={birthPlan} /></div>}
           </TabsContent>
 
           <TabsContent value="trends">
@@ -264,7 +268,16 @@ const PatientDetails = () => {
           </TabsContent>
 
           <TabsContent value="documents">
-            <PatientDocuments documents={documents} />
+            <PatientDocuments
+              documents={documents}
+              patientId={patientId}
+              patientName={patient?.full_name}
+              onSent={doc => {
+                setDocuments(prev => [{ ...doc, sent_note: doc.notes }, ...prev]);
+                // The analysis lands in a minute or two; pick it up then.
+                window.setTimeout(() => { void loadChart(); }, 90_000);
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="notes">

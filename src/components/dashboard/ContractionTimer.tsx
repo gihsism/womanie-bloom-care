@@ -1,117 +1,103 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
-import { Timer, Play, Square, RotateCcw, AlertTriangle, History } from 'lucide-react';
+import { Timer, Play, Square, RotateCcw, Phone, History, CloudOff } from 'lucide-react';
 import { format, formatDistanceToNowStrict } from 'date-fns';
-import { useLifeEvents, importLocalOnce } from '@/hooks/useLifeEvents';
+import { importLocalOnce } from '@/hooks/useLifeEvents';
+import { useOfflineLifeEvents } from '@/hooks/useOfflineLifeEvents';
+import { useWakeLock } from '@/hooks/useWakeLock';
+import {
+  detect511, formatSpan, rollingSummary, withIntervals, MINUTE, type TimedContraction,
+} from '@/lib/contractions';
 
-// Contraction timer for late pregnancy. Standard advice when labor
-// starts: time the frequency (start-to-start) and duration. The
-// "5-1-1 rule" (every 5 min, lasting 1 min, for 1 hour) is the
-// classic threshold for heading to the hospital, though clinics vary.
+// Contraction timer for late pregnancy. Start/Stop each contraction; the
+// card shows duration and the start-to-start interval, a rolling one-hour
+// summary, and a calm banner once the 5-1-1 pattern (every 5 min, lasting
+// 1 min, for 1 hour) holds. Sources and the exact rule: src/lib/contractions.ts
+// (ACOG FAQ004 "How to Tell When Labor Begins"; NHS "Signs that labour has
+// begun"). Non-diagnostic: it only prompts her to call, never says she is
+// or isn't in labour.
 //
 // Finished contractions are saved to the account (life_events, kind
-// 'contraction') so they survive a phone change, appear in the data
-// export and can be shown to a midwife. The one in progress stays on the
-// device so Start/Stop are instant even on a poor connection; history
-// from older versions (device-only) is moved into the account once.
+// 'contraction'); without signal they wait on the device and sync later.
+// The contraction in progress stays on the device so Start/Stop are
+// instant. The screen is kept on while she is timing (Wake Lock API).
 
-interface Contraction {
+interface ActiveContraction {
   id: string;
   startedAt: number;
-  endedAt: number | null;
 }
 
 const KEY = (uid: string) => `womanie_contractions_${uid}`;
 const ACTIVE_KEY = (uid: string) => `womanie_contraction_active_${uid}`;
-const MAX_HISTORY = 50;
+const MAX_HISTORY = 100;
+// Keep the screen on while a contraction runs or one started this recently.
+const KEEP_AWAKE_MS = 15 * MINUTE;
 
-function uid() {
-  return crypto.randomUUID();
-}
-
-function readJson<T>(key: string, fallback: T): T {
+function readActive(key: string): ActiveContraction | null {
   try {
     const raw = localStorage.getItem(key);
-    if (!raw) return fallback;
-    return JSON.parse(raw) as T;
+    const v = raw ? JSON.parse(raw) : null;
+    return v && typeof v.startedAt === 'number' ? { id: String(v.id), startedAt: v.startedAt } : null;
   } catch {
-    return fallback;
+    return null;
   }
-}
-
-function writeJson(key: string, value: unknown) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Quota / private mode — accept in-memory.
-  }
-}
-
-function fmtMs(ms: number): string {
-  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  if (minutes >= 60) {
-    return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
-  }
-  return `${minutes}m ${String(seconds).padStart(2, '0')}s`;
 }
 
 const ContractionTimer = () => {
   const { user } = useAuth();
   const userId = user?.id;
-  const { events, add, remove, error } = useLifeEvents('contraction', {
+  const { events, pending, addOrQueue, remove, removePending, error } = useOfflineLifeEvents('contraction', {
     limit: MAX_HISTORY,
-    beforeLoad: (id) => importLocalOnce<Contraction, Record<string, never>>(id, KEY(id), 'contraction', c =>
+    beforeLoad: (id) => importLocalOnce<{ startedAt: number; endedAt: number | null }, Record<string, never>>(id, KEY(id), 'contraction', c =>
       c.endedAt === null ? null : { occurred_at: new Date(c.startedAt).toISOString(), ended_at: new Date(c.endedAt).toISOString() }),
   });
-  // Oldest first, like the device-only version kept them.
-  const history: Contraction[] = events
-    .filter(e => e.ended_at !== null)
-    .map(e => ({ id: e.id, startedAt: Date.parse(e.occurred_at), endedAt: Date.parse(e.ended_at as string) }))
-    .sort((a, b) => a.startedAt - b.startedAt);
-  const [active, setActive] = useState<Contraction | null>(null);
-  const [now, setNow] = useState(Date.now());
-  const tickRef = useRef<number | null>(null);
 
-  // Restore an in-progress contraction (kept on the device).
+  const saved: Array<TimedContraction & { pending: boolean }> = events
+    .filter(e => e.ended_at !== null)
+    .map(e => ({ id: e.id, startedAt: Date.parse(e.occurred_at), endedAt: Date.parse(e.ended_at as string), pending: false }));
+  const queued = pending
+    .filter(p => p.ended_at)
+    .map(p => ({ id: p.localId, startedAt: Date.parse(p.occurred_at), endedAt: Date.parse(p.ended_at as string), pending: true }));
+  const all = [...saved, ...queued].sort((a, b) => a.startedAt - b.startedAt);
+  const pendingIds = new Set(queued.map(q => q.id));
+
+  const [active, setActive] = useState<ActiveContraction | null>(null);
+  const [now, setNow] = useState(Date.now());
+
   useEffect(() => {
     if (!userId) return;
-    setActive(readJson<Contraction | null>(ACTIVE_KEY(userId), null));
+    setActive(readActive(ACTIVE_KEY(userId)));
   }, [userId]);
 
-  // Tick once a second while there's an active contraction or while
-  // we're inside a "recent" window so the time-since-last counter
-  // stays accurate.
   useEffect(() => {
-    tickRef.current = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => {
-      if (tickRef.current) window.clearInterval(tickRef.current);
-    };
+    const t = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(t);
   }, []);
 
-  const setActiveSaved = (c: Contraction | null) => {
+  const last = all.length ? all[all.length - 1] : null;
+  useWakeLock(!!active || (last !== null && now - last.startedAt < KEEP_AWAKE_MS));
+
+  const setActiveSaved = (c: ActiveContraction | null) => {
     setActive(c);
     if (!userId) return;
-    if (c) writeJson(ACTIVE_KEY(userId), c);
-    else { try { localStorage.removeItem(ACTIVE_KEY(userId)); } catch { /* ignore */ } }
+    try {
+      if (c) localStorage.setItem(ACTIVE_KEY(userId), JSON.stringify(c));
+      else localStorage.removeItem(ACTIVE_KEY(userId));
+    } catch { /* private mode: in memory only */ }
   };
 
-  const start = () => {
-    setActiveSaved({ id: uid(), startedAt: Date.now(), endedAt: null });
-  };
+  const start = () => setActiveSaved({ id: crypto.randomUUID(), startedAt: Date.now() });
 
   const stop = async () => {
     if (!active) return;
     const endedAt = Date.now();
-    const startedAt = active.startedAt;
+    const { startedAt } = active;
     setActiveSaved(null);
-    const saved = await add({ occurred_at: new Date(startedAt).toISOString(), ended_at: new Date(endedAt).toISOString() });
-    // Keep the contraction on screen if the save failed, so it isn't lost.
-    if (!saved) setActiveSaved({ id: uid(), startedAt, endedAt: null });
+    // Never lost: saved to the account, or queued on the device.
+    await addOrQueue({ occurred_at: new Date(startedAt).toISOString(), ended_at: new Date(endedAt).toISOString() });
   };
 
   const discardActive = () => {
@@ -121,54 +107,23 @@ const ContractionTimer = () => {
   };
 
   const removeOne = (id: string) => {
-    void remove(id);
+    if (pendingIds.has(id)) removePending(id);
+    else void remove(id);
   };
 
   const reset = async () => {
-    if (history.length === 0 && !active) return;
+    if (all.length === 0 && !active) return;
     if (!window.confirm('Clear all contraction history?')) return;
     setActiveSaved(null);
-    for (const c of history) await remove(c.id);
+    for (const c of all) {
+      if (c.pending) removePending(c.id);
+      else await remove(c.id);
+    }
   };
 
-  // Sliding-window stats: last hour's average frequency (start-to-start)
-  // and duration. These are the numbers the user is actually trying
-  // to track against the 5-1-1 threshold.
-  const lastHourEnd = active ? active.startedAt : now;
-  const oneHourAgo = lastHourEnd - 60 * 60 * 1000;
-  const lastHour = history.filter(c => c.startedAt >= oneHourAgo);
-  const intervals: number[] = [];
-  for (let i = 1; i < lastHour.length; i++) {
-    intervals.push(lastHour[i].startedAt - lastHour[i - 1].startedAt);
-  }
-  const durations = lastHour
-    .filter(c => c.endedAt !== null)
-    .map(c => (c.endedAt as number) - c.startedAt);
-
-  const avgFrequencyMs = intervals.length > 0
-    ? intervals.reduce((s, v) => s + v, 0) / intervals.length
-    : null;
-  const avgDurationMs = durations.length > 0
-    ? durations.reduce((s, v) => s + v, 0) / durations.length
-    : null;
-
-  // 5-1-1: frequency ≤ 5 minutes, duration ≥ 1 minute, sustained for ≥ 1 hour.
-  // We can't perfectly check "sustained for 1 hour" without a longer
-  // window — we approximate: at least 6 contractions in the last hour
-  // (which is 1 every ~10 min, the minimum for the rule to even be
-  // meaningful) and meeting both other thresholds.
-  const meeting511 = avgFrequencyMs !== null && avgFrequencyMs <= 5 * 60 * 1000
-    && avgDurationMs !== null && avgDurationMs >= 60 * 1000
-    && lastHour.length >= 6;
-
-  const lastEnded = history.length > 0
-    ? history.reduce((a, b) =>
-        (a.endedAt ?? a.startedAt) > (b.endedAt ?? b.startedAt) ? a : b
-      )
-    : null;
-  const sinceLastMs = lastEnded
-    ? now - (lastEnded.endedAt ?? lastEnded.startedAt)
-    : null;
+  const summary = rollingSummary(all, now);
+  const pattern = detect511(all, now);
+  const rows = withIntervals(all).reverse().slice(0, 15);
 
   return (
     <Card className="p-4 space-y-3">
@@ -178,24 +133,47 @@ const ContractionTimer = () => {
           Contraction timer
         </h4>
         <Badge variant="outline" className="text-[10px]">
-          5-1-1 rule for heading in
+          5-1-1 rule
         </Badge>
       </div>
       <p className="text-xs text-muted-foreground -mt-1">
-        Tap Start when a contraction begins, Stop when it ends. The 5-1-1 rule —
-        every 5 minutes, lasting 1 minute, for 1 hour — is the typical "head to the
-        hospital" threshold. Your provider may use a different rule; follow theirs.
+        Tap Start when a contraction begins and Stop when it ends. The usual rule is to call
+        when they come every 5 minutes, last 1 minute, for 1 hour. If your midwife or hospital
+        gave you a different rule, follow theirs.
       </p>
 
       {error && <p className="text-xs text-destructive">{error}</p>}
 
-      {/* Active contraction big surface */}
+      {pattern.status === 'met' && (
+        <div role="status" className="flex items-start gap-2 p-3 rounded-lg border border-primary/30 bg-primary/5">
+          <Phone className="h-4 w-4 mt-0.5 flex-shrink-0 text-primary" />
+          <div className="text-xs text-foreground/85">
+            <p className="font-medium">5-1-1 rule: time to call your midwife or hospital.</p>
+            <p className="mt-0.5">
+              For about {formatSpan(pattern.sustainedMs)} your contractions have come every 5 minutes
+              or less and lasted a minute or more. Call them now; they will tell you when to come in.
+            </p>
+          </div>
+        </div>
+      )}
+      {pattern.status === 'building' && (
+        <p role="status" className="text-xs text-foreground/80 rounded-lg bg-muted/40 p-2.5">
+          Your last {pattern.runCount} contractions fit the 5-1-1 pace ({formatSpan(pattern.sustainedMs)} so far).
+          Keep timing; call when it has held for an hour, or sooner if your midwife told you to.
+        </p>
+      )}
+
       {active ? (
         <div className="rounded-xl bg-primary/10 border border-primary/30 p-4 text-center space-y-2">
-          <div className="text-xs uppercase tracking-wide text-primary">In progress</div>
-          <div className="text-5xl font-bold tabular-nums">{fmtMs(now - active.startedAt)}</div>
+          <div className="text-xs uppercase tracking-wide text-primary">Contraction in progress</div>
+          <div className="text-5xl font-bold tabular-nums">{formatSpan(now - active.startedAt)}</div>
+          {last && (
+            <div className="text-xs text-muted-foreground">
+              {formatSpan(active.startedAt - last.startedAt)} since the start of the last one
+            </div>
+          )}
           <div className="flex items-center justify-center gap-2 pt-1">
-            <Button onClick={stop} className="gap-1">
+            <Button onClick={stop} className="gap-1 h-12 px-8 text-base">
               <Square className="h-4 w-4" />
               Stop
             </Button>
@@ -207,12 +185,9 @@ const ContractionTimer = () => {
       ) : (
         <div className="rounded-xl bg-muted/30 p-4 text-center space-y-3">
           <div className="text-xs text-muted-foreground">
-            {lastEnded
-              ? `Last contraction ended ${formatDistanceToNowStrict(new Date(lastEnded.endedAt ?? lastEnded.startedAt))} ago`
-              : 'No contractions logged yet'}
-            {sinceLastMs !== null && sinceLastMs >= 0 && lastEnded && (
-              <span> · current gap {fmtMs(sinceLastMs)}</span>
-            )}
+            {last
+              ? `Last one started ${formatDistanceToNowStrict(new Date(last.startedAt))} ago and lasted ${formatSpan(last.endedAt - last.startedAt)}`
+              : 'No contractions timed yet'}
           </div>
           <Button onClick={start} className="w-full h-14 text-base gap-2">
             <Play className="h-5 w-5" />
@@ -221,83 +196,77 @@ const ContractionTimer = () => {
         </div>
       )}
 
-      {/* Last-hour stats */}
-      {lastHour.length > 0 && (
-        <div className="grid grid-cols-3 gap-2 text-center text-xs">
-          <div className="bg-muted/50 rounded-lg p-2">
-            <div className="text-[10px] text-muted-foreground">Last hour</div>
-            <div className="font-semibold">{lastHour.length}</div>
-          </div>
-          <div className="bg-muted/50 rounded-lg p-2">
-            <div className="text-[10px] text-muted-foreground">Avg frequency</div>
-            <div className="font-semibold">{avgFrequencyMs ? fmtMs(avgFrequencyMs) : '—'}</div>
-          </div>
-          <div className="bg-muted/50 rounded-lg p-2">
-            <div className="text-[10px] text-muted-foreground">Avg duration</div>
-            <div className="font-semibold">{avgDurationMs ? fmtMs(avgDurationMs) : '—'}</div>
-          </div>
-        </div>
-      )}
-
-      {meeting511 && (
-        <div className="flex items-start gap-2 p-3 rounded-lg border border-destructive/30 bg-destructive/5">
-          <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0 text-destructive" />
-          <div className="text-xs text-destructive">
-            <p className="font-medium">Meeting the 5-1-1 pattern.</p>
-            <p className="mt-0.5">
-              Contractions every ≤5 min, lasting ≥1 min. Many providers consider this the
-              signal to head in — call yours now to confirm.
-            </p>
+      {summary.count > 0 && (
+        <div>
+          <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">Last hour</div>
+          <div className="grid grid-cols-3 gap-2 text-center text-xs">
+            <div className="bg-muted/50 rounded-lg p-2">
+              <div className="text-[10px] text-muted-foreground">Contractions</div>
+              <div className="font-semibold">{summary.count}</div>
+            </div>
+            <div className="bg-muted/50 rounded-lg p-2">
+              <div className="text-[10px] text-muted-foreground">Every (avg)</div>
+              <div className="font-semibold">{summary.avgIntervalMs !== null ? formatSpan(summary.avgIntervalMs) : '—'}</div>
+            </div>
+            <div className="bg-muted/50 rounded-lg p-2">
+              <div className="text-[10px] text-muted-foreground">Lasting (avg)</div>
+              <div className="font-semibold">{summary.avgDurationMs !== null ? formatSpan(summary.avgDurationMs) : '—'}</div>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Recent contractions list */}
-      {history.length > 0 && (
+      <p className="text-[11px] text-muted-foreground">
+        Whatever the timer shows, call your maternity unit straight away if your waters break,
+        you bleed, the baby moves less than usual, or the pain is constant or severe.
+      </p>
+
+      {rows.length > 0 && (
         <div className="space-y-2 pt-2 border-t">
           <div className="flex items-center justify-between">
             <h5 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
               <History className="h-3 w-3" />
-              Recent ({history.length})
+              Recent ({all.length})
             </h5>
             <Button variant="ghost" size="sm" className="h-6 text-[10px] gap-1 text-muted-foreground" onClick={reset}>
               <RotateCcw className="h-3 w-3" />
               Clear history
             </Button>
           </div>
-          <ul className="space-y-0.5 max-h-40 overflow-y-auto">
-            {[...history].reverse().slice(0, 12).map((c, i, arr) => {
-              const dur = c.endedAt !== null ? c.endedAt - c.startedAt : null;
-              // Compute the gap from the *previous* contraction in
-              // wall-clock order (history is sorted desc here).
-              const prevInTime = arr[i + 1];
-              const gap = prevInTime ? c.startedAt - (prevInTime.endedAt ?? prevInTime.startedAt) : null;
-              return (
-                <li key={c.id} className="flex items-center justify-between gap-2 text-xs py-1">
-                  <span className="text-muted-foreground">
-                    {format(new Date(c.startedAt), 'HH:mm:ss')}
-                  </span>
-                  <span className="flex items-center gap-3 flex-shrink-0">
-                    {gap !== null && (
-                      <span className="text-[10px] text-muted-foreground">+{fmtMs(gap)}</span>
-                    )}
-                    <span className="font-medium tabular-nums">
-                      {dur !== null ? fmtMs(dur) : '—'}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => removeOne(c.id)}
-                      className="text-muted-foreground/60 hover:text-destructive"
-                      aria-label="Remove this contraction"
-                      title="Remove"
-                    >
-                      ×
-                    </button>
-                  </span>
-                </li>
-              );
-            })}
+          <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-3 text-[10px] text-muted-foreground">
+            <span>Started</span><span className="text-right">Lasted</span><span className="text-right">Every</span><span />
+          </div>
+          <ul className="space-y-0.5 max-h-48 overflow-y-auto">
+            {rows.map(c => (
+              <li key={c.id} className="grid grid-cols-[1fr_auto_auto_auto] gap-x-3 items-center text-xs py-1">
+                <span className="text-muted-foreground flex items-center gap-1">
+                  {format(new Date(c.startedAt), 'HH:mm:ss')}
+                  {pendingIds.has(c.id) && (
+                    <CloudOff className="h-3 w-3" aria-label="Not synced yet" />
+                  )}
+                </span>
+                <span className="font-medium tabular-nums text-right">{formatSpan(c.durationMs)}</span>
+                <span className="tabular-nums text-right text-muted-foreground">
+                  {c.intervalMs !== null && c.intervalMs < 2 * 60 * MINUTE ? formatSpan(c.intervalMs) : '—'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeOne(c.id)}
+                  className="text-muted-foreground/60 hover:text-destructive"
+                  aria-label="Remove this contraction"
+                  title="Remove"
+                >
+                  ×
+                </button>
+              </li>
+            ))}
           </ul>
+          {queued.length > 0 && (
+            <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+              <CloudOff className="h-3 w-3" />
+              {queued.length} saved on this phone; they sync when you are back online.
+            </p>
+          )}
         </div>
       )}
     </Card>

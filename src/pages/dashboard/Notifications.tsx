@@ -10,6 +10,8 @@ import PendingConnections from '@/components/dashboard/PendingConnections';
 import ConnectedDoctors from '@/components/dashboard/ConnectedDoctors';
 import DoctorNotesCard from '@/components/dashboard/DoctorNotesCard';
 import { formatDistanceToNow } from 'date-fns';
+import { recentlyBooked, formatVisitWhen, visitTypeLabel } from '@/lib/booking';
+import { fetchDoctorSentDocuments, recentDoctorDocuments } from '@/lib/documentFiles';
 
 // Notifications / "needs your attention" page.
 //
@@ -53,6 +55,8 @@ interface CancelledAppt {
   notes: string | null;
   doctor_name: string | null;
   doctor_title: string | null;
+  booked_at?: string | null;
+  consultation_type?: string | null;
 }
 
 function doctorCancelReason(notes: string | null): string | null {
@@ -70,12 +74,16 @@ export default function Notifications() {
   const [stalled, setStalled] = useState<StalledDoc[]>([]);
   const [critical, setCritical] = useState<CriticalFinding[]>([]);
   const [cancellations, setCancellations] = useState<CancelledAppt[]>([]);
+  // Her own bookings from the last 7 days: the in-app booking confirmation.
+  const [confirmed, setConfirmed] = useState<CancelledAppt[]>([]);
+  // "Dr X added a document" (last 14 days), with the document's name.
+  const [fromDoctor, setFromDoctor] = useState<Array<{ id: string; doctor_name: string; note: string | null; uploaded_at: string | null; name: string }>>([]);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [docsRes, findingsRes, apptsResp] = await Promise.all([
+      const [docsRes, findingsRes, apptsResp, sentDocs] = await Promise.all([
         db.from('health_documents')
           .select('id, file_name, ai_suggested_name, ai_summary, uploaded_at')
           .eq('user_id', user.id)
@@ -87,6 +95,7 @@ export default function Notifications() {
         fetch('/api/me/appointments')
           .then(r => (r.ok ? r.json() : { appointments: [] }))
           .catch(() => ({ appointments: [] })),
+        fetchDoctorSentDocuments(),
       ]);
       const docs = (docsRes.data ?? []) as Array<{ id: string; file_name: string; ai_suggested_name: string | null; ai_summary: string | null; uploaded_at: string | null }>;
       const threeMinAgo = Date.now() - 3 * 60 * 1000;
@@ -96,6 +105,13 @@ export default function Notifications() {
           .slice(0, 10),
       );
       setCritical((findingsRes.data ?? []) as CriticalFinding[]);
+      const docName = new Map(docs.map(d => [d.id, d.ai_suggested_name || d.file_name]));
+      setFromDoctor(
+        recentDoctorDocuments(sentDocs)
+          .filter(d => docName.has(d.id))
+          .slice(0, 10)
+          .map(d => ({ ...d, name: docName.get(d.id) || 'Document' })),
+      );
 
       // Doctor-initiated cancellations in the last 14 days. Patient-
       // initiated cancellations don't carry the "Cancelled by doctor:"
@@ -112,6 +128,7 @@ export default function Notifications() {
           )
           .slice(0, 10)
       );
+      setConfirmed(recentlyBooked(appts).slice(0, 5));
       setLoaded(true);
     };
     load();
@@ -138,6 +155,29 @@ export default function Notifications() {
       <div className="px-4 py-5 max-w-3xl mx-auto space-y-6">
         <PendingConnections />
         <DoctorNotesCard />
+
+        {fromDoctor.length > 0 && (
+          <section className="space-y-3" data-testid="doctor-documents">
+            <h2 className="section-title">
+              {fromDoctor.length === 1 ? 'A doctor added a document' : `Doctors added ${fromDoctor.length} documents`}
+            </h2>
+            <ul className="row-group">
+              {fromDoctor.map(d => {
+                const age = d.uploaded_at ? formatDistanceToNow(new Date(d.uploaded_at), { addSuffix: true }) : '';
+                const detail = [d.doctor_name, age, d.note ? `“${d.note}”` : ''].filter(Boolean).join(' · ');
+                return (
+                  <Row
+                    key={d.id}
+                    title={d.name}
+                    detail={detail}
+                    label={`Open ${d.name} from ${d.doctor_name}`}
+                    onClick={() => navigate(`/dashboard/medical-history?doc=${d.id}`)}
+                  />
+                );
+              })}
+            </ul>
+          </section>
+        )}
 
         {stalled.length > 0 && (
           <section className="space-y-3">
@@ -202,12 +242,34 @@ export default function Notifications() {
           </section>
         )}
 
+        {confirmed.length > 0 && (
+          <section className="space-y-3" data-testid="booking-confirmations">
+            <h2 className="section-title">
+              {confirmed.length === 1 ? 'Booking confirmed' : `${confirmed.length} bookings confirmed`}
+            </h2>
+            <ul className="row-group">
+              {confirmed.map(apt => {
+                const doctor = [apt.doctor_title, apt.doctor_name].filter(Boolean).join(' ') || 'Your doctor';
+                return (
+                  <Row
+                    key={apt.id}
+                    title={doctor}
+                    detail={`${formatVisitWhen(new Date(apt.scheduled_at))} · ${visitTypeLabel(apt.consultation_type)}`}
+                    label={`View your visit with ${doctor}`}
+                    onClick={() => navigate('/dashboard/appointments')}
+                  />
+                );
+              })}
+            </ul>
+          </section>
+        )}
+
         <ConnectedDoctors />
 
         {/* Empty-state — only after the fetch has resolved, so we don't
             momentarily claim "nothing to flag" while the data is still
             in flight. */}
-        {loaded && stalled.length === 0 && critical.length === 0 && cancellations.length === 0 && (
+        {loaded && fromDoctor.length === 0 && stalled.length === 0 && critical.length === 0 && cancellations.length === 0 && confirmed.length === 0 && (
           <div className="text-center text-[15px] text-muted-foreground py-8">
             Nothing else needs you right now.
           </div>

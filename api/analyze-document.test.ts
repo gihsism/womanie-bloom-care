@@ -74,3 +74,71 @@ describe('POST /api/analyze-document: which file it reads', () => {
     expect(JSON.stringify(res._body)).not.toMatch(/ECONNREFUSED|hunter2/);
   });
 });
+
+// A doctor may start the analysis of a document she sent into a patient's
+// Records herself, and nothing else of the patient's.
+describe('POST /api/analyze-document: doctor-sent documents', () => {
+  const DOCTOR = { id: 'doc_a', email: 'd@test.com', sessionId: 's2' };
+  const PATIENT = 'pat_1';
+  let roleOk = true;
+  let connStatus = 'approved';
+
+  beforeEach(() => {
+    process.env.ANTHROPIC_API_KEY = 'k';
+    roleOk = true;
+    connStatus = 'approved';
+    query.mockReset();
+    get.mockReset();
+    get.mockResolvedValue(null);
+    callAnthropicWithRetry.mockReset();
+    callAnthropicWithRetry.mockRejectedValue(new Error('stop here'));
+    vi.mocked(getAuthUser).mockResolvedValue(DOCTOR);
+    query.mockImplementation(async (sql: string, params: string[]) => {
+      if (/FROM doctor_patient_connections/.test(sql)) {
+        return roleOk && connStatus === 'approved' && params[0] === DOCTOR.id && params[1] === PATIENT ? [{ id: 'c' }] : [];
+      }
+      if (/FROM health_documents/.test(sql)) {
+        // Only the row this doctor sent matches the uploaded_by_doctor_id filter.
+        if (/uploaded_by_doctor_id = \$3/.test(sql) && params[0] === 'doc_sent' && params[1] === PATIENT && params[2] === DOCTOR.id) {
+          return [{ file_path: `https://s.public.blob.vercel-storage.com/${PATIENT}/1-lab.pdf`, file_name: 'lab.pdf', mime_type: 'application/pdf' }];
+        }
+        return [];
+      }
+      return [];
+    });
+  });
+
+  const req = (documentId: string, userId = PATIENT) =>
+    ({ method: 'POST', headers: {}, body: { documentId, userId } }) as unknown as VercelRequest;
+
+  it("reads the doctor's own sent document from the PATIENT's folder", async () => {
+    const res = mockRes();
+    await handler(req('doc_sent'), res);
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(String(get.mock.calls[0][0])).toContain(`/${PATIENT}/`);
+  });
+
+  it("404s on the patient's own uploads (not sent by this doctor)", async () => {
+    const res = mockRes();
+    await handler(req('doc_hers'), res);
+    expect(res._status).toBe(404);
+    expect(get).not.toHaveBeenCalled();
+  });
+
+  it('403s for a revoked doctor, a pending connection, or another patient', async () => {
+    roleOk = false;
+    let res = mockRes();
+    await handler(req('doc_sent'), res);
+    expect(res._status).toBe(403);
+    roleOk = true;
+    connStatus = 'pending';
+    res = mockRes();
+    await handler(req('doc_sent'), res);
+    expect(res._status).toBe(403);
+    connStatus = 'approved';
+    res = mockRes();
+    await handler(req('doc_sent', 'pat_2'), res);
+    expect(res._status).toBe(403);
+    expect(get).not.toHaveBeenCalled();
+  });
+});

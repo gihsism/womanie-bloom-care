@@ -19,6 +19,7 @@ import { differenceInDays, differenceInWeeks, format, parseISO } from 'date-fns'
 import BabyTracker from './BabyTracker';
 import PostpartumLochiaCard from './PostpartumLochiaCard';
 import PostpartumPelvicFloor from './PostpartumPelvicFloor';
+import PostpartumRecoveryCheckin from './PostpartumRecoveryCheckin';
 import PostpartumNutrition from './PostpartumNutrition';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
@@ -306,6 +307,10 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
           DailyLogging encodes into daily_health_signals.notes.
           Hides itself when no entries exist or past week 8. */}
       {inLochiaWindow && <PostpartumLochiaCard birthDate={birthDate} />}
+
+      {/* Weekly recovery check-in, first 12 weeks (self-hides after).
+          Red flags per NHS -> "call your doctor or 144 now". */}
+      <PostpartumRecoveryCheckin birthDate={birthDate} />
 
       {/* Lochia callout (only in the relevant window) */}
       {inLochiaWindow && (

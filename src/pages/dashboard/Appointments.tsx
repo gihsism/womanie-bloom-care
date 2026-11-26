@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -35,6 +35,9 @@ import ConnectedDoctors from '@/components/dashboard/ConnectedDoctors';
 import ChartAccessLog from '@/components/dashboard/ChartAccessLog';
 import type { LifeStage } from '@/components/dashboard/DashboardHeader';
 import { normalizeLifeStage } from '@/lib/lifeStage';
+import { formatPracticeTime } from '@/lib/practiceTime';
+import { viewerOutsidePracticeTz } from '@/lib/timeSlots';
+import { formatVisitWhen, swissSuffix } from '@/lib/booking';
 
 // Patient-side full appointments view: upcoming + past in one page.
 // Backed by the same /api/me/appointments endpoint the dashboard widget
@@ -55,6 +58,8 @@ interface AppointmentRow {
   doctor_specialties: string[] | null;
   doctor_avatar_url: string | null;
   doctor_verified: boolean | null;
+  doctor_practice_address?: string | null;
+  booked_at?: string | null;
 }
 
 // Extracts the doctor's reason out of the notes field on doctor-
@@ -173,7 +178,8 @@ const Appointments = () => {
 
   const cancel = async (apt: AppointmentRow) => {
     const doctorLabel = [apt.doctor_title, apt.doctor_name].filter(Boolean).join(' ') || 'this doctor';
-    const when = format(new Date(apt.scheduled_at), 'PPP, p');
+    // Visit times are Swiss practice time (labelled when this device is elsewhere).
+    const when = formatVisitWhen(new Date(apt.scheduled_at));
     if (!window.confirm(`Cancel your appointment with ${doctorLabel} on ${when}?`)) return;
     setBusyId(apt.id);
     try {
@@ -221,6 +227,8 @@ const Appointments = () => {
     }
   };
 
+  const outside = viewerOutsidePracticeTz();
+
   const renderAppointment = (apt: AppointmentRow, kind: 'upcoming' | 'past') => {
     const when = new Date(apt.scheduled_at);
     const name = [apt.doctor_title, apt.doctor_name].filter(Boolean).join(' ') || 'A doctor';
@@ -250,7 +258,12 @@ const Appointments = () => {
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[17px] font-bold truncate">{name}</span>
+            <Link
+              to={`/doctors/${encodeURIComponent(apt.doctor_id)}`}
+              className="text-[17px] font-bold truncate hover:underline underline-offset-2"
+            >
+              {name}
+            </Link>
             {apt.doctor_verified && (
               <span className="inline-flex items-center gap-1 text-[12px] text-green-700 dark:text-green-300">
                 <ShieldCheck className="h-3 w-3" />
@@ -282,14 +295,17 @@ const Appointments = () => {
         <div className="mt-3">
           <p className="text-[19px] font-extrabold tabular-nums">
             {kind === 'upcoming'
-              ? `${relativeDay(when)} · ${format(when, 'HH:mm')}`
-              : `${format(when, 'd MMM yyyy')} · ${format(when, 'HH:mm')}`}
+              ? `${relativeDay(when)} · ${formatPracticeTime(when)}${swissSuffix(outside)}`
+              : `${format(when, 'd MMM yyyy')} · ${formatPracticeTime(when)}${swissSuffix(outside)}`}
           </p>
           <p className="text-[14px] text-muted-foreground mt-0.5 inline-flex items-center gap-1.5 flex-wrap">
             {kind === 'upcoming' && <span>in {formatDistanceToNowStrict(when)} ·</span>}
             {isVideo ? <Video className="h-3.5 w-3.5" /> : <MapPin className="h-3.5 w-3.5" />}
             {isVideo ? 'Video consultation' : 'In-person'}
             {apt.duration ? ` · ${apt.duration} min` : ''}
+            {!isVideo && apt.doctor_practice_address && kind === 'upcoming' && !isCancelled
+              ? <span> · {apt.doctor_practice_address}</span>
+              : null}
           </p>
           {isCancelled && (() => {
             const reason = doctorCancelReason(apt.notes);
@@ -316,7 +332,7 @@ const Appointments = () => {
                   description:
                     `${isVideo ? 'Video consultation' : 'In-person consultation'} on Womanie.` +
                     (specialty ? ` Specialty: ${specialty}.` : ''),
-                  location: isVideo ? 'Video call (Womanie)' : 'In-person',
+                  location: isVideo ? 'Video call (Womanie)' : (apt.doctor_practice_address || 'In-person'),
                   url: `${window.location.origin}/dashboard/appointments`,
                 });
                 toast({ title: 'Calendar event saved', description: 'Open the .ics file to add it.' });

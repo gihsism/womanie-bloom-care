@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -7,25 +7,19 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Calendar } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { doctorDisplayName } from '@/lib/doctorName';
 import { db } from '@/integrations/db/client';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Search, Star, Clock, Video, Calendar as CalendarIcon, CheckCircle, User, Loader2, Printer, Share2 } from 'lucide-react';
-import { format } from 'date-fns';
-import { computeFreeSlots, viewerOutsidePracticeTz } from '@/lib/timeSlots';
-import { formatPracticeTime, wallTimeToUtc } from '@/lib/practiceTime';
+import { ArrowLeft, Search, Star, Clock, Video, Calendar as CalendarIcon, CheckCircle, User, Printer, Share2, MapPin } from 'lucide-react';
 import ShareWithDoctor from '@/components/dashboard/ShareWithDoctor';
+import BookingDialog, { doctorDisplayName } from '@/components/booking/BookingDialog';
+import { formatPrice } from '@/lib/booking';
 
 interface Doctor {
-  id: string;
   user_id: string;
   full_name: string;
   title: string | null;
-  specialty: string | null;
   specialties: string[] | null;
   bio: string | null;
   avatar_url: string | null;
@@ -90,17 +84,12 @@ const FindDoctor = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [specialtyFilter, setSpecialtyFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'name' | 'rating' | 'experience' | 'price_low'>('name');
-  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [selectedTime, setSelectedTime] = useState<string>('');
-  const [bookingLoading, setBookingLoading] = useState(false);
-  const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
-  // Busy slots for the currently selected (doctor, date) pair. Each entry is
-  // {scheduled_at, duration} for non-cancelled appointments. We use these to
-  // strike out slots that overlap with already-booked time, so two patients
-  // can't both be offered the same slot.
-  const [busySlots, setBusySlots] = useState<{ scheduled_at: string; duration: number | null }[]>([]);
-  const [busySlotsLoading, setBusySlotsLoading] = useState(false);
+  // The booking dialog's doctor (null = closed) and an optional preselected
+  // time, e.g. from the profile page's "next free times"
+  // (/find-doctor?book=<doctor id>&at=<ISO>).
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [bookingDoctor, setBookingDoctor] = useState<Doctor | null>(null);
+  const [bookingSlot, setBookingSlot] = useState<string | null>(null);
   // Patient's life_stage so we can highlight specialties that match
   // her current mode (OB-GYN for pregnancy, menopause specialist for
   // menopause, fertility specialist for conception, etc).
@@ -152,103 +141,35 @@ const FindDoctor = () => {
     }
   }, [user, fetchDoctors]);
 
-  const getAvailableTimeSlots = (doctor: Doctor, date: Date) => {
-    return computeFreeSlots({
-      date,
-      schedule: doctor.schedule,
-      durationMin: doctor.consultation_settings?.consultation_duration || 30,
-      busy: busySlots,
-    }).map(d => formatPracticeTime(d));
-  };
-
-  // Reload busy slots whenever the doctor or date changes inside the booking dialog.
-  const selectedDoctorId = selectedDoctor?.user_id ?? null;
+  // Deep link from the doctor profile page: open the dialog once the
+  // directory has loaded. A doctor no longer in the list (bookings paused)
+  // is not opened; a short note says why.
   useEffect(() => {
-    let cancelled = false;
-    const run = async () => {
-      if (!selectedDoctorId || !selectedDate) {
-        setBusySlots([]);
-        return;
-      }
-      setBusySlotsLoading(true);
-      try {
-        const dateStr = format(selectedDate, 'yyyy-MM-dd');
-        const params = new URLSearchParams({ doctor_id: selectedDoctorId, date: dateStr });
-        const resp = await fetch(`/api/doctors/availability?${params.toString()}`);
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const payload = await resp.json();
-        if (!cancelled) setBusySlots((payload.busy ?? []) as { scheduled_at: string; duration: number | null }[]);
-      } catch (e) {
-        console.error('Failed to load availability:', e);
-        if (!cancelled) setBusySlots([]);
-      } finally {
-        if (!cancelled) setBusySlotsLoading(false);
-      }
-    };
-    run();
-    return () => { cancelled = true; };
-  }, [selectedDoctorId, selectedDate]);
-
-  const handleBookAppointment = async () => {
-    if (!selectedDoctor || !selectedDate || !selectedTime || !user) return;
-
-    setBookingLoading(true);
-    try {
-      const [hours, minutes] = selectedTime.split(':').map(Number);
-      // The picked day + the slot's Swiss wall time (opening hours are in
-      // Europe/Zurich, whatever zone this device is in).
-      const scheduledAt = wallTimeToUtc(
-        selectedDate.getFullYear(), selectedDate.getMonth() + 1, selectedDate.getDate(), hours, minutes,
-      );
-
-      // Routed through /api/appointments/book so the server can run a
-      // conflict-guarded INSERT — without it, two patients hitting the
-      // same slot inside the round-trip both succeed.
-      const resp = await fetch('/api/appointments/book', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          doctor_id: selectedDoctor.user_id,
-          scheduled_at: scheduledAt.toISOString(),
-          duration: selectedDoctor.consultation_settings?.consultation_duration || 30,
-          consultation_type: selectedDoctor.consultation_settings?.video_enabled ? 'video' : 'in_person',
-        }),
-      });
-      const payload = await resp.json().catch(() => ({}));
-      if (!resp.ok) {
-        // 409 is the recognized "slot just taken" case — surface the
-        // server's message verbatim so the user sees the specific
-        // reason without us re-wording it.
-        throw new Error(payload.error || `HTTP ${resp.status}`);
-      }
-
-      toast({
-        title: 'Visit booked',
-        description: `Your visit with ${doctorDisplayName(selectedDoctor.title, selectedDoctor.full_name)} is on ${format(scheduledAt, 'PPP')} at ${selectedTime}`,
-        action: (
-          <Button size="sm" variant="outline" onClick={() => navigate('/dashboard/appointments')}>
-            View
-          </Button>
-        ),
-      });
-
-      setBookingDialogOpen(false);
-      setSelectedDoctor(null);
-      setSelectedDate(undefined);
-      setSelectedTime('');
-    } catch (error) {
-      console.error('Error booking appointment:', error);
-      toast({
-        title: 'Could not book',
-        description: error instanceof Error ? error.message : 'Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setBookingLoading(false);
+    const id = searchParams.get('book');
+    if (!id || loadingDoctors) return;
+    const doc = doctors.find(d => d.user_id === id);
+    if (doc) {
+      setBookingDoctor(doc);
+      setBookingSlot(searchParams.get('at'));
+    } else if (!loadFailed) {
+      toast({ title: 'Not bookable right now', description: 'This doctor is not taking new bookings at the moment.' });
     }
+    const next = new URLSearchParams(searchParams);
+    next.delete('book');
+    next.delete('at');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams, doctors, loadingDoctors, loadFailed, toast]);
+
+  // The doctor paused bookings while the dialog was open: drop her from
+  // the list at once and re-read the directory.
+  const handleDoctorUnavailable = (doctorId: string) => {
+    setDoctors(prev => prev.filter(d => d.user_id !== doctorId));
+    fetchDoctors();
   };
 
-  const specialties = [...new Set(doctors.map(d => d.specialty).filter(Boolean))];
+  // The directory returns specialties[] (the Supabase-era single
+  // `specialty` column is not part of it), so filter on that list.
+  const specialties = [...new Set(doctors.flatMap(d => (Array.isArray(d.specialties) ? d.specialties : [])).filter(Boolean))].sort();
 
   // Map the patient's life stage → specialty keywords we look for on
   // a doctor's specialty / specialties / bio. A match earns the
@@ -280,7 +201,6 @@ const FindDoctor = () => {
   const isRecommended = (d: Doctor): boolean => {
     if (stageKeywords.length === 0) return false;
     const hay = [
-      d.specialty ?? '',
       ...(Array.isArray(d.specialties) ? d.specialties : []),
       d.bio ?? '',
     ].join(' ').toLowerCase();
@@ -291,12 +211,12 @@ const FindDoctor = () => {
     const q = searchQuery.toLowerCase();
     const matchesSearch = !q
       || doctor.full_name.toLowerCase().includes(q)
-      || (doctor.specialty?.toLowerCase().includes(q) ?? false)
       || (doctor.bio?.toLowerCase().includes(q) ?? false)
       || (Array.isArray(doctor.specialties) && doctor.specialties.some(s => s?.toLowerCase().includes(q)))
       || (Array.isArray(doctor.languages) && doctor.languages.some(l => l?.toLowerCase().includes(q)));
 
-    const matchesSpecialty = specialtyFilter === 'all' || doctor.specialty === specialtyFilter;
+    const matchesSpecialty = specialtyFilter === 'all'
+      || (Array.isArray(doctor.specialties) && doctor.specialties.includes(specialtyFilter));
 
     return matchesSearch && matchesSpecialty;
   });
@@ -442,7 +362,7 @@ const FindDoctor = () => {
         ) : (
           <div className="space-y-3">
             {sortedDoctors.map(doctor => (
-              <Card key={doctor.id} className="overflow-hidden">
+              <Card key={doctor.user_id} className="overflow-hidden" data-testid="doctor-card">
                 <CardHeader className="pb-4">
                   <div className="flex items-start gap-4">
                     <Avatar className="h-16 w-16">
@@ -454,7 +374,9 @@ const FindDoctor = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <h2 className="text-[17px] font-bold leading-snug truncate">
-                          {doctorDisplayName(doctor.title, doctor.full_name)}
+                          <Link to={`/doctors/${encodeURIComponent(doctor.user_id)}`} className="hover:underline underline-offset-2">
+                            {doctorDisplayName(doctor)}
+                          </Link>
                         </h2>
                         {doctor.is_verified && (
                           <CheckCircle className="h-4 w-4 text-stage-accent flex-shrink-0" aria-label="Verified" />
@@ -466,14 +388,11 @@ const FindDoctor = () => {
                         )}
                       </div>
                       <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                        {doctor.specialty && (
-                          <span className="text-[14px] font-semibold text-muted-foreground">{doctor.specialty}</span>
-                        )}
                         {Array.isArray(doctor.specialties) && doctor.specialties
-                          .filter(s => s && s !== doctor.specialty)
-                          .slice(0, 2)
-                          .map(s => (
-                            <span key={s} className="text-[14px] text-muted-foreground">· {s}</span>
+                          .filter(Boolean)
+                          .slice(0, 3)
+                          .map((s, i) => (
+                            <span key={s} className={i === 0 ? 'text-[14px] font-semibold text-muted-foreground' : 'text-[14px] text-muted-foreground'}>{i === 0 ? s : `· ${s}`}</span>
                           ))}
                       </div>
                       {(doctor.years_experience || (doctor.rating && doctor.review_count)) && (
@@ -498,8 +417,9 @@ const FindDoctor = () => {
                   )}
 
                   {doctor.practice_address && (
-                    <p className="text-[12px] text-muted-foreground">
-                      <span className="sr-only">Practice address: </span>{doctor.practice_address}
+                    <p className="text-[12px] text-muted-foreground flex items-start gap-1">
+                      <MapPin className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                      <span><span className="sr-only">Practice address: </span>{doctor.practice_address}</span>
                     </p>
                   )}
 
@@ -509,159 +429,53 @@ const FindDoctor = () => {
                     </p>
                   )}
 
-                  <div className="flex flex-wrap gap-2 text-sm">
-                    {doctor.consultation_settings?.video_enabled && (
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <Video className="h-4 w-4" />
-                        <span>Video</span>
-                      </div>
-                    )}
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm">
                     <div className="flex items-center gap-1 text-muted-foreground">
-                      <Clock className="h-4 w-4" />
+                      {doctor.consultation_settings?.video_enabled
+                        ? <Video className="h-4 w-4" aria-hidden="true" />
+                        : <MapPin className="h-4 w-4" aria-hidden="true" />}
+                      <span>{doctor.consultation_settings?.video_enabled ? 'In person or video' : 'In person'}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                      <Clock className="h-4 w-4" aria-hidden="true" />
                       <span>{doctor.consultation_settings?.consultation_duration || 30} min</span>
                     </div>
-                    {doctor.consultation_settings?.consultation_price && (
-                      <div className="flex items-center gap-1 font-medium text-foreground">
-                        <span>
-                          {doctor.consultation_settings.currency} {doctor.consultation_settings.consultation_price}
-                        </span>
-                      </div>
-                    )}
+                    {(() => {
+                      const price = formatPrice(doctor.consultation_settings?.consultation_price, doctor.consultation_settings?.currency);
+                      return price ? <span className="font-medium text-foreground">{price}</span> : null;
+                    })()}
                   </div>
 
-                  <Dialog open={bookingDialogOpen && selectedDoctor?.id === doctor.id} onOpenChange={(open) => {
-                    setBookingDialogOpen(open);
-                    if (open) setSelectedDoctor(doctor);
-                    else {
-                      setSelectedDoctor(null);
-                      setSelectedDate(undefined);
-                      setSelectedTime('');
-                    }
-                  }}>
-                    <DialogTrigger asChild>
-                      <button
-                        type="button"
-                        className="w-full min-h-12 inline-flex items-center justify-center gap-2 rounded-full border border-stage-accent px-5 text-[16px] font-semibold text-stage-accent hover:bg-stage-tint"
-                        onClick={() => setSelectedDoctor(doctor)}
-                      >
-                        <CalendarIcon className="h-4 w-4" aria-hidden="true" />
-                        Book a visit
-                      </button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-md">
-                      <DialogHeader>
-                        <DialogTitle>Book with {doctorDisplayName(doctor.title, doctor.full_name)}</DialogTitle>
-                        <DialogDescription>
-                          Pick a day and a time
-                        </DialogDescription>
-                      </DialogHeader>
-                      
-                      <div className="space-y-4">
-                        <div>
-                          <p className="text-[15px] font-semibold mb-2">Day</p>
-                          <Calendar
-                            mode="single"
-                            selected={selectedDate}
-                            onSelect={setSelectedDate}
-                            disabled={(date) => {
-                              const today = new Date();
-                              today.setHours(0, 0, 0, 0);
-                              const dayOfWeek = date.getDay();
-                              const hasSchedule = doctor.schedule?.some(s => s.day_of_week === dayOfWeek);
-                              return date < today || !hasSchedule;
-                            }}
-                            className="rounded-md border"
-                          />
-                        </div>
-
-                        {selectedDate && (() => {
-                          const slots = getAvailableTimeSlots(doctor, selectedDate);
-                          return (
-                            <div>
-                              <p className="text-[15px] font-semibold mb-2">Time</p>
-                              {busySlotsLoading ? (
-                                <div className="flex items-center justify-center py-4 bg-muted/50 rounded-lg gap-2 text-sm text-muted-foreground">
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                  Checking availability…
-                                </div>
-                              ) : slots.length === 0 ? (
-                                <div className="text-center py-4 bg-muted/50 rounded-lg">
-                                  <Clock className="h-5 w-5 mx-auto text-muted-foreground mb-1.5" aria-hidden="true" />
-                                  <p className="text-sm text-muted-foreground">
-                                    {busySlots.length > 0
-                                      ? 'All time slots are booked on this day.'
-                                      : 'No time slots available on this day.'}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground mt-1">Try selecting a different date.</p>
-                                </div>
-                              ) : (
-                                <>
-                                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-40 overflow-y-auto">
-                                    {slots.map(time => (
-                                      <Button
-                                        key={time}
-                                        variant={selectedTime === time ? 'default' : 'outline'}
-                                        className="h-10 text-sm"
-                                        onClick={() => setSelectedTime(time)}
-                                      >
-                                        {time}
-                                      </Button>
-                                    ))}
-                                  </div>
-                                  {viewerOutsidePracticeTz() && (
-                                    <p className="text-[11px] text-muted-foreground mt-1.5">Times are Swiss time (Zurich).</p>
-                                  )}
-                                  {busySlots.length > 0 && (
-                                    <p className="text-[11px] text-muted-foreground mt-1.5">
-                                      {busySlots.length} slot{busySlots.length === 1 ? '' : 's'} already booked are hidden.
-                                    </p>
-                                  )}
-                                </>
-                              )}
-                            </div>
-                          );
-                        })()}
-
-                        {selectedDate && selectedTime && (
-                          <div className="p-4 bg-stage-tint rounded-2xl">
-                            <h3 className="text-[15px] font-bold mb-1">Your visit</h3>
-                            <p className="text-sm text-muted-foreground">
-                              {format(selectedDate, 'PPPP')} at {selectedTime}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Duration: {doctor.consultation_settings?.consultation_duration || 30} minutes
-                            </p>
-                            {doctor.consultation_settings?.consultation_price && (
-                              <p className="text-sm font-medium mt-2">
-                                Price: {doctor.consultation_settings.currency} {doctor.consultation_settings.consultation_price}
-                              </p>
-                            )}
-                          </div>
-                        )}
-
-                        <Button
-                          className="btn-stage w-full"
-                          disabled={!selectedDate || !selectedTime || bookingLoading}
-                          onClick={handleBookAppointment}
-                        >
-                          {bookingLoading ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              Booking...
-                            </>
-                          ) : (
-                            'Confirm booking'
-                          )}
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                  <div className="flex gap-2">
+                    <Link
+                      to={`/doctors/${encodeURIComponent(doctor.user_id)}`}
+                      className="flex-1 min-h-12 inline-flex items-center justify-center rounded-full border border-line px-4 text-[16px] font-semibold hover:bg-muted/40"
+                    >
+                      View profile
+                    </Link>
+                    <button
+                      type="button"
+                      className="flex-1 min-h-12 inline-flex items-center justify-center gap-2 rounded-full border border-stage-accent px-4 text-[16px] font-semibold text-stage-accent hover:bg-stage-tint"
+                      onClick={() => { setBookingSlot(null); setBookingDoctor(doctor); }}
+                    >
+                      <CalendarIcon className="h-4 w-4" aria-hidden="true" />
+                      Book
+                    </button>
+                  </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         )}
       </div>
+
+      <BookingDialog
+        doctor={bookingDoctor}
+        open={!!bookingDoctor}
+        initialSlot={bookingSlot}
+        onOpenChange={open => { if (!open) { setBookingDoctor(null); setBookingSlot(null); } }}
+        onDoctorUnavailable={handleDoctorUnavailable}
+      />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { localDay } from '@/hooks/useStageProfile';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -61,6 +62,7 @@ import {
   MoreHorizontal,
   Upload,
 } from 'lucide-react';
+import { fetchDoctorSentDocuments } from '@/lib/documentFiles';
 import { format, differenceInDays, addDays } from 'date-fns';
 import {
   type MedicalDataItem,
@@ -619,6 +621,8 @@ export default function MedicalHistory() {
   const { user, loading: authLoading } = useAuth();
   const [medicalData, setMedicalData] = useState<MedicalDataItem[]>([]);
   const [documents, setDocuments] = useState<DocumentInfo[]>([]);
+  // Documents a connected doctor sent into her Records: id -> who + note.
+  const [fromDoctor, setFromDoctor] = useState<Record<string, { doctor_name: string; note: string | null }>>({});
   const [lifeStage, setLifeStage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedPanels, setExpandedPanels] = useState<Set<string>>(new Set());
@@ -634,6 +638,11 @@ export default function MedicalHistory() {
   // Three segments: Results (default) | Documents | My charts.
   // ?tab=documents|charts opens one directly; ?doc=<id> opens Documents.
   type Segment = 'results' | 'documents' | 'charts';
+  const SEGMENTS = [
+    ['results', 'Results'],
+    ['documents', 'Documents'],
+    ['charts', 'My charts'],
+  ] as const satisfies ReadonlyArray<readonly [Segment, string]>;
   const [segment, setSegment] = useState<Segment>(() => {
     const t = searchParams.get('tab');
     if (searchParams.get('doc') || t === 'documents') return 'documents';
@@ -740,9 +749,15 @@ export default function MedicalHistory() {
       ]);
       if (medRes.data) setMedicalData(medRes.data as MedicalDataItem[]);
       if (docRes.data) setDocuments(docRes.data);
+      // "From Dr X" labels. Best effort: without them the list still works.
+      fetchDoctorSentDocuments().then(list => {
+        const map: Record<string, { doctor_name: string; note: string | null }> = {};
+        for (const d of list) map[d.id] = { doctor_name: d.doctor_name, note: d.note };
+        setFromDoctor(map);
+      });
       if (profileRes.data) {
         setLifeStage(profileRes.data.life_stage);
-        setPregnancyDueDate(profileRes.data.pregnancy_due_date ? new Date(profileRes.data.pregnancy_due_date) : null);
+        setPregnancyDueDate(localDay(profileRes.data.pregnancy_due_date));
       }
     } catch (error) {
       console.error('Error fetching medical history:', error);
@@ -1228,17 +1243,30 @@ export default function MedicalHistory() {
             upload button sits in the empty state instead, so there is
             never a second upload banner. */}
         <div>
-          <div role="tablist" aria-label="Records sections" className="flex w-full min-w-0 gap-1 rounded-full bg-muted p-1">
-            {([
-              ['results', 'Results'],
-              ['documents', 'Documents'],
-              ['charts', 'My charts'],
-            ] as const).map(([key, label]) => (
+          {/* WAI-ARIA tabs: one panel below shows the selected segment;
+              arrow keys / Home / End move between tabs (roving tabindex). */}
+          <div role="tablist" aria-label="Records sections" className="flex w-full min-w-0 gap-1 rounded-full bg-muted p-1"
+            onKeyDown={(e) => {
+              const i = SEGMENTS.findIndex(([k]) => k === segment);
+              const next = e.key === 'ArrowRight' ? (i + 1) % SEGMENTS.length
+                : e.key === 'ArrowLeft' ? (i - 1 + SEGMENTS.length) % SEGMENTS.length
+                : e.key === 'Home' ? 0
+                : e.key === 'End' ? SEGMENTS.length - 1
+                : -1;
+              if (next < 0) return;
+              e.preventDefault();
+              setSegment(SEGMENTS[next][0]);
+              document.getElementById(`records-tab-${SEGMENTS[next][0]}`)?.focus();
+            }}>
+            {SEGMENTS.map(([key, label]) => (
               <button
                 key={key}
+                id={`records-tab-${key}`}
                 type="button"
                 role="tab"
                 aria-selected={segment === key}
+                aria-controls="records-panel"
+                tabIndex={segment === key ? 0 : -1}
                 onClick={() => setSegment(key)}
                 className={`relative hit-44 flex-1 whitespace-nowrap rounded-full px-3 h-10 text-[15px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stage-accent ${
                   segment === key ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
@@ -1249,6 +1277,7 @@ export default function MedicalHistory() {
             ))}
           </div>
         </div>
+        <div id="records-panel" role="tabpanel" aria-labelledby={`records-tab-${segment}`} tabIndex={0} className="space-y-6 focus-visible:outline-none">
         {reanalyzing && (
           <Progress value={reanalyzeProgress.total > 0 ? (reanalyzeProgress.done / reanalyzeProgress.total) * 100 : 0} aria-label="Re-analysis progress" className="h-1.5 bg-muted" />
         )}
@@ -1387,6 +1416,9 @@ export default function MedicalHistory() {
                         <p className="text-sm font-medium truncate">{doc.ai_suggested_name || doc.file_name}</p>
                         <p className="text-[11px] text-muted-foreground flex items-center gap-1.5">
                           <span>{doc.uploaded_at ? format(new Date(doc.uploaded_at), 'MMM d, yyyy') : ''}</span>
+                          {fromDoctor[doc.id] && (
+                            <span className="text-primary font-medium">· From {fromDoctor[doc.id].doctor_name}</span>
+                          )}
                           {analysisStalled ? (
                             <span
                               className="inline-flex items-center gap-1 text-destructive font-medium cursor-pointer hover:underline"
@@ -1413,6 +1445,14 @@ export default function MedicalHistory() {
 
                     {isExpanded && (
                       <div className="px-4 pb-4 bg-muted/20 border-t border-border/30">
+                        {fromDoctor[doc.id] && (
+                          <p className="pt-3 text-xs text-muted-foreground">
+                            Added by {fromDoctor[doc.id].doctor_name}. It is your record: you can delete it any time.
+                            {fromDoctor[doc.id].note && (
+                              <span className="block mt-1 italic text-foreground/80">“{fromDoctor[doc.id].note}”</span>
+                            )}
+                          </p>
+                        )}
                         {/* Action buttons — always visible */}
                         <div className="flex gap-2 py-3 flex-wrap">
                           <Button
@@ -2040,6 +2080,7 @@ export default function MedicalHistory() {
               </>
           </div>
         )}
+        </div>
       </div>
 
       <DocumentUpload open={uploadOpen} onOpenChange={setUploadOpen} showTrigger={false} onUploaded={handleUploaded} />

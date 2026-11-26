@@ -20,15 +20,23 @@
 //   first scheduler run. With a once-a-day scheduler they still arrive the
 //   same day as long as that run lands in her daytime.
 // - Lock-screen wording stays discreet: no medicine names, no doctor names.
+// - IVF trigger shot (opt-in, off until she switches it on): about 1 hour
+//   and in the last 15 minutes before the exact time she entered
+//   (windows in src/lib/ivfJourney.ts TRIGGER_PUSH_WINDOWS, pinned by the
+//   parity test). Sent in quiet hours too: she did not pick the time, her
+//   clinic did, and missing it matters. Wording says "timed injection".
 
-export type ReminderType = 'medicine' | 'period' | 'appointment';
+export type ReminderType = 'medicine' | 'period' | 'appointment' | 'ivf_trigger';
 
 // bookings: doctor side only (a patient booked / cancelled / moved a visit
 // with HER as the doctor); switched in the doctor's Profile & settings.
 // Sent at booking time by api/_lib/doctor-notify.ts, not by this planner.
-export interface PushPrefs { medicine: boolean; period: boolean; appointment: boolean; bookings: boolean }
+// documents: patient side, "Dr X added a document" (sent at upload time by
+// api/_lib/doctor-documents.ts, not by this planner).
+// ivf_trigger: opt-in (false unless she switched it on), see above.
+export interface PushPrefs { medicine: boolean; period: boolean; appointment: boolean; bookings: boolean; documents: boolean; ivf_trigger: boolean }
 
-export const DEFAULT_PREFS: PushPrefs = { medicine: true, period: true, appointment: true, bookings: true };
+export const DEFAULT_PREFS: PushPrefs = { medicine: true, period: true, appointment: true, bookings: true, documents: true, ivf_trigger: false };
 
 export interface SubscriptionRow {
   id: string;
@@ -53,6 +61,8 @@ export interface UserData {
   doses: DoseRow[];
   period: PeriodRow | null;
   appointments: ApptRow[];
+  /** IVF trigger shot moment (UTC ISO) from ivf_plans, if one is near. */
+  ivfTriggerAt?: string | null;
 }
 
 export interface PushPayload { title: string; body: string; url: string; tag: string }
@@ -62,6 +72,13 @@ export interface PlannedReminder {
   type: ReminderType;
   /** Unique per user: the sender claims it once in push_sent_log. */
   key: string;
+  /**
+   * Medicine only: the dose slot (the n-th reminder time of her day). The
+   * sender claims it too and sends only when BOTH keys are new, so editing
+   * a medicine's times never re-sends a dose she was already reminded of
+   * (08:00 sent, time moved to 08:30 -> no second ping for that dose).
+   */
+  slotKey?: string;
   payload: PushPayload;
   /** Only this user's devices that opted in to this type. */
   subscriptions: SubscriptionRow[];
@@ -127,6 +144,8 @@ export function parsePrefs(raw: SubscriptionRow['prefs']): PushPrefs {
     period: o.period !== false,
     appointment: o.appointment !== false,
     bookings: o.bookings !== false,
+    documents: o.documents !== false,
+    ivf_trigger: o.ivf_trigger === true,
   };
 }
 
@@ -144,6 +163,22 @@ function parseTimes(raw: MedRow['reminder_times']): string[] {
 
 const toMin = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
 const hhmm = (min: number) => `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
+
+/**
+ * Trigger-shot reminder due now: 'hour' from 65 to just over 15 minutes
+ * before, 'ten' in the last 15 minutes (the scheduler runs every 15 min, so
+ * one run always lands in each window; the key is claimed once). Same rule
+ * as src/lib/ivfJourney.ts dueTriggerPush (parity test in push-schedule.test.ts).
+ */
+export function triggerPushDue(triggerAt: string | null, now: Date): { kind: 'hour' | 'ten'; minutesLeft: number } | null {
+  if (!triggerAt) return null;
+  const t = Date.parse(triggerAt);
+  if (Number.isNaN(t)) return null;
+  const left = Math.ceil((t - now.getTime()) / 60_000);
+  if (left <= 65 && left > 15) return { kind: 'hour', minutesLeft: left };
+  if (left <= 15 && left > 0) return { kind: 'ten', minutesLeft: left };
+  return null;
+}
 
 /** Her timezone: the most recently updated device's valid zone, else UTC. */
 export function userTimeZone(subs: SubscriptionRow[]): string {
@@ -163,9 +198,9 @@ export function planUserReminders(data: UserData, allSubs: SubscriptionRow[], no
   const { date: today, minutes } = localParts(now, tz);
   const out: PlannedReminder[] = [];
 
-  const push = (type: ReminderType, key: string, payload: PushPayload) => {
+  const push = (type: ReminderType, key: string, payload: PushPayload, slotKey?: string) => {
     const targets = subs.filter(s => parsePrefs(s.prefs)[type]);
-    if (targets.length) out.push({ userId: data.userId, type, key, payload, subscriptions: targets });
+    if (targets.length) out.push({ userId: data.userId, type, key, payload, subscriptions: targets, ...(slotKey ? { slotKey } : {}) });
   };
 
   // Medicine times.
@@ -178,15 +213,35 @@ export function planUserReminders(data: UserData, allSubs: SubscriptionRow[], no
       localParts(new Date(d.occurred_at), tz).date === today,
     ).length;
     const passed = times.filter(t => toMin(t) <= minutes);
-    for (const t of passed.slice(dosesToday)) {
-      if (minutes - toMin(t) > MED_LOOKBACK_MIN) continue;
+    // Times are read fresh each run (an edit takes effect at the next run);
+    // the medicine keeps its id when edited, so its keys and today's doses
+    // stay attached to it.
+    passed.forEach((t, slot) => {
+      if (slot < dosesToday) return;
+      if (minutes - toMin(t) > MED_LOOKBACK_MIN) return;
       push('medicine', `med:${med.id}:${today}:${t}`, {
         title: 'Medicine reminder',
         body: `It's ${t} - time for your medicine. Tap to log it.`,
         url: '/dashboard',
         tag: `med-${med.id}-${t}`,
-      });
-    }
+      }, `med:${med.id}:${today}:slot${slot}`);
+    });
+  }
+
+  // IVF trigger shot: before the quiet-hours cut, the clinic set the time.
+  const trig = triggerPushDue(data.ivfTriggerAt ?? null, now);
+  if (trig) {
+    const at = new Date(data.ivfTriggerAt as string);
+    const atIso = at.toISOString();
+    const local = hhmm(localParts(at, tz).minutes);
+    push('ivf_trigger', `ivf-trigger:${atIso}:${trig.kind}`, {
+      title: 'Timed reminder',
+      body: trig.kind === 'hour'
+        ? `Your timed injection is at ${local}, in about ${trig.minutesLeft >= 55 ? '1 hour' : `${trig.minutesLeft} minutes`}.`
+        : `Your timed injection is at ${local}, in ${trig.minutesLeft} minute${trig.minutesLeft === 1 ? '' : 's'}.`,
+      url: '/dashboard/stage#ivf-trigger',
+      tag: 'ivf-trigger',
+    });
   }
 
   if (!inDayWindow(minutes)) return out;

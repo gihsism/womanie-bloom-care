@@ -327,6 +327,7 @@ const Settings = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notifications]);
 
+  const stagePicked = useRef(false);
   const loadSettings = useCallback(async () => {
     if (!user) return;
     
@@ -338,7 +339,9 @@ const Settings = () => {
         .maybeSingle();
 
       if (error) throw error;
-      if (data?.life_stage) {
+      // A stage tapped while this load was in flight wins: the late reply
+      // holds the old value and used to snap the picker back to it.
+      if (data?.life_stage && !stagePicked.current) {
         setSelectedStage(normalizeLifeStage(data.life_stage));
       }
       const name = (data as { full_name?: string | null } | null)?.full_name?.trim() || null;
@@ -379,6 +382,7 @@ const Settings = () => {
   const handleLifeStageChange = async (value: string) => {
     if (savingStage.current === value) return;
     savingStage.current = value;
+    stagePicked.current = true;
     const stage = value as LifeStage;
     setSelectedStage(stage);
     setSaving(true);

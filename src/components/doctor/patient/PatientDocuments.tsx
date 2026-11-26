@@ -4,21 +4,56 @@ import { NO_REMOTE_IMAGES } from '@/lib/safeMarkdown';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { ChevronDown, ExternalLink, FileText } from 'lucide-react';
-import { openDocumentFile } from '@/lib/documentFiles';
+import { Badge } from '@/components/ui/badge';
+import { ChevronDown, ExternalLink, FileText, Send } from 'lucide-react';
+import { openDocumentFile, type SentDocument } from '@/lib/documentFiles';
+import SendDocumentDialog from './SendDocumentDialog';
 import type { HealthDocument } from './types';
 
 // Documents tab of the doctor's patient chart. Each row: name, type, date
 // and "Open". The AI summary is folded away behind "Summary" so the list
-// stays scannable.
+// stays scannable. "Send a document" puts a lab report, letter or image
+// into her Records; those rows say "Sent by you".
 
-const PatientDocuments = ({ documents }: { documents: HealthDocument[] }) => {
+interface Props {
+  documents: HealthDocument[];
+  /** With a patient id the tab offers "Send a document". */
+  patientId?: string;
+  patientName?: string | null;
+  onSent?: (doc: SentDocument) => void;
+}
+
+const PatientDocuments = ({ documents, patientId, patientName, onSent }: Props) => {
   const { toast } = useToast();
   const [query, setQuery] = useState('');
   const [openSummary, setOpenSummary] = useState<string | null>(null);
+  const [sendOpen, setSendOpen] = useState(false);
+
+  const sendButton = patientId ? (
+    <>
+      <div className="flex justify-end">
+        <Button size="sm" onClick={() => setSendOpen(true)}>
+          <Send className="h-4 w-4 mr-1.5" aria-hidden="true" />
+          Send a document
+        </Button>
+      </div>
+      <SendDocumentDialog
+        patientId={patientId}
+        patientName={patientName}
+        open={sendOpen}
+        onOpenChange={setSendOpen}
+        onSent={doc => onSent?.(doc)}
+      />
+    </>
+  ) : null;
 
   if (documents.length === 0) {
-    return <p className="row-group px-4 py-6 text-center text-[15px] text-muted-foreground">The patient has not uploaded any documents yet.</p>;
+    return (
+      <div className="space-y-3">
+        {sendButton}
+        <p className="row-group px-4 py-6 text-center text-[15px] text-muted-foreground">The patient has not uploaded any documents yet.</p>
+      </div>
+    );
   }
 
   const q = query.trim().toLowerCase();
@@ -40,6 +75,7 @@ const PatientDocuments = ({ documents }: { documents: HealthDocument[] }) => {
 
   return (
     <div className="space-y-3">
+      {sendButton}
       {documents.length > 5 && (
         <Input
           placeholder="Search documents"
@@ -61,7 +97,11 @@ const PatientDocuments = ({ documents }: { documents: HealthDocument[] }) => {
                   <p className="text-[17px] font-medium truncate">{doc.ai_suggested_name || doc.file_name}</p>
                   <p className="text-[14px] text-muted-foreground first-letter:uppercase">
                     {(doc.document_type || 'Document').replace(/_/g, ' ')} · {doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString() : 'date unknown'}
+                    {doc.sent_by_me && <Badge variant="secondary" className="ml-2 text-[10px] py-0">Sent by you</Badge>}
                   </p>
+                  {doc.sent_by_me && doc.sent_note && (
+                    <p className="text-xs text-muted-foreground mt-0.5 italic line-clamp-2">“{doc.sent_note}”</p>
+                  )}
                 </div>
                 <Button
                   variant="ghost"

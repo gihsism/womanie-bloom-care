@@ -183,6 +183,11 @@ describe('me/delete-account security invariants', () => {
       [...readFileSync(new URL(f, migDir), 'utf8').matchAll(/CREATE TABLE IF NOT EXISTS ([a-z_]+)/gi)].map(m => m[1]));
     const NOT_USER_ROWS = new Set([
       'current_extracted_data', // a VIEW over medical_extracted_data (migration 002)
+      // Admin records (migration 023), not the user's own data: who approved
+      // or rejected which doctor licence, and which invite links an admin
+      // sent. The accountability trail must survive the account's deletion.
+      'admin_audit_log',
+      'doctor_invites',
     ]);
     const expected = new Set(
       [...whitelist, ...migrated, 'chat_messages', 'auth_sessions', 'auth_users', 'llm_cache']
@@ -192,7 +197,7 @@ describe('me/delete-account security invariants', () => {
 
     query.mockImplementation(async (q: string) =>
       /to_regclass/.test(q)
-        ? [{ present: true, visit_questions: true, pending_jobs: true, rate_limit_counters: true, push_subscriptions: true }]
+        ? [{ present: true, visit_questions: true, pending_jobs: true, rate_limit_counters: true, push_subscriptions: true, birth_plans: true, ivf_plans: true }]
         : [{ email: 'User@Test.com' }]);
     const res = mockRes();
     await handler(mockReq({ confirm: CONFIRM_PHRASE }), res);

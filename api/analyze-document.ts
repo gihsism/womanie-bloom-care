@@ -1,6 +1,7 @@
 import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from './_lib/auth.js';
+import { hasApprovedDoctorAccess } from './_lib/doctor-documents.js';
 import { normalizeTestTitle } from './_lib/normalize-test-title.js';
 import { normalizeUnit } from './_lib/normalize-unit.js';
 import { checkAndConsume } from './_lib/ratelimit.js';
@@ -107,17 +108,34 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     if (!documentId || !userId) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
+    // A doctor may start the analysis of ONE kind of document that isn't
+    // hers: one she sent into this patient's Records herself
+    // (/api/docs/from-doctor), while she still holds the doctor role and an
+    // approved connection. The analysis is written to the patient (userId),
+    // exactly as if the patient had uploaded it.
+    let sentByDoctor = false;
     if (userId !== sessionUser.id) {
-      return res.status(403).json({ error: 'Cannot analyze a document owned by another user' });
+      const allowed = typeof userId === 'string'
+        && await hasApprovedDoctorAccess((t, p) => sql.query(t, p) as Promise<unknown[]>, sessionUser.id, userId);
+      if (!allowed) {
+        return res.status(403).json({ error: 'Cannot analyze a document owned by another user' });
+      }
+      sentByDoctor = true;
     }
-    // The file to analyse comes from the caller's own health_documents row,
+    // The file to analyse comes from the owner's own health_documents row,
     // never from the request body: a client-supplied URL let the server
     // fetch arbitrary addresses (SSRF) and analyse a document id that
     // belongs to someone else.
-    const docRows = await sql.query(
-      'SELECT file_path, file_name, mime_type FROM health_documents WHERE id = $1 AND user_id = $2',
-      [documentId, sessionUser.id]
-    );
+    const docRows = sentByDoctor
+      ? await sql.query(
+          `SELECT file_path, file_name, mime_type FROM health_documents
+            WHERE id = $1 AND user_id = $2 AND uploaded_by_doctor_id = $3`,
+          [documentId, userId, sessionUser.id]
+        )
+      : await sql.query(
+          'SELECT file_path, file_name, mime_type FROM health_documents WHERE id = $1 AND user_id = $2',
+          [documentId, sessionUser.id]
+        );
     if (docRows.length === 0) {
       return res.status(404).json({ error: 'Document not found' });
     }
@@ -142,11 +160,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Download file from Vercel Blob (server-side, with the store token, so
     // private blobs work as well as the older public ones). Only a file in
-    // the caller's own upload folder: file_path is client-writable at
+    // the owner's own upload folder: file_path is client-writable at
     // insert, so a row pointed at someone else's Blob URL must not pull
     // their file into this account (same rule as /api/docs/file).
     let documentText = '';
-    if (filePath && isOwnBlobUrl(filePath, sessionUser.id)) {
+    if (filePath && isOwnBlobUrl(filePath, userId)) {
       try {
         const buffer = await readBlobBuffer(filePath);
         if (buffer) {

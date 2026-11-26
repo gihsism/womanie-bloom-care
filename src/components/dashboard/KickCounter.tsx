@@ -1,86 +1,66 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Activity, RotateCcw, AlertCircle, History } from 'lucide-react';
+import { Activity, RotateCcw, AlertCircle, History, Undo2, CloudOff, Phone } from 'lucide-react';
 import { format, formatDistanceToNowStrict } from 'date-fns';
 import { attentionBanner, healthTone } from '@/lib/medical-utils';
-import { useLifeEvents, importLocalOnce } from '@/hooks/useLifeEvents';
+import { importLocalOnce } from '@/hooks/useLifeEvents';
+import { useOfflineLifeEvents } from '@/hooks/useOfflineLifeEvents';
+import {
+  finishSession, kickConcern, startSession, tapKick, timeToTarget, undoTap, usualTimeToTarget,
+  TARGET_KICKS, type KickConcern, type KickSession,
+} from '@/lib/kickSession';
+import { formatSpan } from '@/lib/contractions';
 
-// Kick counter for late pregnancy. Standard methodology (ACOG):
-// from ~28 weeks on, count fetal movements daily. 10 distinct
-// movements in 2 hours or less is reassuring; substantially fewer
-// is a reason to call your provider for monitoring.
+// Kick counter for late pregnancy (week 28+): count to 10 movements and
+// see how long it took, with her own history to learn her baby's pattern.
+// Guidance (details in src/lib/kickSession.ts): NHS "Your baby's
+// movements" and RCOG Green-top Guideline 57 say there is no "normal"
+// number; if movements slow down, stop or change, contact the maternity
+// unit straight away, day or night. Never "wait and see", and the app
+// never reassures her that her baby is fine.
 //
 // Finished sessions are saved to the account (life_events, kind
-// 'kick_session', data = { count, taps }) so they survive a phone change,
-// are in the data export, and can be shown to a midwife. The session in
-// progress stays on the device so every tap is instant. Sessions from the
-// older device-only counters (this one and the retired FetalKickCounter)
-// are moved into the account once.
-
-interface KickSession {
-  id: string;
-  startedAt: number;  // epoch ms
-  endedAt: number | null;
-  count: number;
-  // Each "tap" timestamp, so we can show inter-kick timing and the
-  // session can be paused/resumed without losing the cadence.
-  taps: number[];
-}
-
-const TARGET_KICKS = 10;
-const REASSURING_MS = 2 * 60 * 60 * 1000; // 2 hours
-const SESSION_STORAGE_KEY = (userId: string) => `womanie_kick_session_${userId}`;
-const HISTORY_STORAGE_KEY = (userId: string) => `womanie_kick_history_${userId}`;
-const HISTORY_LIMIT = 14;
-// Storage key of the retired FetalKickCounter (sessions: {startedAt, endedAt, count, durationMin}, ISO dates).
-const OLD_FETAL_KEY = (userId: string) => `womanie_kick_sessions_${userId}`;
+// 'kick_session', data = { count, taps }); without signal they wait on the
+// device and sync later. The session in progress stays on the device.
 
 interface KickData { count: number; taps: number[] }
 
-function uid(): string {
-  return crypto.randomUUID();
-}
+const SESSION_STORAGE_KEY = (userId: string) => `womanie_kick_session_${userId}`;
+const HISTORY_STORAGE_KEY = (userId: string) => `womanie_kick_history_${userId}`;
+// Storage key of the retired FetalKickCounter.
+const OLD_FETAL_KEY = (userId: string) => `womanie_kick_sessions_${userId}`;
+const HISTORY_LIMIT = 30;
 
-function readJson<T>(key: string, fallback: T): T {
+const CONTACT_NOW = 'Contact your midwife or maternity unit straight away, day or night. Do not wait until tomorrow.';
+
+const concernText: Record<Exclude<KickConcern, 'none'>, string> = {
+  over_reference: `It has taken more than 2 hours to feel ${TARGET_KICKS} movements. ${CONTACT_NOW}`,
+  slower_than_usual: `That took much longer than usual for your baby. If movements feel slower or different, ${CONTACT_NOW.charAt(0).toLowerCase()}${CONTACT_NOW.slice(1)}`,
+  stopped_short: `Fewer than ${TARGET_KICKS} movements were counted. If your baby is moving less than usual, ${CONTACT_NOW.charAt(0).toLowerCase()}${CONTACT_NOW.slice(1)}`,
+};
+
+function readSession(key: string): KickSession | null {
   try {
     const raw = localStorage.getItem(key);
-    if (!raw) return fallback;
-    return JSON.parse(raw) as T;
+    const v = raw ? JSON.parse(raw) : null;
+    if (!v || typeof v.startedAt !== 'number') return null;
+    return { id: String(v.id), startedAt: v.startedAt, endedAt: null, count: Number(v.count) || 0, taps: Array.isArray(v.taps) ? v.taps : [] };
   } catch {
-    return fallback;
+    return null;
   }
 }
-
-function writeJson(key: string, value: unknown) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Quota / private mode — accept the in-memory state.
-  }
-}
-
-const formatDuration = (ms: number): string => {
-  const totalSeconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  if (minutes >= 60) {
-    const hours = Math.floor(minutes / 60);
-    const remMin = minutes % 60;
-    return `${hours}h ${remMin}m`;
-  }
-  return `${minutes}m ${String(seconds).padStart(2, '0')}s`;
-};
 
 const KickCounter = () => {
   const { user } = useAuth();
   const userId = user?.id;
   const { toast } = useToast();
   const [current, setCurrent] = useState<KickSession | null>(null);
-  const { events, add, error } = useLifeEvents<KickData>('kick_session', {
+  const [lastDone, setLastDone] = useState<KickSession | null>(null);
+  const { events, pending, addOrQueue, error } = useOfflineLifeEvents<KickData>('kick_session', {
     limit: HISTORY_LIMIT,
     beforeLoad: async (id) => {
       await importLocalOnce<KickSession, KickData>(id, HISTORY_STORAGE_KEY(id), 'kick_session', k =>
@@ -96,108 +76,85 @@ const KickCounter = () => {
       }));
     },
   });
-  // Newest first.
-  const history: KickSession[] = events.map(e => ({
-    id: e.id,
-    startedAt: Date.parse(e.occurred_at),
-    endedAt: e.ended_at ? Date.parse(e.ended_at) : null,
-    count: Number(e.data?.count ?? 0),
-    taps: Array.isArray(e.data?.taps) ? e.data.taps : [],
-  }));
-  const [now, setNow] = useState(Date.now());
-  const tickRef = useRef<number | null>(null);
 
-  // Restore an in-progress session (kept on the device).
+  const toSession = (id: string, occurred: string, ended: string | null, data: KickData | undefined): KickSession => ({
+    id,
+    startedAt: Date.parse(occurred),
+    endedAt: ended ? Date.parse(ended) : null,
+    count: Number(data?.count ?? 0),
+    taps: Array.isArray(data?.taps) ? data.taps : [],
+  });
+  const pendingIds = new Set(pending.map(p => p.localId));
+  // Newest first.
+  const history: KickSession[] = [
+    ...events.map(e => toSession(e.id, e.occurred_at, e.ended_at, e.data)),
+    ...pending.map(p => toSession(p.localId, p.occurred_at, p.ended_at, p.data)),
+  ].sort((a, b) => b.startedAt - a.startedAt);
+  const usual = usualTimeToTarget(history);
+
+  const [now, setNow] = useState(Date.now());
+
   useEffect(() => {
     if (!userId) return;
-    setCurrent(readJson<KickSession | null>(SESSION_STORAGE_KEY(userId), null));
+    setCurrent(readSession(SESSION_STORAGE_KEY(userId)));
   }, [userId]);
 
-  // Re-tick once a second only when there's an active session, so the
-  // "elapsed" display stays accurate without spinning when idle.
   useEffect(() => {
-    if (!current || current.endedAt !== null) {
-      if (tickRef.current) {
-        window.clearInterval(tickRef.current);
-        tickRef.current = null;
-      }
-      return;
-    }
-    tickRef.current = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => {
-      if (tickRef.current) window.clearInterval(tickRef.current);
-      tickRef.current = null;
-    };
+    if (!current) return;
+    const t = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(t);
   }, [current]);
 
   const persistCurrent = (next: KickSession | null) => {
-    if (!userId) return;
     setCurrent(next);
-    if (next) writeJson(SESSION_STORAGE_KEY(userId), next);
-    else localStorage.removeItem(SESSION_STORAGE_KEY(userId));
+    if (!userId) return;
+    try {
+      if (next) localStorage.setItem(SESSION_STORAGE_KEY(userId), JSON.stringify(next));
+      else localStorage.removeItem(SESSION_STORAGE_KEY(userId));
+    } catch { /* private mode: in memory only */ }
   };
 
-  // Save a finished session to the account; if that fails, put it back
-  // on screen so the count isn't lost.
-  const saveCompleted = async (completed: KickSession) => {
-    const saved = await add({
-      occurred_at: new Date(completed.startedAt).toISOString(),
-      ended_at: new Date(completed.endedAt ?? Date.now()).toISOString(),
-      data: { count: completed.count, taps: completed.taps },
+  const saveCompleted = async (s: KickSession) => {
+    await addOrQueue({
+      occurred_at: new Date(s.startedAt).toISOString(),
+      ended_at: new Date(s.endedAt ?? Date.now()).toISOString(),
+      data: { count: s.count, taps: s.taps },
     });
-    if (!saved) persistCurrent({ ...completed, endedAt: null });
   };
 
   const start = () => {
-    const session: KickSession = {
-      id: uid(),
-      startedAt: Date.now(),
-      endedAt: null,
-      count: 0,
-      taps: [],
-    };
-    persistCurrent(session);
+    setLastDone(null);
+    persistCurrent(startSession(Date.now(), crypto.randomUUID()));
   };
 
   const tap = () => {
-    if (!current || current.endedAt !== null) return;
-    const t = Date.now();
-    const next: KickSession = {
-      ...current,
-      taps: [...current.taps, t],
-      count: current.count + 1,
-    };
-    // Auto-complete at 10 movements — that's the reassurance threshold.
-    if (next.count >= TARGET_KICKS) {
-      const completed: KickSession = { ...next, endedAt: t };
+    if (!current) return;
+    const { session, completed, ignored } = tapKick(current, Date.now());
+    if (ignored) return;
+    if (completed) {
       persistCurrent(null);
-      void saveCompleted(completed);
-      const duration = t - completed.startedAt;
-      const reassuring = duration <= REASSURING_MS;
+      setLastDone(session);
+      void saveCompleted(session);
       toast({
-        title: reassuring
-          ? `10 movements in ${formatDuration(duration)} ✓`
-          : `10 movements in ${formatDuration(duration)}`,
-        description: reassuring
-          ? 'Within the typical 2-hour reassurance window. Your baby is moving well.'
-          : 'Slower than the typical 2-hour reassurance window. If movement feels reduced, call your provider.',
+        title: `${TARGET_KICKS} movements in ${formatSpan(timeToTarget(session) ?? 0)}`,
+        description: 'Saved to your history.',
       });
       return;
     }
-    persistCurrent(next);
+    persistCurrent(session);
+  };
+
+  const undo = () => {
+    if (current) persistCurrent(undoTap(current));
   };
 
   const stop = () => {
     if (!current) return;
-    const t = Date.now();
-    const completed: KickSession = { ...current, endedAt: t };
+    const done = finishSession(current, Date.now());
     persistCurrent(null);
-    if (completed.count > 0) void saveCompleted(completed);
-    if (completed.count > 0) {
-      toast({
-        title: 'Session saved',
-        description: `${completed.count} movement${completed.count === 1 ? '' : 's'} in ${formatDuration(t - completed.startedAt)}.`,
-      });
+    if (done.count > 0) {
+      setLastDone(done);
+      void saveCompleted(done);
     }
   };
 
@@ -207,8 +164,10 @@ const KickCounter = () => {
     persistCurrent(null);
   };
 
+  const liveConcern = current ? kickConcern(current, now, history) : 'none';
+  const doneConcern = lastDone ? kickConcern(lastDone, now, history) : 'none';
+  const concern = current ? liveConcern : doneConcern;
   const elapsedMs = current ? now - current.startedAt : 0;
-  const reassuring = current ? elapsedMs <= REASSURING_MS : true;
 
   return (
     <Card className="p-4 space-y-4">
@@ -216,73 +175,70 @@ const KickCounter = () => {
       <div className="flex items-center justify-between">
         <h4 className="font-semibold flex items-center gap-2">
           <Activity className="h-4 w-4 text-primary" />
-          Daily kick count
+          Kick counter
         </h4>
         <Badge variant="outline" className="text-[10px]">
-          {TARGET_KICKS} movements in 2h is typical
+          Count to {TARGET_KICKS}
         </Badge>
+      </div>
+
+      {/* Always visible, per NHS/RCOG: reduced movements = call now. */}
+      <div className="flex items-start gap-2 rounded-lg bg-muted/40 p-2.5">
+        <Phone className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-primary" />
+        <p className="text-xs text-foreground/85">
+          <span className="font-medium">If you notice reduced movements, contact your maternity unit straight away</span>,
+          day or night. Do not wait and see, and do not rely on this counter or a home heartbeat
+          monitor to reassure yourself.
+        </p>
       </div>
 
       {!current ? (
         <div className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            From around week 28, tracking fetal movement is a useful check on your baby's
-            wellbeing. Pick a quiet moment, lie down, and tap each distinct movement.
+            There is no set number of movements that is normal; what matters is your baby's own
+            pattern. Pick a time when your baby is usually active, lie on your side, and tap each
+            movement (kicks, rolls, swishes) until you reach {TARGET_KICKS}.
+            {usual !== null && <> Usually it takes you about {formatSpan(usual)}.</>}
           </p>
           <Button onClick={start} className="w-full h-12 text-base">
-            Start a session
+            Start counting
           </Button>
         </div>
       ) : (
         <div className="space-y-4">
           <div className="text-center">
             <div className="font-display text-6xl leading-none text-primary tabular-nums font-medium">{current.count}</div>
-            <div className="text-xs text-muted-foreground mt-1">
-              of {TARGET_KICKS} movements
-            </div>
+            <div className="text-xs text-muted-foreground mt-1">of {TARGET_KICKS} movements</div>
             <div className="text-xs text-muted-foreground mt-2">
-              Started {formatDistanceToNowStrict(new Date(current.startedAt))} ago
-              {' · '}
-              <span className={reassuring ? '' : 'text-destructive font-medium'}>
-                {formatDuration(elapsedMs)} elapsed
-              </span>
+              Started {formatDistanceToNowStrict(new Date(current.startedAt))} ago · {formatSpan(elapsedMs)}
             </div>
           </div>
 
-          <Button
-            onClick={tap}
-            className="w-full h-20 text-lg gap-2"
-            size="lg"
-          >
+          <Button onClick={tap} className="w-full h-20 text-lg gap-2" size="lg">
             <Activity className="h-5 w-5" />
-            Tap each movement
+            Tap for each movement
           </Button>
-
-          {!reassuring && current.count < TARGET_KICKS && (
-            <div className={attentionBanner}>
-              <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
-              <p className="text-xs">
-                Fewer than {TARGET_KICKS} movements in 2 hours. If movement feels reduced
-                compared to your baby's usual pattern, call your provider — they may want
-                to monitor.
-              </p>
-            </div>
-          )}
 
           <div className="flex items-center justify-between gap-2">
             <Button variant="outline" size="sm" onClick={stop} className="flex-1">
               Stop and save
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={reset}
-              className="gap-1 text-muted-foreground hover:text-destructive"
-            >
+            <Button variant="ghost" size="sm" onClick={undo} disabled={current.count === 0} className="gap-1 text-muted-foreground">
+              <Undo2 className="h-3.5 w-3.5" />
+              Undo
+            </Button>
+            <Button variant="ghost" size="sm" onClick={reset} className="gap-1 text-muted-foreground hover:text-destructive">
               <RotateCcw className="h-3.5 w-3.5" />
-              Reset
+              Discard
             </Button>
           </div>
+        </div>
+      )}
+
+      {concern !== 'none' && (
+        <div className={attentionBanner} role="alert">
+          <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+          <p className="text-xs">{concernText[concern]}</p>
         </div>
       )}
 
@@ -290,26 +246,26 @@ const KickCounter = () => {
         <div className="pt-3 border-t space-y-2">
           <h5 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
             <History className="h-3 w-3" />
-            Recent sessions
+            Your sessions
           </h5>
-          <ul className="space-y-1.5">
-            {history.slice(0, 5).map(s => {
-              const dur = s.endedAt ? s.endedAt - s.startedAt : 0;
-              const reachedTarget = s.count >= TARGET_KICKS;
-              const onTime = reachedTarget && dur <= REASSURING_MS;
+          <ul className="space-y-1.5 max-h-48 overflow-y-auto">
+            {history.slice(0, 14).map(s => {
+              const t = timeToTarget(s);
+              const c = kickConcern(s, s.endedAt ?? now, history);
               return (
                 <li key={s.id} className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">
-                    {format(new Date(s.startedAt), 'MMM d, HH:mm')}
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    {format(new Date(s.startedAt), 'EEE d MMM, HH:mm')}
+                    {pendingIds.has(s.id) && <CloudOff className="h-3 w-3" aria-label="Not synced yet" />}
                   </span>
-                  <span className="font-medium flex items-center gap-1.5">
-                    {s.count}/{TARGET_KICKS} in {formatDuration(dur)}
-                    {onTime && (
-                      <span aria-label="within 2 hours" className={`inline-block h-1.5 w-1.5 rounded-full ${healthTone.ok.dot}`} />
-                    )}
-                    {reachedTarget && !onTime && (
-                      <span aria-label="took longer than 2 hours" className={`inline-block h-1.5 w-1.5 rounded-full ${healthTone.watch.dot}`} />
-                    )}
+                  <span className="font-medium flex items-center gap-1.5 tabular-nums">
+                    {t !== null
+                      ? `${TARGET_KICKS} in ${formatSpan(t)}`
+                      : `${s.count} in ${formatSpan((s.endedAt ?? s.startedAt) - s.startedAt)}`}
+                    <span
+                      aria-label={c === 'none' ? 'like your usual' : 'slower or shorter than usual'}
+                      className={`inline-block h-1.5 w-1.5 rounded-full ${c === 'none' ? healthTone.ok.dot : healthTone.watch.dot}`}
+                    />
                   </span>
                 </li>
               );

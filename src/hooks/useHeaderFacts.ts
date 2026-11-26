@@ -5,6 +5,9 @@ import { onHealthDataChange } from '@/lib/data-events';
 import { cycleDial, dayOfLife, hotFlushes, monthsSince, pillFromNotes, pillRing } from '@/lib/bodyMap';
 import { getWeekData } from '@/components/dashboard/pregnancyWeekData';
 import { IVF_PHASES } from '@/components/dashboard/ivfPhases';
+import { deviceTz } from '@/components/dashboard/ivf/ivfFormat';
+import { daysBetween as ivfDaysBetween, ivfStatus, localDate, nextKeyDate } from '@/lib/ivfJourney';
+import { useIvfPlan } from './useIvfPlan';
 import type { LifeStage } from '@/components/dashboard/DashboardHeader';
 import type { HeaderFacts } from '@/lib/stageHeader';
 import type { TodaySignals } from '@/lib/todayItems';
@@ -36,6 +39,8 @@ export function useHeaderFacts(i: Input): HeaderFacts {
   const { mode, userId } = i;
   const isCycle = CYCLE.includes(mode);
   const { prediction: p, loaded, periodRecords } = useCycleModel(isCycle);
+  // Her clinic's dates (ivf_plans), when she entered them, beat the phase she picked by hand.
+  const { plan: ivfPlan } = useIvfPlan({ enabled: mode === 'ivf' });
   const [notes, setNotes] = useState<{ signal_date: string; notes: string | null }[]>([]);
   const [lastPeriod, setLastPeriod] = useState<Date | null>(null);
   const [baby, setBaby] = useState<{ name: string | null; birth_date: string | null } | null>(null);
@@ -133,10 +138,20 @@ export function useHeaderFacts(i: Input): HeaderFacts {
     facts.monthsSincePeriod = monthsSince(lastPeriod, now);
   }
   if (mode === 'ivf') {
-    const idx = IVF_PHASES.findIndex(ph => ph.key === i.ivfPhase);
-    if (idx >= 0 && i.ivfStartDate) {
+    const tz = deviceTz();
+    const status = ivfStatus(ivfPlan, now, tz);
+    const key = nextKeyDate(ivfPlan, now, tz);
+    const phase = status.phase ?? i.ivfPhase;
+    const idx = IVF_PHASES.findIndex(ph => ph.key === phase);
+    const day = status.stimDay
+      ?? (status.phaseStart ? ivfDaysBetween(status.phaseStart, localDate(now, tz)) + 1
+        : i.ivfStartDate ? differenceInDays(now, i.ivfStartDate) + 1 : null);
+    if (idx >= 0 && day != null) {
       const name = (k: number) => IVF_PHASES[k].label.replace(' (TWW)', '').replace('Ovarian ', '').replace(' & Culture', '');
-      facts.ivf = { phase: name(idx), next: idx < IVF_PHASES.length - 1 ? name(idx + 1) : null, day: differenceInDays(now, i.ivfStartDate) + 1 };
+      const next = key
+        ? `${key.label.toLowerCase()} ${key.daysUntil === 0 ? 'today' : key.daysUntil === 1 ? 'tomorrow' : `in ${key.daysUntil} days`}`
+        : idx < IVF_PHASES.length - 1 ? name(idx + 1) : null;
+      facts.ivf = { phase: name(idx), next, day };
     }
     const doses = i.quick.events.filter(e => e.kind === 'med_dose');
     const total = i.meds.reduce((n, m) => n + Math.max(1, m.times_per_day ?? 1), 0);

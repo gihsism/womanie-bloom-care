@@ -25,6 +25,9 @@ const SYMPTOM_OPTIONS = [
   'Dizziness', 'Hot flashes', 'Joint pain', 'Anxiety',
 ];
 
+// Menopause stages also log night sweats (read by "Your symptoms over time").
+const MENOPAUSE_SYMPTOM_OPTIONS = [...SYMPTOM_OPTIONS, 'Night sweats'];
+
 const MOOD_OPTIONS = [
   { emoji: '😊', label: 'Happy', value: 'happy' },
   { emoji: '😌', label: 'Calm', value: 'calm' },
@@ -299,6 +302,7 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
               <button
                 key={m.value}
                 onClick={() => toggleMood(m.value)}
+                aria-pressed={data.moods.includes(m.value)}
                 className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-xl border transition-all text-center ${
                   data.moods.includes(m.value)
                     ? 'border-primary bg-primary/10 scale-105'
@@ -389,10 +393,11 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
         <div>
           <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 block">Symptoms</Label>
           <div className="flex flex-wrap gap-1.5">
-            {SYMPTOM_OPTIONS.map(s => (
+            {(showHotFlashes ? MENOPAUSE_SYMPTOM_OPTIONS : SYMPTOM_OPTIONS).map(s => (
               <button
                 key={s}
                 onClick={() => toggleSymptom(s)}
+                aria-pressed={data.symptoms.includes(s)}
                 className={`px-3 py-1.5 rounded-full text-xs border transition-all ${
                   data.symptoms.includes(s)
                     ? 'border-primary bg-primary/10 font-semibold text-primary'

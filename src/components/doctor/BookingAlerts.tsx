@@ -32,7 +32,7 @@ const BLOCKED: Record<Exclude<PushSupport, 'ok'>, string> = {
 
 // A device switched on from here gets booking alerts only; the patient
 // reminder types stay off until she turns them on in Me -> Reminders.
-const DOCTOR_ONLY_PREFS: PushPrefs = { medicine: false, period: false, appointment: false, bookings: true };
+const DOCTOR_ONLY_PREFS: PushPrefs = { medicine: false, period: false, appointment: false, bookings: true, documents: false };
 
 export default function BookingAlerts() {
   const { toast } = useToast();

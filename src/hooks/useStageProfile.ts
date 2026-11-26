@@ -27,6 +27,21 @@ export interface PeriodData {
   cycleLength: number;
 }
 
+/**
+ * A stored calendar date ('YYYY-MM-DD', or an ISO timestamp at UTC midnight)
+ * as LOCAL midnight of that same day. new Date('2027-01-24') is UTC midnight,
+ * which west of UTC (New York) is still the 23rd: the due date, last period
+ * and IVF start then sat a day early (one day further along, a period shown
+ * "late" a day too soon).
+ */
+export function localDay(raw: string | Date | null | undefined): Date | null {
+  if (raw == null || raw === '') return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw instanceof Date ? raw.toISOString() : String(raw));
+  if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  const d = new Date(raw);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
 export function weeksPregnantFrom(dueDate: Date | null, now = Date.now()): number | null {
   if (!dueDate) return null;
   return Math.max(0, Math.floor((now - (dueDate.getTime() - 280 * 86400000)) / (7 * 86400000)));
@@ -54,7 +69,7 @@ export function useStageProfile() {
         .limit(1)
         .maybeSingle();
       if (data) {
-        setPeriodData({ lastPeriodStart: new Date(data.period_start_date), cycleLength: data.cycle_length });
+        setPeriodData({ lastPeriodStart: localDay(data.period_start_date) ?? new Date(data.period_start_date), cycleLength: data.cycle_length });
       } else {
         // No period data yet — leave as null so CycleCalendar shows empty state
         setPeriodData(null);
@@ -93,8 +108,8 @@ export function useStageProfile() {
 
       setProfile(data);
       setSelectedMode(normalizeLifeStage(data?.life_stage));
-      if (data?.pregnancy_due_date) setPregnancyDueDate(new Date(data.pregnancy_due_date));
-      if (data?.ivf_start_date) setIvfStartDate(new Date(data.ivf_start_date));
+      if (data?.pregnancy_due_date) setPregnancyDueDate(localDay(data.pregnancy_due_date));
+      if (data?.ivf_start_date) setIvfStartDate(localDay(data.ivf_start_date));
       if (data?.ivf_phase) setIvfPhase(data.ivf_phase);
     } catch (error) {
       console.error('Error fetching profile:', error);

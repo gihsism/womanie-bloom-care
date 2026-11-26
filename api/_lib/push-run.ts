@@ -15,6 +15,12 @@ export type Sender = (sub: SubscriptionRow, payload: PushPayload) => Promise<Sen
 
 export interface RunSummary { users: number; planned: number; sent: number; skippedAlreadySent: number; removedDevices: number; failed: number }
 
+const triggerIso = (v: string | Date | null | undefined): string | null => {
+  if (!v) return null;
+  const d = v instanceof Date ? v : new Date(v);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+};
+
 const by = <T extends { user_id?: string | null }>(rows: T[], uid: string) => rows.filter(r => r.user_id === uid);
 
 export async function runSendDue(query: Query, send: Sender, now: Date): Promise<RunSummary> {
@@ -28,7 +34,7 @@ export async function runSendDue(query: Query, send: Sender, now: Date): Promise
 
   const since = new Date(now.getTime() - 36 * 3_600_000).toISOString();
   const until = new Date(now.getTime() + 3 * 86_400_000).toISOString();
-  const [meds, doses, periods, profiles, appts] = await Promise.all([
+  const [meds, doses, periods, profiles, appts, triggers] = await Promise.all([
     query('SELECT id, user_id, reminder_times FROM medications WHERE active = true AND user_id = ANY($1)', [userIds]) as Promise<Array<MedRow & { user_id: string }>>,
     query(
       `SELECT user_id, data->>'medication_id' AS medication_id, occurred_at
@@ -48,6 +54,14 @@ export async function runSendDue(query: Query, send: Sender, now: Date): Promise
           AND COALESCE(status, 'scheduled') <> 'cancelled'`,
       [userIds, now.toISOString(), until],
     ) as Promise<Array<ApptRow & { user_id: string }>>,
+    // IVF trigger shots in the next ~2 hours (migration 022). Before that
+    // migration is applied the table is missing: no trigger reminders,
+    // everything else still runs.
+    (query(
+      `SELECT user_id, trigger_at FROM ivf_plans
+        WHERE user_id = ANY($1) AND trigger_at > $2 AND trigger_at <= $3`,
+      [userIds, now.toISOString(), new Date(now.getTime() + 2 * 3_600_000).toISOString()],
+    ) as Promise<Array<{ user_id: string; trigger_at: string | Date | null }>>).catch(() => []),
   ]);
 
   for (const uid of userIds) {
@@ -58,6 +72,7 @@ export async function runSendDue(query: Query, send: Sender, now: Date): Promise
       doses: by(doses, uid),
       period: by(periods, uid)[0] ?? null,
       appointments: by(appts, uid),
+      ivfTriggerAt: triggerIso(by(triggers, uid)[0]?.trigger_at),
     };
     const planned = planUserReminders(data, by(subs, uid), now);
     summary.planned += planned.length;
@@ -68,6 +83,15 @@ export async function runSendDue(query: Query, send: Sender, now: Date): Promise
         [uid, r.key],
       );
       if (!claimed.length) { summary.skippedAlreadySent++; continue; }
+      // Medicine: the dose slot must be new as well (an edited time is a
+      // new key, but the same dose of the day). The time key stays claimed.
+      if (r.slotKey) {
+        const slot = await query(
+          'INSERT INTO push_sent_log (user_id, key) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING key',
+          [uid, r.slotKey],
+        );
+        if (!slot.length) { summary.skippedAlreadySent++; continue; }
+      }
       let delivered = 0;
       let failed = 0;
       for (const s of r.subscriptions) {
@@ -86,6 +110,7 @@ export async function runSendDue(query: Query, send: Sender, now: Date): Promise
       } else if (failed) {
         // Temporary failure everywhere: release the claim so the next run retries.
         await query('DELETE FROM push_sent_log WHERE user_id = $1 AND key = $2', [uid, r.key]);
+        if (r.slotKey) await query('DELETE FROM push_sent_log WHERE user_id = $1 AND key = $2', [uid, r.slotKey]);
       }
     }
   }

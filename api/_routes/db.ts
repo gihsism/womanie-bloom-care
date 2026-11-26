@@ -28,6 +28,12 @@ const OWNER_COLUMN: Record<string, string | string[]> = {
   // Questions to bring, saved per upcoming visit (migration 012). The
   // patient owns them; the visit's doctor reads them via /api/doctors/patient.
   visit_questions: 'user_id',
+  // Her birth plan (migration 020), one row per patient. A connected doctor
+  // reads it only through /api/doctors/patient, and only when she shared it.
+  birth_plans: 'user_id',
+  // Her IVF treatment dates and trigger-shot time (migration 022), one row
+  // per patient. The push scheduler reads trigger_at for the reminders.
+  ivf_plans: 'user_id',
   patient_access_codes: 'patient_id',
   user_roles: 'user_id',
   document_analyses: 'user_id',
@@ -79,7 +85,14 @@ const UPDATABLE_COLUMNS: Record<string, string[]> = {
 // are flipped by /api/admin/doctors on approval; letting the owner set them
 // would put an unvetted "verified doctor" in every patient's directory.
 const PROTECTED_COLUMNS: Record<string, string[]> = {
-  doctor_profiles: ['is_verified', 'verification_status', 'rating', 'review_count'],
+  doctor_profiles: [
+    'is_verified', 'verification_status', 'rating', 'review_count',
+    // The admin's licence decision (migration 023): server-only.
+    'verification_note', 'verified_at', 'verified_by',
+  ],
+  // "From Dr X": set only by /api/docs/from-doctor after its consent check,
+  // so a patient can't label her own upload as coming from a doctor.
+  health_documents: ['uploaded_by_doctor_id'],
 };
 
 // Columns the client may set when CREATING a row but never read back or

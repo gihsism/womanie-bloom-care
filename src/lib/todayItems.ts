@@ -239,6 +239,20 @@ export function primaryActionFor(
   }
 }
 
+/**
+ * The quiet "Log today" link under the filled button, for the stages
+ * whose filled button opens something else (pregnancy from week 28 = kick
+ * counter / contraction timer, a daily pill, a baby feed). Every stage
+ * thus keeps one tap from Home into today's mood/symptom log. null when
+ * the filled button already opens a Log sheet.
+ */
+export function secondaryActionFor(
+  mode: LifeStage,
+  opts: { weeksPregnant?: number | null; dailyPill?: boolean } = {},
+): PrimaryAction | null {
+  return primaryActionFor(mode, opts).target.startsWith('sheet:') ? null : { label: 'Log today', target: 'sheet:log' };
+}
+
 export interface MoreRow {
   label: string;
   target: Target;

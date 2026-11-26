@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,12 @@ import IVFReminders from './ivf/IVFReminders';
 import BetaHcgTracker from './BetaHcgTracker';
 import IVFMedicationAdherence from './IVFMedicationAdherence';
 import type { IVFEvent } from './ivf/IVFCalendar';
+import IVFJourneyCard from './ivf/IVFJourneyCard';
+import TriggerShotTimer from './ivf/TriggerShotTimer';
+import TwoWeekWaitCard from './ivf/TwoWeekWaitCard';
+import { deviceTz } from './ivf/ivfFormat';
+import { useIvfPlan } from '@/hooks/useIvfPlan';
+import { ivfStatus } from '@/lib/ivfJourney';
 
 // ─── IVF phases ───
 import { IVF_PHASES } from './ivfPhases';
@@ -38,6 +44,42 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase, with
   const [events, setEvents] = useState<IVFEvent[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  // IVF journey: her clinic's dates (ivf_plans). The phase follows the
+  // latest date reached; a phase she picks by hand stays until the next
+  // date is reached.
+  const ivf = useIvfPlan();
+  const tz = useMemo(() => deviceTz(), []);
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+  const status = useMemo(() => ivfStatus(ivf.plan, now, tz), [ivf.plan, now, tz]);
+  const lastSynced = useRef<string | null>(null);
+  useEffect(() => {
+    if (!ivf.loaded || !status.phase || !status.phaseStart) return;
+    const key = `${status.phase}|${status.phaseStart}`;
+    if (lastSynced.current === key) return;
+    lastSynced.current = key;
+    const current = ivfStartDate ? format(ivfStartDate, 'yyyy-MM-dd') : null;
+    if (status.phase === ivfPhase && status.phaseStart === current) return;
+    const [y, m, d] = status.phaseStart.split('-').map(Number);
+    onSetIVFStart(new Date(y, m - 1, d), status.phase);
+    // Only when the derived phase changes; a hand-picked phase is not undone.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ivf.loaded, status.phase, status.phaseStart]);
+
+  const journey = (
+    <IVFJourneyCard
+      plan={ivf.plan} tz={tz} now={now} fallbackPhase={ivfPhase}
+      serverOk={ivf.serverOk} saveState={ivf.saveState} onSave={ivf.save}
+    />
+  );
+  const triggerWindow = ivf.plan.triggerAt
+    ? now.getTime() < Date.parse(ivf.plan.triggerAt) + 48 * 3_600_000
+    : ivfPhase === 'stimulation' || ivfPhase === 'trigger' || status.phase === 'stimulation';
+  const showTww = status.phase === 'tww' || ivfPhase === 'tww' || (status.phase === 'transfer');
 
   // Load events
   const loadEvents = useCallback(async () => {
@@ -155,6 +197,8 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase, with
             Start Tracking
           </Button>
         </Card>
+        <p className="text-xs text-center text-muted-foreground">Or add the dates from your clinic's plan and the phase follows them.</p>
+        {journey}
       </div>
     );
   }
@@ -180,6 +224,12 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase, with
           </div>
         </Card>
       )}
+
+      {/* IVF timeline from her clinic's dates, the trigger timer and the
+          two-week wait. */}
+      {journey}
+      {triggerWindow && <TriggerShotTimer plan={ivf.plan} tz={tz} serverOk={ivf.serverOk} onSave={ivf.save} />}
+      {showTww && <TwoWeekWaitCard plan={ivf.plan} tz={tz} now={now} />}
 
       {/* Current phase status */}
       {!withHero && <div className="bg-stage-tint rounded-2xl p-5">

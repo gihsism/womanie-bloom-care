@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useClinicTheme } from '@/hooks/useClinicTheme';
 import { ArrowLeft, Eye, EyeOff, Mail, Lock, User, Stethoscope, FileText, AlertCircle, Loader2 } from 'lucide-react';
@@ -30,6 +30,13 @@ const DoctorSignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
+  // One-time invite (/auth/doctor-signup?invite=...): the admin created it
+  // for one email, which is pre-filled and locked; the account is approved
+  // on signup and lands on the dashboard's setup checklist.
+  const [searchParams] = useSearchParams();
+  const inviteToken = searchParams.get('invite');
+  const [invite, setInvite] = useState<{ email: string } | null>(null);
+  const [inviteError, setInviteError] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     email: '',
@@ -40,6 +47,24 @@ const DoctorSignUp = () => {
     licenseNumber: '',
     bio: '',
   });
+
+  useEffect(() => {
+    if (!inviteToken) return;
+    let cancelled = false;
+    fetch(`/api/auth/doctor-invite?token=${encodeURIComponent(inviteToken)}`)
+      .then(async r => {
+        const data = await r.json().catch(() => ({}));
+        if (cancelled) return;
+        if (r.ok && typeof data.email === 'string') {
+          setInvite({ email: data.email });
+          setFormData(prev => ({ ...prev, email: data.email }));
+        } else {
+          setInviteError(data.error || 'This invitation link is no longer valid.');
+        }
+      })
+      .catch(() => { if (!cancelled) setInviteError('Could not check the invitation link.'); });
+    return () => { cancelled = true; };
+  }, [inviteToken]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -83,6 +108,7 @@ const DoctorSignUp = () => {
           specialty: formData.specialty,
           licenseNumber: formData.licenseNumber,
           bio: formData.bio,
+          ...(invite && inviteToken ? { inviteToken } : {}),
         }),
       });
       const data = await resp.json().catch(() => ({}));
@@ -92,6 +118,13 @@ const DoctorSignUp = () => {
           title: 'Registration failed',
           description: data.error || 'An unexpected error occurred. Please try again.',
         });
+        return;
+      }
+
+      if (data.redirect === '/doctor/dashboard') {
+        toast({ title: 'Welcome to Womanie', description: 'Your account is ready. A few steps to set up your practice.' });
+        // Full reload so AuthContext picks up the new session cookie.
+        window.location.href = '/doctor/dashboard';
         return;
       }
 
@@ -146,9 +179,17 @@ const DoctorSignUp = () => {
             </p>
           </div>
 
+          {inviteError && (
+            <p role="alert" className="mb-4 text-[15px] text-destructive flex items-start gap-2.5">
+              <AlertCircle className="h-5 w-5 shrink-0 mt-px" aria-hidden="true" />
+              {inviteError} You can still register below; we then check your licence first.
+            </p>
+          )}
           <p className="mb-6 rounded-[1.25rem] bg-stage-tint px-4 py-3 text-[15px] flex items-start gap-2.5">
             <AlertCircle className="h-5 w-5 text-stage-accent shrink-0 mt-px" aria-hidden="true" />
-            We check your licence before you can log in (1–3 working days).
+            {invite
+              ? 'You were invited by Womanie: your account is ready as soon as you register.'
+              : 'We check your licence before you can log in (1–3 working days).'}
           </p>
 
           {/* Form */}
@@ -169,6 +210,8 @@ const DoctorSignUp = () => {
                       className="h-12 rounded-full pl-11 text-[16px]"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
+                      readOnly={Boolean(invite)}
+                      aria-readonly={Boolean(invite)}
                       required
                     />
                   </div>
@@ -297,8 +340,9 @@ const DoctorSignUp = () => {
                 {/* License Number */}
                 <div className="space-y-2">
                   <label htmlFor="licenseNumber" className="text-[15px] font-semibold">
-                    Licence number
+                    Licence number or GLN
                   </label>
+                  <p className="text-xs text-muted-foreground">In Switzerland: your 13-digit GLN from MedReg (starts with 7601).</p>
                   <div className="relative">
                     <FileText className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" aria-hidden="true" />
                     <Input
