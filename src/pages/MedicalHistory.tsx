@@ -1130,7 +1130,7 @@ export default function MedicalHistory() {
           {/* Less-used actions live behind "⋯". Log out lives only in Me. */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9" aria-label="More actions">
+              <Button variant="ghost" size="icon" className="tap-target h-8 w-8 sm:h-9 sm:w-9" aria-label="More actions">
                 <MoreHorizontal className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </DropdownMenuTrigger>
@@ -1167,7 +1167,7 @@ export default function MedicalHistory() {
                 role="tab"
                 aria-selected={segment === key}
                 onClick={() => setSegment(key)}
-                className={`flex-1 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                className={`tap-target flex-1 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                   segment === key ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >

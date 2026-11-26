@@ -717,14 +717,14 @@ export default function AIDoctorChat() {
             </Button>
           )}
           {!showPast && (
-            <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-xs shrink-0" onClick={() => setShowPast(true)} disabled={isStreaming}>
+            <Button variant="ghost" size="sm" className="tap-target h-8 gap-1.5 text-xs shrink-0" onClick={() => setShowPast(true)} disabled={isStreaming}>
               <History className="h-3.5 w-3.5" aria-hidden="true" />
               Past chats
             </Button>
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="More options">
+              <Button variant="ghost" size="icon" className="tap-target h-8 w-8 shrink-0" aria-label="More options">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>

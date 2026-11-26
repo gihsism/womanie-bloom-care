@@ -88,7 +88,7 @@ export default function StagePage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card px-4 py-4 flex items-center gap-2">
-        <Link to="/dashboard" aria-label="Back to Home" className="flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted">
+        <Link to="/dashboard" aria-label="Back to Home" className="tap-target flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted">
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
         <h1 className="font-display text-[24px] font-normal leading-tight">{stageLabel(mode)}</h1>

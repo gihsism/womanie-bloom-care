@@ -233,7 +233,7 @@ export function InstallBanner() {
           type="button"
           onClick={dismiss}
           aria-label="Dismiss install prompt"
-          className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="tap-target shrink-0 rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <X className="h-4 w-4" />
         </button>
