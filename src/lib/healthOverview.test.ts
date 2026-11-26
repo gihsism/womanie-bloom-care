@@ -87,6 +87,18 @@ describe('labMetrics', () => {
     expect(m.state).toBe('in');
   });
 
+  it('treats µg/L, μg/l (Greek mu), ug/L and mcg/L as one unit, but not mg/L', () => {
+    const [m] = labMetrics([
+      lab('Ferritin', '12', '2025-01-01', { unit: 'µg/L' }),
+      lab('Ferritin', '20', '2025-03-01', { unit: 'μg/l' }),
+      lab('Ferritin', '25', '2025-06-01', { unit: 'mcg/L' }),
+      lab('Ferritin', '0.03', '2025-08-01', { unit: 'mg/L' }),
+      lab('Ferritin', '30', '2026-01-01', { unit: 'ug/L' }),
+    ]);
+    expect(m.points.map(p => p.value)).toEqual([12, 20, 25, 30]);
+    expect(m.unit).toBe('ug/L');
+  });
+
   it('skips non-numeric values, missing dates and tests that are not key labs; orders by KEY_LABS', () => {
     const out = labMetrics([
       lab('TSH', '2.1', '2026-01-01', { reference_range: '0.4-4.0' }),

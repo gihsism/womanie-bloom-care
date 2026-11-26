@@ -106,7 +106,11 @@ export function keyLabFor(title: string | null | undefined): KeyLab | null {
   return KEY_LABS.find(k => k.match.test(t)) ?? null;
 }
 
-const normUnit = (u: string | null | undefined) => (u ?? '').trim().toLowerCase().replace(/\s+/g, '');
+// One spelling per unit, so the same unit written differently by two labs
+// stays on one line: micro as µ (micro sign), μ (Greek mu), u or mc
+// ("µg/L" = "μg/l" = "ug/L" = "mcg/L").
+const normUnit = (u: string | null | undefined) =>
+  (u ?? '').trim().toLowerCase().replace(/\s+/g, '').replace(/[µμ]|mc(?=g)/g, 'u');
 
 export function labMetrics(rows: LabRow[]): OverviewMetric[] {
   const byLab = new Map<string, Array<LabRow & { date: string; n: number }>>();
