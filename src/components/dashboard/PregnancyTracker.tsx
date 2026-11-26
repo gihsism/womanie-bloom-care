@@ -882,7 +882,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
               key={`${m.start}-${m.label}`}
               className={`flex items-start gap-3 p-3 rounded-lg border ${
                 variant === 'active' ? 'border-primary/30 bg-primary/5' : 'border-border bg-card'
-              } ${variant === 'recent' ? 'opacity-70' : ''}`}
+              } ${variant === 'recent' ? 'opacity-85' : ''}`}
             >
               <Icon
                 className={`h-4 w-4 mt-0.5 flex-shrink-0 ${

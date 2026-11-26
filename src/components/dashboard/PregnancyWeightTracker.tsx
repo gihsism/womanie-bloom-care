@@ -289,9 +289,9 @@ export default function PregnancyWeightTracker({ dueDate }: PregnancyWeightTrack
         <div className="space-y-3 mb-2">
           <div className="grid grid-cols-3 gap-2 items-end">
             <div className="space-y-1.5">
-              <Label className="text-[11px]">Units</Label>
+              <Label htmlFor="pwt-units" className="text-[11px]">Units</Label>
               <Select value={setup.unit} onValueChange={(v) => setSetup(s => ({ ...s, unit: v as Unit }))}>
-                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectTrigger id="pwt-units" className="h-8 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="metric">kg / cm</SelectItem>
                   <SelectItem value="us">lb / in</SelectItem>
