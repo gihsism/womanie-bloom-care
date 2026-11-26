@@ -25,7 +25,7 @@ import {
 import { cn } from '@/lib/utils';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 import { parsePillStatus, yesterdayPillUnanswered, pillPackDay, type PillStatus } from '@/lib/pillLog';
-import { PILL_TYPES, DEFAULT_PILL_TYPE, isPillType, hoursLateSince, type PillType } from '@/lib/missedPill';
+import { PILL_TYPES, DEFAULT_PILL_TYPE, isPillType, hoursLateSince, vomitWindowHours, type PillType } from '@/lib/missedPill';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MissedPillGuidance from './MissedPillGuidance';
 
@@ -638,7 +638,7 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
           </div>
           <div className="flex items-start gap-2">
             <span className="text-primary">•</span>
-            <span>Vomiting or diarrhea within 2 hours of taking a pill may reduce effectiveness.</span>
+            <span>Vomiting or diarrhea within {vomitWindowHours(pillType)} hours of taking a pill may reduce effectiveness.</span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-primary">•</span>

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  vomitWindowHours,
   classifyLate, missedPillGuidance, hoursLateSince, choiceForHours, LATE_CHOICES,
   isPillType, MISSED_AFTER_HOURS, EC_OPTIONS, UNSURE_FOOTER, PILL_TYPES,
 } from './missedPill';
@@ -98,5 +99,14 @@ describe('hours late helpers', () => {
     expect(isPillType('combined')).toBe(true);
     expect(isPillType('pill')).toBe(false);
     expect(isPillType(null)).toBe(false);
+  });
+});
+
+describe('vomitWindowHours', () => {
+  it('is 2 h for the combined pill and 3 h for every mini-pill (the reminders card used to say 2 h for all)', () => {
+    expect(vomitWindowHours('combined')).toBe(2);
+    expect(vomitWindowHours('pop-desogestrel')).toBe(3);
+    expect(vomitWindowHours('pop-drospirenone')).toBe(3);
+    expect(vomitWindowHours('pop-traditional')).toBe(3);
   });
 });
