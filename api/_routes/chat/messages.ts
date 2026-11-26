@@ -24,12 +24,15 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     // conversation_id (migration 013) groups "Past chats"; until the
     // migration is applied the column is missing, so read without it.
+    // A question and its answer are saved in one transaction, so they share
+    // created_at: the role tie-break keeps the question above the answer
+    // (without it a reload sometimes showed the answer first).
     const page = (cols: string) => before
       ? sql.query(
           `SELECT ${cols}
              FROM chat_messages
             WHERE user_id = $1 AND created_at < $2
-            ORDER BY created_at DESC
+            ORDER BY created_at DESC, CASE role WHEN 'user' THEN 1 ELSE 0 END
             LIMIT $3`,
           [user.id, before, limit]
         )
@@ -37,7 +40,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           `SELECT ${cols}
              FROM chat_messages
             WHERE user_id = $1
-            ORDER BY created_at DESC
+            ORDER BY created_at DESC, CASE role WHEN 'user' THEN 1 ELSE 0 END
             LIMIT $2`,
           [user.id, limit]
         );

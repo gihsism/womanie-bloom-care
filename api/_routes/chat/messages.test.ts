@@ -170,4 +170,17 @@ describe('chat/messages security invariants', () => {
     query.mockRejectedValueOnce(Object.assign(new Error('boom'), { code: '08006' }));
     await expect(handler(mockReq('GET'), mockRes())).rejects.toThrow('boom');
   });
+
+  // A turn is saved in one transaction, so the question and the answer
+  // share created_at. Live, 4 of 25 pairs came back answer-first.
+  it('GET: a question sorts before its answer when both share created_at', async () => {
+    const queries: Array<Record<string, string>> = [{}, { before: '2026-11-26T00:00:00Z' }];
+    for (const q of queries) {
+      query.mockClear();
+      await handler(mockReq('GET', undefined, q), mockRes());
+      const [sql] = query.mock.calls[0] as [string];
+      // Newest-first in SQL (reversed for the client): the answer row first.
+      expect(sql).toMatch(/ORDER BY created_at DESC, CASE role WHEN 'user' THEN 1 ELSE 0 END/);
+    }
+  });
 });
