@@ -287,7 +287,7 @@ export default function PanelDetail() {
           </>
         ) : undefined}
         action={series.length > 0 && (
-          <button type="button" onClick={askAboutPanel} className="inline-flex h-10 items-center gap-1.5 rounded-full border border-line px-4 text-[15px] font-semibold text-stage-accent hover:bg-muted">
+          <button type="button" onClick={askAboutPanel} className="relative hit-44 inline-flex h-10 items-center gap-1.5 rounded-full border border-line px-4 text-[15px] font-semibold text-stage-accent hover:bg-muted">
             <MessageCircle className="h-4 w-4" aria-hidden="true" />
             Ask AI
           </button>
@@ -499,7 +499,7 @@ export default function PanelDetail() {
                             {r.document_id && (
                               <Link
                                 to={`/dashboard/medical-history?doc=${r.document_id}`}
-                                className="ml-auto text-[11px] text-primary hover:underline truncate max-w-[180px]"
+                                className="ml-auto -my-3.5 py-3.5 text-[12px] text-primary hover:underline truncate max-w-[180px]"
                               >
                                 {docName(r.document_id)}
                               </Link>

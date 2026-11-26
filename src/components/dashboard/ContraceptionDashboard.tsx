@@ -376,7 +376,7 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
             <Input
               type="time"
               value={reminderTime}
-              className="h-8 w-28"
+              className="h-11 w-28"
               onChange={(e) => { if (/^\d{2}:\d{2}$/.test(e.target.value)) setReminderTime(e.target.value); }}
             />
           </label>
@@ -535,7 +535,7 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
                 key={effect.id}
                 onClick={() => toggleSideEffect(effect.id)}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border',
+                  'flex items-center gap-1.5 min-h-11 px-3.5 py-2 rounded-full text-[14px] font-medium transition-all border',
                   isActive ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:bg-muted/50'
                 )}
               >

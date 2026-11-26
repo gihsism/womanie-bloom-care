@@ -352,7 +352,7 @@ const FindDoctor = () => {
       {/* Header */}
       <header className="page-head sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4 pt-3 pb-3">
-          <button type="button" onClick={() => navigate('/dashboard')} className="flex items-center gap-2 min-h-10 -ml-1 px-1 hover:text-stage-accent" aria-label="Back to Home">
+          <button type="button" onClick={() => navigate('/dashboard')} className="flex items-center gap-2 min-h-11 -ml-1 px-1 hover:text-stage-accent" aria-label="Back to Home">
             <ArrowLeft className="h-5 w-5" />
             <span className="text-[15px] font-medium">Home</span>
           </button>

@@ -430,7 +430,7 @@ const CycleCalendar = ({
         <div className="animate-pulse space-y-4">
           <div className="h-20 bg-muted rounded-xl" />
           <div className="h-8 bg-muted rounded-full w-2/3" />
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-7 gap-0.5">
             {Array.from({ length: 35 }).map((_, i) => (
               <div key={i} className="aspect-square bg-muted rounded-full" />
             ))}

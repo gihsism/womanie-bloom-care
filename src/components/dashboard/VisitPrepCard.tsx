@@ -349,7 +349,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
             <li key={q.id} className="flex items-start gap-3 py-2.5">
               <button
                 type="button"
-                className={`relative before:absolute before:-inset-3 before:content-[''] flex-shrink-0 mt-0.5 h-5 w-5 rounded-md border-2 ${isChecked ? 'bg-stage-accent border-stage-accent' : 'border-input'} flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-stage-accent`}
+                className={`relative before:absolute before:-inset-[14px] before:content-[''] flex-shrink-0 mt-0.5 h-5 w-5 rounded-md border-2 ${isChecked ? 'bg-stage-accent border-stage-accent' : 'border-input'} flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-stage-accent`}
                 onClick={() => (isSaved ? void store(toggleAsked(saved, q.id)) : persistChecked({ ...checked, [q.id]: !isChecked }))}
                 aria-label={isChecked ? 'Mark as not asked' : 'Mark as asked'}
               >
@@ -390,9 +390,9 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
               placeholder="Add your own question"
               aria-label="Add your own question"
               maxLength={300}
-              className="h-10 text-[15px]"
+              className="h-11 text-[15px]"
             />
-            <Button type="submit" size="sm" variant="outline" className="h-10 gap-1 border-line" disabled={!draft.trim() || saving}>
+            <Button type="submit" size="sm" variant="outline" className="h-11 gap-1 border-line" disabled={!draft.trim() || saving}>
               <Plus className="h-3.5 w-3.5" /> Add
             </Button>
           </form>

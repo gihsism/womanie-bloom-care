@@ -772,7 +772,7 @@ export default function AIDoctorChat() {
             <button
               type="button"
               onClick={() => navigate('/dashboard/appointments')}
-              className="page-sub text-left hover:underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stage-accent rounded"
+              className="relative hit-44 page-sub text-left hover:underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stage-accent rounded"
             >
               Prefer a real doctor? <span className="font-bold text-stage-accent whitespace-nowrap">Book a visit &rarr;</span>
             </button>

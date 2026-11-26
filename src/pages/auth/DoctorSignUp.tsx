@@ -117,7 +117,7 @@ const DoctorSignUp = () => {
       <div className="p-4 flex items-center justify-between">
         <button
           onClick={() => step > 1 ? setStep(step - 1) : navigate('/auth/select-type')}
-          className="flex items-center gap-2 min-h-10 text-foreground hover:text-stage-accent"
+          className="flex items-center gap-2 min-h-11 text-foreground hover:text-stage-accent"
           aria-label="Go back"
         >
           <ArrowLeft className="h-5 w-5" />
@@ -194,7 +194,7 @@ const DoctorSignUp = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 grid place-items-center h-10 w-10 rounded-full text-muted-foreground hover:text-foreground"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 grid place-items-center h-11 w-11 rounded-full text-muted-foreground hover:text-foreground"
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}

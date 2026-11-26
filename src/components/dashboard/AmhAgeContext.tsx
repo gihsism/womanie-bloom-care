@@ -192,7 +192,7 @@ export default function AmhAgeContext({ mode }: AmhAgeContextProps) {
           {trend.annualizedPct < -25 ? (
             <TrendingDown className="h-3.5 w-3.5 text-destructive mt-0.5 flex-shrink-0" />
           ) : trend.annualizedPct < -5 ? (
-            <TrendingDown className="h-3.5 w-3.5 text-destructive/70 mt-0.5 flex-shrink-0" />
+            <TrendingDown className="h-3.5 w-3.5 text-destructive mt-0.5 flex-shrink-0" />
           ) : trend.annualizedPct > 25 ? (
             <TrendingUp className="h-3.5 w-3.5 text-foreground/60 mt-0.5 flex-shrink-0" />
           ) : (

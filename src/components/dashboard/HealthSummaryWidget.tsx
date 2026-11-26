@@ -82,7 +82,7 @@ export default function HealthSummaryWidget({ since = null, showViewAll = true }
           {healthScore !== null && (
             <div className="flex-shrink-0 text-center">
               <p className={`font-display text-2xl font-medium ${
-                healthScore >= 80 ? 'text-muted-foreground' : healthScore >= 50 ? 'text-destructive/80' : 'text-destructive'
+                healthScore >= 80 ? 'text-muted-foreground' : healthScore >= 50 ? 'text-destructive' : 'text-destructive'
               }`}>{healthScore}%</p>
               <p className="text-[9px] text-muted-foreground">wellness</p>
             </div>
@@ -94,7 +94,7 @@ export default function HealthSummaryWidget({ since = null, showViewAll = true }
                 <CheckCircle2 className="h-3 w-3" /> {normalCount} healthy
               </span>
               {abnormalCount > 0 && (
-                <span className="flex items-center gap-1 text-destructive/80">
+                <span className="flex items-center gap-1 text-destructive">
                   <AlertTriangle className="h-3 w-3" /> {abnormalCount} to discuss
                 </span>
               )}

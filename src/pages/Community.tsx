@@ -161,7 +161,7 @@ const Community = () => {
                   rel={external ? 'noopener noreferrer' : undefined}
                   className="flex items-center gap-3.5 px-4 py-4 hover:bg-muted/60"
                 >
-                  <span className="grid place-items-center h-10 w-10 shrink-0 rounded-full bg-stage-tint text-stage-accent" aria-hidden="true">
+                  <span className="grid place-items-center h-11 w-11 shrink-0 rounded-full bg-stage-tint text-stage-accent" aria-hidden="true">
                     <Icon className="h-5 w-5" />
                   </span>
                   <span className="flex-1 min-w-0">

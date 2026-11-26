@@ -165,7 +165,7 @@ export default function HealthStatistics() {
     <header className="page-head sticky top-0 z-10">
       <div className="max-w-3xl mx-auto px-4 pt-3 pb-3">
         <div className="flex items-center justify-between min-h-11">
-          <button type="button" onClick={() => navigate('/dashboard')} className="flex items-center gap-2 min-h-10 -ml-1 px-1 hover:text-stage-accent" aria-label="Back to Home">
+          <button type="button" onClick={() => navigate('/dashboard')} className="flex items-center gap-2 min-h-11 -ml-1 px-1 hover:text-stage-accent" aria-label="Back to Home">
             <ArrowLeft className="h-5 w-5" />
             <span className="text-[15px] font-medium">Home</span>
           </button>
@@ -175,7 +175,7 @@ export default function HealthStatistics() {
                 type="button"
                 onClick={downloadCsv}
                 disabled={downloadingCsv}
-                className="inline-flex items-center gap-1.5 min-h-10 rounded-full px-3 text-[14px] font-semibold text-stage-accent hover:bg-stage-tint disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 min-h-11 rounded-full px-3 text-[14px] font-semibold text-stage-accent hover:bg-stage-tint disabled:opacity-50"
                 title="Download all your extracted lab values as a CSV"
               >
                 <Download className="h-4 w-4" />
@@ -277,7 +277,7 @@ export default function HealthStatistics() {
                 {documents.map((doc) => (
                   <article key={doc.id} className="px-4 py-4">
                     <div className="flex items-start gap-3">
-                      <span className="grid place-items-center h-10 w-10 shrink-0 rounded-full bg-stage-tint text-stage-accent" aria-hidden="true">
+                      <span className="grid place-items-center h-11 w-11 shrink-0 rounded-full bg-stage-tint text-stage-accent" aria-hidden="true">
                         <FileText className="h-5 w-5" />
                       </span>
                       <div className="flex-1 min-w-0">

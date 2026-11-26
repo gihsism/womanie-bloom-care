@@ -7,7 +7,7 @@ export default function AuthLayout({ backHref, title, sub, children }: { backHre
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="w-full max-w-md mx-auto px-4 pt-3 min-h-12 flex items-center justify-between">
-        <a href={backHref} className="flex items-center gap-2 min-h-10 -ml-1 px-1 text-foreground hover:text-stage-accent">
+        <a href={backHref} className="flex items-center gap-2 min-h-11 -ml-1 px-1 text-foreground hover:text-stage-accent">
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           <span className="text-[15px] font-medium">Back</span>
         </a>

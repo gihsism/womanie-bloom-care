@@ -126,13 +126,13 @@ const ConsultationSettings = ({ doctorId }: { doctorId: string }) => {
                     type="number"
                     value={settings.consultation_price}
                     onChange={(e) => setSettings(s => ({ ...s, consultation_price: Number(e.target.value) }))}
-                    className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary bg-background"
+                    className="flex-1 h-11 px-4 border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-stage-accent bg-background"
                     min={0}
                   />
                   <select
                     value={settings.currency}
                     onChange={(e) => setSettings(s => ({ ...s, currency: e.target.value }))}
-                    className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary bg-background"
+                    className="h-11 px-4 border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-stage-accent bg-background"
                   >
                     <option value="CHF">CHF</option>
                     <option value="EUR">EUR</option>
@@ -146,7 +146,7 @@ const ConsultationSettings = ({ doctorId }: { doctorId: string }) => {
                 <select
                   value={settings.consultation_duration}
                   onChange={(e) => setSettings(s => ({ ...s, consultation_duration: Number(e.target.value) }))}
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary bg-background"
+                  className="w-full h-11 px-4 border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-stage-accent bg-background"
                 >
                   <option value={15}>15 minutes</option>
                   <option value={30}>30 minutes</option>
@@ -323,7 +323,7 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
               onClick={() => toggleDay(index)}
               aria-pressed={schedule[index].active}
               aria-label={`Work on ${dayName}`}
-              className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
+              className={`relative hit-44 w-6 h-6 rounded border-2 flex items-center justify-center ${
                 schedule[index].active
                   ? 'bg-stage-accent border-stage-accent text-stage-on'
                   : 'border-muted-foreground'
@@ -341,7 +341,7 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
                   value={schedule[index].start}
                   onChange={(e) => updateTime(index, 'start', e.target.value)}
                   aria-label={`${dayName} from`}
-                  className={`min-w-0 w-[7.5rem] px-3 py-1.5 border border-input rounded-full bg-background ${invalid ? 'border-destructive' : ''}`}
+                  className={`min-w-0 w-[7.5rem] h-11 px-3 py-1.5 border border-input rounded-full bg-background ${invalid ? 'border-destructive' : ''}`}
                 />
                 <span className="text-muted-foreground">to</span>
                 <input
@@ -349,7 +349,7 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
                   value={schedule[index].end}
                   onChange={(e) => updateTime(index, 'end', e.target.value)}
                   aria-label={`${dayName} to`}
-                  className={`min-w-0 w-[7.5rem] px-3 py-1.5 border border-input rounded-full bg-background ${invalid ? 'border-destructive' : ''}`}
+                  className={`min-w-0 w-[7.5rem] h-11 px-3 py-1.5 border border-input rounded-full bg-background ${invalid ? 'border-destructive' : ''}`}
                 />
                 {invalid && (
                   <span className="basis-full text-xs text-destructive">End must be after start</span>

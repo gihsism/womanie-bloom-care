@@ -265,7 +265,7 @@ const BetaHcgTracker = ({ ivfPhase }: BetaHcgTrackerProps) => {
           {interpretation.tone === 'positive' ? (
             <span aria-hidden="true" className={`inline-block h-2 w-2 rounded-full flex-shrink-0 mt-1.5 ${healthTone.ok.dot}`} />
           ) : interpretation.tone === 'caution' ? (
-            <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0 text-destructive/80" />
+            <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0 text-destructive" />
           ) : (
             <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0 text-destructive" />
           )}

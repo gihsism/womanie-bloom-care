@@ -363,7 +363,7 @@ function ValueGauge({ value, unit, refRange, status }: { value: string | null; u
               <>
                 <span className={
                   status === 'critical' ? 'text-destructive font-medium' :
-                  status === 'abnormal' ? 'text-destructive/80 font-medium' :
+                  status === 'abnormal' ? 'text-destructive font-medium' :
                   ''
                 }>
                   {deviationLabel}
@@ -427,7 +427,7 @@ function renderEnhancedSummary(summary: string) {
               <ul className="space-y-2">
                 {items.map((item, j) => (
                   <li key={j} className="text-sm leading-relaxed flex items-start gap-2">
-                    <span className="text-destructive/80 mt-0.5 flex-shrink-0">→</span>
+                    <span className="text-destructive mt-0.5 flex-shrink-0">→</span>
                     <span>{item.replace(/^[•-]\s*/, '')}</span>
                   </li>
                 ))}
@@ -533,7 +533,7 @@ function ResultCard({ item, history = [] }: { item: MedicalDataItem; history?: M
               <span key={idx} className={`text-xs px-2.5 py-1 rounded-full border ${
                 item.status === 'critical'
                   ? 'bg-destructive/10 text-destructive border-destructive/30'
-                  : 'bg-destructive/5 text-destructive/80 border-destructive/20'
+                  : 'bg-destructive/5 text-destructive border-destructive/20'
               }`}>
                 {condition}
               </span>
@@ -576,7 +576,7 @@ function FlagRow({ item }: { item: MedicalDataItem }) {
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center gap-3 min-h-16 px-4 py-3 text-left hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-stage-accent"
       >
-        <span className="grid place-items-center h-10 w-10 rounded-full bg-destructive/10 text-destructive flex-shrink-0" aria-hidden="true">
+        <span className="grid place-items-center h-11 w-11 rounded-full bg-destructive/10 text-destructive flex-shrink-0" aria-hidden="true">
           <FlaskConical className="h-5 w-5" strokeWidth={1.9} />
         </span>
         <span className="flex-1 min-w-0">
@@ -609,7 +609,7 @@ function FlagRow({ item }: { item: MedicalDataItem }) {
 
 const riskColor = (status: string | null) => {
   if (status === 'critical') return 'bg-destructive/10 text-destructive border-destructive/30';
-  if (status === 'abnormal') return 'bg-destructive/5 text-destructive/80 border-destructive/20';
+  if (status === 'abnormal') return 'bg-destructive/5 text-destructive border-destructive/20';
   return 'bg-muted/60 text-muted-foreground border-border';
 };
 
@@ -1240,7 +1240,7 @@ export default function MedicalHistory() {
                 role="tab"
                 aria-selected={segment === key}
                 onClick={() => setSegment(key)}
-                className={`flex-1 whitespace-nowrap rounded-full px-3 h-10 text-[15px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stage-accent ${
+                className={`relative hit-44 flex-1 whitespace-nowrap rounded-full px-3 h-10 text-[15px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stage-accent ${
                   segment === key ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -1545,8 +1545,8 @@ export default function MedicalHistory() {
                           return (
                             <div className="bg-gradient-to-br from-destructive/5 via-destructive/5 to-destructive/5 dark:from-destructive/10 dark:to-transparent rounded-xl p-4 border border-destructive/20 mb-3">
                               <div className="flex items-center gap-2 mb-2">
-                                <AlertTriangle className="h-4 w-4 text-destructive/80" />
-                                <p className="label-mono !text-destructive/80">
+                                <AlertTriangle className="h-4 w-4 text-destructive" />
+                                <p className="label-mono !text-destructive">
                                   Read this first — top {flagged.length} {flagged.length === 1 ? 'finding' : 'findings'}
                                 </p>
                               </div>
@@ -1566,7 +1566,7 @@ export default function MedicalHistory() {
                                           {valueBit && (
                                             <span className={`text-xs font-mono ${
                                               f.status === 'critical' ? 'text-destructive' :
-                                              'text-destructive/80'
+                                              'text-destructive'
                                             }`}>
                                               {valueBit}
                                             </span>
@@ -1831,7 +1831,7 @@ export default function MedicalHistory() {
                           placeholder="Search results"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="h-9 w-full pl-8 pr-3 text-[14px] rounded-full border border-line bg-background focus:outline-none focus:ring-2 focus:ring-stage-accent/40"
+                          className="h-11 w-full pl-8 pr-3 text-[15px] rounded-full border border-line bg-background focus:outline-none focus:ring-2 focus:ring-stage-accent/40"
                         />
                       </div>
                     </div>
@@ -2024,7 +2024,7 @@ export default function MedicalHistory() {
                           <p className="text-sm">
                             {differenceInDays(stats.nextCheckupEstimate, new Date()) > 0
                               ? <>🗓️ Your next checkup might be around <span className="font-medium text-primary">{format(stats.nextCheckupEstimate, 'MMMM d, yyyy')}</span></>
-                              : <>⏰ You might be <span className="font-medium text-destructive/80">{Math.abs(differenceInDays(stats.nextCheckupEstimate, new Date()))} days overdue</span> for a checkup</>
+                              : <>⏰ You might be <span className="font-medium text-destructive">{Math.abs(differenceInDays(stats.nextCheckupEstimate, new Date()))} days overdue</span> for a checkup</>
                             }
                           </p>
                         )}

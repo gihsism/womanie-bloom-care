@@ -11,6 +11,9 @@
 //
 //   COLOR_SCHEME=dark node scripts/design-shots.cjs ...  (emulated system dark/light;
 //     files get a -dark / -light suffix; night mode follows it by default)
+//   WIDTH=768 ...  (tablet width; files get a -768 suffix)
+//   AUDIT=1 ...    (print overflow, clipped text, tap targets <44px, contrast, focus rings)
+//   FULL=0 ...     (skip the tall whole-page shot)
 //
 // Needs Playwright (PLAYWRIGHT_DIR, default ~/.cache/womanie-ux/node_modules).
 const os = require('os');
@@ -24,7 +27,8 @@ const DOCTOR_SIDE = STAGE === 'doctor';
 const FLOW_SIDE = STAGE === 'first-run' || STAGE === 'public';
 const OUT = process.argv[5] || path.join(os.homedir(), '.cache/womanie-ux/build4', DOCTOR_SIDE ? 'doctor' : FLOW_SIDE ? 'round4' : 'round2');
 const SCHEME = process.env.COLOR_SCHEME || ''; // '', 'light' or 'dark'
-const SUFFIX = SCHEME ? `-${SCHEME}` : '';
+const WIDTH = Number(process.env.WIDTH || 390);
+const SUFFIX = (WIDTH !== 390 ? `-${WIDTH}` : '') + (SCHEME ? `-${SCHEME}` : '');
 const UID = 'u-demo';
 const day = (n, h = 9, m = 0) => { const d = new Date(); d.setHours(h, m, 0, 0); d.setDate(d.getDate() + n); return d; };
 const ymd = (d) => d.toISOString().slice(0, 10);
@@ -110,6 +114,8 @@ async function route(r) {
   if (p === '/api/auth/me' && anon) return r.fulfill({ status: 401, contentType: 'application/json', body: '{"error":"Not signed in"}' });
   if (p === '/api/doctors/list') return json({ doctors: DOCTORS });
   if (p === '/api/research/library') return json(LIBRARY);
+  if (p === '/api/push/config') return json({ enabled: true, publicKey: 'BDemoKeyDemoKeyDemoKeyDemoKeyDemoKeyDemoKeyDemoKeyDemoKeyDemoKeyDemoKey' });
+  if (p === '/api/push/subscription') return json({ subscribed: false });
   if (p === '/api/auth/me') return json({ user: { id: UID, email: 'anna@example.com', name: 'Anna Keller', hasPassword: true, created_at: day(-200).toISOString() } });
   if (p === '/api/db') {
     let b = {};
@@ -129,11 +135,14 @@ async function route(r) {
 
 const PAGES = [
   ['home', '/dashboard'],
+  // Dev-only fixture Home (src/dev/HomePreview): a full day of data for the stage.
+  ['home-preview', `/dashboard/dev-home?stage=${STAGE}`],
+  ['home-preview-fresh', `/dashboard/dev-home?stage=${STAGE}&fresh=1`],
   ['records', '/dashboard/medical-history'],
   ['records-documents', '/dashboard/medical-history', async (p) => { await p.getByRole('tab', { name: 'Documents' }).first().click(); }],
   ['ask', '/dashboard/ai-doctor'],
   ['ask-answer', '/dashboard/ai-doctor', async (p) => {
-    await p.getByPlaceholder(/ask about/i).fill('Is back pain normal at 30 weeks?');
+    await p.getByPlaceholder(/ask (about|anything)/i).fill('Is back pain normal at 30 weeks?');
     await p.getByRole('button', { name: 'Send' }).click();
     await p.waitForTimeout(1500);
   }],
@@ -164,6 +173,8 @@ const DOCTOR_FIX = {
   doctor_profiles: [{ id: 'dp1', user_id: DOC_ID, full_name: 'Dr. Laura Meier', specialty: 'Gynaecology & obstetrics', is_verified: true, verification_status: 'approved', bio: 'Gynaecologist in Zürich. Pregnancy care, cycle problems, menopause.', consultation_price: 120, accepts_bookings: true }],
   appointments: [
     { id: 'v1', doctor_id: DOC_ID, patient_id: 'p1', scheduled_at: soon.toISOString(), status: 'scheduled', consultation_type: 'in_person', duration: 30, notes: null },
+    { id: 'v6', doctor_id: DOC_ID, patient_id: 'p3', scheduled_at: day(1, 8, 15).toISOString(), status: 'scheduled', consultation_type: 'in_person', duration: 30, notes: null },
+    { id: 'v7', doctor_id: DOC_ID, patient_id: 'p4', scheduled_at: day(1, 14, 0).toISOString(), status: 'scheduled', consultation_type: 'video', duration: 20, notes: null },
     { id: 'v2', doctor_id: DOC_ID, patient_id: 'p2', scheduled_at: day(2, 9, 0).toISOString(), status: 'scheduled', consultation_type: 'video', duration: 20, notes: null },
     { id: 'v3', doctor_id: DOC_ID, patient_id: 'p3', scheduled_at: day(-1, 11, 0).toISOString(), status: 'scheduled', consultation_type: 'in_person', duration: 30, notes: null },
     { id: 'v4', doctor_id: DOC_ID, patient_id: 'p1', scheduled_at: day(-28, 9, 0).toISOString(), status: 'completed', consultation_type: 'in_person', duration: 30, notes: null },
@@ -212,6 +223,11 @@ async function doctorRoute(r) {
     return json({ rows });
   }
   if (p === '/api/doctors/connections') return json({ connections: CONNECTIONS });
+  if (p === '/api/doctors/day') return json({ visits: [
+    { appointment_id: 'v1', patient_id: 'p1', scheduled_at: soon.toISOString(), approved: true, life_stage: 'pregnancy', pregnancy_due_date: ymd(day(70)), open_questions: 2, last_visit_at: day(-28, 9, 0).toISOString(), new_docs: 2, new_abnormal: 2, low_mood_streak: 0 },
+    { appointment_id: 'v6', patient_id: 'p3', scheduled_at: day(1, 8, 15).toISOString(), approved: true, life_stage: 'conception', open_questions: 0, last_visit_at: null, new_docs: 0, new_abnormal: 0, low_mood_streak: 0 },
+    { appointment_id: 'v7', patient_id: 'p4', scheduled_at: day(1, 14, 0).toISOString(), approved: false },
+  ] });
   // Same consent rule as the server: only an approved connection opens a chart.
   if (p === '/api/doctors/patient') return u.searchParams.get('id') === 'p1' ? json(CHART) : json({ error: 'no access' }, 403);
   unknown.add(`${req.method()} ${p}`);
@@ -300,9 +316,107 @@ const DOCTOR_PAGES = [
   ['for-doctors', '/for-doctors'],
 ];
 
+
+// ---- AUDIT=1: the round-7 visual QA checks, run in the page after each shot ----
+// Horizontal overflow, text clipped without an ellipsis, tap targets under
+// 44px, text contrast under WCAG AA, and keyboard focus with no visible ring.
+async function audit(p) {
+  const found = await p.evaluate(() => {
+    const out = [];
+    const vw = document.documentElement.clientWidth;
+    const vis = (el) => { const r = el.getBoundingClientRect(); const cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' && Number(cs.opacity) > 0.05; };
+    const label = (el) => `${el.tagName.toLowerCase()}${el.id ? '#' + el.id : ''} "${(el.getAttribute('aria-label') || el.textContent || el.getAttribute('placeholder') || '').trim().replace(/\s+/g, ' ').slice(0, 40)}"`;
+    if (document.documentElement.scrollWidth > vw + 1) {
+      for (const el of document.querySelectorAll('body *')) {
+        const r = el.getBoundingClientRect();
+        if (r.width > 0 && r.right > vw + 1 && getComputedStyle(el).position !== 'fixed') {
+          let a = el.parentElement, clipped = false;
+          while (a) { const o = getComputedStyle(a).overflowX; if (o !== 'visible') { clipped = true; break; } a = a.parentElement; }
+          if (!clipped) { out.push(`OVERFLOW ${label(el)} right=${Math.round(r.right)} vw=${vw}`); if (out.length > 3) break; }
+        }
+      }
+    }
+    for (const el of document.querySelectorAll('body *')) {
+      if (!vis(el) || el.children.length > 0 && !el.textContent.trim()) continue;
+      const cs = getComputedStyle(el);
+      const hid = cs.overflowX === 'hidden' || cs.overflowX === 'clip';
+      if (hid && el.clientWidth > 2 && el.scrollWidth > el.clientWidth + 2 && cs.textOverflow !== 'ellipsis' && !cs.webkitLineClamp?.match?.(/\d/) && el.textContent.trim() && !el.closest('[role="tablist"],[data-radix-scroll-area-viewport],.overflow-x-auto,svg') && cs.whiteSpace !== 'normal') {
+        out.push(`CLIPPED ${label(el)} ${el.scrollWidth}>${el.clientWidth}`);
+      }
+    }
+    const tappable = 'a[href],button,[role="button"],[role="tab"],[role="switch"],[role="radio"],[role="checkbox"],input:not([type="hidden"]),select,textarea,[role="combobox"]';
+    for (const el of document.querySelectorAll(tappable)) {
+      if (!vis(el) || el.closest('[aria-hidden="true"]') || el.disabled) continue;
+      const r = el.getBoundingClientRect();
+      // Inline links inside running text are exempt (WCAG 2.5.8 inline exception).
+      if (el.tagName === 'A' && getComputedStyle(el).display === 'inline' && el.parentElement && /^(P|LI|SPAN)$/.test(el.parentElement.tagName)) continue;
+      // A Radix switch/checkbox/radio inside a label or a row: the row is the target.
+      const box = el.closest('label') || (el.id && document.querySelector(`label[for="${CSS.escape(el.id)}"]`));
+      const lr = box ? box.getBoundingClientRect() : null;
+      // A pseudo-element tap area (.hit-44, .tap-target, before:-inset-3) counts.
+      let ph = 0, pw = 0;
+      for (const ps of ['::after', '::before']) {
+        const a = getComputedStyle(el, ps);
+        if (a.content === 'none' || a.position !== 'absolute') continue;
+        ph = Math.max(ph, parseFloat(a.height) || 0, parseFloat(a.minHeight) || 0);
+        pw = Math.max(pw, parseFloat(a.width) || 0, parseFloat(a.minWidth) || 0);
+      }
+      const h = Math.max(r.height, lr ? lr.height : 0, ph);
+      const w = Math.max(r.width, lr ? lr.width : 0, pw);
+      if (h < 43.5 || w < 43.5) out.push(`TAP ${Math.round(w)}x${Math.round(h)} ${label(el)}`);
+    }
+    // Contrast: text colour against the first opaque background behind it.
+    const rgb = (s) => { const m = s.match(/rgba?\(([^)]+)\)/); if (!m) return null; const v = m[1].split(/[ ,/]+/).filter(Boolean).map(Number); return { r: v[0], g: v[1], b: v[2], a: v.length > 3 ? v[3] : 1 }; };
+    const lum = (c) => { const f = (x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); };
+    const bgOf = (el) => {
+      let stack = [];
+      for (let a = el; a; a = a.parentElement) {
+        const cs = getComputedStyle(a);
+        if (cs.backgroundImage && cs.backgroundImage !== 'none') return null; // gradient/image: skip
+        const c = rgb(cs.backgroundColor);
+        if (c && c.a > 0) { stack.push(c); if (c.a >= 0.99) break; }
+      }
+      let base = { r: 255, g: 255, b: 255 };
+      if (!stack.length || stack[stack.length - 1].a < 0.99) base = document.documentElement.classList.contains('dark') ? { r: 20, g: 16, b: 18 } : base;
+      for (let i = stack.length - 1; i >= 0; i--) { const c = stack[i]; base = { r: c.r * c.a + base.r * (1 - c.a), g: c.g * c.a + base.g * (1 - c.a), b: c.b * c.a + base.b * (1 - c.a) }; }
+      return base;
+    };
+    const seen = new Set();
+    for (const el of document.querySelectorAll('body *')) {
+      if (!vis(el) || el.closest('svg,[aria-hidden="true"],[disabled],[data-disabled],input::placeholder')) continue;
+      const own = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
+      if (!own) continue;
+      const cs = getComputedStyle(el);
+      let op = 1; for (let a = el; a; a = a.parentElement) op *= Number(getComputedStyle(a).opacity);
+      if (op < 0.95) continue; // deliberately dimmed (past visits, disabled)
+      const fg = rgb(cs.color); const bg = bgOf(el); if (!fg || !bg) continue;
+      const f = { r: fg.r * fg.a + bg.r * (1 - fg.a), g: fg.g * fg.a + bg.g * (1 - fg.a), b: fg.b * fg.a + bg.b * (1 - fg.a) };
+      const L1 = lum(f), L2 = lum(bg); const ratio = (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05);
+      const px = parseFloat(cs.fontSize); const bold = Number(cs.fontWeight) >= 700;
+      const need = px >= 24 || (bold && px >= 18.66) ? 3 : 4.5;
+      if (ratio < need) { const k = `CONTRAST ${ratio.toFixed(2)}<${need} ${label(el)} ${cs.color} on rgb(${bg.r|0},${bg.g|0},${bg.b|0})`; if (!seen.has(k)) { seen.add(k); out.push(k); } }
+    }
+    return out;
+  });
+  // Focus rings: tab through the first 25 stops and look for a visible ring.
+  await p.evaluate(() => { document.activeElement?.blur?.(); window.scrollTo(0, 0); });
+  for (let i = 0; i < 25; i++) {
+    await p.keyboard.press('Tab');
+    const f = await p.evaluate(() => {
+      const el = document.activeElement; if (!el || el === document.body) return null;
+      const cs = getComputedStyle(el);
+      const ring = (cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0) || (cs.boxShadow && cs.boxShadow !== 'none');
+      return ring ? '' : `NOFOCUS ${el.tagName.toLowerCase()}${el.id ? '#' + el.id : ''}[${el.getAttribute('type') || ''}] "${(el.getAttribute('aria-label') || el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 40)}"`;
+    });
+    if (f) found.push(f);
+  }
+  await p.keyboard.press('Escape');
+  return [...new Set(found)];
+}
+
 (async () => {
   const b = await chromium.launch();
-  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, colorScheme: SCHEME || 'light' });
+  const ctx = await b.newContext({ viewport: { width: WIDTH, height: 844 }, deviceScaleFactor: 2, colorScheme: SCHEME || 'light' });
   // Doctor side: the device remembers a patient stage (pregnancy) to prove
   // the doctor pages switch to the clinic colours anyway.
   // First run / public: nothing remembered on the device.
@@ -313,6 +427,7 @@ const DOCTOR_PAGES = [
   const list = DOCTOR_SIDE ? DOCTOR_PAGES : STAGE === 'first-run' ? FIRST_RUN_PAGES : STAGE === 'public' ? PUBLIC_PAGES : PAGES;
   for (const [name, url, act, signedOut] of list) {
     if (ONLY && !name.startsWith(ONLY)) continue;
+    if (process.env.NAMES && !process.env.NAMES.split(',').includes(name)) continue;
     anon = Boolean(signedOut);
     if (FLOW_SIDE) { // a fresh device for every shot
       await p.goto(BASE + '/no-such-page', { waitUntil: 'domcontentloaded' });
@@ -327,13 +442,15 @@ const DOCTOR_PAGES = [
     await p.mouse.move(1, 1); // no hover left over from the last click
     await p.evaluate(() => document.fonts.ready);
     await p.screenshot({ path: path.join(OUT, `${STAGE}-${name}${SUFFIX}.png`) });
+    if (process.env.AUDIT) { for (const f of await audit(p)) console.log(`  ${name}${SUFFIX}: ${f}`); await p.mouse.move(1, 1); }
+    if (process.env.FULL === '0') { console.log('shot', name); continue; }
     // Whole page with the tab bar at the bottom (a tall viewport, not fullPage,
     // so the fixed bar is not painted half-way down).
     const h = await p.evaluate(() => document.documentElement.scrollHeight);
-    await p.setViewportSize({ width: 390, height: Math.min(6000, Math.max(844, h)) });
+    await p.setViewportSize({ width: WIDTH, height: Math.min(6000, Math.max(844, h)) });
     await p.waitForTimeout(300);
     await p.screenshot({ path: path.join(OUT, `${STAGE}-${name}${SUFFIX}-full.png`) });
-    await p.setViewportSize({ width: 390, height: 844 });
+    await p.setViewportSize({ width: WIDTH, height: 844 });
     console.log('shot', name);
   }
   console.log('unhandled:', [...unknown].join(', '));

@@ -104,7 +104,7 @@ export default function ResultsRangeChart({ medicalData }: ResultsRangeChartProp
                 <span className="text-xs font-medium truncate flex-1">{item.title}</span>
                 <span className={`text-xs font-mono font-medium ml-2 ${
                   item.status === 'critical' ? 'text-destructive' :
-                  item.status === 'abnormal' ? 'text-destructive/80' :
+                  item.status === 'abnormal' ? 'text-destructive' :
                   'text-muted-foreground'
                 }`}>
                   {item.value} {item.unit}

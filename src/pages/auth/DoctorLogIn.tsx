@@ -130,7 +130,7 @@ const DoctorLogIn = () => {
       <div className="p-4 flex items-center justify-between">
         <button
           onClick={() => navigate('/auth/select-type')}
-          className="flex items-center gap-2 min-h-10 text-foreground hover:text-stage-accent"
+          className="flex items-center gap-2 min-h-11 text-foreground hover:text-stage-accent"
           aria-label="Go back"
         >
           <ArrowLeft className="h-5 w-5" />
@@ -185,7 +185,7 @@ const DoctorLogIn = () => {
                   Password
                 </label>
                 <a
-                  className="text-[14px] font-semibold text-stage-accent hover:underline"
+                  className="relative hit-44 text-[14px] font-semibold text-stage-accent hover:underline"
                   href="mailto:support@womanie.info?subject=Password%20reset%20%E2%80%94%20doctor%20account&body=Hi%20Womanie%20team%2C%0A%0AI%20can%27t%20log%20in%20to%20my%20doctor%20account%20and%20need%20a%20password%20reset.%20My%20email%20is%3A%20"
                 >
                   Forgot password?
@@ -205,7 +205,7 @@ const DoctorLogIn = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 grid place-items-center h-10 w-10 rounded-full text-muted-foreground hover:text-foreground"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 grid place-items-center h-11 w-11 rounded-full text-muted-foreground hover:text-foreground"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -227,7 +227,7 @@ const DoctorLogIn = () => {
               <button
                 type="button"
                 onClick={() => navigate('/auth/doctor-signup')}
-                className="text-stage-accent hover:underline font-semibold"
+                className="relative hit-44 text-stage-accent hover:underline font-semibold"
               >
                 Register as a doctor
               </button>
@@ -235,7 +235,7 @@ const DoctorLogIn = () => {
               <button
                 type="button"
                 onClick={() => navigate('/auth/login')}
-                className="text-stage-accent hover:underline font-semibold"
+                className="relative hit-44 text-stage-accent hover:underline font-semibold"
               >
                 I'm a patient
               </button>

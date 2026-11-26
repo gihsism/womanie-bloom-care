@@ -123,7 +123,7 @@ export default function HealthTimeline({ documents, medicalData }: HealthTimelin
                 }`}>
                   <Icon className={`h-4.5 w-4.5 ${
                     event.status === 'abnormal' || event.status === 'critical'
-                      ? 'text-destructive/80'
+                      ? 'text-destructive'
                       : 'text-muted-foreground'
                   }`} aria-hidden="true" />
                 </div>

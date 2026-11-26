@@ -225,7 +225,7 @@ const CalendarGrid = ({
 
   return (
     <div className="space-y-2">
-      <div className={cn("grid gap-1", isPregnancyMode ? "grid-cols-[2rem_repeat(7,1fr)]" : "grid-cols-7")}>
+      <div className={cn("grid gap-0.5", isPregnancyMode ? "grid-cols-[2rem_repeat(7,1fr)]" : "grid-cols-7")}>
         {isPregnancyMode && (
           <div className="text-center text-[10px] font-medium text-muted-foreground py-2">Wk</div>
         )}
@@ -243,7 +243,7 @@ const CalendarGrid = ({
           const pregWeek = isPregnancyMode ? getPregnancyWeek(midDay) : null;
 
           return (
-            <div key={weekIdx} className={cn("grid gap-1", isPregnancyMode ? "grid-cols-[2rem_repeat(7,1fr)]" : "grid-cols-7")}>
+            <div key={weekIdx} className={cn("grid gap-0.5", isPregnancyMode ? "grid-cols-[2rem_repeat(7,1fr)]" : "grid-cols-7")}>
               {isPregnancyMode && (
                 <div className="flex items-center justify-center">
                   {pregWeek !== null && pregWeek >= 0 && pregWeek <= 42 ? (

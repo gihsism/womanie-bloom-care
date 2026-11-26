@@ -105,7 +105,7 @@ const PatientLogIn = () => {
             <label htmlFor="password" className="text-[15px] font-semibold">Password</label>
             <a
               href="mailto:support@womanie.info?subject=Password%20reset&body=Hi%20Womanie%20team%2C%0A%0AI%20can%27t%20log%20in%20and%20need%20a%20password%20reset.%20My%20email%20is%3A%20"
-              className="text-[14px] font-semibold text-stage-accent hover:underline"
+              className="relative hit-44 text-[14px] font-semibold text-stage-accent hover:underline"
             >
               Forgot password?
             </a>
@@ -113,7 +113,7 @@ const PatientLogIn = () => {
           <div className="relative">
             <Lock className={AUTH_ICON} aria-hidden="true" />
             <Input id="password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" autoFocus={Boolean(email) && !leadWithGoogle} placeholder="Your password" className={`${AUTH_INPUT} pr-12`} value={password} onChange={e => setPassword(e.target.value)} required />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 grid place-items-center h-10 w-10 rounded-full text-muted-foreground hover:text-foreground" aria-label={showPassword ? 'Hide password' : 'Show password'}>
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 grid place-items-center h-11 w-11 rounded-full text-muted-foreground hover:text-foreground" aria-label={showPassword ? 'Hide password' : 'Show password'}>
               {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
           </div>

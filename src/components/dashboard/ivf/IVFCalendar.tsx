@@ -82,7 +82,7 @@ const IVFCalendar = ({ events, onSelectDate, selectedDate }: IVFCalendarProps) =
       </div>
 
       {/* Weekday headers */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-0.5">
         {weekDays.map((d, i) => (
           <div key={i} className="text-center text-[10px] font-medium text-muted-foreground py-1">{d}</div>
         ))}
@@ -91,7 +91,7 @@ const IVFCalendar = ({ events, onSelectDate, selectedDate }: IVFCalendarProps) =
       {/* Calendar grid */}
       <div className="space-y-1">
         {weeks.map((week, wi) => (
-          <div key={wi} className="grid grid-cols-7 gap-1">
+          <div key={wi} className="grid grid-cols-7 gap-0.5">
             {week.map(date => {
               const dateKey = format(date, 'yyyy-MM-dd');
               const dayEvents = eventsByDate[dateKey] || [];

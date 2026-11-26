@@ -145,7 +145,7 @@ export default function HealthCategories({ medicalData }: HealthCategoriesProps)
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium">{cat.name}</p>
                     <span className={`text-sm font-medium ${
-                      cat.score >= 80 ? 'text-muted-foreground' : cat.score >= 50 ? 'text-destructive/80' : 'text-destructive'
+                      cat.score >= 80 ? 'text-muted-foreground' : cat.score >= 50 ? 'text-destructive' : 'text-destructive'
                     }`}>{cat.score}%</span>
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
@@ -172,7 +172,7 @@ export default function HealthCategories({ medicalData }: HealthCategoriesProps)
                         <MiniBar value={lab.value} refRange={lab.reference_range} status={lab.status} />
                         <span className={`text-xs font-mono font-medium whitespace-nowrap ${
                           lab.status === 'critical' ? 'text-destructive' :
-                          lab.status === 'abnormal' ? 'text-destructive/80' :
+                          lab.status === 'abnormal' ? 'text-destructive' :
                           'text-foreground'
                         }`}>
                           {lab.value}{lab.unit ? ` ${lab.unit}` : ''}

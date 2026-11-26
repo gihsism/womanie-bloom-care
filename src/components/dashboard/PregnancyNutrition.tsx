@@ -165,13 +165,13 @@ export default function PregnancyNutrition({ weeksPregnant }: Props) {
       {/* Foods to avoid — same across trimesters, easy to forget */}
       <details className="border-t border-border/40 pt-3">
         <summary className="text-xs font-medium flex items-center gap-1.5 cursor-pointer">
-          <AlertCircle className="h-3.5 w-3.5 text-destructive/80" />
+          <AlertCircle className="h-3.5 w-3.5 text-destructive" />
           Foods + drinks to avoid
         </summary>
         <ul className="mt-2 space-y-1">
           {AVOID.map((line, i) => (
             <li key={i} className="text-[11px] text-muted-foreground flex items-start gap-1.5">
-              <span className="text-destructive/70 mt-0.5">·</span>
+              <span className="text-destructive mt-0.5">·</span>
               <span className="leading-snug">{line}</span>
             </li>
           ))}

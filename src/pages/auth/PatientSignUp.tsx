@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import AuthLayout, { AUTH_ICON, AUTH_INPUT, GoogleButton, OrDivider } from '@/components/auth/AuthLayout';
 import { useToast } from '@/hooks/use-toast';
 import { scorePassword } from '@/lib/password-strength';
+import { ONBOARDING_PATHS } from '@/lib/onboardingFlow';
 
 const PatientSignUp = () => {
   usePageTitle('Sign Up');
@@ -23,7 +24,7 @@ const PatientSignUp = () => {
   const strength = scorePassword(password);
 
   useEffect(() => {
-    if (!loading && user) navigate('/welcome', { replace: true });
+    if (!loading && user) navigate(ONBOARDING_PATHS.stage, { replace: true });
   }, [user, loading, navigate]);
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -49,7 +50,10 @@ const PatientSignUp = () => {
         return;
       }
 
-      window.location.href = '/welcome';
+      // Straight to screen 1 of 5 (the stage picker): five screens from
+      // sign-up to a Home set up for her. Welcome stays one tap away
+      // (Back on the stage picker, "See what I can do first" at the end).
+      window.location.href = ONBOARDING_PATHS.stage;
     } catch {
       toast({ variant: 'destructive', title: 'Error', description: 'Something went wrong' });
     } finally {
@@ -94,7 +98,7 @@ const PatientSignUp = () => {
           <div className="relative">
             <Lock className={AUTH_ICON} aria-hidden="true" />
             <Input id="password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" placeholder="At least 8 characters" className={`${AUTH_INPUT} pr-12`} value={password} onChange={e => setPassword(e.target.value)} required minLength={8} />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 grid place-items-center h-10 w-10 rounded-full text-muted-foreground hover:text-foreground" aria-label={showPassword ? 'Hide password' : 'Show password'}>
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 grid place-items-center h-11 w-11 rounded-full text-muted-foreground hover:text-foreground" aria-label={showPassword ? 'Hide password' : 'Show password'}>
               {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
           </div>

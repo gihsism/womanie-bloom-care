@@ -135,7 +135,7 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
             {upcomingAppointments.map((apt) => (
                 <div key={apt.id} className="px-4 pt-3 pb-1.5">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="grid place-items-center h-10 w-10 shrink-0 rounded-full bg-stage-tint" aria-hidden="true">
+                    <div className="grid place-items-center h-11 w-11 shrink-0 rounded-full bg-stage-tint" aria-hidden="true">
                       {apt.consultation_type === 'video' ? (
                         <Video className="h-5 w-5 text-stage-accent" strokeWidth={1.9} />
                       ) : (

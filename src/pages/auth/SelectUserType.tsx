@@ -36,11 +36,11 @@ const SelectUserType = () => {
           same screen, so we have to surface both login paths. */}
       <p className="mt-8 text-center text-[15px] text-muted-foreground">
         Have an account?{' '}
-        <button type="button" onClick={() => navigate('/auth/login')} className="font-semibold text-stage-accent hover:underline">
+        <button type="button" onClick={() => navigate('/auth/login')} className="relative hit-44 font-semibold text-stage-accent hover:underline">
           Patient log in
         </button>
         {' · '}
-        <button type="button" onClick={() => navigate('/auth/doctor-login')} className="font-semibold text-stage-accent hover:underline">
+        <button type="button" onClick={() => navigate('/auth/doctor-login')} className="relative hit-44 font-semibold text-stage-accent hover:underline">
           Doctor log in
         </button>
       </p>

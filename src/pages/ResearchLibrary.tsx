@@ -101,7 +101,7 @@ export default function ResearchLibrary() {
     <div className="min-h-screen bg-background overflow-x-hidden">
       <header className="page-head sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4 pt-3 pb-3">
-          <button type="button" onClick={() => navigate(-1)} className="flex items-center gap-2 min-h-10 -ml-1 px-1 hover:text-stage-accent" aria-label="Back">
+          <button type="button" onClick={() => navigate(-1)} className="flex items-center gap-2 min-h-11 -ml-1 px-1 hover:text-stage-accent" aria-label="Back">
             <ArrowLeft className="h-5 w-5" />
             <span className="text-[15px] font-medium">Back</span>
           </button>
@@ -204,7 +204,7 @@ function Chip({ active, label, onClick }: { active: boolean; label: string; onCl
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`shrink-0 min-h-10 px-4 rounded-full border text-[14px] font-semibold whitespace-nowrap transition-colors ${
+      className={`shrink-0 min-h-11 px-4 rounded-full border text-[14px] font-semibold whitespace-nowrap transition-colors ${
         active
           ? 'bg-stage-tint border-stage-accent text-stage-ink'
           : 'bg-card border-line text-foreground hover:bg-muted/60'
@@ -243,7 +243,7 @@ function ResearchCard({ item }: { item: LibraryItem }) {
           href={item.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 min-h-10 px-1 text-stage-accent text-[15px] font-semibold hover:underline underline-offset-4"
+          className="inline-flex items-center gap-1.5 min-h-11 px-1 text-stage-accent text-[15px] font-semibold hover:underline underline-offset-4"
         >
           Read the source
           <ExternalLink className="h-4 w-4" aria-hidden />

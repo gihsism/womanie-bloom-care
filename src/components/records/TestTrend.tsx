@@ -63,7 +63,7 @@ export default function TestTrend({ info, summary }: TestTrendProps) {
         </p>
         {summary && (
           <Badge variant="outline" className={`text-[10px] flex-shrink-0 ${
-            summary.trend === 'worsening' ? 'text-destructive/80 border-destructive/20' : 'text-muted-foreground border-border'
+            summary.trend === 'worsening' ? 'text-destructive border-destructive/20' : 'text-muted-foreground border-border'
           }`}>
             {summary.trend === 'improving' ? 'Getting better' : summary.trend === 'worsening' ? 'Getting worse' : 'Stable'}
           </Badge>
@@ -115,7 +115,7 @@ export default function TestTrend({ info, summary }: TestTrendProps) {
         <p className="text-[10px] text-muted-foreground mt-1">
           <span className="text-primary">🔮</span> We predict your next result could be around <span className="font-medium whitespace-nowrap">{predictedNext}{info.unit ? ` ${info.unit}` : ''}</span>{' '}
           {hasRefRange && refLow !== undefined && refHigh !== undefined && (
-            <span className={predictedNext >= refLow && predictedNext <= refHigh ? 'text-muted-foreground' : 'text-destructive/80'}>
+            <span className={predictedNext >= refLow && predictedNext <= refHigh ? 'text-muted-foreground' : 'text-destructive'}>
               ({predictedNext >= refLow && predictedNext <= refHigh ? 'in the healthy range' : 'outside healthy range'})
             </span>
           )}

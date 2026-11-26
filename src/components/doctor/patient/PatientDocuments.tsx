@@ -77,7 +77,7 @@ const PatientDocuments = ({ documents }: { documents: HealthDocument[] }) => {
                 <>
                   <button
                     type="button"
-                    className="mt-1 ml-8 min-h-8 text-[14px] font-semibold text-stage-accent inline-flex items-center gap-1"
+                    className="relative hit-44 mt-1 ml-8 min-h-8 text-[14px] font-semibold text-stage-accent inline-flex items-center gap-1"
                     aria-expanded={openSummary === doc.id}
                     onClick={() => setOpenSummary(s => (s === doc.id ? null : doc.id))}
                   >

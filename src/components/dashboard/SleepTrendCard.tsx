@@ -154,7 +154,7 @@ const SleepTrendCard = () => {
         </div>
         <div className="bg-muted/50 rounded-lg p-2">
           <div className="text-[10px] text-muted-foreground">Last 7 days</div>
-          <div className={`font-semibold ${chronicShort ? 'text-destructive/80' : ''}`}>
+          <div className={`font-semibold ${chronicShort ? 'text-destructive' : ''}`}>
             {stats.last7Avg !== null ? `${stats.last7Avg.toFixed(1)}h` : '—'}
           </div>
         </div>
@@ -221,7 +221,7 @@ const SleepTrendCard = () => {
 
       {chronicShort && (
         <div className={attentionBanner}>
-          <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-destructive/80" />
+          <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-destructive" />
           <p className="text-xs">
             Averaging under {RECOMMENDED_LOW}h in the last week. Chronic short sleep is linked
             to mood, cycle, and cardiovascular changes — worth flagging at your next visit if

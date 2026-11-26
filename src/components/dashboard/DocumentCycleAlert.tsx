@@ -52,7 +52,7 @@ export default function DocumentCycleAlert({ medicalData, lifeStage, onSwitchMod
       return {
         icon: Flame,
         color: 'bg-destructive/5 border-destructive/20',
-        iconColor: 'text-destructive/80',
+        iconColor: 'text-destructive',
         title: 'Your hormones suggest perimenopause',
         description: `Your FSH (${fsh}) is elevated and estradiol (${estradiol}) is low — this pattern indicates perimenopause. Switch to Menopause for symptom tracking, hot flash logging, and menopause-specific health insights.`,
         action: 'Switch to Menopause',
@@ -89,7 +89,7 @@ export default function DocumentCycleAlert({ medicalData, lifeStage, onSwitchMod
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <AlertTriangle className="h-4 w-4 text-destructive/80" aria-hidden="true" />
+              <AlertTriangle className="h-4 w-4 text-destructive" aria-hidden="true" />
               <h4 className="text-sm font-medium">{alert.title}</h4>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed mb-3">{alert.description}</p>

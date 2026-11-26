@@ -33,12 +33,12 @@ export default function OnboardingScreen({ step, title, sub, onBack, stage, prim
     <div className="min-h-screen bg-background flex flex-col">
       <div className="w-full max-w-md mx-auto px-4 pt-3 flex items-center justify-between min-h-12">
         {onBack ? (
-          <button type="button" onClick={onBack} className="flex items-center gap-2 min-h-10 -ml-1 px-1 text-foreground hover:text-stage-accent" aria-label="Go back">
+          <button type="button" onClick={onBack} className="flex items-center gap-2 min-h-11 -ml-1 px-1 text-foreground hover:text-stage-accent" aria-label="Go back">
             <ArrowLeft className="h-5 w-5" />
             <span className="text-[15px] font-medium">Back</span>
           </button>
         ) : <span />}
-        <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-xl font-extrabold text-stage-accent hover:opacity-80">
+        <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="relative hit-44 text-xl font-extrabold text-stage-accent hover:opacity-80">
           Womanie
         </a>
       </div>

@@ -162,7 +162,7 @@ export default function TestComparisonTable({ medicalData }: TestComparisonTable
                             <div className={`w-1.5 h-1.5 rounded-full ${statusDot(reading.status)}`} />
                             <span className={`text-sm font-mono font-medium ${
                               reading.status === 'critical' ? 'text-destructive' :
-                              reading.status === 'abnormal' ? 'text-destructive/80' :
+                              reading.status === 'abnormal' ? 'text-destructive' :
                               'text-foreground'
                             }`}>
                               {reading.value}
@@ -181,13 +181,13 @@ export default function TestComparisonTable({ medicalData }: TestComparisonTable
                           {row.trend === 'improving' ? (
                             <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
                           ) : row.trend === 'worsening' ? (
-                            <TrendingDown className="h-3.5 w-3.5 text-destructive/80" />
+                            <TrendingDown className="h-3.5 w-3.5 text-destructive" />
                           ) : (
                             <Minus className="h-3.5 w-3.5 text-muted-foreground" />
                           )}
                           <span className={`text-xs font-medium ${
                             row.trend === 'improving' ? 'text-muted-foreground' :
-                            row.trend === 'worsening' ? 'text-destructive/80' :
+                            row.trend === 'worsening' ? 'text-destructive' :
                             'text-muted-foreground'
                           }`}>
                             {row.changePercent > 0 ? '+' : ''}{row.changePercent}%

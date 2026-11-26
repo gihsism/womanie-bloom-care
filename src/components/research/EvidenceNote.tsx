@@ -64,7 +64,7 @@ export default function EvidenceNote({ specs: rawSpecs, className = 'mt-3 border
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-controls={panelId}
-        className="w-full min-h-[36px] flex items-center gap-1.5 text-left text-[12.5px] text-primary hover:text-primary/80"
+        className="w-full min-h-11 flex items-center gap-1.5 text-left text-[12.5px] text-primary hover:text-primary/80"
       >
         <span aria-hidden className="text-[10px] leading-none">&#10022;</span>
         <span>What the research says{about ? <span className="text-muted-foreground"> {about}</span> : null}</span>

@@ -90,7 +90,7 @@ const Footer = () => {
                   <li key={link.label}>
                     <button
                       onClick={() => navigate(link.href)}
-                      className="min-h-9 text-[15px] text-muted-foreground hover:text-stage-accent transition-colors text-left"
+                      className="min-h-11 text-[15px] text-muted-foreground hover:text-stage-accent transition-colors text-left"
                     >
                       {link.label}
                     </button>
@@ -104,7 +104,7 @@ const Footer = () => {
         <div className="flex items-center gap-2 pt-6 border-t border-line">
           <button
             onClick={() => navigate('/')}
-            className="text-xl font-extrabold text-stage-accent hover:opacity-80 transition-opacity"
+            className="relative hit-44 text-xl font-extrabold text-stage-accent hover:opacity-80 transition-opacity"
           >
             Womanie
           </button>

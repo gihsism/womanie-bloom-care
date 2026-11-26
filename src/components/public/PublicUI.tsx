@@ -64,7 +64,7 @@ export function IconRows({ items, className }: { items: IconRow[]; className?: s
         const Icon = it.icon;
         const inner = (
           <>
-            <span className="grid place-items-center h-10 w-10 shrink-0 rounded-full bg-stage-tint text-stage-accent font-extrabold text-[16px]" aria-hidden="true">
+            <span className="grid place-items-center h-11 w-11 shrink-0 rounded-full bg-stage-tint text-stage-accent font-extrabold text-[16px]" aria-hidden="true">
               {Icon ? <Icon className="h-5 w-5" strokeWidth={1.9} /> : it.n}
             </span>
             <span className="flex-1 min-w-0">

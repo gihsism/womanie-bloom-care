@@ -82,7 +82,7 @@ const Navigation = () => {
           <a
             href="/"
             onClick={(e) => { e.preventDefault(); navigate('/'); }}
-            className="text-2xl font-extrabold text-stage-accent hover:opacity-80 transition-opacity"
+            className="relative hit-44 text-2xl font-extrabold text-stage-accent hover:opacity-80 transition-opacity"
             aria-label="Womanie — go to homepage"
           >
             Womanie
@@ -139,7 +139,7 @@ const Navigation = () => {
             <Button
               size="sm"
               variant={user ? 'ghost' : 'outline'}
-              className="md:hidden h-9 px-4"
+              className="md:hidden h-10 px-4"
               onClick={() => (user ? navigate('/dashboard') : startLogin(navigate))}
             >
               {user ? 'Home' : 'Log in'}
@@ -148,7 +148,7 @@ const Navigation = () => {
             {/* Hamburger */}
             <button
               ref={toggleRef}
-              className="xl:hidden p-2 rounded-lg hover:bg-muted/50 transition-colors"
+              className="xl:hidden p-2.5 rounded-lg hover:bg-muted/50 transition-colors"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={isMobileMenuOpen}

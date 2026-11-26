@@ -8,15 +8,15 @@ export function ChatSources({ sources, onBrowse }: { sources: ChatSource[]; onBr
   return (
     <div className="mt-3 pt-2.5 border-t border-line" aria-label="Sources">
       <p className="label-mono !text-[10px] mb-1.5">Sources</p>
-      <ol className="space-y-1.5">
+      <ol>
         {sources.map((s) => (
           <li key={s.n} className="flex gap-1 text-[13px] leading-snug">
-            <span className="font-display font-bold text-stage-accent tabular-nums w-7 shrink-0">[{s.n}]</span>
+            <span className="font-display font-bold text-stage-accent tabular-nums w-7 shrink-0 pt-1.5">[{s.n}]</span>
             <a
               href={s.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="min-w-0 group/src hover:text-primary"
+              className="min-w-0 block py-1.5 group/src hover:text-primary"
             >
               <span className="line-clamp-2 break-words">{s.title}</span>
               <span className="block text-[11px] text-muted-foreground">
@@ -33,7 +33,7 @@ export function ChatSources({ sources, onBrowse }: { sources: ChatSource[]; onBr
         {onBrowse && (
           <>
             {' '}
-            <button type="button" onClick={onBrowse} className="text-primary hover:underline underline-offset-2">
+            <button type="button" onClick={onBrowse} className="relative hit-44 text-primary hover:underline underline-offset-2">
               Browse the research library
             </button>
           </>
