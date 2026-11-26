@@ -1,0 +1,15 @@
+-- The day she stopped a medicine. Until now "Stop tracking" only set
+-- active = false (and updated_at), so the menopause "Your symptoms over
+-- time" card had to guess the stop date from updated_at. With this column
+-- MedicineLog writes the stop day explicitly, and the card can say
+-- "since you stopped HRT on 3 Oct" with the right date even if the row is
+-- edited later.
+--
+-- Additive only: one nullable column, nothing existing is altered. Text
+-- 'yyyy-mm-dd' like started_on. The app works before it is applied
+-- (MedicineLog retries the stop without the column; the card falls back to
+-- updated_at for stopped medicines).
+--
+-- Apply with:  node scripts/apply-migration.mjs db/migrations/018_medication_stopped_on.sql
+-- Idempotent: safe to run twice.
+ALTER TABLE medications ADD COLUMN IF NOT EXISTS stopped_on TEXT;

@@ -14,6 +14,7 @@ import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 import type { LifeStage } from './DashboardHeader';
 import { getFriendlyName } from '@/lib/medical-utils';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
+import { UNSCHEDULED_VISIT_ID } from '@/lib/hrtQuestions';
 import { addQuestion, fromSuggestions, parseQuestions, removeQuestion, toggleAsked, visitDaysAway, type VisitQuestion } from '@/lib/visitQuestions';
 
 // Generates a personalised "questions to bring to your doctor"
@@ -115,6 +116,10 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
   // table answered (migration applied) and there is a visit to save to.
   const [saved, setSaved] = useState<VisitQuestion[] | null>(null);
   const [canSave, setCanSave] = useState(false);
+  // Questions saved before any visit was booked (e.g. from "Questions for
+  // your doctor about HRT"): shown first, and moved into the visit's list
+  // when she saves it.
+  const [unscheduled, setUnscheduled] = useState<VisitQuestion[]>([]);
   const [saving, setSaving] = useState(false);
   const [draft, setDraft] = useState('');
   const [checked, setChecked] = useState<Record<string, boolean>>({});
@@ -161,6 +166,12 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
     const apts = Array.isArray(aptResp?.appointments) ? aptResp.appointments : [];
     const next = apts.find((a: { scheduled_at: string }) => Date.parse(a.scheduled_at) > Date.now());
     setUpcomingApt(next ?? null);
+    const { data: unsched, error: unschedErr } = await db.from('visit_questions')
+      .select('questions')
+      .eq('user_id', user.id)
+      .eq('appointment_id', UNSCHEDULED_VISIT_ID)
+      .maybeSingle();
+    setUnscheduled(!unschedErr && unsched ? parseQuestions((unsched as { questions: unknown }).questions).filter(q => !q.asked) : []);
     if (next?.id) {
       const { data, error } = await db.from('visit_questions')
         .select('questions')
@@ -258,8 +269,10 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
       }
     }
 
-    return out.slice(0, 6);
-  }, [flagged, signals, ctx, mode]);
+    const own = unscheduled.map(q => ({ id: q.id, text: q.text }));
+    const ownTexts = new Set(own.map(q => q.text.toLowerCase()));
+    return [...own, ...out.filter(q => !ownTexts.has(q.text.toLowerCase())).slice(0, 6)];
+  }, [flagged, signals, ctx, mode, unscheduled]);
 
   // Save (or re-save) the list to the upcoming visit.
   const store = async (next: VisitQuestion[]) => {
@@ -275,6 +288,13 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
     if (error) {
       setSaved(prev);
       toast({ variant: 'destructive', title: 'Could not save', description: 'Check your connection and try again.' });
+      return;
+    }
+    // First save to this visit carried the unscheduled questions over: clear that list.
+    if (prev === null && unscheduled.length > 0) {
+      const { error: delErr } = await db.from('visit_questions').delete()
+        .eq('user_id', user.id).eq('appointment_id', UNSCHEDULED_VISIT_ID);
+      if (!delErr) setUnscheduled([]);
     }
   };
 

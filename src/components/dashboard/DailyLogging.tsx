@@ -25,6 +25,9 @@ const SYMPTOM_OPTIONS = [
   'Dizziness', 'Hot flashes', 'Joint pain', 'Anxiety',
 ];
 
+// Menopause stages also log night sweats (read by "Your symptoms over time").
+const MENOPAUSE_SYMPTOM_OPTIONS = [...SYMPTOM_OPTIONS, 'Night sweats'];
+
 const MOOD_OPTIONS = [
   { emoji: '😊', label: 'Happy', value: 'happy' },
   { emoji: '😌', label: 'Calm', value: 'calm' },
@@ -390,7 +393,7 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
         <div>
           <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 block">Symptoms</Label>
           <div className="flex flex-wrap gap-1.5">
-            {SYMPTOM_OPTIONS.map(s => (
+            {(showHotFlashes ? MENOPAUSE_SYMPTOM_OPTIONS : SYMPTOM_OPTIONS).map(s => (
               <button
                 key={s}
                 onClick={() => toggleSymptom(s)}
