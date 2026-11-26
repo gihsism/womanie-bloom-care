@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
+import { fetchDoctorSentDocuments, recentDoctorDocuments } from '@/lib/documentFiles';
 
 // Count of "needs your attention" items across the app — matches the
 // sections on /dashboard/notifications: pending doctor connections,
@@ -25,6 +26,8 @@ export interface AttentionCounts {
   recentDoctorNotes: number;
   upcomingAppointments: number;
   recentDoctorCancellations: number;
+  /** Documents a connected doctor added to her Records in the last 14 days. */
+  recentDoctorDocuments: number;
 }
 
 const ZERO: AttentionCounts = {
@@ -35,6 +38,7 @@ const ZERO: AttentionCounts = {
   recentDoctorNotes: 0,
   upcomingAppointments: 0,
   recentDoctorCancellations: 0,
+  recentDoctorDocuments: 0,
 };
 
 export function useAttentionCount(): AttentionCounts {
@@ -47,7 +51,7 @@ export function useAttentionCount(): AttentionCounts {
       return;
     }
     try {
-      const [pendingResp, docsRes, findingsRes, notesResp, aptsResp] = await Promise.all([
+      const [pendingResp, docsRes, findingsRes, notesResp, aptsResp, sentDocs] = await Promise.all([
         fetch('/api/connections/pending').then(r => (r.ok ? r.json() : { pending: [] })),
         db.from('health_documents')
           .select('id, ai_summary, uploaded_at')
@@ -61,7 +65,9 @@ export function useAttentionCount(): AttentionCounts {
         // derive both upcoming + recent doctor-initiated cancellations
         // from one round-trip.
         fetch('/api/me/appointments').then(r => (r.ok ? r.json() : { appointments: [] })),
+        fetchDoctorSentDocuments(),
       ]);
+      const recentFromDoctor = recentDoctorDocuments(sentDocs).length;
 
       const pendingConnections = Array.isArray(pendingResp?.pending) ? pendingResp.pending.length : 0;
       const threshold = Date.now() - STALLED_THRESHOLD_MS;
@@ -112,13 +118,15 @@ export function useAttentionCount(): AttentionCounts {
           stalledDocuments +
           criticalFindings +
           recentDoctorNotes +
-          recentDoctorCancellations,
+          recentDoctorCancellations +
+          recentFromDoctor,
         pendingConnections,
         stalledDocuments,
         criticalFindings,
         recentDoctorNotes,
         upcomingAppointments,
         recentDoctorCancellations,
+        recentDoctorDocuments: recentFromDoctor,
       });
     } catch {
       // Silently keep last known counts — a badge is cosmetic.

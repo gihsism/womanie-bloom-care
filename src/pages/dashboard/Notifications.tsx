@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Bell, FileText, AlertTriangle, CalendarX, CalendarCheck, Search } from 'lucide-react';
+import { ArrowLeft, Bell, FilePlus2, FileText, AlertTriangle, CalendarX, CalendarCheck, Search } from 'lucide-react';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -12,6 +12,7 @@ import ConnectedDoctors from '@/components/dashboard/ConnectedDoctors';
 import DoctorNotesCard from '@/components/dashboard/DoctorNotesCard';
 import { formatDistanceToNow } from 'date-fns';
 import { recentlyBooked, formatVisitWhen, visitTypeLabel } from '@/lib/booking';
+import { fetchDoctorSentDocuments, recentDoctorDocuments } from '@/lib/documentFiles';
 
 // Notifications / "needs your attention" page.
 //
@@ -76,12 +77,14 @@ export default function Notifications() {
   const [cancellations, setCancellations] = useState<CancelledAppt[]>([]);
   // Her own bookings from the last 7 days: the in-app booking confirmation.
   const [confirmed, setConfirmed] = useState<CancelledAppt[]>([]);
+  // "Dr X added a document" (last 14 days), with the document's name.
+  const [fromDoctor, setFromDoctor] = useState<Array<{ id: string; doctor_name: string; note: string | null; uploaded_at: string | null; name: string }>>([]);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [docsRes, findingsRes, apptsResp] = await Promise.all([
+      const [docsRes, findingsRes, apptsResp, sentDocs] = await Promise.all([
         db.from('health_documents')
           .select('id, file_name, ai_suggested_name, ai_summary, uploaded_at')
           .eq('user_id', user.id)
@@ -93,6 +96,7 @@ export default function Notifications() {
         fetch('/api/me/appointments')
           .then(r => (r.ok ? r.json() : { appointments: [] }))
           .catch(() => ({ appointments: [] })),
+        fetchDoctorSentDocuments(),
       ]);
       const docs = (docsRes.data ?? []) as Array<{ id: string; file_name: string; ai_suggested_name: string | null; ai_summary: string | null; uploaded_at: string | null }>;
       const threeMinAgo = Date.now() - 3 * 60 * 1000;
@@ -102,6 +106,13 @@ export default function Notifications() {
           .slice(0, 10),
       );
       setCritical((findingsRes.data ?? []) as CriticalFinding[]);
+      const docName = new Map(docs.map(d => [d.id, d.ai_suggested_name || d.file_name]));
+      setFromDoctor(
+        recentDoctorDocuments(sentDocs)
+          .filter(d => docName.has(d.id))
+          .slice(0, 10)
+          .map(d => ({ ...d, name: docName.get(d.id) || 'Document' })),
+      );
 
       // Doctor-initiated cancellations in the last 14 days. Patient-
       // initiated cancellations don't carry the "Cancelled by doctor:"
@@ -143,6 +154,41 @@ export default function Notifications() {
         <PendingConnections />
 
         <DoctorNotesCard />
+
+        {fromDoctor.length > 0 && (
+          <Card className="p-4 border-l-4 border-l-primary" data-testid="doctor-documents">
+            <div className="flex items-center gap-2 mb-3">
+              <FilePlus2 className="h-4 w-4 text-primary" aria-hidden="true" />
+              <p className="text-sm font-semibold">
+                {fromDoctor.length === 1 ? 'A doctor added a document' : `Doctors added ${fromDoctor.length} documents`}
+              </p>
+            </div>
+            <ul className="space-y-2">
+              {fromDoctor.map(d => (
+                <li key={d.id} className="text-xs space-y-0.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate">
+                      <span className="font-medium">{d.doctor_name} added a document</span>
+                      <span className="text-muted-foreground"> · {d.name}</span>
+                      {d.uploaded_at && (
+                        <span className="text-muted-foreground"> · {formatDistanceToNow(new Date(d.uploaded_at), { addSuffix: true })}</span>
+                      )}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs flex-shrink-0"
+                      onClick={() => navigate(`/dashboard/medical-history?doc=${d.id}`)}
+                    >
+                      Open
+                    </Button>
+                  </div>
+                  {d.note && <p className="text-muted-foreground italic">“{d.note}”</p>}
+                </li>
+              ))}
+            </ul>
+          </Card>
+        )}
 
         {stalled.length > 0 && (
           <Card className="p-4 border-l-4 border-l-destructive">
@@ -285,7 +331,7 @@ export default function Notifications() {
         {/* Empty-state — only after the fetch has resolved, so we don't
             momentarily claim "nothing to flag" while the data is still
             in flight. */}
-        {loaded && stalled.length === 0 && critical.length === 0 && cancellations.length === 0 && confirmed.length === 0 && (
+        {loaded && fromDoctor.length === 0 && stalled.length === 0 && critical.length === 0 && cancellations.length === 0 && confirmed.length === 0 && (
           <div className="text-center text-sm text-muted-foreground py-8">
             Nothing else to flag right now.
           </div>

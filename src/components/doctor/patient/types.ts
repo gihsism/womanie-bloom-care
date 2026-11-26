@@ -26,6 +26,10 @@ export interface HealthDocument {
   ai_summary: string | null;
   ai_suggested_name: string | null;
   uploaded_at: string | null;
+  /** This doctor sent it into her Records ("Sent by you"). */
+  sent_by_me?: boolean;
+  /** The note this doctor sent with it (only on her own sends). */
+  sent_note?: string | null;
 }
 
 export interface DoctorNote {

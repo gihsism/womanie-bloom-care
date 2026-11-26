@@ -239,7 +239,16 @@ const PatientDetails = () => {
           </TabsContent>
 
           <TabsContent value="documents">
-            <PatientDocuments documents={documents} />
+            <PatientDocuments
+              documents={documents}
+              patientId={patientId}
+              patientName={patient?.full_name}
+              onSent={doc => {
+                setDocuments(prev => [{ ...doc, sent_note: doc.notes }, ...prev]);
+                // The analysis lands in a minute or two; pick it up then.
+                window.setTimeout(() => { void loadChart(); }, 90_000);
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="notes">

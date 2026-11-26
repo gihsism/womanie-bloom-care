@@ -64,6 +64,7 @@ import {
   MoreHorizontal,
   Upload,
 } from 'lucide-react';
+import { fetchDoctorSentDocuments } from '@/lib/documentFiles';
 import { format, differenceInDays, addDays } from 'date-fns';
 import {
   type MedicalDataItem,
@@ -567,6 +568,8 @@ export default function MedicalHistory() {
   const { user, loading: authLoading } = useAuth();
   const [medicalData, setMedicalData] = useState<MedicalDataItem[]>([]);
   const [documents, setDocuments] = useState<DocumentInfo[]>([]);
+  // Documents a connected doctor sent into her Records: id -> who + note.
+  const [fromDoctor, setFromDoctor] = useState<Record<string, { doctor_name: string; note: string | null }>>({});
   const [lifeStage, setLifeStage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedPanels, setExpandedPanels] = useState<Set<string>>(new Set());
@@ -680,6 +683,12 @@ export default function MedicalHistory() {
       ]);
       if (medRes.data) setMedicalData(medRes.data as MedicalDataItem[]);
       if (docRes.data) setDocuments(docRes.data);
+      // "From Dr X" labels. Best effort: without them the list still works.
+      fetchDoctorSentDocuments().then(list => {
+        const map: Record<string, { doctor_name: string; note: string | null }> = {};
+        for (const d of list) map[d.id] = { doctor_name: d.doctor_name, note: d.note };
+        setFromDoctor(map);
+      });
       if (profileRes.data) {
         setLifeStage(profileRes.data.life_stage);
         setPregnancyDueDate(localDay(profileRes.data.pregnancy_due_date));
@@ -1318,6 +1327,9 @@ export default function MedicalHistory() {
                         <p className="text-sm font-medium truncate">{doc.ai_suggested_name || doc.file_name}</p>
                         <p className="text-[11px] text-muted-foreground flex items-center gap-1.5">
                           <span>{doc.uploaded_at ? format(new Date(doc.uploaded_at), 'MMM d, yyyy') : ''}</span>
+                          {fromDoctor[doc.id] && (
+                            <span className="text-primary font-medium">· From {fromDoctor[doc.id].doctor_name}</span>
+                          )}
                           {analysisStalled ? (
                             <span
                               className="inline-flex items-center gap-1 text-destructive font-medium cursor-pointer hover:underline"
@@ -1344,6 +1356,14 @@ export default function MedicalHistory() {
 
                     {isExpanded && (
                       <div className="px-4 pb-4 bg-muted/20 border-t border-border/30">
+                        {fromDoctor[doc.id] && (
+                          <p className="pt-3 text-xs text-muted-foreground">
+                            Added by {fromDoctor[doc.id].doctor_name}. It is your record: you can delete it any time.
+                            {fromDoctor[doc.id].note && (
+                              <span className="block mt-1 italic text-foreground/80">“{fromDoctor[doc.id].note}”</span>
+                            )}
+                          </p>
+                        )}
                         {/* Action buttons — always visible */}
                         <div className="flex gap-2 py-3 flex-wrap">
                           <Button

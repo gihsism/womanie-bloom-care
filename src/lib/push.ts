@@ -3,8 +3,9 @@
 
 // bookings = doctor side: a patient booked, moved or cancelled a visit with
 // her (switched in the doctor's Profile & settings, not in Me -> Reminders).
-export interface PushPrefs { medicine: boolean; period: boolean; appointment: boolean; bookings: boolean }
-export const DEFAULT_PUSH_PREFS: PushPrefs = { medicine: true, period: true, appointment: true, bookings: true };
+// documents = patient side: "Dr X added a document" to her Records.
+export interface PushPrefs { medicine: boolean; period: boolean; appointment: boolean; bookings: boolean; documents: boolean }
+export const DEFAULT_PUSH_PREFS: PushPrefs = { medicine: true, period: true, appointment: true, bookings: true, documents: true };
 
 export type PushSupport =
   | 'native-app'      // Capacitor iOS/Android shell: Web Push does not run there
