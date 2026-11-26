@@ -15,6 +15,7 @@
 // left out, so the page only shows what she actually has.
 
 import { parseRange } from './bodyMap';
+import { labNumber, numberStylesByDocument, parseLabValue } from './labValue';
 
 export type RangeState = 'in' | 'low' | 'high' | 'out' | 'none';
 
@@ -31,7 +32,7 @@ export interface OverviewMetric {
   points: OverviewPoint[];
   /** Second line of the sparkline (diastolic for blood pressure). */
   secondary?: OverviewPoint[];
-  last: { display: string; date: string };
+  last: { display: string; date: string; /** Ambiguous number ("1,250"): show "check value". */ check?: boolean };
   /** Bounds the sparkline can shade; null side = open. */
   range: { low: number | null; high: number | null } | null;
   /** How the range is written for her, e.g. "15–150" or "under 140/90". */
@@ -79,6 +80,8 @@ export interface LabRow {
   status: string | null;
   date_recorded: string | null;
   document_id: string | null;
+  /** Optional: carries number_style when the analysis stored it. */
+  raw_data?: unknown;
 }
 
 export interface KeyLab {
@@ -113,14 +116,18 @@ const normUnit = (u: string | null | undefined) =>
   (u ?? '').trim().toLowerCase().replace(/\s+/g, '').replace(/[µμ]|mc(?=g)/g, 'u');
 
 export function labMetrics(rows: LabRow[]): OverviewMetric[] {
-  const byLab = new Map<string, Array<LabRow & { date: string; n: number }>>();
+  const byLab = new Map<string, Array<LabRow & { date: string; n: number; check: boolean }>>();
+  // Each report's own decimal mark decides "1,250" (1.25 on a Swiss
+  // report, 1250 on an English one).
+  const styles = numberStylesByDocument(rows);
   for (const r of rows) {
     const lab = keyLabFor(r.title);
     const date = ymd(r.date_recorded);
-    const n = num(r.value);
+    const ctx = { style: styles.get(r.document_id ?? '') ?? null, title: lab?.label ?? r.title, unit: r.unit };
+    const n = labNumber(r.value, ctx);
     if (!lab || !date || n === null) continue;
     const list = byLab.get(lab.id) ?? [];
-    list.push({ ...r, date, n });
+    list.push({ ...r, date, n, check: parseLabValue(r.value, ctx).check });
     byLab.set(lab.id, list);
   }
   const out: OverviewMetric[] = [];
@@ -138,7 +145,7 @@ export function labMetrics(rows: LabRow[]): OverviewMetric[] {
     for (const r of sameUnit) byDate.set(r.date, r.n);
     const points = [...byDate.entries()].map(([date, value]) => ({ date, value })).slice(-MAX_POINTS);
 
-    const range = parseRange(latest.reference_range);
+    const range = parseRange(latest.reference_range, { style: styles.get(latest.document_id ?? '') ?? null });
     let state = rangeState(latest.n, range);
     if (state === 'none') {
       // No parseable range on the report: fall back to the status the
@@ -152,7 +159,7 @@ export function labMetrics(rows: LabRow[]): OverviewMetric[] {
       label: lab.label,
       unit: latest.unit?.trim() || null,
       points,
-      last: { display: raw, date: latest.date },
+      last: { display: raw, date: latest.date, ...(latest.check ? { check: true } : {}) },
       range,
       rangeText: range ? fmtRange(range) : (latest.reference_range?.trim() || null),
       state,

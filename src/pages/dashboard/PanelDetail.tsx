@@ -14,6 +14,7 @@ import ResultSparkline from '@/components/dashboard/ResultSparkline';
 import UserMenu from '@/components/UserMenu';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 import { hormoneKeyForTitle, assessAmh, getPhaseRange } from '@/lib/hormone-reference';
+import { numberStylesByDocument, parseLabValue, labNumber } from '@/lib/labValue';
 
 // Panel deep-dive — every reading in one panel (CBC, Thyroid Panel,
 // Lipid Panel, …) across every document the user has uploaded,
@@ -181,6 +182,12 @@ export default function PanelDetail() {
     else phase = 'luteal';
     return { cycleDay, phase };
   }, [periodRecords]);
+
+  // Each report's own decimal mark decides "1,250" (Swiss 1.25 vs English 1250).
+  const styles = useMemo(() => numberStylesByDocument(rows), [rows]);
+  const labCtx = useCallback((r: ExtractedRow) => (
+    { style: styles.get(r.document_id ?? '') ?? null, title: r.title, unit: r.unit }
+  ), [styles]);
 
   const series = useMemo<TestSeries[]>(() => {
     if (!slug) return [];
@@ -373,9 +380,9 @@ export default function PanelDetail() {
                 const sparklinePoints = s.readings
                   .filter(r => r.value && r.date_recorded)
                   .map(r => {
-                    const m = String(r.value).match(/-?\d+(?:\.\d+)?/);
+                    const n = labNumber(r.value, labCtx(r));
                     return {
-                      value: m ? parseFloat(m[0]) : NaN,
+                      value: n ?? NaN,
                       date: r.date_recorded as string,
                       status: r.status ?? null,
                     };
@@ -385,6 +392,7 @@ export default function PanelDetail() {
                   ? `${s.latest.value}${s.latest.unit ? ' ' + s.latest.unit : ''}`
                   : '—';
                 const latestTone = STATUS_TONE[s.latest.status ?? ''] ?? '';
+                const latestParsed = parseLabValue(s.latest.value, labCtx(s.latest));
 
                 // Personal range: with 3+ numeric readings, compute the
                 // user's own min/median/max so they can tell whether a
@@ -402,7 +410,7 @@ export default function PanelDetail() {
                 const fmt = (n: number): string => {
                   // Match the precision the latest reading uses so we
                   // don't print 12.300000000001.
-                  const sample = String(s.latest.value ?? '');
+                  const sample = latestParsed.value == null ? '' : String(latestParsed.value);
                   const decimals = sample.includes('.') ? sample.split('.')[1].length : 0;
                   return n.toFixed(Math.min(decimals, 3));
                 };
@@ -432,8 +440,7 @@ export default function PanelDetail() {
                           if (!key) return null;
                           // AMH: age-anchored expectation.
                           if (key === 'amh' && healthContext.age) {
-                            const m = String(s.latest.value ?? '').match(/-?\d+(?:\.\d+)?/);
-                            const numericLatest = m ? parseFloat(m[0]) : null;
+                            const numericLatest = latestParsed.value;
                             if (numericLatest === null) return null;
                             const a = assessAmh(numericLatest, healthContext.age);
                             if (!a) return null;
@@ -469,6 +476,14 @@ export default function PanelDetail() {
                       <div className="text-right">
                         <p className={`text-sm font-mono font-bold ${latestTone}`}>{latestValue}</p>
                         <p className="text-[11px] text-muted-foreground">latest</p>
+                        {latestParsed.check && (
+                          <p
+                            className="text-[10px] font-medium text-muted-foreground"
+                            title={latestParsed.reason ? `Could be read two ways: ${latestParsed.reason}. Check it on the report.` : 'Check this number on the report.'}
+                          >
+                            check value
+                          </p>
+                        )}
                       </div>
                       {sparklinePoints.length >= 2 && (
                         <div className="flex items-center gap-2 w-full sm:w-auto">

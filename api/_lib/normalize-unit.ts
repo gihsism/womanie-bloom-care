@@ -14,7 +14,7 @@
 // conversion factors and getting one wrong would be far worse than
 // just leaving the data alone.
 
-const MICRO_VARIANTS = [
+export const MICRO_VARIANTS = [
   'µ', // µ MICRO SIGN
   'μ', // μ Greek small letter mu
   'mc',     // "mc" prefix that sometimes substitutes

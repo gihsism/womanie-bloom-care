@@ -9,6 +9,7 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import { format } from 'date-fns';
 import { getFriendlyName } from '@/lib/medical-utils';
 import UserMenu from '@/components/UserMenu';
+import { labNumber } from '@/lib/labValue';
 
 // Side-by-side comparison of two documents.
 //
@@ -57,12 +58,9 @@ function classifyShift(prev: string | null, next: string | null): StatusShift {
   return 'same';
 }
 
+// Shared lab parser: "3,4" = 3.4, "1'250" = 1250.
 function parseValue(s: string | null): number | null {
-  if (!s) return null;
-  const m = String(s).match(/-?\d+(?:\.\d+)?/);
-  if (!m) return null;
-  const n = parseFloat(m[0]);
-  return Number.isFinite(n) ? n : null;
+  return labNumber(s);
 }
 
 function fmtVal(item: Item | null): string {

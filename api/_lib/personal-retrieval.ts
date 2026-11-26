@@ -24,6 +24,7 @@
 // the synonym table already covers the multilingual analyte names.)
 
 import { normalizeTestTitle } from './normalize-test-title.js';
+import { numberStylesByDocument, parseLabValue, type NumberStyle } from './lab-value.js';
 
 export type Row = Record<string, unknown>;
 
@@ -36,6 +37,8 @@ export interface LabRow {
   status?: unknown;
   date_recorded?: unknown;
   notes?: unknown;
+  document_id?: unknown;
+  raw_data?: unknown;
 }
 
 export interface DocRow {
@@ -55,7 +58,7 @@ export const PERSONAL_LAB_CAP = 3000;
 export const PERSONAL_DOC_CAP = 200;
 
 export const PERSONAL_LAB_SQL =
-  `SELECT data_type, title, value, unit, reference_range, status, date_recorded, notes
+  `SELECT data_type, title, value, unit, reference_range, status, date_recorded, notes, document_id, raw_data
      FROM medical_extracted_data
     WHERE user_id = $1
     ORDER BY date_recorded DESC NULLS LAST, id DESC
@@ -249,17 +252,31 @@ const canonOf = (r: LabRow) => normalizeTestTitle(str(r.title)) || 'Unknown';
 const isLab = (r: LabRow) => !r.data_type || str(r.data_type) === 'lab_result';
 const isAbnormal = (r: LabRow) => ABNORMAL_STATUSES.has(str(r.status).toLowerCase());
 
-function valueText(r: LabRow): string {
+// A value printed with a comma, apostrophe or space ("1,25", "1'250",
+// "1,250") gets its number spelled out for the model, read with that
+// report's own decimal mark; a reading that cannot be settled says so
+// instead of letting the model guess.
+function numberHint(r: LabRow, style: NumberStyle | null): string {
+  const raw = str(r.value);
+  if (!/\d[,'’ \u00a0\u202f]\d/.test(raw)) return '';
+  const p = parseLabValue(raw, { style, title: str(r.title), unit: str(r.unit) });
+  if (p.value == null) return '';
+  if (p.alternatives && p.check) return ` [check value: could be ${p.alternatives[0]} or ${p.alternatives[1]}]`;
+  return ` (= ${p.value}${p.check ? ', check value' : ''})`;
+}
+
+function valueText(r: LabRow, style: NumberStyle | null = null): string {
   let s = str(r.value);
+  if (s) s += numberHint(r, style);
   if (s && str(r.unit)) s += ` ${str(r.unit)}`;
   if (str(r.reference_range)) s += ` (ref ${str(r.reference_range)})`;
   if (str(r.status) && str(r.status).toLowerCase() !== 'normal') s += ` [${str(r.status)}]`;
   return s || '(no value)';
 }
 
-function rowLine(r: LabRow, withNote = false): string {
+function rowLine(r: LabRow, withNote = false, style: NumberStyle | null = null): string {
   const d = fmtDate(r.date_recorded) || 'undated';
-  let line = `- ${d} ${canonOf(r)}: ${valueText(r)}`;
+  let line = `- ${d} ${canonOf(r)}: ${valueText(r, style)}`;
   if (withNote && str(r.notes)) line += ` — ${str(r.notes).slice(0, 160)}`;
   return line;
 }
@@ -309,6 +326,9 @@ export function selectPersonalContext(opts: SelectOptions): PersonalSelection {
   const keywords = questionKeywords(question);
 
   const labRows = labs.filter(isLab);
+  // Each report's own decimal mark (stored, or read from its other values).
+  const styles = numberStylesByDocument(labs.map((r) => ({ document_id: str(r.document_id), value: r.value, reference_range: r.reference_range, raw_data: r.raw_data })));
+  const labLine = (r: LabRow, withNote = false) => rowLine(r, withNote, styles.get(str(r.document_id)) ?? null);
   const otherRows = labs.filter((r) => !isLab(r));
 
   // 1. Full history of named analytes. A row counts if its canonical title
@@ -400,7 +420,7 @@ export function selectPersonalContext(opts: SelectOptions): PersonalSelection {
   let historyRows = 0;
   // Out-of-range values must survive a long history: hold their room back.
   const abnormalReserve = abnormal.length
-    ? abnormal.reduce((n, r) => n + rowLine(r).length + 1, 0) + 40
+    ? abnormal.reduce((n, r) => n + labLine(r).length + 1, 0) + 40
     : 0;
   if (history.size) {
     let left = history.size;
@@ -410,7 +430,7 @@ export function selectPersonalContext(opts: SelectOptions): PersonalSelection {
       // If the histories would blow the budget, each named test gets an
       // equal share; within it the newest values are kept and the reader
       // is told how many older ones were left out.
-      const fits = sorted.map((r) => rowLine(r, true));
+      const fits = sorted.map((r) => labLine(r, true));
       const room = Math.floor((budgetChars - used - abnormalReserve - 120) / left--) - 50;
       let total = fits.reduce((n, l) => n + l.length + 1, 0);
       let start = 0;
@@ -438,14 +458,14 @@ export function selectPersonalContext(opts: SelectOptions): PersonalSelection {
   if (abnormal.length) {
     push('');
     push('## Recent out-of-range values');
-    for (const r of abnormal) if (push(rowLine(r))) abnormalCount++;
+    for (const r of abnormal) if (push(labLine(r))) abnormalCount++;
   }
 
   let baselineCount = 0;
   if (baseline.length) {
     push('');
     push('## Recent baseline (latest value per test)');
-    for (const r of baseline) if (push(rowLine(r))) baselineCount++;
+    for (const r of baseline) if (push(labLine(r))) baselineCount++;
   }
 
   const block = out.join('\n') + '\n';

@@ -86,6 +86,11 @@ function MetricRow({ metric, onOpen }: { metric: OverviewMetric; onOpen: () => v
         <p className="text-base font-semibold tabular-nums">
           {metric.last.display}
           {metric.unit && <span className="ml-1 text-xs font-normal text-muted-foreground">{metric.unit}</span>}
+          {metric.last.check && (
+            <span className="ml-2 text-[10px] font-medium text-muted-foreground" title="This number could be read two ways (for example 1,250). Check it on the report.">
+              check value
+            </span>
+          )}
         </p>
         <p className="text-[11px] text-muted-foreground">
           {niceDate(metric.last.date)}
@@ -120,7 +125,7 @@ export default function HealthOverview() {
     if (!uid) return;
     const [labRes, periodRes] = await Promise.all([
       db.from('current_extracted_data')
-        .select('title, value, unit, reference_range, status, date_recorded, document_id')
+        .select('title, value, unit, reference_range, status, date_recorded, document_id, raw_data')
         .eq('user_id', uid),
       db.from('period_tracking')
         .select('period_start_date')

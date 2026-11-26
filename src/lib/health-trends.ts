@@ -5,6 +5,7 @@
 // parseable numeric value and date, computeTrends pairs the most recent
 // reading with the previous one and describes the change.
 
+import { labNumber, type LabParseContext } from './labValue';
 export interface ExtractedItem {
   title: string;
   value: string | null;
@@ -44,12 +45,10 @@ export const SEVERITY: Record<string, number> = {
   informational: 0,
 };
 
-export function parseNumeric(raw: string | null): number | null {
-  if (raw == null) return null;
-  const match = String(raw).match(/-?\d+(?:\.\d+)?/);
-  if (!match) return null;
-  const n = parseFloat(match[0]);
-  return Number.isFinite(n) ? n : null;
+// Shared lab parser: "3,4" is 3.4 and "1'250" is 1250 (the old regex read
+// "3,4" as 3).
+export function parseNumeric(raw: string | null, ctx?: LabParseContext): number | null {
+  return labNumber(raw, ctx);
 }
 
 export function statusShift(prev: string | null, next: string | null): TrendRow['statusShift'] {

@@ -11,6 +11,7 @@
 //
 // Everything here is plain data + pure functions. No I/O, no React.
 
+import { labNumber, type LabParseContext } from './labValue';
 export type HormoneKey =
   | 'amh'
   | 'fsh'
@@ -281,16 +282,11 @@ export function cyclePhaseForDay(cycleDay: number, cycleLength: number): CyclePh
 }
 
 // Numeric value extractor: pulls a number out of strings like
-// "3.4", "3.4 ng/mL", "<0.1", ">100", "3,4" (European decimal).
-// Returns null when no number is present.
-export function parseLabValue(raw: string | number | null | undefined): number | null {
-  if (raw === null || raw === undefined) return null;
-  if (typeof raw === 'number') return Number.isFinite(raw) ? raw : null;
-  const cleaned = String(raw).replace(/,/g, '.').replace(/[<>≤≥]/g, '');
-  const match = cleaned.match(/-?\d+(?:\.\d+)?/);
-  if (!match) return null;
-  const n = Number(match[0]);
-  return Number.isFinite(n) ? n : null;
+// "3.4", "3.4 ng/mL", "<0.1", ">100", "3,4" (European decimal),
+// "1'250" (Swiss thousands). Returns null when no number is present.
+// Delegates to the shared lab parser (src/lib/labValue.ts).
+export function parseLabValue(raw: string | number | null | undefined, ctx?: LabParseContext): number | null {
+  return labNumber(raw, ctx);
 }
 
 // ---- Egg reserve vs age (soft wording) -------------------------------------

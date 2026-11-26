@@ -156,3 +156,26 @@ describe('fetchPersonalRows', () => {
     expect(block).not.toContain('99');
   });
 });
+
+describe('selectPersonalContext: number hints for comma/apostrophe values', () => {
+  const rows: LabRow[] = [
+    lab('Ferritin', '1,250', '2026-05-01', { unit: 'µg/l', document_id: 'ch', reference_range: '13 - 150' }),
+    lab('TSH', '2,15', '2026-05-01', { unit: 'mU/l', document_id: 'ch', reference_range: '0,27 - 4,20' }),
+    lab('Thrombozyten', "265'000", '2026-05-01', { unit: '/µl', document_id: 'ch' }),
+    lab('Estradiol', '1,250', '2026-04-01', { unit: 'pmol/L', document_id: 'en', reference_range: '45.5-854.5' }),
+    lab('Lipase', '1,250', '2026-03-01', { unit: 'U/L', document_id: 'unk' }),
+  ];
+  it('spells out the number read with each report\'s decimal mark', () => {
+    const sel = selectPersonalContext({ question: 'ferritin tsh estradiol lipase thrombozyten', labs: rows, docs: [], now });
+    expect(sel.block).toContain('Ferritin: 1,250 (= 1.25) µg/l');
+    expect(sel.block).toContain('2,15 (= 2.15) mU/l');
+    expect(sel.block).toContain("265'000 (= 265000) /µl");
+    expect(sel.block).toContain('1,250 (= 1250) pmol/L');
+    expect(sel.block).toContain('1,250 [check value: could be 1.25 or 1250]');
+  });
+  it('leaves plain values alone', () => {
+    const sel = selectPersonalContext({ question: 'How has my ferritin changed since 2022?', labs, docs: [], now });
+    expect(sel.block).not.toContain('(=');
+    expect(sel.block).not.toContain('check value');
+  });
+});

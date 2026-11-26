@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { BarChart3 } from 'lucide-react';
+import { labNumber, parseLabRange } from '@/lib/labValue';
 
 interface LabResult {
   id: string;
@@ -38,7 +39,7 @@ const statusColor = (status: string | null) => {
 export default function ResultsRangeChart({ medicalData }: ResultsRangeChartProps) {
   const items = useMemo(() => {
     const labs = medicalData.filter(d =>
-      d.data_type === 'lab_result' && d.value && d.reference_range && !isNaN(parseFloat(d.value))
+      d.data_type === 'lab_result' && d.value && d.reference_range && labNumber(d.value) !== null
     );
 
     const results: ChartItem[] = [];
@@ -48,12 +49,12 @@ export default function ResultsRangeChart({ medicalData }: ResultsRangeChartProp
       if (seen.has(lab.title)) return;
       seen.add(lab.title);
 
-      const val = parseFloat(lab.value!);
-      const match = lab.reference_range!.match(/([\d.]+)\s*[-–]\s*([\d.]+)/);
-      if (!match) return;
+      const val = labNumber(lab.value) as number;
+      const parsed = parseLabRange(lab.reference_range, { sex: 'female' });
+      if (!parsed || parsed.low == null || parsed.high == null) return;
 
-      const low = parseFloat(match[1]);
-      const high = parseFloat(match[2]);
+      const low = parsed.low;
+      const high = parsed.high;
       const range = high - low;
       if (range <= 0) return;
 

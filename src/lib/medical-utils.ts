@@ -1,5 +1,7 @@
 // Types shared across medical components
 
+import { labNumber, parseLabRange } from './labValue';
+
 export interface MedicalDataItem {
   id: string;
   data_type: string;
@@ -150,8 +152,8 @@ export const testExplanations: Record<string, { high: string; low: string; norma
 export function generateFallbackNote(item: MedicalDataItem): string | null {
   if (item.notes) return null;
 
-  const val = item.value ? parseFloat(item.value) : null;
-  const hasValue = val !== null && !isNaN(val);
+  const val = item.value ? labNumber(item.value, { title: item.title, unit: item.unit }) : null;
+  const hasValue = val !== null;
 
   const titleLower = item.title.toLowerCase();
   const explanation = testExplanations[titleLower]
@@ -159,12 +161,10 @@ export function generateFallbackNote(item: MedicalDataItem): string | null {
 
   let direction: 'high' | 'low' | 'unknown' = 'unknown';
   if (hasValue && item.reference_range) {
-    const match = item.reference_range.match(/([\d.]+)\s*[-–]\s*([\d.]+)/);
-    if (match) {
-      const low = parseFloat(match[1]);
-      const high = parseFloat(match[2]);
-      if (val! < low) direction = 'low';
-      else if (val! > high) direction = 'high';
+    const range = parseLabRange(item.reference_range, { sex: 'female' });
+    if (range) {
+      if (range.low != null && val! < range.low) direction = 'low';
+      else if (range.high != null && val! > range.high) direction = 'high';
     }
   }
 

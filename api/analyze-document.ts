@@ -4,6 +4,7 @@ import { getAuthUser } from './_lib/auth.js';
 import { hasApprovedDoctorAccess } from './_lib/doctor-documents.js';
 import { normalizeTestTitle } from './_lib/normalize-test-title.js';
 import { normalizeUnit } from './_lib/normalize-unit.js';
+import { inferNumberStyle } from './_lib/lab-value.js';
 import { checkAndConsume } from './_lib/ratelimit.js';
 import { isOwnBlobUrl } from './_lib/blob-url.js';
 import { readBlobBuffer } from './_lib/blob-read.js';
@@ -711,6 +712,13 @@ async function processWithAI(
   // document.
   const rows: unknown[][] = [];
   if (Array.isArray(analysis.extracted_data)) {
+    // The report's decimal mark ("1,25" Swiss vs "1.25"), read from all of
+    // its values and ranges, so "1,250" is later read the way this lab
+    // meant it. Values themselves stay verbatim.
+    const numberStyle = inferNumberStyle(
+      (analysis.extracted_data as AnalysisJson[]).flatMap(it => [it?.value, it?.reference_range])
+        .map(v => (typeof v === 'string' ? v : null)),
+    );
     for (const item of analysis.extracted_data as AnalysisJson[]) {
       rows.push([
         userId, documentId, analysisId,
@@ -726,6 +734,7 @@ async function processWithAI(
           // backfilling if our alias map ever needs auditing.
           raw_title: item.title,
           raw_unit: item.unit,
+          ...(numberStyle ? { number_style: numberStyle } : {}),
         }),
       ]);
     }

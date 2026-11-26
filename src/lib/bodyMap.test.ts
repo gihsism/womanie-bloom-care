@@ -182,3 +182,23 @@ describe('postMenopauseBleed', () => {
     expect(postMenopauseBleed('menopause', 0)).toBe(false);
   });
 });
+
+describe('parseRange: Swiss lab formats (shared parser)', () => {
+  it.each([
+    ['5,0 - 7,0', { low: 5, high: 7 }],
+    ["150'000 - 400'000", { low: 150000, high: 400000 }],
+    ['Referenzbereich: 15 - 150', { low: 15, high: 150 }],
+    ['bis 5', { low: null, high: 5 }],
+    ['< 0,5', { low: null, high: 0.5 }],
+    ['M: 30-400 / F: 15-150', { low: 15, high: 150 }],
+  ])('%s', (raw, want) => {
+    expect(parseRange(raw)).toEqual(want);
+  });
+  it('no bounds for qualitative or unreadable ranges', () => {
+    expect(parseRange('negativ')).toBeNull();
+    expect(parseRange('siehe Kommentar')).toBeNull();
+  });
+  it('reads a Swiss thousands value against its range', () => {
+    expect(pickFlaggedLab([{ title: 'Thrombozyten', value: "512'000", unit: '/µl', reference_range: "150'000 - 400'000", status: 'abnormal' }])?.direction).toBe('high');
+  });
+});

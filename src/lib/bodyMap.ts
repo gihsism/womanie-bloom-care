@@ -2,6 +2,8 @@
 // hotspot on the figure shows one live fact. Kept free of React and the
 // database so the rules are unit-tested.
 
+import { labNumber, parseLabRange, type LabParseContext } from './labValue';
+
 export interface LabLike {
   title: string;
   value: string | number | null;
@@ -19,17 +21,16 @@ export interface FlaggedLab {
   critical: boolean;
 }
 
-/** Parse "15-150", "15 – 150", "<5", ">30" into bounds. */
-export function parseRange(range: string | null | undefined): { low: number | null; high: number | null } | null {
-  if (!range) return null;
-  const r = range.replace(/,/g, '.');
-  const between = r.match(/(-?\d+(?:\.\d+)?)\s*(?:-|–|—|to)\s*(-?\d+(?:\.\d+)?)/i);
-  if (between) return { low: Number(between[1]), high: Number(between[2]) };
-  const lt = r.match(/^\s*(?:<|≤|<=)\s*(\d+(?:\.\d+)?)/);
-  if (lt) return { low: null, high: Number(lt[1]) };
-  const gt = r.match(/^\s*(?:>|≥|>=)\s*(\d+(?:\.\d+)?)/);
-  if (gt) return { low: Number(gt[1]), high: null };
-  return null;
+/**
+ * Parse "15-150", "15 – 150", "5,0 - 7,0", "<5", ">30", "bis 5",
+ * "Referenzbereich: 15 - 150", "F: 15-150 / M: 30-400" (hers = female) into
+ * bounds via the shared lab parser. null = nothing numeric to compare with
+ * ("siehe Kommentar", "negativ").
+ */
+export function parseRange(range: string | null | undefined, ctx: LabParseContext = {}): { low: number | null; high: number | null } | null {
+  const r = parseLabRange(range, { sex: 'female', ...ctx });
+  if (!r || (r.low == null && r.high == null)) return null;
+  return { low: r.low, high: r.high };
 }
 
 /** The one lab result worth putting on the figure: critical first, then abnormal. */
@@ -39,7 +40,7 @@ export function pickFlaggedLab(labs: LabLike[]): FlaggedLab | null {
   if (!flagged.length) return null;
   flagged.sort((a, b) => rank(a.status) - rank(b.status));
   const l = flagged[0];
-  const num = Number(String(l.value).replace(',', '.'));
+  const num = labNumber(l.value) ?? Number.NaN;
   const b = parseRange(l.reference_range);
   let direction: FlaggedLab['direction'] = 'out';
   if (b && Number.isFinite(num)) {

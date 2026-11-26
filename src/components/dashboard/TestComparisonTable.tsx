@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Minus, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
+import { labNumber, parseLabRange } from '@/lib/labValue';
 
 interface LabResult {
   id: string;
@@ -44,7 +45,7 @@ const statusDot = (status: string | null) => {
 export default function TestComparisonTable({ medicalData }: TestComparisonTableProps) {
   const comparisons = useMemo(() => {
     const labs = medicalData.filter(
-      d => d.data_type === 'lab_result' && d.value && !isNaN(parseFloat(d.value)) && d.date_recorded
+      d => d.data_type === 'lab_result' && d.value && labNumber(d.value) !== null && d.date_recorded
     );
 
     // Group by title
@@ -66,7 +67,7 @@ export default function TestComparisonTable({ medicalData }: TestComparisonTable
 
       const readings = sorted.map(l => ({
         date: format(new Date(l.date_recorded!), 'MMM d, yy'),
-        value: parseFloat(l.value!),
+        value: labNumber(l.value) as number,
         status: l.status,
       }));
 
@@ -78,11 +79,9 @@ export default function TestComparisonTable({ medicalData }: TestComparisonTable
       let latestInRange = true;
       const refRange = sorted[sorted.length - 1].reference_range;
       if (refRange) {
-        const match = refRange.match(/([\d.]+)\s*[-–]\s*([\d.]+)/);
-        if (match) {
-          const low = parseFloat(match[1]);
-          const high = parseFloat(match[2]);
-          latestInRange = last >= low && last <= high;
+        const parsed = parseLabRange(refRange, { sex: 'female' });
+        if (parsed && (parsed.low != null || parsed.high != null)) {
+          latestInRange = (parsed.low == null || last >= parsed.low) && (parsed.high == null || last <= parsed.high);
         }
       }
 

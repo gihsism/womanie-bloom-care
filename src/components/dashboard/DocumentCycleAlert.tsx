@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Baby, Flame, HeartPulse } from 'lucide-react';
 import { lifeStageLabel } from '@/lib/lifeStageLabels';
+import { labNumber } from '@/lib/labValue';
 
 interface LabResult {
   title: string;
@@ -20,9 +21,9 @@ interface DocumentCycleAlertProps {
 function getVal(data: LabResult[], names: string[]): number | null {
   for (const name of names) {
     const match = data.find(d =>
-      d.data_type === 'lab_result' && d.title.toLowerCase().includes(name.toLowerCase()) && d.value && !isNaN(parseFloat(d.value))
+      d.data_type === 'lab_result' && d.title.toLowerCase().includes(name.toLowerCase()) && d.value && labNumber(d.value) !== null
     );
-    if (match) return parseFloat(match.value!);
+    if (match) return (labNumber(match.value) as number);
   }
   return null;
 }

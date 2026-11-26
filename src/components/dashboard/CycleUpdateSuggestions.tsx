@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CalendarSync, Check, X, RefreshCw, Baby, Egg, AlertCircle } from 'lucide-react';
+import { labNumber } from '@/lib/labValue';
 
 interface LabResult {
   title: string;
@@ -34,9 +35,9 @@ export interface CycleSuggestion {
 function getHormone(labs: LabResult[], names: string[]): { value: number; date: string | null } | null {
   for (const name of names) {
     const match = labs.find(
-      l => l.title.toLowerCase().includes(name.toLowerCase()) && l.value && !isNaN(parseFloat(l.value))
+      l => l.title.toLowerCase().includes(name.toLowerCase()) && l.value && labNumber(l.value) !== null
     );
-    if (match) return { value: parseFloat(match.value!), date: match.date_recorded };
+    if (match) return { value: (labNumber(match.value) as number), date: match.date_recorded };
   }
   return null;
 }

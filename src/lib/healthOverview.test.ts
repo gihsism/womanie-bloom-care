@@ -229,3 +229,38 @@ describe('sparkGeometry', () => {
     expect(g.paths[1]).toBe('M0 50 L100 40');
   });
 });
+
+describe('labMetrics: decimal comma vs thousands, per report', () => {
+  it('reads "1,250" by each report\'s own decimal mark', () => {
+    const [tsh] = labMetrics([
+      // Swiss report: other values use a decimal comma
+      lab('TSH', '1,250', '2026-01-01', { unit: 'mU/l', reference_range: '0,27 - 4,20', document_id: 'ch' }),
+    ]);
+    expect(tsh.points.map(p => p.value)).toEqual([1.25]);
+    expect(tsh.state).toBe('in');
+    expect(tsh.last.check).toBeUndefined();
+    const [fer] = labMetrics([
+      lab('Ferritin', '850', '2025-01-01', { unit: 'ng/mL', reference_range: '13 - 150', document_id: 'en' }),
+      lab('Ferritin', '1,250', '2026-01-01', { unit: 'ng/mL', reference_range: '13.0-150.0', document_id: 'en' }),
+    ]);
+    // English report (decimal points elsewhere): 1250, outside the plausible
+    // ferritin window, so kept and flagged for a check
+    expect(fer.points.map(p => p.value)).toEqual([850, 1250]);
+    expect(fer.last).toEqual({ display: '1,250', date: '2026-01-01', check: true });
+  });
+
+  it('lets the plausible range for the test decide when the report gives no clue', () => {
+    // B12 at 1.25 is impossible in any unit; 1250 pg/mL is a real reading
+    const [b12] = labMetrics([lab('Vitamin B12', '1,250', '2026-01-01', { unit: '', reference_range: null, document_id: 'x' })]);
+    expect(b12.points.map(p => p.value)).toEqual([1250]);
+    expect(b12.last.check).toBeUndefined();
+  });
+
+  it('uses the stored number style and her (female) range', () => {
+    const [hb] = labMetrics([
+      lab('Hemoglobin', '128', '2026-01-01', { unit: 'g/l', reference_range: 'Männer 140-180, Frauen 120-160', document_id: 'd', raw_data: { number_style: 'comma' } }),
+    ]);
+    expect(hb.range).toEqual({ low: 120, high: 160 });
+    expect(hb.state).toBe('in');
+  });
+});

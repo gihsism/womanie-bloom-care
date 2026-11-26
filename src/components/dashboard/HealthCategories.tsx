@@ -12,6 +12,7 @@ import {
   Brain,
   type LucideIcon,
 } from 'lucide-react';
+import { labNumber, parseLabRange } from '@/lib/labValue';
 
 interface LabResult {
   title: string;
@@ -59,12 +60,12 @@ const statusDot = (s: string | null) =>
 
 function MiniBar({ value, refRange, status }: { value: string | null; refRange: string | null; status: string | null }) {
   if (!value || !refRange) return null;
-  const val = parseFloat(value);
-  if (isNaN(val)) return null;
-  const match = refRange.match(/([\d.]+)\s*[-–]\s*([\d.]+)/);
-  if (!match) return null;
-  const low = parseFloat(match[1]);
-  const high = parseFloat(match[2]);
+  const val = labNumber(value);
+  if (val === null) return null;
+  const parsed = parseLabRange(refRange, { sex: 'female' });
+  if (!parsed || parsed.low == null || parsed.high == null) return null;
+  const low = parsed.low;
+  const high = parsed.high;
   const range = high - low;
   if (range <= 0) return null;
   const ext = range * 0.3;

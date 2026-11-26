@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, Link2 } from 'lucide-react';
+import { labNumber } from '@/lib/labValue';
 
 interface LabResult {
   title: string;
@@ -30,9 +31,9 @@ interface PersonalizedInsightsProps {
 function findTest(data: LabResult[], names: string[]): { value: number; status: string | null; raw: LabResult } | null {
   for (const name of names) {
     const match = data.find(
-      d => d.data_type === 'lab_result' && d.title.toLowerCase().includes(name.toLowerCase()) && d.value && !isNaN(parseFloat(d.value))
+      d => d.data_type === 'lab_result' && d.title.toLowerCase().includes(name.toLowerCase()) && d.value && labNumber(d.value) !== null
     );
-    if (match) return { value: parseFloat(match.value!), status: match.status, raw: match };
+    if (match) return { value: (labNumber(match.value) as number), status: match.status, raw: match };
   }
   return null;
 }
