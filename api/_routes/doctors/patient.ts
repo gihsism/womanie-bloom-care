@@ -154,6 +154,22 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       console.error('doctors/patient: medications read failed (non-fatal):', medErr);
     }
 
+    // Her birth plan (migration 020), read-only, and only when she ticked
+    // "Show in my doctor's chart". Best-effort like visit_questions: until
+    // the migration is applied the table does not exist.
+    let birthPlan: unknown = null;
+    try {
+      const bp = await sql.query(
+        `SELECT plan, updated_at FROM birth_plans
+          WHERE user_id = $1 AND shared_with_doctor = true
+          LIMIT 1`,
+        [patientId]
+      ) as unknown[];
+      birthPlan = bp[0] ?? null;
+    } catch (bpErr) {
+      console.error('doctors/patient: birth_plans read failed (non-fatal):', bpErr);
+    }
+
     return res.status(200).json({
       profile: profileRows[0] ?? null,
       healthSignals: signalRows,
@@ -164,6 +180,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       periodRecords: periodRows,
       visitQuestions,
       medicines,
+      birthPlan,
     });
   } catch (error) {
     console.error('doctors/patient error:', error);

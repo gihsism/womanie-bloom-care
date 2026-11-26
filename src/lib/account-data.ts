@@ -51,6 +51,8 @@ export const ACCOUNT_ITEMS: AccountItem[] = [
   { template: 'postpartum:{uid}:milestones', format: 'json' },
   { template: 'postpartum:{uid}:ppd-checkin', format: 'text' },
   { template: 'postpartum:{uid}:pelvic-floor', format: 'json' },
+  // Weekly recovery check-in, first 12 weeks (src/lib/postpartumRecovery.ts).
+  { template: 'postpartum:{uid}:recovery-checkins', format: 'json' },
   // Contraception, pre-menstrual, menopause.
   { template: 'contraception:{uid}:method', format: 'json' },
   { template: 'contraception:{uid}:sideEffects', format: 'json' },
