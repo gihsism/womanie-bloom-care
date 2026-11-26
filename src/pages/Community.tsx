@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Heart, Users, MessageCircle, BookOpen, Baby, Flower2, 
-  Sparkles, ArrowRight, Instagram, Facebook, Globe,
+  Sparkles, ArrowRight, Globe,
   Pill, Activity, Stethoscope, Lightbulb, Shield
 } from 'lucide-react';
 
@@ -81,22 +81,6 @@ const resources = [
 ];
 
 const socialLinks = [
-  {
-    platform: 'Instagram',
-    icon: Instagram,
-    handle: '@womanie.health',
-    url: 'https://instagram.com/womanie.health',
-    description: 'Daily tips, infographics & community stories',
-    color: 'hover:bg-pink-50 hover:border-pink-200',
-  },
-  {
-    platform: 'Facebook Group',
-    icon: Facebook,
-    handle: 'Womanie Community',
-    url: 'https://facebook.com/groups/womanie',
-    description: 'Join our private group for deeper discussions',
-    color: 'hover:bg-blue-50 hover:border-blue-200',
-  },
   {
     platform: 'Website & Blog',
     icon: Globe,
@@ -233,12 +217,12 @@ const Community = () => {
       <section className="py-16 px-4">
         <div className="container mx-auto max-w-4xl">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-3">Connect With Us Today</h2>
+            <h2 className="text-3xl font-bold mb-3">Read while you wait</h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              While we finalize the in-app community, join us on social media to start connecting right away!
+              The in-app community is still being built. Until then, our articles and guides are on the blog.
             </p>
           </div>
-          <div className="grid sm:grid-cols-3 gap-6">
+          <div className="grid max-w-sm mx-auto gap-6">
             {socialLinks.map((social) => {
               const Icon = social.icon;
               return (
