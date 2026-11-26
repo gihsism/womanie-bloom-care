@@ -36,3 +36,8 @@ ios/vendor/capacitor-swift-pm/*.xcframework/
 
 # agent worktrees
 .claude/worktrees/
+
+# Playwright e2e: login sessions, results, reports (never commit .auth)
+e2e/.auth/
+e2e/.results/
+e2e/.report/
