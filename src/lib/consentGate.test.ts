@@ -21,6 +21,17 @@ describe('consent gate', () => {
     expect(isGatedPath('/welcome-back')).toBe(false);
   });
 
+  it('cannot be bypassed by case or percent-encoding (React Router matches those too)', () => {
+    const u = { consentRequired: true };
+    for (const p of ['/DASHBOARD/settings', '/Dashboard', '/dashboar%64/settings', '/dashboard/', '/Welcome', '/ONBOARDING/life-stage', '/dashboard%2Fsettings/x']) {
+      expect(shouldShowConsentGate(u, p), p).toBe(true);
+    }
+    // ...while the policy stays open in any spelling.
+    expect(shouldShowConsentGate(u, '/Dashboard/Privacy')).toBe(false);
+    expect(shouldShowConsentGate(u, '/dashboard/privac%79')).toBe(false);
+    expect(isGatedPath('/%E0%A4%A')).toBe(false); // malformed escape: no throw
+  });
+
   it('stays out of the way once accepted, or when logged out', () => {
     expect(shouldShowConsentGate({ consentRequired: false }, '/dashboard')).toBe(false);
     expect(shouldShowConsentGate({}, '/dashboard')).toBe(false);

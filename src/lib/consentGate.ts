@@ -28,9 +28,20 @@ function matches(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(prefix + '/');
 }
 
+// The path as React Router matches it: case-insensitive, each segment
+// percent-decoded, empty segments and a trailing slash ignored. Without
+// this, /DASHBOARD/settings or /dashboar%64 rendered the app ungated.
+export function normalizeGatePath(pathname: string): string {
+  const segs = pathname.split('/').filter(Boolean).map(s => {
+    try { return decodeURIComponent(s); } catch { return s; }
+  });
+  return '/' + segs.join('/').toLowerCase();
+}
+
 export function isGatedPath(pathname: string): boolean {
-  if (ALWAYS_OPEN.some(p => matches(pathname, p))) return false;
-  return GATED_PREFIXES.some(p => matches(pathname, p));
+  const path = normalizeGatePath(pathname);
+  if (ALWAYS_OPEN.some(p => matches(path, p))) return false;
+  return GATED_PREFIXES.some(p => matches(path, p));
 }
 
 export function shouldShowConsentGate(user: ConsentGateUser | null | undefined, pathname: string): boolean {
