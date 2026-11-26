@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   parseOpk, setOpkInNotes, setBbtInNotes, parseTypedBbt, fertileWindow, windowHeadline, cycleChartPoints,
-  ttcDoctorAdvice, thresholdMonthsFor, monthsBetween, ttcStartFromDuration, ymd,
+  ttcDoctorAdvice, thresholdMonthsFor, monthsBetween, ttcStartFromDuration, ymd, isTtcStartInput, ttcStartMin,
 } from './ttc';
 import { parseLH } from './ovulation';
 
@@ -97,5 +97,18 @@ describe('when to see a doctor', () => {
     expect(ttcStartFromDuration('over-year', now)).toBe('2025-10-26');
     expect(ttcStartFromDuration('just-started', now)).toBe('2026-11-26');
     expect(ttcStartFromDuration('', now)).toBeNull();
+  });
+});
+
+describe('isTtcStartInput (the date field reports each keystroke of the year)', () => {
+  const today = '2026-11-26';
+  it('rejects the half-typed years a date field reports, and future dates', () => {
+    for (const v of ['0001-09-01', '0010-09-01', '0202-09-01', '1020-09-01', '2026-11-27', '2025-9-1', '']) {
+      expect(isTtcStartInput(v, today)).toBe(false);
+    }
+  });
+  it('accepts complete dates from 20 years back up to today', () => {
+    expect(ttcStartMin(today)).toBe('2006-11-26');
+    for (const v of ['2025-09-01', '2026-11-26', '2006-11-26']) expect(isTtcStartInput(v, today)).toBe(true);
   });
 });
