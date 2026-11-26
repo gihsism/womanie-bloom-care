@@ -11,10 +11,12 @@ vi.mock('@/components/dashboard/MedicineLog', () => ({ default: () => <div>medic
 vi.mock('@/components/dashboard/ChartAccessLog', () => ({ default: () => <div>access-log</div> }));
 
 const update = vi.fn(() => ({ eq: () => Promise.resolve({ error: null }) }));
+// The profile load; a test can swap in a promise it resolves itself.
+const profileLoad = { next: null as Promise<unknown> | null };
 vi.mock('@/integrations/db/client', () => ({
   db: {
     from: () => ({
-      select: () => ({ eq: () => ({ maybeSingle: () => Promise.resolve({ data: { life_stage: 'conception', full_name: 'Lena' }, error: null }) }) }),
+      select: () => ({ eq: () => ({ maybeSingle: () => profileLoad.next ?? Promise.resolve({ data: { life_stage: 'conception', full_name: 'Lena' }, error: null }) }) }),
       update,
     }),
   },
@@ -41,7 +43,7 @@ const renderAt = (path: string) =>
   );
 
 describe('Me (Settings as a list of rows)', () => {
-  beforeEach(() => { update.mockClear(); auth.user.isAdmin = false; });
+  beforeEach(() => { update.mockClear(); auth.user.isAdmin = false; profileLoad.next = null; });
 
   it('opens on a short list, not the old stack of cards', async () => {
     renderAt('/dashboard/settings');
@@ -104,6 +106,18 @@ describe('Me (Settings as a list of rows)', () => {
     fireEvent.click(screen.getByText('After birth'));
     await waitFor(() => expect(update).toHaveBeenCalledWith({ life_stage: 'postpartum' }));
     expect(update).toHaveBeenCalledTimes(1);
+  });
+
+  it('a stage tapped while the profile is still loading is not undone by the late load', async () => {
+    let finishLoad: (v: unknown) => void = () => {};
+    profileLoad.next = new Promise((resolve) => { finishLoad = resolve; });
+    renderAt('/dashboard/settings#life-stage');
+    fireEvent.click(screen.getByLabelText('Pregnancy'));
+    await waitFor(() => expect(update).toHaveBeenCalledWith({ life_stage: 'pregnancy' }));
+    finishLoad({ data: { life_stage: 'conception', full_name: 'Lena' }, error: null });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(screen.getByRole('radio', { name: 'Pregnancy' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'Trying to conceive' })).not.toBeChecked();
   });
 
   it('old section names still open the right sub-page', () => {

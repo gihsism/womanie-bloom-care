@@ -190,5 +190,7 @@ export default defineConfig(() => ({
       // utils (lab title/unit normalisation, etc.) are worth unit-testing too.
       "api/**/*.{test,spec}.{ts,tsx}",
     ],
+    // Playwright end-to-end specs run with `npm run e2e`, never in vitest.
+    exclude: ["**/node_modules/**", "e2e/**"],
   },
 }));
