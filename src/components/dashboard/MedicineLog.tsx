@@ -55,6 +55,10 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
   const [name, setName] = useState('');
   const [dose, setDose] = useState('');
   const [times, setTimes] = useState<string[]>(['08:00']);
+  // When she started it (defaults to today). Medicines she already took
+  // before joining keep their real start, so the menopause symptom trends
+  // can line changes up with it.
+  const [startedOn, setStartedOn] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [now, setNow] = useState(new Date());
   const doses = useLifeEvents<DoseData>('med_dose', { limit: 300 });
@@ -95,19 +99,26 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
       times_per_day: cleanTimes.length || null,
       reminder_times: cleanTimes,
       stage: stage ?? null,
-      started_on: format(new Date(), 'yyyy-MM-dd'),
+      started_on: /^\d{4}-\d{2}-\d{2}$/.test(startedOn) && startedOn <= format(new Date(), 'yyyy-MM-dd')
+        ? startedOn
+        : format(new Date(), 'yyyy-MM-dd'),
     }).select('*');
     if (err) { setError('Could not save. Check your connection and try again.'); return; }
     const row = (Array.isArray(data) ? data[0] : data) as Medication | undefined;
     if (row) setMeds(prev => [...prev, row]);
-    setName(''); setDose(''); setTimes(['08:00']); setAdding(false); setError(null);
+    setName(''); setDose(''); setTimes(['08:00']); setStartedOn(''); setAdding(false); setError(null);
     emitHealthDataChange();
   };
 
   const stop = async (m: Medication) => {
     if (!window.confirm(`Stop tracking ${m.name}? Past doses stay in your history.`)) return;
-    const { error: err } = await db.from('medications')
-      .update({ active: false, updated_at: new Date().toISOString() }).eq('id', m.id).eq('user_id', userId);
+    const base = { active: false, updated_at: new Date().toISOString() };
+    // stopped_on arrives with migration 018; until then retry without it.
+    let { error: err } = await db.from('medications')
+      .update({ ...base, stopped_on: format(new Date(), 'yyyy-MM-dd') }).eq('id', m.id).eq('user_id', userId);
+    if (err) {
+      ({ error: err } = await db.from('medications').update(base).eq('id', m.id).eq('user_id', userId));
+    }
     if (err) { setError('Could not update. Try again.'); return; }
     setMeds(prev => prev.filter(x => x.id !== m.id));
     emitHealthDataChange();
@@ -164,6 +175,11 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
             </div>
           </div>
           <div>
+            <Label htmlFor="med-started" className="text-xs">Started on (optional)</Label>
+            <Input id="med-started" type="date" value={startedOn} max={format(now, 'yyyy-MM-dd')}
+              onChange={e => setStartedOn(e.target.value)} className="h-8 w-44" />
+          </div>
+          <div>
             <Label className="text-xs">Reminder times</Label>
             <div className="flex flex-wrap items-center gap-2 mt-1">
               {times.map((t, i) => (
@@ -186,7 +202,7 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
             </div>
           </div>
           <div className="flex gap-2 pt-1">
-            <Button size="sm" variant="outline" className="flex-1" onClick={() => { setAdding(false); setName(''); setDose(''); }}>
+            <Button size="sm" variant="outline" className="flex-1" onClick={() => { setAdding(false); setName(''); setDose(''); setStartedOn(''); }}>
               Cancel
             </Button>
             <Button size="sm" className="flex-1" onClick={save} disabled={!name.trim()}>Save</Button>

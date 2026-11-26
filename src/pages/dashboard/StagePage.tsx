@@ -37,6 +37,7 @@ const MenopauseDashboard = lazy(() => import('@/components/dashboard/MenopauseDa
 const PostpartumDashboard = lazy(() => import('@/components/dashboard/PostpartumDashboard'));
 const EpdsScreener = lazy(() => import('@/components/dashboard/EpdsScreener'));
 const MenopauseSymptomCalendar = lazy(() => import('@/components/dashboard/MenopauseSymptomCalendar'));
+const MenopauseSymptomTrends = lazy(() => import('@/components/dashboard/MenopauseSymptomTrends'));
 const PerimenopauseStageCard = lazy(() => import('@/components/dashboard/PerimenopauseStageCard'));
 const ContraceptionDashboard = lazy(() => import('@/components/dashboard/ContraceptionDashboard'));
 
@@ -154,6 +155,7 @@ export default function StagePage() {
           <>
             <Section><PerimenopauseStageCard mode={mode} /></Section>
             <Section id="symptoms"><MenopauseSymptomCalendar mode={mode} /></Section>
+            <Section id="symptom-trends"><MenopauseSymptomTrends mode={mode} /></Section>
             <Section id="blood-pressure"><BloodPressureTracker mode={mode} /></Section>
             <Section id="menopause-stage">
               <MenopauseDashboard isPostMenopause={mode === 'post-menopause'} onNavigateToDoctorChat={toChat} />
