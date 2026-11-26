@@ -31,6 +31,9 @@ const OWNER_COLUMN: Record<string, string | string[]> = {
   // Her birth plan (migration 020), one row per patient. A connected doctor
   // reads it only through /api/doctors/patient, and only when she shared it.
   birth_plans: 'user_id',
+  // Her IVF treatment dates and trigger-shot time (migration 022), one row
+  // per patient. The push scheduler reads trigger_at for the reminders.
+  ivf_plans: 'user_id',
   patient_access_codes: 'patient_id',
   user_roles: 'user_id',
   document_analyses: 'user_id',
