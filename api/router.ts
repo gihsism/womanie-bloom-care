@@ -26,6 +26,7 @@ import doctorsDay from './_routes/doctors/day.js';
 import doctorsList from './_routes/doctors/list.js';
 import doctorsPatient from './_routes/doctors/patient.js';
 import doctorsPatientTrends from './_routes/doctors/patient-trends.js';
+import doctorsProfile from './_routes/doctors/profile.js';
 import doctorsSchedule from './_routes/doctors/schedule.js';
 import meAppointments from './_routes/me/appointments.js';
 import meChartAccess from './_routes/me/chart-access.js';
@@ -82,6 +83,7 @@ export const ROUTES: Record<string, Handler> = {
   'doctors/list': doctorsList,
   'doctors/patient': doctorsPatient,
   'doctors/patient-trends': doctorsPatientTrends,
+  'doctors/profile': doctorsProfile,
   'doctors/schedule': doctorsSchedule,
   'me/appointments': meAppointments,
   'me/chart-access': meChartAccess,

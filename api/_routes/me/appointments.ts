@@ -36,6 +36,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           `SELECT
               a.id, a.doctor_id, a.scheduled_at, a.status,
               a.consultation_type, a.duration, a.payment_status, a.notes,
+              -- When it was booked: the in-app "Booking confirmed" notice.
+              -- Read through to_jsonb so a database without the column
+              -- still answers (booked_at is then null).
+              to_jsonb(a) ->> 'created_at' AS booked_at,
+              to_jsonb(p) ->> 'practice_address' AS doctor_practice_address,
               p.full_name AS doctor_name,
               p.title AS doctor_title,
               p.specialties AS doctor_specialties,
@@ -53,6 +58,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           `SELECT
               a.id, a.doctor_id, a.scheduled_at, a.status,
               a.consultation_type, a.duration, a.payment_status, a.notes,
+              -- When it was booked: the in-app "Booking confirmed" notice.
+              -- Read through to_jsonb so a database without the column
+              -- still answers (booked_at is then null).
+              to_jsonb(a) ->> 'created_at' AS booked_at,
+              to_jsonb(p) ->> 'practice_address' AS doctor_practice_address,
               p.full_name AS doctor_name,
               p.title AS doctor_title,
               p.specialties AS doctor_specialties,

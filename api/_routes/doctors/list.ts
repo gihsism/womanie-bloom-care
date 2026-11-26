@@ -2,6 +2,7 @@ import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from '../../_lib/auth.js';
 import { withSentry } from '../../_lib/sentry.js';
+import { APPROVED_DOCTOR_SQL, publicConsultation, publicDoctor, publicSchedule } from '../../_lib/doctor-public.js';
 
 // Patient-facing directory of verified doctors.
 //
@@ -30,9 +31,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
             avatar_url, rating, review_count, is_verified, languages, credentials,
             -- practice_address arrives with migration 017; read through
             -- to_jsonb so the directory keeps working before it is applied.
-            to_jsonb(doctor_profiles) ->> 'practice_address' AS practice_address
-       FROM doctor_profiles
-      WHERE is_verified = true`,
+            to_jsonb(dp) ->> 'practice_address' AS practice_address
+       FROM doctor_profiles dp
+      WHERE ${APPROVED_DOCTOR_SQL}`,
     []
   );
 
@@ -70,13 +71,15 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       schedulesByDoctor.set(key, arr);
     }
 
+    // Built field by field (api/_lib/doctor-public): nothing private can
+    // ride along if a column is ever added to the SELECT above.
     const out = doctors
+      .filter(d => settingsByDoctor.has(d.user_id as string))
       .map(d => ({
-        ...d,
-        consultation_settings: settingsByDoctor.get(d.user_id as string) ?? null,
-        schedule: schedulesByDoctor.get(d.user_id as string) ?? [],
-      }))
-      .filter(d => d.consultation_settings);
+        ...publicDoctor(d),
+        consultation_settings: publicConsultation(settingsByDoctor.get(d.user_id as string)!),
+        schedule: publicSchedule(schedulesByDoctor.get(d.user_id as string) ?? []),
+      }));
 
     return res.status(200).json({ doctors: out });
   } catch (error) {

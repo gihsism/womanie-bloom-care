@@ -120,3 +120,83 @@ export function formatPracticeDateTime(instant: Date, tz: string = PRACTICE_TZ):
   const date = new Intl.DateTimeFormat('en-GB', { timeZone: tz, weekday: 'short', day: 'numeric', month: 'short' }).format(instant);
   return `${date.replace(/,/g, '')}, ${formatPracticeTime(instant, tz)}`;
 }
+
+export interface BusyInterval { scheduled_at: string; duration: number | null }
+
+/**
+ * Free slot starts on one calendar day (y-m-d as the patient picked it),
+ * stepped by the visit length inside each opening window read in practice
+ * time. Skips slots that overlap a busy visit or have already started.
+ * Single source for the browser picker (src/lib/timeSlots.ts) and the
+ * server's "next free times" on the doctor profile.
+ */
+export function freeSlotsForDay(opts: {
+  year: number; month: number; day: number;
+  schedule: ScheduleWindow[] | null | undefined;
+  durationMin: number;
+  busy: BusyInterval[];
+  now?: Date;
+  tz?: string;
+}): Date[] {
+  const { year: y, month: mo, day: d, durationMin, busy } = opts;
+  const tz = opts.tz ?? PRACTICE_TZ;
+  const dow = dayOfWeek(y, mo, d);
+  const windows = (opts.schedule ?? []).filter(s => s.day_of_week === dow && s.is_active !== false);
+  if (windows.length === 0 || !(durationMin > 0)) return [];
+
+  const busyIntervals = busy.map(b => {
+    const startMs = new Date(b.scheduled_at).getTime();
+    const dur = typeof b.duration === 'number' && b.duration > 0 ? b.duration : durationMin;
+    return [startMs, startMs + dur * 60000] as const;
+  });
+  const nowMs = (opts.now ?? new Date()).getTime();
+  const seen = new Set<number>();
+  const slots: Date[] = [];
+  for (const w of windows) {
+    const open = parseHm(w.start_time);
+    const close = parseHm(w.end_time);
+    if (open === null || close === null || close <= open) continue;
+    // Step in wall-clock minutes and convert each start on its own, so a
+    // DST change never shifts the grid; a slot running past closing time
+    // is not offered.
+    for (let m = open; m + durationMin <= close; m += durationMin) {
+      const start = wallTimeToUtc(y, mo, d, Math.floor(m / 60), m % 60, tz);
+      const s = start.getTime();
+      const e = s + durationMin * 60000;
+      if (s <= nowMs || seen.has(s)) continue;
+      if (busyIntervals.some(([bs, be]) => s < be && e > bs)) continue;
+      seen.add(s);
+      slots.push(start);
+    }
+  }
+  return slots.sort((a, b) => a.getTime() - b.getTime());
+}
+
+/**
+ * The next `count` free slots from `now`, looking up to `daysAhead`
+ * practice-time days forward (doctor profile: "next free times").
+ */
+export function nextFreeSlots(opts: {
+  schedule: ScheduleWindow[] | null | undefined;
+  durationMin: number;
+  busy: BusyInterval[];
+  now?: Date;
+  count?: number;
+  daysAhead?: number;
+  tz?: string;
+}): Date[] {
+  const tz = opts.tz ?? PRACTICE_TZ;
+  const now = opts.now ?? new Date();
+  const count = opts.count ?? 3;
+  const daysAhead = opts.daysAhead ?? 28;
+  const today = wallParts(now, tz);
+  const out: Date[] = [];
+  for (let i = 0; i <= daysAhead && out.length < count; i++) {
+    const day = new Date(Date.UTC(today.year, today.month - 1, today.day + i));
+    out.push(...freeSlotsForDay({
+      year: day.getUTCFullYear(), month: day.getUTCMonth() + 1, day: day.getUTCDate(),
+      schedule: opts.schedule, durationMin: opts.durationMin, busy: opts.busy, now, tz,
+    }));
+  }
+  return out.slice(0, count);
+}

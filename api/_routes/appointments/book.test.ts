@@ -93,7 +93,8 @@ describe('appointments/book security invariants', () => {
     const res = mockRes();
     await handler(mockReq({ doctor_id: 'doc_1', scheduled_at: past }), res);
     expect(res._status).toBe(400);
-    expect((res._body as Record<string, string>).error).toMatch(/past/i);
+    expect((res._body as Record<string, string>).error).toMatch(/passed/i);
+    expect((res._body as Record<string, string>).code).toBe('past');
   });
 
   it('returns 400 when duration exceeds the 240-minute cap', async () => {
@@ -126,7 +127,8 @@ describe('appointments/book security invariants', () => {
     const res = mockRes();
     await handler(mockReq({ doctor_id: 'doc_1', scheduled_at: FUTURE }), res);
     expect(res._status).toBe(400);
-    expect((res._body as Record<string, string>).error).toMatch(/not currently available/i);
+    expect((res._body as Record<string, string>).error).toMatch(/paused new bookings/i);
+    expect((res._body as Record<string, string>).code).toBe('bookings_off');
   });
 
   // Documents the 2026-10-25 conflict-guard design: two patients submitting the
@@ -142,6 +144,17 @@ describe('appointments/book security invariants', () => {
     await handler(mockReq({ doctor_id: 'doc_1', scheduled_at: FUTURE }), res);
     expect(res._status).toBe(409);
     expect((res._body as Record<string, string>).error).toMatch(/slot was just taken/i);
+    expect((res._body as Record<string, string>).code).toBe('slot_taken');
+  });
+
+  it('a revoked doctor is not bookable even with a stale is_verified flag', async () => {
+    query.mockReset();
+    query.mockResolvedValueOnce([{ ...DOCTOR_ROW[0], verification_status: 'revoked' }]);
+    const res = mockRes();
+    await handler(mockReq({ doctor_id: 'doc_1', scheduled_at: FUTURE }), res);
+    expect(res._status).toBe(400);
+    expect((res._body as Record<string, string>).code).toBe('not_bookable');
+    expect(query).toHaveBeenCalledTimes(1);
   });
 
   // Regression guard: confirms the INSERT still carries the WHERE NOT EXISTS
