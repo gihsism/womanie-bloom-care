@@ -48,7 +48,10 @@ const Footer = () => {
     ],
     Resources: [
       { label: 'Blog', href: '/blog' },
-      { label: 'Health Statistics', href: '/health-statistics' },
+      // Was 'Health Statistics' (/health-statistics): that is her own
+      // logged-in summary, so a visitor clicking it from the public
+      // footer was bounced to the login page.
+      { label: 'Research library', href: '/library' },
     ],
     Legal: [
       { label: 'Privacy Policy', href: '/dashboard/privacy' },
