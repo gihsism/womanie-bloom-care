@@ -642,7 +642,7 @@ export default function MedicalHistory() {
         case 'phase_update':
         case 'cycle_length_adjust':
         case 'irregularity_flag':
-          toast({ title: 'Noted!', description: 'This will be factored into your predictions.' });
+          toast({ title: 'Noted', description: 'Your predictions will take this into account.' });
           return;
         default:
           return;
@@ -657,7 +657,7 @@ export default function MedicalHistory() {
 
       setLifeStage(newLifeStage);
       toast({
-        title: 'Mode updated!',
+        title: 'Stage changed',
         description: `Switching to ${newLifeStage.replace('-', ' ')} mode...`,
       });
 
@@ -1779,7 +1779,7 @@ export default function MedicalHistory() {
                     try {
                       await db.from('profiles').upsert({ id: user.id, life_stage: mode }, { onConflict: 'id' });
                       setLifeStage(mode);
-                      toast({ title: 'Mode updated!', description: `Switching to ${mode.replace('-', ' ')} mode...` });
+                      toast({ title: 'Stage changed', description: `Switching to ${mode.replace('-', ' ')}…` });
                       setTimeout(() => { window.location.href = '/dashboard'; }, 1000);
                     } catch {
                       toast({ variant: 'destructive', title: 'Error', description: 'Failed to switch mode.' });

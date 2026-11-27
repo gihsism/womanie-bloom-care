@@ -11,39 +11,39 @@ const KeyFeatures = () => {
   const features = [
     {
       icon: Calendar,
-      title: 'Adaptive Cycle Tracking',
+      title: 'Cycle and stage tracking',
       description:
-        'Smart tracking that evolves with you - from periods to pregnancy to perimenopause. Our AI learns your patterns for accurate predictions.',
+        'Periods, ovulation, pregnancy weeks, pill days or menopause symptoms. Predictions use the dates you log, so they get better as you go.',
     },
     {
       icon: Bot,
-      title: 'AI Health Assistant',
+      title: 'Questions about your results',
       description:
-        'Get instant answers to health questions, symptom analysis, and personalized recommendations based on your unique health profile.',
+        'Ask about a value, a symptom or what to raise at your next visit. Answers take your own results and stage into account.',
     },
     {
       icon: Video,
-      title: 'Doctor Consultations',
+      title: 'Doctor visits',
       description:
-        'Connect with verified OB-GYNs, endocrinologists, and mental health specialists via secure video calls. No waiting rooms.',
+        'Book a doctor listed on Womanie, in person or by video, and share only the records you choose with them.',
     },
     {
       icon: FolderHeart,
-      title: 'Medical Records Hub',
+      title: 'All your records in one place',
       description:
-        'Store and manage all your health records, lab results, and prescriptions in one secure, easily shareable location.',
+        'Lab results, prescriptions and letters, kept together and searchable. Print a summary before an appointment.',
     },
     {
       icon: Users,
-      title: 'Community Support',
+      title: 'Community (in progress)',
       description:
-        'Join supportive groups based on your journey stage. Share experiences, ask questions, and find solidarity with others.',
+        'Groups for each stage, where women can compare notes and ask each other questions. We are still building this part.',
     },
     {
       icon: Watch,
-      title: 'Wearable Integration',
+      title: 'Apple Health',
       description:
-        'Sync with Apple Health, Fitbit, and other devices to automatically track sleep, activity, heart rate, and more.',
+        'On iPhone, bring in sleep, steps, heart rate and cycle data from Apple Health. Fitbit and Garmin are planned.',
     },
   ];
 
@@ -51,9 +51,9 @@ const KeyFeatures = () => {
     <section className="py-16 lg:py-24 px-4 bg-muted/30">
       <div className="container mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-5xl font-bold mb-4">Key Features</h2>
+          <h2 className="text-3xl lg:text-5xl font-bold mb-4">What it does</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Comprehensive tools to support your complete health journey
+            Tracking, records and answers, in one app that knows your stage
           </p>
         </div>
 

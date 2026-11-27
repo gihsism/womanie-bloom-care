@@ -9,35 +9,35 @@ const WhoItsFor = () => {
       icon: Pill,
       title: 'Contraception',
       description:
-        'Track your birth control, manage side effects, and get expert guidance on the best options for you.',
+        'A daily pill reminder, a pack tracker and a place to note side effects to bring up with your doctor.',
       stage: 'contraception',
     },
     {
       icon: Baby,
       title: 'Conception',
       description:
-        'Optimize your fertility window with predictive tracking and connect with fertility specialists.',
+        'See your likely fertile days from your cycle, temperature and ovulation tests, and log each try.',
       stage: 'conception',
     },
     {
       icon: HeartPulse,
       title: 'Pregnancy',
       description:
-        'Monitor your pregnancy journey with week-by-week guidance and on-demand prenatal care.',
+        'What is happening in your body and in the baby, week by week, with the tests that are usually due.',
       stage: 'pregnancy',
     },
     {
       icon: Microscope,
       title: 'IVF',
       description:
-        'Navigate your IVF journey with medication tracking, appointment management, and emotional support.',
+        'Enter the dates from your clinic once. See which phase you are in, what is next and when the trigger shot is due.',
       stage: 'ivf',
     },
     {
       icon: Flame,
       title: 'Menopause',
       description:
-        'Manage symptoms, track hormone changes, and get specialized care for this transition.',
+        'Log hot flushes, sleep and mood, and follow hormone, bone and heart markers from your blood tests.',
       stage: 'menopause',
     },
   ];
@@ -47,10 +47,10 @@ const WhoItsFor = () => {
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-5xl font-bold mb-4">
-            For Every Stage of Your Journey
+            Whatever stage you are in
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Womanie adapts to your unique needs, wherever you are in your reproductive health journey
+            Pick your stage and the app shows what matters now. Change it whenever life changes.
           </p>
         </div>
 

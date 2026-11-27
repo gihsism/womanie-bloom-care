@@ -161,7 +161,7 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase, with
           </div>
           <h3 className="text-lg font-semibold">Set up IVF Tracking</h3>
           <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-            Track your IVF journey phase by phase with a treatment calendar and reminders.
+            Enter your clinic dates to see each phase, what is next, and reminders.
           </p>
           <div className="space-y-3 max-w-xs mx-auto text-left">
             <div className="space-y-2">
@@ -261,7 +261,7 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase, with
         <details open={!withHero} className="group">
         <summary className="font-semibold flex items-center gap-2 cursor-pointer list-none">
           <Timer className="h-4 w-4 text-primary" />
-          {withHero ? 'Change phase' : 'IVF Journey'}
+          {withHero ? 'Change phase' : 'IVF phases'}
           {withHero && <span className="ml-auto text-xs font-normal text-muted-foreground">{currentPhaseData.label}</span>}
         </summary>
         <div className="space-y-1 mt-3">

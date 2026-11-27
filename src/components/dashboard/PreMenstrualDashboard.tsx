@@ -122,7 +122,7 @@ export default function PreMenstrualDashboard() {
             <Flower2 className="h-6 w-6 text-pink-500" />
           </div>
           <div className="flex-1">
-            <h2 className="text-lg font-bold mb-1">Your Body, Your Journey 🌸</h2>
+            <h2 className="text-lg font-bold mb-1">What is happening in your body</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Your body is getting ready for an amazing change. Here you'll learn what to expect, 
               how to feel prepared, and why everything you're experiencing is perfectly normal.

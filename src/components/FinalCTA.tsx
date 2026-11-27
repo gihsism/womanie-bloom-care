@@ -11,12 +11,12 @@ const FinalCTA = () => {
     <section className="py-16 lg:py-24 px-4 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
       <div className="container mx-auto max-w-4xl text-center">
         <h2 className="text-3xl lg:text-5xl font-bold mb-4">
-          {user ? 'Your health journey continues' : 'Start Understanding Your Health Today'}
+          {user ? 'Good to see you again' : 'Start with your latest lab report'}
         </h2>
         <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
           {user
-            ? 'Upload a new document, check your latest insights, or track your daily health.'
-            : 'Upload your lab results and get AI-powered analysis in minutes. Free to start, no credit card required.'}
+            ? 'Add a new report, look at your latest results, or log how today went.'
+            : 'Upload it and see each value explained within minutes. Free to start, no credit card needed.'}
         </p>
 
         {/* Value props */}
@@ -24,15 +24,15 @@ const FinalCTA = () => {
           <div className="flex flex-wrap justify-center gap-6 mb-8 text-sm text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <FileText className="h-4 w-4 text-primary" aria-hidden="true" />
-              Upload any medical document
+              PDF, photo or Word file
             </span>
             <span className="flex items-center gap-1.5">
               <Brain className="h-4 w-4 text-primary" aria-hidden="true" />
-              AI explains every result
+              Every value explained
             </span>
             <span className="flex items-center gap-1.5">
               <Shield className="h-4 w-4 text-primary" aria-hidden="true" />
-              100% private & encrypted
+              Encrypted, never sold
             </span>
           </div>
         )}
@@ -53,7 +53,7 @@ const FinalCTA = () => {
               className="text-lg px-8"
               onClick={() => navigate('/auth/select-type')}
             >
-              Get Started Free
+              Create a free account
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           )}
@@ -64,7 +64,7 @@ const FinalCTA = () => {
             onClick={() => navigate('/install')}
           >
             <Download className="mr-2 h-5 w-5" aria-hidden="true" />
-            Install App
+            Add to home screen
           </Button>
         </div>
       </div>

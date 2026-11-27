@@ -18,7 +18,7 @@ const supportGroups = [
   },
   {
     title: 'Trying to Conceive',
-    description: 'Share your fertility journey, tips, and emotional support with women on the same path.',
+    description: 'Talk through cycles, tests and the waiting with women who are trying too.',
     icon: Heart,
     color: 'bg-secondary/10 text-secondary',
     members: 'Coming soon',
@@ -103,16 +103,16 @@ const Community = () => {
             <Users className="h-8 w-8 text-primary" />
           </div>
           <h1 className="text-4xl lg:text-5xl font-bold mb-4">
-            You're Never Alone on This Journey
+            Women at the same stage as you
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-6">
-            Womanie Community is a safe, supportive space where women connect, share experiences, 
-            and empower each other through every stage of health and life.
+            Womanie Community will be a moderated space to compare notes with women who are 
+            going through the same thing: trying, pregnant, in IVF or in menopause.
           </p>
           <div className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 rounded-full px-5 py-2.5">
             <Sparkles className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium text-primary">
-              We're building something special — launching very soon! 💜
+              We are still building this. It is not open yet.
             </span>
           </div>
         </div>
@@ -124,7 +124,7 @@ const Community = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-3">Support Groups by Life Stage</h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Find your tribe — groups tailored to exactly where you are in your health journey.
+              One group per stage, so the conversation stays relevant to you.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">

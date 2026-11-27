@@ -19,32 +19,32 @@ import Logo from '@/components/brand/Logo';
 const features = [
   {
     icon: Calendar,
-    title: 'Cycle Tracking',
-    description: 'Log your period, track symptoms, and get personalised predictions.',
+    title: 'Cycle tracking',
+    description: 'Log your period and symptoms; predictions follow your own dates.',
     bg: 'bg-primary/10',
     color: 'text-primary',
     path: '/dashboard',
   },
   {
     icon: MessageSquare,
-    title: 'AI Health Assistant',
-    description: 'Get instant health guidance powered by latest AI models.',
+    title: 'Ask a question',
+    description: 'Ask about a symptom or a result, in your own words.',
     bg: 'bg-secondary/10',
     color: 'text-secondary',
     path: '/dashboard/ai-doctor',
   },
   {
     icon: FileText,
-    title: 'Document Analysis',
-    description: 'Upload lab results for AI-powered summaries and insights.',
+    title: 'Lab reports',
+    description: 'Upload a report and see each value explained.',
     bg: 'bg-purple/10',
     color: 'text-purple',
     path: '/dashboard/medical-history',
   },
   {
     icon: Activity,
-    title: 'Health Insights',
-    description: 'Track patterns in mood, symptoms, and overall wellbeing.',
+    title: 'Patterns',
+    description: 'See how mood, sleep and symptoms change over weeks.',
     bg: 'bg-accent/10',
     color: 'text-accent',
     path: '/health-statistics',
@@ -106,10 +106,10 @@ const Welcome = () => {
               <Heart className="h-8 w-8 text-primary" />
             </div>
             <h2 className="text-3xl font-bold text-foreground">
-              Welcome, {userName}! 🎉
+              Welcome, {userName}
             </h2>
             <p className="text-muted-foreground text-base">
-              Your personal health companion is ready. Here's what you can do:
+              Your account is ready. A good place to start:
             </p>
           </div>
 
@@ -140,7 +140,7 @@ const Welcome = () => {
           <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-primary/5 border border-primary/10">
             <Shield className="h-4 w-4 text-primary flex-shrink-0" />
             <span className="text-xs text-muted-foreground">
-              Your data is encrypted and visible only to you. We never share your health data.
+              Your data is encrypted and only you can see it. We never sell or share it.
             </span>
           </div>
 
@@ -160,7 +160,7 @@ const Welcome = () => {
               onClick={() => navigate('/onboarding/basic-info')}
             >
               <Sparkles className="h-4 w-4" />
-              Personalise my experience
+              Answer a few setup questions
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>

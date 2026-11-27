@@ -88,10 +88,10 @@ const LifeStageSelection = () => {
 
           <div className="text-center mb-8">
             <h1 className="text-3xl lg:text-4xl font-bold mb-3">
-              Where are you in your health journey?
+              Which stage are you in right now?
             </h1>
             <p className="text-muted-foreground">
-              We'll customize your experience based on your stage
+              Home will show what matters for this stage. You can change it later.
             </p>
           </div>
 

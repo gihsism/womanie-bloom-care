@@ -53,7 +53,7 @@ const SelectUserType = () => {
                 <div>
                   <h3 className="text-2xl font-bold mb-2">Patient</h3>
                   <p className="text-muted-foreground">
-                    Track your health, consult with doctors, and manage your reproductive wellness
+                    Track your cycle or pregnancy, keep your lab results, and book doctors
                   </p>
                 </div>
               </div>
@@ -71,7 +71,7 @@ const SelectUserType = () => {
                 <div>
                   <h3 className="text-2xl font-bold mb-2">Healthcare Provider</h3>
                   <p className="text-muted-foreground">
-                    Provide care, review patient data, and manage consultations
+                    See shared patient records and manage your bookings
                   </p>
                 </div>
               </div>

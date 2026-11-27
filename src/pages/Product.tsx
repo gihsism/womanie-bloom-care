@@ -16,32 +16,32 @@ const Product = () => {
     {
       icon: Activity,
       title: 'Health Tracking',
-      description: 'Monitor your menstrual cycle, symptoms, and overall health metrics with advanced AI-powered analytics.',
+      description: 'Log your cycle, symptoms, weight and blood pressure, and see how they change month to month.',
     },
     {
       icon: Calendar,
       title: 'Cycle Prediction',
-      description: 'Get accurate predictions for your next period, ovulation, and fertile window based on your unique patterns.',
+      description: 'Your next period, ovulation and fertile days, worked out from the cycles you have logged.',
     },
     {
       icon: MessageSquare,
-      title: 'AI Health Assistant',
-      description: 'Chat with our AI assistant for instant health advice, symptom checking, and personalized recommendations.',
+      title: 'Ask about your health',
+      description: 'Ask a question in your own words. The AI assistant answers with your results and stage in mind.',
     },
     {
       icon: FileText,
       title: 'Medical Records',
-      description: 'Store and manage all your health documents, test results, and medical history securely in one place.',
+      description: 'Your reports, test results and history in one place, ready to show a new doctor.',
     },
     {
       icon: Shield,
-      title: 'Privacy First',
-      description: 'Your health data is encrypted and protected with bank-level security. You control who sees your information.',
+      title: 'Private',
+      description: 'Your data is encrypted in transit and at rest. A doctor sees it only after you approve them.',
     },
     {
       icon: Zap,
       title: 'Device Integration',
-      description: 'Connect your smartwatch and fitness trackers to automatically sync health data and insights.',
+      description: 'On iPhone, bring in sleep, steps and heart rate from Apple Health. More devices are planned.',
     },
   ];
 
@@ -54,14 +54,14 @@ const Product = () => {
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-              Your Complete Women's Health Platform
+              Your cycle, your body, your records
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Womanie combines AI-powered insights, expert medical care, and community support
-              to help you take control of your health journey.
+              Womanie tracks the stage you are in, explains your lab reports, and helps you
+              prepare for doctor visits.
             </p>
             <Button size="lg" onClick={() => navigate(user ? '/dashboard' : '/auth/select-type')}>
-              {user ? 'Go to Dashboard' : 'Get Started Free'}
+              {user ? 'Go to Dashboard' : 'Create a free account'}
             </Button>
           </div>
 
@@ -89,27 +89,27 @@ const Product = () => {
               <div className="w-16 h-16 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
                 1
               </div>
-              <h3 className="text-xl font-semibold mb-3">Sign Up & Personalize</h3>
+              <h3 className="text-xl font-semibold mb-3">Tell us your stage</h3>
               <p className="text-muted-foreground">
-                Create your account and complete your health profile to get personalized insights.
+                Create an account and answer a few questions, so Home shows what matters for you now.
               </p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
                 2
               </div>
-              <h3 className="text-xl font-semibold mb-3">Track & Monitor</h3>
+              <h3 className="text-xl font-semibold mb-3">Log and upload</h3>
               <p className="text-muted-foreground">
-                Log your symptoms, cycle, and connect your devices for automatic health tracking.
+                Log your cycle and symptoms, and add lab reports as you get them.
               </p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
                 3
               </div>
-              <h3 className="text-xl font-semibold mb-3">Get Insights & Care</h3>
+              <h3 className="text-xl font-semibold mb-3">Understand and act</h3>
               <p className="text-muted-foreground">
-                Receive AI-powered insights, consult with doctors, and join our supportive community.
+                Read what your results mean, ask follow-up questions, and book a doctor when you need one.
               </p>
             </div>
           </div>

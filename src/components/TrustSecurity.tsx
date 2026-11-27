@@ -4,27 +4,27 @@ const TrustSecurity = () => {
   const features = [
     {
       icon: Shield,
-      title: 'Private by Design',
+      title: 'Your data, not ours',
       description:
-        'Your health data belongs to you. We never sell it, and you can export or delete it at any time.',
+        'We never sell it. Download everything or delete your account from Settings at any time.',
     },
     {
       icon: Lock,
       title: 'Encrypted Data',
       description:
-        'Your health data is encrypted in transit and at rest, so it stays secure.',
+        'Your data is encrypted on the way to our servers and while it is stored there.',
     },
     {
       icon: UserCheck,
-      title: 'You Control Sharing',
+      title: 'You decide who sees it',
       description:
-        'Decide exactly what data to share with doctors, partners, or family members.',
+        'A doctor sees your records only after you approve their request, and you can stop sharing later.',
     },
     {
       icon: Stethoscope,
-      title: 'Evidence-Based Content',
+      title: 'Where the facts come from',
       description:
-        'Health content is guided by clinical references from ACOG, CDC, and other leading medical sources.',
+        'Our health guidance follows published clinical sources such as ACOG and the CDC.',
     },
   ];
 
@@ -33,10 +33,10 @@ const TrustSecurity = () => {
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-5xl font-bold mb-4">
-            Your Privacy, Our Priority
+            What happens to your data
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            We understand the sensitivity of your health data. That's why security and privacy are built into everything we do.
+            Health data is personal. Here is plainly what we do with yours, and what we never do.
           </p>
         </div>
 
