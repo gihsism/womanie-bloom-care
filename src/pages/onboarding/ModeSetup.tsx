@@ -8,6 +8,7 @@ import PregnancyForm from '@/components/onboarding/PregnancyForm';
 import PreMenstrualForm from '@/components/onboarding/PreMenstrualForm';
 import MenopauseForm from '@/components/onboarding/MenopauseForm';
 import PostpartumForm from '@/components/onboarding/PostpartumForm';
+import Logo from '@/components/brand/Logo';
 
 const ModeSetup = () => {
   const navigate = useNavigate();
@@ -48,8 +49,8 @@ const ModeSetup = () => {
           <ArrowLeft className="h-5 w-5" />
           <span className="text-sm">Back</span>
         </button>
-        <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
-          Womanie
+        <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-xl hover:opacity-80 transition-opacity">
+          <Logo />
         </a>
       </div>
 

@@ -15,6 +15,7 @@ import { ArrowLeft, Search, Star, Clock, Video, Calendar as CalendarIcon, CheckC
 import ShareWithDoctor from '@/components/dashboard/ShareWithDoctor';
 import BookingDialog, { doctorDisplayName } from '@/components/booking/BookingDialog';
 import { formatPrice } from '@/lib/booking';
+import Logo from '@/components/brand/Logo';
 
 interface Doctor {
   user_id: string;
@@ -286,8 +287,8 @@ const FindDoctor = () => {
               <h1 className="text-2xl font-bold">Find a Doctor</h1>
               <p className="text-sm text-muted-foreground">Book a consultation with verified healthcare professionals</p>
             </div>
-            <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
-              Womanie
+            <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-lg hover:opacity-80 transition-opacity">
+              <Logo />
             </a>
           </div>
         </div>

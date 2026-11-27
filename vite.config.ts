@@ -14,7 +14,7 @@ export default defineConfig(() => ({
     VitePWA({
       registerType: "autoUpdate",
       // og-image.png is only for link previews (crawlers): not precached.
-      includeAssets: ["favicon.svg", "apple-touch-icon.png"],
+      includeAssets: ["favicon.svg", "favicon-32x32.png", "apple-touch-icon.png"],
       manifest: {
         // Stable install identity so updates/re-installs are recognised
         // as the same app rather than spawning a duplicate entry.
@@ -31,10 +31,11 @@ export default defineConfig(() => ({
         orientation: "portrait",
         scope: "/",
         start_url: "/",
-        // Real PNG icons generated from the brand mark (public/*.png).
+        // Real PNG icons generated from the brand mark by
+        // scripts/brand-icons.mjs (src/components/brand/Logo.tsx geometry).
         // SVG stays as the scalable "any" icon; the 192/512 PNGs satisfy
         // the Android install prompt + Lighthouse, and the 512 doubles as
-        // the maskable icon (full-bleed gradient, heart inside the safe zone).
+        // the maskable icon (full-bleed porcelain, loop inside the safe zone).
         icons: [
           {
             src: "/favicon.svg",

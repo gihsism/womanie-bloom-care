@@ -7,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import ProgressBar from '@/components/onboarding/ProgressBar';
+import Logo from '@/components/brand/Logo';
 
 const lifeStages = [
   {
@@ -76,8 +77,8 @@ const LifeStageSelection = () => {
           <ArrowLeft className="h-5 w-5" />
           <span className="text-sm">Back</span>
         </button>
-        <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
-          Womanie
+        <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-xl hover:opacity-80 transition-opacity">
+          <Logo />
         </a>
       </div>
 

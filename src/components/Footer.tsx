@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import Logo from '@/components/brand/Logo';
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -107,9 +108,9 @@ const Footer = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate('/')}
-              className="text-xl font-bold text-primary hover:opacity-80 transition-opacity"
+              className="text-xl hover:opacity-80 transition-opacity"
             >
-              Womanie
+              <Logo />
             </button>
             <span className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} All rights reserved

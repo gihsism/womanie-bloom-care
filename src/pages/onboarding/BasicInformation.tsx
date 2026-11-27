@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import ProgressBar from '@/components/onboarding/ProgressBar';
+import Logo from '@/components/brand/Logo';
 
 const BasicInformation = () => {
   const navigate = useNavigate();
@@ -67,8 +68,8 @@ const BasicInformation = () => {
           <ArrowLeft className="h-5 w-5" />
           <span className="text-sm">Back</span>
         </button>
-        <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
-          Womanie
+        <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-xl hover:opacity-80 transition-opacity">
+          <Logo />
         </a>
       </div>
 

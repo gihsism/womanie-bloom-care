@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import Logo from '@/components/brand/Logo';
 
 const PatientLogIn = () => {
   usePageTitle('Log In');
@@ -83,8 +84,8 @@ const PatientLogIn = () => {
           <ArrowLeft className="h-5 w-5" />
           <span className="text-sm">Back</span>
         </a>
-        <a href="/" className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
-          Womanie
+        <a href="/" className="text-xl hover:opacity-80 transition-opacity">
+          <Logo />
         </a>
       </div>
       <div className="flex-1 flex items-center justify-center px-4 pb-16">

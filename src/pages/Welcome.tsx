@@ -14,6 +14,7 @@ import {
   Shield,
   Sparkles,
 } from 'lucide-react';
+import Logo from '@/components/brand/Logo';
 
 const features = [
   {
@@ -83,9 +84,9 @@ const Welcome = () => {
         <button
           type="button"
           onClick={() => { window.location.href = '/'; }}
-          className="text-xl font-bold text-primary hover:opacity-80 transition-opacity z-50 relative cursor-pointer"
+          className="text-xl hover:opacity-80 transition-opacity z-50 relative cursor-pointer"
         >
-          Womanie
+          <Logo />
         </button>
         <Button
           variant="ghost"

@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import Logo from '@/components/brand/Logo';
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -82,10 +83,10 @@ const Navigation = () => {
           <a
             href="/"
             onClick={(e) => { e.preventDefault(); navigate('/'); }}
-            className="text-2xl font-bold text-primary hover:opacity-80 transition-opacity"
+            className="text-2xl hover:opacity-80 transition-opacity"
             aria-label="Womanie — go to homepage"
           >
-            Womanie
+            <Logo />
           </a>
 
           {/* Desktop Navigation Links */}

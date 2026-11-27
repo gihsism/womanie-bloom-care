@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { commitOnboarding } from '@/lib/onboarding-commit';
+import Logo from '@/components/brand/Logo';
 
 const OnboardingSuccess = () => {
   const navigate = useNavigate();
@@ -35,8 +36,8 @@ const OnboardingSuccess = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="p-4 flex justify-center border-b border-border">
-        <button type="button" onClick={() => { window.location.href = '/'; }} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
-          Womanie
+        <button type="button" onClick={() => { window.location.href = '/'; }} className="text-xl hover:opacity-80 transition-opacity">
+          <Logo />
         </button>
       </div>
       <div className="flex-1 flex items-center justify-center px-4">

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/integrations/db/client';
+import Logo from '@/components/brand/Logo';
 
 const DoctorLogIn = () => {
   const navigate = useNavigate();
@@ -141,8 +142,8 @@ const DoctorLogIn = () => {
           <ArrowLeft className="h-5 w-5" />
           <span className="text-sm">Back</span>
         </button>
-        <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
-          Womanie
+        <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-xl hover:opacity-80 transition-opacity">
+          <Logo />
         </a>
       </div>
 

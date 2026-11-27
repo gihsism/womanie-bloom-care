@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import UserMenu from "@/components/UserMenu";
 import { format } from "date-fns";
+import Logo from '@/components/brand/Logo';
 
 interface DocumentSummary {
   id: string;
@@ -223,8 +224,8 @@ export default function HealthStatistics() {
             {downloadingCsv ? 'Preparing…' : 'Download CSV'}
           </Button>
         )}
-        <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
-          Womanie
+        <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-lg hover:opacity-80 transition-opacity">
+          <Logo />
         </a>
         <UserMenu />
       </div>

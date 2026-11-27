@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { User, Stethoscope, ArrowLeft } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import Logo from '@/components/brand/Logo';
 
 const SelectUserType = () => {
   const navigate = useNavigate();
@@ -19,8 +20,8 @@ const SelectUserType = () => {
           <ArrowLeft className="h-5 w-5" />
           <span className="text-sm">Back</span>
         </button>
-        <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
-          Womanie
+        <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-xl hover:opacity-80 transition-opacity">
+          <Logo />
         </a>
       </div>
 
@@ -29,7 +30,7 @@ const SelectUserType = () => {
         <div className="w-full max-w-4xl">
           {/* Logo */}
           <div className="text-center mb-8">
-            <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-4xl font-bold text-primary hover:opacity-80 transition-opacity">Womanie</a>
+            <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-4xl hover:opacity-80 transition-opacity"><Logo /></a>
           </div>
 
           {/* Heading */}

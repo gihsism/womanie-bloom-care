@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { scorePassword } from '@/lib/password-strength';
 import { PRIVACY_POLICY_VERSION } from '@/lib/policyVersion';
+import Logo from '@/components/brand/Logo';
 
 const PatientSignUp = () => {
   usePageTitle('Sign Up');
@@ -83,8 +84,8 @@ const PatientSignUp = () => {
           <ArrowLeft className="h-5 w-5" />
           <span className="text-sm">Back</span>
         </a>
-        <a href="/" className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
-          Womanie
+        <a href="/" className="text-xl hover:opacity-80 transition-opacity">
+          <Logo />
         </a>
       </div>
       <div className="flex-1 flex items-center justify-center px-4 pb-16">

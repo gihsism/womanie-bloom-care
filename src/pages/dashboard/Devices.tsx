@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Watch, Heart, Activity, Bluetooth, Smartphone, CheckCircle2, AlertCircle, ExternalLink, Loader2 } from 'lucide-react';
 import { healthKitService } from '@/services/healthkit';
 import { toast } from 'sonner';
+import Logo from '@/components/brand/Logo';
 
 interface Device {
   id: string;
@@ -112,8 +113,8 @@ const Devices = () => {
               <h1 className="text-xl font-bold">Connected Devices</h1>
               <p className="text-xs text-muted-foreground">Sync health data from your wearables</p>
             </div>
-            <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-lg font-bold text-primary hover:opacity-80 transition-opacity">
-              Womanie
+            <a href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }} className="text-lg hover:opacity-80 transition-opacity">
+              <Logo />
             </a>
           </div>
         </div>

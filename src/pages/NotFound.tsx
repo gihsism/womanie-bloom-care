@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Home, ArrowLeft, Calendar, MessageSquare, FileText, Heart } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import Logo from '@/components/brand/Logo';
 
 const suggestions = [
   { icon: Home, label: 'Homepage', path: '/', description: 'Back to the main site' },
@@ -22,8 +23,8 @@ const NotFound = () => {
     // "Go back"; this page opts out so the way out is always visible.
     <div className="min-h-screen bg-background flex flex-col" data-hide-install-banner>
       <div className="p-4 flex justify-center border-b border-border">
-        <button type="button" onClick={() => { window.location.href = '/'; }} className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
-          Womanie
+        <button type="button" onClick={() => { window.location.href = '/'; }} className="text-xl hover:opacity-80 transition-opacity">
+          <Logo />
         </button>
       </div>
       <div className="flex-1 flex items-center justify-center px-4">
