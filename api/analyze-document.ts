@@ -427,8 +427,9 @@ I. priority is for the patient's reading order:
 
 15. BONE HEALTH:
    - DEXA T-score >= -1.0 normal. -1.1 to -2.4 osteopenia. <=-2.5 osteoporosis
-   - Vitamin D <20 ng/mL deficient. 20-29 insufficient. 30-100 sufficient
-   - PTH rises when vitamin D <31 ng/mL (compensatory)
+   - Vitamin D <20 ng/mL (50 nmol/L) deficient. 20 ng/mL covers bone needs for most people (US NIH, EFSA, Swiss BLV); some labs flag 20-29 as insufficient, there is no agreed 30 ng/mL target
+   - PTH can rise when vitamin D is low (compensatory)
+   - Do not give a vitamin D dose for a deficiency; the doctor sets it. Everyday amount 600 IU/day (800 IU from 60, BLV); upper limit 4,000 IU/day without medical advice
    - T-score <=-2.5 + low vitamin D + elevated PTH = secondary hyperparathyroidism driving bone loss
    - Low vitamin D + low calcium = impaired calcium absorption
    - Screen all women >=65. Younger postmenopausal with risk factors (USPSTF)

@@ -187,7 +187,9 @@ export default function PregnancyVaccinations({ dueDate }: PregnancyVaccinations
       <p className="text-[10px] text-muted-foreground mt-3 leading-relaxed flex items-start gap-1.5">
         <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
         <span>
-          Reference: ACOG 2026 maternal immunization schedule and CDC guidance for pregnancy. Status is saved
+          Reference: ACOG 2026 maternal immunization schedule and CDC guidance for pregnancy; Swiss timing from the{' '}
+          <a href="https://www.bag.admin.ch/de/schweizerischer-impfplan" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">BAG Swiss vaccination schedule</a>{' '}
+          (BAG-Bulletins 35 and 36/2025). Status is saved
           to your account — share with your OB at the next visit. Schedules update annually.
         </span>
       </p>

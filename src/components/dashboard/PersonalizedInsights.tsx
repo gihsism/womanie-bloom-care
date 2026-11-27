@@ -173,7 +173,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       emoji: '🦴',
       connectedTests: ['Vitamin D', 'Calcium'],
       explanation: 'After menopause, declining estrogen accelerates bone loss. Combined with low vitamin D, this increases your risk of osteoporosis and fractures.',
-      recommendation: 'Ensure adequate calcium (1200mg/day) and vitamin D (1000-2000 IU/day). Weight-bearing exercise helps maintain bone density. Ask about a DEXA scan if you haven\'t had one.',
+      recommendation: 'Ask your doctor how much calcium and vitamin D you need. Everyday amounts: calcium about 1000-1200 mg a day from food and, if needed, supplements; vitamin D 600 IU a day, 800 IU from age 60 (Swiss BLV recommendation). Weight-bearing exercise helps maintain bone density. Ask about a DEXA scan if you haven\'t had one.',
       severity: 'attention',
     });
   }
@@ -268,7 +268,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       emoji: '🦴',
       connectedTests: ['Vitamin D', 'Calcium'],
       explanation: 'Your vitamin D is very low, and your calcium is also below normal. Vitamin D is essential for absorbing calcium from food. Without enough D, your body can\'t use the calcium you consume, weakening bones.',
-      recommendation: 'Start vitamin D supplementation (2000-4000 IU daily) — this should help your calcium levels improve too. Get calcium from dairy, fortified foods, or supplements.',
+      recommendation: 'Ask your doctor about treating the low vitamin D: for a confirmed deficiency the doctor sets the dose, which is often higher than the everyday amount, and checks your calcium again. The everyday recommendation in Switzerland is 600 IU a day (800 IU from age 60, BLV). Do not take more than 4,000 IU a day without medical advice (the adult upper limit set by EFSA and the US NIH). Get calcium from dairy, fortified foods, or supplements.',
       severity: 'attention',
     });
   }
@@ -416,8 +416,8 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       title: 'Low vitamin D is driving elevated PTH — bone loss risk',
       emoji: '🦴',
       connectedTests: ['Vitamin D', 'PTH', ...(calcium ? ['Calcium'] : [])],
-      explanation: `Your vitamin D is very low (${vitD.value} ng/mL) and your PTH is elevated (${pth.value} pg/mL). When vitamin D drops below ~31, PTH rises to maintain calcium levels — but it does this by pulling calcium from your bones (secondary hyperparathyroidism).`,
-      recommendation: 'Start vitamin D supplementation (2000-4000 IU daily) to bring your levels above 30 ng/mL. This should bring PTH back down and stop the calcium drain from your bones. A recheck in about 3 months is an app reminder, not a guideline.',
+      explanation: `Your vitamin D is very low (${vitD.value} ng/mL) and your PTH is elevated (${pth.value} pg/mL). When vitamin D is low, PTH can rise to keep blood calcium steady, partly by taking calcium from the bones (secondary hyperparathyroidism).`,
+      recommendation: 'Ask your doctor about treating the low vitamin D: for a confirmed deficiency the doctor sets the dose (often higher than the everyday amount) and the target level. Raising vitamin D usually lowers PTH again, which can reduce the pull on your bones. The everyday recommendation in Switzerland is 600 IU a day (800 IU from age 60, BLV); do not take more than 4,000 IU a day without medical advice (EFSA and US NIH upper limit). A recheck in about 3 months is an app reminder, not a guideline.',
       severity: 'attention',
     });
   }

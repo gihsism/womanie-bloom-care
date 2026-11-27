@@ -52,8 +52,8 @@ const NUTRIENTS_SUSTAINED: NutrientTip[] = [
   {
     key: 'vit-d',
     label: 'Vitamin D',
-    amount: '1000–2000 IU/day',
-    rationale: 'Postpartum vitamin D depletion is common, especially if breastfeeding (baby pulls from your stores). Supports mood, bone, immunity.',
+    amount: '600 IU/day (also when breastfeeding)',
+    rationale: 'Swiss recommendation (BLV) for adults, including breastfeeding mothers. Breast milk carries little vitamin D, so breastfed babies get their own vitamin D drops; ask your paediatrician.',
     food: 'Fatty fish, fortified milk; supplement is the most reliable path.',
   },
   {

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
-  PREGNANCY_SCHEDULE, SCHEDULE_ASK_LINE, doneCount, glucoseTestInPregnancy, scheduleStatus,
+  PREGNANCY_SCHEDULE, SCHEDULE_ASK_LINE, SWISS_CHECKUPS_LINE, doneCount, glucoseTestInPregnancy, scheduleStatus,
 } from './pregnancySchedule';
 
 const item = (key: string) => PREGNANCY_SCHEDULE.find(i => i.key === key)!;
@@ -29,6 +29,17 @@ describe('PREGNANCY_SCHEDULE sources', () => {
     expect(text(item('mid-pregnancy-scan').source.id)).toMatch(/around (week )?20/);
     expect(text(item('glucose-test').source.id)).toContain('24 weeks');
     expect(text(item('chromosome-screening').source.id)).toMatch(/each pregnancy/);
+  });
+
+  it('Swiss notes cite an official Swiss source (BAG or SGGG) and match it', () => {
+    expect(item('first-trimester-scan').swiss?.note).toContain('12 to 14');
+    expect(item('mid-pregnancy-scan').swiss?.note).toContain('20 to 23');
+    expect(item('chromosome-screening').swiss?.note).toContain('1 in 1000');
+    expect(item('glucose-test').swiss?.note).toMatch(/24 and 28/);
+    for (const s of PREGNANCY_SCHEDULE) {
+      if (s.swiss) expect(s.swiss.source.url, s.key).toMatch(/^https:\/\/www\.(bag\.admin\.ch|rosenfluh\.ch)\//);
+    }
+    expect(SWISS_CHECKUPS_LINE.note).toMatch(/seven check-ups/);
   });
 
   it('sends the rest of the schedule to the midwife or doctor', () => {
