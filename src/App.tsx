@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { InstallBanner } from "@/components/InstallBanner";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
+import { PendingSync } from "@/components/PendingSync";
 import { MaintenanceBanner } from "@/components/MaintenanceBanner";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { BottomNav } from "@/components/BottomNav";
@@ -102,6 +103,7 @@ const App = () => (
         </Suspense>
         <Sonner />
         <OfflineIndicator />
+        <PendingSync />
         <MaintenanceBanner />
         <BrowserRouter>
           <ScrollToTop />

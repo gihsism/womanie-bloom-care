@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { isNetworkFailure, pendingRow, queueUpsert } from '@/lib/pendingUpserts';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { emitHealthDataChange } from '@/lib/data-events';
@@ -93,6 +94,8 @@ interface QuickLogData {
   notes: string;
 }
 
+const dailyLogKey = (day: string) => `daily_health_signals:${day}`;
+
 const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -108,12 +111,17 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
     try {
       if (!user) return;
       const today = format(new Date(), 'yyyy-MM-dd');
-      const { data: existing } = await db
+      // A log saved on this phone while offline and not sent yet is newer
+      // than what the server has, so it is what the form shows.
+      let queued: Record<string, unknown> | null = null;
+      try { queued = pendingRow(localStorage, user.id, dailyLogKey(today)); } catch { queued = null; }
+      const { data: fromServer } = queued ? { data: null } : await db
         .from('daily_health_signals')
         .select('*')
         .eq('user_id', user.id)
         .eq('signal_date', today)
         .maybeSingle();
+      const existing = (queued ?? fromServer) as { notes?: string | null; mood?: string[] | null; symptoms?: string[] | null; discharge?: string | null } | null;
 
       if (existing) {
         // Parse the encoded segments out of `notes` so reopening the
@@ -228,17 +236,28 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
         data.notes,
       ].filter(Boolean).join('. ');
 
+      const row = {
+        user_id: user.id,
+        signal_date: today,
+        mood: data.moods.length > 0 ? data.moods : null,
+        discharge: data.discharge !== 'none' ? data.discharge : null,
+        symptoms: data.symptoms.length > 0 ? data.symptoms : null,
+        notes: noteParts || null,
+      };
       const { error } = await db
         .from('daily_health_signals')
-        .upsert({
-          user_id: user.id,
-          signal_date: today,
-          mood: data.moods.length > 0 ? data.moods : null,
-          discharge: data.discharge !== 'none' ? data.discharge : null,
-          symptoms: data.symptoms.length > 0 ? data.symptoms : null,
-          notes: noteParts || null,
-        }, { onConflict: 'user_id,signal_date' });
+        .upsert(row, { onConflict: 'user_id,signal_date' });
 
+      if (error && isNetworkFailure(error)) {
+        // No connection: keep it on the phone; PendingSync sends it when
+        // she is back online. Not an error for her, but she is told.
+        queueUpsert(localStorage, user.id, {
+          key: dailyLogKey(today), table: 'daily_health_signals', row, onConflict: 'user_id,signal_date',
+        });
+        setSaved(true);
+        toast({ title: 'Saved on this phone', description: "No connection right now. It will sync when you're back online." });
+        return;
+      }
       if (error) throw error;
       setSaved(true);
       toast({ title: 'Saved', description: 'Today is logged.' });
