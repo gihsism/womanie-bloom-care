@@ -592,3 +592,86 @@ describe('api/_routes/db: doctor booking alerts on a patient cancel', () => {
     expect(query.mock.calls.some(c => /push_subscriptions/.test(c[0] as string))).toBe(false);
   });
 });
+
+// audit P0 #3 — the router must pin every read, update and delete of her
+// medical rows to the session user, whatever filters the client sends, and
+// must never let an insert or update move a row to another user.
+describe('api/_routes/db: medical rows stay with their owner', () => {
+  beforeEach(() => {
+    vi.mocked(getAuthUser).mockResolvedValue(SESSION_USER);
+    query.mockReset();
+    query.mockResolvedValue([]);
+  });
+
+  const lastCall = () => query.mock.calls[query.mock.calls.length - 1] as [string, unknown[]];
+
+  for (const table of ['medical_extracted_data', 'current_extracted_data', 'health_documents', 'document_analyses']) {
+    it(`${table}: a select by row id alone still binds the session user`, async () => {
+      const res = mockRes();
+      await handler(mockReq({ table, operation: 'select', filters: [['id', 'eq', 'row-1']] }), res);
+      expect(res._status).toBe(200);
+      const [sql, params] = lastCall();
+      expect(sql).toMatch(/user_id = \$\d/);
+      expect(params).toContain(SESSION_USER.id);
+    });
+
+    it(`${table}: a select filtered to another user is refused before any query`, async () => {
+      const res = mockRes();
+      await handler(mockReq({ table, operation: 'select', filters: [['user_id', 'eq', 'victim']] }), res);
+      expect(res._status).toBe(403);
+      expect(query).not.toHaveBeenCalled();
+    });
+  }
+
+  it('a delete by row id alone is scoped to the session user', async () => {
+    const res = mockRes();
+    await handler(mockReq({ table: 'medical_extracted_data', operation: 'delete', filters: [['id', 'eq', 'row-1']] }), res);
+    expect(res._status).toBe(200);
+    const [sql, params] = lastCall();
+    expect(sql).toMatch(/^DELETE FROM medical_extracted_data WHERE .*user_id = \$\d/);
+    expect(params).toEqual(expect.arrayContaining(['row-1', SESSION_USER.id]));
+  });
+
+  it('a delete with no filter at all deletes only her rows, never the table', async () => {
+    const res = mockRes();
+    await handler(mockReq({ table: 'medical_extracted_data', operation: 'delete' }), res);
+    const [sql, params] = lastCall();
+    expect(sql).toMatch(/WHERE user_id = \$1/);
+    expect(params).toEqual([SESSION_USER.id]);
+  });
+
+  it('an update cannot re-point a row to another user', async () => {
+    const res = mockRes();
+    await handler(mockReq({
+      table: 'medical_extracted_data', operation: 'update',
+      updateData: { user_id: 'victim', value: '5' }, filters: [['id', 'eq', 'row-1']],
+    }), res);
+    expect(res._status).toBe(200);
+    const [sql, params] = lastCall();
+    expect(sql.split(' WHERE ')[0]).not.toMatch(/user_id/);
+    expect(params).not.toContain('victim');
+    expect(sql).toMatch(/WHERE .*user_id = \$\d/);
+    expect(params).toContain(SESSION_USER.id);
+  });
+
+  it('an insert naming another user is refused; one naming nobody is stamped with hers', async () => {
+    const bad = mockRes();
+    await handler(mockReq({ table: 'medical_extracted_data', operation: 'insert', insertData: { user_id: 'victim', title: 'TSH' } }), bad);
+    expect(bad._status).toBe(403);
+    expect(query).not.toHaveBeenCalled();
+
+    const ok = mockRes();
+    await handler(mockReq({ table: 'medical_extracted_data', operation: 'insert', insertData: { title: 'TSH' } }), ok);
+    const [sql, params] = lastCall();
+    expect(sql).toMatch(/INSERT INTO medical_extracted_data \(.*user_id.*\)/);
+    expect(params).toContain(SESSION_USER.id);
+  });
+
+  it('a relational table read with no owner filter is limited to rows where she is a party', async () => {
+    const res = mockRes();
+    await handler(mockReq({ table: 'appointments', operation: 'select' }), res);
+    const [sql, params] = lastCall();
+    expect(sql).toMatch(/\(patient_id = \$\d OR doctor_id = \$\d\)/);
+    expect(params.filter(p => p === SESSION_USER.id)).toHaveLength(2);
+  });
+});
