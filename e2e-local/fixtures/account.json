@@ -1,0 +1,122 @@
+{
+  "_comment": "One fake patient. Dates are tokens resolved at run time by fixtures.ts: {{day:N}} = local date N days from today (yyyy-mm-dd), {{at:N}} = ISO timestamp N days from now.",
+  "user": {
+    "id": "e2e-user-1",
+    "email": "e2e-patient@womanie.test",
+    "name": "Mia Example",
+    "hasPassword": true,
+    "isAdmin": false,
+    "created_at": "{{at:-120}}",
+    "consentRequired": false,
+    "consentReason": null
+  },
+  "profile": {
+    "id": "e2e-user-1",
+    "full_name": "Mia Example",
+    "date_of_birth": "1990-04-12",
+    "life_stage": "menstrual-cycle",
+    "pregnancy_due_date": null,
+    "ivf_start_date": null,
+    "ivf_phase": null,
+    "onboarding_completed": true
+  },
+  "tables": {
+    "medications": [
+      {
+        "id": "med-1",
+        "user_id": "e2e-user-1",
+        "name": "Vitamin D",
+        "dose": "1000 IU",
+        "times_per_day": 1,
+        "reminder_times": ["08:00"],
+        "active": true,
+        "started_on": "{{day:-60}}",
+        "created_at": "{{at:-60}}"
+      }
+    ],
+    "health_documents": [
+      {
+        "id": "doc-1",
+        "user_id": "e2e-user-1",
+        "file_name": "blood-test-march.pdf",
+        "mime_type": "application/pdf",
+        "ai_suggested_name": "Blood test - iron and vitamin D",
+        "ai_summary": "Ferritin is slightly low; vitamin D is in range.",
+        "ai_suggested_category": "lab_results",
+        "document_type": "lab_results",
+        "uploaded_at": "{{at:-20}}",
+        "created_at": "{{at:-20}}"
+      }
+    ],
+    "current_extracted_data": [
+      {
+        "id": "res-1",
+        "user_id": "e2e-user-1",
+        "document_id": "doc-1",
+        "data_type": "lab_result",
+        "title": "Ferritin",
+        "value": "12",
+        "unit": "ng/mL",
+        "reference_range": "15-150",
+        "status": "abnormal",
+        "date_recorded": "{{day:-21}}",
+        "created_at": "{{at:-20}}"
+      },
+      {
+        "id": "res-2",
+        "user_id": "e2e-user-1",
+        "document_id": "doc-1",
+        "data_type": "lab_result",
+        "title": "Vitamin D (25-OH)",
+        "value": "38",
+        "unit": "ng/mL",
+        "reference_range": "30-100",
+        "status": "normal",
+        "date_recorded": "{{day:-21}}",
+        "created_at": "{{at:-20}}"
+      }
+    ],
+    "period_tracking": [
+      {
+        "id": "per-1",
+        "user_id": "e2e-user-1",
+        "period_start_date": "{{day:-12}}",
+        "period_end_date": "{{day:-8}}",
+        "cycle_length": 28,
+        "created_at": "{{at:-12}}"
+      },
+      {
+        "id": "per-2",
+        "user_id": "e2e-user-1",
+        "period_start_date": "{{day:-40}}",
+        "period_end_date": "{{day:-35}}",
+        "cycle_length": 28,
+        "created_at": "{{at:-40}}"
+      }
+    ],
+    "daily_health_signals": [],
+    "life_events": [],
+    "visit_questions": [],
+    "user_app_data": [],
+    "chat_messages": []
+  },
+  "appointments": [
+    {
+      "id": "apt-1",
+      "doctor_id": "doc-user-1",
+      "scheduled_at": "{{at:5}}",
+      "status": "scheduled",
+      "consultation_type": "video",
+      "duration": 30,
+      "payment_status": null,
+      "notes": null,
+      "booked_at": "{{at:-3}}",
+      "doctor_practice_address": null,
+      "doctor_name": "Anna Keller",
+      "doctor_title": "Dr.",
+      "doctor_specialties": ["Gynecology"],
+      "doctor_avatar_url": null,
+      "doctor_verified": true
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "_comment": "Per life stage: profile columns laid over account.json's profile, and the label Home shows in 'Change life stage (now <label>)'.",
+  "pre-menstrual": { "label": "Before first period", "profile": {} },
+  "menstrual-cycle": { "label": "Period tracking", "profile": {} },
+  "contraception": { "label": "Birth control", "profile": {} },
+  "conception": { "label": "Trying to conceive", "profile": {} },
+  "ivf": { "label": "IVF", "profile": { "ivf_start_date": "{{day:-6}}", "ivf_phase": "stimulation" } },
+  "pregnancy": { "label": "Pregnancy", "profile": { "pregnancy_due_date": "{{day:120}}" } },
+  "postpartum": { "label": "After birth", "profile": {} },
+  "menopause": { "label": "Menopause", "profile": {} },
+  "post-menopause": { "label": "After menopause", "profile": {} }
+}
