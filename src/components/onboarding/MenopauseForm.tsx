@@ -57,7 +57,7 @@ const MenopauseForm = () => {
     <div>
       <div className="text-center mb-8">
         <h1 className="text-3xl lg:text-4xl font-bold mb-3">
-          Let's support your menopause journey
+          Tell us where you are with menopause
         </h1>
       </div>
 

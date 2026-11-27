@@ -54,7 +54,7 @@ const PregnancyForm = () => {
     <div>
       <div className="text-center mb-8">
         <h1 className="text-3xl lg:text-4xl font-bold mb-3">
-          Congratulations! Tell us about your pregnancy
+          Congratulations. Tell us about your pregnancy
         </h1>
       </div>
 

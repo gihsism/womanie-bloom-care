@@ -567,7 +567,7 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
             <div className="flex-1">
               <p className="text-sm font-medium">Refill Reminder</p>
               <p className="text-xs text-muted-foreground">
-                {packDay <= 21 ? `${21 - packDay + 7} days until refill needed` : 'Time to get your refill!'}
+                {packDay <= 21 ? `${21 - packDay + 7} days until refill needed` : 'Time to get your refill'}
               </p>
             </div>
             <Button variant="outline" size="sm" className="text-xs h-7">

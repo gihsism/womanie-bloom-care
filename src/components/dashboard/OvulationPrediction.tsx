@@ -106,8 +106,8 @@ const OvulationPrediction = ({ userId, lastPeriodStart, cycleLength = 28, onPred
         setPrediction(data.prediction);
         onPredictionUpdate?.(data.prediction);
         toast({
-          title: 'Prediction Generated',
-          description: 'Your ovulation prediction is ready!',
+          title: 'Prediction ready',
+          description: 'Your likely ovulation days are below.',
         });
       } else {
         throw new Error('No prediction data returned');
@@ -134,7 +134,7 @@ const OvulationPrediction = ({ userId, lastPeriodStart, cycleLength = 28, onPred
               Ovulation Prediction
             </CardTitle>
             <CardDescription>
-              AI-powered prediction based on your health signals
+              Worked out from your cycle dates, temperature and tests
             </CardDescription>
           </div>
           <Button 

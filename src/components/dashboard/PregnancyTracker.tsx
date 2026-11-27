@@ -992,7 +992,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
         <Card className="p-4 space-y-3">
           <h4 className="font-semibold flex items-center gap-2">
             <Calendar className="h-4 w-4 text-primary" />
-            Your Pregnancy Journey
+            Your 40 weeks at a glance
           </h4>
           <div className="flex gap-0.5 overflow-x-auto pb-1">
             {Array.from({ length: 40 }, (_, i) => i + 1).map(week => {

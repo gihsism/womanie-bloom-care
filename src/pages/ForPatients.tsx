@@ -13,12 +13,12 @@ const ForPatients = () => {
   usePageTitle('For Patients');
 
   const features = [
-    { icon: FileText, title: 'Upload Any Medical Document', description: 'Lab results, prescriptions, imaging reports, discharge summaries — PDF, images, or DOCX. We handle it all.' },
-    { icon: Brain, title: 'AI Explains Every Result', description: 'Claude AI reads your documents, extracts every test, and explains what each result means in plain language — not medical jargon.' },
-    { icon: TrendingUp, title: 'Track Changes Over Time', description: 'Visual charts show how your values change across multiple tests. See trends and predictions for where your health is heading.' },
-    { icon: MessageCircle, title: 'AI Health Assistant', description: 'Ask any health question — the AI knows your medical history and gives personalized answers based on your actual results.' },
-    { icon: Shield, title: 'Completely Private', description: 'Your health data is encrypted and visible only to you. We never share, sell, or use your data for anything else.' },
-    { icon: Heart, title: 'Adapts to Your Journey', description: 'Pregnancy, cycles, IVF, menopause — the app shows different insights and recommendations based on your life stage.' },
+    { icon: FileText, title: 'Upload any medical document', description: 'Lab results, prescriptions, scan reports, discharge letters. PDF, a photo, or a Word file.' },
+    { icon: Brain, title: 'Each result explained', description: 'Claude, an AI model, reads your document, pulls out each test and explains what the value means in plain words.' },
+    { icon: TrendingUp, title: 'Track Changes Over Time', description: 'Charts show how each value moves across your tests, so you can see what is improving and what is not.' },
+    { icon: MessageCircle, title: 'Ask about your results', description: 'Ask a question in your own words. The AI assistant sees your results and answers with them in mind.' },
+    { icon: Shield, title: 'Private', description: 'Your data is encrypted and only you see it, unless you approve a doctor. We never sell it.' },
+    { icon: Heart, title: 'Changes with your stage', description: 'Pregnancy, cycles, IVF, menopause: Home shows what matters for the stage you are in.' },
   ];
 
   const journeys = [
@@ -41,10 +41,10 @@ const ForPatients = () => {
               Finally Understand Your <span className="text-primary">Medical Results</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Upload your lab results and get instant AI-powered analysis. Every test explained in plain language, with personalized insights for your health journey.
+              Upload a lab report and see every test explained in plain language, next to your earlier results and in the context of your stage.
             </p>
             <Button size="lg" className="gap-2" onClick={() => navigate(user ? '/dashboard' : '/auth/select-type')}>
-              {user ? 'Go to Dashboard' : 'Get Started Free'}
+              {user ? 'Go to Dashboard' : 'Create a free account'}
               <ArrowRight className="h-5 w-5" />
             </Button>
           </div>

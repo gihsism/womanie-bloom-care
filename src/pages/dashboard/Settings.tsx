@@ -725,7 +725,7 @@ const Settings = () => {
             <div className="flex items-center justify-between">
               <div>
                 <Label>Health Tips</Label>
-                <p className="text-sm text-muted-foreground">Daily tips based on your health journey</p>
+                <p className="text-sm text-muted-foreground">A short daily tip for your stage</p>
               </div>
               <Switch
                 checked={notifications.healthTips}

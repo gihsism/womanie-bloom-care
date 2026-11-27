@@ -43,7 +43,7 @@ const Blog = () => {
     },
     {
       title: 'Navigating Perimenopause: What to Expect',
-      excerpt: 'Understanding the transition to menopause and how to manage symptoms for a smoother journey.',
+      excerpt: 'What changes in perimenopause, and what helps with the symptoms.',
       author: 'Dr. Jennifer Lee',
       date: 'March 5, 2024',
       category: 'Menopause',
@@ -82,8 +82,8 @@ const Blog = () => {
               Women's Health Blog
             </h1>
             <p className="text-xl text-muted-foreground">
-              Expert insights, evidence-based advice, and community stories
-              to support your health journey.
+              Plain explanations of tests, symptoms and treatments, with the
+              sources we used.
             </p>
           </div>
         </div>
@@ -157,9 +157,9 @@ const Blog = () => {
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <Card className="p-8 max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-4">Stay Informed</h2>
+            <h2 className="text-3xl font-bold mb-4">Weekly email</h2>
             <p className="text-muted-foreground mb-6">
-              Get the latest women's health insights, tips, and research delivered to your inbox weekly.
+              One email a week with the newest articles. Unsubscribe in one click.
             </p>
             <div className="flex gap-2 max-w-md mx-auto">
               <input

@@ -84,7 +84,7 @@ const Install = () => {
           {isInstalled ? (
             <Card className="p-8 text-center bg-primary/10 border-primary/20">
               <Check className="h-16 w-16 text-primary mx-auto mb-4" />
-              <h2 className="text-2xl font-bold mb-2">Already Installed!</h2>
+              <h2 className="text-2xl font-bold mb-2">Already installed</h2>
               <p className="text-muted-foreground">
                 Womanie is installed on your device. You can find it on your home screen.
               </p>

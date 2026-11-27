@@ -4,23 +4,23 @@ import { Card } from '@/components/ui/card';
 const highlights = [
   {
     icon: FileText,
-    title: 'AI Document Analysis',
-    description: 'Upload lab results and get instant, plain-language explanations of every test — what it means, whether it\'s healthy, and what to do next.',
+    title: 'Reports explained',
+    description: 'Each test on your report in plain words: what it measures, whether it is in range, and what to ask your doctor.',
   },
   {
     icon: Brain,
-    title: 'Personalized Insights',
-    description: 'Our AI cross-references your results to find patterns that matter — like how your iron levels connect to your cycle, or what your hormones mean for fertility.',
+    title: 'Results read together',
+    description: 'Values are read side by side, so low ferritin is linked to heavy periods, or AMH to your fertility plans.',
   },
   {
     icon: TrendingUp,
-    title: 'Trend Predictions',
-    description: 'Track how your health changes over time with visual charts, comparisons, and predictions for where your values are heading.',
+    title: 'Changes over time',
+    description: 'Each value charted across all your tests, so you can see whether it is rising, falling or steady.',
   },
   {
     icon: Shield,
-    title: 'Private & Secure',
-    description: 'Your health data is encrypted and visible only to you. We never share, sell, or use your data for anything other than helping you.',
+    title: 'Yours alone',
+    description: 'Your data is encrypted and only you can see it, unless you share it with a doctor. We never sell it.',
   },
 ];
 
@@ -33,10 +33,10 @@ const Testimonials = () => {
             <Heart className="h-7 w-7 text-primary" aria-hidden="true" />
           </div>
           <h2 className="text-3xl lg:text-5xl font-bold mb-4">
-            Built for Real Women's Health
+            More than a period tracker
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Womanie goes beyond basic tracking. We analyze your medical documents, explain results in plain language, and give you insights your doctor would approve of.
+            Womanie also reads your medical paperwork and explains it, so you walk into appointments knowing what your numbers mean.
           </p>
         </div>
 

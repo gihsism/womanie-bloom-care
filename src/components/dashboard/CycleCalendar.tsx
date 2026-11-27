@@ -308,7 +308,7 @@ const CycleCalendar = ({
   };
 
   const handleStillGoing = () => {
-    toast({ title: 'Got it!', description: "We'll check again tomorrow." });
+    toast({ title: 'Got it', description: "We'll check again tomorrow." });
   };
 
   // ─── Remove a period record ───

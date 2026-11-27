@@ -79,9 +79,9 @@ const BasicInformation = () => {
 
         <div className="text-center mb-8">
           <h1 className="text-3xl lg:text-4xl font-bold mb-3">
-            Let's personalize Womanie for you
+            A few basics first
           </h1>
-          <p className="text-muted-foreground">This helps us give you better health insights</p>
+          <p className="text-muted-foreground">Age, height and weight change what counts as a normal result</p>
         </div>
 
         <Card className="p-6 lg:p-8">

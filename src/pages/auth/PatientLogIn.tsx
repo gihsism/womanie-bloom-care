@@ -91,8 +91,8 @@ const PatientLogIn = () => {
       <div className="flex-1 flex items-center justify-center px-4 pb-16">
         <Card className="w-full max-w-md p-8 space-y-6">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-2">Welcome Back</h1>
-            <p className="text-muted-foreground">Log in to your health dashboard</p>
+            <h1 className="text-2xl font-bold mb-2">Log in to Womanie</h1>
+            <p className="text-muted-foreground">Your records and tracking are where you left them</p>
           </div>
 
           {googleOnlyError && showGoogle && (

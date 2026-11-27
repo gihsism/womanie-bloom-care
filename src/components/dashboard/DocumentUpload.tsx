@@ -132,7 +132,7 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
       setIsOpen(false);
 
       toast({
-        title: 'Uploaded!',
+        title: 'Uploaded',
         description: 'Analyzing in the background — results will appear in Health Records shortly.',
       });
 

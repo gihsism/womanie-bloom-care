@@ -17,32 +17,32 @@ const Hero = () => {
           <div className="animate-fade-in">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6">
               <Brain className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-              <span className="text-xs font-medium text-primary">AI-Powered Health Analysis</span>
+              <span className="text-xs font-medium text-primary">Reads lab reports in English, German and French</span>
             </div>
 
             <h1 className="text-4xl lg:text-6xl font-bold leading-tight mb-5">
-              Understand Your Health{' '}
-              <span className="text-primary">Like Never Before</span>
+              Know what your lab results{' '}
+              <span className="text-primary">actually say</span>
             </h1>
             <p className="text-lg lg:text-xl text-muted-foreground mb-6">
-              Upload your lab results and medical documents — our AI explains every result
-              in plain language, spots patterns your doctor might miss, and tracks your
-              health across pregnancy, cycles, fertility, and menopause.
+              Upload a lab report or a doctor's letter. Each value is explained in plain
+              words, next to your earlier results. The app follows your cycle, pregnancy,
+              fertility treatment or menopause, and changes with you.
             </p>
 
             {/* Key benefits */}
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-8 text-sm text-muted-foreground">
               <span className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-primary" aria-hidden="true" />
-                Upload any medical document
+                PDF, photo or Word file
               </span>
               <span className="flex items-center gap-2">
                 <Brain className="h-4 w-4 text-primary" aria-hidden="true" />
-                AI explains every result
+                Every value explained
               </span>
               <span className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-primary" aria-hidden="true" />
-                100% private & encrypted
+                Encrypted, never sold
               </span>
             </div>
 
@@ -62,7 +62,7 @@ const Hero = () => {
                   className="text-lg px-8 gap-2"
                   onClick={() => navigate('/auth/select-type')}
                 >
-                  Get Started Free
+                  Create a free account
                   <ArrowRight className="h-5 w-5" />
                 </Button>
               )}
@@ -72,7 +72,7 @@ const Hero = () => {
                 className="text-lg px-8"
                 onClick={() => navigate('/product')}
               >
-                See How It Works
+                See what it does
               </Button>
             </div>
             {!user && (
@@ -91,7 +91,7 @@ const Hero = () => {
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl blur-3xl"></div>
               <img
                 src={heroIllustration}
-                alt="Woman holding smartphone with health tracking dashboard"
+                alt="Woman looking at the Womanie app on her phone"
                 className="relative w-full h-auto rounded-3xl"
                 width={512}
                 height={512}

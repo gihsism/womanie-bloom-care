@@ -241,7 +241,7 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
 
       if (error) throw error;
       setSaved(true);
-      toast({ title: 'Saved!', description: 'Your daily log has been recorded.' });
+      toast({ title: 'Saved', description: 'Today is logged.' });
       emitHealthDataChange();
     } catch (error) {
       console.error('Error saving:', error);

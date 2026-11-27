@@ -25,7 +25,7 @@ const Footer = () => {
         body: JSON.stringify({ email }),
       });
       if (!resp.ok) throw new Error(`subscribe failed (${resp.status})`);
-      toast({ title: 'Subscribed!', description: 'Thanks for signing up. We\'ll keep you in the loop.' });
+      toast({ title: 'You are subscribed', description: 'Thank you. Expect an email now and then, not every day.' });
       setEmail('');
     } catch {
       toast({ variant: 'destructive', title: 'Something went wrong', description: 'Could not subscribe right now — please try again later.' });
@@ -43,7 +43,7 @@ const Footer = () => {
     ],
     Product: [
       { label: 'Features', href: '/product' },
-      { label: 'AI Assistant', href: '/product' },
+      { label: 'Ask about results', href: '/product' },
       { label: 'Install App', href: '/install' },
       { label: 'Community', href: '/community' },
     ],
@@ -64,9 +64,9 @@ const Footer = () => {
         {/* Newsletter */}
         <div className="mb-12 pb-12 border-b border-border">
           <div className="max-w-2xl mx-auto text-center">
-            <h3 className="text-2xl font-bold mb-2">Stay Informed</h3>
+            <h3 className="text-2xl font-bold mb-2">Email updates</h3>
             <p className="text-muted-foreground mb-6">
-              Get health tips, product updates, and exclusive content delivered to your inbox
+              Short notes on women's health and on what we have added to the app
             </p>
             <form onSubmit={handleSubscribe} className="flex gap-2 max-w-md mx-auto">
               <Input

@@ -202,7 +202,7 @@ const Devices = () => {
                                 if (granted) {
                                   setHealthKitConnected(true);
                                   const data = await healthKitService.getAllHealthData();
-                                  toast.success('Apple Health connected!', {
+                                  toast.success('Apple Health connected', {
                                     description: `Synced ${data.steps} steps, ${data.heartRate?.length || 0} heart rate readings`,
                                   });
                                 } else {

@@ -128,7 +128,7 @@ const DoctorSignUp = () => {
       }
 
       toast({
-        title: 'Registration submitted!',
+        title: 'Registration sent',
         description: data.message || 'Your account is pending verification. License review typically takes 1–3 business days; try logging in again once approved.',
       });
       navigate('/auth/doctor-login');

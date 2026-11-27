@@ -51,7 +51,7 @@ const PostpartumForm = () => {
     <div>
       <div className="text-center mb-8">
         <h1 className="text-3xl lg:text-4xl font-bold mb-3">
-          Welcome — let's tune Womanie for your fourth trimester
+          Tell us about your birth and recovery
         </h1>
         <p className="text-muted-foreground">
           The dashboard times recovery milestones to your delivery date.
