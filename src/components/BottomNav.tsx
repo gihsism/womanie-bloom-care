@@ -35,6 +35,8 @@ const TABS: Tab[] = [
 // marketing pages, auth, onboarding, doctor/admin, and print views.
 function shouldShow(pathname: string): boolean {
   if (pathname.endsWith("/print") || pathname.includes("/print")) return false;
+  // The visit prep sheet is a print view too (/dashboard/appointments/:id/prep).
+  if (/^\/dashboard\/appointments\/[^/]+\/prep\/?$/.test(pathname)) return false;
   return pathname === "/dashboard" || pathname.startsWith("/dashboard/");
 }
 
