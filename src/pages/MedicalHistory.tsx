@@ -65,6 +65,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { fetchDoctorSentDocuments } from '@/lib/documentFiles';
+import { LoadFailed } from '@/components/LoadFailed';
 import { format, differenceInDays, addDays } from 'date-fns';
 import {
   type MedicalDataItem,
@@ -572,6 +573,9 @@ export default function MedicalHistory() {
   const [fromDoctor, setFromDoctor] = useState<Record<string, { doctor_name: string; note: string | null }>>({});
   const [lifeStage, setLifeStage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  // The document list could not be loaded (server/network): say so with a
+  // retry instead of "No documents yet", which reads as if her records are gone.
+  const [loadFailed, setLoadFailed] = useState(false);
   const [expandedPanels, setExpandedPanels] = useState<Set<string>>(new Set());
   const [reanalyzing, setReanalyzing] = useState(false);
   const [reanalyzeProgress, setReanalyzeProgress] = useState({ done: 0, total: 0 });
@@ -688,6 +692,7 @@ export default function MedicalHistory() {
       ]);
       if (medRes.data) setMedicalData(medRes.data as MedicalDataItem[]);
       if (docRes.data) setDocuments(docRes.data);
+      setLoadFailed(Boolean(docRes.error));
       // "From Dr X" labels. Best effort: without them the list still works.
       fetchDoctorSentDocuments().then(list => {
         const map: Record<string, { doctor_name: string; note: string | null }> = {};
@@ -700,6 +705,7 @@ export default function MedicalHistory() {
       }
     } catch (error) {
       console.error('Error fetching medical history:', error);
+      setLoadFailed(true);
     } finally {
       setLoading(false);
     }
@@ -1218,7 +1224,13 @@ export default function MedicalHistory() {
         {justUploaded && hasDocuments && <NewDocInsights documents={documents} medicalData={medicalData} />}
 
         {/* Empty state: one sentence, one button (Results + Documents) */}
-        {!hasDocuments && segment !== 'charts' && (
+        {loadFailed && !hasDocuments && segment !== 'charts' && (
+          <LoadFailed
+            message="We couldn't load your documents."
+            onRetry={() => { setLoading(true); void fetchData(); }}
+          />
+        )}
+        {!loadFailed && !hasDocuments && segment !== 'charts' && (
           <Card className="border-dashed">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">

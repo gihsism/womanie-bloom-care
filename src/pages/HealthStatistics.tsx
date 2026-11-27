@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { LoadFailed } from "@/components/LoadFailed";
 import { useNavigate } from "react-router-dom";
 import { db } from "@/integrations/db/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -53,6 +54,7 @@ export default function HealthStatistics() {
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
   const [extracted, setExtracted] = useState<ExtractedItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [downloadingCsv, setDownloadingCsv] = useState(false);
 
   useEffect(() => {
@@ -74,8 +76,10 @@ export default function HealthStatistics() {
       if (docsRes.error) throw docsRes.error;
       setDocuments(docsRes.data || []);
       setExtracted((extractedRes.data ?? []) as ExtractedItem[]);
+      setLoadFailed(false);
     } catch (error) {
       console.error('Error fetching statistics:', error);
+      setLoadFailed(true);
     } finally {
       setLoading(false);
     }
@@ -229,7 +233,9 @@ export default function HealthStatistics() {
         <UserMenu />
       </div>
 
-      {documents.length === 0 ? (
+      {loadFailed && documents.length === 0 ? (
+        <LoadFailed message="We couldn't load your documents." onRetry={() => { setLoading(true); void fetchDocuments(); }} />
+      ) : documents.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <FileText className="h-12 w-12 text-muted-foreground mb-4" />

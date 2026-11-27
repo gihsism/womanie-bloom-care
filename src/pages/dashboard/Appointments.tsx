@@ -43,6 +43,7 @@ import { formatPracticeTime } from '@/lib/practiceTime';
 const RescheduleDialog = lazy(() => import('@/components/dashboard/RescheduleDialog'));
 import { viewerOutsidePracticeTz } from '@/lib/timeSlots';
 import { formatVisitWhen, swissSuffix } from '@/lib/booking';
+import { LoadFailed } from '@/components/LoadFailed';
 
 // Patient-side full appointments view: upcoming + past in one page.
 // Backed by the same /api/me/appointments endpoint the dashboard widget
@@ -100,6 +101,8 @@ const Appointments = () => {
   const [confirm, confirmDialog] = useConfirm();
   const [rows, setRows] = useState<AppointmentRow[]>([]);
   const [loaded, setLoaded] = useState(false);
+  // Visits could not be loaded: show that with a retry, not "No visits yet".
+  const [loadFailed, setLoadFailed] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rescheduling, setRescheduling] = useState<AppointmentRow | null>(null);
   const rescheduleMounted = useOnceTrue(rescheduling !== null);
@@ -127,8 +130,10 @@ const Appointments = () => {
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const payload = await resp.json();
       setRows((payload.appointments ?? []) as AppointmentRow[]);
+      setLoadFailed(false);
     } catch (e) {
       console.error('Failed to load appointments:', e);
+      setLoadFailed(true);
       toast({
         variant: 'destructive',
         title: 'Could not load appointments',
@@ -405,6 +410,8 @@ const Appointments = () => {
           </div>
           {!loaded ? (
             <Skeleton className="h-20 w-full" />
+          ) : loadFailed && rows.length === 0 ? (
+            <LoadFailed message="We couldn't load your visits." onRetry={() => { setLoaded(false); void load(); }} />
           ) : nextVisit ? (
             <ul className="space-y-2">{renderAppointment(nextVisit, 'upcoming')}</ul>
           ) : (
