@@ -8,6 +8,7 @@
 // with its dates ("gone down at each of your last 3 tests").
 
 import { labNumber, type LabParseContext } from './labValue';
+import { normLabUnit, normTestTitle } from './labFlags';
 export interface ExtractedItem {
   title: string;
   value: string | null;
@@ -54,11 +55,11 @@ export interface TrendRun {
 export const MIN_RUN = 3;
 export const MAX_RUN_POINTS = 6;
 
-// Same unit written two ways ("µg/L", "ug/l", "mcg/L") counts as one.
-const normUnit = (u: string | null | undefined) =>
-  (u ?? '').trim().toLowerCase().replace(/\s+/g, '').replace(/[µμ]|mc(?=g)/g, 'u');
-// "Ferritin" and "ferritin " from two labs are one test.
-const normTitle = (t: string) => t.trim().toLowerCase().replace(/\s+/g, ' ');
+// Test matching shared with the "outside the range" rule (labFlags):
+// same unit written two ways counts as one; "Ferritin" and "ferritin "
+// from two labs are one test.
+const normUnit = normLabUnit;
+const normTitle = normTestTitle;
 
 /**
  * Readings newest first -> the run that ends at the newest reading, when

@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { differenceInDays, differenceInMonths, format, parseISO, subDays } from 'date-fns';
 import { getFriendlyName } from '@/lib/medical-utils';
+import { currentFlagged } from '@/lib/labFlags';
 import { lifeStageLabel } from '@/lib/lifeStageLabels';
 
 // Bring-to-the-doctor printout — everything Womanie has on the patient
@@ -234,19 +235,9 @@ export default function PrintHealthRecord() {
     return { total, daysWith };
   }, [signalRows]);
 
-  const flagged = useMemo<Item[]>(() => {
-    const flaggedRows = items.filter(
-      i => i.status === 'critical' || i.status === 'abnormal'
-    );
-    flaggedRows.sort((a, b) => {
-      const sev = (a.status === 'critical' ? 0 : 1) - (b.status === 'critical' ? 0 : 1);
-      if (sev !== 0) return sev;
-      const ta = a.date_recorded ? Date.parse(a.date_recorded) : 0;
-      const tb = b.date_recorded ? Date.parse(b.date_recorded) : 0;
-      return tb - ta;
-    });
-    return flaggedRows;
-  }, [items]);
+  // Latest reading per test, outside the range, urgent first then newest
+  // (shared rule, labFlags): a result re-tested normal is not flagged.
+  const flagged = useMemo<Item[]>(() => currentFlagged(items), [items]);
 
   if (!loaded) {
     return (

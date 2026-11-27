@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { dueTriggerPush } from '../../src/lib/ivfJourney';
 import {
-  planUserReminders, triggerPushDue, localParts, isQuietHours, inDayWindow, parsePrefs, userTimeZone,
+  planUserReminders, triggerPushDue, localParts, isQuietHours, inDayWindow, parsePrefs, userTimeZone, wallClock, appDataValue,
   type SubscriptionRow, type UserData,
 } from './push-schedule';
 
@@ -166,7 +166,7 @@ describe('opt-out and ownership', () => {
   });
 
   it('defaults every type on except the opt-in IVF trigger reminder', () => {
-    expect(parsePrefs(null)).toEqual({ medicine: true, period: true, appointment: true, bookings: true, documents: true, ivf_trigger: false });
+    expect(parsePrefs(null)).toEqual({ medicine: true, period: true, appointment: true, bookings: true, documents: true, ivf_trigger: false, checkups: true });
   });
 });
 
@@ -209,5 +209,77 @@ describe('IVF trigger-shot reminders', () => {
       expect(triggerPushDue(T, before(m))).toEqual(dueTriggerPush(T, before(m)));
     }
     expect(triggerPushDue('garbage', before(10))).toBeNull();
+  });
+});
+
+describe('Today-list reminders now sent to the phone (2026-11-28)', () => {
+  const DAY_AT = new Date('2026-11-26T10:05:00Z'); // 11:05 in Zurich
+  const keys = (r: ReturnType<typeof planUserReminders>) => r.map(x => x.key);
+
+  it('a medicine pack running out: once per run-out day, no medicine name, Medicine switch', () => {
+    const med = { id: 'm2', user_id: 'A', reminder_times: [], name: 'Iron', times_per_day: 1, pack_size: 30, pack_started_on: '2026-10-30' };
+    const r = planUserReminders(data({ meds: [med] }), [sub()], DAY_AT);
+    expect(keys(r)).toEqual(['supply:m2:2026-11-28']);
+    expect(r[0].payload.body).toBe('A medicine pack runs out in 2 days. Tap to see which one.');
+    expect(r[0].payload.body).not.toContain('Iron');
+    expect(planUserReminders(data({ meds: [med] }), [sub({ prefs: { medicine: false } })], DAY_AT)).toEqual([]);
+    // Womanie picks the time: never before 09:00 or in quiet hours.
+    expect(planUserReminders(data({ meds: [med] }), [sub()], new Date('2026-11-26T07:05:00Z'))).toEqual([]);
+    expect(planUserReminders(data({ meds: [med] }), [sub()], new Date('2026-11-26T21:30:00Z'))).toEqual([]);
+    // A course end date counts too; nothing when neither is known.
+    const course = { id: 'm3', user_id: 'A', reminder_times: [], name: 'Antibiotic', ends_on: '2026-11-26' };
+    expect(planUserReminders(data({ meds: [course] }), [sub()], DAY_AT)[0].payload.body).toBe('A medicine course ends today. Tap to see which one.');
+    expect(planUserReminders(data({ meds: [{ id: 'm4', user_id: 'A', reminder_times: [], name: 'X' }] }), [sub()], DAY_AT)).toEqual([]);
+  });
+
+  it('pregnancy vaccinations due now (account-synced marks), one push per set of due vaccinations', () => {
+    // Due 2027-02-04 -> week 30 on 26 Nov 2026: Tdap, flu and COVID are in their window; flu is marked received.
+    const preg = data({ lifeStage: 'pregnancy', pregnancyDueDate: '2027-02-04', pregVaccines: JSON.stringify({ flu: { receivedDate: '2026-10-01' } }) });
+    const r = planUserReminders(preg, [sub()], DAY_AT);
+    expect(keys(r)).toEqual(['pregvax:2027-02-04:covid,tdap']);
+    expect(r[0].type).toBe('checkups');
+    expect(r[0].payload.body).toBe('2 vaccinations are recommended around this week. Tap to see which.');
+    expect(r[0].payload.url).toBe('/dashboard/stage#vaccinations');
+    // "Not now" and received marks hide them; the switch turns them off; other stages get none.
+    expect(planUserReminders({ ...preg, pregVaccines: { tdap: { declined: true }, covid: { receivedDate: '2026-11-01' }, flu: { declined: true } } }, [sub()], DAY_AT)).toEqual([]);
+    expect(planUserReminders(preg, [sub({ prefs: { checkups: false } })], DAY_AT)).toEqual([]);
+    expect(planUserReminders({ ...preg, pregVaccines: undefined }, [sub()], DAY_AT)).toEqual([]); // marks unreadable: no guess
+    expect(planUserReminders({ ...preg, lifeStage: 'postpartum' }, [sub()], DAY_AT).filter(x => x.key.startsWith('pregvax'))).toEqual([]);
+  });
+
+  it('a baby at a common vaccination age with nothing logged: once per baby and age', () => {
+    const pp = data({ lifeStage: 'postpartum', babies: [{ id: 'b1', name: 'Mia', birth_date: '2026-09-24' }] });
+    const r = planUserReminders(pp, [sub()], DAY_AT);
+    expect(keys(r)).toEqual(['babyvax:b1:2 months']);
+    expect(r[0].payload.body).toBe('Mia is 2 months: a common age for vaccinations. Check the vaccine booklet.');
+    expect(planUserReminders(data({ lifeStage: 'postpartum', babies: [{ id: 'b1', name: 'Mia', birth_date: '2026-09-24', lastVaccineAt: '2026-11-25T10:00:00Z' }] }), [sub()], DAY_AT)).toEqual([]);
+  });
+
+  it('the 6-week postnatal check: weeks 5-8 after the birth, no visit since, milestone not ticked', () => {
+    const known = { visitTimes: [], postpartumMilestones: null };
+    const pp = data({ lifeStage: 'postpartum', birthAt: '2026-10-15T08:00:00Z', ...known });
+    const r = planUserReminders(pp, [sub()], DAY_AT);
+    expect(keys(r)).toEqual(['postnatal:2026-10-15']);
+    expect(r[0].payload.url).toBe('/dashboard/stage#recovery');
+    expect(planUserReminders({ ...pp, visitTimes: ['2026-11-20T09:00:00Z'] }, [sub()], DAY_AT)).toEqual([]);
+    expect(planUserReminders({ ...pp, visitTimes: ['2026-10-01T09:00:00Z'] }, [sub()], DAY_AT)).toHaveLength(1); // a visit before the birth does not count
+    expect(planUserReminders({ ...pp, postpartumMilestones: JSON.stringify({ 'six-week-visit': true }) }, [sub()], DAY_AT)).toEqual([]);
+    expect(planUserReminders(pp, [sub({ prefs: { checkups: false } })], DAY_AT)).toEqual([]);
+    // The birth day is HER calendar day: 23:30Z on 14 Oct is 00:30 on 15 Oct in Zurich.
+    expect(keys(planUserReminders(data({ lifeStage: 'postpartum', birthAt: '2026-10-14T23:30:00Z', ...known }), [sub()], DAY_AT))).toEqual(['postnatal:2026-10-15']);
+    // Without a birth record, the youngest baby's birth date is used.
+    expect(keys(planUserReminders(data({ lifeStage: 'postpartum', birthAt: null, babies: [{ id: 'b2', name: 'Leo', birth_date: '2026-10-15' }], ...known }), [sub()], DAY_AT))).toEqual(['postnatal:2026-10-15']);
+    // Anything unreadable (undefined): no guess, no push.
+    expect(planUserReminders({ ...pp, visitTimes: undefined }, [sub()], DAY_AT)).toEqual([]);
+    expect(planUserReminders({ ...pp, postpartumMilestones: undefined }, [sub()], DAY_AT)).toEqual([]);
+  });
+
+  it('reads her calendar day in her timezone', () => {
+    const t = new Date('2026-11-26T23:30:00Z'); // still 26 Nov in New York (18:30), 27 Nov in Zurich (quiet hours)
+    expect(wallClock(t, 'America/New_York').getDate()).toBe(26);
+    expect(wallClock(t, 'Europe/Zurich').getDate()).toBe(27);
+    expect(appDataValue('{"a":1}')).toEqual({ a: 1 });
+    expect(appDataValue({ a: 1 })).toEqual({ a: 1 });
+    expect(appDataValue('not json')).toBeNull();
   });
 });

@@ -63,4 +63,15 @@ describe("RecentFindings", () => {
     const html = container.innerHTML;
     expect(html.indexOf("CriticalTest")).toBeLessThan(html.indexOf("AbnormalTest"));
   });
+  it("hides a result whose newer reading of the same test is normal", async () => {
+    state.rows = [
+      finding("TSH", "abnormal", "2026-03-01"),
+      { ...finding("TSH", "normal", "2026-09-01"), id: "TSH-new" },
+      finding("Ferritin", "abnormal", "2026-05-01"),
+    ];
+    const { container } = renderCard();
+    await screen.findByText("Results that need attention");
+    expect(screen.getByText(/1 flagged/)).toBeInTheDocument();
+    expect(container.innerHTML).not.toContain("TSH");
+  });
 });

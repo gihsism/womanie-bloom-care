@@ -6,8 +6,10 @@
 // documents = patient side: "Dr X added a document" to her Records.
 // ivf_trigger = IVF trigger shot, 1 h and 10 min before; opt-in (off when
 // missing, so older callers that build prefs without it keep it off).
-export interface PushPrefs { medicine: boolean; period: boolean; appointment: boolean; bookings: boolean; documents: boolean; ivf_trigger?: boolean }
-export const DEFAULT_PUSH_PREFS: PushPrefs = { medicine: true, period: true, appointment: true, bookings: true, documents: true, ivf_trigger: false };
+// checkups = pregnancy and baby vaccinations, 6-week postnatal check (on
+// when missing: the server reads a device saved before it existed as on).
+export interface PushPrefs { medicine: boolean; period: boolean; appointment: boolean; bookings: boolean; documents: boolean; ivf_trigger?: boolean; checkups?: boolean }
+export const DEFAULT_PUSH_PREFS: PushPrefs = { medicine: true, period: true, appointment: true, bookings: true, documents: true, ivf_trigger: false, checkups: true };
 
 export type PushSupport =
   | 'native-app'      // Capacitor iOS/Android shell: Web Push does not run there

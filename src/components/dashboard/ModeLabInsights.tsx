@@ -1,4 +1,5 @@
 import { Card } from '@/components/ui/card';
+import { isOutsideRange } from '@/lib/labFlags';
 import { useLabResults } from '@/hooks/useLabResults';
 import EvidenceNote from '@/components/research/EvidenceNote';
 import { specsForLabs } from '@/lib/evidenceTopics';
@@ -109,7 +110,7 @@ export default function ModeLabInsights({ mode }: ModeLabInsightsProps) {
 
   const tested = matched.filter(m => m.result);
   const missing = matched.filter(m => !m.result);
-  const flagged = tested.filter(m => m.result?.status === 'abnormal' || m.result?.status === 'critical');
+  const flagged = tested.filter(m => isOutsideRange(m.result?.status));
 
   if (labs.length === 0) {
     return <LabEmptyCard title="Upload blood tests" text={`See results relevant to ${MODE_LABELS[mode] || 'your health'}`} />;

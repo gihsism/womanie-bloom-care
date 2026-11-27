@@ -50,6 +50,7 @@ import { AnswerFeedback, FollowUpChips, RecordChips } from '@/components/chat/An
 import { addToVisitList, chatToMarkdown, questionFromAnswer } from '@/lib/chatExport';
 import { UNSCHEDULED_VISIT_ID } from '@/lib/hrtQuestions';
 import { emitHealthDataChange } from '@/lib/data-events';
+import { currentFlagged, latestPerTest } from '@/lib/labFlags';
 import { citedSources, linkCitations, splitSourcesFooter, stripSourcesFooter, stripUnknownCitations, type ChatSource } from '@/lib/research-sources';
 
 // `sources`: research-library items the server gave the model for this
@@ -81,7 +82,6 @@ function readPostpartumWeeks(userId: string): number | null {
   }
 }
 
-const FLAGGED_STATUSES = new Set(['low', 'high', 'abnormal', 'critical', 'elevated', 'decreased', 'out of range', 'borderline']);
 
 const CHAT_URL = '/api/ai-doctor-chat';
 
@@ -306,21 +306,23 @@ export default function AIDoctorChat() {
         const [profileRes, docsRes, extractedRes, appointmentsResp, notesResp] = await Promise.all([
           db.from('profiles').select('life_stage, pregnancy_due_date, ivf_phase').eq('id', user.id).maybeSingle(),
           db.from('health_documents').select('ai_suggested_name, ai_summary, document_type').eq('user_id', user.id).order('uploaded_at', { ascending: false }).limit(5),
-          db.from('current_extracted_data').select('title, value, unit, status, data_type').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
+          db.from('current_extracted_data').select('title, value, unit, status, data_type, date_recorded').eq('user_id', user.id).order('created_at', { ascending: false }).limit(300),
           fetch('/api/me/appointments?upcoming=true').then(r => (r.ok ? r.json() : { appointments: [] })),
           fetch('/api/me/doctor-notes').then(r => (r.ok ? r.json() : { notes: [] })),
         ]);
 
-        type ExtractedRow = { title: string; value: string | null; unit: string | null; status: string | null; data_type: string };
+        type ExtractedRow = { title: string; value: string | null; unit: string | null; status: string | null; data_type: string; date_recorded: string | null };
         type DocRow = { ai_suggested_name: string | null; ai_summary: string | null; document_type: string };
-        const extractedRows = (extractedRes.data ?? []) as ExtractedRow[];
+        // Only the latest reading of each test (shared rule, labFlags), in
+        // the order the tests were last added, 20 at most: an old high TSH
+        // re-tested normal must not reach the AI as "abnormal".
+        const extractedRows = latestPerTest((extractedRes.data ?? []) as ExtractedRow[]).slice(0, 20);
         const docRows = (docsRes.data ?? []) as DocRow[];
         const profile = profileRes.data as { life_stage?: string | null; pregnancy_due_date?: string | null; ivf_phase?: string | null } | null;
         setStarterInfo({
           dueDate: profile?.pregnancy_due_date ?? null,
           ivfPhase: profile?.ivf_phase ?? null,
-          flaggedLabs: extractedRows
-            .filter(d => d.data_type === 'lab_result' && FLAGGED_STATUSES.has(String(d.status || '').toLowerCase()))
+          flaggedLabs: currentFlagged(extractedRows.filter(d => d.data_type === 'lab_result'))
             .map(d => ({ title: d.title, status: d.status })),
         });
 
@@ -849,7 +851,8 @@ export default function AIDoctorChat() {
     lifeStage,
     // A bare life-stage line is not "records on file".
     hasContext: hasContext && medicalContext !== `Life stage: ${lifeStage}`,
-    hasFlaggedResults: Boolean(medicalContext?.includes('abnormal') || medicalContext?.includes('critical')),
+    // Same list as the starter question: latest reading per test, outside the range.
+    hasFlaggedResults: starterInfo.flaggedLabs.length > 0,
     hasUpcomingVisit: Boolean(medicalContext?.includes('Upcoming appointments:')),
     pregnancyWeek: preg?.week ?? null,
     postpartumWeeks: lifeStage === 'postpartum' && user ? readPostpartumWeeks(user.id) : null,

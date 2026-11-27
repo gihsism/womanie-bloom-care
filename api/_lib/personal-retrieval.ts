@@ -24,6 +24,7 @@
 // the synonym table already covers the multilingual analyte names.)
 
 import { normalizeTestTitle } from './normalize-test-title.js';
+import { isOutsideRange } from './lab-flags.js';
 import { numberStylesByDocument, parseLabValue, type NumberStyle } from './lab-value.js';
 import type { RecordCandidate } from './record-citations.js';
 
@@ -184,7 +185,6 @@ const GROUP_SYNONYMS: Record<string, string[]> = {
   niere: ['Creatinine', 'eGFR'],
 };
 
-const ABNORMAL_STATUSES = new Set(['high', 'low', 'abnormal', 'critical', 'elevated', 'decreased', 'out of range', 'borderline']);
 
 // Question words too common to match documents or row titles on.
 const STOPWORDS = new Set((
@@ -254,7 +254,8 @@ export function fmtDate(v: unknown): string {
 
 const canonOf = (r: LabRow) => normalizeTestTitle(str(r.title)) || 'Unknown';
 const isLab = (r: LabRow) => !r.data_type || str(r.data_type) === 'lab_result';
-const isAbnormal = (r: LabRow) => ABNORMAL_STATUSES.has(str(r.status).toLowerCase());
+// Outside the range by the shared definition (lab-flags.ts): borderline is not.
+const isAbnormal = (r: LabRow) => isOutsideRange(str(r.status));
 
 // A value printed with a comma, apostrophe or space ("1,25", "1'250",
 // "1,250") gets its number spelled out for the model, read with that
@@ -310,6 +311,7 @@ export interface SelectOptions {
   previousQuestion?: string | null;
   labs: LabRow[];
   docs: DocRow[];
+  /** No longer read (the out-of-range list keeps latest readings only); kept so callers need not change. */
   now?: Date;
   /** Approximate token budget for the whole block (1 token ~ 4 chars). Default 2500. */
   tokenBudget?: number;
@@ -321,7 +323,6 @@ export const estimateTokens = (s: string) => Math.ceil(s.length / 4);
 const DOC_INTENT = /\b(document|documents|report|reports|letter|upload|uploaded|scan|befund|bericht|arztbrief|pdf)\b|документ|заключени|выписк|анализ/iu;
 
 export function selectPersonalContext(opts: SelectOptions): PersonalSelection {
-  const now = opts.now ?? new Date();
   const budgetChars = (opts.tokenBudget ?? 2500) * 4;
   const baselineSize = opts.baselineSize ?? 10;
   const question = str(opts.question);
@@ -381,17 +382,17 @@ export function selectPersonalContext(opts: SelectOptions): PersonalSelection {
   let matchedDocs = scoredDocs.map((x) => x.d).slice(0, 6);
   if (matchedDocs.length === 0 && DOC_INTENT.test(question)) matchedDocs = docs.slice(0, 3);
 
-  // 3. Recent abnormal values: the latest reading of each test if abnormal,
-  //    plus any abnormal reading from the last 12 months.
+  // 3. Out-of-range values: the latest reading of each test when it is
+  //    outside the range (shared rule, lab-flags.ts). An older high reading
+  //    that was re-tested in range is history, not an out-of-range value; it
+  //    still reaches the model when the question is about that test.
   const latestByCanon = new Map<string, LabRow>();
   for (const r of [...labRows].sort(byDateDesc)) {
     const c = canonOf(r);
     if (!latestByCanon.has(c)) latestByCanon.set(c, r);
   }
-  const yearAgo = new Date(now.getTime() - 365 * 86400_000).toISOString().slice(0, 10);
   const abnormal = [...labRows].sort(byDateDesc).filter((r) =>
-    isAbnormal(r) && !historySet.has(r)
-    && (latestByCanon.get(canonOf(r)) === r || fmtDate(r.date_recorded) >= yearAgo)).slice(0, 20);
+    isAbnormal(r) && !historySet.has(r) && latestByCanon.get(canonOf(r)) === r).slice(0, 20);
   const abnormalSet = new Set(abnormal);
 
   // 4. Baseline: latest value of the most recently measured tests.
@@ -466,7 +467,7 @@ export function selectPersonalContext(opts: SelectOptions): PersonalSelection {
   let abnormalCount = 0;
   if (abnormal.length) {
     push('');
-    push('## Recent out-of-range values');
+    push('## Out-of-range values (latest reading of each test)');
     for (const r of abnormal) if (push(labLine(r))) abnormalCount++;
   }
 

@@ -10,18 +10,21 @@
 
 import { computeTrends, describeRun, formatLabDay, type ExtractedItem } from './health-trends';
 import { parseQuestions } from './visitQuestions';
+import { flagRank, labFlag, latestPerTest, normTestTitle } from './labFlags';
 
 export const MAX_PREP_RESULTS = 10;
 
-const FLAGGED = new Set(['critical', 'abnormal', 'borderline']);
+// "Outside range" / "borderline" come from the shared definition (labFlags).
+const FLAG_WORD = { urgent: 'outside range (marked urgent)', outside: 'outside range', borderline: 'borderline' } as const;
 const STATUS_WORD: Record<string, string> = {
-  critical: 'outside range (marked urgent)',
-  abnormal: 'outside range',
-  borderline: 'borderline',
   normal: 'within range',
   expected: 'expected for life stage',
 };
-const statusWord = (s: string | null | undefined) => (s ? STATUS_WORD[s] ?? null : null);
+const statusWord = (s: string | null | undefined) => {
+  const f = labFlag(s);
+  if (f) return FLAG_WORD[f];
+  return s ? STATUS_WORD[s.trim().toLowerCase()] ?? null : null;
+};
 
 export interface PrepResultRow extends ExtractedItem {
   reference_range?: string | null;
@@ -38,7 +41,7 @@ export interface PrepResult {
   note: string;
 }
 
-const norm = (t: string) => t.trim().toLowerCase().replace(/\s+/g, ' ');
+const norm = normTestTitle;
 const day = (raw: string | null) => (raw ? /^(\d{4}-\d{2}-\d{2})/.exec(raw)?.[1] ?? null : null);
 
 /**
@@ -52,24 +55,19 @@ export function resultsToDiscuss(
   max = MAX_PREP_RESULTS,
 ): PrepResult[] {
   const labs = rows.filter(r => (!r.data_type || r.data_type === 'lab_result') && r.title && r.value != null && String(r.value).trim() !== '');
-  // Latest reading per test (undated readings only count when nothing is dated).
-  const latest = new Map<string, PrepResultRow>();
-  for (const r of labs) {
-    const k = norm(r.title);
-    const prev = latest.get(k);
-    if (!prev || (day(r.date_recorded) ?? '') > (day(prev.date_recorded) ?? '')) latest.set(k, r);
-  }
+  // Latest reading per test (shared rule, labFlags; undated readings only
+  // count when nothing is dated).
+  const latest = new Map(latestPerTest(labs.map(r => ({ ...r, data_type: 'lab_result' }))).map(r => [norm(r.title), r] as const));
   const trends = new Map(computeTrends(labs).map(t => [norm(t.title), t]));
 
   const out: Array<PrepResult & { rank: number }> = [];
   for (const [k, r] of latest) {
-    const status = (r.status ?? '').toLowerCase();
     const t = trends.get(k);
     const notes: string[] = [];
     let rank = 9;
-    if (FLAGGED.has(status)) {
-      notes.push(`Marked ${statusWord(status)}`);
-      rank = status === 'critical' ? 0 : status === 'abnormal' ? 1 : 2;
+    if (labFlag(r.status)) {
+      notes.push(`Marked ${statusWord(r.status)}`);
+      rank = flagRank(r.status);
     }
     if (t && t.statusShift !== 'same') {
       const was = statusWord(t.prevStatus);

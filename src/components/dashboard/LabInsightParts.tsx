@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { isOutsideRange } from '@/lib/labFlags';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,7 @@ import { attentionBanner, getStatusInfo } from '@/lib/medical-utils';
 // burnt-orange (--destructive) for out-of-range ones. No green, no
 // yellow, no emoji.
 
-const isFlagged = (status: string | null) => status === 'abnormal' || status === 'critical';
+const isFlagged = (status: string | null) => isOutsideRange(status);
 
 export function LabCardHeader() {
   const navigate = useNavigate();

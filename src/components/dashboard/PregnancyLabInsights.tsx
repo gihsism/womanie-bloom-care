@@ -1,4 +1,5 @@
 import { withinWindow } from '@/lib/labWindow';
+import { isOutsideRange } from '@/lib/labFlags';
 import { Card } from '@/components/ui/card';
 import { useLabResults } from '@/hooks/useLabResults';
 import EvidenceNote from '@/components/research/EvidenceNote';
@@ -36,7 +37,7 @@ export default function PregnancyLabInsights({ since = null }: { since?: Date | 
 
   const tested = matched.filter(m => m.result);
   const missing = matched.filter(m => !m.result);
-  const flagged = tested.filter(m => m.result?.status === 'abnormal' || m.result?.status === 'critical');
+  const flagged = tested.filter(m => isOutsideRange(m.result?.status));
 
   if (labs.length === 0) {
     return (

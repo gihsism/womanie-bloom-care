@@ -37,6 +37,16 @@ describe('flaggedResults', () => {
   });
 });
 
+describe('flaggedResults matches tests like the patient screens (labFlags)', () => {
+  it('merges titles that differ only in spacing, so the newer normal reading wins', () => {
+    const rows = [
+      { id: '1', title: 'Free  T4', status: 'abnormal', date_recorded: '2026-01-01' },
+      { id: '2', title: 'free t4', status: 'normal', date_recorded: '2026-06-01' },
+    ];
+    expect(flaggedResults(rows)).toEqual([]);
+  });
+});
+
 describe('pregnancyWeek', () => {
   it('derives the week from the due date', () => {
     // 112 days to due -> (280-112)/7 = 24

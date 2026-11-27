@@ -68,7 +68,7 @@ describe('push/subscription', () => {
     expect(res._status).toBe(200);
     const [, params] = query.mock.calls[0];
     expect(params.slice(0, 5)).toEqual(['A', SUB.endpoint, 'BKey_-1', 'auth1', 'Europe/Zurich']);
-    expect(JSON.parse(params[5])).toEqual({ medicine: true, period: false, appointment: true, bookings: true, documents: true, ivf_trigger: false });
+    expect(JSON.parse(params[5])).toEqual({ medicine: true, period: false, appointment: true, bookings: true, documents: true, ivf_trigger: false, checkups: true });
   });
 
   it('rejects a non-https endpoint and a bad timezone falls back to UTC', async () => {

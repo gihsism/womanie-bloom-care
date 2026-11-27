@@ -15,10 +15,13 @@ import { PREG_VACCINES_KEY, gestationalWeek, vaccinesDueNow, type VaccineState }
 import { useAccountDataVersion } from '@/lib/account-data';
 import { babyVaccineReminders, type BabyForVaccines } from '@/lib/babyVaccines';
 import { postnatalCheckDue, pickBirthDate, POSTNATAL_MILESTONE_ID } from '@/lib/postnatalCheck';
+import { currentFlagged } from '@/lib/labFlags';
+
+type FlagRow = { id: string; title: string; status: string | null; data_type: string | null; date_recorded: string | null };
 
 // Reads the few facts Home's "Today" list ranks (lib/todayItems.ts):
-// visits (today / within a week), recent doctor notes, results marked
-// critical, getting-started progress, the next predicted period, and the
+// visits (today / within a week), recent doctor notes, results outside
+// the range (latest reading per test), getting-started progress, the next predicted period, and the
 // stage tasks: medicines due (medications + today's med_dose ticks), a
 // medicine whose course or pack ends within 3 days,
 // an unticked contraceptive pill, pregnancy vaccinations in their window
@@ -113,7 +116,7 @@ export function useTodaySignals(
       const [apptResp, notesResp, critRes, docsRes, signalsRes] = await Promise.all([
         fetch('/api/me/appointments').then(r => (r.ok ? r.json() : { appointments: [] })).catch(() => ({ appointments: [] })),
         fetch('/api/me/doctor-notes').then(r => (r.ok ? r.json() : { notes: [] })).catch(() => ({ notes: [] })),
-        db.from('current_extracted_data').select('id').eq('user_id', user.id).eq('status', 'critical'),
+        db.from('current_extracted_data').select('id, title, status, data_type, date_recorded').eq('user_id', user.id),
         db.from('health_documents').select('id').eq('user_id', user.id).limit(1),
         db.from('daily_health_signals').select('id').eq('user_id', user.id).limit(1),
       ]);
@@ -133,7 +136,9 @@ export function useTodaySignals(
         appointmentToday: today ? new Date(today.scheduled_at) : null,
         nextVisit: next ? new Date(next.scheduled_at) : null,
         newDoctorNotes: notes.filter(n => n.created_at && Date.parse(n.created_at) >= now - NOTE_WINDOW_MS).length,
-        flaggedResults: Array.isArray(critRes.data) ? critRes.data.length : 0,
+        // Same list as Records' "Talk to your doctor about": the latest
+        // reading of each test, outside the range (shared rule, labFlags).
+        flaggedResults: Array.isArray(critRes.data) ? currentFlagged(critRes.data as FlagRow[]).length : 0,
         // The name part is added at render time from the CURRENT profile
         // name: an earlier load (before the profile arrived) finishing last
         // must not show "Add your name" to someone who has one.

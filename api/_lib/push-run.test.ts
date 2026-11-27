@@ -3,7 +3,7 @@ import { runSendDue, type Query, type Sender } from './push-run';
 import type { SubscriptionRow } from './push-schedule';
 
 // In-memory stand-in for the tables the run reads; answers by SQL shape.
-function fakeDb(opts: { subs: SubscriptionRow[]; meds?: unknown[]; doses?: unknown[]; periods?: unknown[]; profiles?: unknown[]; appts?: unknown[]; triggers?: unknown[] | 'missing' }) {
+function fakeDb(opts: { subs: SubscriptionRow[]; meds?: unknown[]; doses?: unknown[]; periods?: unknown[]; profiles?: unknown[]; appts?: unknown[]; triggers?: unknown[] | 'missing'; appData?: unknown[]; babies?: unknown[]; babyVax?: unknown[]; births?: unknown[]; visits?: unknown[]; missingCheckupTables?: boolean }) {
   const sentLog = new Set<string>();
   let subs = [...opts.subs];
   const deletedSubs: string[] = [];
@@ -12,6 +12,15 @@ function fakeDb(opts: { subs: SubscriptionRow[]; meds?: unknown[]; doses?: unkno
     const mine = (rows: unknown[] = []) => rows.filter(r => ids.includes((r as { user_id: string }).user_id));
     if (text.startsWith('SELECT id, user_id, endpoint')) return subs;
     if (text.includes('FROM medications')) return mine(opts.meds);
+    const checkup = (rows?: unknown[]) => {
+      if (opts.missingCheckupTables) throw new Error('relation does not exist');
+      return mine(rows);
+    };
+    if (text.includes("kind = 'baby_vaccine'")) return checkup(opts.babyVax);
+    if (text.includes('FROM user_app_data')) return checkup(opts.appData);
+    if (text.includes('FROM babies')) return checkup(opts.babies);
+    if (text.includes('FROM birth_records')) return checkup(opts.births);
+    if (text.includes('FROM appointments') && !text.includes('< $3')) return checkup(opts.visits);
     if (text.includes('FROM life_events')) return mine(opts.doses);
     if (text.includes('FROM period_tracking')) return mine(opts.periods);
     if (text.includes('FROM profiles')) return mine(opts.profiles);
@@ -164,5 +173,37 @@ describe('runSendDue', () => {
     const out = await runSendDue(db.query, async (_s, p) => { sent.push(p.tag); return 'sent'; }, AT);
     expect(sent).toEqual(['med-mA-08:00']);
     expect(out.sent).toBe(1);
+  });
+  it('sends the check-up reminders from her own account data, and still runs when those tables are missing', async () => {
+    const DAY = new Date('2026-11-26T10:05:00Z'); // 11:05 in Zurich
+    const opts = {
+      subs: [sub('A'), sub('B')],
+      profiles: [
+        { user_id: 'A', life_stage: 'pregnancy', pregnancy_due_date: '2027-02-04' },
+        { user_id: 'B', life_stage: 'postpartum', pregnancy_due_date: null },
+      ],
+      appData: [
+        { user_id: 'A', key: 'preg_vaccinations', value: JSON.stringify({ flu: { receivedDate: '2026-10-01' }, covid: { declined: true } }) },
+        // B ticked the milestone: no postnatal push, but her baby is at 2 months.
+        { user_id: 'B', key: 'postpartum:milestones', value: { 'six-week-visit': true } },
+      ],
+      babies: [{ id: 'b1', user_id: 'B', name: 'Mia', birth_date: '2026-09-24' }],
+      births: [{ user_id: 'B', birth_at: '2026-10-15T08:00:00Z' }],
+      meds: [{ id: 'mA', user_id: 'A', reminder_times: [], name: 'Iron', times_per_day: 1, pack_size: 30, pack_started_on: '2026-10-30' }],
+    };
+    const db = fakeDb(opts);
+    const send: Sender = vi.fn(async () => 'sent' as const);
+    const summary = await runSendDue(db.query, send, DAY);
+    expect([...db.sentLog].sort()).toEqual([
+      'A|pregvax:2027-02-04:tdap',
+      'A|supply:mA:2026-11-28',
+      'B|babyvax:b1:2 months',
+    ]);
+    expect(summary.sent).toBe(3);
+
+    const bare = fakeDb({ ...opts, missingCheckupTables: true });
+    const s2 = await runSendDue(bare.query, send, DAY);
+    expect([...bare.sentLog]).toEqual(['A|supply:mA:2026-11-28']);
+    expect(s2.sent).toBe(1);
   });
 });

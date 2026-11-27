@@ -68,6 +68,7 @@ import {
 } from 'lucide-react';
 import { fetchDoctorSentDocuments } from '@/lib/documentFiles';
 import { LoadFailed } from '@/components/LoadFailed';
+import { currentFlagged } from '@/lib/labFlags';
 import { format, differenceInDays, addDays } from 'date-fns';
 import {
   type MedicalDataItem,
@@ -965,8 +966,8 @@ export default function MedicalHistory() {
 
     // Sort panels: panels with issues first
     const sortedPanels = Object.entries(labsByPanel).sort((a, b) => {
-      const aHasIssue = a[1].some(l => l.status === 'critical' || l.status === 'abnormal');
-      const bHasIssue = b[1].some(l => l.status === 'critical' || l.status === 'abnormal');
+      const aHasIssue = currentFlagged(a[1]).length > 0;
+      const bHasIssue = currentFlagged(b[1]).length > 0;
       if (aHasIssue && !bHasIssue) return -1;
       if (!aHasIssue && bHasIssue) return 1;
       return 0;
@@ -1070,9 +1071,10 @@ export default function MedicalHistory() {
     };
   }, [medicalData, documents]);
 
+  // Only the latest reading of each test counts (shared rule, labFlags): a
+  // high TSH re-tested normal no longer belongs in "Talk to your doctor about".
   const flaggedItems = useMemo(() =>
-    [...medicalData]
-      .filter(i => i.status === 'abnormal' || i.status === 'critical')
+    currentFlagged(medicalData)
       .sort((a, b) => (priorityOrder[a.raw_data?.priority || 'low'] ?? 2) - (priorityOrder[b.raw_data?.priority || 'low'] ?? 2)),
     [medicalData]
   );
@@ -1720,8 +1722,8 @@ export default function MedicalHistory() {
                     <Heart className="h-4 w-4 text-primary flex-shrink-0" aria-hidden="true" />
                     <p className="text-muted-foreground">
                       <span className="font-medium text-foreground">{stats.labResults.length} result{stats.labResults.length !== 1 ? 's' : ''}</span>
-                      {stats.abnormalLabs + stats.criticalLabs > 0
-                        ? <> · <span className="font-medium text-destructive">{stats.abnormalLabs + stats.criticalLabs} to talk about with your doctor</span></>
+                      {flaggedItems.length > 0
+                        ? <> · <span className="font-medium text-destructive">{flaggedItems.length} to talk about with your doctor</span></>
                         : ' · nothing flagged'}
                     </p>
                   </div>
@@ -1835,7 +1837,11 @@ export default function MedicalHistory() {
                           ? labs.filter(l => l.title.toLowerCase().includes(searchQuery.toLowerCase()) || (l.notes || '').toLowerCase().includes(searchQuery.toLowerCase()))
                           : labs;
                         if (searchQuery && filteredLabs.length === 0) return null;
-                        const hasIssues = filteredLabs.some(l => l.status === 'critical' || l.status === 'abnormal');
+                        // Older readings superseded by a newer one of the same test
+                        // are history, not something to review (labFlags).
+                        const currentOut = currentFlagged(filteredLabs);
+                        const currentOutIds = new Set(currentOut.map(l => l.id));
+                        const hasIssues = currentOut.length > 0;
                         const allGood = filteredLabs.every(l => l.status === 'normal' || l.status === 'expected');
                         const isExpanded = expandedPanels.has(panelName) || !!searchQuery;
 
@@ -1852,7 +1858,7 @@ export default function MedicalHistory() {
                                   <p className="text-[11px] text-muted-foreground">
                                     {filteredLabs.length}{searchQuery ? `/${labs.length}` : ''} test{filteredLabs.length !== 1 ? 's' : ''} — {
                                       hasIssues
-                                        ? `${filteredLabs.filter(l => l.status === 'abnormal' || l.status === 'critical').length} need${filteredLabs.filter(l => l.status === 'abnormal' || l.status === 'critical').length === 1 ? 's' : ''} review`
+                                        ? `${currentOut.length} need${currentOut.length === 1 ? 's' : ''} review`
                                         : 'all look good'
                                     }
                                   </p>
@@ -1866,8 +1872,8 @@ export default function MedicalHistory() {
                                 const bPri = b.raw_data?.priority || 'low';
                                 return (priorityOrder[aPri] ?? 2) - (priorityOrder[bPri] ?? 2);
                               });
-                              const abnormals = sorted.filter(l => l.status === 'abnormal' || l.status === 'critical');
-                              const normals = sorted.filter(l => l.status !== 'abnormal' && l.status !== 'critical');
+                              const abnormals = sorted.filter(l => currentOutIds.has(l.id));
+                              const normals = sorted.filter(l => !currentOutIds.has(l.id));
 
                               return (
                                 <div className="px-4 pb-4 border-t border-border/50 pt-3 space-y-3">

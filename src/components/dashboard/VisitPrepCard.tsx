@@ -13,6 +13,7 @@ import { format, parseISO } from 'date-fns';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 import type { LifeStage } from './DashboardHeader';
 import { getFriendlyName } from '@/lib/medical-utils';
+import { currentFlagged, flagRank } from '@/lib/labFlags';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 import { UNSCHEDULED_VISIT_ID } from '@/lib/hrtQuestions';
 import { addQuestion, fromSuggestions, parseQuestions, removeQuestion, toggleAsked, visitDaysAway, type VisitQuestion } from '@/lib/visitQuestions';
@@ -151,8 +152,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
       db.from('current_extracted_data')
         .select('title, value, unit, status, date_recorded')
         .eq('user_id', user.id)
-        .eq('data_type', 'lab_result')
-        .in('status', ['critical', 'abnormal', 'borderline']),
+        .eq('data_type', 'lab_result'),
       db.from('daily_health_signals')
         .select('signal_date, symptoms, notes')
         .eq('user_id', user.id)
@@ -161,7 +161,9 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
         .then(r => (r.ok ? r.json() : { appointments: [] }))
         .catch(() => ({ appointments: [] })),
     ]);
-    setFlagged((flaggedRes.data ?? []) as FlaggedRow[]);
+    // Latest reading per test only (shared rule, labFlags): a TSH that was
+    // high and has since been re-tested normal is no longer a question.
+    setFlagged(currentFlagged((flaggedRes.data ?? []) as FlaggedRow[], { borderline: true }));
     setSignals((signalsRes.data ?? []) as SignalRow[]);
     const apts = Array.isArray(aptResp?.appointments) ? aptResp.appointments : [];
     const next = apts.find((a: { scheduled_at: string }) => Date.parse(a.scheduled_at) > Date.now());
@@ -208,7 +210,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
       }
     }
     const sortedFlagged = [...byTest.entries()].sort(([, a], [, b]) => {
-      const sev = (a.status === 'critical' ? 0 : 1) - (b.status === 'critical' ? 0 : 1);
+      const sev = flagRank(a.status) - flagRank(b.status);
       if (sev !== 0) return sev;
       const ta = a.date_recorded ? Date.parse(a.date_recorded) : 0;
       const tb = b.date_recorded ? Date.parse(b.date_recorded) : 0;
