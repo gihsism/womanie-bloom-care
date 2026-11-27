@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { VisitSummarySheet, type VisitSummaryData } from './PrintVisitSummary';
+import { SECTION_ORDER } from '@/lib/visitSummary';
+
+const defaultSelectionKeys = [...SECTION_ORDER];
 
 const NOW = new Date(2026, 10, 25, 10, 0);
 const data: VisitSummaryData = {
@@ -48,5 +51,44 @@ describe('VisitSummarySheet', () => {
     expect(screen.getByText('None recorded.')).toBeInTheDocument();
     expect(screen.getByText('Nothing logged in the last 30 days.')).toBeInTheDocument();
     expect(screen.getByText('No open questions saved.')).toBeInTheDocument();
+  });
+
+  it('menopause: the 4-week symptom diary prints without a booked visit', () => {
+    const meno: VisitSummaryData = {
+      ...data, stage: 'menopause', periods: [],
+      signals: [
+        { signal_date: '2026-11-24', symptoms: null, mood: ['anxious'], notes: 'Hot flashes: 5. Sleep quality: 2/5' },
+        { signal_date: '2026-11-10', symptoms: ['Hot flashes'], mood: null },
+      ],
+    };
+    const { container } = render(<VisitSummarySheet data={meno} now={NOW} sections={defaultSelectionKeys} />);
+    const section = container.querySelector('[data-section="diary"]')!;
+    expect(section.textContent).toContain('Symptom diary, last 4 weeks');
+    expect(section.textContent).toContain('Logged on 2 of the last 28 days.');
+    expect(container.querySelector('[data-section="ttcCycles"]')).toBeNull();
+    expect(container.querySelector('[data-section="cycles"]')).not.toBeNull();
+  });
+
+  it('trying to conceive: the cycle table with ovulation tests replaces "Last 3 cycles"', () => {
+    const ttc: VisitSummaryData = {
+      ...data, stage: 'conception',
+      periods: [
+        { period_start_date: '2026-11-20', period_end_date: '2026-11-24' },
+        { period_start_date: '2026-10-22', period_end_date: '2026-10-26' },
+      ],
+      signals: [{ signal_date: '2026-11-04', symptoms: null, mood: null, notes: 'LH test: peak' }],
+    };
+    const { container } = render(<VisitSummarySheet data={ttc} now={NOW} sections={defaultSelectionKeys} />);
+    const section = container.querySelector('[data-section="ttcCycles"]')!;
+    expect(section.textContent).toContain('Cycles and ovulation tests');
+    expect(section.textContent).toContain('1 test; day 14 peak');
+    expect(container.querySelector('[data-section="cycles"]')).toBeNull();
+    expect(container.querySelector('[data-section="diary"]')).toBeNull();
+  });
+
+  it('other stages: neither stage block appears even if asked for', () => {
+    const { container } = render(<VisitSummarySheet data={data} now={NOW} sections={defaultSelectionKeys} />);
+    expect(container.querySelector('[data-section="diary"]')).toBeNull();
+    expect(container.querySelector('[data-section="ttcCycles"]')).toBeNull();
   });
 });

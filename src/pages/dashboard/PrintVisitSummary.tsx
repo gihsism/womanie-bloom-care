@@ -10,11 +10,14 @@ import { getFriendlyName } from '@/lib/medical-utils';
 import { normalizeLifeStage } from '@/lib/lifeStage';
 import { readTtcStartLocal } from '@/hooks/useTtcStart';
 import {
-  SUMMARY_SECTIONS, SECTION_ORDER, type SummarySection, defaultSelection, selectedSections,
+  SUMMARY_SECTIONS, type SummarySection, defaultSelection, selectedSections, sectionsForStage,
   stageLines, lastCycles, medicineLines, summariseSignals, countSentence, openQuestions,
   recentResults, documentNames, footerLine, localDate, isoDay, SYMPTOM_WINDOW_DAYS,
   type PeriodRow, type MedicineRow, type SignalRow, type ResultRow, type DocumentRow,
 } from '@/lib/visitSummary';
+import { symptomDiary } from '@/lib/menopauseDiary';
+import { ttcCycleSummary } from '@/lib/ttcPrep';
+import { DiaryBlock, TtcCyclesBlock } from '@/components/print/StageSummaryBlocks';
 
 // "Share with any doctor": a one-page visit summary for a gynaecologist who
 // is not on Womanie. She ticks the sections she wants to share (all ticked
@@ -30,7 +33,8 @@ export interface VisitSummaryData {
   ttcStartDate?: string | null;
   periods: PeriodRow[];
   medicines: MedicineRow[];
-  signals: SignalRow[];
+  /** daily_health_signals of the last ~200 days (symptoms use the last 30; notes feed the diary and the LH tests). */
+  signals: Array<SignalRow & { notes?: string | null }>;
   questionRows: Array<{ questions: unknown }>;
   results: ResultRow[];
   documents: DocumentRow[];
@@ -52,6 +56,8 @@ export function VisitSummarySheet({ data, sections, now = new Date() }: {
   const results = recentResults(data.results, getFriendlyName);
   const docs = documentNames(data.documents);
   const day = (d: Date | null) => (d ? localDate(d) : '—');
+  const offered = sectionsForStage(data.stage);
+  const shown = sections.filter(k => offered.includes(k));
 
   const body: Record<SummarySection, JSX.Element> = {
     stage: (
@@ -80,6 +86,8 @@ export function VisitSummarySheet({ data, sections, now = new Date() }: {
         </tbody>
       </table>
     ),
+    ttcCycles: offered.includes('ttcCycles') ? <TtcCyclesBlock ttc={ttcCycleSummary(data.periods, data.signals, now)} /> : NONE,
+    diary: offered.includes('diary') ? <DiaryBlock diary={symptomDiary(data.signals, now)} /> : NONE,
     medicines: meds.length === 0 ? NONE : (
       <ul className="text-sm list-disc pl-5">{meds.map(m => <li key={m}>{m}</li>)}</ul>
     ),
@@ -132,8 +140,8 @@ export function VisitSummarySheet({ data, sections, now = new Date() }: {
         <h1 className="text-xl font-bold">{data.name || 'Patient'}</h1>
         <p className="text-xs text-gray-600">Prepared {localDate(now)}</p>
       </header>
-      {sections.length === 0 && <p className="text-sm text-gray-500">No sections selected.</p>}
-      {sections.map(k => (
+      {shown.length === 0 && <p className="text-sm text-gray-500">No sections selected.</p>}
+      {shown.map(k => (
         <section key={k} className="mb-4 break-inside-avoid" data-section={k}>
           <h2 className={H2}>{SUMMARY_SECTIONS[k]}</h2>
           {body[k]}
@@ -153,7 +161,8 @@ export default function PrintVisitSummary() {
 
   const load = useCallback(async () => {
     if (!user) return;
-    const since = new Date(Date.now() - (SYMPTOM_WINDOW_DAYS + 1) * 86_400_000).toISOString().slice(0, 10);
+    // ~200 days: 6 cycles of ovulation tests (TTC); the symptom lines still count only the last 30.
+    const since = isoDay(new Date(Date.now() - 200 * 86_400_000));
     const rows = <T,>(r: { data: unknown }) => (Array.isArray(r.data) ? r.data : []) as T[];
     const [profileRes, periodRes, medsRes, signalRes, qRes, resultRes, docsRes] = await Promise.all([
       // '*': ttc_start_date exists only once migration 025 is applied; naming it would fail the read.
@@ -161,7 +170,7 @@ export default function PrintVisitSummary() {
       db.from('period_tracking').select('period_start_date, period_end_date').eq('user_id', user.id)
         .order('period_start_date', { ascending: false }).limit(12),
       db.from('medications').select('name, dose, times_per_day, active').eq('user_id', user.id).eq('active', true),
-      db.from('daily_health_signals').select('signal_date, symptoms, mood').eq('user_id', user.id).gte('signal_date', since),
+      db.from('daily_health_signals').select('signal_date, symptoms, mood, notes').eq('user_id', user.id).gte('signal_date', since),
       // Absent before migration 012 is applied: the section then says "none saved".
       db.from('visit_questions').select('questions, updated_at').eq('user_id', user.id).order('updated_at', { ascending: false }),
       db.from('current_extracted_data').select('title, value, unit, reference_range, status, date_recorded, data_type')
@@ -184,7 +193,8 @@ export default function PrintVisitSummary() {
   }, [user]);
 
   useEffect(() => { void load(); }, [load]);
-  const sections = useMemo(() => selectedSections(sel), [sel]);
+  const offered = useMemo(() => sectionsForStage(data?.stage), [data?.stage]);
+  const sections = useMemo(() => selectedSections(sel, offered), [sel, offered]);
 
   if (!data) {
     return (
@@ -213,7 +223,7 @@ export default function PrintVisitSummary() {
         <fieldset className="max-w-3xl mx-auto px-4 pb-3" data-testid="visit-summary-choices">
           <legend className="text-xs text-muted-foreground mb-2">Include on the page (only what is ticked is printed):</legend>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
-            {SECTION_ORDER.map(k => (
+            {offered.map(k => (
               <label key={k} className="flex items-center gap-2 text-sm cursor-pointer">
                 <Checkbox checked={sel[k]} onCheckedChange={v => setSel(s => ({ ...s, [k]: v === true }))} aria-label={SUMMARY_SECTIONS[k]} />
                 {SUMMARY_SECTIONS[k]}
