@@ -137,6 +137,29 @@ describe('me/export security invariants', () => {
     expect(body.newsletter_subscription).toEqual({ email: 'export@test.com', source: 'footer' });
   });
 
+  it('exports every medicine column (pack and course end, migration 027) and the questions saved per visit', async () => {
+    const queries: string[] = [];
+    const med = {
+      id: 'm1', name: 'Iron', dose: '100 mg', times_per_day: 2, reminder_times: ['08:00', '20:00'],
+      started_on: '2026-10-01', stopped_on: null, ends_on: '2026-12-01', pack_size: 60, pack_started_on: '2026-11-01',
+    };
+    const vq = { appointment_id: 'a1', questions: [{ text: 'Recheck ferritin?', done: false }], updated_at: 't' };
+    query.mockImplementation(async (q: string) => {
+      queries.push(q);
+      if (/FROM medications/.test(q)) return [med];
+      if (/FROM visit_questions/.test(q)) return [vq];
+      return [];
+    });
+    const res = mockRes();
+    await handler(mockReq(), res);
+    const body = res._body as Record<string, unknown>;
+    expect(body.medications).toEqual([med]);
+    expect(body.visit_questions).toEqual([vq]);
+    // A column list here would silently drop fields added by later migrations.
+    expect(queries.find(q => /FROM medications/.test(q))).toMatch(/SELECT \* FROM medications/);
+    expect(queries.find(q => /FROM visit_questions/.test(q))).toMatch(/SELECT \* FROM visit_questions/);
+  });
+
   it('still exports chats before migration 013 (no conversation_id column)', async () => {
     query.mockImplementation(async (q: string) => {
       if (/conversation_id/.test(q)) throw Object.assign(new Error('column does not exist'), { code: '42703' });

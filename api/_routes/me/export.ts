@@ -261,6 +261,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       visible_doctor_notes: visibleDoctorNotes,
       chart_access_log: chartAccessLog,
       life_events: lifeEvents,
+      // Every column (SELECT *): dose, reminder times, start / stop dates,
+      // and the pack size, pack start and last day of the course (migration 027).
       medications,
       babies,
       birth_records: birthRecords,
