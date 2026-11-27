@@ -30,24 +30,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import MissedPillGuidance from './MissedPillGuidance';
 
 const CONTRACEPTION_METHODS = [
-  { id: 'pill', label: 'Birth Control Pill', emoji: '💊', effectiveness: '91-99%', schedule: 'Daily', description: 'Take at the same time every day for best protection.' },
-  { id: 'patch', label: 'Patch', emoji: '🩹', effectiveness: '91-99%', schedule: 'Weekly', description: 'Change weekly for 3 weeks, then 1 week off.' },
-  { id: 'ring', label: 'Vaginal Ring', emoji: '⭕', effectiveness: '91-99%', schedule: 'Monthly', description: 'Insert for 3 weeks, remove for 1 week.' },
-  { id: 'injection', label: 'Injection (Depo)', emoji: '💉', effectiveness: '94-99%', schedule: 'Every 3 months', description: 'Get a shot every 12-13 weeks.' },
-  { id: 'implant', label: 'Implant', emoji: '📍', effectiveness: '99%+', schedule: 'Every 3-5 years', description: 'Small rod under skin, lasts 3-5 years.' },
-  { id: 'iud-hormonal', label: 'Hormonal IUD', emoji: '🔷', effectiveness: '99%+', schedule: 'Every 3-8 years', description: 'T-shaped device, lasts 3-8 years depending on brand.' },
-  { id: 'iud-copper', label: 'Copper IUD', emoji: '🔶', effectiveness: '99%+', schedule: 'Every 10-12 years', description: 'Non-hormonal, lasts up to 12 years.' },
+  { id: 'pill', label: 'Birth Control Pill', effectiveness: '91-99%', schedule: 'Daily', description: 'Take at the same time every day for best protection.' },
+  { id: 'patch', label: 'Patch', effectiveness: '91-99%', schedule: 'Weekly', description: 'Change weekly for 3 weeks, then 1 week off.' },
+  { id: 'ring', label: 'Vaginal Ring', effectiveness: '91-99%', schedule: 'Monthly', description: 'Insert for 3 weeks, remove for 1 week.' },
+  { id: 'injection', label: 'Injection (Depo)', effectiveness: '94-99%', schedule: 'Every 3 months', description: 'Get a shot every 12-13 weeks.' },
+  { id: 'implant', label: 'Implant', effectiveness: '99%+', schedule: 'Every 3-5 years', description: 'Small rod under skin, lasts 3-5 years.' },
+  { id: 'iud-hormonal', label: 'Hormonal IUD', effectiveness: '99%+', schedule: 'Every 3-8 years', description: 'T-shaped device, lasts 3-8 years depending on brand.' },
+  { id: 'iud-copper', label: 'Copper IUD', effectiveness: '99%+', schedule: 'Every 10-12 years', description: 'Non-hormonal, lasts up to 12 years.' },
 ];
 
 const SIDE_EFFECTS = [
-  { id: 'headache', label: 'Headache', emoji: '🤕' },
-  { id: 'nausea', label: 'Nausea', emoji: '🤢' },
-  { id: 'mood-changes', label: 'Mood Changes', emoji: '🎭' },
-  { id: 'spotting', label: 'Spotting', emoji: '🩸' },
-  { id: 'breast-tenderness', label: 'Breast Tenderness', emoji: '😣' },
-  { id: 'weight-change', label: 'Weight Change', emoji: '⚖️' },
-  { id: 'low-libido', label: 'Low Libido', emoji: '💔' },
-  { id: 'acne', label: 'Acne', emoji: '😔' },
+  { id: 'headache', label: 'Headache' },
+  { id: 'nausea', label: 'Nausea' },
+  { id: 'mood-changes', label: 'Mood Changes' },
+  { id: 'spotting', label: 'Spotting' },
+  { id: 'breast-tenderness', label: 'Breast Tenderness' },
+  { id: 'weight-change', label: 'Weight Change' },
+  { id: 'low-libido', label: 'Low Libido' },
+  { id: 'acne', label: 'Acne' },
 ];
 
 interface ContraceptionDashboardProps {
@@ -267,7 +267,7 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
       // A late or missed daily pill: show what to do now, by pill type.
       if (selectedMethod === 'pill' && status !== 'on-time') openGuidance(day);
       toast({
-        title: status === 'missed' ? 'Logged as missed' : '✅ Logged!',
+        title: status === 'missed' ? 'Logged as missed' : 'Logged',
         description: `${currentMethod?.label || 'Contraception'} marked ${status} for ${day === today ? 'today' : 'yesterday'}.`,
       });
     } catch (e) {
@@ -295,9 +295,6 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
       {/* Current Method Card */}
       <Card className="p-5 bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5">
         <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0 text-3xl">
-            {currentMethod?.emoji || '💊'}
-          </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <h2 className="text-lg font-bold">{currentMethod?.label || 'Select Method'}</h2>
@@ -325,7 +322,6 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
                   selectedMethod === method.id ? 'border-primary bg-primary/10' : 'border-border hover:bg-muted/50'
                 )}
               >
-                <span className="text-xl">{method.emoji}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium truncate">{method.label}</p>
                   <p className="text-[10px] text-muted-foreground">{method.effectiveness}</p>
@@ -346,8 +342,8 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
             </h3>
             <Badge variant={pillsTakenToday ? 'default' : 'outline'} className="text-xs">
               {todayStatus === 'on-time' && '✓ Taken on time'}
-              {todayStatus === 'late' && '⏰ Taken late'}
-              {todayStatus === 'missed' && '⚠ Missed'}
+              {todayStatus === 'late' && 'Taken late'}
+              {todayStatus === 'missed' && 'Missed'}
               {!todayStatus && 'Not logged'}
             </Badge>
           </div>
@@ -371,7 +367,7 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
             <div className="text-center py-3 bg-secondary/10 rounded-xl">
               <CheckCircle2 className="h-8 w-8 text-secondary mx-auto mb-1" />
               <p className="text-sm font-medium">All done for today!</p>
-              <p className="text-xs text-muted-foreground">Great job staying consistent 💪</p>
+              <p className="text-xs text-muted-foreground">Great job staying consistent</p>
               <Button
                 variant="ghost"
                 size="sm"
@@ -447,7 +443,7 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
               ) : (
                 <p className="text-2xl font-bold text-primary">{pillStreak}</p>
               )}
-              <p className="text-xs text-muted-foreground">Day streak 🔥</p>
+              <p className="text-xs text-muted-foreground">Day streak</p>
             </div>
             <div className="p-3 rounded-xl bg-muted/50">
               {packDay !== null ? (
@@ -597,7 +593,6 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
                   isActive ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:bg-muted/50'
                 )}
               >
-                <span>{effect.emoji}</span>
                 {effect.label}
               </button>
             );

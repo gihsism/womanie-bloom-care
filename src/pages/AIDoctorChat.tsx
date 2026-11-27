@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { AskAiMark } from '@/components/art';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -23,7 +24,6 @@ import rehypeSanitize from 'rehype-sanitize';
 import { NO_REMOTE_IMAGES, tablesToLists } from '@/lib/safeMarkdown';
 import {
   Send,
-  Bot,
   User,
   Loader2,
   Trash2,
@@ -911,8 +911,8 @@ export default function AIDoctorChat() {
                 className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {msg.role === 'assistant' && (
-                  <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
-                    <Bot className="h-3.5 w-3.5 text-primary" />
+                  <div className="flex-shrink-0 mt-1" data-testid="assistant-avatar">
+                    <AskAiMark title={null} size={28} />
                   </div>
                 )}
                 <div
@@ -982,8 +982,8 @@ export default function AIDoctorChat() {
 
             {isStreaming && messages[messages.length - 1]?.role !== 'assistant' && (
               <div className="flex gap-3">
-                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Bot className="h-3.5 w-3.5 text-primary" />
+                <div className="flex-shrink-0">
+                  <AskAiMark title={null} size={28} />
                 </div>
                 <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />

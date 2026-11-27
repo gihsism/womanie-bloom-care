@@ -17,7 +17,6 @@ interface SmartRecommendationsProps {
 }
 
 interface Recommendation {
-  emoji: string;
   title: string;
   description: string;
   priority: 'high' | 'medium' | 'low';
@@ -65,7 +64,6 @@ export default function SmartRecommendations({ medicalData, lifeStage }: SmartRe
     if (missingTests.length > 0 && missingTests.length <= 6) {
       const testNames = missingTests.map(t => t.charAt(0).toUpperCase() + t.slice(1)).join(', ');
       recs.push({
-        emoji: '🔬',
         title: `Consider testing: ${testNames}`,
         description: `These tests are commonly recommended for ${stageConfig.label}. Ask your doctor if they'd be relevant for you.`,
         priority: 'medium',
@@ -83,7 +81,6 @@ export default function SmartRecommendations({ medicalData, lifeStage }: SmartRe
     if (staleTests.length > 0) {
       const staleNames = [...new Set(staleTests.map(t => t.title))].slice(0, 3).join(', ');
       recs.push({
-        emoji: '🔄',
         title: `Retest: ${staleNames}`,
         description: `These abnormal results are over 6 months old. A follow-up test can show if values have improved.`,
         priority: 'high',
@@ -102,7 +99,6 @@ export default function SmartRecommendations({ medicalData, lifeStage }: SmartRe
     if (unretestedAbnormals.length > 0) {
       const names = unretestedAbnormals.slice(0, 3).join(', ');
       recs.push({
-        emoji: '📋',
         title: `Follow up on: ${names}`,
         description: `These were flagged as outside the healthy range but haven't been retested yet. A follow-up test can confirm if it was a one-time reading or a pattern.`,
         priority: 'high',
@@ -127,7 +123,6 @@ export default function SmartRecommendations({ medicalData, lifeStage }: SmartRe
     if (improvingTests.length > 0) {
       const names = [...new Set(improvingTests.map(t => t.title))].join(', ');
       recs.push({
-        emoji: '🎉',
         title: `Great progress on: ${names}`,
         description: `These results have moved back into the healthy range since your last test. Keep doing what you're doing!`,
         priority: 'low',
@@ -137,7 +132,6 @@ export default function SmartRecommendations({ medicalData, lifeStage }: SmartRe
     // 5. General: no tests at all
     if (labs.length === 0) {
       recs.push({
-        emoji: '📄',
         title: 'Upload your lab results',
         description: 'Upload your blood test results, imaging reports, or other medical documents. We\'ll analyze them and explain everything in plain language.',
         priority: 'low',
@@ -164,7 +158,6 @@ export default function SmartRecommendations({ medicalData, lifeStage }: SmartRe
             rec.priority === 'high' ? 'border-destructive/20' : ''
           }`}>
             <CardContent className="p-3.5 flex items-start gap-3">
-              <span className="text-xl flex-shrink-0">{rec.emoji}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium">{rec.title}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{rec.description}</p>

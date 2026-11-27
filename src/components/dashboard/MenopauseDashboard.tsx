@@ -76,26 +76,26 @@ function writeLS(userId: string, scope: string, key: string, value: unknown) {
 
 // ─── Menopause symptoms ───
 const menoSymptoms = [
-  { id: 'hot-flashes', label: 'Hot Flashes', emoji: '🔥', description: 'Sudden warmth spreading through body, often face and chest.' },
-  { id: 'night-sweats', label: 'Night Sweats', emoji: '🌙', description: 'Hot flashes during sleep. Try breathable fabrics and a cool room.' },
-  { id: 'mood-changes', label: 'Mood Changes', emoji: '🎭', description: 'Irritability, anxiety, or sadness from hormonal shifts.' },
-  { id: 'sleep-issues', label: 'Sleep Disruption', emoji: '😴', description: 'Difficulty falling or staying asleep.' },
-  { id: 'brain-fog', label: 'Brain Fog', emoji: '🌫️', description: 'Forgetfulness, difficulty concentrating. Usually improves over time.' },
-  { id: 'joint-pain', label: 'Joint Pain', emoji: '🦴', description: 'Stiffness and aching from declining estrogen.' },
-  { id: 'weight-changes', label: 'Weight Changes', emoji: '⚖️', description: 'Metabolism slows and fat distribution shifts.' },
-  { id: 'vaginal-dryness', label: 'Vaginal Dryness', emoji: '💧', description: 'Reduced estrogen thins vaginal tissue. Moisturizers can help.' },
+  { id: 'hot-flashes', label: 'Hot Flashes', description: 'Sudden warmth spreading through body, often face and chest.' },
+  { id: 'night-sweats', label: 'Night Sweats', description: 'Hot flashes during sleep. Try breathable fabrics and a cool room.' },
+  { id: 'mood-changes', label: 'Mood Changes', description: 'Irritability, anxiety, or sadness from hormonal shifts.' },
+  { id: 'sleep-issues', label: 'Sleep Disruption', description: 'Difficulty falling or staying asleep.' },
+  { id: 'brain-fog', label: 'Brain Fog', description: 'Forgetfulness, difficulty concentrating. Usually improves over time.' },
+  { id: 'joint-pain', label: 'Joint Pain', description: 'Stiffness and aching from declining estrogen.' },
+  { id: 'weight-changes', label: 'Weight Changes', description: 'Metabolism slows and fat distribution shifts.' },
+  { id: 'vaginal-dryness', label: 'Vaginal Dryness', description: 'Reduced estrogen thins vaginal tissue. Moisturizers can help.' },
 ];
 
 // ─── Post-menopause symptoms ───
 const postSymptoms = [
-  { id: 'bone-loss', label: 'Bone Density Loss', emoji: '🦴', description: 'Accelerated bone loss in first 5-7 years. DEXA scans are critical.' },
-  { id: 'heart-risk', label: 'Heart Health', emoji: '❤️', description: 'Cardiovascular risk increases without estrogen protection.' },
-  { id: 'urinary', label: 'Urinary Changes', emoji: '💧', description: 'Increased UTI risk and incontinence. Pelvic floor exercises help.' },
-  { id: 'skin-hair', label: 'Skin & Hair', emoji: '✨', description: 'Thinner skin, slower collagen production, hair changes.' },
-  { id: 'cognitive', label: 'Cognitive Health', emoji: '🧠', description: 'Stay mentally active — puzzles, reading, social connections protect brain health.' },
-  { id: 'joint-pain', label: 'Joint Stiffness', emoji: '🤸', description: 'Low-impact movement and anti-inflammatory foods reduce stiffness.' },
-  { id: 'energy', label: 'Energy Levels', emoji: '⚡', description: 'Fatigue is common. Prioritize sleep, nutrition, and gentle exercise.' },
-  { id: 'mood', label: 'Emotional Wellness', emoji: '🌻', description: 'Many women feel a sense of freedom. Honor all your feelings.' },
+  { id: 'bone-loss', label: 'Bone Density Loss', description: 'Accelerated bone loss in first 5-7 years. DEXA scans are critical.' },
+  { id: 'heart-risk', label: 'Heart Health', description: 'Cardiovascular risk increases without estrogen protection.' },
+  { id: 'urinary', label: 'Urinary Changes', description: 'Increased UTI risk and incontinence. Pelvic floor exercises help.' },
+  { id: 'skin-hair', label: 'Skin & Hair', description: 'Thinner skin, slower collagen production, hair changes.' },
+  { id: 'cognitive', label: 'Cognitive Health', description: 'Stay mentally active — puzzles, reading, social connections protect brain health.' },
+  { id: 'joint-pain', label: 'Joint Stiffness', description: 'Low-impact movement and anti-inflammatory foods reduce stiffness.' },
+  { id: 'energy', label: 'Energy Levels', description: 'Fatigue is common. Prioritize sleep, nutrition, and gentle exercise.' },
+  { id: 'mood', label: 'Emotional Wellness', description: 'Many women feel a sense of freedom. Honor all your feelings.' },
 ];
 
 const menoWellness = [
@@ -287,12 +287,11 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
       {isPostMenopause && (
         <div className="grid grid-cols-3 gap-2">
           {[
-            { icon: Bone, label: 'Bones', emoji: '🦴', color: 'bg-primary/5' },
-            { icon: HeartPulse, label: 'Heart', emoji: '❤️', color: 'bg-destructive/5' },
-            { icon: Brain, label: 'Brain', emoji: '🧠', color: 'bg-secondary/10' },
+            { icon: Bone, label: 'Bones', color: 'bg-primary/5' },
+            { icon: HeartPulse, label: 'Heart', color: 'bg-destructive/5' },
+            { icon: Brain, label: 'Brain', color: 'bg-secondary/10' },
           ].map(p => (
             <Card key={p.label} className={`p-3 text-center ${p.color}`}>
-              <span className="text-2xl">{p.emoji}</span>
               <p className="text-xs font-bold mt-1">{p.label} Health</p>
               <p className="text-[10px] text-muted-foreground">Priority focus</p>
             </Card>
@@ -501,7 +500,6 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <span className="text-2xl">{symptom.emoji}</span>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="text-sm font-semibold">{symptom.label}</h4>
@@ -557,27 +555,26 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
           <Card className="p-4">
             <div className="space-y-2">
               {(isPostMenopause ? [
-                { title: 'Osteoporosis Prevention', subtitle: 'DEXA scans, calcium, exercise, and medication options', emoji: '🦴' },
-                { title: 'Heart Health After Menopause', subtitle: 'Risk factors, prevention, and warning signs', emoji: '❤️' },
-                { title: 'Brain Health & Cognition', subtitle: 'Protecting memory and mental sharpness', emoji: '🧠' },
-                { title: 'Staying Active at Every Age', subtitle: 'Safe, effective exercise for post-menopause', emoji: '🏃‍♀️' },
-                { title: 'Nutrition for Longevity', subtitle: 'Key nutrients, supplements, and meal planning', emoji: '🥗' },
-                { title: 'Pelvic Floor Health', subtitle: 'Exercises and treatments for bladder health', emoji: '💪' },
-                { title: 'Cancer Screening Guide', subtitle: 'What tests to get and when', emoji: '🩺' },
-                { title: 'Thriving in Post-Menopause', subtitle: 'Mental health, relationships, and purpose', emoji: '🌻' },
+                { title: 'Osteoporosis Prevention', subtitle: 'DEXA scans, calcium, exercise, and medication options' },
+                { title: 'Heart Health After Menopause', subtitle: 'Risk factors, prevention, and warning signs' },
+                { title: 'Brain Health & Cognition', subtitle: 'Protecting memory and mental sharpness' },
+                { title: 'Staying Active at Every Age', subtitle: 'Safe, effective exercise for post-menopause' },
+                { title: 'Nutrition for Longevity', subtitle: 'Key nutrients, supplements, and meal planning' },
+                { title: 'Pelvic Floor Health', subtitle: 'Exercises and treatments for bladder health' },
+                { title: 'Cancer Screening Guide', subtitle: 'What tests to get and when' },
+                { title: 'Thriving in Post-Menopause', subtitle: 'Mental health, relationships, and purpose' },
               ] : [
-                { title: 'HRT: What You Need to Know', subtitle: 'Hormone replacement therapy options, risks and benefits', emoji: '💊' },
-                { title: 'Nutrition After 45', subtitle: 'Foods that support bone, heart, and brain health', emoji: '🥗' },
-                { title: 'Exercise for Menopause', subtitle: 'Best workouts for this life stage', emoji: '🏋️' },
-                { title: 'Managing Hot Flashes', subtitle: 'Proven techniques and when to see a doctor', emoji: '🌡️' },
-                { title: 'Sleep Solutions', subtitle: 'Evidence-based tips for better rest', emoji: '🛏️' },
-                { title: 'Mental Health & Menopause', subtitle: 'Understanding mood changes and getting support', emoji: '🧠' },
-                { title: 'Bone Health Guide', subtitle: 'DEXA scans, calcium, and prevention strategies', emoji: '🦴' },
-                { title: 'When to See Your Doctor', subtitle: 'Warning signs and recommended screenings', emoji: '🩺' },
+                { title: 'HRT: What You Need to Know', subtitle: 'Hormone replacement therapy options, risks and benefits' },
+                { title: 'Nutrition After 45', subtitle: 'Foods that support bone, heart, and brain health' },
+                { title: 'Exercise for Menopause', subtitle: 'Best workouts for this life stage' },
+                { title: 'Managing Hot Flashes', subtitle: 'Proven techniques and when to see a doctor' },
+                { title: 'Sleep Solutions', subtitle: 'Evidence-based tips for better rest' },
+                { title: 'Mental Health & Menopause', subtitle: 'Understanding mood changes and getting support' },
+                { title: 'Bone Health Guide', subtitle: 'DEXA scans, calcium, and prevention strategies' },
+                { title: 'When to See Your Doctor', subtitle: 'Warning signs and recommended screenings' },
               ]).map(resource => (
                 <button key={resource.title} className="w-full flex items-center justify-between p-3 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors text-left">
                   <div className="flex items-center gap-3">
-                    <span className="text-lg">{resource.emoji}</span>
                     <div>
                       <p className="text-sm font-medium">{resource.title}</p>
                       <p className="text-xs text-muted-foreground">{resource.subtitle}</p>

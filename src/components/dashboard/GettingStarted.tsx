@@ -106,12 +106,12 @@ export default function GettingStarted() {
     const newlyDone = [...nowDone].filter(k => !already.has(k));
     for (const key of newlyDone) {
       const labels = CELEBRATION_LABELS[key];
-      if (labels) toast({ title: `🎉 ${labels.title}`, description: labels.description });
+      if (labels) toast({ title: labels.title, description: labels.description });
     }
     if (newlyDone.length > 0 && nowDone.size === 3 && already.size < 3) {
       // Last box just ticked off — send a final "you're all set" toast.
       const d = CELEBRATION_LABELS.done;
-      toast({ title: `✨ ${d.title}`, description: d.description });
+      toast({ title: d.title, description: d.description });
     }
     congratulatedRef.current = nowDone;
   }, [loaded, profileName, docCount, signalCount, toast]);

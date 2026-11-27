@@ -3,6 +3,7 @@ import { captureException } from '@/lib/monitoring';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw, Home } from '@/components/icons';
 import { hardReload, isStaleChunkError, reloadOnceForStaleChunk } from '@/lib/staleChunk';
+import { ArtEmptyState } from '@/components/ArtEmptyState';
 
 interface Props {
   children: ReactNode;
@@ -40,6 +41,21 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
       const stale = isStaleChunkError(this.state.error);
+
+      // Offline: a page whose code was not cached yet cannot load. Say so
+      // plainly with the offline drawing instead of "something went wrong".
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        return (
+          <div className="min-h-[50vh] flex items-center justify-center px-4">
+            <ArtEmptyState kind="offline" testId="offline-empty">
+              <Button size="sm" onClick={() => window.location.reload()}>
+                <RefreshCw className="h-4 w-4 mr-1.5" />
+                Try again
+              </Button>
+            </ArtEmptyState>
+          </div>
+        );
+      }
 
       return (
         <div className="min-h-[50vh] flex items-center justify-center px-4">

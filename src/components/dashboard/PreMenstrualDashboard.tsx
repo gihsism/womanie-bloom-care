@@ -21,12 +21,12 @@ import {
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 const bodyChangesData = [
-  { title: 'Breast Development', icon: '🌸', description: 'One of the first signs of puberty. Totally normal for one side to grow faster.', ageRange: '8–13 years' },
-  { title: 'Growth Spurt', icon: '📏', description: 'You may grow several inches quickly. Your body needs extra nutrition and sleep.', ageRange: '9–14 years' },
-  { title: 'Body Hair', icon: '🌿', description: 'Hair appears under arms and in the pubic area. This is natural and healthy.', ageRange: '9–14 years' },
-  { title: 'Skin Changes', icon: '✨', description: 'Oily skin and acne may appear due to hormones. A gentle skincare routine helps.', ageRange: '10–14 years' },
-  { title: 'Mood Changes', icon: '🎭', description: 'Feeling emotional is normal — hormones are fluctuating. Talking to someone helps.', ageRange: '10–14 years' },
-  { title: 'Vaginal Discharge', icon: '💧', description: 'White or clear discharge is a sign your first period may be coming in 6–12 months.', ageRange: '10–14 years' },
+  { title: 'Breast Development', description: 'One of the first signs of puberty. Totally normal for one side to grow faster.', ageRange: '8–13 years' },
+  { title: 'Growth Spurt', description: 'You may grow several inches quickly. Your body needs extra nutrition and sleep.', ageRange: '9–14 years' },
+  { title: 'Body Hair', description: 'Hair appears under arms and in the pubic area. This is natural and healthy.', ageRange: '9–14 years' },
+  { title: 'Skin Changes', description: 'Oily skin and acne may appear due to hormones. A gentle skincare routine helps.', ageRange: '10–14 years' },
+  { title: 'Mood Changes', description: 'Feeling emotional is normal — hormones are fluctuating. Talking to someone helps.', ageRange: '10–14 years' },
+  { title: 'Vaginal Discharge', description: 'White or clear discharge is a sign your first period may be coming in 6–12 months.', ageRange: '10–14 years' },
 ];
 
 const wellnessTips = [
@@ -39,12 +39,12 @@ const wellnessTips = [
 ];
 
 const periodPrepChecklist = [
-  { id: 1, label: 'I know what a period is and why it happens', emoji: '📚' },
-  { id: 2, label: 'I have period products ready (pads or liners)', emoji: '🎒' },
-  { id: 3, label: 'I have a trusted adult I can talk to', emoji: '💬' },
-  { id: 4, label: 'I know period cramps are normal', emoji: '💪' },
-  { id: 5, label: 'I know periods are nothing to be embarrassed about', emoji: '🌟' },
-  { id: 6, label: 'I have a small pouch/kit for school', emoji: '👛' },
+  { id: 1, label: 'I know what a period is and why it happens' },
+  { id: 2, label: 'I have period products ready (pads or liners)' },
+  { id: 3, label: 'I have a trusted adult I can talk to' },
+  { id: 4, label: 'I know period cramps are normal' },
+  { id: 5, label: 'I know periods are nothing to be embarrassed about' },
+  { id: 6, label: 'I have a small pouch/kit for school' },
 ];
 
 const funFacts = [
@@ -245,7 +245,6 @@ export default function PreMenstrualDashboard() {
             {bodyChangesData.map((item) => (
               <Card key={item.title} className="p-4 hover:shadow-md transition-shadow">
                 <div className="flex items-start gap-3">
-                  <span className="text-2xl">{item.icon}</span>
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
                       <h4 className="text-sm font-semibold">{item.title}</h4>
@@ -313,7 +312,6 @@ export default function PreMenstrualDashboard() {
                         : 'bg-muted/40 border border-transparent hover:bg-muted/60'
                     }`}
                   >
-                    <span className="text-lg">{item.emoji}</span>
                     <span className={`flex-1 text-sm ${isChecked ? 'font-medium' : ''}`}>
                       {item.label}
                     </span>
@@ -326,7 +324,7 @@ export default function PreMenstrualDashboard() {
             {readinessPercent === 100 && (
               <div className="mt-4 p-3 rounded-xl bg-primary/5 border border-primary/20 text-center">
                 <p className="text-sm font-semibold text-primary">
-                  🎉 You're prepared! You've got this!
+                  You're prepared! You've got this!
                 </p>
               </div>
             )}

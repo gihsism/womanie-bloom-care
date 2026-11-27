@@ -1,4 +1,5 @@
 import { Card } from '@/components/ui/card';
+import { MOOD_FACES, type MoodValue } from '@/components/art';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -28,15 +29,16 @@ const SYMPTOM_OPTIONS = [
 // Menopause stages also log night sweats (read by "Your symptoms over time").
 const MENOPAUSE_SYMPTOM_OPTIONS = [...SYMPTOM_OPTIONS, 'Night sweats'];
 
+// Values must be keys of MOOD_FACES (checked in art.test.tsx).
 const MOOD_OPTIONS = [
-  { emoji: '😊', label: 'Happy', value: 'happy' },
-  { emoji: '😌', label: 'Calm', value: 'calm' },
-  { emoji: '😐', label: 'Neutral', value: 'neutral' },
-  { emoji: '😔', label: 'Sad', value: 'sad' },
-  { emoji: '😤', label: 'Irritable', value: 'irritable' },
-  { emoji: '😰', label: 'Anxious', value: 'anxious' },
-  { emoji: '🥰', label: 'Loving', value: 'loving' },
-  { emoji: '😴', label: 'Tired', value: 'tired' },
+  { label: 'Happy', value: 'happy' },
+  { label: 'Calm', value: 'calm' },
+  { label: 'Neutral', value: 'neutral' },
+  { label: 'Sad', value: 'sad' },
+  { label: 'Irritable', value: 'irritable' },
+  { label: 'Anxious', value: 'anxious' },
+  { label: 'Loving', value: 'loving' },
+  { label: 'Tired', value: 'tired' },
 ];
 
 const FLOW_OPTIONS = [
@@ -294,11 +296,13 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
       </div>
 
       <div className="space-y-5">
-        {/* Mood — emoji tap */}
+        {/* Mood: drawn faces */}
         <div>
           <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 block">How are you feeling?</Label>
           <div className="flex flex-wrap gap-2">
-            {MOOD_OPTIONS.map(m => (
+            {MOOD_OPTIONS.map(m => {
+              const Face = MOOD_FACES[m.value as MoodValue];
+              return (
               <button
                 key={m.value}
                 onClick={() => toggleMood(m.value)}
@@ -309,10 +313,11 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
                     : 'border-border hover:border-primary/30'
                 }`}
               >
-                <span className="text-lg">{m.emoji}</span>
+                <Face title={null} size={28} />
                 <span className="text-[10px]">{m.label}</span>
               </button>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -382,8 +387,7 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
                   }`}
                 >
                   {d.label}
-                  {d.value === 'ewcm' && ' 🥚'}
-                </button>
+                                  </button>
               ))}
             </div>
           </div>
@@ -502,11 +506,11 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
             <Select value={data.sleepQuality} onValueChange={(v) => update('sleepQuality', v)}>
               <SelectTrigger className="h-9"><SelectValue placeholder="Rate 1–5" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="1">😩 1 — Terrible</SelectItem>
-                <SelectItem value="2">😪 2 — Poor</SelectItem>
-                <SelectItem value="3">😐 3 — OK</SelectItem>
-                <SelectItem value="4">🙂 4 — Good</SelectItem>
-                <SelectItem value="5">😴 5 — Great</SelectItem>
+                <SelectItem value="1">1 — Terrible</SelectItem>
+                <SelectItem value="2">2 — Poor</SelectItem>
+                <SelectItem value="3">3 — OK</SelectItem>
+                <SelectItem value="4">4 — Good</SelectItem>
+                <SelectItem value="5">5 — Great</SelectItem>
               </SelectContent>
             </Select>
           </div>

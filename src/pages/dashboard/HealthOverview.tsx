@@ -10,6 +10,7 @@ import { db } from '@/integrations/db/client';
 import { onHealthDataChange } from '@/lib/data-events';
 import { useAccountDataVersion } from '@/lib/account-data';
 import { healthTone } from '@/lib/medical-utils';
+import { ArtEmptyState } from '@/components/ArtEmptyState';
 import {
   buildHealthOverview,
   sparkGeometry,
@@ -176,14 +177,17 @@ export default function HealthOverview() {
         ) : !uid ? (
           <Card className="p-4 text-sm text-muted-foreground">Log in to see your health overview.</Card>
         ) : metrics.length === 0 ? (
-          <Card className="p-5 space-y-2" data-testid="overview-empty">
-            <p className="text-sm font-semibold">Nothing to chart yet</p>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+          <ArtEmptyState
+            kind="charts"
+            testId="overview-empty"
+            caption={<>
+              <span className="block font-medium text-foreground mb-1">Nothing to chart yet</span>
               Your numbers appear here as you add them: log two periods to see your cycle length, log weight or blood
               pressure, or upload a lab report (ferritin, TSH, vitamin D and other key tests are picked up automatically).
-            </p>
+            </>}
+          >
             <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/medical-history')}>Upload a report</Button>
-          </Card>
+          </ArtEmptyState>
         ) : (
           <>
             <p className="text-xs text-muted-foreground leading-relaxed">

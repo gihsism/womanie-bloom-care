@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, ArrowUpDown, MessageCircle, Loader2 } from '@/components/icons';
+import { ArrowLeft, ArrowRight, ArrowUpDown, Loader2 } from '@/components/icons';
+import { AskAiMark } from '@/components/art';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -226,7 +227,7 @@ export default function CompareDocs() {
             <h1 className="text-base font-bold">Compare documents</h1>
           </div>
           <Button size="sm" variant="outline" onClick={askAboutComparison} className="gap-1.5">
-            <MessageCircle className="h-3.5 w-3.5" />
+            <AskAiMark title={null} size={18} />
             Ask AI
           </Button>
           <UserMenu />

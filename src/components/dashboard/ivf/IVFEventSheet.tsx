@@ -15,20 +15,20 @@ interface IVFEventSheetProps {
 }
 
 const QUICK_ITEMS = [
-  { title: 'FSH (Follitropin)', type: 'injection', icon: '💉', time: '20:00' },
-  { title: 'hMG (Menotropin)', type: 'injection', icon: '💉', time: '20:00' },
-  { title: 'GnRH Antagonist', type: 'injection', icon: '💉', time: '08:00' },
-  { title: 'GnRH Agonist', type: 'injection', icon: '💉', time: '08:00' },
-  { title: 'hCG Trigger', type: 'injection', icon: '⏰', time: null },
-  { title: 'Progesterone', type: 'medication', icon: '💊', time: '09:00' },
-  { title: 'Estradiol', type: 'medication', icon: '💊', time: '09:00' },
-  { title: 'Vitamins', type: 'medication', icon: '🫶', time: '09:00' },
-  { title: 'Blood Work', type: 'test', icon: '🩸', time: null },
-  { title: 'Ultrasound', type: 'appointment', icon: '🔬', time: null },
-  { title: 'Doctor Visit', type: 'appointment', icon: '👩‍⚕️', time: null },
-  { title: 'Egg Retrieval', type: 'procedure', icon: '🥚', time: null },
-  { title: 'Transfer', type: 'transfer', icon: '🌱', time: null },
-  { title: 'Beta Test', type: 'test', icon: '🩸', time: null },
+  { title: 'FSH (Follitropin)', type: 'injection', time: '20:00' },
+  { title: 'hMG (Menotropin)', type: 'injection', time: '20:00' },
+  { title: 'GnRH Antagonist', type: 'injection', time: '08:00' },
+  { title: 'GnRH Agonist', type: 'injection', time: '08:00' },
+  { title: 'hCG Trigger', type: 'injection', time: null },
+  { title: 'Progesterone', type: 'medication', time: '09:00' },
+  { title: 'Estradiol', type: 'medication', time: '09:00' },
+  { title: 'Vitamins', type: 'medication', time: '09:00' },
+  { title: 'Blood Work', type: 'test', time: null },
+  { title: 'Ultrasound', type: 'appointment', time: null },
+  { title: 'Doctor Visit', type: 'appointment', time: null },
+  { title: 'Egg Retrieval', type: 'procedure', time: null },
+  { title: 'Transfer', type: 'transfer', time: null },
+  { title: 'Beta Test', type: 'test', time: null },
 ];
 
 const IVFEventSheet = ({ open, onClose, date, events, onAddEvent, onToggleComplete, onDeleteEvent }: IVFEventSheetProps) => {
@@ -90,7 +90,6 @@ const IVFEventSheet = ({ open, onClose, date, events, onAddEvent, onToggleComple
               onClick={() => handleQuickAdd(item)}
               className="flex flex-col items-center gap-1 p-3 rounded-xl border border-border hover:bg-primary/5 hover:border-primary/30 transition-all active:scale-95"
             >
-              <span className="text-xl">{item.icon}</span>
               <span className="text-[11px] font-medium text-center leading-tight">{item.title}</span>
             </button>
           ))}

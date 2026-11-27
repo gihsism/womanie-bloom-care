@@ -227,7 +227,7 @@ const ModeHeroStat = ({
           headline:
             pillStreak === 0
               ? 'Log today\'s pill to start a streak'
-              : `${pillStreak}-day pill streak 🔥`,
+              : `${pillStreak}-day pill streak`,
           detail: pillStreak > 0 ? 'Keep it going: log today\'s pill.' : undefined,
           tone: 'bg-primary/5 border-primary/20',
         };
@@ -273,7 +273,7 @@ const ModeHeroStat = ({
             daysToDue > 0
               ? `${Math.ceil(daysToDue / 7)} weeks to your due date`
               : daysToDue === 0
-              ? 'Due date is today 💛'
+              ? 'Due date is today'
               : `${Math.abs(daysToDue)} days past due date`,
           tone: 'bg-pink-50/70 dark:bg-pink-950/20 border-pink-200/60 dark:border-pink-800/40',
         };

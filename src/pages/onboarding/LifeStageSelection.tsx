@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset } from '@/components/icons';
+import { ArrowLeft } from '@/components/icons';
+import { plateForStage } from '@/components/art';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -12,37 +13,37 @@ import Logo from '@/components/brand/Logo';
 const lifeStages = [
   {
     value: 'pre-menstrual',
-    icon: Flower2,
+    plate: 'pre-menstrual',
     title: 'Before first period',
     description: 'Getting ready for a first period',
   },
   {
     value: 'regular-cycle',
-    icon: Calendar,
+    plate: 'menstrual-cycle',
     title: 'Period tracking',
     description: 'Tracking my cycle',
   },
   {
     value: 'trying-to-conceive',
-    icon: Heart,
+    plate: 'conception',
     title: 'Trying to conceive',
     description: 'Planning pregnancy',
   },
   {
     value: 'pregnant',
-    icon: Baby,
+    plate: 'pregnancy',
     title: 'Pregnancy',
     description: 'Expecting a baby',
   },
   {
     value: 'postpartum',
-    icon: Baby,
+    plate: 'postpartum',
     title: 'After birth',
     description: 'Your recovery and your baby',
   },
   {
     value: 'menopause',
-    icon: Sunset,
+    plate: 'menopause',
     title: 'Menopause or after menopause',
     description: 'Managing menopause',
   },
@@ -101,35 +102,27 @@ const LifeStageSelection = () => {
             className="space-y-4"
           >
             {lifeStages.map((stage) => {
-              const Icon = stage.icon;
+              const Plate = plateForStage(stage.plate);
+              const selected = selectedStage === stage.value;
               return (
                 <Card
                   key={stage.value}
-                  className={`p-6 cursor-pointer transition-all duration-300 hover:shadow-lg hover:border-primary/50 ${
-                    selectedStage === stage.value ? 'border-primary bg-primary/5' : ''
+                  className={`p-4 cursor-pointer transition-colors hover:border-primary/50 ${
+                    selected ? 'border-primary bg-primary/5' : ''
                   }`}
                   onClick={() => setSelectedStage(stage.value as typeof selectedStage)}
+                  data-testid={`stage-card-${stage.value}`}
                 >
                   <div className="flex items-center gap-4">
                     <RadioGroupItem value={stage.value} id={stage.value} />
-                    <div className="flex-1 flex items-center gap-4">
-                      <div
-                        className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                          selectedStage === stage.value ? 'bg-primary/20' : 'bg-muted'
-                        }`}
-                      >
-                        <Icon
-                          className={`h-6 w-6 ${
-                            selectedStage === stage.value ? 'text-primary' : 'text-muted-foreground'
-                          }`}
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <Label htmlFor={stage.value} className="text-lg font-bold cursor-pointer">
-                          {stage.title}
-                        </Label>
-                        <p className="text-sm text-muted-foreground">{stage.description}</p>
-                      </div>
+                    <div className="flex-1 min-w-0">
+                      <Label htmlFor={stage.value} className="text-lg font-bold cursor-pointer">
+                        {stage.title}
+                      </Label>
+                      <p className="text-sm text-muted-foreground">{stage.description}</p>
+                    </div>
+                    <div className="w-28 sm:w-36 flex-shrink-0" aria-hidden="true">
+                      <Plate title={null} />
                     </div>
                   </div>
                 </Card>
