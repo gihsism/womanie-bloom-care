@@ -43,6 +43,8 @@ export const ACCOUNT_ITEMS: AccountItem[] = [
   { template: 'womanie_maternal_weight_{uid}', format: 'json' },
   { template: 'womanie_bp_log_{uid}', format: 'json' },
   { template: 'womanie_preg_vaccinations_{uid}', format: 'json' },
+  // Check-ups and scans marked done (lib/pregnancySchedule.ts).
+  { template: 'womanie_preg_checkups_{uid}', format: 'json' },
   { template: 'womanie_beta_hcg_{uid}', format: 'json' },
   { template: 'womanie_screenings_{uid}', format: 'json' },
   { template: 'womanie_visit_prep_checked_{uid}', format: 'json' },
