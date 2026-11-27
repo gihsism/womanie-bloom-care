@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek, addMonths, subMonths } from 'date-fns';
-import { ChevronLeft, ChevronRight, Syringe, Pill, Stethoscope, Baby, FlaskConical, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Syringe, Pill, Stethoscope, Baby, FlaskConical, Clock } from '@/components/icons';
 import { cn } from '@/lib/utils';
 
 export interface IVFEvent {

@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Check, X, Stethoscope, ShieldCheck } from 'lucide-react';
+import { Check, X, Stethoscope, ShieldCheck } from '@/components/icons';
 import { formatDistanceToNow } from 'date-fns';
 import { errorMessage } from '@/lib/errors';
 import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';

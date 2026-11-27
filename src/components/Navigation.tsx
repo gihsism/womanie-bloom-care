@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { startLogin } from '@/lib/login';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X } from 'lucide-react';
+import { Menu, X } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Navigation = () => {

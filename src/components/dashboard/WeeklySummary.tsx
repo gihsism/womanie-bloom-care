@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { onHealthDataChange } from '@/lib/data-events';
 import { formatDistanceToNow } from 'date-fns';
-import { BookOpen, RefreshCw, Sparkles } from 'lucide-react';
+import { BookOpen, RefreshCw, Sparkles } from '@/components/icons';
 import { errorMessage } from '@/lib/errors';
 
 // Weekly narrative summary card on the patient dashboard.

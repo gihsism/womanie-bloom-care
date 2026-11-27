@@ -1,4 +1,4 @@
-import { CheckCircle2, ChevronRight, Circle, Clock } from 'lucide-react';
+import { CheckCircle2, ChevronRight, Circle, Clock } from '@/components/icons';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { setupProgress, type SetupStep } from '@/lib/doctorSetup';

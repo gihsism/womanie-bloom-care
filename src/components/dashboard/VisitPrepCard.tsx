@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ClipboardCheck, Copy, Check, ExternalLink, Plus, X } from 'lucide-react';
+import { ClipboardCheck, Copy, Check, ExternalLink, Plus, X } from '@/components/icons';
 import { Input } from '@/components/ui/input';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';

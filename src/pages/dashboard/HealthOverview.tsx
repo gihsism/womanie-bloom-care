@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Activity, ChevronRight, Loader2 } from 'lucide-react';
+import { ArrowLeft, Activity, ChevronRight, Loader2 } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import UserMenu from '@/components/UserMenu';

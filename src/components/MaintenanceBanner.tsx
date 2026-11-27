@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Wrench } from "lucide-react";
+import { Wrench } from "@/components/icons";
 
 /**
  * Shown only while the server's maintenance (read-only) mode is ON, e.g.

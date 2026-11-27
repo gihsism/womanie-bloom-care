@@ -14,7 +14,7 @@ import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRequireRole } from '@/hooks/useRequireRole';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertCircle, ArrowRightLeft, LogOut, Menu, UserPlus } from 'lucide-react';
+import { AlertCircle, ArrowRightLeft, LogOut, Menu, UserPlus } from '@/components/icons';
 import DoctorTodayList from '@/components/doctor/DoctorTodayList';
 import DoctorDaySchedule from '@/components/doctor/DoctorDaySchedule';
 import DoctorPatientList from '@/components/doctor/DoctorPatientList';

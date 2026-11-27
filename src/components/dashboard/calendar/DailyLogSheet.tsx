@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { format } from 'date-fns';
-import { Heart, AlertCircle, Smile, Droplet, X, Check } from 'lucide-react';
+import { Heart, AlertCircle, Smile, Droplet, X, Check } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';

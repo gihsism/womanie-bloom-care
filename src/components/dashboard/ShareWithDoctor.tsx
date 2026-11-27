@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Share2, Copy, Check, Loader2, Trash2 } from 'lucide-react';
+import { Share2, Copy, Check, Loader2, Trash2 } from '@/components/icons';
 import { formatDistanceToNow } from 'date-fns';
 import { errorMessage } from '@/lib/errors';
 

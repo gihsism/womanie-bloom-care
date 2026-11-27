@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLifeEvents, importLocalOnce, type LifeEvent } from '@/hooks/useLifeEvents';
-import { Baby, Milk, Moon, Droplets, Ruler, Syringe, Trash2, Play, Square, BarChart3, Plus, Timer } from 'lucide-react';
+import { Baby, Milk, Moon, Droplets, Ruler, Syringe, Trash2, Play, Square, BarChart3, Plus, Timer } from '@/components/icons';
 // Stats tab draws charts (recharts, ~110 KB gzip): load it when opened.
 const BabyStatsTab = lazy(() => import('./BabyStatsTab'));
 import { differenceInMinutes, format, isToday, isYesterday, parseISO } from 'date-fns';

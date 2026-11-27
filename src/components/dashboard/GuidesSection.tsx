@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { BookOpen, ChevronDown } from 'lucide-react';
+import { BookOpen, ChevronDown } from '@/components/icons';
 
 // Folds reading material (nutrition, movement and other guides) into one
 // closed section, so the dashboard leads with the things people log and

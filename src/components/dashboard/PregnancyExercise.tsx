@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Activity, Info, AlertCircle } from 'lucide-react';
+import { Activity, Info, AlertCircle } from '@/components/icons';
 
 // Trimester-aware movement guidance for pregnancy mode.
 // Conservative — defers to clinician on the always-cleared question.

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { AlertTriangle, BookOpen, FileText, FlaskConical, MessageSquare } from 'lucide-react';
+import { AlertTriangle, BookOpen, FileText, FlaskConical, MessageSquare } from '@/components/icons';
 import { newSinceLastVisit, type SinceItem } from '@/lib/doctorDay';
 import type { PatientTab } from '@/lib/doctorPatient';
 import type { DoctorNote, HealthDocument, HealthSignal, MedicalDataRow, PatientAppointment } from './types';

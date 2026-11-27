@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Card } from '@/components/ui/card';
-import { Apple, Info } from 'lucide-react';
+import { Apple, Info } from '@/components/icons';
 
 // Postpartum nutrition reference card. Curated, evidence-based,
 // non-prescriptive. The numbers are the standard recommendations

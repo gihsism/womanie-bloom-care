@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import DocumentUpload from '@/components/dashboard/DocumentUpload';
-import { ArrowLeft, Baby, Pill, FileText, Timer, Plus, Trash2, Check } from 'lucide-react';
+import { ArrowLeft, Baby, Pill, FileText, Timer, Plus, Trash2, Check } from '@/components/icons';
 import { format, parseISO } from 'date-fns';
 
 // Labour & birth record: birth details (birth_records + babies), medicines

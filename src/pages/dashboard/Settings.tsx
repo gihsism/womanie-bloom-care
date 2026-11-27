@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Shield, Bell, User, Download, Loader2, Trash2, Wand2, KeyRound, Eye, EyeOff, Pill, Inbox, Phone, Smartphone, Users, HelpCircle, Info, LogOut, UserCog, FileText, Activity } from 'lucide-react';
+import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Shield, Bell, User, Download, Loader2, Trash2, Wand2, KeyRound, Eye, EyeOff, Pill, Inbox, Phone, Smartphone, Users, HelpCircle, Info, LogOut, UserCog, FileText, Activity } from '@/components/icons';
 import { Input } from '@/components/ui/input';
 import { scorePassword } from '@/lib/password-strength';
 import { Button } from '@/components/ui/button';

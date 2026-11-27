@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { LogOut, Shield } from 'lucide-react';
+import { LogOut, Shield } from '@/components/icons';
 
 export default function UserMenu() {
   const navigate = useNavigate();

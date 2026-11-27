@@ -3,7 +3,7 @@ import { withinWindow } from '@/lib/labWindow';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, AlertCircle, ArrowRight, Activity, MessageCircle } from 'lucide-react';
+import { AlertTriangle, AlertCircle, ArrowRight, Activity, MessageCircle } from '@/components/icons';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';

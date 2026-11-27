@@ -1,5 +1,5 @@
 import { format, isSameDay, startOfDay, parseISO, addDays } from 'date-fns';
-import { Droplet, Sparkles, Heart, Smile, AlertCircle, Check } from 'lucide-react';
+import { Droplet, Sparkles, Heart, Smile, AlertCircle, Check } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';

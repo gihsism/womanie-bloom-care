@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
-import { ChevronRight, type LucideIcon } from 'lucide-react';
+import { ChevronRight, type LucideIcon } from '@/components/icons';
 
 // A tappable card that opens a life-cycle page (Labour & birth, Baby).
 export default function LifeLinkCard({ to, icon: Icon, title, description }: { to: string; icon: LucideIcon; title: string; description: string }) {

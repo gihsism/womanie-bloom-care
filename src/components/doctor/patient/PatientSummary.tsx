@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Calendar, ChevronDown, ChevronRight, FileText, MessageSquare } from 'lucide-react';
+import { AlertTriangle, Calendar, ChevronDown, ChevronRight, FileText, MessageSquare } from '@/components/icons';
 import DoctorPatientTrackingSummary from '@/components/dashboard/DoctorPatientTrackingSummary';
 import { flaggedResults, visitSummary, type PatientTab } from '@/lib/doctorPatient';
 import type {

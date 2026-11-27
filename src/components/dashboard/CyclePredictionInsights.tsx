@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Card } from '@/components/ui/card';
-import { Info, FlaskConical, MessageCircle } from 'lucide-react';
+import { Info, FlaskConical, MessageCircle } from '@/components/icons';
 import { db } from '@/integrations/db/client';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';

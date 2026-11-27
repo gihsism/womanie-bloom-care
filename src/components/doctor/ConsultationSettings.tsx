@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { db } from '@/integrations/db/client';
 import { useToast } from '@/hooks/use-toast';
-import { AlertCircle, CheckCircle, Clock, DollarSign, Loader2, Settings, Video } from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, DollarSign, Loader2, Settings, Video } from '@/components/icons';
 
 // Consultation price/availability and the weekly schedule. Lives under
 // the doctor's "Profile & settings" view (moved out of DoctorDashboard).

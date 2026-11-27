@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown } from '@/components/icons';
 import {
   Droplet,
   HeartPulse,
@@ -11,7 +11,7 @@ import {
   Zap,
   Brain,
   type LucideIcon,
-} from 'lucide-react';
+} from '@/components/icons';
 import { labNumber, parseLabRange } from '@/lib/labValue';
 
 interface LabResult {

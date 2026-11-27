@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Droplet, Plus, X, TrendingUp, AlertCircle } from 'lucide-react';
+import { Droplet, Plus, X, TrendingUp, AlertCircle } from '@/components/icons';
 import { format, parseISO, differenceInHours } from 'date-fns';
 import { healthTone } from '@/lib/medical-utils';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';

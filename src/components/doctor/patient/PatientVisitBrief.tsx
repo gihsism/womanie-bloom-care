@@ -1,5 +1,5 @@
 import { Card } from '@/components/ui/card';
-import { AlertTriangle, ClipboardList, HeartPulse, MapPin, Pill } from 'lucide-react';
+import { AlertTriangle, ClipboardList, HeartPulse, MapPin, Pill } from '@/components/icons';
 import { stageLabel } from '@/lib/doctorDashboard';
 import { cycleDay, medicineLine, moodSummary, pregnancyWeek, visitSummary } from '@/lib/doctorPatient';
 import { parseQuestions } from '@/lib/visitQuestions';

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { NOTHING_TODAY, type MoreRow, type PrimaryAction, type Target, type TodayItem } from '@/lib/todayItems';
 

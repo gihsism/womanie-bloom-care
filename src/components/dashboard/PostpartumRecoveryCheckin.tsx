@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
-import { AlertTriangle, ArrowDownRight, ArrowRight, ArrowUpRight, HeartPulse, Phone } from 'lucide-react';
+import { AlertTriangle, ArrowDownRight, ArrowRight, ArrowUpRight, HeartPulse, Phone } from '@/components/icons';
 import {
   CHECK_ITEMS, CHECKIN_WEEKS, RECOVERY_CHECKINS_KEY, RED_FLAGS, SELF_HARM_SUPPORT, URGENT_MESSAGE,
   assessCheckin, checkItemTitle, entryForWeek, isComplete, parseCheckins, recoveryTrend,

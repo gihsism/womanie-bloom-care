@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CalendarSync, Check, X, RefreshCw, Baby, Egg, AlertCircle } from 'lucide-react';
+import { CalendarSync, Check, X, RefreshCw, Baby, Egg, AlertCircle } from '@/components/icons';
 import { labNumber } from '@/lib/labValue';
 
 interface LabResult {

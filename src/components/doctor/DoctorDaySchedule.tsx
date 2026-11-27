@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
-import { ChevronRight, ClipboardList, Sparkles } from 'lucide-react';
+import { ChevronRight, ClipboardList, Sparkles } from '@/components/icons';
 import { buildDaySchedule, dayWindow, type DayVisit, type ScheduleRow } from '@/lib/doctorDay';
 import type { DoctorAppointment, DoctorPatientConnection } from '@/lib/doctorDashboard';
 

@@ -14,7 +14,7 @@ import { MaintenanceBanner } from "@/components/MaintenanceBanner";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { BottomNav } from "@/components/BottomNav";
 import { ConsentGate } from "@/components/ConsentGate";
-import { Loader2 } from "lucide-react";
+import { Loader2 } from "@/components/icons";
 
 // Custom auth — no third-party dependency
 

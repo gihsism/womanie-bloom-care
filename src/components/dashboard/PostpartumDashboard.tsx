@@ -14,7 +14,7 @@ import {
   Moon,
   Apple,
   Droplet,
-} from 'lucide-react';
+} from '@/components/icons';
 import { differenceInDays, differenceInWeeks, format, parseISO } from 'date-fns';
 import BabyTracker from './BabyTracker';
 import PostpartumLochiaCard from './PostpartumLochiaCard';

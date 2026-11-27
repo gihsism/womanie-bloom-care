@@ -13,7 +13,7 @@ import {
   Heart,
   Shield,
   Sparkles,
-} from 'lucide-react';
+} from '@/components/icons';
 
 const features = [
   {

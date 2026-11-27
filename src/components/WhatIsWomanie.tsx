@@ -1,4 +1,4 @@
-import { Shield, Upload, Brain, TrendingUp } from 'lucide-react';
+import { Shield, Upload, Brain, TrendingUp } from '@/components/icons';
 
 const WhatIsWomanie = () => {
   const steps = [

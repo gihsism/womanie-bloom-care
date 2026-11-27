@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { Activity, Calendar, MessageSquare, FileText, Shield, Zap } from 'lucide-react';
+import { Activity, Calendar, MessageSquare, FileText, Shield, Zap } from '@/components/icons';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';

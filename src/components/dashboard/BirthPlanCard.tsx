@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/integrations/db/client';
-import { Check, ChevronDown, FileHeart, Printer } from 'lucide-react';
+import { Check, ChevronDown, FileHeart, Printer } from '@/components/icons';
 import {
   BIRTH_PLAN_LOCAL_KEY, BIRTH_PLAN_SECTIONS, EMPTY_PLAN, NOTE_MAX, parsePlan, planProgress, planStatusLine,
   sectionHasContent, setNote, toggleChoice, type BirthPlan, type BirthPlanSectionId,

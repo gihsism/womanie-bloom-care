@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Bell, FilePlus2, FileText, AlertTriangle, CalendarX, CalendarCheck, Search } from 'lucide-react';
+import { ArrowLeft, Bell, FilePlus2, FileText, AlertTriangle, CalendarX, CalendarCheck, Search } from '@/components/icons';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';

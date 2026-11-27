@@ -4,7 +4,7 @@ import { hormoneKeyForTitle, parseLabValue, amhAgeComparison } from '@/lib/hormo
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
-import { Egg, Info, TrendingDown, TrendingUp, Minus, MessageCircle } from 'lucide-react';
+import { Egg, Info, TrendingDown, TrendingUp, Minus, MessageCircle } from '@/components/icons';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';

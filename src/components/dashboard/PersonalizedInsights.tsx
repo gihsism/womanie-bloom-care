@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Link2 } from 'lucide-react';
+import { Sparkles, Link2 } from '@/components/icons';
 import { labNumber } from '@/lib/labValue';
 
 interface LabResult {

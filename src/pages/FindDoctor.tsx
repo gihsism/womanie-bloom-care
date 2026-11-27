@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/integrations/db/client';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Search, Star, Clock, Video, Calendar as CalendarIcon, CheckCircle, User, Printer, Share2, MapPin } from 'lucide-react';
+import { ArrowLeft, Search, Star, Clock, Video, Calendar as CalendarIcon, CheckCircle, User, Printer, Share2, MapPin } from '@/components/icons';
 import ShareWithDoctor from '@/components/dashboard/ShareWithDoctor';
 import BookingDialog, { doctorDisplayName } from '@/components/booking/BookingDialog';
 import { formatPrice } from '@/lib/booking';

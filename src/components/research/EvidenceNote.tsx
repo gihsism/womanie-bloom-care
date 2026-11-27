@@ -1,6 +1,6 @@
 import { useEffect, useId, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, ExternalLink, Loader2 } from 'lucide-react';
+import { ChevronRight, ExternalLink, Loader2 } from '@/components/icons';
 import { EVIDENCE_LABEL } from '@/lib/research-library';
 import { RESEARCH_DISCLAIMER } from '@/lib/research-sources';
 import { libraryLink, type EvidenceSpec } from '@/lib/evidenceTopics';

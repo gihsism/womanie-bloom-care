@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { WifiOff } from "lucide-react";
+import { WifiOff } from "@/components/icons";
 
 /**
  * A slim banner that appears when the device goes offline and clears

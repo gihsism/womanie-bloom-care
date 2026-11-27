@@ -28,7 +28,7 @@ import {
   Compass,
   HeartPulse,
   TrendingUp,
-} from 'lucide-react';
+} from '@/components/icons';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 interface MenopauseDashboardProps {

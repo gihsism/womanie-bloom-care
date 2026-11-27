@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Download, Share, X } from "lucide-react";
+import { Download, Share, X } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { isNativeApp } from "@/lib/platform";
 

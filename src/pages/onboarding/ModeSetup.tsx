@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from '@/components/icons';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import ProgressBar from '@/components/onboarding/ProgressBar';
 import RegularCycleForm from '@/components/onboarding/RegularCycleForm';

@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/integrations/db/client';
 import { onHealthDataChange } from '@/lib/data-events';
-import { Droplet, AlertCircle } from 'lucide-react';
+import { Droplet, AlertCircle } from '@/components/icons';
 import { attentionBanner } from '@/lib/medical-utils';
 import { format, parseISO, subMonths, differenceInDays } from 'date-fns';
 

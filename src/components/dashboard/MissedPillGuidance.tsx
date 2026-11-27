@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, ShieldCheck, Info } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, Info } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import {
   LATE_CHOICES, PILL_TYPES, choiceForHours, missedPillGuidance, vomitWindowHours, type PillType,

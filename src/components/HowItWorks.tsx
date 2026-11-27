@@ -1,4 +1,4 @@
-import { UserPlus, Activity, Stethoscope, TrendingUp } from 'lucide-react';
+import { UserPlus, Activity, Stethoscope, TrendingUp } from '@/components/icons';
 
 const HowItWorks = () => {
   const steps = [

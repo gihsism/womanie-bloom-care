@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
-import { ChevronDown, ExternalLink, FileText, Send } from 'lucide-react';
+import { ChevronDown, ExternalLink, FileText, Send } from '@/components/icons';
 import { openDocumentFile, type SentDocument } from '@/lib/documentFiles';
 import SendDocumentDialog from './SendDocumentDialog';
 import type { HealthDocument } from './types';

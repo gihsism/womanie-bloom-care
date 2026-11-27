@@ -10,7 +10,7 @@ import {
   User,
   LogOut,
   CalendarClock,
-} from "lucide-react";
+} from "@/components/icons";
 import {
   Sidebar,
   SidebarContent,

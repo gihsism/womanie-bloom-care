@@ -1,7 +1,7 @@
 import { Component, type ReactNode } from 'react';
 import { captureException } from '@/lib/monitoring';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Home } from '@/components/icons';
 import { hardReload, isStaleChunkError, reloadOnceForStaleChunk } from '@/lib/staleChunk';
 
 interface Props {

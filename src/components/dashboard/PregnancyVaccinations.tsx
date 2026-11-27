@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { differenceInDays, format, parseISO } from 'date-fns';
-import { Syringe, Check, Clock, Info } from 'lucide-react';
+import { Syringe, Check, Clock, Info } from '@/components/icons';
 import { useEffect, useMemo, useState } from 'react';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 import { PREGNANCY_VACCINES as VACCINES, PREG_VACCINES_KEY, type Vaccine, type VaccineState } from '@/lib/pregnancyVaccines';

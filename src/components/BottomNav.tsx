@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { shouldShowConsentGate } from "@/lib/consentGate";
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, FileText, MessageCircle, Calendar, Settings } from "lucide-react";
+import { Home, FileText, AskMark, Calendar, Me } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 // Mobile navigation — a standard bottom tab bar: five tabs, each an icon
@@ -26,9 +26,9 @@ interface Tab {
 const TABS: Tab[] = [
   { to: "/dashboard", label: "Home", icon: Home, exact: true },
   { to: "/dashboard/medical-history", label: "Records", icon: FileText },
-  { to: "/dashboard/ai-doctor", label: "Ask AI", icon: MessageCircle },
+  { to: "/dashboard/ai-doctor", label: "Ask AI", icon: AskMark },
   { to: "/dashboard/appointments", label: "Visits", icon: Calendar },
-  { to: "/dashboard/settings", label: "Me", icon: Settings },
+  { to: "/dashboard/settings", label: "Me", icon: Me },
 ];
 
 // Where the tab bar belongs — the patient dashboard surfaces. Kept off

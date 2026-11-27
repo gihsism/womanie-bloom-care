@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Scale, Plus, X, TrendingUp } from 'lucide-react';
+import { Scale, Plus, X, TrendingUp } from '@/components/icons';
 import { format } from 'date-fns';
 
 // Maternal weight-gain tracker. Uses IOM (Institute of Medicine /

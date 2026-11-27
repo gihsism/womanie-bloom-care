@@ -1,5 +1,5 @@
 import { Card } from '@/components/ui/card';
-import { Apple, Info } from 'lucide-react';
+import { Apple, Info } from '@/components/icons';
 import { Badge } from '@/components/ui/badge';
 
 // Menopause / post-menopause nutrition focus card.

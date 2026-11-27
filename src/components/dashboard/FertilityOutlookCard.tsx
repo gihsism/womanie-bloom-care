@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { differenceInDays, parseISO } from 'date-fns';
 import { healthTone } from '@/lib/medical-utils';
-import { Heart, Info, MessageCircle } from 'lucide-react';
+import { Heart, Info, MessageCircle } from '@/components/icons';
 
 // Fertility-outlook synthesis for conception mode.
 //

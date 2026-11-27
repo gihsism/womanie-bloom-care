@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Shield, Loader2 } from 'lucide-react';
+import { Shield, Loader2 } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';

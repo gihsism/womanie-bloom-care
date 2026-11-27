@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Activity, RotateCcw, AlertCircle, History, Undo2, CloudOff, Phone } from 'lucide-react';
+import { Activity, RotateCcw, AlertCircle, History, Undo2, CloudOff, Phone } from '@/components/icons';
 import { format, formatDistanceToNowStrict } from 'date-fns';
 import { attentionBanner, healthTone } from '@/lib/medical-utils';
 import { importLocalOnce } from '@/hooks/useLifeEvents';

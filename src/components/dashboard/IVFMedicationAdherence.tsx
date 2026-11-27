@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/integrations/db/client';
 import { onHealthDataChange } from '@/lib/data-events';
-import { Syringe, AlertCircle } from 'lucide-react';
+import { Syringe, AlertCircle } from '@/components/icons';
 import { format, subDays } from 'date-fns';
 
 // IVF medication adherence card. Reads back the per-day "Medication:

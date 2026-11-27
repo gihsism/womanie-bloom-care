@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Sparkles, TrendingDown, TrendingUp, AlertCircle, X, MessageCircle } from 'lucide-react';
+import { Sparkles, TrendingDown, TrendingUp, AlertCircle, X, MessageCircle } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 

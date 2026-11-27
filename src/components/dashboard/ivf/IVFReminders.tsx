@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bell, Clock, CheckCircle2 } from 'lucide-react';
+import { Bell, Clock, CheckCircle2 } from '@/components/icons';
 import { parseISO, differenceInMinutes, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 import type { IVFEvent } from './IVFCalendar';

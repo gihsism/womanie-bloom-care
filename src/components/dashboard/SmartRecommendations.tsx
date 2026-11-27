@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Lightbulb } from 'lucide-react';
+import { Lightbulb } from '@/components/icons';
 
 interface LabResult {
   title: string;

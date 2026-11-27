@@ -1,6 +1,6 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { format } from 'date-fns';
-import { Trash2, CheckCircle2, Circle } from 'lucide-react';
+import { Trash2, CheckCircle2, Circle } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import type { IVFEvent } from './IVFCalendar';
 

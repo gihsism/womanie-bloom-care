@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, Search } from 'lucide-react';
+import { ChevronRight, Search } from '@/components/icons';
 import {
   canOpenChart,
   filterPatients,

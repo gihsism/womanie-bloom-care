@@ -9,7 +9,7 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import {
   ArrowLeft, Check, X, Stethoscope, Loader2, ShieldOff, ShieldCheck, ExternalLink, Copy,
   Mail, Link2, History, Ban,
-} from 'lucide-react';
+} from '@/components/icons';
 import { formatDistanceToNow, format } from 'date-fns';
 
 // Admin surface for getting doctors onboard.

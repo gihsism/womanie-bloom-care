@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Baby, Flame, HeartPulse } from 'lucide-react';
+import { AlertTriangle, Baby, Flame, HeartPulse } from '@/components/icons';
 import { lifeStageLabel } from '@/lib/lifeStageLabels';
 import { labNumber } from '@/lib/labValue';
 

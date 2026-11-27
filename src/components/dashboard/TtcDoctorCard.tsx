@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTtcStart } from '@/hooks/useTtcStart';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 import { ttcDoctorAdvice, ttcDoctorText, parseYmd, isTtcStartInput, ttcStartMin } from '@/lib/ttc';
-import { CalendarHeart, FileText, Stethoscope } from 'lucide-react';
+import { CalendarHeart, FileText, Stethoscope } from '@/components/icons';
 
 // TTC stage: "When did you start trying?" and, once it has been 12 months
 // (6 from age 35, straight away from 40), a calm suggestion to see a

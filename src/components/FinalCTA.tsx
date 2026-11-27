@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Download, ArrowRight, FileText, Brain, Shield } from 'lucide-react';
+import { Download, ArrowRight, FileText, Brain, Shield } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
 
 const FinalCTA = () => {

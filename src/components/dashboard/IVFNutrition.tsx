@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Apple, Info } from 'lucide-react';
+import { Apple, Info } from '@/components/icons';
 
 // IVF nutrition focus — phase-aware. Stimulation, retrieval, transfer,
 // and TWW each have slightly different priorities.

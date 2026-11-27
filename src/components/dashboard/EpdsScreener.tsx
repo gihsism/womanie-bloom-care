@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { format, parseISO } from 'date-fns';
-import { Brain, RotateCcw, ChevronRight } from 'lucide-react';
+import { Brain, RotateCcw, ChevronRight } from '@/components/icons';
 import { useEffect, useMemo, useState } from 'react';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 import EvidenceNote from '@/components/research/EvidenceNote';

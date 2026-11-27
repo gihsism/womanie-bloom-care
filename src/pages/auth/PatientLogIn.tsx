@@ -3,7 +3,7 @@ import { isNativeApp } from '@/lib/platform';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Loader2, Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { ArrowLeft, Loader2, Eye, EyeOff, Mail, Lock } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';

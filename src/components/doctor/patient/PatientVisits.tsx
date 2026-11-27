@@ -1,5 +1,5 @@
 import { Card } from '@/components/ui/card';
-import { Calendar, Video } from 'lucide-react';
+import { Calendar, Video } from '@/components/icons';
 import { parseQuestions } from '@/lib/visitQuestions';
 import { QuestionList } from './PatientVisitQuestions';
 import type { PatientAppointment, PatientVisitQuestions } from './types';

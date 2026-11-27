@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Apple, Info, AlertCircle } from 'lucide-react';
+import { Apple, Info, AlertCircle } from '@/components/icons';
 
 // Trimester-aware nutrition focus for pregnancy mode. Adapts to the
 // week count PregnancyTracker computes from pregnancy_due_date.
