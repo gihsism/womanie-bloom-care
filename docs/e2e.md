@@ -1,5 +1,62 @@
 # End-to-end tests (Playwright)
 
+There are two suites:
+
+- **Local suite** (`e2e-local/`, `npm run e2e:local`): the production build
+  on your machine with a fake API. No network, no database, no account.
+  Run it before every merge.
+- **Live smoke suite** (`e2e/`, `npm run e2e`): the deployed site with the
+  real test account. Described from "Run" below.
+
+## Local suite (no network, no live DB)
+
+```sh
+npm run e2e:local                                   # build, then run all (~2 min)
+npx playwright test -c e2e-local/playwright.config.ts            # rerun without rebuilding
+npx playwright test -c e2e-local/playwright.config.ts --project=phone-390 -g Pregnancy
+npx playwright show-report e2e-local/.report        # last HTML report
+```
+
+Playwright is the repo's own `@playwright/test` devDependency (1.56.1, the
+same version as in `~/.cache/womanie-ux/node_modules`). In an agent worktree,
+symlink `node_modules` to the main checkout's; never install there. Chromium
+must be installed once (`npx playwright install chromium`).
+
+How it works: the config starts `vite preview` on `127.0.0.1:4179`
+(`E2E_LOCAL_PORT` overrides) and serves `dist/`. `e2e-local/mock-api.ts`
+answers every `/api/**` request in the browser: `/api/db` is a small
+in-memory table store (filters, order, limit, insert/update/upsert/delete),
+so a saved log or a ticked medicine can be read back; Ask AI streams a canned
+answer; anything off `127.0.0.1` (fonts, Sentry) gets an empty 204. The
+service worker is blocked so it cannot bypass the mocks. A request no
+handler knows is recorded, and every test asserts there were none, so a new
+endpoint shows up as a failure until it gets a fixture.
+
+Fixtures: `e2e-local/fixtures/account.json` (one patient: a medicine, a lab
+document with two results, two periods, an upcoming visit) and
+`fixtures/stages.json` (per-stage profile columns and the stage label).
+Dates are tokens (`{{day:-12}}`, `{{at:5}}`) resolved against today.
+
+Two projects: `phone-390` (390x844, touch) and `desktop` (1280x900). Tests
+run in parallel; each starts from a fresh copy of the fixtures.
+
+| File | Per life stage (all 9) |
+|---|---|
+| `journeys.spec.ts` | Home: log today (mood, save) and tick a medicine (0 -> 1 of 1, dose row written); Records -> Documents -> open the lab document -> Print / PDF view; Ask AI -> canned streamed answer; Visits -> next visit -> prep sheet -> Print (window.print called, toolbar hidden in print media); Me -> profile shows the email, life-stage picker shows the stage |
+| `edge-cases.spec.ts` | Every main page (Home, stage page, Records, Ask AI, Visits, Me, prep sheet) renders with no error screen and no console errors, for a brand-new empty account and for rows whose optional columns are null |
+
+Bugs it has caught: a period row with no `cycle_length` froze the stage page
+(endless loop) and crashed Home's cycle dial (fixed in `useStageProfile`).
+
+Adding a journey: add data to the fixture JSON if needed, use role/text
+selectors as below, and finish with `expect(api.unhandled).toEqual([])` and
+`expect(consoleErrors).toEqual([])`. No visual assertions (screenshots are
+only taken on failure).
+
+---
+
+# Live smoke suite
+
 A small smoke suite that drives the deployed app in a real browser and
 guards the critical patient flows. Run it before (or right after) a deploy.
 It is separate from `npm run build` and from the vitest unit tests.
