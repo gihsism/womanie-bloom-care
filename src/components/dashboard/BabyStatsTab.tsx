@@ -3,6 +3,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { useLifeEvents } from '@/hooks/useLifeEvents';
 import { Button } from '@/components/ui/button';
 import { dailyRows, feedSummary, type DayRow } from '@/lib/babyStats';
+import { chartBarCursor, chartBarRadius, chartGrid, chartSlipClass, chartXAxis, chartYAxis } from '@/components/charts/chartTheme';
 
 // Feeding and nappy statistics for one baby (last 7 days).
 // Colours: feeds = brand primary (single series, title names it);
@@ -27,13 +28,12 @@ function Tile({ label, value, hint }: { label: string; value: string; hint?: str
   );
 }
 
-const axis = { fontSize: 10, fill: 'hsl(var(--muted-foreground))' };
 
 function ChartTip({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string }>; label?: string }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-md border bg-popover px-2 py-1 text-xs shadow-sm">
-      <div className="font-medium mb-0.5">{label}</div>
+    <div className={chartSlipClass}>
+      <div className="label-mono !text-[10px] mb-0.5">{label}</div>
       {payload.map(p => (
         <div key={p.name} className="flex items-center gap-1.5 text-foreground">
           <span className="inline-block h-2 w-2 rounded-sm" style={{ background: p.color }} />
@@ -80,11 +80,11 @@ export default function BabyStatsTab({ babyId, onGoTo }: { babyId: string; onGoT
           <div className="h-40 text-primary" role="img" aria-label={`Feeds per day, last 7 days: ${rows.map(r => `${r.label} ${r.feeds}`).join(', ')}`}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={rows} margin={{ top: 8, right: 4, left: -24, bottom: 0 }}>
-                <CartesianGrid vertical={false} stroke="hsl(var(--border))" strokeDasharray="0" />
-                <XAxis dataKey="label" tick={axis} tickLine={false} axisLine={false} />
-                <YAxis allowDecimals={false} tick={axis} tickLine={false} axisLine={false} width={40} />
-                <Tooltip content={<ChartTip />} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }} />
-                <Bar dataKey="feeds" name="Feeds" fill="currentColor" radius={[4, 4, 0, 0]} maxBarSize={12} isAnimationActive={false} />
+                <CartesianGrid {...chartGrid} />
+                <XAxis dataKey="label" {...chartXAxis} />
+                <YAxis allowDecimals={false} {...chartYAxis} width={40} />
+                <Tooltip content={<ChartTip />} cursor={chartBarCursor} />
+                <Bar dataKey="feeds" name="Feeds" fill="currentColor" radius={chartBarRadius} maxBarSize={12} isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -108,12 +108,12 @@ export default function BabyStatsTab({ babyId, onGoTo }: { babyId: string; onGoT
           <div className="h-40" role="img" aria-label={`Nappies per day, last 7 days: ${rows.map(r => `${r.label} ${r.wet} wet ${r.dirty} dirty`).join(', ')}`}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={rows} margin={{ top: 8, right: 4, left: -24, bottom: 0 }}>
-                <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
-                <XAxis dataKey="label" tick={axis} tickLine={false} axisLine={false} />
-                <YAxis allowDecimals={false} tick={axis} tickLine={false} axisLine={false} width={40} />
-                <Tooltip content={<ChartTip />} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }} />
+                <CartesianGrid {...chartGrid} />
+                <XAxis dataKey="label" {...chartXAxis} />
+                <YAxis allowDecimals={false} {...chartYAxis} width={40} />
+                <Tooltip content={<ChartTip />} cursor={chartBarCursor} />
                 <Bar dataKey="wet" name="Wet" stackId="n" fill={WET} stroke="hsl(var(--card))" strokeWidth={2} maxBarSize={12} isAnimationActive={false} />
-                <Bar dataKey="dirty" name="Dirty" stackId="n" fill={DIRTY} stroke="hsl(var(--card))" strokeWidth={2} radius={[4, 4, 0, 0]} maxBarSize={12} isAnimationActive={false} />
+                <Bar dataKey="dirty" name="Dirty" stackId="n" fill={DIRTY} stroke="hsl(var(--card))" strokeWidth={2} radius={chartBarRadius} maxBarSize={12} isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
           </div>

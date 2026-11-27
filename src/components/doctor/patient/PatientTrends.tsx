@@ -4,6 +4,7 @@ import {
   Legend,
   Line,
   LineChart,
+  ReferenceArea,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -21,6 +22,10 @@ import {
   type Trend,
   type TrendsPayload,
 } from '@/lib/patientTrends';
+import {
+  CHART, chartActiveDot, chartBand, chartCursor, chartDot, chartGrid, chartLegend, chartLine, chartRefLabel, chartRefLine,
+  chartSlipClass, chartXAxis, chartYAxis,
+} from '@/components/charts/chartTheme';
 
 // Trends tab of the doctor's patient chart: small charts for what the
 // patient already logs (cycle and period length, weight, blood pressure,
@@ -32,9 +37,9 @@ import {
 // read logged for the patient). Fetched the first time the tab opens; the
 // parent keeps the answer so switching tabs does not re-fetch.
 
-const INK = 'hsl(var(--primary))';
-const MUTED = 'hsl(var(--muted-foreground))';
-const TICK = { fontSize: 10, fill: MUTED };
+// Her values in the raspberry accent; the second series in ink.
+const INK = CHART.accent;
+const MUTED = CHART.ink;
 
 type LoadState =
   | { kind: 'loading' }
@@ -156,33 +161,30 @@ function LineTrendCard({ title, trend, valueLabel, decimals = 0, refBand }: {
       <div role="img" aria-label={`${title} chart. ${trend.summary}`}>
         <ResponsiveContainer width="100%" height={140}>
           <LineChart data={trend.points} margin={{ top: 8, right: 12, bottom: 0, left: -12 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-            <XAxis dataKey="label" tick={TICK} tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={16} />
-            <YAxis tick={TICK} tickLine={false} axisLine={false} width={44} domain={['auto', 'auto']} />
+            <CartesianGrid {...chartGrid} />
             {refBand && (
-              <>
-                <ReferenceLine y={refBand[0]} stroke={MUTED} strokeDasharray="4 4" label={{ value: `${refBand[0]}`, position: 'right', fontSize: 9, fill: MUTED }} />
-                <ReferenceLine y={refBand[1]} stroke={MUTED} strokeDasharray="4 4" label={{ value: `${refBand[1]}`, position: 'right', fontSize: 9, fill: MUTED }} />
-              </>
+              <ReferenceArea y1={refBand[0]} y2={refBand[1]} {...chartBand} label={chartRefLabel(`${refBand[0]}–${refBand[1]}`, 'insideTopRight')} />
             )}
+            <XAxis dataKey="label" {...chartXAxis} interval="preserveStartEnd" minTickGap={16} />
+            <YAxis {...chartYAxis} width={44} domain={['auto', 'auto']} />
             <Tooltip
-              cursor={{ stroke: MUTED, strokeWidth: 1 }}
+              cursor={chartCursor}
               content={({ active, payload }) => {
                 if (!active || !payload?.length) return null;
                 const d = payload[0].payload as Trend['points'][number];
                 return (
-                  <div className="bg-background border border-border rounded-lg px-2.5 py-1.5 shadow text-xs">
-                    <p className="text-muted-foreground">{valueLabel} {d.label}</p>
+                  <div className={chartSlipClass}>
+                    <p className="label-mono !text-[10px]">{valueLabel} {d.label}</p>
                     <p className="font-medium">{fmt(d.value)} {trend.unit}</p>
                   </div>
                 );
               }}
             />
-            <Line type="monotone" dataKey="value" stroke={INK} strokeWidth={2} dot={{ r: 4, fill: INK, strokeWidth: 0 }} activeDot={{ r: 6 }} isAnimationActive={false} />
+            <Line {...chartLine} dataKey="value" stroke={INK} dot={chartDot(INK)} activeDot={chartActiveDot(INK)} />
           </LineChart>
         </ResponsiveContainer>
       </div>
-      {refBand && <p className="text-[11px] text-muted-foreground px-2">Dashed lines: typical range {refBand[0]}–{refBand[1]} {trend.unit}.</p>}
+      {refBand && <p className="text-[11px] text-muted-foreground px-2">Shaded band: typical range {refBand[0]}–{refBand[1]} {trend.unit}.</p>}
       <ValuesList
         headers={[valueLabel, `${title} (${trend.unit})`]}
         rows={[...trend.points].reverse().map(p => [p.label, fmt(p.value)])}
@@ -197,32 +199,32 @@ function BloodPressureCard({ trend }: { trend: BpTrend }) {
       <div role="img" aria-label={`Blood pressure chart. ${trend.summary}`}>
         <ResponsiveContainer width="100%" height={170}>
           <LineChart data={trend.points} margin={{ top: 8, right: 12, bottom: 0, left: -12 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-            <XAxis dataKey="label" tick={TICK} tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={16} />
-            <YAxis tick={TICK} tickLine={false} axisLine={false} width={44} domain={[40, 'auto']} />
-            <ReferenceLine y={140} stroke={MUTED} strokeDasharray="4 4" label={{ value: '140', position: 'right', fontSize: 9, fill: MUTED }} />
-            <ReferenceLine y={90} stroke={MUTED} strokeDasharray="4 4" label={{ value: '90', position: 'right', fontSize: 9, fill: MUTED }} />
+            <CartesianGrid {...chartGrid} />
+            <XAxis dataKey="label" {...chartXAxis} interval="preserveStartEnd" minTickGap={16} />
+            <YAxis {...chartYAxis} width={44} domain={[40, 'auto']} />
+            <ReferenceLine y={140} {...chartRefLine} label={chartRefLabel('140')} />
+            <ReferenceLine y={90} {...chartRefLine} label={chartRefLabel('90')} />
             <Tooltip
-              cursor={{ stroke: MUTED, strokeWidth: 1 }}
+              cursor={chartCursor}
               content={({ active, payload }) => {
                 if (!active || !payload?.length) return null;
                 const d = payload[0].payload as BpTrend['points'][number];
                 return (
-                  <div className="bg-background border border-border rounded-lg px-2.5 py-1.5 shadow text-xs">
-                    <p className="text-muted-foreground">{d.label}</p>
+                  <div className={chartSlipClass}>
+                    <p className="label-mono !text-[10px]">{d.label}</p>
                     <p className="font-medium">{d.systolic}/{d.diastolic} mmHg{isHighBp(d.systolic, d.diastolic) ? ' (high)' : ''}</p>
                   </div>
                 );
               }}
             />
             {/* Two series told apart by line style and the legend, not colour alone. */}
-            <Legend verticalAlign="top" align="left" height={22} iconType="plainline" wrapperStyle={{ fontSize: 11, paddingLeft: 12 }} />
-            <Line name="Systolic (top)" type="monotone" dataKey="systolic" stroke={INK} strokeWidth={2} dot={{ r: 4, fill: INK, strokeWidth: 0 }} isAnimationActive={false} />
-            <Line name="Diastolic (bottom)" type="monotone" dataKey="diastolic" stroke={MUTED} strokeWidth={2} strokeDasharray="5 3" dot={{ r: 4, fill: MUTED, strokeWidth: 0 }} isAnimationActive={false} />
+            <Legend verticalAlign="top" align="left" height={22} iconType={chartLegend.iconType} wrapperStyle={{ ...chartLegend.wrapperStyle, paddingLeft: 12 }} />
+            <Line name="Systolic (top)" {...chartLine} dataKey="systolic" stroke={INK} dot={chartDot(INK)} activeDot={chartActiveDot(INK)} />
+            <Line name="Diastolic (bottom)" {...chartLine} dataKey="diastolic" stroke={MUTED} strokeDasharray="5 3" dot={chartDot(MUTED)} activeDot={chartActiveDot(MUTED)} />
           </LineChart>
         </ResponsiveContainer>
       </div>
-      <p className="text-[11px] text-muted-foreground px-2">Dashed lines: 140 / 90 mmHg.</p>
+      <p className="text-[11px] text-muted-foreground px-2">Thin lines: 140 / 90 mmHg.</p>
       <ValuesList
         headers={['Date', 'mmHg', '']}
         rows={[...trend.points].reverse().map(p => [p.label, `${p.systolic}/${p.diastolic}`, isHighBp(p.systolic, p.diastolic) ? 'High' : ''])}

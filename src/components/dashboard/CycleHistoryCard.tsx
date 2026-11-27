@@ -16,6 +16,9 @@ import {
   ReferenceLine,
   Cell,
 } from 'recharts';
+import {
+  CHART, chartBarCursor, chartBarRadius, chartGrid, chartRefLabel, chartRefLine, chartTooltip, chartXAxis, chartYAxis,
+} from '@/components/charts/chartTheme';
 import { attentionBanner, healthTone } from '@/lib/medical-utils';
 import { Activity, AlertCircle } from '@/components/icons';
 
@@ -184,42 +187,38 @@ const CycleHistoryCard = ({ enabled = true }: CycleHistoryCardProps) => {
       <div className="h-44">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={cycles} margin={{ top: 5, right: 5, left: -10, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+            <CartesianGrid {...chartGrid} />
             <XAxis
               dataKey="index"
-              tick={{ fontSize: 10 }}
-              label={{ value: 'Cycle', position: 'insideBottom', offset: -2, fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+              {...chartXAxis}
+              label={{ ...chartRefLabel('CYCLE', 'insideBottom'), offset: -2 }}
             />
             <YAxis
-              tick={{ fontSize: 10 }}
+              {...chartYAxis}
               width={40}
               domain={['dataMin - 2', 'dataMax + 2']}
-              label={{ value: 'Days', angle: -90, position: 'insideLeft', offset: 16, fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+              label={{ ...chartRefLabel('DAYS', 'insideLeft'), angle: -90, offset: 16 }}
             />
             <Tooltip
-              contentStyle={{
-                background: 'hsl(var(--background))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: 8,
-                fontSize: 12,
-              }}
+              {...chartTooltip}
+              cursor={chartBarCursor}
               formatter={(value: number) => [`${value} days`, 'Length']}
               labelFormatter={(idx) => {
                 const c = cycles[Number(idx) - 1];
                 return c ? `Cycle ${idx} — started ${format(parseISO(c.startDate), 'MMM d, yyyy')}` : `Cycle ${idx}`;
               }}
             />
-            <ReferenceLine
-              y={stats.mean}
-              stroke="hsl(var(--muted-foreground))"
-              strokeDasharray="3 3"
-              label={{ value: 'avg', position: 'right', fontSize: 9, fill: 'hsl(var(--muted-foreground))' }}
-            />
-            <Bar dataKey="lengthDays" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="lengthDays" radius={chartBarRadius} stroke={CHART.paper} strokeWidth={1} isAnimationActive={false}>
               {cycles.map((c, i) => (
                 <Cell key={`cell-${i}`} fill={barColor(c.lengthDays)} />
               ))}
             </Bar>
+            {/* After the bars so the average rule and its label sit on top. */}
+            <ReferenceLine
+              y={stats.mean}
+              {...chartRefLine}
+              label={chartRefLabel('AVG')}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>

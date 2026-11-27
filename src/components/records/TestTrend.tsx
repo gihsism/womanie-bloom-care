@@ -8,7 +8,11 @@ import {
   Line,
   ComposedChart,
   ReferenceArea,
+  LabelList,
 } from 'recharts';
+import {
+  CHART, ChartSlip, chartActiveDot, chartBand, chartCursor, chartGrid, chartLine, chartRefLabel, chartXAxis, chartYAxis, directLabel,
+} from '@/components/charts/chartTheme';
 
 // One test's history, shown inside that test's row on Records → Results.
 // It replaces three separate page sections ("Results Breakdown", "How
@@ -74,46 +78,49 @@ export default function TestTrend({ info, summary }: TestTrendProps) {
           ...info.data,
           ...(predictedNext !== null ? [{ date: 'Next?', value: predictedNext, refLow: refLow ?? null, refHigh: refHigh ?? null }] : [])
         ]} margin={{ left: 0, right: 5, top: 5, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="date" tick={{ fontSize: 9 }} />
-          <YAxis tick={{ fontSize: 9 }} domain={['auto', 'auto']} />
+          <CartesianGrid {...chartGrid} />
           {hasRefRange && refLow !== undefined && refHigh !== undefined && (
-            <ReferenceArea y1={refLow} y2={refHigh} fill="hsl(var(--muted-foreground))" fillOpacity={0.08} label={{ value: "Healthy", position: "insideTopLeft", fontSize: 8, fill: "hsl(var(--muted-foreground))" }} />
+            <ReferenceArea y1={refLow} y2={refHigh} {...chartBand} label={chartRefLabel('HEALTHY', 'insideTopLeft')} />
           )}
+          <XAxis dataKey="date" {...chartXAxis} />
+          <YAxis {...chartYAxis} width={36} domain={['auto', 'auto']} />
           <Tooltip
+            cursor={chartCursor}
             content={({ active, payload }) => {
               if (!active || !payload?.length) return null;
               const d = payload[0].payload;
               const isPredicted = d.date === 'Next?';
               return (
-                <div className="bg-background border border-border rounded-xl px-3 py-2 shadow-lg text-xs">
-                  <p className={isPredicted ? 'text-primary font-medium' : ''}>
-                    {isPredicted ? '🔮 Predicted' : d.date}: <span className="font-medium">{d.value}{info.unit ? ` ${info.unit}` : ''}</span>
+                <ChartSlip label={isPredicted ? 'Predicted' : d.date}>
+                  <p className={isPredicted ? 'text-primary' : ''}>
+                    <span className="font-medium">{d.value}{info.unit ? ` ${info.unit}` : ''}</span>
                   </p>
                   {d.refLow !== null && <p className="text-muted-foreground">Healthy range: {d.refLow}–{d.refHigh}</p>}
-                </div>
+                </ChartSlip>
               );
             }}
           />
           <Line
-            type="monotone"
+            {...chartLine}
             dataKey="value"
-            stroke="hsl(var(--primary))"
-            strokeWidth={2}
+            stroke={CHART.accent}
+            activeDot={chartActiveDot()}
             dot={(props: { cx?: number; cy?: number; payload?: { date?: string } }) => {
               const { cx, cy, payload } = props;
               if (payload?.date === 'Next?') {
-                return <circle key="predicted" cx={cx} cy={cy} r={4} fill="hsl(var(--primary))" stroke="hsl(var(--primary))" strokeWidth={2} strokeDasharray="4 2" opacity={0.4} />;
+                return <circle key="predicted" cx={cx} cy={cy} r={4} fill={CHART.paper} stroke={CHART.accent} strokeWidth={1.5} strokeDasharray="2 2" />;
               }
-              return <circle key={payload?.date} cx={cx} cy={cy} r={3} fill="hsl(var(--primary))" />;
+              return <circle key={payload?.date} cx={cx} cy={cy} r={4} fill={CHART.accent} stroke={CHART.paper} strokeWidth={1.5} />;
             }}
-          />
+          >
+            <LabelList dataKey="value" content={directLabel(info.data.length - 1, v => `${v}${info.unit ? ` ${info.unit}` : ''}`)} />
+          </Line>
         </ComposedChart>
       </ResponsiveContainer>
-      <p className="text-[10px] text-muted-foreground mt-1">Shaded area = healthy range. Faded dot = predicted next value.</p>
+      <p className="text-[10px] text-muted-foreground mt-1">Shaded band = healthy range. Open dot = predicted next value.</p>
       {predictedNext !== null && (
         <p className="text-[10px] text-muted-foreground mt-1">
-          <span className="text-primary">🔮</span> We predict your next result could be around <span className="font-medium whitespace-nowrap">{predictedNext}{info.unit ? ` ${info.unit}` : ''}</span>{' '}
+          We predict your next result could be around <span className="font-medium whitespace-nowrap">{predictedNext}{info.unit ? ` ${info.unit}` : ''}</span>{' '}
           {hasRefRange && refLow !== undefined && refHigh !== undefined && (
             <span className={predictedNext >= refLow && predictedNext <= refHigh ? 'text-muted-foreground' : 'text-destructive'}>
               ({predictedNext >= refLow && predictedNext <= refHigh ? 'in the healthy range' : 'outside healthy range'})
