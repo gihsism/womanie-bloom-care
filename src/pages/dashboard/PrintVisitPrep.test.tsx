@@ -57,4 +57,43 @@ describe('VisitPrepSheet', () => {
     expect(screen.getByText(/^Pregnancy week /)).toBeInTheDocument();
     expect(container.textContent).toContain('TSH: last checked 8 months ago (1 Mar 2026). That was before this pregnancy.');
   });
+
+  it('menopause: prints the 4-week symptom diary with a neutral sentence', () => {
+    const data: VisitPrepData = {
+      ...base, stage: 'menopause', periods: [],
+      signals: [
+        { signal_date: '2026-11-24', notes: 'Hot flashes: 5. Sleep quality: 2/5', mood: ['anxious'] },
+        { signal_date: '2026-11-10', symptoms: ['Hot flashes'] },
+      ],
+    };
+    const { container } = render(<VisitPrepSheet data={data} now={NOW} />);
+    const section = container.querySelector('[data-section="symptom-diary"]')!;
+    expect(section.textContent).toContain('Symptom diary, last 4 weeks');
+    expect(section.textContent).toContain('Logged on 2 of the last 28 days. In that time: hot flushes on 2 days (5 hot flushes counted), poor sleep on 1 night and low mood on 1 day.');
+    expect(section.querySelectorAll('thead th')).toHaveLength(5);
+    expect(screen.getByText('Hot flushes counted')).toBeInTheDocument();
+    expect(container.querySelector('[data-section="ttc-cycles"]')).toBeNull();
+  });
+
+  it('not in a menopause stage or TTC: neither summary is on the sheet', () => {
+    const { container } = render(<VisitPrepSheet data={{ ...base, signals: [{ signal_date: '2026-11-24', notes: 'Hot flashes: 5' }] }} now={NOW} />);
+    expect(container.querySelector('[data-section="symptom-diary"]')).toBeNull();
+    expect(container.querySelector('[data-section="ttc-cycles"]')).toBeNull();
+  });
+
+  it('trying to conceive: prints cycle and period lengths with the logged ovulation tests', () => {
+    const data: VisitPrepData = {
+      ...base, stage: 'conception',
+      periods: [
+        { period_start_date: '2026-11-20', period_end_date: '2026-11-24' },
+        { period_start_date: '2026-10-22', period_end_date: '2026-10-26' },
+      ],
+      signals: [{ signal_date: '2026-11-04', notes: 'LH test: peak' }],
+    };
+    const { container } = render(<VisitPrepSheet data={data} now={NOW} />);
+    const section = container.querySelector('[data-section="ttc-cycles"]')!;
+    expect(section.textContent).toContain('Cycle length 29 days over 1 cycle. Period length 5 days. Ovulation tests logged in 1 of 2 cycles; a positive or peak result in 1.');
+    expect(section.textContent).toContain('1 test; day 14 peak');
+    expect(section.textContent).toContain('current');
+  });
 });

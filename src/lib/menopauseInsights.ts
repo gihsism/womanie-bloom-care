@@ -157,7 +157,7 @@ const LOW_MOODS = new Set(['sad', 'irritable', 'anxious', 'low', 'down', 'depres
 const LOW_MOOD_TAGS = new Set(['anxiety', 'mood swings', 'mood changes', 'low mood']);
 const POOR_SLEEP_TAGS = new Set(['insomnia', 'sleep issues', 'sleep disruption', 'poor sleep']);
 
-interface Day {
+export interface Day {
   ago: number;
   logged: boolean;
   hotCount: number | null;
@@ -170,7 +170,8 @@ interface Day {
   sleepKnown: boolean;
 }
 
-function parseDayRow(r: SignalInput, ago: number): Day {
+/** One daily_health_signals row read into the metrics (also used by menopauseDiary). */
+export function parseDayRow(r: SignalInput, ago: number): Day {
   const notes = typeof r.notes === 'string' ? r.notes : '';
   const tags = asList(r.symptoms).map(norm);
   const moods = asList(r.mood).map(norm);

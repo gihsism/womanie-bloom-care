@@ -12,6 +12,9 @@ import { UNSCHEDULED_VISIT_ID } from '@/lib/hrtQuestions';
 import { formatLabDay } from '@/lib/health-trends';
 import { recheckHints, type RecheckRow } from '@/lib/labRecheck';
 import { prepQuestions, resultsToDiscuss, type PrepResultRow } from '@/lib/visitPrep';
+import { symptomDiary, weekLabel, type DiaryWeek, type SymptomDiary } from '@/lib/menopauseDiary';
+import type { SignalInput } from '@/lib/menopauseInsights';
+import { lhText, ttcCycleSummary } from '@/lib/ttcPrep';
 import {
   stageLines, lastCycles, medicineLines, footerLine, localDate, isoDay,
   type PeriodRow, type MedicineRow,
@@ -34,9 +37,54 @@ export interface VisitPrepData {
   visitQuestions: { questions: unknown } | null;
   unscheduledQuestions: { questions: unknown } | null;
   results: PrepResultRow[];
+  /** daily_health_signals of the last ~200 days: the menopause diary and the TTC LH tests. */
+  signals?: SignalInput[];
 }
 
 const H2 = 'text-[11px] font-bold uppercase tracking-wide text-gray-500 mb-1';
+const MENOPAUSE_STAGES = ['menopause', 'post-menopause'];
+
+// Menopause stages: the last 4 weeks of logged symptoms, one column per week.
+function DiarySection({ diary }: { diary: SymptomDiary }) {
+  type Row = [label: string, cell: (w: DiaryWeek) => string, show: boolean];
+  const dash = (v: number | null) => (v == null ? '—' : String(v));
+  const rows = ([
+    ['Days logged', w => String(w.daysLogged), true],
+    ['Hot flushes (days)', w => String(w.hotFlushDays), true],
+    ['Hot flushes counted', w => dash(w.hotFlushCount), diary.hasHotCounts],
+    ['Poor-sleep nights', w => String(w.poorSleepNights), true],
+    ['Sleep, hours a night', w => dash(w.sleepHours), diary.hasSleepHours],
+    ['Low-mood days', w => String(w.lowMoodDays), true],
+  ] as Row[]).filter(r => r[2]);
+  return (
+    <section className="mb-4 break-inside-avoid" data-section="symptom-diary">
+      <h2 className={H2}>Symptom diary, last 4 weeks</h2>
+      <p className="text-sm mb-1">{diary.sentence}</p>
+      {diary.daysLogged > 0 && (
+        <table className="w-full text-sm border-collapse">
+          <thead>
+            <tr className="border-b border-gray-300 text-xs text-gray-500">
+              <th className="text-left py-1 font-medium">Week</th>
+              {diary.weeks.map(w => {
+                const [a, b] = weekLabel(w).split(' – ');
+                return <th key={a} className="text-right py-1 pl-2 font-medium leading-tight">{a}<span className="block">– {b}</span></th>;
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(([label, cell]) => (
+              <tr key={label} className="border-b border-gray-100">
+                <td className="py-1 pr-2">{label}</td>
+                {diary.weeks.map(w => <td key={w.from.getTime()} className="py-1 pl-2 text-right tabular-nums">{cell(w)}</td>)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      <p className="text-xs text-gray-500 mt-1">From the daily log in Womanie. Days with nothing logged are not counted.</p>
+    </section>
+  );
+}
 
 export function VisitPrepSheet({ data, now = new Date() }: { data: VisitPrepData; now?: Date }) {
   const cycles = lastCycles(data.periods);
@@ -46,6 +94,8 @@ export function VisitPrepSheet({ data, now = new Date() }: { data: VisitPrepData
   const due = data.dueDate ? new Date(`${String(data.dueDate).slice(0, 10)}T00:00:00`) : null;
   const hints = recheckHints(data.results as RecheckRow[], { stage: data.stage, dueDate: due, now });
   const when = data.visit ? new Date(data.visit.scheduled_at) : null;
+  const diary = MENOPAUSE_STAGES.includes(data.stage ?? '') ? symptomDiary(data.signals ?? [], now) : null;
+  const ttc = data.stage === 'conception' ? ttcCycleSummary(data.periods, data.signals ?? [], now) : null;
 
   return (
     <article className="max-w-3xl mx-auto px-4 sm:px-8 py-6 sm:py-8 print:px-0 print:py-0" data-testid="visit-prep-sheet">
@@ -68,6 +118,38 @@ export function VisitPrepSheet({ data, now = new Date() }: { data: VisitPrepData
             .map(l => <p key={l}>{l}</p>)}
         </div>
       </section>
+
+      {diary && <DiarySection diary={diary} />}
+
+      {ttc && (
+        <section className="mb-4 break-inside-avoid" data-section="ttc-cycles">
+          <h2 className={H2}>Cycles and ovulation tests</h2>
+          <p className="text-sm mb-1">{ttc.sentence}</p>
+          {ttc.cycles.length > 0 && (
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="border-b border-gray-300 text-xs text-gray-500">
+                  <th className="text-left py-1 font-medium">Period started</th>
+                  <th className="text-right py-1 pl-2 font-medium">Cycle</th>
+                  <th className="text-right py-1 pl-2 font-medium">Period</th>
+                  <th className="text-left py-1 pl-2 font-medium">Ovulation tests</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ttc.cycles.map(c => (
+                  <tr key={c.start.getTime()} className="border-b border-gray-100 align-top">
+                    <td className="py-1 pr-2 whitespace-nowrap">{localDate(c.start)}</td>
+                    <td className="py-1 pl-2 text-right whitespace-nowrap">{c.current ? 'current' : c.cycleLength != null ? `${c.cycleLength} d` : '—'}</td>
+                    <td className="py-1 pl-2 text-right whitespace-nowrap">{c.periodLength != null ? `${c.periodLength} d` : '—'}</td>
+                    <td className="py-1 pl-2">{lhText(c)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          <p className="text-xs text-gray-500 mt-1">Cycle = days from one period start to the next. Ovulation tests as logged in Womanie; cycle day 1 is the first day of the period.</p>
+        </section>
+      )}
 
       <section className="mb-4 break-inside-avoid" data-section="questions">
         <h2 className={H2}>My questions</h2>
@@ -141,7 +223,8 @@ export default function PrintVisitPrep() {
   const load = useCallback(async () => {
     if (!user || !id) return;
     const rows = <T,>(r: { data: unknown }) => (Array.isArray(r.data) ? r.data : []) as T[];
-    const [aptResp, profileRes, periodRes, medsRes, qRes, resultRes] = await Promise.all([
+    const since = new Date(Date.now() - 200 * 86_400_000);
+    const [aptResp, profileRes, periodRes, medsRes, qRes, resultRes, signalRes] = await Promise.all([
       fetch('/api/me/appointments').then(r => (r.ok ? r.json() : { appointments: [] })).catch(() => ({ appointments: [] })),
       // '*': ttc_start_date exists only once migration 025 is applied.
       db.from('profiles').select('*').eq('id', user.id).maybeSingle(),
@@ -153,6 +236,9 @@ export default function PrintVisitPrep() {
         .in('appointment_id', [String(id), UNSCHEDULED_VISIT_ID]),
       db.from('current_extracted_data').select('title, value, unit, reference_range, status, date_recorded, data_type, document_id')
         .eq('user_id', user.id).eq('data_type', 'lab_result'),
+      // Menopause diary (last 4 weeks) and TTC ovulation tests (last 6 cycles).
+      db.from('daily_health_signals').select('signal_date, symptoms, mood, notes').eq('user_id', user.id)
+        .gte('signal_date', isoDay(since)),
     ]);
     const apts = (Array.isArray(aptResp?.appointments) ? aptResp.appointments : []) as Array<{ id: string; scheduled_at: string; doctor_name: string | null; doctor_title: string | null }>;
     const apt = apts.find(a => String(a.id) === String(id)) ?? null;
@@ -169,6 +255,7 @@ export default function PrintVisitPrep() {
       visitQuestions: qs.find(r => r.appointment_id === String(id)) ?? null,
       unscheduledQuestions: qs.find(r => r.appointment_id === UNSCHEDULED_VISIT_ID) ?? null,
       results: rows<PrepResultRow>(resultRes),
+      signals: rows<SignalInput>(signalRes),
     });
   }, [user, id]);
 

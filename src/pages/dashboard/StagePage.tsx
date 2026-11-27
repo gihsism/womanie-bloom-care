@@ -9,6 +9,7 @@ import { useScrollToHash } from '@/hooks/useScrollToHash';
 import { useStageProfile } from '@/hooks/useStageProfile';
 import { stageLabel } from '@/lib/stageLabels';
 import PregnancyVaccinations from '@/components/dashboard/PregnancyVaccinations';
+import PregnancyCheckupsCard from '@/components/dashboard/PregnancyCheckupsCard';
 import PregnancyNutrition from '@/components/dashboard/PregnancyNutrition';
 import PregnancyExercise from '@/components/dashboard/PregnancyExercise';
 import MenopauseNutrition from '@/components/dashboard/MenopauseNutrition';
@@ -126,6 +127,7 @@ export default function StagePage() {
             </Section>
             <Section id="weight"><PregnancyWeightTracker dueDate={p.pregnancyDueDate} /></Section>
             <Section id="blood-pressure"><BloodPressureTracker mode="pregnancy" /></Section>
+            <Section id="check-ups"><PregnancyCheckupsCard dueDate={p.pregnancyDueDate} /></Section>
             <Section id="vaccinations"><PregnancyVaccinations dueDate={p.pregnancyDueDate} /></Section>
             <Section id="mood-check"><EpdsScreener mode="pregnancy" /></Section>
             {p.pregnancyDueDate && (
