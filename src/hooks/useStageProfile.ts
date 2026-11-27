@@ -33,6 +33,16 @@ export interface PeriodData {
  * and IVF start then sat a day early (one day further along, a period shown
  * "late" a day too soon).
  */
+/**
+ * The cycle length stored on her last period row. A row without one (or
+ * with an unreadable value) made Home crash ("Invalid time value") and the
+ * hero loop over an empty step: fall back to 28, as the stage page does.
+ */
+export function storedCycleLength(raw: unknown): number {
+  const n = Number(raw);
+  return raw != null && raw !== '' && Number.isFinite(n) && n >= 15 && n <= 90 ? Math.round(n) : 28;
+}
+
 export function localDay(raw: string | Date | null | undefined): Date | null {
   if (raw == null || raw === '') return null;
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw instanceof Date ? raw.toISOString() : String(raw));
@@ -68,7 +78,7 @@ export function useStageProfile() {
         .limit(1)
         .maybeSingle();
       if (data) {
-        setPeriodData({ lastPeriodStart: localDay(data.period_start_date) ?? new Date(data.period_start_date), cycleLength: data.cycle_length });
+        setPeriodData({ lastPeriodStart: localDay(data.period_start_date) ?? new Date(data.period_start_date), cycleLength: storedCycleLength(data.cycle_length) });
       } else {
         // No period data yet — leave as null so CycleCalendar shows empty state
         setPeriodData(null);

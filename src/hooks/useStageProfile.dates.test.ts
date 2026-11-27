@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { localDay } from './useStageProfile';
+import { localDay, storedCycleLength } from './useStageProfile';
 import { periodDaysUntil } from './useTodaySignals';
 
 // Dates come back from /api/db as 'YYYY-MM-DD'. new Date() on that is UTC
@@ -32,5 +32,15 @@ describe('localDay keeps the stored calendar day west of UTC', () => {
     // The old parse put the start on 27 Oct: "1 day late".
     const old = { lastPeriodStart: new Date('2026-10-28'), cycleLength: 28 };
     expect(periodDaysUntil(old, new Date(2026, 10, 25, 18))).toBe(-1);
+  });
+});
+
+describe('storedCycleLength', () => {
+  it('keeps a usable stored length, numbers or numeric strings', () => {
+    expect(storedCycleLength(31)).toBe(31);
+    expect(storedCycleLength('26')).toBe(26);
+  });
+  it('a missing or unusable length falls back to 28 (Home crashed on undefined)', () => {
+    for (const v of [null, undefined, '', 0, 'abc', 5, 400, NaN]) expect(storedCycleLength(v)).toBe(28);
   });
 });
