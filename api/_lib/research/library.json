@@ -101073,57 +101073,6 @@
    ]
   },
   {
-   "id": "pmid-37311484",
-   "pmid": "37311484",
-   "doi": "10.1016/j.ajogmf.2023.101049",
-   "title": "Tranexamic acid for the prevention of blood loss after cesarean section: an updated systematic review and meta-analysis of randomized controlled trials",
-   "source": "American Journal of Obstetrics & Gynecology MFM",
-   "journal": "American Journal of Obstetrics & Gynecology MFM",
-   "organisation": null,
-   "year": 2023,
-   "publicationTypes": [
-    "Meta-Analysis",
-    "Systematic Review"
-   ],
-   "evidenceLevel": "systematic review",
-   "url": "https://pubmed.ncbi.nlm.nih.gov/37311484/",
-   "summary": "This review pooled 50 randomized trials of tranexamic acid, a medicine given through a vein, to reduce bleeding during and after cesarean birth. It found less heavy blood loss and fewer blood transfusions, with the biggest benefit in women at higher risk of bleeding. The quality of the evidence was low to very low for lower-risk women and moderate for most results in higher-risk women, so the authors say no strong conclusions can be drawn yet.",
-   "keyPoints": [
-    "Tranexamic acid reduced heavy blood loss (over 1000 mL), average blood loss and the need for blood transfusion in both lower-risk and higher-risk cesarean births.",
-    "It was linked to more non-clotting-related side effects, but based on limited data it did not appear to raise the risk of blood clots.",
-    "Giving it before the skin cut, but not after the baby's cord was clamped, was linked to a large benefit.",
-    "Evidence quality was low to very low for lower-risk women and moderate for most results in higher-risk women, and more studies are needed, especially on timing."
-   ],
-   "certainty": "low",
-   "lifeStages": [
-    "pregnancy",
-    "postpartum"
-   ],
-   "topics": [
-    "postpartum-haemorrhage"
-   ],
-   "tags": [
-    "tranexamic acid",
-    "cesarean birth",
-    "postpartum hemorrhage",
-    "blood loss",
-    "blood transfusion"
-   ],
-   "keywords": [
-    "tranexamic acid",
-    "c-section",
-    "cesarean",
-    "caesarean",
-    "bleeding after birth",
-    "postpartum hemorrhage",
-    "heavy bleeding",
-    "blood loss",
-    "blood transfusion",
-    "blood clots",
-    "birth"
-   ]
-  },
-  {
    "id": "pmid-38009552",
    "pmid": "38009552",
    "doi": "10.1002/14651858.CD013795.pub2",

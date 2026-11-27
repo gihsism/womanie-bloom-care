@@ -61,6 +61,12 @@ for the gaps are in `docs/research-gap-candidates.md`.
   embryo transfer" and the keywords "frozen embryo" / "fresh transfer"
   removed.
 - The library has no retracted items (checked on publication types and titles).
+- Re-checked on 2026-11-27 against PubMed (all 2,507 PMIDs: exist, title
+  and year match). One review was retracted after the build: `pmid-37311484`
+  (tranexamic acid at caesarean, *AJOG MFM* 2023; expression of concern Sep
+  2026, retraction Dec 2026). Removed from `library.json` and the
+  embeddings; `build-library.mjs` now drops retracted records even when
+  their summary is cached.
 
 ## Retrieval fixes made in this audit
 

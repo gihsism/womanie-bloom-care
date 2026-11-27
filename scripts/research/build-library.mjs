@@ -400,6 +400,9 @@ function assemble(records, cache) {
     const s = cache[rec.pmid];
     if (!s) { rejected.missing++; continue; }
     if (!s.include) { rejected.excluded++; continue; }
+    // A paper retracted after its summary was cached must still drop out
+    // (pmid 37311484, tranexamic acid at caesarean, retracted Dec 2026).
+    if (rec.retracted) { rejected.excluded++; continue; }
     if (/^withdrawn\b/i.test(rec.title)) { rejected.excluded++; continue; }
     const level = evidenceLevel(rec);
     // An organisation is shown as the source only for guidelines, and only
