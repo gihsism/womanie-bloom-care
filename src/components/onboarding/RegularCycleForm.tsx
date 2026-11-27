@@ -6,31 +6,39 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 
-const RegularCycleForm = () => {
+// Period tracking and contraception: the last period start and cycle
+// length seed the calendar (period_tracking). The stage itself now comes
+// from step 2 (Contraception and IVF are stages there), so the old "main
+// focus" question is gone; mainFocus is still written for older code paths.
+// With contraception (an IUD, implant or the pill) she may have no periods,
+// so the date is optional there.
+
+const RegularCycleForm = ({ contraception = false }: { contraception?: boolean }) => {
   const navigate = useNavigate();
   const { data, updateRegularCycle } = useOnboarding();
+  // One date picker open at a time; picking a day closes it (it used to
+  // stay open over the Finish button on a phone).
+  const [openPicker, setOpenPicker] = useState<number | null>(null);
   
   const [lastPeriodStart, setLastPeriodStart] = useState<Date | undefined>(
     data.regularCycle?.lastPeriodStart
   );
   const [cycleLength, setCycleLength] = useState(data.regularCycle?.averageCycleLength || 28);
-  const [mainFocus, setMainFocus] = useState(data.regularCycle?.mainFocus || '');
 
   const isFormValid = () => {
-    return lastPeriodStart && cycleLength && mainFocus;
+    return (contraception || lastPeriodStart) && cycleLength;
   };
 
   const handleFinish = () => {
     updateRegularCycle({
       lastPeriodStart,
       averageCycleLength: cycleLength,
-      mainFocus,
+      mainFocus: contraception ? 'contraception' : 'general',
     });
     navigate('/onboarding/success');
   };
@@ -45,8 +53,11 @@ const RegularCycleForm = () => {
         <div className="space-y-6">
           {/* Last Period Start */}
           <div className="space-y-2">
-            <Label>When did your last period start? *</Label>
-            <Popover>
+            <Label>
+              When did your last period start?{' '}
+              {contraception ? <span className="text-muted-foreground text-sm">(Optional, skip if you don't have periods)</span> : '*'}
+            </Label>
+            <Popover open={openPicker === 0} onOpenChange={(o) => setOpenPicker(o ? 0 : null)}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -63,7 +74,7 @@ const RegularCycleForm = () => {
                 <Calendar
                   mode="single"
                   selected={lastPeriodStart}
-                  onSelect={setLastPeriodStart}
+                  onSelect={(d) => { setLastPeriodStart(d); setOpenPicker(null); }}
                   disabled={(date) => date > new Date()}
                   initialFocus
                   className="pointer-events-auto"
@@ -87,54 +98,6 @@ const RegularCycleForm = () => {
                 ))}
               </SelectContent>
             </Select>
-          </div>
-
-          {/* Main Focus */}
-          <div className="space-y-4">
-            <Label>What's your main focus? *</Label>
-            <RadioGroup value={mainFocus} onValueChange={setMainFocus}>
-              <div className="space-y-3">
-                <div className="flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setMainFocus('contraception')}>
-                  <RadioGroupItem value="contraception" id="contraception" className="mt-1" />
-                  <div className="flex-1">
-                    <Label htmlFor="contraception" className="font-bold cursor-pointer">
-                      Contraception/Prevention
-                    </Label>
-                    <p className="text-sm text-muted-foreground">Avoiding pregnancy</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setMainFocus('conception')}>
-                  <RadioGroupItem value="conception" id="conception" className="mt-1" />
-                  <div className="flex-1">
-                    <Label htmlFor="conception" className="font-bold cursor-pointer">
-                      Conception/Getting pregnant
-                    </Label>
-                    <p className="text-sm text-muted-foreground">Trying to conceive</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setMainFocus('ivf')}>
-                  <RadioGroupItem value="ivf" id="ivf" className="mt-1" />
-                  <div className="flex-1">
-                    <Label htmlFor="ivf" className="font-bold cursor-pointer">
-                      IVF/Fertility treatment
-                    </Label>
-                    <p className="text-sm text-muted-foreground">Undergoing treatment</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setMainFocus('general')}>
-                  <RadioGroupItem value="general" id="general" className="mt-1" />
-                  <div className="flex-1">
-                    <Label htmlFor="general" className="font-bold cursor-pointer">
-                      General health tracking
-                    </Label>
-                    <p className="text-sm text-muted-foreground">Just tracking my health</p>
-                  </div>
-                </div>
-              </div>
-            </RadioGroup>
           </div>
         </div>
 

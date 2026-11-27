@@ -12,7 +12,7 @@ interface BasicInfo {
 }
 
 interface LifeStage {
-  stage: 'pre-menstrual' | 'regular-cycle' | 'trying-to-conceive' | 'pregnant' | 'postpartum' | 'menopause' | '';
+  stage: 'pre-menstrual' | 'regular-cycle' | 'contraception' | 'trying-to-conceive' | 'ivf' | 'pregnant' | 'postpartum' | 'menopause' | '';
 }
 
 interface RegularCycleData {

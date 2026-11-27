@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
@@ -5,13 +6,19 @@ import ProgressBar from '@/components/onboarding/ProgressBar';
 import RegularCycleForm from '@/components/onboarding/RegularCycleForm';
 import TryingToConceiveForm from '@/components/onboarding/TryingToConceiveForm';
 import PregnancyForm from '@/components/onboarding/PregnancyForm';
-import PreMenstrualForm from '@/components/onboarding/PreMenstrualForm';
 import MenopauseForm from '@/components/onboarding/MenopauseForm';
 import PostpartumForm from '@/components/onboarding/PostpartumForm';
 
 const ModeSetup = () => {
   const navigate = useNavigate();
   const { data, setCurrentStep } = useOnboarding();
+
+  // Nothing to ask for these stages (or no stage yet): don't show an empty step.
+  const stage = data.lifeStage.stage;
+  const hasForm = ['regular-cycle', 'contraception', 'trying-to-conceive', 'pregnant', 'postpartum', 'menopause'].includes(stage);
+  useEffect(() => {
+    if (!hasForm) navigate(stage ? '/onboarding/success' : '/onboarding/life-stage', { replace: true });
+  }, [hasForm, stage, navigate]);
 
   const handleBack = () => {
     setCurrentStep(2);
@@ -22,14 +29,14 @@ const ModeSetup = () => {
     switch (data.lifeStage.stage) {
       case 'regular-cycle':
         return <RegularCycleForm />;
+      case 'contraception':
+        return <RegularCycleForm contraception />;
       case 'trying-to-conceive':
         return <TryingToConceiveForm />;
       case 'pregnant':
         return <PregnancyForm />;
       case 'postpartum':
         return <PostpartumForm />;
-      case 'pre-menstrual':
-        return <PreMenstrualForm />;
       case 'menopause':
         return <MenopauseForm />;
       default:

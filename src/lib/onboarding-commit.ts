@@ -1,4 +1,4 @@
-import { addDays, format } from 'date-fns';
+import { addDays, differenceInCalendarDays, format } from 'date-fns';
 import { db } from '@/integrations/db/client';
 import type { OnboardingData } from '@/contexts/OnboardingContext';
 import { pushAccountData } from '@/lib/account-data';
@@ -34,14 +34,21 @@ interface UserShape {
 // Map the onboarding-side life stage (broad, user-facing) to the
 // dashboard's life-stage key (8 modes). Returns null when we can't
 // determine — caller defaults to 'menstrual-cycle'.
-export function deriveLifeStage(data: OnboardingData): string | null {
+export function deriveLifeStage(data: OnboardingData, now = new Date()): string | null {
   const stage = data.lifeStage?.stage;
   if (!stage) return null;
   if (stage === 'pre-menstrual') return 'pre-menstrual';
   if (stage === 'pregnant') return 'pregnancy';
   if (stage === 'postpartum') return 'postpartum';
-  if (stage === 'menopause') return 'menopause';
+  if (stage === 'menopause') {
+    // 12 months or more since the last period = after menopause.
+    const last = data.menopause?.lastPeriod;
+    if (last && differenceInCalendarDays(now, new Date(last)) >= 365) return 'post-menopause';
+    return 'menopause';
+  }
   if (stage === 'trying-to-conceive') return 'conception';
+  if (stage === 'contraception') return 'contraception';
+  if (stage === 'ivf') return 'ivf';
   if (stage === 'regular-cycle') {
     const focus = data.regularCycle?.mainFocus;
     if (focus === 'contraception') return 'contraception';
@@ -64,6 +71,17 @@ export function derivePregnancyDueDate(data: OnboardingData): Date | null {
     return addDays(new Date(), weeksLeft * 7);
   }
   return null;
+}
+
+const MENO_IDS = ['hot-flashes', 'night-sweats', 'mood-changes', 'sleep-issues', 'weight-changes'];
+const POST_IDS: Record<string, string> = { 'bone-health': 'bone-loss', 'mood-changes': 'mood' };
+
+/** Onboarding concern ids -> MenopauseDashboard symptom ids for that scope. */
+export function trackedSymptomsFromConcerns(concerns: string[], scope: 'meno' | 'post'): string[] {
+  const ids = scope === 'meno'
+    ? concerns.filter(c => MENO_IDS.includes(c))
+    : concerns.map(c => POST_IDS[c]).filter((c): c is string => !!c);
+  return [...new Set(ids)];
 }
 
 export async function commitOnboarding(user: UserShape, data: OnboardingData): Promise<void> {
@@ -105,7 +123,12 @@ export async function commitOnboarding(user: UserShape, data: OnboardingData): P
   const conceptionCycleStart = data.tryingToConceive?.lastPeriodStart
     ? new Date(data.tryingToConceive.lastPeriodStart)
     : null;
-  const lastPeriodStart = regularCycleStart ?? conceptionCycleStart;
+  // Menopause: the last period anchors the stage tracker on the menopause
+  // page (it asks "Mark your last period" when there is none).
+  const menopauseLast = data.lifeStage?.stage === 'menopause' && data.menopause?.lastPeriod
+    ? new Date(data.menopause.lastPeriod)
+    : null;
+  const lastPeriodStart = regularCycleStart ?? conceptionCycleStart ?? menopauseLast;
   const cycleLength =
     data.regularCycle?.averageCycleLength ??
     data.tryingToConceive?.averageCycleLength ??
@@ -140,6 +163,21 @@ export async function commitOnboarding(user: UserShape, data: OnboardingData): P
       const iso = localYmd(ppBirth);
       localStorage.setItem(`womanie_postpartum_birth_${user.id}`, iso);
     } catch { /* ignore */ }
+  }
+
+  // --- menopause concerns -> the symptoms the menopause page tracks ---
+  // Same ids as MenopauseDashboard's lists; never replaces a list she
+  // already has on this device.
+  const concerns = data.lifeStage?.stage === 'menopause' ? data.menopause?.mainConcerns ?? [] : [];
+  const tracked = trackedSymptomsFromConcerns(concerns, lifeStage === 'post-menopause' ? 'post' : 'meno');
+  if (tracked.length) {
+    const key = `menopause:${user.id}:${lifeStage === 'post-menopause' ? 'post' : 'meno'}:trackedSymptoms`;
+    try {
+      if (!localStorage.getItem(key)) {
+        localStorage.setItem(key, JSON.stringify(tracked));
+        pushAccountData(user.id, key);
+      }
+    } catch { /* storage blocked */ }
   }
 
   // --- localStorage fallback for unschematized basic info ---
