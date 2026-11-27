@@ -104,21 +104,31 @@ export const SWISS_SOURCES = [
   },
   {
     url: 'https://www.blv.admin.ch/de/ernaehrung-schwangere-und-stillende',
-    title: 'Nutrition before and during pregnancy and while breastfeeding: Swiss federal advice (BLV)',
-    year: 2018,
+    title: 'Nutrition before and during pregnancy and while breastfeeding: Swiss federal advice (BLV page, FAQ and brochure of August 2025)',
+    year: 2025,
+    // Round 5: figures added from the BLV brochure "Ernährung rund um
+    // Schwangerschaft und Stillzeit" (August 2025, order no. 341.801.D),
+    // linked from this page; read 2026-11-28.
+    fetchedAt: '2026-11-28T12:00:00.000Z',
     summary:
-      'The Swiss Federal Food Safety and Veterinary Office (BLV) advises taking folic acid tablets (400 micrograms a day) already before a planned pregnancy, to lower the risk of birth defects, and eating a varied, balanced diet. In pregnancy almost all nutrients can come from food, except folic acid and vitamin D; sometimes a supplement for iron, iodine or omega-3 fats is needed, to be discussed with the gynaecologist. Women of childbearing age, pregnant and breastfeeding women in Switzerland often get too little iodine: the BLV advises iodised salt, dairy and sea fish, and asking the gynaecologist whether an iodine tablet is needed. While breastfeeding it recommends vitamin D drops, enough omega-3 fats and avoiding alcohol.',
+      'The Swiss Federal Food Safety and Veterinary Office (BLV) advises taking folic acid tablets (400 micrograms a day) already before a planned pregnancy, to lower the risk of birth defects, and eating a varied, balanced diet. In pregnancy almost all nutrients can come from food, except folic acid and vitamin D; sometimes a supplement for iron, iodine or omega-3 fats is needed, to be discussed with the gynaecologist. Women of childbearing age, pregnant and breastfeeding women in Switzerland often get too little iodine: the BLV advises iodised salt, dairy and sea fish, and asking the gynaecologist whether an iodine tablet is needed. While breastfeeding it recommends vitamin D drops, enough omega-3 fats and avoiding alcohol. Its brochure (August 2025) adds: weight gain by starting BMI (11.5 to 16 kg at normal weight), about 250 extra kcal a day from month 4 and 500 from month 7, 1.5 to 2 litres of drinks a day, caffeine in moderation (for example 1 to 2 cups of coffee or 4 cups of black or green tea a day), no alcohol in pregnancy, limits for some fish because of mercury, and about 30 minutes of movement a day.',
     keyPoints: [
       'Folic acid tablets, 400 micrograms a day, from before a planned pregnancy.',
       'In pregnancy, folic acid and vitamin D are the nutrients food alone does not cover; iron, iodine or omega-3 supplements only after talking with the gynaecologist.',
       'Iodine: use iodised salt, have dairy products and sea fish, and ask the gynaecologist about an iodine tablet when trying to conceive, pregnant or breastfeeding.',
       'Breastfeeding: vitamin D drops, omega-3 fats from oily fish, walnuts or rapeseed oil, and no alcohol (a small glass on a special occasion, then wait two hours before the next feed).',
       'Soft cheese should be avoided in pregnancy.',
+      'Weight gain in pregnancy by BMI before pregnancy: under 18.5: 12.5 to 18 kg; 18.5 to 24.9: 11.5 to 16 kg; 25 to 29.9: 7 to 11.5 kg; 30 or more: 5 to 9 kg.',
+      'Energy: about 250 extra kcal a day from month 4 and about 500 from month 7 (normal weight); eat twice as well, not twice as much.',
+      'Drinks: 1.5 to 2 litres a day in pregnancy, at least 2 litres while breastfeeding; caffeine in moderation, for example 1 to 2 cups of coffee or 4 cups of black or green tea a day; avoid energy drinks and tonic.',
+      'No alcohol in pregnancy.',
+      'Fish: avoid marlin, swordfish, shark, Baltic salmon and Baltic herring; fresh or tinned tuna and imported pike at most once a week.',
+      'Movement: about 30 minutes a day, avoiding overexertion; low-risk activities such as swimming, walking, gymnastics or yoga.',
     ],
     lifeStages: ['conception', 'pregnancy', 'postpartum'],
     topics: ['pregnancy-nutrition', 'folic-acid', 'iodine-supplements-pregnancy', 'vitamin-d-pregnancy'],
     tags: ['switzerland', 'nutrition', 'folic acid', 'iodine', 'vitamin d', 'breastfeeding'],
-    keywords: ['switzerland', 'swiss', 'folic acid', 'folsäure', 'iodine', 'iodised salt', 'vitamin d', 'iron', 'supplement', 'diet', 'nutrition', 'breastfeeding', 'pregnancy', 'trying to conceive'],
+    keywords: ['switzerland', 'swiss', 'folic acid', 'folsäure', 'iodine', 'iodised salt', 'vitamin d', 'iron', 'supplement', 'diet', 'nutrition', 'breastfeeding', 'pregnancy', 'trying to conceive', 'caffeine', 'coffee', 'alcohol', 'tuna', 'mercury', 'fish', 'weight gain', 'calories', 'exercise'],
   },
   {
     url: 'https://www.blv.admin.ch/de/naehrstoffzufuhr',
@@ -154,6 +164,51 @@ export const SWISS_SOURCES = [
     tags: ['switzerland', 'gestational diabetes', 'ogtt', 'glucose test', 'screening'],
     keywords: ['switzerland', 'swiss', 'gestational diabetes', 'glucose test', 'sugar test', 'ogtt', 'glucose drink', 'blood sugar', 'hba1c', 'week 24', '24 to 28 weeks', 'fasting'],
   },
+  // Round 5 (2026-11-28): the two SGGG letters whose free links were not
+  // confirmed in round 4. Anti-D: the German journal version (Gynäkologie
+  // 1/2020; sggg.ch hosts only the French and Italian PDFs). A revised
+  // letter 68 was announced in November 2025 (written consent for the
+  // fetal blood group test); not yet published when checked.
+  {
+    url: 'https://www.rosenfluh.ch/media/gynaekologie/2020/01/Empfehlungen-zur-Anti-D-Immunglobulin-Gabe-in-der-Schwangerschaft-Anti-D-Prophylaxe.pdf',
+    title: 'Anti-D injections in pregnancy for RhD-negative women (SGGG expert letter 68, Gynäkologie 1/2020)',
+    year: 2020,
+    fetchedAt: '2026-11-28T12:00:00.000Z',
+    summary:
+      'The Swiss Society of Gynaecology and Obstetrics (SGGG) explains when a pregnant woman whose blood group is RhD negative needs an anti-D injection, which stops her body from making antibodies against an RhD-positive baby. At the first check-ups (weeks 8 to 12) every woman has her blood group, RhD status and an antibody screen checked. For RhD-negative women, a blood test between weeks 18 and 24 can read the baby\'s RhD status from the baby\'s DNA in the mother\'s blood. If the baby is RhD positive, the woman gets an anti-D injection between weeks 28 and 30, and again after the birth. If the baby is RhD negative, no routine anti-D is needed in pregnancy, after bleeding or procedures, or after the birth; the letter says this spares about 40% of injections in Switzerland. Anti-D after the birth is given ideally within 72 hours, and can still be given up to 14 days later.',
+    keyPoints: [
+      'First check-ups (weeks 8 to 12): blood group, RhD status and a screen for blood group antibodies.',
+      'RhD-negative women: a blood test between weeks 18 and 24 shows the baby\'s RhD status; women should be told about this option.',
+      'Baby RhD positive: anti-D injection between weeks 28 and 30, and again after the birth, ideally within 72 hours (up to 14 days later if missed).',
+      'Baby RhD negative: no routine anti-D in pregnancy or after the birth, and none needed after bleeding or procedures.',
+      'Without a known baby RhD status, anti-D is also given after a miscarriage, a termination, an ectopic pregnancy, amniocentesis or CVS, bleeding in pregnancy, turning a breech baby or a blow to the belly.',
+    ],
+    lifeStages: ['pregnancy', 'postpartum'],
+    topics: ['prenatal-screening'],
+    tags: ['switzerland', 'anti-d', 'rhesus', 'rhd negative', 'blood group', 'prenatal care'],
+    keywords: ['switzerland', 'swiss', 'anti-d', 'anti d', 'rhesus', 'rh negative', 'rhd negative', 'rhesus negative', 'blood group', 'rhophylac', 'rhesus injection', 'baby blood group', 'week 28'],
+  },
+  {
+    url: 'https://www.sggg.ch/fileadmin/user_upload/86_Prophylaxe_GBS-Sepsis_des_Neugeborenen_englischVersion.pdf',
+    title: 'Group B streptococcus (GBS): swab at weeks 35 to 37 and antibiotics in labour to protect the newborn (SGGG clinical practice recommendation 86, 2024)',
+    year: 2024,
+    fetchedAt: '2026-11-28T12:00:00.000Z',
+    summary:
+      'Group B streptococci (GBS) are bacteria that live harmlessly in the vagina or bowel of many women, about 20% of pregnant women in Switzerland. During birth they can pass to the baby and, rarely, cause a serious infection in the first week of life. The Swiss recommendation (SGGG, approved by the Swiss Academy for Feto-Maternal Medicine) is to test every pregnant woman at weeks 35 to 37 with one swab from the lower vagina and the skin around the anus; no speculum is needed and women can take the swab themselves. Women who test positive get antibiotics through a drip from the start of labour or when the waters break, which lowers early infections in the baby by 80 to 90%. Treating GBS before labour is not advised, because it usually comes back. Antibiotics are also given without a swab after GBS in the urine in this pregnancy or a previous baby with GBS infection, and when the result is unknown and there is a risk factor (birth before 37 weeks, waters broken 18 hours or more, fever in labour). A planned caesarean before labour and before the waters break does not need GBS antibiotics.',
+    keyPoints: [
+      'Every pregnant woman is offered a GBS swab at weeks 35 to 37; a result older than 5 weeks counts as unknown.',
+      'One swab from the lower vagina and the skin around the anus; women can take it themselves.',
+      'GBS found: antibiotics through a drip from the start of labour or when the waters break; this lowers early infection of the baby by 80 to 90%.',
+      'No treatment before labour: the bacteria usually come back.',
+      'Antibiotics without a swab: GBS in the urine in this pregnancy, or a previous baby with GBS infection.',
+      'Unknown result: antibiotics if the birth is before 37 weeks, the waters have been broken 18 hours or more, or there is fever in labour.',
+      'Tell your team about a penicillin allergy: the lab then tests which other antibiotics work.',
+    ],
+    lifeStages: ['pregnancy'],
+    topics: ['prenatal-screening'],
+    tags: ['switzerland', 'group b streptococcus', 'gbs', 'swab', 'antibiotics in labour', 'newborn infection'],
+    keywords: ['switzerland', 'swiss', 'group b strep', 'group b streptococcus', 'gbs', 'strep b', 'swab', 'vaginal swab', 'antibiotics in labour', 'newborn sepsis', 'week 36', '35 to 37 weeks', 'penicillin'],
+  },
 ];
 
 function toItem(src) {
@@ -183,7 +238,7 @@ function toItem(src) {
     page: {
       publisher: policy.publisher,
       url: src.url,
-      fetchedAt: FETCHED,
+      fetchedAt: src.fetchedAt ?? FETCHED,
       published: null,
       lastUpdated: null,
       lastReviewed: null,
@@ -191,7 +246,7 @@ function toItem(src) {
       licence: { ...policy.licence, pageCopyright: null },
       attribution: policy.attribution ?? null,
       refreshDays: null,
-      robots: { allowed: true, rule: null, checkedAt: FETCHED },
+      robots: { allowed: true, rule: null, checkedAt: src.fetchedAt ?? FETCHED },
       // Hash of our own summary text (no page text is stored).
       contentHash: fnv1a(text),
       summariser: HAND_WRITTEN_SUMMARISER,

@@ -113,7 +113,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       emoji: '☀️',
       connectedTests: ['Vitamin D'],
       explanation: 'Your vitamin D is below the optimal range. Vitamin D plays a role in mood regulation, immune function, and reproductive health. Low levels are linked to worse PMS symptoms, irregular cycles, and reduced fertility.',
-      recommendation: 'Consider a vitamin D3 supplement (most adults need 1000-4000 IU daily). Get tested again in 3 months. Spending 15 minutes in sunlight daily also helps.',
+      recommendation: 'Ask your doctor whether you need a vitamin D supplement and how much; for a confirmed deficiency the doctor sets the dose. The everyday recommendation in Switzerland is 600 IU a day (800 IU over 65, BLV); do not take more than 4,000 IU a day without medical advice. Your doctor can tell you when to test again.',
       severity: 'attention',
     });
   }
@@ -173,7 +173,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       emoji: '🦴',
       connectedTests: ['Vitamin D', 'Calcium'],
       explanation: 'After menopause, declining estrogen accelerates bone loss. Combined with low vitamin D, this increases your risk of osteoporosis and fractures.',
-      recommendation: 'Ask your doctor how much calcium and vitamin D you need. Everyday amounts: calcium about 950 mg a day up to age 65 and 1000-1200 mg from 66, mainly from food and, if needed, supplements; vitamin D 600 IU a day, 800 IU from age 60 (Swiss BLV recommendation). Weight-bearing exercise helps maintain bone density. Ask whether a bone density scan (DXA) makes sense for you.',
+      recommendation: 'Ask your doctor how much calcium and vitamin D you need. Everyday amounts: calcium about 950 mg a day up to age 65 and 1000-1200 mg from 66, mainly from food and, if needed, supplements; vitamin D 600 IU a day up to age 65 and 800 IU from 66 (Swiss BLV recommendation). Weight-bearing exercise helps maintain bone density. Ask whether a bone density scan (DXA) makes sense for you.',
       severity: 'attention',
     });
   }
@@ -268,7 +268,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       emoji: '🦴',
       connectedTests: ['Vitamin D', 'Calcium'],
       explanation: 'Your vitamin D is very low, and your calcium is also below normal. Vitamin D is essential for absorbing calcium from food. Without enough D, your body can\'t use the calcium you consume, weakening bones.',
-      recommendation: 'Ask your doctor about treating the low vitamin D: for a confirmed deficiency the doctor sets the dose, which is often higher than the everyday amount, and checks your calcium again. The everyday recommendation in Switzerland is 600 IU a day (800 IU from age 60, BLV). Do not take more than 4,000 IU a day without medical advice (the adult upper limit set by EFSA and the US NIH). Get calcium from dairy, fortified foods, or supplements.',
+      recommendation: 'Ask your doctor about treating the low vitamin D: for a confirmed deficiency the doctor sets the dose, which is often higher than the everyday amount, and checks your calcium again. The everyday recommendation in Switzerland is 600 IU a day (800 IU over 65, BLV). Do not take more than 4,000 IU a day without medical advice (the adult upper limit set by EFSA and the US NIH). Get calcium from dairy, fortified foods, or supplements.',
       severity: 'attention',
     });
   }
@@ -417,7 +417,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       emoji: '🦴',
       connectedTests: ['Vitamin D', 'PTH', ...(calcium ? ['Calcium'] : [])],
       explanation: `Your vitamin D is very low (${vitD.value} ng/mL) and your PTH is elevated (${pth.value} pg/mL). When vitamin D is low, PTH can rise to keep blood calcium steady, partly by taking calcium from the bones (secondary hyperparathyroidism).`,
-      recommendation: 'Ask your doctor about treating the low vitamin D: for a confirmed deficiency the doctor sets the dose (often higher than the everyday amount) and the target level. Raising vitamin D usually lowers PTH again, which can reduce the pull on your bones. The everyday recommendation in Switzerland is 600 IU a day (800 IU from age 60, BLV); do not take more than 4,000 IU a day without medical advice (EFSA and US NIH upper limit). A recheck in about 3 months is an app reminder, not a guideline.',
+      recommendation: 'Ask your doctor about treating the low vitamin D: for a confirmed deficiency the doctor sets the dose (often higher than the everyday amount) and the target level. Raising vitamin D usually lowers PTH again, which can reduce the pull on your bones. The everyday recommendation in Switzerland is 600 IU a day (800 IU over 65, BLV); do not take more than 4,000 IU a day without medical advice (EFSA and US NIH upper limit). A recheck in about 3 months is an app reminder, not a guideline.',
       severity: 'attention',
     });
   }

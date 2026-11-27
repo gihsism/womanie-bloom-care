@@ -200,7 +200,7 @@ const WEEK_PERSPECTIVES: Record<number, WeekPerspectives> = {
   },
   12: {
     baby: 'End of the first trimester. The baby has all major organs in place and is starting to look proportional. Risk of miscarriage drops significantly past this point.',
-    mother: 'Energy often returns. Many people start sharing the news now. The first-trimester combined screen (NT scan + bloodwork) typically happens between weeks 10 and 13.',
+    mother: 'Energy often returns. Many people start sharing the news now. The first-trimester combined screen (NT scan + bloodwork) is done around weeks 11 to 14 (in Switzerland at the weeks 12 to 14 scan).',
     partner: 'First-trimester ending — many couples share the news now. Help draft the announcement timing and the people involved. The anatomy scan is coming around week 20; mark your calendar.',
     employer: 'This is the typical disclosure window. Once told, your employer cannot legally discriminate against you for pregnancy in most jurisdictions. Consider talking to HR about leave options, work-from-home, and accommodations.',
   },
@@ -212,7 +212,7 @@ const WEEK_PERSPECTIVES: Record<number, WeekPerspectives> = {
   },
   20: {
     baby: 'Halfway. Anatomy scan typically this week or next — a 20-minute ultrasound that checks organs, placenta, growth, and amniotic fluid. Most parents-to-be remember this scan for the rest of their lives.',
-    mother: 'Belly is now obviously pregnant to observers. Round-ligament pain (sharp twinges on the sides of the belly) is normal. Start sleeping on your left side from now on — better circulation to the placenta.',
+    mother: 'Belly is now obviously pregnant to observers. Round-ligament pain (sharp twinges on the sides of the belly) is normal. Later in pregnancy, lying flat on your back can make you dizzy; from 28 weeks the advice is to go to sleep on your side, left or right (Tommy\'s, MiNESS study).',
     partner: 'Clear your calendar for the anatomy scan. Many couples find out the sex now if they want to. Start nursery conversations — what you\'re reusing, what you need, who\'s doing what. Research childbirth classes.',
     employer: 'Mid-pregnancy: time to talk leave dates with your manager and HR. Get exact return-to-work expectations in writing. If your work has any physical risk (chemicals, heavy lifting), request the accommodations now.',
   },
@@ -224,7 +224,7 @@ const WEEK_PERSPECTIVES: Record<number, WeekPerspectives> = {
   },
   28: {
     baby: 'Third trimester begins. Eyes can open and close. Baby may show a sleep-wake cycle. Brain is developing rapidly through the rest of pregnancy — much of the weight gain from here is brain growth.',
-    mother: 'Standard prenatal visits shift from monthly to every 2 weeks. Get to know your baby\'s usual pattern of movements. Sleep gets harder — heartburn, back pain, more bathroom trips, harder to find a comfortable position. Rhogam at 28 weeks if you\'re Rh-negative (in Switzerland only if a blood test shows the baby is Rh-positive).',
+    mother: 'Check-ups often become more frequent from now; ask your midwife or doctor about your schedule. Get to know your baby\'s usual pattern of movements. Sleep gets harder — heartburn, back pain, more bathroom trips, harder to find a comfortable position. Anti-D injection at weeks 28 to 30 if you are RhD negative (in Switzerland only if a blood test at weeks 18 to 24 shows the baby is RhD positive, SGGG).',
     partner: 'Help with anything that involves bending over (shoes, laundry, picking things up). Ask to feel the kicks — at this point they\'re usually visible from outside. Start the conversation about night feedings and parental-leave overlap.',
     employer: 'Begin a detailed handover document — what\'s in flight, where to find docs, who covers what for each project. Have it 80% done by week 32 so you\'re not scrambling if labor starts early.',
   },
@@ -236,7 +236,7 @@ const WEEK_PERSPECTIVES: Record<number, WeekPerspectives> = {
   },
   36: {
     baby: 'Considered "early term" from 37 weeks; "full term" from 39. The baby is gaining weight and dropping into the pelvis — what\'s called "lightening" or "engagement".',
-    mother: 'Weekly prenatal visits. Cervical checks may begin. Group B strep swab around weeks 35-37. Hospital bag should be packed and accessible. Practice your labor breathing if you\'re going to use it.',
+    mother: 'Check-ups are often more frequent now. Cervical checks may begin. Group B strep swab around weeks 35-37. Hospital bag should be packed and accessible. Practice your labor breathing if you\'re going to use it.',
     partner: 'Stay reachable. Have your bag ready too. Know the hospital paperwork — ID, insurance, birth plan. Have a backup person on call in case you can\'t get there fast enough.',
     employer: 'Labor can start any time now. Make sure your team knows you may disappear without warning. Set up the actual out-of-office. Set boundaries about being contacted during leave.',
   },

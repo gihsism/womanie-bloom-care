@@ -152,7 +152,7 @@ export default function PostpartumLochiaCard({ birthDate }: Props) {
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-semibold">Lochia progression</h3>
           <p className="text-[11px] text-muted-foreground">
-            Day-by-day, since birth. Expected: red → brown → yellow over 4–6 weeks.
+            Day-by-day, since birth. Usually red → brown → yellowish over several weeks, often 4 to 6, sometimes longer.
           </p>
         </div>
       </div>
@@ -192,8 +192,9 @@ export default function PostpartumLochiaCard({ birthDate }: Props) {
             )}
             {reBleed && !persistentRed && (
               <p className="leading-snug">
-                New bright red after several days of fading — often a sign of activity
-                overdone, occasionally retained tissue. Worth a provider call.
+                New bright red after several days of fading. This can happen after a busier
+                day, but it can also mean retained tissue or an infection. Call your midwife or doctor.
+                Soaking a pad in an hour or clots bigger than an egg: get medical help now (144).
               </p>
             )}
           </div>

@@ -26,7 +26,7 @@ describe('PregnancyCheckupsCard', () => {
   it('lists the library-backed steps with their source, and the ask-your-midwife line', async () => {
     render(<PregnancyCheckupsCard dueDate={DUE} />);
     await act(async () => {});
-    expect(screen.getByText('Week 25 · 0 of 4 marked done')).toBeInTheDocument();
+    expect(screen.getByText('Week 25 · 0 of 6 marked done')).toBeInTheDocument();
     expect(screen.getByText('Weeks 11 to 13+6')).toBeInTheDocument();
     expect(screen.getAllByRole('link').map(a => a.getAttribute('href'))).toContain('https://pubmed.ncbi.nlm.nih.gov/39353600/');
     expect(screen.getByText(/^How many check-ups you have.*ask your midwife or doctor\.$/)).toBeInTheDocument();
@@ -50,7 +50,7 @@ describe('PregnancyCheckupsCard', () => {
     render(<PregnancyCheckupsCard dueDate={DUE} />);
     await act(async () => {});
     expect(screen.getByText('Result in your records, 10 Nov 2026')).toBeInTheDocument();
-    expect(screen.getByText('Week 25 · 1 of 4 marked done')).toBeInTheDocument();
+    expect(screen.getByText('Week 25 · 1 of 6 marked done')).toBeInTheDocument();
   });
 
   it('renders nothing without a due date', () => {

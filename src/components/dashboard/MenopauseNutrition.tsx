@@ -24,7 +24,7 @@ const TIPS = [
   {
     key: 'vit-d',
     label: 'Vitamin D',
-    amount: '600 IU/day, 800 IU/day from 60',
+    amount: '600 IU/day up to 65, 800 IU/day from 66',
     rationale: 'Needed to absorb calcium. Swiss recommendation (BLV); the Endocrine Society (2024) advises against routine vitamin D blood tests and against taking more than the everyday amount without a reason. Your doctor may advise more if a test shows a deficiency.',
     food: 'Fatty fish, fortified milk, egg yolks; supplement is the most reliable path.',
   },

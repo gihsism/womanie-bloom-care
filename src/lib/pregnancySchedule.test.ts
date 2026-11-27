@@ -47,6 +47,22 @@ describe('PREGNANCY_SCHEDULE sources', () => {
     expect(pe?.source.url).toMatch(/^https:\/\/www\.bag\.admin\.ch\//);
   });
 
+  it('RhD and GBS steps cite the SGGG letters in the library, with their weeks', () => {
+    const text = (id: string) => { const i = byId.get(id)!; return [i.summary, ...i.keyPoints].join(' '); };
+    const rh = item('rhd-baby-test');
+    expect(rh.source.id).toMatch(/^gp-sggg-/);
+    expect(text(rh.source.id)).toMatch(/weeks 18 and 24/);
+    expect(text(rh.source.id)).toMatch(/weeks 28 and 30/);
+    expect(rh.note).toMatch(/28 to 30/);
+    expect(rh.note).toMatch(/does not apply/);
+    const gbs = item('gbs-swab');
+    expect(gbs.source.id).toMatch(/^gp-sggg-/);
+    expect(gbs.source.url).toMatch(/^https:\/\/www\.sggg\.ch\//);
+    expect(text(gbs.source.id)).toMatch(/weeks 35 to 37/);
+    expect(scheduleStatus(gbs, 36, {}).kind).toBe('now');
+    expect(scheduleStatus(rh, 16, {}).label).toBe('In 2 weeks');
+  });
+
   it('sends the rest of the schedule to the midwife or doctor', () => {
     expect(SCHEDULE_ASK_LINE).toMatch(/ask your midwife or doctor/);
   });

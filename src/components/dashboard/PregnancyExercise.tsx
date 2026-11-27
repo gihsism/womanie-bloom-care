@@ -35,7 +35,7 @@ const T1: PhaseTips = {
     'Hot tubs / saunas / hot yoga — heat exposure best avoided',
     'Contact sports / high fall risk (skiing, climbing, horseback) typically stopped here',
   ],
-  rationale: 'No good evidence that moderate exercise harms early pregnancy in low-risk women; ACOG actively recommends 150 min/week of moderate activity unless contraindicated.',
+  rationale: 'No good evidence that moderate exercise harms early pregnancy in low-risk women. ACOG (2020) and the WHO advise at least 150 minutes of moderate activity a week unless your doctor advises otherwise; the Swiss BLV suggests about 30 minutes a day.',
 };
 
 const T2: PhaseTips = {
@@ -44,17 +44,17 @@ const T2: PhaseTips = {
   yes: [
     'Walking, prenatal yoga, swimming, stationary bike — all reliable',
     'Strength training continues — modify exercises for the changing centre of gravity',
-    'Pelvic floor work (Kegels) starting now pays off for labour + recovery',
+    'Pelvic floor exercises: in trials they lowered the chance of leaking urine late in pregnancy and after the birth (Cochrane 2020)',
     'Stretching for hip flexors + hamstrings (relaxin loosens joints — work range, not extremes)',
-    'Stop supine (on-back) exercises after ~20 weeks — vena cava compression',
+    'From about week 20, keep exercises lying flat on your back short',
   ],
   caution: [
     'Avoid moves that require lying flat on your back for more than a minute or two',
     'Modify or skip deep abdominal work; diastasis recti starts to develop',
     'Joint laxity rises — be careful with lunges, deep squats, sudden directional changes',
-    'Hydrate aggressively — blood volume is up ~50% and the body sweats sooner',
+    'Drink enough — blood volume rises by about 40–50% and you sweat sooner',
   ],
-  rationale: 'Relaxin loosens ligaments to prepare the pelvis; the trade-off is increased risk of strain. Avoid lying flat from ~week 20 because the growing uterus compresses the vena cava.',
+  rationale: 'Relaxin loosens ligaments to prepare the pelvis; the trade-off is increased risk of strain. From about week 20 the growing womb can press on a large vein when you lie flat on your back, which can make you dizzy; change position if it does (ACOG 2020).',
 };
 
 const T3: PhaseTips = {
@@ -66,7 +66,7 @@ const T3: PhaseTips = {
     'Swimming — buoyancy is a huge relief for back / pelvis',
     'Cat-cow, hip openers, gentle squats (great labour prep)',
     'Continue pelvic floor work — both contraction AND relaxation matter',
-    'Perineal massage from week 34 (with provider guidance) reduces tearing',
+    'Perineal massage from about week 34 lowered tears and episiotomies in trials, mainly in a first vaginal birth (ask your midwife how)',
   ],
   caution: [
     'Heart rate isn\'t a great gauge anymore — use perceived effort (talk test)',
@@ -74,7 +74,7 @@ const T3: PhaseTips = {
     'Round ligament pain is normal but worsens with sudden movement / lifting',
     'Stop if you feel dizzy, short of breath, contractions, or any leaking fluid',
   ],
-  rationale: 'Comfort and pelvis-preparation matter more than fitness gains. Walking, controlled hip work, and breathing practice are the most evidence-backed labour-prep activities.',
+  rationale: 'Comfort matters more than fitness gains now. Staying active in pregnancy is linked to fewer caesarean and assisted births (ACOG 2020, observational studies).',
 };
 
 const ALWAYS_STOP_AND_CALL = [

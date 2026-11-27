@@ -7,9 +7,9 @@ import { CheckCircle2, Plus, Trash2, Wind } from 'lucide-react';
 import { format, isToday, parseISO, subDays } from 'date-fns';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
-// Simple pelvic-floor exercise tracker for postpartum. Most clinicians
-// recommend starting light Kegels from week 2 (vaginal delivery) or
-// once cleared by a provider for C-section; the canonical target is
+// Simple pelvic-floor exercise tracker for postpartum. NHS: gentle
+// exercise incl. pelvic floor as soon as she feels up to it after a
+// straightforward birth; after a caesarean ask first. The target is
 // 10 reps × 3 sessions per day. Adherence is the problem, not the
 // physical effort.
 //
@@ -101,8 +101,10 @@ const PostpartumPelvicFloor = () => {
       </div>
 
       <p className="text-[11px] text-muted-foreground mb-3">
-        Aim for {TARGET_PER_DAY} short sets a day (10 reps each). Once cleared by your provider —
-        usually week 2 for vaginal delivery, after the 6-week visit if C-section.
+        Aim for {TARGET_PER_DAY} short sets a day (10 reps each). After a straightforward birth you can start
+        gently as soon as you feel up to it; after a caesarean or a more complicated birth, ask your midwife or
+        doctor first. Walking can start early too; ask at your 6-week check before running or other high-impact
+        exercise, and wait until 7 days after the bleeding stops before swimming (NHS).
       </p>
 
       <div className="flex items-center gap-2 mb-3">

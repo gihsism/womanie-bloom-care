@@ -3,7 +3,8 @@
 // ids below); for everything else (how many check-ups, when) the card says
 // to ask your midwife or doctor. Swiss notes (what basic insurance covers,
 // BAG; the SGGG glucose-test advice) sit next to the steps with their own
-// official Swiss source. Shows which ones she has marked done, and counts a glucose test
+// official Swiss source. The RhD and GBS steps cite the Swiss SGGG letters
+// themselves (library items with hand-written summaries, round 5). Shows which ones she has marked done, and counts a glucose test
 // result in her records dated in this pregnancy as done. Pure, unit-tested.
 //
 // Marks live in womanie_preg_checkups_{uid} (synced to the account, see
@@ -52,6 +53,19 @@ const FIRST_TRIMESTER_GUIDELINE: ScheduleSource = {
   id: 'pmid-39353600',
   label: 'First-trimester guideline, Ultraschall in der Medizin 2025',
   url: 'https://pubmed.ncbi.nlm.nih.gov/39353600/',
+};
+
+/** Swiss SGGG letters held in the research library as hand-written summaries (scripts/research/swiss-sources.mjs). */
+const SGGG_ANTI_D: ScheduleSource = {
+  id: 'gp-sggg-empfehlungen-zur-anti-d-immunglobulin-ga-d77009',
+  label: 'SGGG expert letter 68 (anti-D), Gynäkologie 1/2020',
+  url: 'https://www.rosenfluh.ch/media/gynaekologie/2020/01/Empfehlungen-zur-Anti-D-Immunglobulin-Gabe-in-der-Schwangerschaft-Anti-D-Prophylaxe.pdf',
+};
+
+const SGGG_GBS: ScheduleSource = {
+  id: 'gp-sggg-86-prophylaxe-gbs-sepsis-des-neugeborene-52360b',
+  label: 'SGGG clinical practice recommendation 86 (GBS), 2024',
+  url: 'https://www.sggg.ch/fileadmin/user_upload/86_Prophylaxe_GBS-Sepsis_des_Neugeborenen_englischVersion.pdf',
 };
 
 export const PREGNANCY_SCHEDULE: ScheduleItem[] = [
@@ -121,6 +135,24 @@ export const PREGNANCY_SCHEDULE: ScheduleItem[] = [
         url: 'https://www.rosenfluh.ch/media/gynaekologie/2024/01/Screening-und-Management-der-Gestationsdiabetes.pdf',
       },
     },
+  },
+  {
+    key: 'rhd-baby-test',
+    label: "Baby's RhD blood group test (if you are RhD negative)",
+    when: 'Weeks 18 to 24',
+    startWeek: 18,
+    endWeek: 24,
+    note: "Your blood group is checked at an early check-up. If you are RhD negative, a blood test from you can show your baby's RhD group. Only if the baby is RhD positive do you get an anti-D injection at weeks 28 to 30 and after the birth. If you are RhD positive, this step does not apply to you.",
+    source: SGGG_ANTI_D,
+  },
+  {
+    key: 'gbs-swab',
+    label: 'Swab for group B streptococcus (GBS)',
+    when: 'Weeks 35 to 37',
+    startWeek: 35,
+    endWeek: 37,
+    note: 'One swab from the lower vagina and the skin around the anus, which you can often take yourself. If it finds GBS, you are offered antibiotics through a drip during labour to protect your baby; no treatment is needed before labour. Tell your team if you are allergic to penicillin.',
+    source: SGGG_GBS,
   },
 ];
 

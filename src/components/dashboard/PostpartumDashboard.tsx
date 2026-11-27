@@ -55,12 +55,12 @@ interface RecoveryItem {
 const RECOVERY: RecoveryItem[] = [
   { id: 'pediatrician-2-3-days', label: 'First pediatrician check (2–3 days)', weeksFrom: 0, weeksTo: 1, category: 'baby', why: 'Newborn weight check + jaundice screen.' },
   { id: 'lactation-week-1', label: 'Lactation/feeding consult if you want one', weeksFrom: 0, weeksTo: 2, category: 'baby', why: 'Earliest help is the highest leverage if feeding is hard.' },
-  { id: 'lochia-resolves', label: 'Lochia (postpartum bleeding) gradually lightens', weeksFrom: 1, weeksTo: 6, category: 'physical', why: 'Bleeding heavier than a soaked pad/hour or with large clots is not normal — call your provider.' },
+  { id: 'lochia-resolves', label: 'Lochia (postpartum bleeding) gradually lightens', weeksFrom: 1, weeksTo: 6, category: 'physical', why: 'Soaking a pad in an hour or less, or clots bigger than an egg, is an urgent warning sign (CDC): get medical help now.' },
   { id: 'pediatrician-1-2-weeks', label: '1–2 week newborn visit', weeksFrom: 1, weeksTo: 2, category: 'baby', why: 'Confirms baby has regained birth weight.' },
   { id: 'mood-check-2-weeks', label: 'Baby-blues / mood self-check (~2 weeks)', weeksFrom: 1, weeksTo: 3, category: 'emotional', why: 'Brief sad/tearful days are common. If they persist past 2 weeks → screen for PPD.' },
   { id: 'six-week-visit', label: '6-week postnatal visit (you, not baby)', weeksFrom: 5, weeksTo: 8, category: 'visit', why: 'Pelvic floor, mood, contraception, healing of any tear or incision.' },
   { id: 'iron-recheck', label: 'Iron recheck if you bled heavily', weeksFrom: 5, weeksTo: 12, category: 'physical', why: 'Low ferritin from delivery blood loss can linger — fatigue you might be blaming on the baby.' },
-  { id: 'pelvic-floor', label: 'Pelvic floor exercises / PT referral', weeksFrom: 4, weeksTo: 16, category: 'physical', why: 'Light Kegels from week 2; PT if leaking, heaviness, or pain stays.' },
+  { id: 'pelvic-floor', label: 'Pelvic floor exercises / PT referral', weeksFrom: 4, weeksTo: 16, category: 'physical', why: 'Gentle pelvic floor exercises once you feel up to it (after a caesarean, ask first); PT if leaking, heaviness, or pain stays.' },
   { id: 'six-month-visit', label: '6-month wellness check (you)', weeksFrom: 22, weeksTo: 28, category: 'visit', why: 'Sleep, mood, thyroid (postpartum thyroiditis peaks ~3–6 months).' },
 ];
 
@@ -75,9 +75,9 @@ const PPD_FLAGS = [
 
 const WELLNESS_TIPS = [
   { icon: Apple, label: 'Eat regularly — your body needs more calories during recovery, especially while breastfeeding.', color: 'text-primary' },
-  { icon: Moon, label: 'Nap when you can, even 20-minute stretches. Sleep deprivation is the single biggest postpartum risk factor.', color: 'text-indigo-500' },
+  { icon: Moon, label: 'Nap when you can, even 20-minute stretches. Too little sleep makes recovery and mood harder.', color: 'text-indigo-500' },
   { icon: Heart, label: 'Accept help — meals, errands, baby-holding. The "village" is a real thing and not optional.', color: 'text-pink-500' },
-  { icon: Droplet, label: 'Hydrate. Especially if breastfeeding (aim 2.5–3 L/day).', color: 'text-blue-500' },
+  { icon: Droplet, label: 'Drink to thirst. While breastfeeding, at least 2 L a day (Swiss BLV).', color: 'text-blue-500' },
 ];
 
 interface PostpartumDashboardProps {
@@ -320,9 +320,9 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
             <div className="text-xs">
               <p className="font-medium mb-1">Postpartum bleeding (lochia)</p>
               <p className="text-muted-foreground leading-relaxed">
-                Bleeding usually tapers from bright red → pink → brown → yellow over 4–6 weeks.
-                Heavy bleeding (soaking a pad in an hour) or passing clots larger than a golf
-                ball is <span className="font-medium text-red-700 dark:text-red-300">not normal</span> — call your provider.
+                Bleeding usually tapers from bright red → pink → brown → yellow over several weeks, often 4 to 6.
+                Heavy bleeding (soaking a pad in an hour) or passing clots bigger than an
+                egg is <span className="font-medium text-red-700 dark:text-red-300">not normal</span> — get medical help now (144 if very heavy or you feel faint).
               </p>
             </div>
           </div>
