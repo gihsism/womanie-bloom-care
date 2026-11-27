@@ -61,8 +61,55 @@ function scrubCommon<E extends WithRequest>(event: E): E {
   return event;
 }
 
+// Keys that hold (or describe) health data, personal details or secrets.
+// The server's list (api/_lib/sentry.ts) plus request fields. An unhandled rejection with
+// a plain object (a failed /api/db answer, a row) arrives as
+// extra.__serialized__ with every field, so extra and contexts are
+// filtered by key at any depth.
+export const SENSITIVE_KEY = new RegExp(
+  '^(' + [
+    'content', 'messages?', 'prompt', 'body', 'data', 'text', 'notes?', 'question', 'answer',
+    'value', 'values', 'result', 'results', 'unit', 'test_name', 'title', 'summary', 'ai_summary',
+    'symptoms?', 'mood', 'flow', 'pain', 'temperature', 'weight', 'blood_?pressure', 'bbt',
+    'medications?', 'dose', 'diagnosis', 'plan', 'cycle', 'period.*', 'pregnan.*', 'ivf.*', 'birth.*',
+    'date_of_birth', 'dob', 'full_name', 'name', 'email', 'phone', 'address', 'ip_address',
+    'password.*', 'token', 'secret', 'session', 'cookies?', 'authorization', 'api_?key', 'p256dh', 'auth',
+    'file_.*', 'license_number', 'rows', 'row', 'insertData', 'updateData', 'upsertData', 'filters',
+  ].join('|') + ')$',
+  'i',
+);
+
+const SDK_CONTEXTS = new Set(['os', 'browser', 'device', 'app', 'trace', 'culture', 'runtime', 'otel']);
+const EMAIL = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
+
+function maskText(v: unknown): unknown {
+  return typeof v === 'string' ? v.replace(EMAIL, '[email]') : v;
+}
+
+export function redactDeep(value: unknown, depth = 0): unknown {
+  if (depth > 6 || value === null || typeof value !== 'object') return maskText(value);
+  if (Array.isArray(value)) return value.map(v => redactDeep(v, depth + 1));
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+    out[k] = SENSITIVE_KEY.test(k) ? '[Filtered]' : redactDeep(v, depth + 1);
+  }
+  return out;
+}
+
 export function scrubErrorEvent(event: ErrorEvent): ErrorEvent {
-  return scrubCommon(event);
+  scrubCommon(event);
+  if (event.user) event.user = event.user.id === undefined ? {} : { id: event.user.id };
+  if (event.extra) event.extra = redactDeep(event.extra) as Record<string, unknown>;
+  if (event.contexts) {
+    for (const k of Object.keys(event.contexts)) {
+      if (!SDK_CONTEXTS.has(k)) event.contexts[k] = redactDeep(event.contexts[k]) as Record<string, unknown>;
+    }
+  }
+  if (event.message) event.message = String(maskText(event.message));
+  for (const ex of event.exception?.values ?? []) {
+    if (ex.value) ex.value = String(maskText(ex.value));
+  }
+  return event;
 }
 
 /** Performance events: http.client spans carry full request URLs. */
