@@ -23,7 +23,10 @@ symlink `node_modules` to the main checkout's; never install there. Chromium
 must be installed once (`npx playwright install chromium`).
 
 How it works: the config starts `vite preview` on `127.0.0.1:4179`
-(`E2E_LOCAL_PORT` overrides) and serves `dist/`. `e2e-local/mock-api.ts`
+(`E2E_LOCAL_PORT` overrides) and serves `dist/`. It does not reuse a server
+already on that port (another worktree's preview would serve its own build
+to your tests); a busy port fails at start. Pick another `E2E_LOCAL_PORT`,
+or set `E2E_REUSE_SERVER=1` to reuse one on purpose. `e2e-local/mock-api.ts`
 answers every `/api/**` request in the browser: `/api/db` is a small
 in-memory table store (filters, order, limit, insert/update/upsert/delete),
 so a saved log or a ticked medicine can be read back; Ask AI streams a canned
@@ -43,6 +46,7 @@ run in parallel; each starts from a fresh copy of the fixtures.
 | File | Per life stage (all 9) |
 |---|---|
 | `journeys.spec.ts` | Home: log today (mood, save) and tick a medicine (0 -> 1 of 1, dose row written); Records -> Documents -> open the lab document -> Print / PDF view; Ask AI -> canned streamed answer; Visits -> next visit -> prep sheet -> Print (window.print called, toolbar hidden in print media); Me -> profile shows the email, life-stage picker shows the stage |
+| `new-features.spec.ts` | Prep sheet: questions, medicines, results, plus the symptom diary only for menopause / post-menopause and the cycles + ovulation tests only for trying to conceive. Once: Ask AI "Ask my doctor about this" (saved to the next visit, or to the unscheduled list with no visit, and shown on the prep sheet); "Print this chat" (print page, no tab bar, toolbar hidden in print); baby Stats weekly summary -> print page; pregnancy Check-ups "Mark done" saved to `user_app_data`, then Undo |
 | `edge-cases.spec.ts` | Every main page (Home, stage page, Records, Ask AI, Visits, Me, prep sheet) renders with no error screen and no console errors, for a brand-new empty account and for rows whose optional columns are null |
 
 Bugs it has caught: a period row with no `cycle_length` froze the stage page

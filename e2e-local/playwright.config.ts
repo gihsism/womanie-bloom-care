@@ -23,7 +23,10 @@ export default defineConfig({
     command: `npx vite preview --port ${PORT} --strictPort --host 127.0.0.1`,
     cwd: '..',
     url: `http://127.0.0.1:${PORT}/`,
-    reuseExistingServer: !process.env.CI,
+    // Never reuse by default: another worktree's preview on the same port
+    // would serve ITS build to these tests. A busy port fails loudly;
+    // set E2E_LOCAL_PORT, or E2E_REUSE_SERVER=1 to reuse on purpose.
+    reuseExistingServer: process.env.E2E_REUSE_SERVER === '1',
     timeout: 60_000,
   },
   use: {

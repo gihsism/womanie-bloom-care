@@ -68,7 +68,10 @@ function runDb(tables: Tables, b: DbBody, userId: string): Row[] {
     case 'upsert': {
       const keys = (b.upsertOptions?.onConflict ?? 'id').split(',').map((s) => s.trim());
       const out: Row[] = [];
-      for (const r of Array.isArray(b.upsertData) ? b.upsertData : [b.upsertData ?? {}]) {
+      for (const raw of Array.isArray(b.upsertData) ? b.upsertData : [b.upsertData ?? {}]) {
+        // The server stamps the signed-in user's id, so onConflict
+        // 'user_id,key' matches rows the client sent without user_id.
+        const r: Row = { user_id: userId, ...raw };
         const existing = t.find((x) => keys.every((k) => r[k] !== undefined && String(x[k]) === String(r[k])));
         if (existing) { Object.assign(existing, r); out.push({ ...existing }); }
         else { const n = { id: newId(), created_at: now, user_id: userId, ...r }; t.push(n); out.push({ ...n }); }
