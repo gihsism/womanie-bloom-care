@@ -12,6 +12,7 @@ import MenopauseBodyMap from '@/components/dashboard/MenopauseBodyMap';
 import IVFTimelineHero from '@/components/dashboard/IVFTimelineHero';
 import { TodayList, PrimaryButton, MoreForStage, useGo, type SheetKind } from '@/components/dashboard/HomeBlocks';
 import LogSheet from '@/components/dashboard/LogSheet';
+import PeriodLateCard from '@/components/dashboard/PeriodLateCard';
 import { useStageProfile } from '@/hooks/useStageProfile';
 import { useTodaySignals } from '@/hooks/useTodaySignals';
 import { todayItems, primaryActionFor, secondaryActionFor, moreFor } from '@/lib/todayItems';
@@ -21,7 +22,8 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 // Home: the same short template for every life stage —
 //   1. greeting, with the stage as a quiet "· change" link (to Me)
 //   2. one hero: one fact, one sentence, one "Details" link
-//   3. Today: at most 3 ranked one-line rows (lib/todayItems.ts)
+//   3. Today: at most 3 ranked one-line rows (lib/todayItems.ts); under it,
+//      only when the period is 5+ days late, the "period late?" note
 //   4. one filled button (opens the Log sheet or the stage's main tool;
 //      in the latter case a quiet "Log today" link sits under it, so every
 //      stage keeps one tap into today's mood/symptom log)
@@ -93,6 +95,14 @@ const PatientDashboard = () => {
         {hero}
 
         <TodayList items={todayItems(mode, signals)} go={go} />
+
+        <PeriodLateCard
+          userId={user.id}
+          mode={mode}
+          periodDaysUntil={signals.periodDaysUntil}
+          lastPeriodStart={periodData?.lastPeriodStart}
+          onLog={() => setSheet('log')}
+        />
 
         <PrimaryButton
           action={primaryActionFor(mode, primaryOpts)}
