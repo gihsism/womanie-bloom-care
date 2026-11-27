@@ -38,6 +38,60 @@ exists but is old or narrow.
 | Continuing levothyroxine in pregnancy (dose increase) | ATA 2026 and ACOG PB 223 guidelines are in the library, but their keywords do not name levothyroxine, so reviews of IVF women and subclinical hypothyroidism outrank them. | Re-run the keyword step for these two items (adds "levothyroxine", "thyroid medication dose"). A data fix, not a new item. | Low |
 | Combined pill and breast milk | Cochrane 2015 and a 2016 systematic review. | Nothing newer; check for an update at the next build. | Low |
 
+## Gaps filled on 2026-11-27 (no API spend)
+
+14 PubMed records added to `library.json` with summaries written by hand
+from the PubMed abstract only (same fields and rules as the build; the next
+build keeps them, since it reuses every existing item's summary).
+Embeddings re-built offline.
+
+| Gap | Added | Status |
+|---|---|---|
+| 1 Ibuprofen / painkillers while breastfeeding | LactMed (NLM) entries for ibuprofen (`pmid-30000045`), paracetamol (`pmid-30000253`), naproxen (`pmid-30000103`) | **Closed** |
+| 2 Time to pregnancy | Wesselink 2017 preconception cohort (`pmid-28917614`): % pregnant at 6 and 12 cycles by age | **Closed** (NICE NG257 figures stay out: licence) |
+| 3 When to see a fertility doctor | ASRM 2026 fertility evaluation (`pmid-42901815`) | Partly: the abstract has no 12 / 6-month timings. The ASRM 2023 definition (`40991339`) has no usable abstract. The app's own rule (`src/lib/ttc.ts`) cites NICE NG257 / ASRM. |
+| 4 Contraception effectiveness | US MEC 2024 (`pmid-39106314`), replaces the 2016 updates | Partly: eligibility only; no typical- vs perfect-use table on PubMed |
+| 5 Birth spacing | ACOG/SMFM Obstetric Care Consensus 8 (`pmid-30575677`) | Partly: the abstract does not state the 6 / 18-month advice |
+| 6 Amenorrhoea work-up | ASRM 2024 (`pmid-38456861`) | Partly: abstract lists no tests |
+| 7 Normal period | FIGO AUB systems 2018 (`pmid-30198563`), ACOG CO 651 (`pmid-26595586`) | Partly: abstracts give no 24-38 day figures (the cycle card cites FIGO directly) |
+| 8 UTI antibiotics in pregnancy | ACOG CO 717 (`pmid-28832488`) | **Closed** for nitrofurantoin / sulfonamides by trimester |
+| Low: NAMS non-hormone position | NAMS 2023 (`pmid-37252752`) | **Closed** |
+| 9, 10 | nothing on PubMed with a usable abstract | Open |
+
+Stale guidelines with a newer version now in the library (added to
+`SUPERSEDED` in `library.ts`, so the old one steps back): NAMS hormone
+therapy 2017 -> 2022 (`pmid-35797481`, added), NAMS non-hormonal 2015 ->
+2023, ACOG CO 623 -> CO 767 (`pmid-30575639`, added), ACOG CO 757 -> CPG 4
+(already present), US MEC 2016 updates -> 2024, ACOG CO 637 -> CO 722,
+ACOG CO 656 -> CO 723.
+
+Still stale, newer version not addable for free: NICE "Menopause: full
+guideline" 2015 (`pmid-26598775`; NICE NG23 was updated in 2024, but NICE
+terms forbid retrieval use outside the UK).
+
+Build fixes: `evidenceLevel` now counts network meta-analyses as reviews
+(4 items were labelled "study") and society documents PubMed does not tag
+as guidelines (consensus statements, committee opinions, position
+statements, US MEC) as guidelines. LactMed chapters (a living Bookshelf
+database) get the book name in the title and the year last revised, not
+2006.
+
+## Hand-written app guidance: claims still without an adequate source
+
+Checked on 2026-11-27 (the cards outside the research library). Left as
+they are, flagged for review:
+- `AmhAgeContext`: "typical 10-20%/yr decline" of AMH.
+- `PersonalizedInsights`: HOMA-IR "PCOS-specific cutoff >=2.0"; CA-125
+  "median ~68 in endometriosis vs ~12"; homocysteine "normal <10";
+  prolactin raising DHEA-S; "Many women are deficient" in magnesium.
+- `LabFreshnessCard`: the reminder intervals are Womanie's own; AMH every
+  12 months while trying to conceive is not advised by ASRM for women
+  without infertility; "most clinics want AMH within 6 months" for IVF.
+- `hormone-reference.ts`: FSH, LH, estradiol and progesterone phase ranges
+  are lab reference ranges (Mayo / LabCorp style), not guideline values.
+- `PregnancyTracker` milestones are US-centred (quad screen, Rhogam at 28
+  weeks); Swiss practice differs in places.
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed

@@ -2484,6 +2484,51 @@
    ]
   },
   {
+   "id": "pmid-28917614",
+   "pmid": "28917614",
+   "doi": "10.1016/j.ajog.2017.09.002",
+   "title": "Age and fecundability in a North American preconception cohort study",
+   "source": "American Journal of Obstetrics and Gynecology",
+   "journal": "American Journal of Obstetrics and Gynecology",
+   "organisation": null,
+   "year": 2017,
+   "publicationTypes": [],
+   "evidenceLevel": "study",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/28917614/",
+   "summary": "This study followed 2,962 couples in the US and Canada who had just started trying for a baby, for up to 12 cycles, to see how age affects the chance of getting pregnant naturally. After 6 cycles, 62% of women aged 28-30 were pregnant compared with 28% of women aged 40-45; after 12 cycles the figures ranged from 79% (age 25-27) to 56% (age 40-45). The chance of conceiving each cycle fell steadily with the woman's age, staying fairly stable between 28 and 33. The man's age made little difference once the woman's age was taken into account, though few men over 45 took part.",
+   "keyPoints": [
+    "Pregnant within 6 cycles: from 62% at age 28-30 down to 28% at age 40-45.",
+    "Pregnant within 12 cycles: from 79% at age 25-27 down to 56% at age 40-45.",
+    "Compared with women aged 21-24, the chance per cycle was 0.60 times as high at 37-39 and 0.40 times as high at 40-45.",
+    "Male age was not clearly linked to the chance of pregnancy after accounting for female age."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "ivf"
+   ],
+   "topics": [
+    "age-fertility"
+   ],
+   "tags": [
+    "age",
+    "fecundability",
+    "time to pregnancy",
+    "natural conception"
+   ],
+   "keywords": [
+    "how long to get pregnant",
+    "time to pregnancy",
+    "chance of pregnancy per cycle",
+    "age and fertility",
+    "trying to conceive",
+    "getting pregnant at 35",
+    "getting pregnant at 40",
+    "fertility by age",
+    "male age"
+   ]
+  },
+  {
    "id": "pmid-42993792",
    "pmid": "42993792",
    "doi": "10.1093/alcalc/agag071",
@@ -23763,6 +23808,54 @@
    ]
   },
   {
+   "id": "pmid-39106314",
+   "pmid": "39106314",
+   "doi": "10.15585/mmwr.rr7304a1",
+   "title": "U.S. Medical Eligibility Criteria for Contraceptive Use, 2024",
+   "source": "MMWR. Recommendations and Reports",
+   "journal": "MMWR. Recommendations and Reports",
+   "organisation": null,
+   "year": 2024,
+   "publicationTypes": [],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/39106314/",
+   "summary": "These are the 2024 US Medical Eligibility Criteria for Contraceptive Use from the CDC, which say which contraceptive methods are suitable for people with particular health conditions or circumstances. They replace the 2016 version. Updates include new advice for chronic kidney disease, revised advice for breastfeeding, after birth or abortion, obesity, blood clots, clotting disorders, lupus, sickle cell disease and other conditions, and newer pills, patches, rings and hormonal IUDs. The aim is to remove unnecessary barriers to contraception and support person-centred counselling.",
+   "keyPoints": [
+    "Replaces the 2016 US Medical Eligibility Criteria for Contraceptive Use.",
+    "Adds recommendations for people with chronic kidney disease.",
+    "Revises recommendations for breastfeeding, postpartum and post-abortion use, obesity, deep vein thrombosis or pulmonary embolism, thrombophilia and several other conditions.",
+    "Includes newer methods such as new pill doses, patches, vaginal rings, progestin-only pills and levonorgestrel IUDs."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "postpartum",
+    "contraception"
+   ],
+   "topics": [
+    "combined-pill",
+    "progestogen-only",
+    "iud-implant",
+    "postpartum-contraception"
+   ],
+   "tags": [
+    "medical eligibility",
+    "contraception safety",
+    "us mec",
+    "health conditions"
+   ],
+   "keywords": [
+    "which contraception is safe for me",
+    "contraception with health conditions",
+    "pill and blood clots",
+    "contraception breastfeeding",
+    "contraception after birth",
+    "contraception obesity",
+    "medical eligibility criteria",
+    "us mec 2024",
+    "birth control safety"
+   ]
+  },
+  {
    "id": "pmid-40476466",
    "pmid": "40476466",
    "doi": "10.1002/14651858.CD015701.pub2",
@@ -42721,6 +42814,49 @@
    ]
   },
   {
+   "id": "pmid-30198563",
+   "pmid": "30198563",
+   "doi": "10.1002/ijgo.12666",
+   "title": "The two FIGO systems for normal and abnormal uterine bleeding symptoms and classification of causes of abnormal uterine bleeding in the reproductive years: 2018 revisions",
+   "source": "International Journal of Gynaecology and Obstetrics",
+   "journal": "International Journal of Gynaecology and Obstetrics",
+   "organisation": null,
+   "year": 2018,
+   "publicationTypes": [],
+   "evidenceLevel": "study",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/30198563/",
+   "summary": "This paper from the FIGO Menstrual Disorders Committee presents the 2018 revisions of FIGO's two systems for abnormal uterine bleeding: one that defines normal and abnormal bleeding symptoms, and one (PALM-COEIN) that classifies their causes. They were first published in 2011 to give doctors and researchers worldwide the same definitions. The revisions came from expert meetings and voting between 2012 and 2017. The abstract does not give the definitions themselves.",
+   "keyPoints": [
+    "FIGO AUB System 1 sets common terms for normal and abnormal menstrual bleeding in the reproductive years.",
+    "FIGO AUB System 2 (PALM-COEIN) classifies the causes of abnormal bleeding.",
+    "Both systems were reviewed and revised by international experts between 2012 and 2017."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menstrual-cycle"
+   ],
+   "topics": [
+    "heavy-bleeding",
+    "irregular-cycles"
+   ],
+   "tags": [
+    "abnormal uterine bleeding",
+    "normal period",
+    "figo",
+    "palm-coein"
+   ],
+   "keywords": [
+    "what is a normal period",
+    "abnormal bleeding",
+    "irregular periods",
+    "heavy periods",
+    "cycle length normal",
+    "figo",
+    "palm-coein",
+    "bleeding between periods"
+   ]
+  },
+  {
    "id": "pmid-42743436",
    "pmid": "42743436",
    "doi": "10.1097/AOG.0000000000006436",
@@ -46255,6 +46391,58 @@
    ]
   },
   {
+   "id": "pmid-35797481",
+   "pmid": "35797481",
+   "doi": "10.1097/GME.0000000000002028",
+   "title": "The 2022 hormone therapy position statement of The North American Menopause Society",
+   "source": "North American Menopause Society",
+   "journal": "Menopause",
+   "organisation": "North American Menopause Society",
+   "year": 2022,
+   "publicationTypes": [
+    "Consensus Statement"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/35797481/",
+   "summary": "This 2022 position statement from the North American Menopause Society updates its 2017 statement on hormone therapy. Hormone therapy remains the most effective treatment for hot flushes and night sweats and for vaginal and urinary symptoms of menopause, and it prevents bone loss and fractures. For women under 60 or within 10 years of menopause without reasons to avoid it, the benefits generally outweigh the risks; starting later carries greater risks of heart disease, stroke, blood clots and dementia. Risks depend on the type, dose, route and timing, so treatment should be individual and reviewed regularly.",
+   "keyPoints": [
+    "Hormone therapy is the most effective treatment for hot flushes and genitourinary syndrome of menopause and prevents bone loss and fracture.",
+    "Under 60 or within 10 years of menopause onset, without contraindications, the benefit-risk balance is favourable for bothersome hot flushes and bone protection.",
+    "Starting more than 10 years after menopause or after 60 carries greater absolute risks of heart disease, stroke, blood clots and dementia.",
+    "For vaginal symptoms not helped by over-the-counter products, low-dose vaginal estrogen or other local therapies are recommended."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menopause",
+    "post-menopause"
+   ],
+   "topics": [
+    "hrt-benefits-risks",
+    "hot-flushes",
+    "bone-health",
+    "genitourinary"
+   ],
+   "tags": [
+    "hormone therapy",
+    "hrt",
+    "hot flushes",
+    "bone loss",
+    "vaginal dryness"
+   ],
+   "keywords": [
+    "hrt",
+    "hormone replacement therapy",
+    "is hrt safe",
+    "hrt risks",
+    "menopause hormone therapy",
+    "hot flashes treatment",
+    "night sweats",
+    "vaginal estrogen",
+    "hrt after 60",
+    "estrogen"
+   ]
+  },
+  {
    "id": "pmid-41421750",
    "pmid": "41421750",
    "doi": "10.1016/j.ajog.2025.12.039",
@@ -47625,6 +47813,52 @@
     "blood sugar",
     "newborn outcomes",
     "diabetes tablets"
+   ]
+  },
+  {
+   "id": "pmid-30575639",
+   "pmid": "30575639",
+   "doi": "10.1097/AOG.0000000000003075",
+   "title": "ACOG Committee Opinion No. 767: Emergent Therapy for Acute-Onset, Severe Hypertension During Pregnancy and the Postpartum Period",
+   "source": "ACOG",
+   "journal": "Obstetrics and Gynecology",
+   "organisation": "ACOG",
+   "year": 2019,
+   "publicationTypes": [
+    "Editorial"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/30575639/",
+   "summary": "This ACOG committee opinion covers urgent treatment of suddenly very high blood pressure during pregnancy or after birth. Women with acute-onset severe high blood pressure need urgent treatment, ideally within 30-60 minutes of it being confirmed, to lower the risk of stroke. Intravenous labetalol and hydralazine are first-line medicines, and immediate-release oral nifedipine may also be used first-line, especially without intravenous access. Standard hospital protocols for pre-eclampsia have been shown to reduce serious complications for mothers.",
+   "keyPoints": [
+    "Acute-onset severe hypertension in pregnancy or after birth needs urgent treatment.",
+    "Treatment should start as soon as possible, within 30-60 minutes of confirmed severe hypertension, to reduce the risk of maternal stroke.",
+    "Intravenous labetalol and hydralazine are first-line; immediate-release oral nifedipine may also be first-line.",
+    "Standardised protocols for pre-eclampsia and eclampsia reduce adverse maternal outcomes."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy",
+    "postpartum"
+   ],
+   "topics": [
+    "hypertension-pregnancy"
+   ],
+   "tags": [
+    "severe hypertension",
+    "pre-eclampsia",
+    "blood pressure",
+    "emergency treatment"
+   ],
+   "keywords": [
+    "very high blood pressure pregnancy",
+    "severe hypertension pregnancy",
+    "blood pressure after birth",
+    "preeclampsia treatment",
+    "labetalol",
+    "nifedipine",
+    "hydralazine",
+    "160/110"
    ]
   },
   {
@@ -52098,6 +52332,47 @@
    ]
   },
   {
+   "id": "pmid-42901815",
+   "pmid": "42901815",
+   "doi": "10.1016/j.fertnstert.2026.08.686",
+   "title": "Fertility evaluation of infertile women: a committee opinion",
+   "source": "American Society for Reproductive Medicine",
+   "journal": "Fertility and Sterility",
+   "organisation": "American Society for Reproductive Medicine",
+   "year": 2026,
+   "publicationTypes": [],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/42901815/",
+   "summary": "This 2026 committee opinion from the American Society for Reproductive Medicine reviews how women with infertility should be assessed. It says the evaluation should be systematic, quick and cost-effective, looking for all relevant factors and starting with the least invasive tests for the most common causes. It replaces the 2021 version of the same document. The abstract does not list the specific tests or timings.",
+   "keyPoints": [
+    "Infertility evaluation in women should be systematic, prompt and cost-effective.",
+    "It should look for all relevant factors, starting with the least invasive methods for the most common causes.",
+    "Replaces the 2021 ASRM committee opinion of the same name."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "ivf"
+   ],
+   "topics": [
+    "infertility-evaluation"
+   ],
+   "tags": [
+    "infertility",
+    "fertility tests",
+    "evaluation"
+   ],
+   "keywords": [
+    "when to see a fertility doctor",
+    "fertility tests for women",
+    "infertility workup",
+    "fertility evaluation",
+    "not getting pregnant",
+    "trying to conceive for a year",
+    "fertility specialist"
+   ]
+  },
+  {
    "id": "pmid-41574757",
    "pmid": "41574757",
    "doi": "10.1002/14651858.CD002118.pub7",
@@ -56151,6 +56426,90 @@
     "bone density",
     "weight loss after birth",
     "exclusive breastfeeding"
+   ]
+  },
+  {
+   "id": "pmid-38456861",
+   "pmid": "38456861",
+   "doi": "10.1016/j.fertnstert.2024.02.001",
+   "title": "Current evaluation of amenorrhea: a committee opinion",
+   "source": "American Society for Reproductive Medicine",
+   "journal": "Fertility and Sterility",
+   "organisation": "American Society for Reproductive Medicine",
+   "year": 2024,
+   "publicationTypes": [
+    "Practice Guideline"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/38456861/",
+   "summary": "This 2024 committee opinion from the American Society for Reproductive Medicine gives clinicians principles and strategies for working out why someone has no periods, either never having started them (primary amenorrhoea) or having stopped (secondary amenorrhoea). It replaces the 2008 version. The abstract does not list the specific tests.",
+   "keyPoints": [
+    "Covers the diagnostic evaluation of both primary and secondary amenorrhoea.",
+    "Replaces the ASRM document of the same name from 2008."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menstrual-cycle"
+   ],
+   "topics": [
+    "irregular-cycles",
+    "hypothalamic-amenorrhoea"
+   ],
+   "tags": [
+    "amenorrhoea",
+    "missed periods",
+    "evaluation"
+   ],
+   "keywords": [
+    "periods stopped",
+    "no period not pregnant",
+    "missed periods",
+    "amenorrhea",
+    "secondary amenorrhea",
+    "absent periods",
+    "why have my periods stopped"
+   ]
+  },
+  {
+   "id": "pmid-26595586",
+   "pmid": "26595586",
+   "doi": "10.1097/AOG.0000000000001215",
+   "title": "ACOG Committee Opinion No. 651: Menstruation in Girls and Adolescents: Using the Menstrual Cycle as a Vital Sign",
+   "source": "ACOG",
+   "journal": "Obstetrics and Gynecology",
+   "organisation": "ACOG",
+   "year": 2015,
+   "publicationTypes": [],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/26595586/",
+   "summary": "This ACOG committee opinion explains what is normal for periods in girls and teenagers. The usual age of the first period has stayed between 12 and 13 years in well-nourished populations. Clinicians should explain what to expect from the first period and the normal range of cycle length afterwards, because spotting unusual patterns early may help find health problems. It suggests treating the menstrual cycle as a vital sign of overall health.",
+   "keyPoints": [
+    "The median age at the first period is between 12 and 13 years in well-nourished populations.",
+    "Several medical conditions can cause abnormal bleeding with unpredictable timing and flow.",
+    "Clinicians should explain the normal range of cycle length after the first period.",
+    "Assessing the menstrual cycle as a vital sign helps judge overall health."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menstrual-cycle"
+   ],
+   "topics": [
+    "irregular-cycles"
+   ],
+   "tags": [
+    "normal period",
+    "menarche",
+    "adolescents",
+    "cycle length"
+   ],
+   "keywords": [
+    "what is a normal period",
+    "normal cycle length",
+    "first period",
+    "teenager periods",
+    "irregular periods teenager",
+    "menstrual cycle vital sign",
+    "age of first period"
    ]
   },
   {
@@ -69189,7 +69548,7 @@
    "publicationTypes": [
     "Network Meta-Analysis"
    ],
-   "evidenceLevel": "study",
+   "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/39695450/",
    "summary": "This study pooled results from 17 randomized trials to compare two medicines, domperidone and metoclopramide, that are sometimes used to boost breast milk supply after birth. In mothers of preterm babies, domperidone increased daily milk volume more than metoclopramide or placebo (a dummy pill). In mothers who gave birth at term, domperidone did not show a clear benefit, and metoclopramide was no better than placebo in either group. The studies were small, so the findings are limited.",
    "keyPoints": [
@@ -69778,6 +70137,138 @@
     "nicu",
     "lactation",
     "milk supply"
+   ]
+  },
+  {
+   "id": "pmid-30000045",
+   "pmid": "30000045",
+   "doi": null,
+   "title": "Ibuprofen — Drugs and Lactation Database (LactMed®)",
+   "source": "National Institute of Child Health and Human Development",
+   "journal": "National Institute of Child Health and Human Development",
+   "organisation": null,
+   "year": 2025,
+   "publicationTypes": [
+    "Review"
+   ],
+   "evidenceLevel": "study",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/30000045/",
+   "summary": "This entry from LactMed, the US National Library of Medicine's database on medicines and breastfeeding, covers ibuprofen. Very little ibuprofen passes into breast milk, it leaves the body quickly, and babies are safely given much higher doses than they could get through milk, so it is a preferred painkiller and anti-inflammatory for breastfeeding mothers. Taking ibuprofen and paracetamol (acetaminophen) on a fixed schedule for 24 hours after a vaginal birth appears to increase breastfeeding rates.",
+   "keyPoints": [
+    "Ibuprofen levels in breast milk are extremely low and it has a short half-life.",
+    "Ibuprofen is a preferred choice for pain or inflammation while breastfeeding.",
+    "Fixed-schedule ibuprofen plus paracetamol for 24 hours after vaginal birth appears to increase the breastfeeding rate.",
+    "Breastfeeding initiation did not differ between ibuprofen alone and paracetamol alone."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "postpartum"
+   ],
+   "topics": [
+    "medicines-breastfeeding"
+   ],
+   "tags": [
+    "ibuprofen",
+    "breastfeeding",
+    "painkillers",
+    "nsaids"
+   ],
+   "keywords": [
+    "ibuprofen breastfeeding",
+    "is ibuprofen safe while breastfeeding",
+    "advil breastfeeding",
+    "nurofen breastfeeding",
+    "painkiller breastfeeding",
+    "nsaid breast milk",
+    "pain relief after birth",
+    "medicines while nursing"
+   ]
+  },
+  {
+   "id": "pmid-30000253",
+   "pmid": "30000253",
+   "doi": "10.1111/j.1651-2227.2011.02340.x",
+   "title": "Acetaminophen — Drugs and Lactation Database (LactMed®)",
+   "source": "National Institute of Child Health and Human Development",
+   "journal": "National Institute of Child Health and Human Development",
+   "organisation": null,
+   "year": 2026,
+   "publicationTypes": [
+    "Review"
+   ],
+   "evidenceLevel": "study",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/30000253/",
+   "summary": "This entry from LactMed, the US National Library of Medicine's database on medicines and breastfeeding, covers paracetamol (acetaminophen). It is described as a good choice for pain relief and fever in breastfeeding mothers. The amounts that reach breast milk are much smaller than the doses usually given to babies, and side effects in breastfed babies appear to be rare.",
+   "keyPoints": [
+    "Paracetamol (acetaminophen) is a good choice for pain and fever while breastfeeding.",
+    "Amounts in milk are much less than doses usually given to infants.",
+    "Adverse effects in breastfed infants appear to be rare.",
+    "Fixed-schedule paracetamol plus ibuprofen for 24 hours after vaginal birth appears to increase the breastfeeding rate."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "postpartum"
+   ],
+   "topics": [
+    "medicines-breastfeeding"
+   ],
+   "tags": [
+    "paracetamol",
+    "acetaminophen",
+    "breastfeeding",
+    "painkillers"
+   ],
+   "keywords": [
+    "paracetamol breastfeeding",
+    "acetaminophen breastfeeding",
+    "tylenol breastfeeding",
+    "panadol breastfeeding",
+    "fever while breastfeeding",
+    "painkiller breastfeeding",
+    "headache breastfeeding",
+    "medicines while nursing"
+   ]
+  },
+  {
+   "id": "pmid-30000103",
+   "pmid": "30000103",
+   "doi": null,
+   "title": "Naproxen — Drugs and Lactation Database (LactMed®)",
+   "source": "National Institute of Child Health and Human Development",
+   "journal": "National Institute of Child Health and Human Development",
+   "organisation": null,
+   "year": 2025,
+   "publicationTypes": [
+    "Review"
+   ],
+   "evidenceLevel": "study",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/30000103/",
+   "summary": "This entry from LactMed, the US National Library of Medicine's database on medicines and breastfeeding, covers naproxen. Limited information shows that naproxen levels in breast milk are low and side effects in breastfed babies seem uncommon. Because naproxen stays in the body a long time and one serious reaction was reported in a breastfed newborn, other painkillers may be preferred while feeding a newborn or premature baby.",
+   "keyPoints": [
+    "Limited information indicates naproxen levels in breast milk are low.",
+    "Adverse effects in breastfed infants are apparently uncommon.",
+    "Because of its long half-life and a reported serious reaction in a newborn, other medicines may be preferred while nursing a newborn or preterm baby."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "postpartum"
+   ],
+   "topics": [
+    "medicines-breastfeeding"
+   ],
+   "tags": [
+    "naproxen",
+    "breastfeeding",
+    "painkillers",
+    "nsaids"
+   ],
+   "keywords": [
+    "naproxen breastfeeding",
+    "aleve breastfeeding",
+    "period pain breastfeeding",
+    "painkiller breastfeeding",
+    "nsaid breast milk",
+    "medicines while nursing"
    ]
   },
   {
@@ -72603,7 +73094,7 @@
    "publicationTypes": [
     "Network Meta-Analysis"
    ],
-   "evidenceLevel": "study",
+   "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/37603500/",
    "summary": "This review pooled 27 trials with 2,269 women who had depression during perimenopause (the years around menopause). It compared different acupuncture-based treatments with each other and with the antidepressant fluoxetine plus menopausal hormone treatment. Several acupuncture types, especially warm acupuncture, scored better than fluoxetine plus hormone treatment, and warm acupuncture ranked best on depression scores. The authors suggest the findings could help patients and therapists choose among acupuncture options, but the abstract does not rate how certain the evidence is.",
    "keyPoints": [
@@ -73514,6 +74005,56 @@
     "paroxetine",
     "herbal supplements",
     "acupuncture"
+   ]
+  },
+  {
+   "id": "pmid-37252752",
+   "pmid": "37252752",
+   "doi": "10.1097/GME.0000000000002200",
+   "title": "The 2023 nonhormone therapy position statement of The North American Menopause Society",
+   "source": "North American Menopause Society",
+   "journal": "Menopause",
+   "organisation": "North American Menopause Society",
+   "year": 2023,
+   "publicationTypes": [
+    "Review",
+    "Consensus Statement"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/37252752/",
+   "summary": "This 2023 position statement from the North American Menopause Society updates its 2015 review of non-hormone treatments for hot flushes and night sweats. Recommended options include cognitive behavioural therapy, clinical hypnosis, SSRI/SNRI antidepressants, gabapentin and fezolinetant, with oxybutynin, weight loss and stellate ganglion block also supported by more limited evidence. Paced breathing, supplements and herbal remedies, soy, cooling techniques, avoiding triggers, exercise, yoga and acupuncture are not recommended for hot flushes. Hormone therapy remains the most effective treatment, but these options matter for women who cannot or prefer not to use it.",
+   "keyPoints": [
+    "Recommended with good evidence: cognitive behavioural therapy, clinical hypnosis, SSRIs/SNRIs, gabapentin and fezolinetant.",
+    "Also recommended on more limited evidence: oxybutynin, weight loss and stellate ganglion block.",
+    "Not recommended for hot flushes: paced breathing, supplements and herbal remedies, soy products, cannabinoids, acupuncture, exercise, yoga, cooling techniques and avoiding triggers.",
+    "Hormone therapy remains the most effective treatment and should be considered within 10 years of the final period."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menopause",
+    "post-menopause"
+   ],
+   "topics": [
+    "menopause-non-hormonal",
+    "hot-flushes"
+   ],
+   "tags": [
+    "hot flushes",
+    "non-hormonal treatment",
+    "fezolinetant",
+    "cbt"
+   ],
+   "keywords": [
+    "hot flashes without hormones",
+    "non-hormonal treatment hot flushes",
+    "fezolinetant",
+    "gabapentin hot flashes",
+    "antidepressant hot flashes",
+    "cbt menopause",
+    "herbal remedies menopause",
+    "black cohosh",
+    "soy menopause",
+    "night sweats"
    ]
   },
   {
@@ -99877,6 +100418,54 @@
    ]
   },
   {
+   "id": "pmid-30575677",
+   "pmid": "30575677",
+   "doi": "10.1097/AOG.0000000000003025",
+   "title": "Obstetric Care Consensus No. 8: Interpregnancy Care",
+   "source": "American College of Obstetricians and Gynecologists",
+   "journal": "Obstetrics and Gynecology",
+   "organisation": "American College of Obstetricians and Gynecologists",
+   "year": 2019,
+   "publicationTypes": [
+    "Consensus Statement",
+    "Practice Guideline"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/30575677/",
+   "summary": "This consensus from ACOG and the Society for Maternal-Fetal Medicine describes care between pregnancies. All women who have been pregnant, whatever the outcome, should get interpregnancy care continuing on from postpartum care. It starts with planning whether and when to have more children, depression screening, vaccines, managing diabetes or high blood pressure and planning long-term care. For women with long-term conditions it is a chance to improve health before another pregnancy.",
+   "keyPoints": [
+    "Everyone who has been pregnant, including after miscarriage or abortion, should receive interpregnancy care.",
+    "Early components include reproductive life planning, depression screening, vaccination and managing diabetes or hypertension.",
+    "Women with chronic conditions can use this time to optimise health before a next pregnancy.",
+    "For women not planning more pregnancies it supports long-term health."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "postpartum",
+    "contraception"
+   ],
+   "topics": [
+    "postpartum-contraception",
+    "preconception-care"
+   ],
+   "tags": [
+    "interpregnancy care",
+    "birth spacing",
+    "postpartum care",
+    "reproductive planning"
+   ],
+   "keywords": [
+    "how soon to get pregnant again",
+    "time between pregnancies",
+    "birth spacing",
+    "pregnancy after birth",
+    "interpregnancy interval",
+    "next pregnancy planning",
+    "postpartum checkup"
+   ]
+  },
+  {
    "id": "pmid-41746799",
    "pmid": "41746799",
    "doi": "10.1177/17455057261421734",
@@ -114785,7 +115374,7 @@
     "Review",
     "Network Meta-Analysis"
    ],
-   "evidenceLevel": "study",
+   "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/38564922/",
    "summary": "This review pooled 79 trials with about 36,700 smokers (without psychiatric conditions) to compare sleep-related side effects of different quit-smoking medicines. People taking bupropion, alone or combined with other treatments, were more likely to report insomnia than those using nicotine replacement alone. Other sleep effects, such as odd dreams, nightmares and sleepiness, varied by medicine. The authors advise healthcare providers to be careful when prescribing these drugs because of possible sleep side effects.",
    "keyPoints": [
@@ -123411,6 +124000,53 @@
    ]
   },
   {
+   "id": "pmid-28832488",
+   "pmid": "28832488",
+   "doi": "10.1097/AOG.0000000000002300",
+   "title": "Committee Opinion No. 717: Sulfonamides, Nitrofurantoin, and Risk of Birth Defects",
+   "source": "Obstetrics and Gynecology",
+   "journal": "Obstetrics and Gynecology",
+   "organisation": null,
+   "year": 2017,
+   "publicationTypes": [
+    "Practice Guideline"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/28832488/",
+   "summary": "This ACOG committee opinion looks at whether two groups of antibiotics, sulfonamides and nitrofurantoin, are linked to birth defects. The evidence is mixed. In the second and third trimesters both can still be used as first-choice treatments for urinary tract infections. In the first trimester they are still considered appropriate when no other suitable antibiotic is available, because untreated infections can cause serious problems for mother and baby.",
+   "keyPoints": [
+    "Evidence linking sulfonamides and nitrofurantoin to birth defects is mixed.",
+    "In the second and third trimesters both may continue to be used as first-line treatment for urinary tract infections.",
+    "In the first trimester they are considered appropriate when no suitable alternative antibiotic is available.",
+    "Pregnant women should not be denied treatment for infections, because untreated infections can lead to serious complications."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy",
+    "general"
+   ],
+   "topics": [
+    "uti",
+    "medications-pregnancy"
+   ],
+   "tags": [
+    "urinary tract infection",
+    "antibiotics",
+    "nitrofurantoin",
+    "birth defects"
+   ],
+   "keywords": [
+    "uti in pregnancy",
+    "bladder infection pregnant",
+    "antibiotics pregnancy",
+    "nitrofurantoin pregnancy",
+    "trimethoprim sulfamethoxazole pregnancy",
+    "cystitis pregnancy",
+    "is nitrofurantoin safe in pregnancy",
+    "first trimester antibiotics"
+   ]
+  },
+  {
    "id": "pmid-42712161",
    "pmid": "42712161",
    "doi": "10.1002/iid3.70510",
@@ -127086,7 +127722,7 @@
     "Review",
     "Network Meta-Analysis"
    ],
-   "evidenceLevel": "study",
+   "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/36283479/",
    "summary": "This review pooled 130 randomized trials (about 113,000 pregnant women) to compare ways of preventing preeclampsia, a pregnancy condition involving high blood pressure. Low-molecular-weight heparin, vitamin D supplements, exercise, calcium supplements and aspirin were each linked to a lower risk of preeclampsia or pregnancy-related high blood pressure. The evidence was rated moderate to very low certainty, and the benefits of heparin, vitamin D and exercise varied between groups of women, doses and regions.",
    "keyPoints": [

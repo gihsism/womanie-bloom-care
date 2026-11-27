@@ -544,6 +544,14 @@ export const SUPERSEDED: Record<string, string> = {
   'pmid-29232273': 'pmid-29470343', // ACOG tubal ectopic PB 191 -> PB 193 (2018)
   'pmid-26813211': 'pmid-37338872', // USPSTF depression screening 2016 -> 2023
   'pmid-34014910': 'pmid-39106301', // US SPR 2021 update -> US SPR 2024
+  'pmid-26241291': 'pmid-28937569', // ACOG marijuana CO 637 (2015) -> CO 722 (2017)
+  'pmid-26942391': 'pmid-28937570', // ACOG imaging in pregnancy CO 656 (2016) -> CO 723 (2017)
+  'pmid-30358733': 'pmid-35797481', // NAMS hormone therapy position statement 2017 -> 2022
+  'pmid-26382310': 'pmid-37252752', // NAMS non-hormonal hot flushes 2015 -> 2023
+  'pmid-25611642': 'pmid-30575639', // ACOG severe hypertension in pregnancy CO 623 (2015) -> CO 767 (2019)
+  'pmid-30629567': 'pmid-37486660', // ACOG perinatal depression screening CO 757 (2018) -> CPG 4 (2023)
+  'pmid-28934178': 'pmid-39106314', // US MEC 2016 updates -> US MEC 2024
+  'pmid-32271729': 'pmid-39106314',
 };
 /**
  * Factor for a superseded guideline, and for an ACOG "Summary:" record
