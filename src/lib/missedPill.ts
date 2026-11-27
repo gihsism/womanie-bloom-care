@@ -13,6 +13,26 @@
 //     drospirenone 4 mg (24+4) at more than 24 h late. Take one pill now,
 //     condoms for 48 h (drospirenone: 7 days); EC if there was sex without
 //     a condom since the missed pill.
+//   - FSRH (now CoSRH) CEU Guidance: Recommended Actions after Incorrect
+//     Use of Combined Hormonal Contraception (2020, amended 2021) - the
+//     week-by-week rules above; EC "should be considered if UPSI occurred
+//     in the pill-free interval or in the first week"; one missed pill:
+//     EC "not usually required but may need to be considered if pills have
+//     been missed earlier in the packet or in the last week of the previous
+//     packet". Vomiting within 3 hours of any pill (combined or
+//     progestogen-only) = take another pill (FSRH CHC 2019 + POP 2022;
+//     NHS "Combined pill: sickness or diarrhoea"; Qlaira / Zoely leaflets
+//     allow 4 h - the leaflet wins).
+//   - Drospirenone (FSRH POP 2022): EC if sex without a condom while
+//     pills were missed and before 7 pills in a row were taken again;
+//     missed in days 1-7 -> EC if sex without a condom in the 4
+//     hormone-free days before the pack.
+//   - Research library: CDC U.S. Selected Practice Recommendations for
+//     Contraceptive Use 2024 (pmid 39106301; same 24 h / 48 h split, 7
+//     days of condoms, skip the hormone-free days after week-3 misses, EC
+//     after week-1 misses). WHO Selected Practice Recommendations (3rd ed.
+//     2016) use the same thresholds. Checked against all of the above on
+//     2026-11-27.
 //   - Swiss practice (SGGG guidance, Swiss package leaflets on
 //     compendium.ch, Swiss pharmacies' EC counselling) uses the same hour
 //     limits. In Switzerland the emergency pill is sold in pharmacies
@@ -71,10 +91,18 @@ export function classifyLate(pillType: PillType, hoursLate: number, packDay?: nu
   return 'missed';
 }
 
-/** Vomiting within this many hours of a pill counts like a missed pill (FSRH: CHC 2 h, POP 3 h). */
-export function vomitWindowHours(pillType: PillType): number {
-  return pillType === 'combined' ? 2 : 3;
+/**
+ * Vomiting within this many hours of a pill counts like a missed pill:
+ * 3 h for combined and progestogen-only pills alike (FSRH CHC 2019 and
+ * POP 2022, NHS). Kept per type so a brand rule can differ later.
+ */
+export function vomitWindowHours(_pillType: PillType): number {
+  return 3;
 }
+
+/** The sources line under the guidance (plain names, no links needed on paper). */
+export const SOURCES_LINE =
+  'Based on: FSRH (UK) missed-pill guidance for combined and progestogen-only pills, and the CDC U.S. Selected Practice Recommendations for Contraceptive Use (2024).';
 
 /** Hours since the pill was due: due day (yyyy-MM-dd) at her usual time (HH:mm). */
 export function hoursLateSince(dueDay: string, usualTime: string, now = new Date()): number {
@@ -195,7 +223,9 @@ export function missedPillGuidance(pillType: PillType, hoursLate: number, packDa
       CARRY_ON,
     ];
     let consider = false;
-    let ecLine = 'If all the pills in the 7 days before were taken correctly, emergency contraception is not usually needed.';
+    let ecLine = packDay == null
+      ? 'If the missed pills were in the first week of the pack and you had sex without a condom in the break week or since, emergency contraception may be needed: talk to a pharmacist today. Later in the pack, if all the pills in the 7 days before were taken correctly, it is not usually needed.'
+      : 'If all the pills in the 7 days before were taken correctly, emergency contraception is not usually needed.';
     if (packDay != null && packDay >= 1 && packDay <= 7) {
       consider = true;
       ecLine = 'The missed pills were in the first week of the pack. If you had sex without a condom in the break week or since, emergency contraception may be needed: talk to a pharmacist today.';
@@ -215,10 +245,10 @@ export function missedPillGuidance(pillType: PillType, hoursLate: number, packDa
   if (pillType === 'pop-drospirenone') {
     const steps = [TAKE_NOW, CARRY_ON];
     let consider = false;
-    let ecLine = 'If you had sex without a condom since the pill was due, ask a pharmacist about emergency contraception today.';
+    let ecLine = 'If you had sex without a condom since the pill was due, or before you have taken 7 pills in a row again, ask a pharmacist about emergency contraception today.';
     if (packDay != null && packDay >= 1 && packDay <= 7) {
       consider = true;
-      ecLine = 'The missed pill was in the first week of the pack. If you had sex without a condom in the 7 days before, emergency contraception may be needed: talk to a pharmacist today.';
+      ecLine = 'The missed pill was in the first week of the pack. If you had sex without a condom in the 4 hormone-free days before this pack or since the pill was due, emergency contraception may be needed: talk to a pharmacist today.';
     } else if (packDay != null && packDay >= 15 && packDay <= 24) {
       steps.push('Skip the 4 pills without hormones and start the next pack straight after the last hormone pill.');
     }
