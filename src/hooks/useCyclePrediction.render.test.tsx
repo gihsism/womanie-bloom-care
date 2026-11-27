@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { differenceInDays } from "date-fns";
+import { differenceInDays, format, subDays } from "date-fns";
 import { useCyclePrediction, type PeriodRecord } from "./useCyclePrediction";
 import type { UserHealthContext } from "./useUserHealthContext";
 
@@ -225,5 +225,16 @@ describe("useCyclePrediction — personal ovulation", () => {
     });
     expect(p.cyclesCounted).toBe(0);
     expect(p.dataQualityMessage).toContain("Based on 2 logged periods");
+  });
+
+  it("days late counts from the expected start, not from the end of the last period", () => {
+    const iso = (n: number) => format(subDays(new Date(), n), "yyyy-MM-dd");
+    // Three 28-day cycles; the last period started 51 days ago and lasted 5 days.
+    const p = predict({
+      periodRecords: [rec(iso(51), iso(47)), rec(iso(79), iso(75)), rec(iso(107), iso(103)), rec(iso(135), iso(131))],
+      daySignals: {},
+    });
+    expect(p.currentCycleAnomaly).toBe(true);
+    expect(p.anomalyMessage).toContain("Your period is 23 days late");
   });
 });

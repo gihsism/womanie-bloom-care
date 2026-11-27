@@ -329,7 +329,11 @@ export function useCyclePrediction({
         const expected = avgCycleLength + (2 * standardDeviation);
         if (daysSince > expected && daysSince > 45) {
           currentCycleAnomaly = true;
-          anomalyMessage = `Your period is ${Math.round(daysSince - avgCycleLength)} days late. If concerned, consider consulting a healthcare provider.`;
+          // Late = days past the expected start (last start + average cycle),
+          // not days since the period ended minus a cycle (that undercounts
+          // by the length of her period).
+          const lateBy = differenceInDays(now, addDays(parseISO(sortedRecords[0].period_start_date), avgCycleLength));
+          anomalyMessage = `Your period is ${lateBy} days late. If concerned, consider consulting a healthcare provider.`;
         }
       }
     }
