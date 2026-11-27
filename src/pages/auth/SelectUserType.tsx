@@ -34,7 +34,7 @@ const SelectUserType = () => {
 
           {/* Heading */}
           <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold mb-3">Welcome to Womanie</h2>
+            <h1 className="text-3xl lg:text-4xl font-bold mb-3">Welcome to Womanie</h1>
             <p className="text-lg text-muted-foreground">How will you use the app?</p>
           </div>
 

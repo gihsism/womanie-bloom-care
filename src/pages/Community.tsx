@@ -1,3 +1,4 @@
+import { usePageTitle } from '@/hooks/usePageTitle';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
@@ -92,6 +93,7 @@ const socialLinks = [
 ];
 
 const Community = () => {
+  usePageTitle('Community');
   return (
     <div className="min-h-screen bg-background">
       <Navigation />

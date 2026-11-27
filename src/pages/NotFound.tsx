@@ -1,3 +1,4 @@
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -12,6 +13,7 @@ const suggestions = [
 ];
 
 const NotFound = () => {
+  usePageTitle('Page not found');
   const navigate = useNavigate();
   const { user } = useAuth();
 
