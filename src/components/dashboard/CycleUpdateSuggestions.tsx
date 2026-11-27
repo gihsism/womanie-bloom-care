@@ -24,7 +24,6 @@ export interface CycleSuggestion {
   id: string;
   type: 'ovulation_confirmed' | 'phase_update' | 'cycle_length_adjust' | 'pregnancy_detected' | 'menopause_indicator' | 'irregularity_flag';
   title: string;
-  emoji: string;
   description: string;
   actionLabel: string;
   detail: string;
@@ -60,7 +59,6 @@ function generateSuggestions(labs: LabResult[], lifeStage?: string | null): Cycl
       id: 'ovulation_progesterone',
       type: 'ovulation_confirmed',
       title: 'Ovulation confirmed by progesterone',
-      emoji: '🥚',
       description: `Your progesterone level (${progesterone.value} ${labs.find(l => l.title.toLowerCase().includes('progesterone'))?.unit || 'ng/mL'}) confirms that ovulation occurred${testDate ? ` around the time of your test` : ''}.`,
       actionLabel: 'Mark ovulation in calendar',
       detail: testDate
@@ -77,7 +75,6 @@ function generateSuggestions(labs: LabResult[], lifeStage?: string | null): Cycl
       id: 'lh_surge',
       type: 'ovulation_confirmed',
       title: 'LH surge detected — ovulation approaching',
-      emoji: '⚡',
       description: `Your LH level (${lh.value}) is elevated, indicating an LH surge. Ovulation typically occurs within 24-48 hours of an LH surge.`,
       actionLabel: 'Mark fertile window',
       detail: 'This is your most fertile time. If you\'re trying to conceive, the next 24-48 hours are optimal. Would you like to mark this as your fertile window?',
@@ -92,7 +89,6 @@ function generateSuggestions(labs: LabResult[], lifeStage?: string | null): Cycl
       id: 'pregnancy_hcg',
       type: 'pregnancy_detected',
       title: hcg.value > 1000 ? 'Pregnancy confirmed' : 'Pregnancy likely',
-      emoji: '🤰',
       description: `Your HCG level (${hcg.value} ${labs.find(l => l.title.toLowerCase().includes('hcg'))?.unit || 'mIU/mL'}) ${hcg.value > 1000 ? 'confirms pregnancy' : 'indicates pregnancy'}.`,
       actionLabel: 'Switch to pregnancy mode',
       detail: 'Would you like to switch your app to pregnancy tracking mode? This will update your dashboard with pregnancy milestones, baby development info, and prenatal care reminders.',
@@ -104,7 +100,6 @@ function generateSuggestions(labs: LabResult[], lifeStage?: string | null): Cycl
       id: 'pregnancy_hcg_early',
       type: 'irregularity_flag',
       title: 'Possible early pregnancy',
-      emoji: '🤰',
       description: `Your HCG level (${hcg.value} ${labs.find(l => l.title.toLowerCase().includes('hcg'))?.unit || 'mIU/mL'}) is mildly elevated.`,
       actionLabel: 'Monitor & retest',
       detail: 'A mildly elevated HCG may indicate very early pregnancy. A repeat test in 48-72 hours can confirm if levels are doubling.',
@@ -120,7 +115,6 @@ function generateSuggestions(labs: LabResult[], lifeStage?: string | null): Cycl
       id: 'menopause_fsh',
       type: 'menopause_indicator',
       title: 'Hormone levels suggest perimenopause',
-      emoji: '🌙',
       description: `Your FSH (${fsh.value}) is elevated${hasLowEstradiol ? ' and estradiol is low' : ''}, which can indicate perimenopause or menopause transition.`,
       actionLabel: 'Consider switching to menopause mode',
       detail: 'If you\'ve been experiencing irregular periods, hot flashes, or sleep changes, your hormone levels support a perimenopausal transition. Switching to menopause mode will give you symptom tracking and relevant health tips.',
@@ -135,7 +129,6 @@ function generateSuggestions(labs: LabResult[], lifeStage?: string | null): Cycl
       id: 'thyroid_cycle',
       type: 'cycle_length_adjust',
       title: 'Thyroid may be affecting your cycle length',
-      emoji: '🦋',
       description: tsh.value > 4.5
         ? 'Hypothyroidism can make cycles longer and heavier. Your predictions may be less accurate until thyroid is treated.'
         : 'Hyperthyroidism can make cycles shorter and lighter. Your predictions may be less accurate until thyroid is treated.',
@@ -154,7 +147,6 @@ function generateSuggestions(labs: LabResult[], lifeStage?: string | null): Cycl
       id: 'amh_fertility',
       type: 'irregularity_flag',
       title: 'Low ovarian reserve — consider fertility timeline',
-      emoji: '⏳',
       description: `Your AMH (${amh.value} ${labs.find(l => l.title.toLowerCase().includes('amh'))?.unit || 'ng/mL'}) indicates a lower egg reserve than average.`,
       actionLabel: 'Add fertility tracking',
       detail: 'If you\'re planning to conceive, time may be an important factor. Consider discussing egg freezing or accelerated timelines with a fertility specialist. Enhanced fertility tracking can help optimize your chances.',
@@ -218,7 +210,6 @@ export default function CycleUpdateSuggestions({ labResults, lifeStage, onUpdate
             }`}>
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
-                  <span className="text-2xl flex-shrink-0">{suggestion.emoji}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <h4 className="text-sm font-medium">{suggestion.title}</h4>

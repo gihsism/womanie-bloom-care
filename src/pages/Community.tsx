@@ -112,7 +112,7 @@ const Community = () => {
           <div className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 rounded-full px-5 py-2.5">
             <Sparkles className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium text-primary">
-              We're building something special — launching very soon! 💜
+              We're building something special — launching very soon!
             </span>
           </div>
         </div>
@@ -167,7 +167,7 @@ const Community = () => {
               <h3 className="text-xl font-semibold mb-2">Forum Opening Soon</h3>
               <p className="text-muted-foreground max-w-md mx-auto mb-4">
                 We're setting up a safe, doctor-moderated space where you can ask anything — 
-                from "Is this normal?" to "What worked for you?" No judgment, just support. 🌸
+                from "Is this normal?" to "What worked for you?" No judgment, just support.
               </p>
               <div className="inline-flex items-center gap-2 text-sm text-primary font-medium">
                 <Sparkles className="h-4 w-4" />
@@ -253,7 +253,7 @@ const Community = () => {
           </h2>
           <p className="text-muted-foreground mb-6">
             Sign up for Womanie and be the first to know when our community features go live. 
-            Together, we're stronger. 💪
+            Together, we're stronger.
           </p>
           <Button size="lg" onClick={() => window.location.href = '/auth/select-type'}>
             Join Womanie

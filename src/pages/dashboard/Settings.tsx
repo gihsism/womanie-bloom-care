@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Shield, Bell, User, Download, Loader2, Trash2, Wand2, KeyRound, Eye, EyeOff, Pill, Inbox, Phone, Smartphone, Users, HelpCircle, Info, LogOut, UserCog, FileText, Activity } from '@/components/icons';
+import { ArrowLeft, Shield, User, Download, Loader2, Trash2, Wand2, Eye, EyeOff, LogOut } from '@/components/icons';
 import { Input } from '@/components/ui/input';
 import { scorePassword } from '@/lib/password-strength';
 import { Button } from '@/components/ui/button';
@@ -24,25 +24,20 @@ import MedicineLog from '@/components/dashboard/MedicineLog';
 import PhoneNotifications from '@/components/dashboard/PhoneNotifications';
 import { useAttentionCount } from '@/hooks/useAttentionCount';
 import { MeRow, MeGroup } from './me/MeRow';
+import { plateForStage } from '@/components/art';
 import { ME_SECTIONS, meSectionFromHash } from './me/sections';
 
 // Labels come from the one label map (src/lib/lifeStageLabels.ts); the
 // stored values (profiles.life_stage) are unchanged.
-const stageIcons: Record<LifeStage, typeof Calendar> = {
-  'pre-menstrual': Flower2,
-  'menstrual-cycle': Calendar,
-  contraception: Shield,
-  conception: Heart,
-  ivf: Heart,
-  pregnancy: Baby,
-  postpartum: Baby,
-  menopause: Sunset,
-  'post-menopause': Sunset,
-};
+// Order of the choices; each is drawn with its life-stage plate.
+const STAGE_ORDER: LifeStage[] = [
+  'pre-menstrual', 'menstrual-cycle', 'contraception', 'conception', 'ivf',
+  'pregnancy', 'postpartum', 'menopause', 'post-menopause',
+];
 
-const lifeStageOptions = (Object.keys(stageIcons) as LifeStage[]).map((value) => ({
+const lifeStageOptions = STAGE_ORDER.map((value) => ({
   value,
-  icon: stageIcons[value],
+  plate: plateForStage(value),
   title: LIFE_STAGE_LABELS[value],
   description: LIFE_STAGE_DESCRIPTIONS[value],
 }));
@@ -441,27 +436,27 @@ const Settings = () => {
 
       {!section && (
         <div className="w-full max-w-3xl mx-auto px-4 py-6 space-y-6" data-testid="me-list">
-          <MeGroup>
-            <MeRow icon={User} label={savedName || user?.name || 'Your profile'} value={savedName || user?.name ? 'Profile' : user?.email} onClick={() => openSection('profile')} testId="me-row-profile" />
-            <MeRow icon={Calendar} label="Life stage" value={LIFE_STAGE_LABELS[selectedStage]} onClick={() => openSection('life-stage')} testId="me-row-life-stage" />
+          <MeGroup label="You">
+            <MeRow label={savedName || user?.name || 'Your profile'} value={savedName || user?.name ? 'Profile' : user?.email} onClick={() => openSection('profile')} testId="me-row-profile" />
+            <MeRow label="Life stage" value={LIFE_STAGE_LABELS[selectedStage]} art={plateForStage(selectedStage)} onClick={() => openSection('life-stage')} testId="me-row-life-stage" />
           </MeGroup>
-          <MeGroup>
-            <MeRow icon={Activity} label="Health overview" value="Your numbers over time" onClick={() => navigate('/dashboard/health-overview')} testId="me-row-health-overview" />
-            <MeRow icon={Pill} label="Medicines & supplements" onClick={() => openSection('medicines')} testId="me-row-medicines" />
-            <MeRow icon={Bell} label="Reminders" onClick={() => openSection('reminders')} testId="me-row-reminders" />
-            <MeRow icon={FileText} label="Prepare a visit summary" value="For any doctor" onClick={() => navigate('/dashboard/visit-summary/print')} testId="me-row-visit-summary" />
-            <MeRow icon={Inbox} label="Needs your attention" badge={attention.total} onClick={() => navigate('/dashboard/notifications')} testId="me-row-attention" />
-            <MeRow icon={Phone} label="Emergency contacts" onClick={() => navigate('/dashboard/emergency')} testId="me-row-emergency" />
-            <MeRow icon={Smartphone} label="Connected devices" onClick={() => navigate('/dashboard/devices')} testId="me-row-devices" />
-            <MeRow icon={Users} label="Community" onClick={() => navigate('/community')} testId="me-row-community" />
+          <MeGroup label="Your health">
+            <MeRow label="Health overview" value="Your numbers over time" onClick={() => navigate('/dashboard/health-overview')} testId="me-row-health-overview" />
+            <MeRow label="Medicines & supplements" onClick={() => openSection('medicines')} testId="me-row-medicines" />
+            <MeRow label="Reminders" onClick={() => openSection('reminders')} testId="me-row-reminders" />
+            <MeRow label="Prepare a visit summary" value="For any doctor" onClick={() => navigate('/dashboard/visit-summary/print')} testId="me-row-visit-summary" />
+            <MeRow label="Needs your attention" badge={attention.total} onClick={() => navigate('/dashboard/notifications')} testId="me-row-attention" />
+            <MeRow label="Emergency contacts" onClick={() => navigate('/dashboard/emergency')} testId="me-row-emergency" />
+            <MeRow label="Connected devices" onClick={() => navigate('/dashboard/devices')} testId="me-row-devices" />
+            <MeRow label="Community" onClick={() => navigate('/community')} testId="me-row-community" />
           </MeGroup>
-          <MeGroup>
-            <MeRow icon={Shield} label="Privacy & your data" onClick={() => openSection('privacy')} testId="me-row-privacy" />
-            <MeRow icon={KeyRound} label="Password & sign-in" onClick={() => openSection('password')} testId="me-row-password" />
-            <MeRow icon={HelpCircle} label="Help" onClick={() => navigate('/dashboard/help')} testId="me-row-help" />
-            <MeRow icon={Info} label="About & terms" onClick={() => navigate('/about')} testId="me-row-about" />
+          <MeGroup label="Account">
+            <MeRow label="Privacy & your data" onClick={() => openSection('privacy')} testId="me-row-privacy" />
+            <MeRow label="Password & sign-in" onClick={() => openSection('password')} testId="me-row-password" />
+            <MeRow label="Help" onClick={() => navigate('/dashboard/help')} testId="me-row-help" />
+            <MeRow label="About & terms" onClick={() => navigate('/about')} testId="me-row-about" />
             {user?.isAdmin && (
-              <MeRow icon={UserCog} label="Doctor approvals (admin)" onClick={() => navigate('/admin/doctors')} testId="me-row-admin" />
+              <MeRow label="Doctor approvals (admin)" onClick={() => navigate('/admin/doctors')} testId="me-row-admin" />
             )}
           </MeGroup>
           <Button
@@ -494,7 +489,7 @@ const Settings = () => {
               disabled={saving}
             >
               {lifeStageOptions.map((stage) => {
-                const Icon = stage.icon;
+                const Plate = stage.plate;
                 return (
                   <div
                     key={stage.value}
@@ -504,22 +499,14 @@ const Settings = () => {
                     onClick={() => handleLifeStageChange(stage.value)}
                   >
                     <RadioGroupItem value={stage.value} id={stage.value} />
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        selectedStage === stage.value ? 'bg-primary/20' : 'bg-muted'
-                      }`}
-                    >
-                      <Icon
-                        className={`h-5 w-5 ${
-                          selectedStage === stage.value ? 'text-primary' : 'text-muted-foreground'
-                        }`}
-                      />
-                    </div>
                     <div className="flex-1">
                       <Label htmlFor={stage.value} className="font-medium cursor-pointer">
                         {stage.title}
                       </Label>
                       <p className="text-sm text-muted-foreground">{stage.description}</p>
+                    </div>
+                    <div className="w-24 flex-shrink-0" aria-hidden="true">
+                      <Plate title={null} />
                     </div>
                   </div>
                 );

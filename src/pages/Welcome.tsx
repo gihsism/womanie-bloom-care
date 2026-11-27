@@ -106,7 +106,7 @@ const Welcome = () => {
               <Heart className="h-8 w-8 text-primary" />
             </div>
             <h2 className="text-3xl font-bold text-foreground">
-              Welcome, {userName}! 🎉
+              Welcome, {userName}!
             </h2>
             <p className="text-muted-foreground text-base">
               Your personal health companion is ready. Here's what you can do:

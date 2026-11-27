@@ -12,6 +12,7 @@ import { format, isToday, parseISO } from 'date-fns';
 import { dueReminders } from '@/lib/medicine';
 import { emitHealthDataChange } from '@/lib/data-events';
 import EvidenceNote from '@/components/research/EvidenceNote';
+import { ArtEmptyState } from '@/components/ArtEmptyState';
 import { medicineMarker, specsForMarkers } from '@/lib/evidenceTopics';
 
 // Medicine & supplement log for every life stage (table medications;
@@ -275,9 +276,7 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
       )}
 
       {loaded && meds.length === 0 && !adding && (
-        <p className="text-xs text-muted-foreground">
-          Add the medicines, vitamins or supplements you take. Tap “Taken” each time, and see what’s due today.
-        </p>
+        <ArtEmptyState kind="medicines" compact testId="medicines-empty" />
       )}
 
       <ul className="space-y-2">

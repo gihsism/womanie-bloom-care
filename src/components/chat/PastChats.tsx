@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import { ChevronRight, Loader2, Trash2 } from '@/components/icons';
 import { chatDeleteTarget, type PastChat } from '@/lib/chatSessions';
+import { ArtEmptyState } from '@/components/ArtEmptyState';
 
 // The "Past chats" list on Ask AI. Every stored message is still on the
 // server; this only lists them grouped into chats. Tapping one reopens it.
@@ -35,7 +36,7 @@ export function PastChats<C extends PastChat>({
   return (
     <div className="flex-1 overflow-y-auto px-4 py-4" data-testid="past-chats" data-hide-install-banner>
       {chats.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-10">No past chats yet.</p>
+        <ArtEmptyState kind="chats" testId="past-chats-empty" />
       ) : (
         <div className="max-w-2xl mx-auto rounded-lg border border-border bg-card divide-y divide-border overflow-hidden">
           {chats.map((c) => (

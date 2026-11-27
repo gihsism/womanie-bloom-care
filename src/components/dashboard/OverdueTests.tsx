@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Clock, ArrowRight } from '@/components/icons';
+import { AskAiMark } from '@/components/art';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
@@ -166,6 +167,7 @@ export default function OverdueTests() {
         className="mt-2 h-7 w-full text-xs gap-1.5"
         onClick={() => navigate('/dashboard/ai-doctor?q=' + encodeURIComponent('Which of my tests am I overdue to recheck, and why?'))}
       >
+        <AskAiMark title={null} size={16} />
         Ask AI which to prioritize
       </Button>
     </Card>

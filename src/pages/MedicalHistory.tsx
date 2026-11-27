@@ -17,6 +17,7 @@ import ResultSparkline from '@/components/dashboard/ResultSparkline';
 import NewDocInsights from '@/components/dashboard/NewDocInsights';
 import ShareWithDoctor from '@/components/dashboard/ShareWithDoctor';
 import StageLabCards from '@/components/records/StageLabCards';
+import { ArtEmptyState } from '@/components/ArtEmptyState';
 import type { LifeStage } from '@/components/dashboard/DashboardHeader';
 import { normalizeLifeStage } from '@/lib/lifeStage';
 import { pregnancyStart } from '@/lib/labWindow';
@@ -38,7 +39,6 @@ import HealthTrends from '@/components/dashboard/HealthTrends';
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import { useToast } from '@/hooks/use-toast';
 import {
-  FileText,
   Pill,
   FlaskConical,
   AlertTriangle,
@@ -410,7 +410,7 @@ function renderEnhancedSummary(summary: string) {
               <ul className="space-y-2">
                 {items.map((item, j) => (
                   <li key={j} className="text-sm leading-relaxed flex items-start gap-2">
-                    <span className="text-primary mt-0.5 flex-shrink-0">💡</span>
+                    <span aria-hidden="true" className="mt-2 h-1 w-1 rounded-full bg-primary flex-shrink-0" />
                     <span>{item.replace(/^[•-]\s*/, '')}</span>
                   </li>
                 ))}
@@ -450,7 +450,7 @@ function renderEnhancedSummary(summary: string) {
               <ul className="space-y-2">
                 {items.map((item, j) => (
                   <li key={j} className="text-sm leading-relaxed flex items-start gap-2">
-                    <span className="flex-shrink-0">{item.match(/^(?:🚨|⚠️|ℹ️)/u)?.[0] || '🔗'}</span>
+                    <span aria-hidden="true" className={`mt-2 h-1 w-1 rounded-full flex-shrink-0 ${/^(?:🚨|⚠️)/u.test(item) ? 'bg-destructive' : 'bg-primary'}`} />
                     <span>{item.replace(/^(?:🚨|⚠️|ℹ️)\s*/u, '')}</span>
                   </li>
                 ))}
@@ -543,13 +543,13 @@ function ResultCard({ item, history = [] }: { item: MedicalDataItem; history?: M
             ))}
           </div>
           <p className="text-[9px] text-muted-foreground mt-2 italic">
-            ⚕️ These are possibilities, not diagnoses. Only your doctor can make a diagnosis.
+            These are possibilities, not diagnoses. Only your doctor can make a diagnosis.
           </p>
         </div>
       )}
       {item.date_recorded && (
         <p className="text-[10px] text-muted-foreground mt-2">
-          📅 {format(new Date(item.date_recorded), 'MMMM d, yyyy')}
+          {format(new Date(item.date_recorded), 'MMMM d, yyyy')}
         </p>
       )}
     </div>
@@ -1217,22 +1217,14 @@ export default function MedicalHistory() {
         {/* What changed with the document just uploaded */}
         {justUploaded && hasDocuments && <NewDocInsights documents={documents} medicalData={medicalData} />}
 
-        {/* Empty state: one sentence, one button (Results + Documents) */}
+        {/* Empty state: the drawing, one sentence, one button (Results + Documents) */}
         {!hasDocuments && segment !== 'charts' && (
-          <Card className="border-dashed">
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                <FileText className="h-8 w-8 text-primary" />
-              </div>
-              <p className="text-sm text-muted-foreground text-center max-w-sm mb-4">
-                No documents yet. Upload a lab result, prescription or report and we'll explain it in plain language.
-              </p>
-              <Button className="gap-1.5" onClick={() => setUploadOpen(true)}>
-                <Upload className="h-4 w-4" />
-                Upload a document
-              </Button>
-            </CardContent>
-          </Card>
+          <ArtEmptyState kind="documents" testId="records-empty">
+            <Button className="gap-1.5" onClick={() => setUploadOpen(true)}>
+              <Upload className="h-4 w-4" />
+              Upload a document
+            </Button>
+          </ArtEmptyState>
         )}
 
         <Suspense fallback={null}>{segment === 'charts' && <MyCharts mode={mode} />}</Suspense>
@@ -1320,10 +1312,6 @@ export default function MedicalHistory() {
                 const docResults = medicalData.filter(m => m.document_id === doc.id);
                 const abnormals = docResults.filter(m => m.status === 'abnormal' || m.status === 'critical').length;
                 const isExpanded = expandedDocId === doc.id;
-                const categoryIcon = doc.ai_suggested_category === 'lab_results' ? '🧪'
-                  : doc.ai_suggested_category === 'imaging' ? '📷'
-                  : doc.ai_suggested_category === 'prescription' ? '💊'
-                  : doc.ai_suggested_category === 'consultation_notes' ? '📋' : '📄';
                 // A doc that's been sitting without an ai_summary for more
                 // than the polling window is almost certainly stalled —
                 // either Claude failed, the dispatched fetch was dropped,
@@ -1341,7 +1329,6 @@ export default function MedicalHistory() {
                       <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
                         abnormals > 0 ? 'bg-destructive/70' : docResults.length > 0 ? 'bg-foreground/35' : 'bg-muted-foreground/40'
                       }`} />
-                      <span className="text-base flex-shrink-0">{categoryIcon}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{doc.ai_suggested_name || doc.file_name}</p>
                         <p className="text-[11px] text-muted-foreground flex items-center gap-1.5">
@@ -1527,9 +1514,7 @@ export default function MedicalHistory() {
                                     : '';
                                   return (
                                     <li key={f.id} className="flex items-start gap-2 text-sm">
-                                      <span className="flex-shrink-0 mt-0.5">
-                                        {f.status === 'critical' ? '🚨' : '⚠️'}
-                                      </span>
+                                      <span aria-hidden="true" className={`mt-2 h-1.5 w-1.5 rounded-full flex-shrink-0 ${f.status === 'critical' ? 'bg-destructive' : 'bg-destructive/60'}`} />
                                       <div className="flex-1 min-w-0">
                                         <div className="flex items-baseline gap-2 flex-wrap">
                                           <span className="font-medium">{getFriendlyName(f.title)}</span>
@@ -1708,7 +1693,7 @@ export default function MedicalHistory() {
                   </div>
                 )}
 
-                {/* ⚠️ Things that need attention — front and center */}
+                {/* Things that need attention — front and center */}
                 {flaggedItems.length > 0 && (
                   <div id="attention" className="scroll-mt-20">
                     <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
@@ -1886,6 +1871,9 @@ export default function MedicalHistory() {
                                             </div>
                                           );
                                         })}
+                      {searchQuery && !stats.labsByPanel.some(([, labs]) => labs.some(l => l.title.toLowerCase().includes(searchQuery.toLowerCase()) || (l.notes || '').toLowerCase().includes(searchQuery.toLowerCase()))) && (
+                        <ArtEmptyState kind="search" compact testId="records-search-empty" />
+                      )}
                                       </div>
                                     </div>
                                   )}
@@ -1912,7 +1900,7 @@ export default function MedicalHistory() {
                           <div className="space-y-2">
                             {stats.activeConditions.map(item => (
                               <div key={item.id} className="bg-primary/5 rounded-xl px-3 py-2.5 border border-primary/10">
-                                <span className="text-sm font-medium">📌 {item.title}</span>
+                                <span className="text-sm font-medium">{item.title}</span>
                                 {item.notes && <p className="text-xs text-muted-foreground mt-1">{item.notes}</p>}
                               </div>
                             ))}
@@ -1930,7 +1918,7 @@ export default function MedicalHistory() {
                           <div className="space-y-2">
                             {stats.activeMedications.map(item => (
                               <div key={item.id} className="bg-primary/5 rounded-xl px-3 py-2.5 border border-primary/10">
-                                <span className="text-sm font-medium">💊 {item.title}</span>
+                                <span className="text-sm font-medium">{item.title}</span>
                                 {item.value && <span className="text-xs text-muted-foreground ml-2">{item.value}</span>}
                                 {item.notes && <p className="text-xs text-muted-foreground mt-1">{item.notes}</p>}
                               </div>
@@ -1987,19 +1975,19 @@ export default function MedicalHistory() {
                       <div className="space-y-2">
                         {stats.avgDaysBetweenDocs !== null && (
                           <p className="text-sm text-muted-foreground">
-                            📊 You typically get checked every <span className="font-medium text-foreground">{stats.avgDaysBetweenDocs} days</span>
+                            You typically get checked every <span className="font-medium text-foreground">{stats.avgDaysBetweenDocs} days</span>
                           </p>
                         )}
                         {stats.daysSinceLastDoc !== null && (
                           <p className="text-sm text-muted-foreground">
-                            📅 Your last document was <span className="font-medium text-foreground">{stats.daysSinceLastDoc} days ago</span>
+                            Your last document was <span className="font-medium text-foreground">{stats.daysSinceLastDoc} days ago</span>
                           </p>
                         )}
                         {stats.nextCheckupEstimate && (
                           <p className="text-sm">
                             {differenceInDays(stats.nextCheckupEstimate, new Date()) > 0
-                              ? <>🗓️ Your next checkup might be around <span className="font-medium text-primary">{format(stats.nextCheckupEstimate, 'MMMM d, yyyy')}</span></>
-                              : <>⏰ You might be <span className="font-medium text-destructive">{Math.abs(differenceInDays(stats.nextCheckupEstimate, new Date()))} days overdue</span> for a checkup</>
+                              ? <>Your next checkup might be around <span className="font-medium text-primary">{format(stats.nextCheckupEstimate, 'MMMM d, yyyy')}</span></>
+                              : <>You might be <span className="font-medium text-destructive">{Math.abs(differenceInDays(stats.nextCheckupEstimate, new Date()))} days overdue</span> for a checkup</>
                             }
                           </p>
                         )}

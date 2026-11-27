@@ -315,30 +315,30 @@ const MILESTONE_CATEGORY_TONE: Record<PregnancyMilestone['category'], { dot: str
 };
 
 // ─── Pregnancy symptoms by trimester ───
-const PREGNANCY_SYMPTOMS: Record<string, { label: string; icon: string }[]> = {
+const PREGNANCY_SYMPTOMS: Record<string, { label: string }[]> = {
   first: [
-    { label: 'Morning sickness', icon: '🤢' },
-    { label: 'Fatigue', icon: '😴' },
-    { label: 'Tender breasts', icon: '💢' },
-    { label: 'Frequent urination', icon: '🚻' },
-    { label: 'Food aversions', icon: '🙅' },
-    { label: 'Mood swings', icon: '🎭' },
+    { label: 'Morning sickness' },
+    { label: 'Fatigue' },
+    { label: 'Tender breasts' },
+    { label: 'Frequent urination' },
+    { label: 'Food aversions' },
+    { label: 'Mood swings' },
   ],
   second: [
-    { label: 'Back pain', icon: '🔙' },
-    { label: 'Round ligament pain', icon: '⚡' },
-    { label: 'Nasal congestion', icon: '🤧' },
-    { label: 'Leg cramps', icon: '🦵' },
-    { label: 'Heartburn', icon: '🔥' },
-    { label: 'Increased appetite', icon: '🍽️' },
+    { label: 'Back pain' },
+    { label: 'Round ligament pain' },
+    { label: 'Nasal congestion' },
+    { label: 'Leg cramps' },
+    { label: 'Heartburn' },
+    { label: 'Increased appetite' },
   ],
   third: [
-    { label: 'Braxton Hicks', icon: '💫' },
-    { label: 'Shortness of breath', icon: '😮‍💨' },
-    { label: 'Swelling', icon: '🫧' },
-    { label: 'Insomnia', icon: '😵' },
-    { label: 'Pelvic pressure', icon: '⬇️' },
-    { label: 'Nesting instinct', icon: '🏠' },
+    { label: 'Braxton Hicks' },
+    { label: 'Shortness of breath' },
+    { label: 'Swelling' },
+    { label: 'Insomnia' },
+    { label: 'Pelvic pressure' },
+    { label: 'Nesting instinct' },
   ],
 };
 
@@ -960,10 +960,10 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
           const persp = getNearestPerspectives(weeksPregnant);
           if (!persp) return null;
           const sections = [
-            { key: 'baby', label: 'For the baby', tone: 'bg-pink-50/60 dark:bg-pink-950/20 border-pink-200/60 dark:border-pink-800/40', emoji: '👶', text: persp.baby },
-            { key: 'mother', label: 'For you', tone: 'bg-primary/5 border-primary/20', emoji: '💗', text: persp.mother },
-            { key: 'partner', label: 'For your partner', tone: 'bg-secondary/10 border-secondary/30', emoji: '🤝', text: persp.partner },
-            { key: 'employer', label: 'At work', tone: 'bg-muted/60 border-border', emoji: '💼', text: persp.employer },
+            { key: 'baby', label: 'For the baby', tone: 'bg-pink-50/60 dark:bg-pink-950/20 border-pink-200/60 dark:border-pink-800/40', text: persp.baby },
+            { key: 'mother', label: 'For you', tone: 'bg-primary/5 border-primary/20', text: persp.mother },
+            { key: 'partner', label: 'For your partner', tone: 'bg-secondary/10 border-secondary/30', text: persp.partner },
+            { key: 'employer', label: 'At work', tone: 'bg-muted/60 border-border', text: persp.employer },
           ];
           return (
             <Card className="p-4 space-y-3">
@@ -978,7 +978,6 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
                 {sections.map(s => (
                   <div key={s.key} className={`p-3 rounded-lg border ${s.tone}`}>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm" aria-hidden="true">{s.emoji}</span>
                       <span className="text-xs font-semibold uppercase tracking-wide">{s.label}</span>
                     </div>
                     <p className="text-sm leading-relaxed">{s.text}</p>
@@ -1030,7 +1029,6 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
                 key={symptom.label}
                 className="flex flex-col items-center gap-1 p-3 rounded-xl bg-muted/50 text-center"
               >
-                <span className="text-2xl">{symptom.icon}</span>
                 <span className="text-xs font-medium">{symptom.label}</span>
               </div>
             ))}
@@ -1083,7 +1081,7 @@ function getMilestones(currentWeek: number) {
     { week: 32, title: 'Hospital Bag', description: 'Good time to pack your hospital bag' },
     { week: 36, title: 'Weekly Check-ups', description: 'Baby may drop into position' },
     { week: 37, title: 'Full Term', description: 'Baby is considered early term' },
-    { week: 40, title: 'Due Date', description: 'Baby is ready to meet you! 🎉' },
+    { week: 40, title: 'Due Date', description: 'Baby is ready to meet you.' },
   ];
 
   // Show past 1 + next 4 milestones

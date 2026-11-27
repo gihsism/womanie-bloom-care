@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { MOOD_FACES, type MoodValue } from '@/components/art';
 
 interface DaySignal {
   date: string;
@@ -25,23 +26,24 @@ interface DailyLogSheetProps {
 }
 
 const SYMPTOM_OPTIONS = [
-  { value: 'cramps', label: 'Cramps', icon: '🤕' },
-  { value: 'headache', label: 'Headache', icon: '🤯' },
-  { value: 'bloating', label: 'Bloating', icon: '😖' },
-  { value: 'tender_breasts', label: 'Tender Breasts', icon: '💢' },
-  { value: 'back_pain', label: 'Back Pain', icon: '🔙' },
-  { value: 'nausea', label: 'Nausea', icon: '🤢' },
-  { value: 'fatigue', label: 'Fatigue', icon: '😴' },
-  { value: 'acne', label: 'Acne', icon: '😣' },
+  { value: 'cramps', label: 'Cramps' },
+  { value: 'headache', label: 'Headache' },
+  { value: 'bloating', label: 'Bloating' },
+  { value: 'tender_breasts', label: 'Tender Breasts' },
+  { value: 'back_pain', label: 'Back Pain' },
+  { value: 'nausea', label: 'Nausea' },
+  { value: 'fatigue', label: 'Fatigue' },
+  { value: 'acne', label: 'Acne' },
 ];
 
+// Values must be keys of MOOD_FACES (checked in art.test.tsx).
 const MOOD_OPTIONS = [
-  { value: 'happy', label: 'Happy', icon: '😊' },
-  { value: 'sad', label: 'Sad', icon: '😢' },
-  { value: 'anxious', label: 'Anxious', icon: '😰' },
-  { value: 'irritable', label: 'Irritable', icon: '😤' },
-  { value: 'energetic', label: 'Energetic', icon: '⚡' },
-  { value: 'calm', label: 'Calm', icon: '😌' },
+  { value: 'happy', label: 'Happy' },
+  { value: 'sad', label: 'Sad' },
+  { value: 'anxious', label: 'Anxious' },
+  { value: 'irritable', label: 'Irritable' },
+  { value: 'energetic', label: 'Energetic' },
+  { value: 'calm', label: 'Calm' },
 ];
 
 const DISCHARGE_OPTIONS = [
@@ -131,15 +133,14 @@ const DailyLogSheet = ({
                       key={symptom.value}
                       onClick={() => toggleSymptom(symptom.value)}
                       className={cn(
-                        "flex flex-col items-center gap-1 p-3 rounded-xl transition-all",
+                        "flex min-h-[44px] items-center justify-center px-2 py-2 rounded-xl transition-all",
                         "border-2",
                         isSelected
                           ? "bg-destructive/10 border-destructive"
                           : "bg-muted/50 border-transparent hover:bg-muted"
                       )}
                     >
-                      <span className="text-2xl">{symptom.icon}</span>
-                      <span className="text-xs font-medium">{symptom.label}</span>
+                      <span className="text-xs font-medium text-center leading-tight">{symptom.label}</span>
                     </button>
                   );
                 })}
@@ -155,6 +156,7 @@ const DailyLogSheet = ({
               <div className="grid grid-cols-3 gap-2">
                 {MOOD_OPTIONS.map((mood) => {
                   const isSelected = signal.mood.includes(mood.value);
+                  const Face = MOOD_FACES[mood.value as MoodValue];
                   return (
                     <button
                       key={mood.value}
@@ -167,7 +169,7 @@ const DailyLogSheet = ({
                           : "bg-muted/50 border-transparent hover:bg-muted"
                       )}
                     >
-                      <span className="text-2xl">{mood.icon}</span>
+                      <Face title={null} size={32} />
                       <span className="text-xs font-medium">{mood.label}</span>
                     </button>
                   );
@@ -214,7 +216,6 @@ const DailyLogSheet = ({
                   onClick={() => addIntercourse(true)}
                   className="h-12 rounded-xl"
                 >
-                  <span className="text-lg mr-2">🛡️</span>
                   Protected
                 </Button>
                 <Button
@@ -222,7 +223,6 @@ const DailyLogSheet = ({
                   onClick={() => addIntercourse(false)}
                   className="h-12 rounded-xl"
                 >
-                  <span className="text-lg mr-2">⚠️</span>
                   Unprotected
                 </Button>
               </div>

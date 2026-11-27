@@ -134,7 +134,7 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase, with
 
   const handleMarkCompleteFromReminder = async (eventId: string) => {
     await handleToggleComplete(eventId, true);
-    toast({ title: '✅ Treatment completed!', description: 'Great job staying on track.' });
+    toast({ title: 'Treatment completed', description: 'Great job staying on track.' });
   };
 
   const currentPhaseData = useMemo(() => {
@@ -178,7 +178,6 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase, with
                         : "border-transparent bg-muted/50 hover:bg-muted"
                     )}
                   >
-                    <span className="mr-1.5">{phase.icon}</span>
                     {phase.label}
                   </button>
                 ))}
@@ -214,7 +213,6 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase, with
       {todayEvents.length > 0 && (
         <Card className="p-3 bg-primary/5 border-primary/20">
           <div className="flex items-center gap-2 text-sm">
-            <span className="animate-pulse">💉</span>
             <span className="font-medium">
               {todayEvents.length} treatment{todayEvents.length > 1 ? 's' : ''} remaining today
             </span>
@@ -234,7 +232,6 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase, with
       {/* Current phase status */}
       {!withHero && <div className="bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 rounded-2xl p-5">
         <div className="text-center mb-4">
-          <div className="text-5xl mb-2">{currentPhaseData.icon}</div>
           <div className="text-2xl font-semibold text-foreground mb-1">{currentPhaseData.label}</div>
           <div className="text-sm text-muted-foreground">Tracking day {daysInPhase + 1} • Typical: {currentPhaseData.duration}</div>
           <Badge variant="secondary" className="mt-2">Phase {currentPhaseIndex + 1} of {IVF_PHASES.length}</Badge>
@@ -291,7 +288,6 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase, with
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium flex items-center gap-1.5">
-                    <span>{phase.icon}</span>
                     <span className="truncate">{phase.label}</span>
                   </div>
                   <div className="text-xs text-muted-foreground">{phase.duration}</div>

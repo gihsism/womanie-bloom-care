@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, FlaskConical, Loader2, MessageCircle, Sparkles, RefreshCw } from '@/components/icons';
+import { ArrowLeft, FlaskConical, Loader2, Sparkles, RefreshCw } from '@/components/icons';
+import { AskAiMark } from '@/components/art';
 import ReactMarkdown from 'react-markdown';
 import { NO_REMOTE_IMAGES } from '@/lib/safeMarkdown';
 import { db } from '@/integrations/db/client';
@@ -14,6 +15,7 @@ import ResultSparkline from '@/components/dashboard/ResultSparkline';
 import UserMenu from '@/components/UserMenu';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 import { hormoneKeyForTitle, assessAmh, getPhaseRange } from '@/lib/hormone-reference';
+import { ArtEmptyState } from '@/components/ArtEmptyState';
 import { numberStylesByDocument, parseLabValue, labNumber } from '@/lib/labValue';
 
 // Panel deep-dive — every reading in one panel (CBC, Thyroid Panel,
@@ -299,7 +301,7 @@ export default function PanelDetail() {
           </div>
           {series.length > 0 && (
             <Button size="sm" variant="outline" onClick={askAboutPanel} className="gap-1.5">
-              <MessageCircle className="h-3.5 w-3.5" />
+              <AskAiMark title={null} size={18} />
               Ask AI
             </Button>
           )}
@@ -309,9 +311,10 @@ export default function PanelDetail() {
 
       <div className="px-4 py-6 max-w-4xl mx-auto space-y-4">
         {series.length === 0 ? (
-          <Card className="p-6 text-center text-sm text-muted-foreground">
-            No readings in this panel yet. Upload a document with results and Womanie will categorise them here.
-          </Card>
+          <ArtEmptyState
+            kind="charts"
+            caption="No readings in this panel yet. Upload a document with results and Womanie will sort them in here; a line appears from the second result of the same test."
+          />
         ) : (
           <>
             <Card className="p-4">

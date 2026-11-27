@@ -7,26 +7,22 @@ import { db } from '@/integrations/db/client';
 import { onHealthDataChange, emitHealthDataChange } from '@/lib/data-events';
 import { errorMessage } from '@/lib/errors';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format, formatDistanceToNowStrict, isToday, isTomorrow, isPast } from 'date-fns';
 import {
-  CalendarClock,
   Video,
   MapPin,
-  Stethoscope,
   ShieldCheck,
   X,
   Search,
-  History,
   CalendarPlus,
   CalendarCog,
   ChevronDown,
-  Users,
-  FileText,
+  ChevronRight,
 } from '@/components/icons';
 import { downloadIcs } from '@/lib/ics';
+import { ArtEmptyState } from '@/components/ArtEmptyState';
 import RescheduleDialog from '@/components/dashboard/RescheduleDialog';
 import VisitPrepCard from '@/components/dashboard/VisitPrepCard';
 import DoctorNotesCard from '@/components/dashboard/DoctorNotesCard';
@@ -244,16 +240,13 @@ const Appointments = () => {
     return (
       <li
         key={apt.id}
-        className={`flex items-start gap-3 p-4 rounded-lg border bg-card ${
+        className={`flex items-start gap-3 py-4 ${
           kind === 'past' || isCancelled ? 'opacity-70' : ''
         }`}
       >
-        {apt.doctor_avatar_url ? (
+        {/* Her doctor's photo when there is one; no stock icon in its place. */}
+        {apt.doctor_avatar_url && (
           <img src={apt.doctor_avatar_url} alt="" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
-        ) : (
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <Stethoscope className="h-6 w-6 text-primary" />
-          </div>
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
@@ -390,24 +383,20 @@ const Appointments = () => {
       <div className="w-full max-w-3xl mx-auto px-4 py-8 space-y-8">
         {/* Next visit, with the questions to bring attached to it */}
         <section aria-labelledby="next-visit-heading">
-          <div className="flex items-center gap-2 mb-3">
-            <CalendarClock className="h-4 w-4 text-primary" />
-            <h2 id="next-visit-heading" className="text-sm font-semibold text-muted-foreground">
-              Your next visit
-            </h2>
-          </div>
+          <h2 id="next-visit-heading" className="label-mono mb-1">
+            Your next visit
+          </h2>
           {!loaded ? (
             <Skeleton className="h-20 w-full" />
           ) : nextVisit ? (
-            <ul className="space-y-2">{renderAppointment(nextVisit, 'upcoming')}</ul>
+            <ul className="divide-y divide-border border-y border-border">{renderAppointment(nextVisit, 'upcoming')}</ul>
           ) : (
-            <Card className="p-6 text-center">
-              <p className="text-sm text-muted-foreground mb-3">No visits yet.</p>
+            <ArtEmptyState kind="visits" testId="visits-empty">
               <Button size="sm" className="gap-2" onClick={bookVisit}>
                 <Search className="h-4 w-4" />
                 Book a visit
               </Button>
-            </Card>
+            </ArtEmptyState>
           )}
           {/* Questions to bring: hides itself when there is nothing to ask. */}
           {mode && (
@@ -419,11 +408,14 @@ const Appointments = () => {
           <button
             type="button"
             onClick={() => navigate('/dashboard/visit-summary/print')}
-            className="mt-3 inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+            className="mt-3 w-full min-h-[48px] flex items-center gap-3 py-3 text-left border-y border-border hover:bg-muted/40 transition-colors"
             data-testid="visits-visit-summary"
           >
-            <FileText className="h-4 w-4" />
-            Seeing a doctor who isn't on Womanie? Prepare a visit summary
+            <span className="flex-1 min-w-0">
+              <span className="block text-[15px]">Prepare a visit summary</span>
+              <span className="block text-xs text-muted-foreground">Seeing a doctor who isn't on Womanie? Print one page for them.</span>
+            </span>
+            <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
           </button>
         </section>
 
@@ -441,36 +433,39 @@ const Appointments = () => {
         {/* Later visits */}
         {loaded && laterVisits.length > 0 && (
           <section aria-labelledby="later-visits-heading">
-            <h2 id="later-visits-heading" className="text-sm font-semibold text-muted-foreground mb-3">
+            <h2 id="later-visits-heading" className="label-mono mb-1">
               Later visits ({laterVisits.length})
             </h2>
-            <ul className="space-y-2">
+            <ul className="divide-y divide-border border-y border-border">
               {laterVisits.map(apt => renderAppointment(apt, 'upcoming'))}
             </ul>
           </section>
         )}
 
+        {/* Your doctors and past visits: plain rows that open in place */}
+        <section aria-labelledby="visits-more-heading">
+        <h2 id="visits-more-heading" className="label-mono mb-1">Doctors and history</h2>
+        <div className="border-y border-border divide-y divide-border">
         {/* Your doctors: who can see your records, and when they looked */}
-        <details className="group rounded-lg border border-border bg-card">
-          <summary className="flex cursor-pointer list-none items-center gap-2 p-4 text-sm font-medium">
-            <Users className="h-4 w-4 text-primary" />
+        <details className="group">
+          <summary className="flex min-h-[48px] cursor-pointer list-none items-center gap-3 py-3 text-[15px]">
             <span className="flex-1">Your doctors</span>
             <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden="true" />
           </summary>
-          <div className="space-y-4 border-t border-border p-4">
+          <div className="space-y-4 pb-4">
             <ConnectedDoctors />
             <ChartAccessLog />
           </div>
         </details>
 
         {/* Past visits */}
-        <details className="group rounded-lg border border-border bg-card">
-          <summary className="flex cursor-pointer list-none items-center gap-2 p-4 text-sm font-medium">
-            <History className="h-4 w-4 text-muted-foreground" />
-            <span className="flex-1">Past visits{loaded ? ` (${past.length})` : ''}</span>
+        <details className="group">
+          <summary className="flex min-h-[48px] cursor-pointer list-none items-center gap-3 py-3 text-[15px]">
+            <span className="flex-1">Past visits</span>
+            {loaded && <span className="text-sm text-muted-foreground">{past.length}</span>}
             <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden="true" />
           </summary>
-          <div className="border-t border-border p-4">
+          <div className="pb-4">
               {loaded && past.length > 3 && (
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {([
@@ -511,12 +506,14 @@ const Appointments = () => {
                   No past appointments match this filter.
                 </p>
               ) : (
-                <ul className="space-y-2">
+                <ul className="divide-y divide-border border-y border-border">
                   {filteredPast.slice(0, 50).map(apt => renderAppointment(apt, 'past'))}
                 </ul>
               )}
           </div>
         </details>
+        </div>
+        </section>
       </div>
 
       <RescheduleDialog

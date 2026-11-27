@@ -88,7 +88,7 @@ export default function TestTrend({ info, summary }: TestTrendProps) {
               return (
                 <div className="bg-background border border-border rounded-xl px-3 py-2 shadow-lg text-xs">
                   <p className={isPredicted ? 'text-primary font-medium' : ''}>
-                    {isPredicted ? '🔮 Predicted' : d.date}: <span className="font-medium">{d.value}{info.unit ? ` ${info.unit}` : ''}</span>
+                    {isPredicted ? 'Predicted' : d.date}: <span className="font-medium">{d.value}{info.unit ? ` ${info.unit}` : ''}</span>
                   </p>
                   {d.refLow !== null && <p className="text-muted-foreground">Healthy range: {d.refLow}–{d.refHigh}</p>}
                 </div>
@@ -113,7 +113,7 @@ export default function TestTrend({ info, summary }: TestTrendProps) {
       <p className="text-[10px] text-muted-foreground mt-1">Shaded area = healthy range. Faded dot = predicted next value.</p>
       {predictedNext !== null && (
         <p className="text-[10px] text-muted-foreground mt-1">
-          <span className="text-primary">🔮</span> We predict your next result could be around <span className="font-medium whitespace-nowrap">{predictedNext}{info.unit ? ` ${info.unit}` : ''}</span>{' '}
+          We predict your next result could be around <span className="font-medium whitespace-nowrap">{predictedNext}{info.unit ? ` ${info.unit}` : ''}</span>{' '}
           {hasRefRange && refLow !== undefined && refHigh !== undefined && (
             <span className={predictedNext >= refLow && predictedNext <= refHigh ? 'text-muted-foreground' : 'text-destructive'}>
               ({predictedNext >= refLow && predictedNext <= refHigh ? 'in the healthy range' : 'outside healthy range'})
