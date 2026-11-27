@@ -64,10 +64,31 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
       },
+      // "Anatomical plate" radius scale (design-own): small and consistent.
+      // sm 2px = inputs, badges, tooltips · md 4px = buttons that are not the
+      // primary pill, menus · lg 6px = cards, sheets, dialogs. The larger
+      // Tailwind steps are folded onto the same scale so stray rounded-xl /
+      // rounded-2xl classes across the pages stop reading as bubbly.
+      // rounded-full stays a true pill (primary button, segmented choices, dots).
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        md: "calc(var(--radius) - 2px)",
+        lg: "var(--radius)",
+        xl: "var(--radius)",
+        "2xl": "calc(var(--radius) + 2px)",
+        "3xl": "calc(var(--radius) + 4px)",
+      },
+      // Flat paper: surfaces are separated by hairline ink borders, never by
+      // drop shadows. Every default shadow step resolves to none, so the
+      // ad-hoc shadow-sm/md/lg classes in page files go quiet in one place.
+      boxShadow: {
+        sm: "none",
+        DEFAULT: "none",
+        md: "none",
+        lg: "none",
+        xl: "none",
+        "2xl": "none",
+        inner: "none",
       },
       keyframes: {
         "accordion-down": {

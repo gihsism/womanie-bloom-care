@@ -17,6 +17,9 @@ import {
   ResponsiveContainer,
   ReferenceArea,
 } from 'recharts';
+import {
+  CHART, chartActiveDot, chartBand, chartCursor, chartDot, chartGrid, chartLine, chartRefLabel, chartTooltip, chartXAxis, chartYAxis,
+} from '@/components/charts/chartTheme';
 
 // Sleep tracking card. DailyLogging now writes "Sleep: 7.5h" and
 // "Sleep quality: 4/5" into daily_health_signals.notes for any mode;
@@ -172,17 +175,24 @@ const SleepTrendCard = () => {
         <div className="h-40">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <CartesianGrid {...chartGrid} />
+              {/* Recommended-range band */}
+              <ReferenceArea
+                y1={RECOMMENDED_LOW}
+                y2={RECOMMENDED_HIGH}
+                {...chartBand}
+                label={chartRefLabel('RECOMMENDED', 'insideTopRight')}
+              />
               <XAxis
                 dataKey="day"
                 tickFormatter={(d) => format(subDays(new Date(), SCAN_DAYS - 1 - d), 'MMM d')}
-                tick={{ fontSize: 10 }}
+                {...chartXAxis}
                 tickCount={5}
               />
               <YAxis
                 domain={[0, 12]}
                 tickFormatter={(v) => `${v}h`}
-                tick={{ fontSize: 10 }}
+                {...chartYAxis}
                 width={36}
               />
               <Tooltip
@@ -190,29 +200,16 @@ const SleepTrendCard = () => {
                   format(subDays(new Date(), SCAN_DAYS - 1 - Number(d)), 'MMM d, yyyy')
                 }
                 formatter={(v: number) => [`${v.toFixed(1)}h`, 'Sleep']}
-                contentStyle={{
-                  background: 'hsl(var(--background))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: 8,
-                  fontSize: 12,
-                }}
-              />
-              {/* Recommended-range band */}
-              <ReferenceArea
-                y1={RECOMMENDED_LOW}
-                y2={RECOMMENDED_HIGH}
-                fill="hsl(var(--primary))"
-                fillOpacity={0.06}
+                {...chartTooltip}
+                cursor={chartCursor}
               />
               <Line
-                type="monotone"
+                {...chartLine}
                 dataKey="hours"
-                stroke="hsl(var(--primary))"
-                strokeWidth={2}
-                dot={{ r: 3 }}
-                activeDot={{ r: 5 }}
+                stroke={CHART.accent}
+                dot={chartDot()}
+                activeDot={chartActiveDot()}
                 connectNulls
-                isAnimationActive={false}
               />
             </LineChart>
           </ResponsiveContainer>

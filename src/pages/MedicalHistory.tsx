@@ -1170,7 +1170,7 @@ export default function MedicalHistory() {
         <div className="flex items-center gap-2">
           {/* WAI-ARIA tabs: one panel below shows the selected segment;
               arrow keys / Home / End move between tabs (roving tabindex). */}
-          <div role="tablist" aria-label="Records sections" className="flex flex-1 min-w-0 gap-1 rounded-full bg-muted p-1"
+          <div role="tablist" aria-label="Records sections" className="flex flex-1 min-w-0 items-end gap-5 border-b border-foreground/15"
             onKeyDown={(e) => {
               const i = SEGMENTS.findIndex(([k]) => k === segment);
               const next = e.key === 'ArrowRight' ? (i + 1) % SEGMENTS.length
@@ -1193,8 +1193,8 @@ export default function MedicalHistory() {
                 aria-controls="records-panel"
                 tabIndex={segment === key ? 0 : -1}
                 onClick={() => setSegment(key)}
-                className={`tap-target flex-1 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                  segment === key ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                className={`tap-target -mb-px whitespace-nowrap border-b-[1.5px] px-0.5 pb-2.5 pt-3 font-mono text-[0.6875rem] uppercase leading-none tracking-[0.06em] transition-colors ${
+                  segment === key ? 'border-foreground text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {label}

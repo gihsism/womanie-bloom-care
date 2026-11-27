@@ -18,6 +18,9 @@ import {
   ReferenceLine,
   ReferenceArea,
 } from 'recharts';
+import {
+  CHART, chartActiveDot, chartBand, chartCursor, chartDot, chartGrid, chartLine, chartRefLabel, chartRefLine, chartTooltip, chartXAxis, chartYAxis,
+} from '@/components/charts/chartTheme';
 
 // Basal body temperature chart for conception mode. Users log BBT daily
 // via DailyLogging, which currently stamps the value into
@@ -261,17 +264,17 @@ const BBTChart = ({ lastPeriodStart }: BBTChartProps) => {
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <CartesianGrid {...chartGrid} />
             <XAxis
               dataKey="day"
               tickFormatter={(d) => format(subDays(new Date(), SCAN_DAYS - d), 'MMM d')}
-              tick={{ fontSize: 10 }}
+              {...chartXAxis}
               tickCount={5}
             />
             <YAxis
               domain={yDomain}
               tickFormatter={yTickFormatter}
-              tick={{ fontSize: 10 }}
+              {...chartYAxis}
               width={50}
             />
             <Tooltip
@@ -279,26 +282,23 @@ const BBTChart = ({ lastPeriodStart }: BBTChartProps) => {
                 format(subDays(new Date(), SCAN_DAYS - Number(d)), 'MMM d, yyyy')
               }
               formatter={(v: number) => [tooltipFormatter(v), 'BBT']}
-              contentStyle={{
-                background: 'hsl(var(--background))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: 8,
-                fontSize: 12,
-              }}
+              {...chartTooltip}
+              cursor={chartCursor}
             />
             {cycleStartLine !== null && (
               <ReferenceLine
                 x={cycleStartLine}
-                stroke="hsl(var(--primary))"
-                strokeDasharray="3 3"
-                label={{ value: 'Cycle', position: 'top', fontSize: 10, fill: 'hsl(var(--primary))' }}
+                {...chartRefLine}
+                strokeDasharray="2 3"
+                label={chartRefLabel('CYCLE', 'top')}
               />
             )}
             {ovulationCandidate && (
               <ReferenceLine
                 x={ovulationCandidate.dayNumber}
-                stroke="hsl(var(--secondary))"
-                label={{ value: 'Ovulation', position: 'top', fontSize: 10, fill: 'hsl(var(--secondary))' }}
+                {...chartRefLine}
+                strokeOpacity={0.8}
+                label={chartRefLabel('OVULATION', 'top')}
               />
             )}
             {coverlines && (
@@ -306,19 +306,16 @@ const BBTChart = ({ lastPeriodStart }: BBTChartProps) => {
                 <ReferenceArea
                   y1={unit === 'F' ? coverlines.preMedian : ((coverlines.preMedian - 32) * 5) / 9}
                   y2={unit === 'F' ? coverlines.postMedian : ((coverlines.postMedian - 32) * 5) / 9}
-                  fill="hsl(var(--secondary))"
-                  fillOpacity={0.07}
+                  {...chartBand}
                 />
               </>
             )}
             <Line
-              type="monotone"
+              {...chartLine}
               dataKey={tempKey}
-              stroke="hsl(var(--primary))"
-              strokeWidth={2}
-              dot={{ r: 3 }}
-              activeDot={{ r: 5 }}
-              isAnimationActive={false}
+              stroke={CHART.accent}
+              dot={chartDot()}
+              activeDot={chartActiveDot()}
             />
           </LineChart>
         </ResponsiveContainer>
