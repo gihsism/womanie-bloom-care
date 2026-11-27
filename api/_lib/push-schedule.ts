@@ -25,8 +25,29 @@
 //   (windows in src/lib/ivfJourney.ts TRIGGER_PUSH_WINDOWS, pinned by the
 //   parity test). Sent in quiet hours too: she did not pick the time, her
 //   clinic did, and missing it matters. Wording says "timed injection".
+//
+// Added 2026-11-28 (the Home "Today" rows that used to be in-app only; same
+// pure rules as Home, now shared from api/_lib):
+// - A medicine pack or course running out (medicine-supply.ts): once per
+//   run-out day, from 3 days before. Follows the Medicine switch.
+// - Pregnancy vaccinations in their window and not marked received or
+//   "not now" (pregnancy-vaccines.ts); a new push only when the set of due
+//   vaccinations changes. Pregnancy stage only.
+// - A baby at a common vaccination age with nothing logged around it
+//   (baby-vaccines.ts): once per baby and age. Postpartum stage only.
+// - The 6-week postnatal check, weeks 5-8 after the birth with no visit
+//   logged since and the milestone not ticked (postnatal-check.ts): once
+//   per birth. Postpartum stage only.
+//   These three follow the "Vaccinations and check-ups" switch (on unless
+//   she switches it off). All four are Womanie-timed: daytime only
+//   (09:00-21:59 her time), discreet wording (no medicine or vaccine names).
 
-export type ReminderType = 'medicine' | 'period' | 'appointment' | 'ivf_trigger';
+import { supplyReminders, type SupplyMed } from './medicine-supply.js';
+import { gestationalWeek, vaccinesDueNow, type VaccineState } from './pregnancy-vaccines.js';
+import { babyVaccineReminders } from './baby-vaccines.js';
+import { postnatalCheckDue, pickBirthDate, POSTNATAL_MILESTONE_ID } from './postnatal-check.js';
+
+export type ReminderType = 'medicine' | 'period' | 'appointment' | 'ivf_trigger' | 'checkups';
 
 // bookings: doctor side only (a patient booked / cancelled / moved a visit
 // with HER as the doctor); switched in the doctor's Profile & settings.
@@ -34,9 +55,11 @@ export type ReminderType = 'medicine' | 'period' | 'appointment' | 'ivf_trigger'
 // documents: patient side, "Dr X added a document" (sent at upload time by
 // api/_lib/doctor-documents.ts, not by this planner).
 // ivf_trigger: opt-in (false unless she switched it on), see above.
-export interface PushPrefs { medicine: boolean; period: boolean; appointment: boolean; bookings: boolean; documents: boolean; ivf_trigger: boolean }
+// checkups: pregnancy and baby vaccinations, 6-week postnatal check (on
+// unless she switched it off; devices saved before it existed count as on).
+export interface PushPrefs { medicine: boolean; period: boolean; appointment: boolean; bookings: boolean; documents: boolean; ivf_trigger: boolean; checkups: boolean }
 
-export const DEFAULT_PREFS: PushPrefs = { medicine: true, period: true, appointment: true, bookings: true, documents: true, ivf_trigger: false };
+export const DEFAULT_PREFS: PushPrefs = { medicine: true, period: true, appointment: true, bookings: true, documents: true, ivf_trigger: false, checkups: true };
 
 export interface SubscriptionRow {
   id: string;
@@ -49,7 +72,7 @@ export interface SubscriptionRow {
   updated_at?: string | null;
 }
 
-export interface MedRow { id: string; user_id?: string; reminder_times: string[] | string | null }
+export interface MedRow extends Omit<SupplyMed, 'name'> { id: string; user_id?: string; reminder_times: string[] | string | null; name?: string | null }
 export interface DoseRow { user_id?: string; medication_id: string | null; occurred_at: string }
 export interface PeriodRow { period_start_date: string; cycle_length: number | null }
 export interface ApptRow { id: string; scheduled_at: string; status: string | null }
@@ -63,7 +86,22 @@ export interface UserData {
   appointments: ApptRow[];
   /** IVF trigger shot moment (UTC ISO) from ivf_plans, if one is near. */
   ivfTriggerAt?: string | null;
+  /** profiles.pregnancy_due_date (YYYY-MM-DD), for pregnancy vaccinations. */
+  pregnancyDueDate?: string | null;
+  // For the check-up reminders, undefined means "could not be read": that
+  // reminder is skipped rather than guessed. null / [] means nothing saved.
+  /** Her account-synced app data (user_app_data): vaccination marks, recovery milestones. */
+  pregVaccines?: unknown;
+  postpartumMilestones?: unknown;
+  /** Postpartum: her babies, with the newest logged vaccination of each. */
+  babies?: BabyRow[];
+  /** Postpartum: the latest birth record's birth time. */
+  birthAt?: string | null;
+  /** Start times of her visits that are not cancelled, past (since before the birth window) and upcoming. */
+  visitTimes?: string[];
 }
+
+export interface BabyRow { id: string; name: string | null; birth_date: string | null; lastVaccineAt?: string | null }
 
 export interface PushPayload { title: string; body: string; url: string; tag: string }
 
@@ -146,8 +184,33 @@ export function parsePrefs(raw: SubscriptionRow['prefs']): PushPrefs {
     bookings: o.bookings !== false,
     documents: o.documents !== false,
     ivf_trigger: o.ivf_trigger === true,
+    checkups: o.checkups !== false,
   };
 }
+
+/** A user_app_data value: stored as JSON text inside JSONB by the app, so parse a string once. */
+export function appDataValue(raw: unknown): unknown {
+  if (typeof raw !== 'string') return raw ?? null;
+  try { return JSON.parse(raw); } catch { return null; }
+}
+
+/**
+ * A Date whose LOCAL fields (year, month, day, hours, minutes) are her wall
+ * clock in `tz`, so the shared day-based rules (written for the browser's
+ * local time) read her calendar day whatever zone the server runs in.
+ */
+export function wallClock(at: Date, tz: string): Date {
+  const { date, minutes } = localParts(at, tz);
+  const [y, m, d] = date.split('-').map(Number);
+  return new Date(y, m - 1, d, Math.floor(minutes / 60), minutes % 60);
+}
+
+const localDay = (s: string | null | undefined): Date | null => {
+  const m = s ? /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s)) : null;
+  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;
+};
+
+const inWhen = (n: number) => (n === 0 ? 'today' : n === 1 ? 'tomorrow' : `in ${n} days`);
 
 function parseTimes(raw: MedRow['reminder_times']): string[] {
   let v: unknown = raw;
@@ -269,6 +332,84 @@ export function planUserReminders(data: UserData, allSubs: SubscriptionRow[], no
           tag: 'period',
         });
       }
+    }
+  }
+
+  // Daytime reminders from Home's Today list (see the header).
+  const nowWall = wallClock(now, tz);
+
+  // A medicine pack or course running out. Discreet: no medicine name.
+  for (const med of data.meds) {
+    if (med.user_id && med.user_id !== data.userId) continue;
+    // The name only gates "is this a real medicine" (as on Home); it never goes on the lock screen.
+    const r = supplyReminders([{ ...med, name: med.name?.trim() || 'Medicine' }], nowWall)[0];
+    if (!r) continue;
+    push('medicine', `supply:${med.id}:${r.lastDay}`, {
+      title: 'Medicine reminder',
+      body: r.kind === 'course'
+        ? `A medicine course ends ${inWhen(r.daysLeft)}. Tap to see which one.`
+        : r.daysLeft === 0
+          ? 'The last dose of a medicine pack is today. Tap to see which one.'
+          : `A medicine pack runs out ${inWhen(r.daysLeft)}. Tap to see which one.`,
+      url: '/dashboard/stage#medicines',
+      tag: `supply-${med.id}`,
+    });
+  }
+
+  // Pregnancy vaccinations due now and not marked received / "not now".
+  if (stage === 'pregnancy' && data.pregVaccines !== undefined) {
+    const due = localDay(data.pregnancyDueDate);
+    const state = appDataValue(data.pregVaccines);
+    const vax = due
+      ? vaccinesDueNow((state && typeof state === 'object' ? state : {}) as VaccineState, gestationalWeek(due, nowWall))
+      : [];
+    if (vax.length) {
+      const keys = vax.map(v => v.key).sort().join(',');
+      push('checkups', `pregvax:${String(data.pregnancyDueDate).slice(0, 10)}:${keys}`, {
+        title: 'Vaccination reminder',
+        body: vax.length === 1
+          ? 'A vaccination is recommended around this week. Tap to see which one.'
+          : `${vax.length} vaccinations are recommended around this week. Tap to see which.`,
+        url: '/dashboard/stage#vaccinations',
+        tag: 'preg-vaccines',
+      });
+    }
+  }
+
+  if (stage === 'postpartum') {
+    // A baby at a common vaccination age (one push per baby and age).
+    for (const b of data.babies ?? []) {
+      const last = b.lastVaccineAt ? wallClock(new Date(b.lastVaccineAt), tz) : null;
+      const [r] = babyVaccineReminders([{ name: b.name, birth_date: b.birth_date, lastVaccineAt: last }], nowWall);
+      if (!r) continue;
+      push('checkups', `babyvax:${b.id}:${r.age}`, {
+        title: 'Vaccination reminder',
+        body: `${r.name} is ${r.age}: a common age for vaccinations. Check the vaccine booklet.`,
+        url: '/dashboard/baby?tab=vax',
+        tag: `baby-vax-${b.id}`,
+      });
+    }
+
+    // The 6-week postnatal check (once per birth); skipped when the birth,
+    // the visits or the milestone tick could not be read.
+    // Same sources as Home: the birth record (her calendar day), else the youngest baby.
+    const birthAt = data.birthAt ? new Date(data.birthAt) : null;
+    const birthLocal = birthAt && !Number.isNaN(birthAt.getTime()) ? wallClock(birthAt, tz) : null;
+    const birthDate = birthLocal
+      ? new Date(birthLocal.getFullYear(), birthLocal.getMonth(), birthLocal.getDate())
+      : pickBirthDate(null, (data.babies ?? []).map(b => b.birth_date), null);
+    const milestones = appDataValue(data.postpartumMilestones);
+    const ticked = !!milestones && typeof milestones === 'object' && (milestones as Record<string, unknown>)[POSTNATAL_MILESTONE_ID] === true;
+    const visits = (data.visitTimes ?? []).map(v => new Date(v)).filter(v => !Number.isNaN(v.getTime())).map(v => wallClock(v, tz));
+    const known = data.birthAt !== undefined && data.visitTimes !== undefined && data.postpartumMilestones !== undefined;
+    if (known && birthDate && postnatalCheckDue({ birthDate, visits, ticked, now: nowWall })) {
+      const day = `${birthDate.getFullYear()}-${String(birthDate.getMonth() + 1).padStart(2, '0')}-${String(birthDate.getDate()).padStart(2, '0')}`;
+      push('checkups', `postnatal:${day}`, {
+        title: 'Check-up reminder',
+        body: 'Your 6-week check after the birth: booked yet? Tap to add the visit.',
+        url: '/dashboard/stage#recovery',
+        tag: 'postnatal-check',
+      });
     }
   }
 

@@ -15,7 +15,8 @@ import {
 } from '@/lib/push';
 
 // Me -> Reminders -> "Phone notifications": the opt-in that makes medicine
-// times, period and visit reminders reach her when the app is closed.
+// times and supply, period, visit and vaccination / check-up reminders
+// reach her when the app is closed.
 
 type State =
   | { kind: 'loading' }
@@ -25,9 +26,10 @@ type State =
   | { kind: 'on'; publicKey: string; prefs: PushPrefs };
 
 const TYPES: Array<{ key: keyof PushPrefs; label: string; hint: string }> = [
-  { key: 'medicine', label: 'Medicine times', hint: 'At the times you set on each medicine, unless you already logged the dose' },
+  { key: 'medicine', label: 'Medicine times', hint: 'At the times you set on each medicine, unless you already logged the dose, and 3 days before a pack or course runs out' },
   { key: 'period', label: 'Period', hint: 'The day before your period is expected, and if it is a few days late' },
   { key: 'appointment', label: 'Visits', hint: 'The day before a visit' },
+  { key: 'checkups', label: 'Vaccinations and check-ups', hint: 'Vaccinations recommended in pregnancy, your baby\'s vaccination ages, and your 6-week check after the birth, when the app would show them on Home' },
   { key: 'documents', label: 'Documents from your doctor', hint: 'When a connected doctor adds a document to your Records (the name of the document is never shown)' },
   { key: 'ivf_trigger', label: 'IVF trigger shot', hint: 'About 1 hour and 10 minutes before the trigger time you entered, also at night. Off unless you switch it on; the lock screen only says "timed injection"' },
 ];
