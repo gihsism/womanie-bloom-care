@@ -3,7 +3,7 @@ import { runSendDue, type Query, type Sender } from './push-run';
 import type { SubscriptionRow } from './push-schedule';
 
 // In-memory stand-in for the tables the run reads; answers by SQL shape.
-function fakeDb(opts: { subs: SubscriptionRow[]; meds?: unknown[]; doses?: unknown[]; periods?: unknown[]; profiles?: unknown[]; appts?: unknown[]; triggers?: unknown[] | 'missing'; appData?: unknown[]; babies?: unknown[]; babyVax?: unknown[]; births?: unknown[]; visits?: unknown[]; missingCheckupTables?: boolean }) {
+function fakeDb(opts: { subs: SubscriptionRow[]; meds?: unknown[]; doses?: unknown[]; periods?: unknown[]; profiles?: unknown[]; appts?: unknown[]; triggers?: unknown[] | 'missing'; appData?: unknown[]; babies?: unknown[]; babyVax?: unknown[]; births?: unknown[]; visits?: unknown[]; pillSignals?: unknown[] | 'missing'; missingCheckupTables?: boolean }) {
   const sentLog = new Set<string>();
   let subs = [...opts.subs];
   const deletedSubs: string[] = [];
@@ -21,6 +21,10 @@ function fakeDb(opts: { subs: SubscriptionRow[]; meds?: unknown[]; doses?: unkno
     if (text.includes('FROM babies')) return checkup(opts.babies);
     if (text.includes('FROM birth_records')) return checkup(opts.births);
     if (text.includes('FROM appointments') && !text.includes('< $3')) return checkup(opts.visits);
+    if (text.includes('FROM daily_health_signals')) {
+      if (opts.pillSignals === 'missing') throw new Error('read failed');
+      return mine(opts.pillSignals);
+    }
     if (text.includes('FROM life_events')) return mine(opts.doses);
     if (text.includes('FROM period_tracking')) return mine(opts.periods);
     if (text.includes('FROM profiles')) return mine(opts.profiles);
@@ -205,5 +209,37 @@ describe('runSendDue', () => {
     const s2 = await runSendDue(bare.query, send, DAY);
     expect([...bare.sentLog]).toEqual(['A|supply:mA:2026-11-28']);
     expect(s2.sent).toBe(1);
+  });
+
+  it('sends the pill-time reminder from her account data and pill ticks', async () => {
+    const PILL_AT = new Date('2026-11-26T20:05:00Z'); // 21:05 Zurich
+    const opts = {
+      subs: [sub('A'), sub('B')],
+      profiles: [
+        { user_id: 'A', life_stage: 'contraception', pregnancy_due_date: null },
+        { user_id: 'B', life_stage: 'contraception', pregnancy_due_date: null },
+      ],
+      appData: [
+        { user_id: 'A', key: 'contraception:method', value: 'pill' },
+        { user_id: 'A', key: 'contraception:reminderTime', value: '21:00' },
+        { user_id: 'B', key: 'contraception:method', value: 'pill' },
+        { user_id: 'B', key: 'contraception:reminderTime', value: '21:00' },
+      ],
+      // B already ticked today's pill.
+      pillSignals: [{ user_id: 'B', signal_date: '2026-11-26', notes: 'Pill: on-time' }],
+    };
+    const db = fakeDb(opts);
+    const sent: string[] = [];
+    const send: Sender = async (s, p) => { sent.push(`${s.user_id}:${p.title}`); return 'sent'; };
+    await runSendDue(db.query, send, PILL_AT);
+    expect(sent).toEqual(['A:Daily reminder']);
+    const sql = (db.query as ReturnType<typeof vi.fn>).mock.calls.map(c => String(c[0]));
+    expect(sql.find(t => t.includes('FROM user_app_data'))).toContain("'contraception:reminderTime'");
+
+    // A failed read of the pill ticks skips only the pill reminder.
+    const bad = fakeDb({ ...opts, pillSignals: 'missing' as const, meds: [{ id: 'mA', user_id: 'A', reminder_times: ['21:00'] }] });
+    const tags: string[] = [];
+    await runSendDue(bad.query, async (_s, p) => { tags.push(p.tag); return 'sent'; }, PILL_AT);
+    expect(tags).toEqual(['med-mA-21:00']);
   });
 });

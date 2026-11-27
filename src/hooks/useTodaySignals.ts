@@ -304,8 +304,12 @@ export function useTodaySignals(
     lastMoodCheck,
     postnatalCheckDue: postnatal,
     setup: s.setup ? { ...s.setup, done: s.setup.done + Number(hasName), nameMissing: !hasName } : s.setup,
-    // The day-of and upcoming visit rows follow the appointment-reminder toggle, as the old cards did.
+    // Settings -> Reminders, the in-app switches (the phone has its own per-device ones):
+    // "Visit rows in the app" hides the day-of and upcoming visit rows,
+    // "Period notes in the app" the period due / late rows.
     appointmentToday: prefs.appointmentReminders ? s.appointmentToday : null,
+    nextVisit: prefs.appointmentReminders ? s.nextVisit : null,
+    periodReminders: prefs.cycleReminders,
     periodDaysUntil: periodDaysUntil(period),
   };
 }

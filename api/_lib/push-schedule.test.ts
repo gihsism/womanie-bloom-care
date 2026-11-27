@@ -166,7 +166,7 @@ describe('opt-out and ownership', () => {
   });
 
   it('defaults every type on except the opt-in IVF trigger reminder', () => {
-    expect(parsePrefs(null)).toEqual({ medicine: true, period: true, appointment: true, bookings: true, documents: true, ivf_trigger: false, checkups: true });
+    expect(parsePrefs(null)).toEqual({ medicine: true, pill: true, period: true, appointment: true, bookings: true, documents: true, ivf_trigger: false, checkups: true });
   });
 });
 

@@ -38,6 +38,12 @@ export interface TodaySignals {
   flaggedResults?: number;
   /** Days until the next predicted period; negative = late. Cycle stages only. */
   periodDaysUntil?: number | null;
+  /**
+   * Settings -> Reminders -> "Period notes in the app" (cycleReminders).
+   * false hides the "Period likely ..." and "Period N days late?" rows; the
+   * PMS heads-up stays. Omitted = on.
+   */
+  periodReminders?: boolean;
   /** Start of the next upcoming visit (after today). */
   nextVisit?: Date | null;
   /** Medicines whose reminder time has passed today without a "Taken" tick (time = HH:MM). */
@@ -170,7 +176,7 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
     items.push({ id: 'baby-vaccination', label: 'Vaccination age: check the babies\' booklets', target: BABY_VACCINES });
   }
   const pd = s.periodDaysUntil;
-  if (CYCLE_STAGES.includes(mode) && pd != null) {
+  if (CYCLE_STAGES.includes(mode) && pd != null && s.periodReminders !== false) {
     // Late by up to two weeks; beyond that the log is likely just stale.
     if (pd < 0 && pd >= -MAX_LATE_DAYS) {
       const late = -pd;

@@ -37,7 +37,8 @@ export async function runSendDue(query: Query, send: Sender, now: Date): Promise
   // Visits since before the postnatal window (8 weeks + slack), for the
   // "6-week check booked yet?" rule: any visit after the birth hides it.
   const visitsSince = new Date(now.getTime() - 70 * 86_400_000).toISOString();
-  const [meds, doses, periods, profiles, appts, triggers, appData, babies, babyVax, births, visits] = await Promise.all([
+  const pillSince = new Date(now.getTime() - 8 * 86_400_000).toISOString().slice(0, 10);
+  const [meds, doses, periods, profiles, appts, triggers, appData, babies, babyVax, births, visits, pillSignals] = await Promise.all([
     // '*': the supply columns (ends_on, pack_size, pack_started_on) exist
     // only once migration 027 is applied; before that they are absent and
     // no run-out reminder is planned.
@@ -74,7 +75,8 @@ export async function runSendDue(query: Query, send: Sender, now: Date): Promise
     // reminders always run.
     (query(
       `SELECT user_id, key, value FROM user_app_data
-        WHERE user_id = ANY($1) AND key IN ('preg_vaccinations', 'postpartum:milestones')`,
+        WHERE user_id = ANY($1) AND key IN ('preg_vaccinations', 'postpartum:milestones',
+          'contraception:method', 'contraception:reminderTime', 'contraception:packStartDate')`,
       [userIds],
     ) as Promise<Array<{ user_id: string; key: string; value: unknown }>>).catch(() => null),
     (query('SELECT id::text AS id, user_id, name, birth_date FROM babies WHERE user_id = ANY($1)', [userIds]) as Promise<Array<BabyRow & { user_id: string }>>).catch(() => null),
@@ -95,6 +97,13 @@ export async function runSendDue(query: Query, send: Sender, now: Date): Promise
           AND COALESCE(status, 'scheduled') <> 'cancelled'`,
       [userIds, visitsSince],
     ) as Promise<Array<{ user_id: string; scheduled_at: string | Date }>>).catch(() => null),
+    // Pill ticks ("Pill: on-time" in notes) for the pill-time reminder; a
+    // failed read skips that reminder only.
+    (query(
+      `SELECT user_id, signal_date::text AS signal_date, notes FROM daily_health_signals
+        WHERE user_id = ANY($1) AND signal_date >= $2 AND notes ILIKE '%pill:%'`,
+      [userIds, pillSince],
+    ) as Promise<Array<{ user_id: string; signal_date: string; notes: string | null }>>).catch(() => null),
   ]);
 
   for (const uid of userIds) {
@@ -120,6 +129,10 @@ export async function runSendDue(query: Query, send: Sender, now: Date): Promise
         : undefined,
       birthAt: births ? triggerIso(by(births, uid)[0]?.birth_at) : undefined,
       visitTimes: visits ? by(visits, uid).map(v => triggerIso(v.scheduled_at)).filter((v): v is string => !!v) : undefined,
+      contraceptionMethod: appData ? by(appData, uid).find(r => r.key === 'contraception:method')?.value ?? null : undefined,
+      pillReminderTime: appData ? by(appData, uid).find(r => r.key === 'contraception:reminderTime')?.value ?? null : undefined,
+      pillPackStart: appData ? by(appData, uid).find(r => r.key === 'contraception:packStartDate')?.value ?? null : undefined,
+      pillSignals: pillSignals ? by(pillSignals, uid).map(r => ({ signal_date: r.signal_date, notes: r.notes })) : undefined,
     };
     const planned = planUserReminders(data, by(subs, uid), now);
     summary.planned += planned.length;

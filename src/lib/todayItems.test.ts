@@ -64,6 +64,13 @@ describe('todayItems', () => {
     expect(ids('menstrual-cycle', { periodDaysUntil: -15 })).toEqual([]); // a stale log, not a late period
   });
 
+  it('the in-app "Period notes" switch (Settings) hides the period due / late rows, not PMS', () => {
+    expect(ids('menstrual-cycle', { periodDaysUntil: 0, periodReminders: false })).toEqual([]);
+    expect(ids('conception', { periodDaysUntil: -3, periodReminders: false })).toEqual([]);
+    expect(ids('menstrual-cycle', { periodDaysUntil: 4, periodReminders: false })).toEqual(['pms-soon']);
+    expect(ids('menstrual-cycle', { periodDaysUntil: 0, periodReminders: true })).toEqual(['period-soon']);
+  });
+
   it('visits further than 7 days out are not a Today row', () => {
     expect(ids('menstrual-cycle', { nextVisit: at(8) })).toEqual([]);
   });

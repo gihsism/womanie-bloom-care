@@ -22,6 +22,7 @@ import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 import { LIFE_STAGE_LABELS, LIFE_STAGE_DESCRIPTIONS } from '@/lib/lifeStageLabels';
 import MedicineLog from '@/components/dashboard/MedicineLog';
 import PhoneNotifications from '@/components/dashboard/PhoneNotifications';
+import { IN_APP_SWITCHES, REMINDER_OVERVIEW, phoneLabel, type InAppPref } from '@/lib/reminderSwitches';
 import { useAttentionCount } from '@/hooks/useAttentionCount';
 import { MeRow, MeGroup } from './me/MeRow';
 import { ME_SECTIONS, meSectionFromHash } from './me/sections';
@@ -291,6 +292,8 @@ const Settings = () => {
   // column this can swap to a server round-trip keyed on user.id
   // while keeping the same shape.
   const NOTIFICATION_STORAGE_KEY = user ? `womanie_notification_prefs_${user.id}` : 'womanie_notification_prefs';
+  // healthTips: kept in the saved shape, but its switch is gone: the daily
+  // tip card it controlled left Home on 2026-11-23 and nothing reads it.
   type NotificationPrefs = { cycleReminders: boolean; appointmentReminders: boolean; healthTips: boolean };
   const [notifications, setNotifications] = useState<NotificationPrefs>(() => {
     const fallback: NotificationPrefs = { cycleReminders: true, appointmentReminders: true, healthTips: true };
@@ -686,55 +689,53 @@ const Settings = () => {
 
         {/* Notifications */}
         {section === 'reminders' && (<>
-        <PhoneNotifications />
-        <Card>
+        <Card data-testid="reminder-overview">
           <CardHeader>
             <CardDescription>
-              Choose what Womanie reminds you about
+              Which switch does what. Phone switches only change what this device receives; the switches under "In the app" only change what shows inside Womanie, on all your devices.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-3">
+              {REMINDER_OVERVIEW.map(r => (
+                <li key={r.phone} className="text-sm">
+                  <p className="font-medium">{r.what}</p>
+                  <p className="text-muted-foreground">
+                    In the app: {r.inApp}{r.inAppSwitch ? ` (switch "${IN_APP_SWITCHES[r.inAppSwitch].label}")` : ''}
+                  </p>
+                  <p className="text-muted-foreground">On your phone: switch "{phoneLabel(r.phone)}"</p>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+        <PhoneNotifications />
+        <Card data-testid="in-app-reminders">
+          <CardHeader>
+            <CardTitle className="text-base">In the app</CardTitle>
+            <CardDescription>
+              What shows inside Womanie. Saved in your account, so it is the same on all your devices. It does not change phone notifications.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Cycle Reminders</Label>
-                <p className="text-sm text-muted-foreground">Get notified about your cycle phases</p>
+            {(Object.keys(IN_APP_SWITCHES) as InAppPref[]).map((key, i) => (
+              <div key={key}>
+                {i > 0 && <Separator className="mb-4" />}
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <Label htmlFor={`inapp-${key}`}>{IN_APP_SWITCHES[key].label}</Label>
+                    <p className="text-sm text-muted-foreground">{IN_APP_SWITCHES[key].hint}</p>
+                  </div>
+                  <Switch id={`inapp-${key}`}
+                    checked={notifications[key]}
+                    onCheckedChange={(checked) => {
+                      setNotifications(prev => ({ ...prev, [key]: checked }));
+                      toast({ title: `${IN_APP_SWITCHES[key].label}: ${checked ? 'on' : 'off'}` });
+                    }}
+                  />
+                </div>
               </div>
-              <Switch aria-label="Cycle Reminders"
-                checked={notifications.cycleReminders}
-                onCheckedChange={(checked) => {
-                  setNotifications(prev => ({ ...prev, cycleReminders: checked }));
-                  toast({ title: checked ? 'Cycle reminders enabled' : 'Cycle reminders disabled' });
-                }}
-              />
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Appointment Reminders</Label>
-                <p className="text-sm text-muted-foreground">Reminders for upcoming doctor appointments</p>
-              </div>
-              <Switch aria-label="Appointment Reminders"
-                checked={notifications.appointmentReminders}
-                onCheckedChange={(checked) => {
-                  setNotifications(prev => ({ ...prev, appointmentReminders: checked }));
-                  toast({ title: checked ? 'Appointment reminders enabled' : 'Appointment reminders disabled' });
-                }}
-              />
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Health Tips</Label>
-                <p className="text-sm text-muted-foreground">A short daily tip for your stage</p>
-              </div>
-              <Switch aria-label="Health Tips"
-                checked={notifications.healthTips}
-                onCheckedChange={(checked) => {
-                  setNotifications(prev => ({ ...prev, healthTips: checked }));
-                  toast({ title: checked ? 'Health tips enabled' : 'Health tips disabled' });
-                }}
-              />
-            </div>
+            ))}
           </CardContent>
         </Card>
         </>)}

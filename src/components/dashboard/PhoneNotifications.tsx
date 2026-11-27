@@ -13,10 +13,11 @@ import {
   currentSubscription, disablePush, enablePush, fetchPushConfig, pushSupport,
   readPushEnv, sendTestPush, serverPushState, updatePushPrefs,
 } from '@/lib/push';
+import { PHONE_SWITCHES } from '@/lib/reminderSwitches';
 
 // Me -> Reminders -> "Phone notifications": the opt-in that makes medicine
-// times and supply, period, visit and vaccination / check-up reminders
-// reach her when the app is closed.
+// times and supply, the pill time, period, visit and vaccination / check-up
+// reminders reach her when the app is closed. Switches are per device.
 
 type State =
   | { kind: 'loading' }
@@ -25,14 +26,9 @@ type State =
   | { kind: 'off'; publicKey: string }
   | { kind: 'on'; publicKey: string; prefs: PushPrefs };
 
-const TYPES: Array<{ key: keyof PushPrefs; label: string; hint: string }> = [
-  { key: 'medicine', label: 'Medicine times', hint: 'At the times you set on each medicine, unless you already logged the dose, and 3 days before a pack or course runs out' },
-  { key: 'period', label: 'Period', hint: 'The day before your period is expected, and if it is a few days late' },
-  { key: 'appointment', label: 'Visits', hint: 'The day before a visit' },
-  { key: 'checkups', label: 'Vaccinations and check-ups', hint: 'Vaccinations recommended in pregnancy, your baby\'s vaccination ages, and your 6-week check after the birth, when the app would show them on Home' },
-  { key: 'documents', label: 'Documents from your doctor', hint: 'When a connected doctor adds a document to your Records (the name of the document is never shown)' },
-  { key: 'ivf_trigger', label: 'IVF trigger shot', hint: 'About 1 hour and 10 minutes before the trigger time you entered, also at night. Off unless you switch it on; the lock screen only says "timed injection"' },
-];
+// The switches and their wording live in lib/reminderSwitches.ts (shared with
+// the "which switch does what" list in Settings).
+const TYPES = PHONE_SWITCHES;
 
 const BLOCKED_TEXT: Record<Exclude<PushSupport, 'ok'>, string> = {
   'ios-install': 'On iPhone and iPad, notifications work only in the installed app (iOS 16.4 or later). In Safari tap Share, then "Add to Home Screen", open Womanie from your Home Screen and switch them on here.',
@@ -99,8 +95,8 @@ export default function PhoneNotifications() {
   return (
     <Card data-testid="phone-notifications">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base"><BellRing className="h-4 w-4" /> Phone notifications</CardTitle>
-        <CardDescription>Reminders that reach you when Womanie is closed. Nothing is sent between 22:00 and 07:00 except medicine times you set yourself and an IVF trigger shot.</CardDescription>
+        <CardTitle className="flex items-center gap-2 text-base"><BellRing className="h-4 w-4" /> Phone notifications on this device</CardTitle>
+        <CardDescription>Reminders that reach this phone or computer when Womanie is closed. These switches only change what this device receives; what shows inside the app is set below. Nothing is sent between 22:00 and 07:00 except medicine and pill times you set yourself and an IVF trigger shot.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {state.kind === 'loading' && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
