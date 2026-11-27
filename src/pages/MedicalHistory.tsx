@@ -34,6 +34,7 @@ import DocumentCycleAlert from '@/components/dashboard/DocumentCycleAlert';
 import WeeklySummary from '@/components/dashboard/WeeklySummary';
 import RecentFindings from '@/components/dashboard/RecentFindings';
 import OverdueTests from '@/components/dashboard/OverdueTests';
+import RecheckHints from '@/components/dashboard/RecheckHints';
 import HealthTrends from '@/components/dashboard/HealthTrends';
 import HealthSummaryWidget from '@/components/dashboard/HealthSummaryWidget';
 import { useToast } from '@/hooks/use-toast';
@@ -1766,6 +1767,7 @@ export default function MedicalHistory() {
                   <WeeklySummary />
                   <RecentFindings showViewAll={false} />
                   <OverdueTests />
+                  <RecheckHints stage={mode} dueDate={pregnancyDueDate} />
                   <HealthTrends showViewAll={false} />
                   <HealthSummaryWidget showViewAll={false} />
                 </div>
