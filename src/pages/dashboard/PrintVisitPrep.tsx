@@ -48,7 +48,7 @@ export function VisitPrepSheet({ data, now = new Date() }: { data: VisitPrepData
   const when = data.visit ? new Date(data.visit.scheduled_at) : null;
 
   return (
-    <article className="max-w-3xl mx-auto px-8 py-8 print:px-0 print:py-0" data-testid="visit-prep-sheet">
+    <article className="max-w-3xl mx-auto px-4 sm:px-8 py-6 sm:py-8 print:px-0 print:py-0" data-testid="visit-prep-sheet">
       <header className="mb-4 pb-3 border-b border-gray-300">
         <p className="text-xs uppercase tracking-wide text-gray-500">Visit prep</p>
         <h1 className="text-xl font-bold">{data.name || 'Patient'}</h1>
@@ -97,21 +97,21 @@ export function VisitPrepSheet({ data, now = new Date() }: { data: VisitPrepData
             <thead>
               <tr className="border-b border-gray-300 text-xs text-gray-500">
                 <th className="text-left py-1 font-medium">Test</th>
-                <th className="text-right py-1 font-medium">Latest</th>
-                <th className="text-right py-1 font-medium">Reference</th>
-                <th className="text-right py-1 font-medium">Date</th>
+                <th className="text-right py-1 pl-2 font-medium">Latest</th>
+                <th className="text-right py-1 pl-2 font-medium">Reference</th>
+                <th className="text-right py-1 pl-2 font-medium">Date</th>
               </tr>
             </thead>
             <tbody>
               {results.map(r => (
                 <tr key={r.name} className="border-b border-gray-100 align-top">
-                  <td className="py-1 pr-2">
+                  <td className="py-1 pr-2 min-w-[6.5rem]">
                     {r.name}
                     <span className="block text-xs text-gray-600">{r.note}</span>
                   </td>
-                  <td className="py-1 text-right whitespace-nowrap">{r.value}</td>
-                  <td className="py-1 text-right text-gray-600 whitespace-nowrap">{r.range || '—'}</td>
-                  <td className="py-1 text-right text-gray-600 whitespace-nowrap">{r.date ? formatLabDay(r.date) : '—'}</td>
+                  <td className="py-1 pl-2 text-right whitespace-nowrap">{r.value}</td>
+                  <td className="py-1 pl-2 text-right text-gray-600">{r.range || '—'}</td>
+                  <td className="py-1 pl-2 text-right text-gray-600 whitespace-nowrap">{r.date ? formatLabDay(r.date) : '—'}</td>
                 </tr>
               ))}
             </tbody>

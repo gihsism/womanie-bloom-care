@@ -30,6 +30,10 @@ describe("BottomNav", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
+  it("is hidden on the visit prep sheet but not on Visits", () => {
+    expect(renderAt("/dashboard/appointments/abc-123/prep").container).toBeEmptyDOMElement();
+  });
+
   it("highlights the tab matching the current route", () => {
     renderAt("/dashboard/medical-history");
     expect(screen.getByText("Records").closest("a")).toHaveAttribute("aria-current", "page");
