@@ -105,7 +105,7 @@ const testExplanations: Record<string, { high: string; low: string; normal: stri
     normal: 'Your thyroid function is healthy.',
   },
   'vitamin d': {
-    low: 'Low vitamin D is very common and can affect bone health, mood, immunity, and fertility. A supplement (usually 1000-4000 IU daily) can bring it back to healthy levels.',
+    low: 'Low vitamin D is common. Over time it can weaken bones. Your doctor can tell you whether you need a supplement and in what dose; for a confirmed deficiency the dose is set by the doctor. Do not take more than 4,000 IU a day without medical advice.',
     high: 'Very high vitamin D is rare and usually only from excessive supplementation. Your doctor may adjust your dose.',
     normal: 'Your vitamin D level is healthy.',
   },
