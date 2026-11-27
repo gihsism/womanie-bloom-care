@@ -26,7 +26,9 @@ describe('PatientVisitBrief (doctor, before the visit)', () => {
     expect(screen.getByText('Iron 50 mg, 2× a day')).toBeInTheDocument();
     expect(screen.getByText(/Low mood on 5 of 6 logged days/)).toBeInTheDocument();
     expect(screen.getByLabelText('Worth a look')).toBeInTheDocument();
-    expect(screen.getByText('1 open question, listed below')).toBeInTheDocument();
+    // Open questions listed in the brief; asked ones are not.
+    expect(screen.getByTestId('brief-questions').textContent).toBe('Is my iron low?');
+    expect(screen.queryByText('Can I travel?')).toBeNull();
     // Read-only: nothing to edit on the brief.
     expect(screen.queryByRole('button')).toBeNull();
     expect(screen.queryByRole('textbox')).toBeNull();
@@ -50,6 +52,35 @@ describe('PatientVisitBrief (doctor, before the visit)', () => {
     expect(screen.getByText('None recorded')).toBeInTheDocument();
     expect(screen.getByText('Not logged')).toBeInTheDocument();
     expect(screen.getByText('None saved')).toBeInTheDocument();
+    expect(screen.getByText('No results yet')).toBeInTheDocument();
     expect(screen.queryByLabelText('Worth a look')).toBeNull();
+  });
+
+  it('lists the results worth raising by the prep-sheet rules (out of range, status change)', () => {
+    const row = (id: string, title: string, value: string, status: string, date: string) => ({
+      id, document_id: 'd', title, value, unit: 'ng/mL', reference_range: '30-400', status,
+      data_type: 'lab_result', date_recorded: date, notes: null, raw_data: null,
+    });
+    render(
+      <PatientVisitBrief
+        now={NOW}
+        profile={null}
+        appointments={[]}
+        periodRecords={[]}
+        signals={[]}
+        medicines={[]}
+        visitQuestions={[]}
+        medicalData={[
+          row('1', 'Ferritin', '12', 'abnormal', '2026-11-01'),
+          row('2', 'Ferritin', '40', 'normal', '2026-06-01'),
+          row('3', 'Prolactin', '200', 'normal', '2026-11-01'),
+        ]}
+      />,
+    );
+    const list = screen.getByTestId('brief-results');
+    expect(list.textContent).toContain('12 ng/mL');
+    expect(list.textContent).toMatch(/Marked outside range; was 40 ng\/mL \(within range\)/);
+    expect(list.textContent).not.toContain('Prolactin');
+    expect(screen.getByLabelText('Worth a look')).toBeInTheDocument();
   });
 });

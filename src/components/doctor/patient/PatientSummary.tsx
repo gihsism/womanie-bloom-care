@@ -16,7 +16,6 @@ import type {
   PatientProfile,
   PatientVisitQuestions as VisitQuestionsRow,
 } from './types';
-import PatientVisitQuestions from './PatientVisitQuestions';
 import PatientVisitBrief from './PatientVisitBrief';
 import PatientNewSince from './PatientNewSince';
 
@@ -99,6 +98,7 @@ const PatientSummary = ({ medicalData, documents, notes, appointments, signals, 
         signals={signals}
         medicines={medicines}
         visitQuestions={visitQuestions}
+        medicalData={medicalData}
       />
 
       <PatientNewSince
@@ -141,9 +141,6 @@ const PatientSummary = ({ medicalData, documents, notes, appointments, signals, 
           onClick={() => onOpenTab('notes')}
         />
       </Card>
-
-      {/* Her questions for the next visit with you. Self-hides when none. */}
-      <PatientVisitQuestions rows={visitQuestions} />
 
       {/* What the patient tracked herself. Self-hides empty blocks. */}
       <DoctorPatientTrackingSummary periodRecords={periodRecords} signals={signals} lifeStage={lifeStage} />

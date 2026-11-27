@@ -1,10 +1,13 @@
 import { Card } from '@/components/ui/card';
-import { AlertTriangle, ClipboardList, HeartPulse, MapPin, Pill } from 'lucide-react';
+import { AlertTriangle, ClipboardList, FlaskConical, HeartPulse, MapPin, Pill } from 'lucide-react';
 import { stageLabel } from '@/lib/doctorDashboard';
 import { cycleDay, medicineLine, moodSummary, pregnancyWeek, visitSummary } from '@/lib/doctorPatient';
 import { parseQuestions } from '@/lib/visitQuestions';
+import { resultsToDiscuss } from '@/lib/visitPrep';
+import { formatLabDay } from '@/lib/health-trends';
 import type {
   HealthSignal,
+  MedicalDataRow,
   PatientAppointment,
   PatientMedicine,
   PatientProfile,
@@ -12,10 +15,12 @@ import type {
   PeriodRecord,
 } from './types';
 
-// "Before the visit": the five things a gynaecologist checks first, on one
+// "Before the visit": the things a gynaecologist checks first, on one
 // card at the top of the Summary tab. Where she is (stage, pregnancy week
 // or cycle day), what she takes, how her mood has been, and whether she is
-// bringing questions. Everything is from the consent-gated chart fetch;
+// bringing questions. Her open questions and the results worth raising
+// are listed here, chosen by the same rules as her own visit prep sheet
+// (lib/visitPrep), so doctor and patient see the same list. Everything is from the consent-gated chart fetch;
 // medicines and moods are what the patient logged herself, and the card
 // says so.
 
@@ -26,6 +31,8 @@ interface Props {
   signals: HealthSignal[];
   medicines: PatientMedicine[];
   visitQuestions: PatientVisitQuestions[];
+  /** Her extracted lab results (latest per test picked by resultsToDiscuss). */
+  medicalData?: MedicalDataRow[];
   now?: number;
 }
 
@@ -62,16 +69,20 @@ function whereSheIs(profile: PatientProfile | null, periods: PeriodRecord[], now
   ].filter(Boolean).join(' · ');
 }
 
-const PatientVisitBrief = ({ profile, appointments, periodRecords, signals, medicines, visitQuestions, now = Date.now() }: Props) => {
+const PatientVisitBrief = ({ profile, appointments, periodRecords, signals, medicines, visitQuestions, medicalData = [], now = Date.now() }: Props) => {
   const { next } = visitSummary(appointments, now);
   const mood = moodSummary(signals);
-  // Same visit as the "Questions she's bringing" card below: the earliest
-  // upcoming one with any questions saved.
+  // The earliest upcoming visit with this doctor that has questions saved
+  // (the same visit the Visits tab marks).
   const forVisit = visitQuestions
     .map(r => ({ at: Date.parse(r.scheduled_at), list: parseQuestions(r.questions) }))
     .filter(r => r.list.length > 0)
     .sort((a, b) => a.at - b.at)[0];
-  const openQuestions = forVisit ? forVisit.list.filter(q => !q.asked).length : 0;
+  const openQuestions = forVisit ? forVisit.list.filter(q => !q.asked) : [];
+  const results = resultsToDiscuss(
+    // Test names as the lab wrote them (the patient-friendly names are for her).
+    medicalData.map(r => ({ ...r, value: r.value == null ? null : String(r.value), data_type: r.data_type ?? 'lab_result' })),
+  );
 
   const nextLine = next
     ? `Next visit ${new Date(next.scheduled_at).toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}${next.consultation_type ? ` · ${next.consultation_type.replace(/_/g, ' ')}` : ''}`
@@ -110,12 +121,36 @@ const PatientVisitBrief = ({ profile, appointments, periodRecords, signals, medi
           )}
         </Row>
 
-        <Row icon={ClipboardList} label="Questions for the visit">
-          {!forVisit
-            ? <span className="text-muted-foreground">None saved</span>
-            : openQuestions === 0
-            ? 'All marked as asked'
-            : `${openQuestions} open question${openQuestions === 1 ? '' : 's'}, listed below`}
+        <Row icon={FlaskConical} label="Results worth raising" alert={results.length > 0}>
+          {results.length === 0 ? (
+            <span className="text-muted-foreground">
+              {medicalData.length === 0 ? 'No results yet' : 'None outside the range or changed since the previous test'}
+            </span>
+          ) : (
+            <ul className="space-y-1" data-testid="brief-results">
+              {results.map(r => (
+                <li key={r.name}>
+                  <span className="font-medium">{r.name}</span> {r.value}
+                  <span className="text-muted-foreground">
+                    {r.range ? ` (ref. ${r.range})` : ''}{r.date ? ` · ${formatLabDay(r.date)}` : ''}
+                  </span>
+                  <span className="block text-xs text-muted-foreground">{r.note}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Row>
+
+        <Row icon={ClipboardList} label="Her open questions for the visit">
+          {!forVisit ? (
+            <span className="text-muted-foreground">None saved</span>
+          ) : openQuestions.length === 0 ? (
+            'All marked as asked'
+          ) : (
+            <ul className="list-disc pl-4 space-y-0.5" data-testid="brief-questions">
+              {openQuestions.map(q => <li key={q.id}>{q.text}</li>)}
+            </ul>
+          )}
         </Row>
       </div>
     </Card>
