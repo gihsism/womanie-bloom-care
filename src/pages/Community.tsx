@@ -6,7 +6,7 @@ import {
   Heart, Users, MessageCircle, BookOpen, Baby, Flower2, 
   Sparkles, ArrowRight, Globe,
   Pill, Activity, Stethoscope, Lightbulb, Shield
-} from 'lucide-react';
+} from '@/components/icons';
 
 const supportGroups = [
   {

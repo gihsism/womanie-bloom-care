@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { db } from '@/integrations/db/client';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from '@/components/icons';
 import { EMPTY_DRAFT, type DoctorNote, type NoteDraft } from './types';
 
 // Notes tab of the doctor's patient chart: write, edit, delete notes.

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Activity, Sparkles } from 'lucide-react';
+import { Activity, Sparkles } from '@/components/icons';
 import { db } from '@/integrations/db/client';
 import { parseISO, differenceInDays, format, subDays } from 'date-fns';
 import { onHealthDataChange } from '@/lib/data-events';

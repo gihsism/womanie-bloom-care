@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useRequireRole } from '@/hooks/useRequireRole';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, PenLine } from 'lucide-react';
+import { ArrowLeft, PenLine } from '@/components/icons';
 import { stageLabel } from '@/lib/doctorDashboard';
 import { cycleDay, normalizePatientTab, pregnancyWeek, type PatientTab } from '@/lib/doctorPatient';
 import PatientSummary from '@/components/doctor/patient/PatientSummary';

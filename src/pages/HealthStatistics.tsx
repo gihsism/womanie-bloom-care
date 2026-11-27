@@ -7,7 +7,7 @@ import { onHealthDataChange } from "@/lib/data-events";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FileText, Calendar, ArrowLeft, Activity, AlertTriangle, CheckCircle2, FlaskConical, Download } from "lucide-react";
+import { FileText, Calendar, ArrowLeft, Activity, AlertTriangle, CheckCircle2, FlaskConical, Download } from "@/components/icons";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import UserMenu from "@/components/UserMenu";

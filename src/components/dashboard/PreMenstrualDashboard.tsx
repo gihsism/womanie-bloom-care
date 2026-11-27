@@ -17,7 +17,7 @@ import {
   CheckCircle2,
   Lightbulb,
   Activity,
-} from 'lucide-react';
+} from '@/components/icons';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 
 const bodyChangesData = [

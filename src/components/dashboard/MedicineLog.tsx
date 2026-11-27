@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { insertLifeEvent, useLifeEvents } from '@/hooks/useLifeEvents';
-import { Pill, Plus, Check, Trash2, Bell, X, Pencil } from 'lucide-react';
+import { Pill, Plus, Check, Trash2, Bell, X, Pencil } from '@/components/icons';
 import { format, isToday, parseISO } from 'date-fns';
 import { dueReminders } from '@/lib/medicine';
 import { emitHealthDataChange } from '@/lib/data-events';

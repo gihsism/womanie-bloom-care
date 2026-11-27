@@ -12,7 +12,7 @@ import {
   ArrowRight,
   AlertTriangle,
   CheckCircle2,
-} from 'lucide-react';
+} from '@/components/icons';
 
 interface ExtractedItem {
   title: string;

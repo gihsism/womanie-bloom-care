@@ -1,4 +1,4 @@
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink } from '@/components/icons';
 import { RESEARCH_DISCLAIMER, type ChatSource } from '@/lib/research-sources';
 
 // Compact "Sources" list under an AI answer: only the research-library

@@ -7,7 +7,7 @@ import {
   Flower2,
   Egg,
   HeartPulse,
-} from 'lucide-react';
+} from '@/components/icons';
 import { labNumber } from '@/lib/labValue';
 
 interface LabResult {

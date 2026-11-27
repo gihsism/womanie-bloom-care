@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Download, Smartphone, Check, ArrowLeft } from 'lucide-react';
+import { Download, Smartphone, Check, ArrowLeft } from '@/components/icons';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 

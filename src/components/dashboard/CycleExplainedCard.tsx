@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { format, subDays } from 'date-fns';
-import { BookOpen, Info, Stethoscope } from 'lucide-react';
+import { BookOpen, Info, Stethoscope } from '@/components/icons';
 import { Card } from '@/components/ui/card';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';

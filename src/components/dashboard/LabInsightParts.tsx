@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Upload } from 'lucide-react';
+import { ArrowRight, Upload } from '@/components/icons';
 import { attentionBanner, getStatusInfo } from '@/lib/medical-utils';
 
 // Shared pieces of the Home lab-insight cards (pregnancy, cycle, other

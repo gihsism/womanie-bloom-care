@@ -35,7 +35,7 @@ import {
   ArrowLeft,
   Copy,
   Check,
-} from 'lucide-react';
+} from '@/components/icons';
 import { ChatSources } from '@/components/chat/ChatSources';
 import { PastChats } from '@/components/chat/PastChats';
 import { chatDeleteTarget, groupIntoChats, newConversationId, type PastChat, type StoredChatMessage } from '@/lib/chatSessions';

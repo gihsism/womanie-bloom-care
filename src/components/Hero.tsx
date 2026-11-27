@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { startLogin } from '@/lib/login';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, FileText, Brain, Shield } from 'lucide-react';
+import { ArrowRight, FileText, Brain, Shield } from '@/components/icons';
 import heroIllustration from '@/assets/hero-illustration.png';
 import { useAuth } from '@/contexts/AuthContext';
 

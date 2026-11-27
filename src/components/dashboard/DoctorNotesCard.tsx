@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
-import { Stethoscope, NotebookPen, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react';
+import { Stethoscope, NotebookPen, ChevronDown, ChevronUp, ShieldCheck } from '@/components/icons';
 import { formatDistanceToNow } from 'date-fns';
 import { onHealthDataChange } from '@/lib/data-events';
 

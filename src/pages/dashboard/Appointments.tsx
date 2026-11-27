@@ -25,7 +25,7 @@ import {
   ChevronDown,
   Users,
   FileText,
-} from 'lucide-react';
+} from '@/components/icons';
 import { downloadIcs } from '@/lib/ics';
 import RescheduleDialog from '@/components/dashboard/RescheduleDialog';
 import VisitPrepCard from '@/components/dashboard/VisitPrepCard';

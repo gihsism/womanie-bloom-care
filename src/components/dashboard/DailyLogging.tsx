@@ -10,7 +10,7 @@ import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { emitHealthDataChange } from '@/lib/data-events';
 import { format } from 'date-fns';
-import { Loader2, Check } from 'lucide-react';
+import { Loader2, Check } from '@/components/icons';
 import type { LifeStage } from './DashboardHeader';
 
 interface DailyLoggingProps {

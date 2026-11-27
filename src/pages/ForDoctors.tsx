@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { ArrowRight, FileText, KeyRound, PenLine, Stethoscope } from 'lucide-react';
+import { ArrowRight, FileText, KeyRound, PenLine, Stethoscope } from '@/components/icons';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 

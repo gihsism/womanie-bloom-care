@@ -6,7 +6,7 @@ import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { differenceInDays, differenceInMonths, format, parseISO } from 'date-fns';
-import { Flower2, Info, MessageCircle } from 'lucide-react';
+import { Flower2, Info, MessageCircle } from '@/components/icons';
 
 // STRAW+10 staging estimator for menopausal-mode users.
 //

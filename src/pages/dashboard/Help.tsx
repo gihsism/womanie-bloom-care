@@ -13,7 +13,7 @@ import {
   Activity,
   Download,
   Trash2,
-} from 'lucide-react';
+} from '@/components/icons';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import UserMenu from '@/components/UserMenu';
 

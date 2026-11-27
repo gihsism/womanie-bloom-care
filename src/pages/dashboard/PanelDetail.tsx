@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, FlaskConical, Loader2, MessageCircle, Sparkles, RefreshCw } from 'lucide-react';
+import { ArrowLeft, FlaskConical, Loader2, MessageCircle, Sparkles, RefreshCw } from '@/components/icons';
 import ReactMarkdown from 'react-markdown';
 import { NO_REMOTE_IMAGES } from '@/lib/safeMarkdown';
 import { db } from '@/integrations/db/client';

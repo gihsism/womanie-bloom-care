@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { ChevronRight, Loader2, Trash2 } from 'lucide-react';
+import { ChevronRight, Loader2, Trash2 } from '@/components/icons';
 import { chatDeleteTarget, type PastChat } from '@/lib/chatSessions';
 
 // The "Past chats" list on Ask AI. Every stored message is still on the

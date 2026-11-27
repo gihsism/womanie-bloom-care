@@ -1,5 +1,5 @@
-import type { LucideIcon } from 'lucide-react';
-import { ChevronRight } from 'lucide-react';
+import type { LucideIcon } from '@/components/icons';
+import { ChevronRight } from '@/components/icons';
 
 // One tappable row on the Me page: icon, label, an optional quiet value
 // on the right ("Trying to conceive") and a chevron. Uses the current

@@ -2,7 +2,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
 import BabyTracker from '@/components/dashboard/BabyTracker';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from '@/components/icons';
 
 // Full-page baby tracker, reachable at any life stage (the postpartum
 // dashboard shows the same tracker inline for the first 6 months).

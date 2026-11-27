@@ -1,5 +1,5 @@
 import { Card } from '@/components/ui/card';
-import { Check, ClipboardList } from 'lucide-react';
+import { Check, ClipboardList } from '@/components/icons';
 import { parseQuestions, type VisitQuestion } from '@/lib/visitQuestions';
 import type { PatientVisitQuestions as Row } from './types';
 

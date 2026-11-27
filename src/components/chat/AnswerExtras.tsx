@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileText, FlaskConical, ThumbsDown, ThumbsUp } from 'lucide-react';
+import { FileText, FlaskConical, ThumbsDown, ThumbsUp } from '@/components/icons';
 import type { RecordRef } from '@/lib/recordCitations';
 import { FEEDBACK_REASON_LABELS, FEEDBACK_REASONS, MAX_FEEDBACK_COMMENT, type FeedbackReason } from '@/lib/chatFeedback';
 

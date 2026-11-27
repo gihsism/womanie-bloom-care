@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/integrations/db/client';
 import { onHealthDataChange } from '@/lib/data-events';
 import { format, subDays, differenceInDays, parseISO } from 'date-fns';
-import { Thermometer, TrendingUp, Info } from 'lucide-react';
+import { Thermometer, TrendingUp, Info } from '@/components/icons';
 import {
   LineChart,
   Line,

@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNotificationPrefs } from '@/hooks/useNotificationPrefs';
 import { onHealthDataChange } from '@/lib/data-events';
 import { format, isToday, formatDistanceToNowStrict, differenceInMinutes } from 'date-fns';
-import { CalendarClock, Video, MapPin, Stethoscope, AlertCircle } from 'lucide-react';
+import { CalendarClock, Video, MapPin, Stethoscope, AlertCircle } from '@/components/icons';
 
 // Day-of reminder for appointments. Pulls upcoming consultations, keeps
 // only the ones scheduled today, and renders a prominent banner above

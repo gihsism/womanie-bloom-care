@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
 import { format, parseISO, subDays } from 'date-fns';
-import { TrendingUp, ClipboardCheck, Check, Printer, Info } from 'lucide-react';
+import { TrendingUp, ClipboardCheck, Check, Printer, Info } from '@/components/icons';
 import {
   computeMenopauseInsight,
   WINDOW_WEEKS,

@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/integrations/db/client';
 import { onHealthDataChange } from '@/lib/data-events';
-import { CalendarRange, Sparkles } from 'lucide-react';
+import { CalendarRange, Sparkles } from '@/components/icons';
 import { addDays, differenceInDays, format, parseISO, subMonths } from 'date-fns';
 
 // Three-month fertility forecast for conception + menstrual-cycle

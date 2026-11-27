@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Pill, Baby, HeartPulse, Microscope, Flame } from 'lucide-react';
+import { Pill, Baby, HeartPulse, Microscope, Flame } from '@/components/icons';
 
 const WhoItsFor = () => {
   const navigate = useNavigate();

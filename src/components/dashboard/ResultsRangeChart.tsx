@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { BarChart3 } from 'lucide-react';
+import { BarChart3 } from '@/components/icons';
 import { labNumber, parseLabRange } from '@/lib/labValue';
 
 interface LabResult {

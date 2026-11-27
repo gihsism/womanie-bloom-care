@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Eye, Stethoscope } from 'lucide-react';
+import { Eye, Stethoscope } from '@/components/icons';
 import { format } from 'date-fns';
 
 // Patient-facing chart access history (Settings). Every time a doctor

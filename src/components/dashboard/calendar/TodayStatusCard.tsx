@@ -1,4 +1,4 @@
-import { Sparkles, TrendingUp, TrendingDown, AlertCircle, Info } from 'lucide-react';
+import { Sparkles, TrendingUp, TrendingDown, AlertCircle, Info } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { addDays, differenceInCalendarDays, format, parseISO, startOfDay } from 'date-fns';
 import { Badge } from '@/components/ui/badge';

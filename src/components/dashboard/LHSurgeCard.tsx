@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/integrations/db/client';
 import { onHealthDataChange } from '@/lib/data-events';
 import { format, subDays, parseISO, differenceInDays, addDays } from 'date-fns';
-import { Zap, CheckCircle2, XCircle, Circle } from 'lucide-react';
+import { Zap, CheckCircle2, XCircle, Circle } from '@/components/icons';
 
 // LH surge tracker for conception mode. The DailyLogging form has
 // asked users for their daily LH test result for a while

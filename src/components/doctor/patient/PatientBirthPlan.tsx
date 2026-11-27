@@ -1,5 +1,5 @@
 import { Card } from '@/components/ui/card';
-import { FileHeart } from 'lucide-react';
+import { FileHeart } from '@/components/icons';
 import { parsePlan, planSummary } from '@/lib/birthPlan';
 
 // Read-only: the birth plan the patient chose to show in her doctor's

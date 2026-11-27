@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { differenceInDays, format, parseISO } from 'date-fns';
-import { FlaskConical, Timer, CheckCircle2, ArrowRight, Sparkles, Heart } from 'lucide-react';
+import { FlaskConical, Timer, CheckCircle2, ArrowRight, Sparkles, Heart } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import IVFCalendar from './ivf/IVFCalendar';

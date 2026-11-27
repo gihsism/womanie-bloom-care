@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Shield, Plus, Check, AlertCircle, CalendarClock } from 'lucide-react';
+import { Shield, Plus, Check, AlertCircle, CalendarClock } from '@/components/icons';
 import { format, addMonths, differenceInDays, parseISO } from 'date-fns';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 

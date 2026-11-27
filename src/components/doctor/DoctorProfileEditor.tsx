@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { db } from '@/integrations/db/client';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, User, Upload } from 'lucide-react';
+import { Loader2, User, Upload } from '@/components/icons';
 
 // Doctor profile editor. Until now the only chance to set bio /
 // specialty / years of experience / languages was the signup form;

@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { Calendar, User, ArrowRight } from 'lucide-react';
+import { Calendar, User, ArrowRight } from '@/components/icons';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 

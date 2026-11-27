@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { differenceInDays, format, parseISO } from 'date-fns';
-import { Scale, Info, Trash2 } from 'lucide-react';
+import { Scale, Info, Trash2 } from '@/components/icons';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 import EvidenceNote from '@/components/research/EvidenceNote';

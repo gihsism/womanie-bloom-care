@@ -1,4 +1,4 @@
-import { Heart, FileText, Brain, TrendingUp, Shield } from 'lucide-react';
+import { Heart, FileText, Brain, TrendingUp, Shield } from '@/components/icons';
 import { Card } from '@/components/ui/card';
 
 const highlights = [

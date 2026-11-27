@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { AlertCircle, CalendarPlus, CheckCircle, Clock, Loader2, MapPin, Video } from 'lucide-react';
+import { AlertCircle, CalendarPlus, CheckCircle, Clock, Loader2, MapPin, Video } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';

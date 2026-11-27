@@ -17,7 +17,7 @@ import {
   Cell,
 } from 'recharts';
 import { attentionBanner, healthTone } from '@/lib/medical-utils';
-import { Activity, AlertCircle } from 'lucide-react';
+import { Activity, AlertCircle } from '@/components/icons';
 
 // Cycle-length history chart for menstrual / conception / contraception
 // modes. Pulls period_tracking rows from the last 12 months, computes

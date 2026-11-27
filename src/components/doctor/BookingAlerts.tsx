@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { BellRing, Loader2 } from 'lucide-react';
+import { BellRing, Loader2 } from '@/components/icons';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';

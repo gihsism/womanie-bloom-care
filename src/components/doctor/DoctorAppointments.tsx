@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { db } from '@/integrations/db/client';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, CheckCircle, Video, XCircle } from 'lucide-react';
+import { Calendar, CheckCircle, Video, XCircle } from '@/components/icons';
 import {
   needsCloseout,
   pastAppointments as pastOf,

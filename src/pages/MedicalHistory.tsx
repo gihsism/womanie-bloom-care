@@ -63,7 +63,7 @@ import {
   ArrowUpDown,
   MoreHorizontal,
   Upload,
-} from 'lucide-react';
+} from '@/components/icons';
 import { fetchDoctorSentDocuments } from '@/lib/documentFiles';
 import { format, differenceInDays, addDays } from 'date-fns';
 import {

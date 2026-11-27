@@ -4,7 +4,7 @@ import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
 import { format, parseISO, startOfDay, subDays } from 'date-fns';
-import { CalendarHeart, Flame, Activity } from 'lucide-react';
+import { CalendarHeart, Flame, Activity } from '@/components/icons';
 import EvidenceNote from '@/components/research/EvidenceNote';
 import { evidenceSpec } from '@/lib/evidenceTopics';
 

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { User, Stethoscope, ArrowLeft } from 'lucide-react';
+import { User, Stethoscope, ArrowLeft } from '@/components/icons';
 import { Card } from '@/components/ui/card';
 import Logo from '@/components/brand/Logo';
 

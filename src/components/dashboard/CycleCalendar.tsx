@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Settings2, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Settings2, Sparkles } from '@/components/icons';
 import { format, addMonths, subMonths, addDays, differenceInDays, startOfDay, parseISO } from 'date-fns';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

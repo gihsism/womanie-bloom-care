@@ -1,4 +1,4 @@
-import { Shield, Lock, UserCheck, Stethoscope } from 'lucide-react';
+import { Shield, Lock, UserCheck, Stethoscope } from '@/components/icons';
 
 const TrustSecurity = () => {
   const features = [

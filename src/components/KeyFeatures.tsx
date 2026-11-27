@@ -5,7 +5,7 @@ import {
   FolderHeart,
   Users,
   Watch,
-} from 'lucide-react';
+} from '@/components/icons';
 
 const KeyFeatures = () => {
   const features = [

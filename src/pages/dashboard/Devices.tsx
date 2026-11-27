@@ -4,7 +4,7 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Watch, Heart, Activity, Bluetooth, Smartphone, CheckCircle2, AlertCircle, ExternalLink, Loader2 } from 'lucide-react';
+import { ArrowLeft, Watch, Heart, Activity, Bluetooth, Smartphone, CheckCircle2, AlertCircle, ExternalLink, Loader2 } from '@/components/icons';
 import { healthKitService } from '@/services/healthkit';
 import { toast } from 'sonner';
 import Logo from '@/components/brand/Logo';

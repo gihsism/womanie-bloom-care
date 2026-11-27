@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { differenceInDays, differenceInMonths, format, parseISO } from 'date-fns';
-import { CalendarRange, Activity, Thermometer } from 'lucide-react';
+import { CalendarRange, Activity, Thermometer } from '@/components/icons';
 
 // Condensed tracking-summary card for the doctor's PatientDetails
 // Overview tab. Same aggregation the patient sees on her own

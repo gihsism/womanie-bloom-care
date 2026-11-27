@@ -1,5 +1,5 @@
 import { format, differenceInDays, addDays, parseISO } from 'date-fns';
-import { Droplet, AlertTriangle } from 'lucide-react';
+import { Droplet, AlertTriangle } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { PeriodRecord, isActivePeriod } from '@/hooks/useCyclePrediction';
 

@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/integrations/db/client';
-import { CalendarClock, Video, MapPin, Stethoscope, ShieldCheck, X, CalendarCog } from 'lucide-react';
+import { CalendarClock, Video, MapPin, Stethoscope, ShieldCheck, X, CalendarCog } from '@/components/icons';
 import RescheduleDialog from './RescheduleDialog';
 import { format, formatDistanceToNowStrict } from 'date-fns';
 import { errorMessage } from '@/lib/errors';

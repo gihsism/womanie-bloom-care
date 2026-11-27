@@ -21,7 +21,7 @@ import {
   Heart,
   Info,
   Sparkles,
-} from 'lucide-react';
+} from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 import { parsePillStatus, yesterdayPillUnanswered, pillPackDay, type PillStatus } from '@/lib/pillLog';

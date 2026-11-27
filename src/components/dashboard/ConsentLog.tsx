@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileCheck2, Loader2 } from 'lucide-react';
+import { FileCheck2, Loader2 } from '@/components/icons';
 import { format } from 'date-fns';
 
 // Me -> Privacy: when she accepted the privacy policy, and which version

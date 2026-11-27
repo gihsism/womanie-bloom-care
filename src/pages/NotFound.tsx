@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Home, ArrowLeft, Calendar, MessageSquare, FileText, Heart } from 'lucide-react';
+import { Home, ArrowLeft, Calendar, MessageSquare, FileText, Heart } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
 import Logo from '@/components/brand/Logo';
 

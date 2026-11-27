@@ -13,7 +13,7 @@ import {
   parseTypedBbt, parseYmd, ymd, type OpkResult, type FertileWindow,
 } from '@/lib/ttc';
 import { cn } from '@/lib/utils';
-import { TestTube2, Thermometer } from 'lucide-react';
+import { TestTube2, Thermometer } from '@/components/icons';
 
 // TTC stage: today's ovulation test (negative / positive / peak, one tap),
 // today's temperature, and the cycle's temperature chart with the tests

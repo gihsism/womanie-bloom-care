@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
-import { CheckCircle2, Plus, Trash2, Wind } from 'lucide-react';
+import { CheckCircle2, Plus, Trash2, Wind } from '@/components/icons';
 import { format, isToday, parseISO, subDays } from 'date-fns';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, CalendarIcon, CheckCircle, Clock, Languages, MapPin, Star, Video } from 'lucide-react';
+import { ArrowLeft, CalendarIcon, CheckCircle, Clock, Languages, MapPin, Star, Video } from '@/components/icons';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';

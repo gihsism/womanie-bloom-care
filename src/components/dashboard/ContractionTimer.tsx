@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
-import { Timer, Play, Square, RotateCcw, Phone, History, CloudOff } from 'lucide-react';
+import { Timer, Play, Square, RotateCcw, Phone, History, CloudOff } from '@/components/icons';
 import { format, formatDistanceToNowStrict } from 'date-fns';
 import { importLocalOnce } from '@/hooks/useLifeEvents';
 import { useOfflineLifeEvents } from '@/hooks/useOfflineLifeEvents';

@@ -1,4 +1,4 @@
-import { Activity, Baby, CalendarDays, ClipboardList, Droplets, HeartPulse, Milk, Pill, Scale, Timer, type LucideIcon } from 'lucide-react';
+import { Activity, Baby, CalendarDays, ClipboardList, Droplets, HeartPulse, Milk, Pill, Scale, Timer, type LucideIcon } from '@/components/icons';
 
 // Quick-log shortcuts per life stage, shown as chips inside Home's Log
 // sheet. Targets: '/path' or '/dashboard/stage#id' navigates (the stage

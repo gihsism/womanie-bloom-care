@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { TrendingUp, TrendingDown, Minus, ArrowRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, ArrowRight } from '@/components/icons';
 import { format } from 'date-fns';
 import { labNumber, parseLabRange } from '@/lib/labValue';
 

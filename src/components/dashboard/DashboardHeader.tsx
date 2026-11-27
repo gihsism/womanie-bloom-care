@@ -7,7 +7,7 @@ import {
   TrendingUp,
   Baby,
   Flame,
-} from 'lucide-react';
+} from '@/components/icons';
 import { stageLabel } from '@/lib/stageLabels';
 
 export type LifeStage =

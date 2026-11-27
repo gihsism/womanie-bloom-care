@@ -5,7 +5,7 @@ import { onHealthDataChange } from '@/lib/data-events';
 import { hormoneKeyForTitle, type HormoneKey } from '@/lib/hormone-reference';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { differenceInDays, parseISO, formatDistanceToNowStrict } from 'date-fns';
-import { Clock, AlertCircle } from 'lucide-react';
+import { Clock, AlertCircle } from '@/components/icons';
 
 // "When did you last check…" prompts.
 //

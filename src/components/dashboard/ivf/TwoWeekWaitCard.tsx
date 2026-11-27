@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Hourglass } from 'lucide-react';
+import { Hourglass } from '@/components/icons';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';

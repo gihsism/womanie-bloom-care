@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { CheckCircle2, Circle, Briefcase, RotateCcw, Plus, X, Pencil } from 'lucide-react';
+import { CheckCircle2, Circle, Briefcase, RotateCcw, Plus, X, Pencil } from '@/components/icons';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 import {
   addCustomItem, bagProgress, BAG_SECTIONS, clearPacked, EMPTY_BAG, parseBagState, removeItem,

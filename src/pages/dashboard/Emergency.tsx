@@ -15,7 +15,7 @@ import {
   Trash2,
   AlertTriangle,
   Siren,
-} from 'lucide-react';
+} from '@/components/icons';
 import { errorMessage } from '@/lib/errors';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 

@@ -13,7 +13,7 @@ import {
   Sunset,
   Flower2,
   ThermometerSun,
-} from 'lucide-react';
+} from '@/components/icons';
 import { addDays, differenceInCalendarDays, differenceInDays, startOfDay, subDays, format } from 'date-fns';
 import { DetailsLink } from '@/components/dashboard/HomeBlocks';
 
