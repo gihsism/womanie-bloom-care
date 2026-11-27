@@ -7,6 +7,8 @@ import { Check, X, Stethoscope, ShieldCheck } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { errorMessage } from '@/lib/errors';
 import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
+import { useConfirm } from '@/components/ConfirmDialog';
+import { declineRequestConfirm } from '@/lib/confirmCopy';
 
 // Pending-doctor-connection approvals.
 //
@@ -36,6 +38,7 @@ export default function PendingConnections() {
   const [rows, setRows] = useState<PendingRow[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [confirm, confirmDialog] = useConfirm();
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -54,7 +57,8 @@ export default function PendingConnections() {
   useEffect(() => { load(); }, [load]);
   useEffect(() => onHealthDataChange(load), [load]);
 
-  const respond = async (connectionId: string, action: 'approve' | 'reject') => {
+  const respond = async (connectionId: string, action: 'approve' | 'reject', label = 'This doctor') => {
+    if (action === 'reject' && !(await confirm(declineRequestConfirm(label)))) return;
     setBusyId(connectionId);
     try {
       const resp = await fetch('/api/connections/respond', {
@@ -142,7 +146,7 @@ export default function PendingConnections() {
                   variant="outline"
                   size="sm"
                   className="h-8 gap-1"
-                  onClick={() => respond(r.id, 'reject')}
+                  onClick={() => respond(r.id, 'reject', name)}
                   disabled={busyId === r.id}
                 >
                   <X className="h-3.5 w-3.5" />
@@ -162,6 +166,7 @@ export default function PendingConnections() {
           );
         })}
       </ul>
+      {confirmDialog}
     </Card>
   );
 }

@@ -12,6 +12,8 @@ import { format, formatDistanceToNowStrict } from 'date-fns';
 import { errorMessage } from '@/lib/errors';
 import { relativeDay } from '@/lib/relative-day';
 import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
+import { useConfirm } from '@/components/ConfirmDialog';
+import { cancelAppointmentConfirm } from '@/lib/confirmCopy';
 
 // Upcoming consultations on the patient dashboard. Patients can already
 // book through FindDoctor but had nowhere to see their schedule after.
@@ -44,6 +46,7 @@ export default function UpcomingAppointments() {
   const [loaded, setLoaded] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rescheduling, setRescheduling] = useState<AppointmentRow | null>(null);
+  const [confirm, confirmDialog] = useConfirm();
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -73,7 +76,7 @@ export default function UpcomingAppointments() {
   const cancel = async (apt: AppointmentRow) => {
     const doctorLabel = [apt.doctor_title, apt.doctor_name].filter(Boolean).join(' ') || 'this doctor';
     const when = format(new Date(apt.scheduled_at), 'PPP, p');
-    if (!window.confirm(`Cancel your appointment with ${doctorLabel} on ${when}?`)) return;
+    if (!(await confirm(cancelAppointmentConfirm(doctorLabel, when)))) return;
     setBusyId(apt.id);
     try {
       await setApptStatus(apt, 'cancelled');
@@ -241,6 +244,7 @@ export default function UpcomingAppointments() {
         onOpenChange={(open) => { if (!open) setRescheduling(null); }}
         onRescheduled={() => { emitHealthDataChange(); load(); }}
       />
+      {confirmDialog}
     </Card>
   );
 }
