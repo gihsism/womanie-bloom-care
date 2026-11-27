@@ -353,6 +353,33 @@ signs, Cochrane PFMT 2020, perineal-massage reviews in the library, RCOG
 Tests: `src/lib/healthClaims.test.ts`, `pregnancySchedule.test.ts`,
 `PregnancyCheckupsCard.test.tsx`.
 
+### Summary content check, next 150 items
+
+Ranks 472-621 of the round-2 exposure ranking (none skipped; all had
+PubMed abstracts), checked the same way. 138 fair. 12 fixes in 11 items,
+text only (10 re-embedded offline):
+
+| Item | Problem | Fix |
+|---|---|---|
+| `pmid-38901794` SOGC endometrial thickening | key point "often not serious"; abstract does not say so | "often found on ultrasound" |
+| `pmid-41470910` fish and depression (observational) | "a clear benefit appeared" | "a clear link" |
+| `pmid-36744416` vitamin D for asthma | calcidiol trial called "small" | "one trial" |
+| `pmid-37188442` early postpartum OGTT | "wrongly flagged some women"; specificity 56% | "about 44%" |
+| `pmid-31318420` endometriosis and IVF | "ovarian endometriosis reduced egg numbers most" | "also linked to fewer eggs" |
+| `pmid-38197853` abstinence time and sperm | firm "more benefit ... mostly within 4 days"; authors say "could be" | "possibly", "may" |
+| `pmid-36302159` immediate postpartum IUD/implant (Cochrane) | "were more likely to come out" on low-certainty evidence | "may be" |
+| `pmid-34449251` acupuncture after breast cancer | "many trials" at high risk of bias (abstract: "some"); certainty "low" ungraded | "some"; "not stated" |
+| `pmid-25722103` | certainty "low", abstract grades nothing | "not stated" |
+| `pmid-41147529` acupuncture for PCOS (Cochrane) | "made little or no difference" on low certainty | "may make" |
+| `pmid-29168557` probiotics for thrush | "improved short-term cure" on low quality | "may have improved" |
+
+Left as is (judgement calls): about 30 labels where the abstract gives a
+range ("moderate to low") or calls the evidence weak without a formal
+grade, e.g. `pmid-30342643`, `pmid-28237870`, `pmid-29910107`,
+`pmid-27534637`, `pmid-42372649`, `pmid-27364100`, `pmid-28276140`,
+`pmid-35325124`, `pmid-25864059`, `pmid-36449274` (could be "not stated"
+under a strict reading).
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed

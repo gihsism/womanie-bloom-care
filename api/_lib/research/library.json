@@ -1607,7 +1607,7 @@
    "keyPoints": [
     "Miscarriage risk was higher with both adenomyosis (OR 3.40) and endometriosis (OR 1.30).",
     "Endometriosis was linked to preterm delivery (OR 1.38), caesarean delivery (OR 1.98) and neonatal unit admission (OR 1.29).",
-    "Endometriosis was linked to fewer eggs retrieved and lower fertilisation rates; ovarian endometriosis reduced egg numbers most.",
+    "Endometriosis was linked to fewer eggs retrieved and lower fertilisation rates; ovarian endometriosis on its own was also linked to fewer eggs.",
     "The authors suggest pre-pregnancy counselling and treating pregnancies with these conditions as higher risk until more evidence is available."
    ],
    "certainty": "not stated",
@@ -35771,7 +35771,7 @@
    "keyPoints": [
     "Higher fish consumption was linked to lower depression risk overall (RR 0.79).",
     "A similar link was found for depression related to pregnancy (RR 0.78).",
-    "A clear benefit appeared only in studies where fish intake was at least 68.4 g/day, hinting at a possible threshold.",
+    "A clear link appeared only in studies where fish intake was at least 68.4 g/day, hinting at a possible threshold.",
     "Each extra 15 g/day of fish was linked to a 6% lower depression risk."
    ],
    "certainty": "not stated",
@@ -49439,7 +49439,7 @@
     "Vitamin D did not reduce or increase the number of people having asthma attacks needing steroid treatment (high-quality evidence).",
     "No benefit was found for asthma control scores, emergency visits or lung function, and results did not differ by age, dose or starting vitamin D level.",
     "No effect on serious side effects was seen; reported reactions such as high urine calcium or stomach upset occurred in both vitamin D and placebo groups.",
-    "Too few people with severe asthma or very low vitamin D were studied, and one small trial of a different form (calcidiol) showed benefit, so more research is needed."
+    "Too few people with severe asthma or very low vitamin D were studied, and one trial of a different form (calcidiol) showed benefit, so more research is needed."
    ],
    "certainty": "high",
    "lifeStages": [
@@ -65597,7 +65597,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/41147529/",
-   "summary": "This Cochrane review looked at whether acupuncture helps women with polycystic ovary syndrome (PCOS) who ovulate rarely or not at all. It combined nine trials with 1606 women. Compared with fake (sham) acupuncture, real acupuncture made little or no difference to live births, pregnancies, ovulation or miscarriage, though this evidence is low certainty. Side effects were probably more common with acupuncture.",
+   "summary": "This Cochrane review looked at whether acupuncture helps women with polycystic ovary syndrome (PCOS) who ovulate rarely or not at all. It combined nine trials with 1606 women. Compared with fake (sham) acupuncture, real acupuncture may make little or no difference to live births, pregnancies, ovulation or miscarriage, though this evidence is low certainty. Side effects were probably more common with acupuncture.",
    "keyPoints": [
     "Compared with sham acupuncture, acupuncture may make little to no difference to live birth, clinical pregnancy, ovulation, multiple pregnancy or miscarriage (low-certainty evidence).",
     "Adverse events are probably more common with acupuncture than sham acupuncture (moderate-certainty evidence).",
@@ -70110,7 +70110,7 @@
     "No difference was found in milk contamination or in breast or nipple pain between the methods compared.",
     "Small studies, wide variation and manufacturer support for many pump trials mean the results should be applied with caution."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "postpartum"
    ],
@@ -71938,7 +71938,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/38901794/",
    "summary": "This Canadian guideline looks at what to do when an ultrasound shows a thickened womb lining in a woman after menopause who has no bleeding. It aims to avoid unnecessary tests and procedures while still checking women who may be at risk of womb cancer. The guideline's public summary says that without bleeding, a lining thinner than 11 mm is rarely a serious problem, but it should still be looked at by a health care provider.",
    "keyPoints": [
-    "A thickened womb lining found on ultrasound in a postmenopausal woman with no bleeding is often not serious.",
+    "A thickened womb lining is often found on ultrasound in postmenopausal women who have no bleeding.",
     "Without bleeding, a lining under 11 mm is rarely a serious problem but should still be evaluated by a health care provider.",
     "The aim is to avoid unnecessary invasive tests while selectively investigating women at risk of endometrial cancer.",
     "Fewer unnecessary procedures could mean less anxiety, pain and risk of complications."
@@ -73514,14 +73514,14 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34449251/",
-   "summary": "This review pooled 20 trials (1,709 breast cancer survivors) to see whether acupuncture eases symptoms linked to cancer treatment, including hot flashes. Acupuncture reduced pain, tiredness and hot flash severity compared with control groups. When it was compared only with sham (fake) acupuncture, the benefits were not statistically significant. Many trials had a high risk of bias, so the authors say more rigorous studies are needed.",
+   "summary": "This review pooled 20 trials (1,709 breast cancer survivors) to see whether acupuncture eases symptoms linked to cancer treatment, including hot flashes. Acupuncture reduced pain, tiredness and hot flash severity compared with control groups. When it was compared only with sham (fake) acupuncture, the benefits were not statistically significant. Some trials had a high risk of bias, so the authors say more rigorous studies are needed.",
    "keyPoints": [
     "Acupuncture was more effective than control groups for pain, fatigue and hot flash severity.",
     "Compared with waitlist or usual care, acupuncture also reduced depression and neuropathy.",
     "Against sham acupuncture, effects showed trends but were not significant.",
     "No serious side effects were reported; mild ones such as bruising, pain and headache occurred in 11 studies, and safety reporting was incomplete."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menopause",
     "post-menopause"
@@ -99713,7 +99713,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/36302159/",
-   "summary": "This Cochrane review looked at whether getting a contraceptive implant or an IUD (a small device placed in the womb) right after birth works better than waiting until a later visit. It combined 16 trials: 5 on implants and 11 on IUDs. More people ended up with an implant or IUD when it was offered right after birth. However, IUDs placed straight after birth were more likely to come out on their own, and immediate implants may be linked with more bleeding and other side effects in the first six weeks.",
+   "summary": "This Cochrane review looked at whether getting a contraceptive implant or an IUD (a small device placed in the womb) right after birth works better than waiting until a later visit. It combined 16 trials: 5 on implants and 11 on IUDs. More people ended up with an implant or IUD when it was offered right after birth. However, IUDs placed straight after birth may be more likely to come out on their own, and immediate implants may be linked with more bleeding and other side effects in the first six weeks.",
    "keyPoints": [
     "Immediate insertion probably means more people start an implant (moderate-certainty evidence) or an IUD (moderate-certainty evidence) than waiting for a later visit.",
     "IUDs placed immediately after birth may be more likely to be expelled (come out) by six months than IUDs placed later (low-certainty evidence).",
@@ -104461,7 +104461,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/37188442/",
-   "summary": "Women who had gestational diabetes are at higher risk of developing diabetes later, but many miss the usual blood sugar test at 4-12 weeks after birth. This review combined four studies to see how well a sugar tolerance test done in the first few days after birth, before leaving hospital, picks up abnormal results. The early test caught about 74% of abnormal cases but wrongly flagged some women who were actually normal. The authors suggest an early test before discharge is a practical option, though more research is needed.",
+   "summary": "Women who had gestational diabetes are at higher risk of developing diabetes later, but many miss the usual blood sugar test at 4-12 weeks after birth. This review combined four studies to see how well a sugar tolerance test done in the first few days after birth, before leaving hospital, picks up abnormal results. The early test caught about 74% of abnormal cases but wrongly flagged about 44% of women whose results were actually normal. The authors suggest an early test before discharge is a practical option, though more research is needed.",
    "keyPoints": [
     "An early postpartum glucose tolerance test had a sensitivity of 74% and a specificity of 56%.",
     "The early test could help tell normal results from abnormal ones, including diabetes and glucose intolerance.",
@@ -121823,7 +121823,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/38197853/",
-   "summary": "This review pooled 85 studies to look at how long a man waits between ejaculations (abstinence time) affects sperm quality and fertility treatment results. Shorter abstinence was linked to some improvements in sperm quality, with more benefit for men with fertility problems, including unexplained infertility, than for healthy men. The benefit was mostly seen within the first 4 days. The authors say the link may not be causal because other factors could be involved.",
+   "summary": "This review pooled 85 studies to look at how long a man waits between ejaculations (abstinence time) affects sperm quality and fertility treatment results. Shorter abstinence was linked to some improvements in sperm quality, with possibly more benefit for men with fertility problems, including unexplained infertility, than for healthy men. Any benefit may be mainly within the first 4 days. The authors say the link may not be causal because other factors could be involved.",
    "keyPoints": [
     "In healthy men, shorter abstinence gave only limited improvements in semen quality, such as a lower DNA fragmentation index.",
     "In men with unexplained infertility, shorter abstinence was linked to lower DNA fragmentation and better sperm viability.",
@@ -125912,7 +125912,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/29168557/",
    "summary": "This Cochrane review looked at whether taking probiotics alongside usual antifungal medicine helps treat vaginal thrush in women who are not pregnant. It combined ten trials with 1656 women. Probiotics seemed to help symptoms and clear the infection in the short term and lowered the chance of thrush returning at one month. This did not clearly last in the longer term, and the evidence was low or very low quality.",
    "keyPoints": [
-    "Added to antifungal drugs, probiotics improved short-term symptom cure and short-term clearing of the yeast infection.",
+    "Added to antifungal drugs, probiotics may have improved short-term symptom cure and short-term clearing of the yeast infection.",
     "Thrush came back less often at one month, but the evidence for this was very low quality.",
     "No clear long-term benefit was seen at one or three months after treatment.",
     "Probiotics did not seem to raise the rate of serious or non-serious side effects."
