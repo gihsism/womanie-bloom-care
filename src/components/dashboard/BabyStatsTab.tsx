@@ -136,7 +136,7 @@ export default function BabyStatsTab({ babyId, onGoTo }: { babyId: string; onGoT
         </div>
         <p className="text-[11px] text-muted-foreground">The 7 full days before today. Averages count only the days with entries.</p>
         <Button asChild size="sm" variant="outline" className="gap-1.5">
-          <Link to={`/dashboard/baby/summary?baby=${encodeURIComponent(babyId)}`}><Printer className="h-3.5 w-3.5" />Print weekly summary</Link>
+          <Link to={`/dashboard/baby/summary/print?baby=${encodeURIComponent(babyId)}`}><Printer className="h-3.5 w-3.5" />Print weekly summary</Link>
         </Button>
       </section>
 

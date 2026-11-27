@@ -159,7 +159,7 @@ const App = () => (
                 <Route path="/dashboard/appointments" element={<Appointments />} />
                 <Route path="/dashboard/birth" element={<BirthRecord />} />
                 <Route path="/dashboard/baby" element={<BabyPage />} />
-                <Route path="/dashboard/baby/summary" element={<PrintBabySummary />} />
+                <Route path="/dashboard/baby/summary/print" element={<PrintBabySummary />} />
                 <Route path="/dashboard/stage" element={<StagePage />} />
                 <Route path="/library" element={<ResearchLibrary />} />
                 {/* Dashboard menu entries that historically pointed to
