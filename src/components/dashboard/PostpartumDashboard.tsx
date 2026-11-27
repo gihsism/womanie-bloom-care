@@ -280,7 +280,7 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
             <h2 className="text-lg font-bold">
               {daysPp <= 7
                 ? `${daysPp} ${daysPp === 1 ? 'day' : 'days'} postpartum`
-                : `Week ${weeksPp} postpartum`}
+                : `${weeksPp} ${weeksPp === 1 ? 'week' : 'weeks'} postpartum`}
             </h2>
             <p className="text-xs text-muted-foreground">
               Baby born {format(birthDate, 'MMM d, yyyy')} ·{' '}
