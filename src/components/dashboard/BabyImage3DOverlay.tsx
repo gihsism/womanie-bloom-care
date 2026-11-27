@@ -14,6 +14,28 @@ const BabyImage3DOverlay = ({ src, week, onClose }: BabyImage3DOverlayProps) => 
   const autoRotateRef = useRef(true);
   const animFrameRef = useRef<number>(0);
   const angleRef = useRef(0);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  // Parents pass an inline onClose and this component re-renders every frame
+  // (rotation), so the keyboard effect reads it from a ref and runs once.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  // Behaves like a dialog for keyboard and screen-reader users: focus moves
+  // to Close, Escape closes, Tab stays inside (Close is the only control),
+  // and focus returns to whatever opened it.
+  useEffect(() => {
+    const opener = document.activeElement as HTMLElement | null;
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { e.preventDefault(); onCloseRef.current(); }
+      else if (e.key === 'Tab') { e.preventDefault(); closeRef.current?.focus(); }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      opener?.focus?.();
+    };
+  }, []);
 
   // Auto-rotate gently on mount
   useEffect(() => {
@@ -56,6 +78,9 @@ const BabyImage3DOverlay = ({ src, week, onClose }: BabyImage3DOverlayProps) => 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Your baby at week ${week}`}
       onClick={onClose}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -117,6 +142,9 @@ const BabyImage3DOverlay = ({ src, week, onClose }: BabyImage3DOverlayProps) => 
 
         {/* Close button */}
         <button
+          ref={closeRef}
+          type="button"
+          aria-label="Close"
           onClick={onClose}
           className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-background text-foreground flex items-center justify-center shadow-lg text-sm font-bold z-20"
           style={{ transform: 'translateZ(40px)' }}
