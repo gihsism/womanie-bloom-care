@@ -1,4 +1,5 @@
 import type { LifeStage } from '@/components/dashboard/DashboardHeader';
+import { POSTNATAL_LABEL } from './postnatalCheck';
 
 // Home's three answers to "what do I do now?", as pure functions so they
 // can be unit-tested without a browser or database:
@@ -54,6 +55,8 @@ export interface TodaySignals {
   vaccinesDue?: string[];
   /** Date of the last EPDS mood check; null = never taken; undefined = not known yet. */
   lastMoodCheck?: Date | null;
+  /** Postpartum: weeks 5-8 after the birth with no visit logged since (lib/postnatalCheck.ts). */
+  postnatalCheckDue?: boolean;
   /** Postpartum: babies at a common vaccination age with nothing logged around it. */
   babyVaccines?: Array<{ name: string; age: string }>;
   /**
@@ -124,7 +127,7 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
     items.push({ id: 'flagged-results', label: n === 1 ? '1 result to talk to your doctor about' : `${n} results to talk to your doctor about`, target: RECORDS });
   }
   // 4. A due stage task: missed pill, medicine due, vaccination due,
-  //    baby vaccination age, mood check due, period due in the next 2 days or late.
+  //    6-week postnatal check, baby vaccination age, mood check due, period due in the next 2 days or late.
   const pill = s.pill;
   if (mode === 'contraception' && pill && !(pill.packDay != null && pill.packDay > 21)) {
     const due = minutesOf(pill.reminderTime);
@@ -156,6 +159,9 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
     } else if (daysBetween(last, now) >= MOOD_CHECK_EVERY_DAYS) {
       items.push({ id: 'mood-check', label: 'Mood check due (every 2 weeks)', target: `${STAGE_PAGE}#mood-check` });
     }
+  }
+  if (mode === 'postpartum' && s.postnatalCheckDue) {
+    items.push({ id: 'postnatal-check', label: POSTNATAL_LABEL, target: `${STAGE_PAGE}#recovery` });
   }
   const babies = mode === 'postpartum' ? s.babyVaccines ?? [] : [];
   if (babies.length === 1) {

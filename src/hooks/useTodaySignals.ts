@@ -14,6 +14,7 @@ import { parsePillStatus, pillPackDay } from '@/lib/pillLog';
 import { PREG_VACCINES_KEY, gestationalWeek, vaccinesDueNow, type VaccineState } from '@/lib/pregnancyVaccines';
 import { useAccountDataVersion } from '@/lib/account-data';
 import { babyVaccineReminders, type BabyForVaccines } from '@/lib/babyVaccines';
+import { postnatalCheckDue, pickBirthDate, POSTNATAL_MILESTONE_ID } from '@/lib/postnatalCheck';
 
 // Reads the few facts Home's "Today" list ranks (lib/todayItems.ts):
 // visits (today / within a week), recent doctor notes, results marked
@@ -95,13 +96,16 @@ export function useTodaySignals(
   const { user } = useAuth();
   const prefs = useNotificationPrefs();
   const [s, setS] = useState<Omit<TodaySignals, 'periodDaysUntil'>>({});
+  // Start times of her visits that are not cancelled (for the postnatal-check row).
+  const [visitTimes, setVisitTimes] = useState<Date[] | null>(null);
+  const [birthDate, setBirthDate] = useState<Date | null>(null);
   const [tasks, setTasks] = useState<Pick<TodaySignals, 'medicinesDue' | 'medicinesRunningOut' | 'pill' | 'babyVaccines' | 'lastMoodLog'>>({});
   const { mode, pregnancyDueDate } = stage;
   const uid = user?.id;
   // Device copies of account data (synced in lib/account-data.ts).
   const vaxKey = uid ? PREG_VACCINES_KEY(uid) : null;
   const epdsKey = uid ? `womanie_epds_history_${uid}` : null;
-  const accountVersion = useAccountDataVersion([vaxKey, epdsKey, uid ? `contraception:${uid}:method` : null]);
+  const accountVersion = useAccountDataVersion([vaxKey, epdsKey, uid ? `contraception:${uid}:method` : null, uid ? `postpartum:${uid}:milestones` : null]);
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -121,6 +125,7 @@ export function useTodaySignals(
       const next = appts
         .filter(a => !isToday(new Date(a.scheduled_at)) && Date.parse(a.scheduled_at) > now)
         .sort((a, b) => Date.parse(a.scheduled_at) - Date.parse(b.scheduled_at))[0];
+      setVisitTimes(appts.map(a => new Date(a.scheduled_at)));
       const notes = (Array.isArray(notesResp?.notes) ? notesResp.notes : []) as Array<{ created_at: string | null }>;
       const hasDoc = Array.isArray(docsRes.data) && docsRes.data.length > 0;
       const hasLog = Array.isArray(signalsRes.data) && signalsRes.data.length > 0;
@@ -217,10 +222,12 @@ export function useTodaySignals(
     try {
       const now = new Date();
       if (mode === 'postpartum') {
-        const [babiesRes, vaxRes] = await Promise.all([
+        const [babiesRes, vaxRes, birthRes] = await Promise.all([
           db.from('babies').select('id, name, birth_date').eq('user_id', uid),
           db.from('life_events').select('baby_id, occurred_at').eq('user_id', uid).eq('kind', 'baby_vaccine')
             .order('occurred_at', { ascending: false }).limit(200),
+          db.from('birth_records').select('birth_at').eq('user_id', uid)
+            .order('created_at', { ascending: false }).limit(1),
         ]);
         const last = new Map<string, Date>();
         for (const v of (Array.isArray(vaxRes.data) ? vaxRes.data : []) as Array<{ baby_id: string | null; occurred_at: string }>) {
@@ -232,6 +239,12 @@ export function useTodaySignals(
         const babies: BabyForVaccines[] = ((Array.isArray(babiesRes.data) ? babiesRes.data : []) as Array<{ id: string; name: string | null; birth_date: string | null }>)
           .map(b => ({ name: b.name, birth_date: b.birth_date ? String(b.birth_date).slice(0, 10) : null, lastVaccineAt: last.get(b.id) ?? null }));
         setTasks(t => ({ ...t, babyVaccines: babyVaccineReminders(babies, now), lastMoodLog: undefined }));
+        // Same sources as the stage page's recovery list: the birth record,
+        // else the babies, else the date kept on this device.
+        const rec = (Array.isArray(birthRes.data) ? birthRes.data[0] : null) as { birth_at?: string | null } | null;
+        let deviceBirth: string | null = null;
+        try { deviceBirth = localStorage.getItem(`womanie_postpartum_birth_${uid}`); } catch { /* storage blocked */ }
+        setBirthDate(pickBirthDate(rec?.birth_at ?? null, babies.map(b => b.birth_date), deviceBirth));
       } else if (mode === 'pregnancy') {
         setTasks(t => ({ ...t, babyVaccines: [], lastMoodLog: undefined }));
       } else {
@@ -270,12 +283,21 @@ export function useTodaySignals(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, epdsKey, accountVersion, s]);
 
+  // The recovery milestone tick lives in an account-synced device key.
+  const postnatal = useMemo(() => {
+    if (mode !== 'postpartum' || !uid || visitTimes === null) return false;
+    const ticked = readJSON<Record<string, boolean>>(`postpartum:${uid}:milestones`)?.[POSTNATAL_MILESTONE_ID] === true;
+    return postnatalCheckDue({ birthDate, visits: visitTimes, ticked });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, uid, visitTimes, birthDate, accountVersion, s]);
+
   const hasName = !!profileName?.trim();
   return {
     ...s,
     ...tasks,
     vaccinesDue,
     lastMoodCheck,
+    postnatalCheckDue: postnatal,
     setup: s.setup ? { ...s.setup, done: s.setup.done + Number(hasName), nameMissing: !hasName } : s.setup,
     // The day-of and upcoming visit rows follow the appointment-reminder toggle, as the old cards did.
     appointmentToday: prefs.appointmentReminders ? s.appointmentToday : null,

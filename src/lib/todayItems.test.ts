@@ -266,3 +266,23 @@ describe('moreFor postpartum', () => {
     expect(labels).toEqual(['Your recovery', 'Mood check', 'Birth details', 'Medicines']);
   });
 });
+
+describe('todayItems: 6-week postnatal check', () => {
+  it('postpartum only, opens the recovery list', () => {
+    const items = todayItems('postpartum', { postnatalCheckDue: true });
+    expect(items).toEqual([{ id: 'postnatal-check', label: 'Your 6-week postnatal check: booked yet?', target: `${STAGE_PAGE}#recovery` }]);
+    expect(todayItems('pregnancy', { postnatalCheckDue: true })).toEqual([]);
+    expect(todayItems('postpartum', { postnatalCheckDue: false })).toEqual([]);
+  });
+
+  it('ranks after a visit today and before the baby vaccination row', () => {
+    const now = new Date(2026, 10, 27, 9, 0);
+    const ids = todayItems('postpartum', {
+      now,
+      appointmentToday: new Date(2026, 10, 27, 15, 0),
+      postnatalCheckDue: true,
+      babyVaccines: [{ name: 'Mia', age: '2 months' }],
+    }).map(i => i.id);
+    expect(ids).toEqual(['visit-today', 'postnatal-check', 'baby-vaccination']);
+  });
+});
