@@ -19,7 +19,7 @@ const About = () => {
     {
       icon: Shield,
       title: 'Privacy & Security',
-      description: 'Your health data is sacred. We use bank-level encryption and never share your information.',
+      description: 'Your data is encrypted in transit and at rest. We never sell it, and you can delete it any time.',
     },
     {
       icon: Users,
@@ -29,7 +29,7 @@ const About = () => {
     {
       icon: Award,
       title: 'Evidence-Based',
-      description: 'All our health information is reviewed by medical professionals and backed by research.',
+      description: 'Our health guidance follows published clinical sources, and we name them where it matters.',
     },
   ];
 
@@ -49,11 +49,11 @@ const About = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-              Empowering Women Through Technology
+              Built by women who needed it
             </h1>
             <p className="text-xl text-muted-foreground">
-              Womanie was born from a simple belief: every woman deserves access to personalized,
-              comprehensive healthcare that understands her unique journey.
+              Womanie started with a folder of lab results nobody explained. We are building
+              the app we wanted then: one place for your records, your stage and your questions.
             </p>
           </div>
 
@@ -88,7 +88,7 @@ const About = () => {
                 concern in between.
               </p>
               <p>
-              Today, Womanie combines cutting-edge AI technology with expert medical care and a supportive
+              Today, Womanie brings together AI that explains your results, doctors you can book, and a
               community to provide truly personalized health insights. We're finalizing our platform and 
               can't wait to welcome women worldwide very soon.
               </p>

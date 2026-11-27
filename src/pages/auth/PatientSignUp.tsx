@@ -90,8 +90,8 @@ const PatientSignUp = () => {
       <div className="flex-1 flex items-center justify-center px-4 pb-16">
         <Card className="w-full max-w-md p-8 space-y-6">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-2">Create Your Account</h1>
-            <p className="text-muted-foreground">Start tracking your health journey</p>
+            <h1 className="text-2xl font-bold mb-2">Create your account</h1>
+            <p className="text-muted-foreground">Free. Takes about a minute.</p>
           </div>
 
           <form onSubmit={handleSignUp} className="space-y-4">

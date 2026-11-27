@@ -34,7 +34,7 @@ const PreMenstrualForm = () => {
     <div>
       <div className="text-center mb-8">
         <h1 className="text-3xl lg:text-4xl font-bold mb-3">
-          Let's prepare for your health journey
+          Let's get ready for your first period
         </h1>
       </div>
 

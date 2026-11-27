@@ -272,12 +272,12 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
           </div>
           <div className="flex-1">
             <h2 className="text-lg font-bold mb-1">
-              {isPostMenopause ? 'Your Post-Menopause Wellness' : 'Your Menopause Journey'}
+              {isPostMenopause ? 'Your health after menopause' : 'Your menopause at a glance'}
             </h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {isPostMenopause
-                ? 'Focus on long-term health, prevention, and thriving. This stage is about empowerment, not decline.'
-                : 'Track your symptoms, learn evidence-based strategies, and take charge of your health during this transition.'}
+                ? 'The focus now is long-term health: bones, heart and the checks worth keeping up.'
+                : 'Log your symptoms, see what changes them, and read what the evidence says helps.'}
             </p>
           </div>
         </div>

@@ -80,7 +80,7 @@ const DoctorLogIn = () => {
 
       // Happy path: an approved doctor with the role row in place.
       if (roleData && profileData?.is_verified) {
-        toast({ title: 'Welcome back' });
+        toast({ title: 'Logged in' });
         // Full reload so AuthContext picks up the new session cookie
         // before routing into the doctor dashboard.
         window.location.href = '/doctor/dashboard';

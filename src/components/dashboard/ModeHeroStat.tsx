@@ -282,7 +282,7 @@ const ModeHeroStat = ({
         if (hotFlashes7d === null) {
           return {
             icon: <ThermometerSun className="h-5 w-5 text-primary" />,
-            headline: 'Your menopause journey',
+            headline: 'Menopause, week by week',
             detail: 'Log symptoms daily to surface trends here.',
             tone: 'bg-primary/5 border-primary/20',
           };

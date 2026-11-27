@@ -57,9 +57,9 @@ const OnboardingSuccess = () => {
 
         {/* Text */}
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold">You're all set!</h1>
+          <h1 className="text-3xl font-bold">You're set up</h1>
           <p className="text-muted-foreground">
-            Your personalized health dashboard is ready. Everything is tailored to your journey.
+            Home now shows your stage. Add a lab report whenever you have one.
           </p>
         </div>
 
@@ -77,7 +77,7 @@ const OnboardingSuccess = () => {
               </>
             ) : (
               <>
-                Go to my dashboard
+                Go to Home
                 <ArrowRight className="h-4 w-4 ml-2" />
               </>
             )}
@@ -87,7 +87,7 @@ const OnboardingSuccess = () => {
             className="w-full"
             onClick={() => navigate('/welcome', { replace: true })}
           >
-            See what I can do first
+            Show me around first
           </Button>
         </div>
       </div>

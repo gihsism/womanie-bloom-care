@@ -5,25 +5,25 @@ const WhatIsWomanie = () => {
     {
       icon: Upload,
       number: '1',
-      title: 'Upload your documents',
-      description: 'Lab results, prescriptions, imaging reports — any medical document in PDF, image, or DOCX format.',
+      title: 'Add a report',
+      description: 'Blood tests, prescriptions, scan reports, doctor\'s letters. A PDF, a photo of the paper, or a Word file.',
     },
     {
       icon: Brain,
       number: '2',
-      title: 'AI analyzes everything',
-      description: 'Claude AI extracts every test result, explains what it means, and flags anything that needs attention.',
+      title: 'Claude reads it',
+      description: 'Claude, an AI model, pulls out each test value, says what it measures and marks the ones outside the lab range.',
     },
     {
       icon: TrendingUp,
       number: '3',
-      title: 'See insights & trends',
-      description: 'Visual charts, health categories, cross-referenced patterns, and predictions — all in plain language.',
+      title: 'You see the picture',
+      description: 'Values sorted by body system, charted against your earlier tests, explained without jargon.',
     },
   ];
 
   const badges = [
-    { icon: Shield, label: 'Encrypted & Private' },
+    { icon: Shield, label: 'Encrypted, and never sold' },
   ];
 
   return (
@@ -31,10 +31,10 @@ const WhatIsWomanie = () => {
       <div className="container mx-auto max-w-5xl">
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-5xl font-bold mb-4">
-            How It Works
+            How it works
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            From upload to understanding in minutes — no medical degree needed
+            From the PDF in your inbox to an explanation you can follow, in a few minutes
           </p>
         </div>
 
