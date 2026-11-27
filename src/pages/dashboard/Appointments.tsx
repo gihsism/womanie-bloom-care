@@ -6,6 +6,8 @@ import { useToast } from '@/hooks/use-toast';
 import { db } from '@/integrations/db/client';
 import { onHealthDataChange, emitHealthDataChange } from '@/lib/data-events';
 import { errorMessage } from '@/lib/errors';
+import { useConfirm } from '@/components/ConfirmDialog';
+import { cancelAppointmentConfirm } from '@/lib/confirmCopy';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -92,6 +94,7 @@ const Appointments = () => {
   usePageTitle('Visits');
   const { user } = useAuth();
   const { toast } = useToast();
+  const [confirm, confirmDialog] = useConfirm();
   const [rows, setRows] = useState<AppointmentRow[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -180,7 +183,7 @@ const Appointments = () => {
     const doctorLabel = [apt.doctor_title, apt.doctor_name].filter(Boolean).join(' ') || 'this doctor';
     // Visit times are Swiss practice time (labelled when this device is elsewhere).
     const when = formatVisitWhen(new Date(apt.scheduled_at));
-    if (!window.confirm(`Cancel your appointment with ${doctorLabel} on ${when}?`)) return;
+    if (!(await confirm(cancelAppointmentConfirm(doctorLabel, when)))) return;
     setBusyId(apt.id);
     try {
       const { error } = await db
@@ -525,6 +528,7 @@ const Appointments = () => {
         onOpenChange={(open) => { if (!open) setRescheduling(null); }}
         onRescheduled={() => { emitHealthDataChange(); load(); }}
       />
+      {confirmDialog}
     </div>
   );
 };

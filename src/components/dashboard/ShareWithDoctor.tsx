@@ -7,6 +7,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Share2, Copy, Check, Loader2, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { errorMessage } from '@/lib/errors';
+import { useConfirm } from '@/components/ConfirmDialog';
+import { cancelCodeConfirm } from '@/lib/confirmCopy';
 
 // Patient flow for sharing health records with a doctor.
 //
@@ -50,6 +52,7 @@ export default function ShareWithDoctor({ trigger }: { trigger?: ReactElement } 
   const { user } = useAuth();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const [confirm, confirmDialog] = useConfirm();
   const [codes, setCodes] = useState<AccessCode[]>([]);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -104,8 +107,9 @@ export default function ShareWithDoctor({ trigger }: { trigger?: ReactElement } 
     }
   };
 
-  const revoke = async (codeId: string) => {
+  const revoke = async (codeId: string, code: string) => {
     if (!user) return;
+    if (!(await confirm(cancelCodeConfirm(code)))) return;
     try {
       const { error } = await db
         .from('patient_access_codes')
@@ -203,7 +207,7 @@ export default function ShareWithDoctor({ trigger }: { trigger?: ReactElement } 
                         variant="ghost"
                         size="sm"
                         className="gap-1 h-8 text-destructive hover:text-destructive"
-                        onClick={() => revoke(c.id)}
+                        onClick={() => revoke(c.id, c.code)}
                         aria-label="Cancel this code"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -219,6 +223,7 @@ export default function ShareWithDoctor({ trigger }: { trigger?: ReactElement } 
             Each code can be used once and expires after {CODE_TTL_HOURS} hours. You can generate as many as you need.
           </p>
         </div>
+        {confirmDialog}
       </DialogContent>
     </Dialog>
   );

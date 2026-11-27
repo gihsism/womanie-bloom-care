@@ -7,6 +7,8 @@ import { Stethoscope, ShieldCheck, ShieldOff } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { errorMessage } from '@/lib/errors';
 import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
+import { useConfirm } from '@/components/ConfirmDialog';
+import { revokeAccessConfirm } from '@/lib/confirmCopy';
 
 // Approved doctor connections with a Revoke action. Pairs with
 // PendingConnections: that one handles "doctor wants in", this one
@@ -30,6 +32,7 @@ export default function ConnectedDoctors() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [confirm, confirmDialog] = useConfirm();
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -49,7 +52,7 @@ export default function ConnectedDoctors() {
   useEffect(() => onHealthDataChange(load), [load]);
 
   const revoke = async (connectionId: string, label: string) => {
-    if (!window.confirm(`Revoke access for ${label}? They'll no longer be able to view your records.`)) return;
+    if (!(await confirm(revokeAccessConfirm(label)))) return;
     setBusyId(connectionId);
     try {
       const resp = await fetch('/api/connections/respond', {
@@ -137,6 +140,7 @@ export default function ConnectedDoctors() {
           );
         })}
       </ul>
+      {confirmDialog}
     </Card>
   );
 }

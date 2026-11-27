@@ -6,8 +6,7 @@ import { TrendingUp, TrendingDown, Minus, ArrowRight, Sparkles, MessageCircle } 
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
-import { computeTrends, type ExtractedItem, type TrendRow } from '@/lib/health-trends';
-import { format } from 'date-fns';
+import { computeTrends, describeRun, formatLabDay, type ExtractedItem, type TrendRow } from '@/lib/health-trends';
 
 // Cross-document trend view.
 //
@@ -133,16 +132,21 @@ export default function HealthTrends({ showViewAll = true }: { showViewAll?: boo
                   <span className="font-medium text-foreground/80">
                     {t.latestRawValue}{unit}
                   </span>
-                  <span className="mx-1">↑ from {t.prevRawValue}{unit}</span>
+                  <span className="mx-1">from {t.prevRawValue}{unit}</span>
                   {t.direction !== 'flat' && (
                     <span className="ml-1">
                       ({pct > 0 ? '+' : ''}{pct}%)
                     </span>
                   )}
                   <span className="ml-1">
-                    · {format(new Date(t.prevDate), 'MMM d')} → {format(new Date(t.latestDate), 'MMM d')}
+                    · {formatLabDay(t.prevDate)} → {formatLabDay(t.latestDate)}
                   </span>
                 </p>
+                {t.run && (
+                  <p className="text-[11px] text-muted-foreground" data-testid="trend-run">
+                    {describeRun(t.run, t.unit)}
+                  </p>
+                )}
               </button>
               <button
                 type="button"
@@ -154,7 +158,9 @@ export default function HealthTrends({ showViewAll = true }: { showViewAll?: boo
                     t.statusShift === 'worsened' ? 'got worse' :
                     t.direction === 'up' ? 'went up' :
                     t.direction === 'down' ? 'went down' : 'changed';
-                  const q = `My ${t.title} ${direction} from ${t.prevRawValue}${unit} to ${t.latestRawValue}${unit}. What does this mean for me?`;
+                  const q = t.run
+                    ? `My ${t.title} has ${t.run.direction === 'rising' ? 'gone up' : 'gone down'} at each of my last ${t.run.points.length} tests: ${t.run.points.map(p => `${p.raw}${unit} on ${formatLabDay(p.date)}`).join(', ')}. What could this mean, and what should I ask my doctor?`
+                    : `My ${t.title} ${direction} from ${t.prevRawValue}${unit} to ${t.latestRawValue}${unit}. What does this mean for me?`;
                   navigate(`/dashboard/ai-doctor?q=${encodeURIComponent(q)}`);
                 }}
                 aria-label={`Ask AI about ${t.title} trend`}
