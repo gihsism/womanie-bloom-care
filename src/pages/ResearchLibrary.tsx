@@ -193,7 +193,8 @@ export default function ResearchLibrary() {
 
         <p className="mt-8 text-[11.5px] leading-relaxed text-muted-foreground text-center">
           Sources come from PubMed (US National Library of Medicine). Summaries are written from each paper&rsquo;s
-          abstract. {RESEARCH_DISCLAIMER}
+          abstract. A few official Swiss sources (BAG, BLV, SGGG) are summarised by hand from the official page.{' '}
+          {RESEARCH_DISCLAIMER}
         </p>
       </main>
     </div>

@@ -28,6 +28,8 @@ export interface ScheduleItem {
   source: ScheduleSource;
   /** What applies in Switzerland, from an official Swiss source (not a library item). */
   swiss?: { note: string; source: SwissSource };
+  /** A second Swiss note with its own source (e.g. a coverage change the BAG page does not list yet). */
+  swissMore?: { note: string; source: SwissSource };
 }
 
 export interface SwissSource {
@@ -38,6 +40,12 @@ export interface SwissSource {
 const BAG_MATERNITY: SwissSource = {
   label: 'BAG, Krankenversicherung: Leistungen bei Mutterschaft',
   url: 'https://www.bag.admin.ch/de/krankenversicherung-leistungen-bei-mutterschaft',
+};
+
+/** EDI decision of 9 June 2026 (AS 2026 336): KLV Art. 13 new letter b quater, in force 1 July 2026. */
+const BAG_KLV_JULY_2026: SwissSource = {
+  label: 'BAG, Kommentar zu den Änderungen der KLV per 1.7.2026 (Art. 13 Bst. bquater)',
+  url: 'https://www.bag.admin.ch/dam/it/sd-web/hB7uwEMylr2J/Kommentar%20zu%20den%20%C3%84nderungen%20der%20KLV%20per%201.7.2026%20und%201.1.2027.pdf',
 };
 
 const FIRST_TRIMESTER_GUIDELINE: ScheduleSource = {
@@ -58,6 +66,10 @@ export const PREGNANCY_SCHEDULE: ScheduleItem[] = [
     swiss: {
       note: 'In Switzerland, basic insurance covers a scan at weeks 12 to 14 in a normal pregnancy.',
       source: BAG_MATERNITY,
+    },
+    swissMore: {
+      note: 'Since 1 July 2026, basic insurance in Switzerland also covers a first-trimester test for the risk of pre-eclampsia (a pregnancy condition with high blood pressure), done at the same weeks 12 to 14 scan for women expecting one baby: your risk factors, your blood pressure, a Doppler scan of the blood flow to the womb and a blood test (PlGF). Depending on the result, your doctor may prescribe low-dose aspirin to lower the risk.',
+      source: BAG_KLV_JULY_2026,
     },
   },
   {
@@ -103,7 +115,7 @@ export const PREGNANCY_SCHEDULE: ScheduleItem[] = [
       url: 'https://pubmed.ncbi.nlm.nih.gov/34374716/',
     },
     swiss: {
-      note: 'In Switzerland, the SGGG recommends a 75 g glucose drink test (OGTT) for every pregnant woman between weeks 24 and 28.',
+      note: 'In Switzerland, the SGGG recommends testing every pregnant woman between weeks 24 and 28, as a rule with a 75 g glucose drink test (OGTT). Without risk factors, a fasting blood sugar test can come first, which spares some women the drink.',
       source: {
         label: 'SGGG expert letter 81, Gynäkologie 1/2024',
         url: 'https://www.rosenfluh.ch/media/gynaekologie/2024/01/Screening-und-Management-der-Gestationsdiabetes.pdf',

@@ -36,21 +36,21 @@ const SCREENINGS: ScreeningType[] = [
     id: 'mammogram',
     label: 'Mammogram',
     cadenceMonths: 24,
-    description: 'Every 1–2 years from 40, every 1–2 years through 74. Catches early breast cancer well before it can be felt.',
+    description: 'Every 2 years from 40 to 74 (USPSTF 2024). In Switzerland, many cantons run programmes that invite women from 50 every 2 years. Can find breast cancer before it can be felt.',
     scopes: ['post-menopause', 'menopause', 'general'],
   },
   {
     id: 'dexa',
     label: 'DEXA bone density',
     cadenceMonths: 24,
-    description: 'Bone mineral density scan. Recommended every 2 years post-menopause — earlier if you have risk factors (smoker, low BMI, family history).',
+    description: 'Bone density scan (DXA). Recommended from 65, and earlier after menopause if a risk check shows a higher fracture risk, e.g. smoking, low body weight, a parent with a hip fracture (USPSTF 2025). How often to repeat it depends on your result and treatment; no guideline sets one interval for everyone, so the 2-year reminder here is an app reminder. In Switzerland, basic insurance pays for DXA only for set reasons (e.g. a fracture after a minor fall, long-term cortisone, low sex hormones), and repeat scans at most every 2 years while the risk lasts (KLV Annex 1).',
     scopes: ['post-menopause'],
   },
   {
     id: 'colonoscopy',
     label: 'Colonoscopy',
     cadenceMonths: 120,
-    description: 'Every 10 years from 45 if average risk. More often if you have a family history of colorectal cancer.',
+    description: 'Every 10 years from 45 if average risk (USPSTF 2021). In Switzerland, screening from 50 is covered by basic insurance (a colonoscopy every 10 years or a stool blood test every 2 years), and many cantons run programmes; ask your doctor about the age limits. More often if you have a family history of colorectal cancer.',
     scopes: ['post-menopause', 'general'],
   },
   {
@@ -64,28 +64,28 @@ const SCREENINGS: ScreeningType[] = [
     id: 'cholesterol',
     label: 'Lipid panel',
     cadenceMonths: 60,
-    description: 'Every 5 years for average-risk adults; more often if you have heart-disease risk factors.',
+    description: 'Often checked about every 5 years in average-risk adults (guidelines differ, so this is an app reminder); more often if you have heart-disease risk factors.',
     scopes: ['post-menopause', 'menopause', 'general'],
   },
   {
     id: 'blood-pressure',
     label: 'Blood pressure',
     cadenceMonths: 12,
-    description: 'Annual reading at minimum; home monitoring if your last reading was elevated.',
+    description: 'At least once a year from 40 (USPSTF 2021); home monitoring if your last reading was elevated.',
     scopes: ['post-menopause', 'menopause', 'general'],
   },
   {
     id: 'thyroid',
     label: 'Thyroid (TSH)',
     cadenceMonths: 60,
-    description: 'Every 5 years for low-risk adults; more often if you have a family history or symptoms like fatigue or weight changes.',
+    description: 'No routine test is recommended for adults without symptoms (USPSTF: not enough evidence), so the 5-year reminder is an app reminder. Ask for a test if you have symptoms such as tiredness or weight changes, or a family history of thyroid disease.',
     scopes: ['post-menopause', 'menopause', 'general'],
   },
   {
     id: 'diabetes',
     label: 'Diabetes (HbA1c)',
     cadenceMonths: 36,
-    description: 'Every 3 years from 35 if average risk. Earlier and more often if BMI ≥25, family history, or PCOS history.',
+    description: 'About every 3 years from 35 (American Diabetes Association; USPSTF 2021 for adults 35-70 with overweight). Earlier and more often with overweight, a family history, earlier gestational diabetes or PCOS.',
     scopes: ['post-menopause', 'menopause', 'general'],
   },
 ];
@@ -174,8 +174,9 @@ const ScreeningTracker = ({ scope }: ScreeningTrackerProps) => {
       </div>
 
       <p className="text-xs text-muted-foreground -mt-1">
-        Cadences are USPSTF / ACS general-population recommendations — your provider may
-        suggest a different schedule based on your personal and family history.
+        Intervals follow US (USPSTF) general-population advice where a guideline sets one;
+        otherwise they are app reminders. Swiss programmes and your doctor may suggest a
+        different schedule based on your personal and family history.
       </p>
 
       <ul className="space-y-2">

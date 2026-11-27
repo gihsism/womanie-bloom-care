@@ -28,7 +28,10 @@ export const SOURCES_FOOTER_MARK = '\n\n---\n**Sources**\n';
 export const RESEARCH_DISCLAIMER =
   'General information from published research, not medical advice. Talk to your doctor or midwife about your situation.';
 
-const FOOTER_LINE = /^- \[(\d+)\] \[(.+)\]\((https:\/\/pubmed\.ncbi\.nlm\.nih\.gov\/(\d+)\/)\) — (.+), (\d{4})(?: · Full text, (.+))?$/;
+// PubMed links carry the PMID; an official non-PubMed source (e.g. BAG, BLV,
+// SGGG) has any https link and no PMID.
+const FOOTER_LINE = /^- \[(\d+)\] \[(.+)\]\((https:\/\/[^\s()]+)\) — (.+), (\d{4})(?: · Full text, (.+))?$/;
+const PUBMED_URL = /^https:\/\/pubmed\.ncbi\.nlm\.nih\.gov\/(\d+)\/$/;
 
 /** Splits a stored assistant message into its text and its saved sources. */
 export function splitSourcesFooter(content: string): { body: string; sources: ChatSource[] } {
@@ -38,15 +41,16 @@ export function splitSourcesFooter(content: string): { body: string; sources: Ch
   for (const line of content.slice(at + SOURCES_FOOTER_MARK.length).split('\n')) {
     const m = line.trim().match(FOOTER_LINE);
     if (!m) continue;
+    const pmid = m[3].match(PUBMED_URL)?.[1] ?? '';
     sources.push({
       n: Number(m[1]),
-      id: `pmid-${m[4]}`,
-      pmid: m[4],
+      id: pmid ? `pmid-${pmid}` : m[3],
+      pmid,
       title: m[2],
-      source: m[5],
-      year: Number(m[6]),
+      source: m[4],
+      year: Number(m[5]),
       url: m[3],
-      ...(m[7] ? { fulltext: m[7] } : {}),
+      ...(m[6] ? { fulltext: m[6] } : {}),
     });
   }
   // Not our footer after all (e.g. the model wrote one): leave text alone.

@@ -298,7 +298,9 @@ describe('library.json data file', () => {
   it('every item has a PMID, PubMed URL, and non-empty summary, key points and tags', () => {
     const bad: string[] = [];
     const seen = new Set<string>();
-    for (const it of lib.items) {
+    // Official non-PubMed sources (sourceType "guideline-page", e.g. BAG) have
+    // no PMID; validateLibraryItem checks them (guideline-page.test.ts).
+    for (const it of lib.items.filter((x) => !x.sourceType)) {
       const ok =
         /^\d+$/.test(it.pmid) &&
         it.url === `https://pubmed.ncbi.nlm.nih.gov/${it.pmid}/` &&

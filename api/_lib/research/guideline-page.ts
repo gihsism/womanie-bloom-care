@@ -594,8 +594,12 @@ export interface PublisherPolicy {
   /** Display name, used as item.source / organisation. */
   publisher: string;
   hosts: string[];
-  /** allowed = may be fetched and staged; licence-required = never fetched by this script. */
-  ingest: 'allowed' | 'licence-required';
+  /**
+   * allowed = may be fetched and staged; licence-required = never fetched by this script;
+   * summary-only = never fetched or stored: the library item is a summary written by hand
+   * in our own words from the official page, with its link (no text copied).
+   */
+  ingest: 'allowed' | 'licence-required' | 'summary-only';
   licence: { name: string; url: string | null; termsUrl: string; notes: string };
   evidenceLevel: 'guideline' | 'systematic review' | 'study';
   publicationType: string;
@@ -694,6 +698,63 @@ export const PUBLISHERS: PublisherPolicy[] = [
     publicationType: 'Guideline',
   },
 ];
+
+/**
+ * Official Swiss sources the app already cites (round 4, 2026-11-27).
+ * admin.ch terms require written consent to reproduce content, and the
+ * SGGG expert letters are copyrighted journal articles, so nothing is
+ * fetched or stored: each library item is a hand-written summary of the
+ * facts with a link. (Federal ordinances such as the KLV are not
+ * protected by copyright, URG Art. 5.)
+ */
+const SWISS_SUMMARY_ONLY = 'Summary-only: the library item is a hand-written summary in our own words, with a link to the official page. No page text is copied, fetched or stored.';
+
+PUBLISHERS.push(
+  {
+    publisher: 'BAG',
+    hosts: ['www.bag.admin.ch'],
+    ingest: 'summary-only',
+    licence: {
+      name: 'Copyright, Swiss federal authorities (reproduction needs written consent)',
+      url: null,
+      termsUrl: 'https://www.admin.ch/gov/de/start/rechtliches.html',
+      notes: SWISS_SUMMARY_ONLY,
+    },
+    evidenceLevel: 'guideline',
+    publicationType: 'Swiss federal health guidance (BAG)',
+    attribution: 'Source: Swiss Federal Office of Public Health (BAG).',
+  },
+  {
+    publisher: 'BLV',
+    hosts: ['www.blv.admin.ch', 'kwk.blv.admin.ch'],
+    ingest: 'summary-only',
+    licence: {
+      name: 'Copyright, Swiss federal authorities (reproduction needs written consent)',
+      url: null,
+      termsUrl: 'https://www.admin.ch/gov/de/start/rechtliches.html',
+      notes: SWISS_SUMMARY_ONLY,
+    },
+    evidenceLevel: 'guideline',
+    publicationType: 'Swiss federal nutrition guidance (BLV)',
+    attribution: 'Source: Swiss Federal Food Safety and Veterinary Office (BLV).',
+  },
+  {
+    publisher: 'SGGG',
+    hosts: ['www.sggg.ch', 'www.rosenfluh.ch'],
+    ingest: 'summary-only',
+    licence: {
+      name: '© SGGG / Rosenfluh Publikationen (journal GYNÄKOLOGIE)',
+      url: null,
+      termsUrl: 'https://www.sggg.ch/',
+      notes: SWISS_SUMMARY_ONLY,
+    },
+    evidenceLevel: 'guideline',
+    publicationType: 'Swiss society guideline (SGGG expert letter)',
+    attribution: 'Source: Swiss Society of Gynaecology and Obstetrics (SGGG).',
+  },
+);
+
+export const HAND_WRITTEN_SUMMARISER = 'hand-written';
 
 export function publisherFor(url: string): PublisherPolicy | null {
   let host: string;
@@ -946,7 +1007,7 @@ export function validateLibraryItem(item: unknown, topicIds?: Set<string>): stri
   const policy = isStr(it.url) ? publisherFor(it.url) : null;
   if (!isStr(it.url) || !it.url.startsWith('https://')) errs.push('url: must be https');
   else if (!policy) errs.push('url: host is not a known publisher');
-  else if (policy.ingest !== 'allowed') errs.push(`url: ${policy.publisher} content needs a licence first`);
+  else if (policy.ingest === 'licence-required') errs.push(`url: ${policy.publisher} content needs a licence first`);
   const page = it.page as Record<string, unknown> | undefined;
   if (!page || typeof page !== 'object') return [...errs, 'page: missing'];
   if (page.url !== it.url) errs.push('page.url: differs from url');
@@ -960,6 +1021,8 @@ export function validateLibraryItem(item: unknown, topicIds?: Set<string>): stri
   if (!robots || robots.allowed !== true) errs.push('page.robots: must record an allowed robots check');
   if (!isStr(page.contentHash) || !/^[0-9a-f]{8}$/.test(page.contentHash)) errs.push('page.contentHash: invalid');
   if (!isStr(page.summariser) || !page.summariser) errs.push('page.summariser: missing');
-  if (!Number.isInteger(page.chunks) || (page.chunks as number) < 1) errs.push('page.chunks: need 1+');
+  const handWritten = page.summariser === HAND_WRITTEN_SUMMARISER;
+  if (policy?.ingest === 'summary-only' && !handWritten) errs.push(`page.summariser: ${policy.publisher} items must be hand-written summaries`);
+  if (!Number.isInteger(page.chunks) || (page.chunks as number) < (handWritten ? 0 : 1)) errs.push('page.chunks: need 1+');
   return errs;
 }

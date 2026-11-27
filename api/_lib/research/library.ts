@@ -50,6 +50,9 @@ export interface ResearchItem {
   topics: string[];
   tags: string[];
   keywords: string[];
+  /** Absent for PubMed items; "guideline-page" for an official non-PubMed source (pmid ""). */
+  sourceType?: 'guideline-page';
+  page?: { publisher: string; summariser: string; [key: string]: unknown };
 }
 
 export interface ResearchTopic {
@@ -860,7 +863,7 @@ Finding: ${it.summary}
 Key points: ${it.keyPoints.join(' | ')}`;
   });
   return `\n\n## Research sources
-These are summaries of published research from the Womanie research library (clinical guidelines and systematic reviews from PubMed), chosen for this question. Each one lists what the research actually found; check that text before citing it:
+These are summaries of published research from the Womanie research library (clinical guidelines and systematic reviews from PubMed, plus official Swiss guidance from BAG, BLV and SGGG), chosen for this question. Each one lists what the research actually found; check that text before citing it:
 
 ${blocks.join('\n\n')}
 

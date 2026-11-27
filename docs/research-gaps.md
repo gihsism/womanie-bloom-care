@@ -200,10 +200,102 @@ offline):
 | `IVFNutrition` | folic acid 400 µg (was 600-800 µg "3 months before", "neural tube starts on implantation") | same |
 | Pregnancy vaccinations card | link to the BAG Swiss vaccination schedule next to the ACOG/CDC reference | bag.admin.ch/de/schweizerischer-impfplan |
 
-Still open: the Swiss sources sit in the app text, not in the research
-library (they have no PubMed record), so the chat cannot cite them. The KLV
-change of 1 July 2026 (first-trimester pre-eclampsia screening, new Art. 13
-letter b quater) was not checked: the BAG commentary PDF was not readable.
+Still open (resolved in round 4): the Swiss sources sat in the app text,
+not in the research library, so the chat could not cite them; the KLV
+change of 1 July 2026 was not checked.
+
+## Round 4 (2026-11-27)
+
+### Menopause, bone and heart screens
+
+Checked against free official sources: USPSTF osteoporosis screening 2025
+(women 65+, and younger postmenopausal women at higher risk after a risk
+check; repeat interval not set, repeating within 4-8 years added no
+accuracy), the Swiss reference values for nutrient intake (BLV, June 2022:
+women 18-65 calcium 950 mg, vitamin D 15 µg = 600 IU; over 65 calcium
+1000-1200 mg, vitamin D 20 µg = 800 IU), KLV Annex 1 (edition 1 July 2026:
+DXA covered only for listed reasons, follow-ups "as a rule at most every
+two years" while the risk lasts), NAMS 2021 (calcium 1000-1200 mg total),
+NOGG (UK 700 mg), NAMS 2023 non-hormone therapy (CBT and clinical hypnosis
+recommended; yoga and mindfulness not), WHO activity guidance.
+
+| Where | Claim | Done |
+|---|---|---|
+| `MenopauseDashboard` wellness tips (2) | "1200mg calcium daily", "DEXA scan every 2 years" | BLV amounts by age, food first; DXA from 65 or earlier with risk factors, repeat depends on the result (USPSTF 2025) |
+| `ScreeningTracker` DEXA | "Recommended every 2 years post-menopause" | USPSTF 2025 wording; the 24-month reminder is labelled an app reminder; Swiss coverage rule (KLV Annex 1) added |
+| `ScreeningTracker` other rows | mammogram "every 1-2 years from 40, every 1-2 years through 74"; thyroid "every 5 years"; lipids "every 5 years"; HbA1c "every 3 years from 35" | mammogram every 2 years 40-74 (USPSTF 2024) + Swiss cantonal programmes from 50; thyroid: USPSTF finds not enough evidence for routine tests, 5 years = app reminder; lipids = app reminder; HbA1c ADA / USPSTF 2021; colonoscopy row adds Swiss coverage from 50; header says which intervals are guideline and which are app reminders |
+| `MenopauseNutrition`, `ModeLabInsights`, `PersonalizedInsights` | calcium "1200 mg/day", "need 1200mg/day", "about 1000-1200 mg (Swiss BLV)" | 950 mg up to 65, 1000-1200 mg from 66 (BLV table) |
+| `MenopauseDashboard` | "Meditation and yoga can reduce hot flash frequency by up to 40%" | stress and sleep only; CBT and clinical hypnosis for hot flushes (NAMS 2023) |
+| `MenopauseDashboard` | "Strong social ties lower dementia risk by 50%"; hot flushes "most resolve within 2-7 years"; "Accelerated bone loss in first 5-7 years. DEXA scans are critical" | association wording; "a large US study found a median of about 7 years" (SWAN); bone loss fastest around and just after the last period, ask about DXA |
+
+Open: the app says vitamin D 800 IU "from 60" (EEK 2012 report, round 3);
+the current BLV table gives 20 µg from over 65. Left unchanged; decide which
+Swiss source the app follows.
+
+### KLV change of 1 July 2026 (confirmed)
+
+BAG "Kommentar zu den Änderungen der KLV per 1.7.2026 und 1.1.2027" (EDI
+decision 9 June 2026, AS 2026 336), section 2.9: new KLV Art. 13 letter
+b quater covers a first-trimester pre-eclampsia test (risk factors, blood
+pressure, uterine-artery Doppler, PlGF) at the routine weeks 12-14 scan for
+all singleton pregnancies; aspirin depending on the risk. The Annex 3
+commentary adds analysis 1779.00 (PlGF). The BAG maternity page does not
+list it yet. Added as a second Swiss note (`swissMore`) on the
+first-trimester scan step of the check-ups card. The SGGG glucose note now
+also mentions the two-step option (fasting glucose first without risk
+factors) from expert letter 81.
+
+### Swiss sources in the research library (chat can cite them)
+
+The library format already allows non-PubMed items (`sourceType:
+"guideline-page"`, `pmid: ""`, a `page` block, checked by
+`validateLibraryItem`). admin.ch terms require written consent to
+reproduce content and the SGGG letters are journal articles, so the new
+publishers BAG, BLV and SGGG have `ingest: "summary-only"`: never fetched
+or stored; each item is a hand-written summary in our own words with a link
+(`summariser: "hand-written"`, `chunks: 0`). Seven items, built by
+`scripts/research/swiss-sources.mjs` (upsert + validate):
+
+| Item | Source |
+|---|---|
+| Maternity benefits (scans, first-trimester test, NIPT 1:1000, seven check-ups, no cost-sharing) | BAG page |
+| First-trimester pre-eclampsia test covered from 1 July 2026 | BAG KLV commentary |
+| When DXA bone density scans are covered | BAG, KLV Annex 1 |
+| Vaccinations before and during pregnancy | BAG Swiss vaccination schedule 2026 |
+| Nutrition before/during pregnancy and breastfeeding (folic acid 400 µg, iodine, vitamin D) | BLV page + FAQ (2018) |
+| Reference values: calcium, vitamin D, folate for women | BLV (June 2022) |
+| Gestational diabetes screening (OGTT 24-28 weeks, limits) | SGGG expert letter 81 |
+
+Also: `build-library.mjs` carries `sourceType` items over unchanged; the
+chat's saved sources footer now keeps non-PubMed links; the chat prompt and
+/library footer mention the Swiss sources. Embeddings rebuilt offline.
+Regression tests in `guideline-page.test.ts` (validation, Swiss questions
+pick the Swiss item, other questions keep PubMed sources) and
+`research-sources.test.ts`.
+
+Not added: SGGG expert letter 68 (anti-D) and CPR 86 (GBS swab), whose
+free URLs were not confirmed this round.
+
+### Summary content check, next 150 items
+
+Ranks 322-471 of the round-2 exposure ranking (none skipped; all had
+PubMed abstracts), checked the same way. 143 fair. 7 fixes, all text only:
+
+| Item | Problem | Fix |
+|---|---|---|
+| `pmid-37095519` risk factors, high inherited breast-cancer risk | certainty "low", abstract grades nothing | "not stated" |
+| `pmid-36948440` endometriosis / adenomyosis and pregnancy | same | "not stated" |
+| `pmid-27636867` combined hormonal contraception and mood | same (narrative review) | "not stated" |
+| `pmid-30633132` DMPA side effects | only per-study risk of bias, no overall grade | "not stated" |
+| `pmid-25304764` migraine and vascular events in pregnancy | grades nothing | "not stated" |
+| `pmid-27121239` labour epidural and breastfeeding | grades nothing | "not stated" |
+| `pmid-30577080` iron-fortified maize flour (Cochrane) | "only 3 studies, so very low certainty"; abstract gives other reasons | "and" |
+
+Left as is (judgement calls): `pmid-41732035` ESHRE 2025 stimulation
+guideline labelled "low" (most of its graded evidence is very low; the
+summary says "low or very low"); four "low" labels whose abstracts call the
+evidence weak without a formal grade (`pmid-30461693`, `pmid-40577932`,
+`pmid-26641959`, `pmid-27132058`).
 
 ## Data-quality notes found during the audit
 

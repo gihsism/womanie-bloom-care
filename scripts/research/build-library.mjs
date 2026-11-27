@@ -494,7 +494,11 @@ async function main() {
   }
   // Keep every item already in the library: fetch any record the new
   // searches did not return, and reuse its existing summary (never pay twice).
-  const previous = readJson(outFile, { items: [] }).items || [];
+  const all = readJson(outFile, { items: [] }).items || [];
+  // Official non-PubMed sources (sourceType "guideline-page", e.g. the
+  // hand-written BAG / BLV / SGGG summaries) are carried over unchanged.
+  const nonPubmed = all.filter((it) => it.sourceType);
+  const previous = all.filter((it) => !it.sourceType);
   const have = new Set(records.map((r) => r.pmid));
   const missing = previous.filter((it) => !have.has(it.pmid));
   if (missing.length) {
@@ -520,12 +524,14 @@ async function main() {
   }
   await summariseAll(records, cache);
 
-  const { items, rejected } = assemble(records, cache);
+  const assembled = assemble(records, cache);
+  const items = [...assembled.items, ...nonPubmed];
+  const { rejected } = assembled;
   const usedTopics = new Set(items.flatMap((i) => i.topics));
   const library = {
     version: new Date().toISOString().slice(0, 10),
     generatedAt: new Date().toISOString(),
-    source: 'PubMed (NCBI E-utilities). Summaries written from abstracts only.',
+    source: 'PubMed (NCBI E-utilities). Summaries written from abstracts only. Plus hand-written summaries of official Swiss sources (sourceType guideline-page).',
     disclaimer: 'General information from published research, not medical advice. Talk to your doctor or midwife about your situation.',
     topics: TOPICS.filter((t) => usedTopics.has(t.id)).map(({ id, label, stages }) => ({ id, label, stages })),
     items,

@@ -21803,7 +21803,7 @@
     "Many studies were small or did not account for things like a mother's intention to breastfeed, social support, or the type and dose of pain relief.",
     "It is unclear how much any effect might be due to factors like infant alertness, maternal fever, oxytocin release, labor length, or instrumental delivery."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "pregnancy",
     "postpartum"
@@ -23672,7 +23672,7 @@
     "Continuous dosing and possibly non-oral forms seemed to have the fewest mood effects.",
     "Women with existing mood disorders may be more prone to mood effects, but this may reflect which contraception they were given rather than the disorder itself."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "contraception"
    ],
@@ -25154,7 +25154,7 @@
     "For women with BRCA mutations, most studies found no link, and the few that did showed conflicting results.",
     "Small studies and varied methods mean more research is needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "contraception",
     "menopause",
@@ -30489,7 +30489,7 @@
     "Severe endometriosis is linked to a several-fold higher risk of placenta previa, and deep endometriosis to surgical complications at cesarean section and rarely bleeding inside the abdomen in pregnancy.",
     "Adenomyosis is linked to higher risks of preeclampsia, preterm birth, baby not head-down, heavy bleeding after birth, low birth weight and small babies; women with deep endometriosis or severe adenomyosis may benefit from care at specialist centers."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menstrual-cycle",
     "conception",
@@ -55151,7 +55151,7 @@
    "summary": "This Cochrane review looked at whether adding iron (plus other vitamins and minerals) to maize flour, a staple food in many countries, helps prevent anaemia and low iron. It found only a few studies, covering children over 2 and women. The evidence was of very low quality, so it is not clear whether fortified maize flour makes any difference to anaemia, iron levels or haemoglobin. None of the studies reported side effects.",
    "keyPoints": [
     "It is uncertain whether iron-fortified maize flour reduces anaemia or iron deficiency.",
-    "Only 3 studies contributed data, so the evidence was judged very low certainty.",
+    "Only 3 studies contributed data, and the evidence was judged very low certainty.",
     "No change in haemoglobin or ferritin (iron store) levels could be confirmed.",
     "No studies reported on any side effects."
    ],
@@ -76836,7 +76836,7 @@
     "Migraine was also linked to higher risk of heart attack, heart disease and blood clots (deep vein thrombosis and pulmonary embolus) in pregnancy.",
     "The authors say the amount of data is limited and more research is needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menstrual-cycle",
     "pregnancy",
@@ -112697,7 +112697,7 @@
     "Evidence for a lower risk of some cancers and tubal infertility was limited.",
     "None of the 24 studies were randomized trials, so higher-quality research is needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "contraception"
    ],
@@ -130261,6 +130261,578 @@
     "nutrition education",
     "undernourished"
    ]
+  },
+  {
+   "id": "gp-bag-krankenversicherung-leistungen-bei-mutte-0036e3",
+   "pmid": "",
+   "doi": null,
+   "title": "Health insurance: maternity benefits (what Swiss basic insurance covers in pregnancy and after the birth)",
+   "source": "BAG",
+   "journal": "BAG",
+   "organisation": "BAG",
+   "year": 2026,
+   "publicationTypes": [
+    "Swiss federal health guidance (BAG)"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://www.bag.admin.ch/de/krankenversicherung-leistungen-bei-mutterschaft",
+   "summary": "The Swiss Federal Office of Public Health (BAG) explains what basic health insurance pays for in pregnancy and after the birth. In a normal pregnancy it covers seven check-ups with a doctor or midwife, one ultrasound scan at weeks 12 to 14 and one at weeks 20 to 23, and the first-trimester test for the risk of trisomy 21, 18 and 13. More scans are covered in a high-risk pregnancy when the gynaecologist finds them necessary. Maternity services cost nothing extra: no deductible or co-payment, and from week 13 until eight weeks after the birth other medical care is free of cost-sharing too.",
+   "keyPoints": [
+    "A normal pregnancy: seven check-ups and two ultrasound scans (weeks 12 to 14 and weeks 20 to 23) are covered.",
+    "The first-trimester test (nuchal scan at weeks 12 to 14 plus a blood test) for trisomy 21, 18 and 13 is covered.",
+    "A NIPT blood test is covered from week 12 if the risk of a trisomy is 1 in 1000 or higher.",
+    "Amniocentesis or a placenta biopsy (CVS) is covered if the first-trimester risk is 1 in 380 or higher, or if NIPT strongly suggests a trisomy.",
+    "No deductible or co-payment for maternity services; from week 13 until eight weeks after the birth none for other medical care either.",
+    "After the birth: a check between weeks 6 and 10, three breastfeeding-advice sessions and a 150-franc contribution to a birth-preparation course."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy",
+    "postpartum"
+   ],
+   "topics": [
+    "prenatal-screening"
+   ],
+   "tags": [
+    "switzerland",
+    "health insurance",
+    "prenatal care",
+    "ultrasound",
+    "nipt",
+    "first-trimester test"
+   ],
+   "keywords": [
+    "switzerland",
+    "swiss",
+    "insurance",
+    "krankenkasse",
+    "covered",
+    "cost",
+    "pay",
+    "check-ups",
+    "scan",
+    "ultrasound",
+    "nipt",
+    "first trimester test",
+    "amniocentesis",
+    "midwife",
+    "deductible"
+   ],
+   "sourceType": "guideline-page",
+   "page": {
+    "publisher": "BAG",
+    "url": "https://www.bag.admin.ch/de/krankenversicherung-leistungen-bei-mutterschaft",
+    "fetchedAt": "2026-11-27T12:00:00.000Z",
+    "published": null,
+    "lastUpdated": null,
+    "lastReviewed": null,
+    "nextReview": null,
+    "licence": {
+     "name": "Copyright, Swiss federal authorities (reproduction needs written consent)",
+     "url": null,
+     "termsUrl": "https://www.admin.ch/gov/de/start/rechtliches.html",
+     "notes": "Summary-only: the library item is a hand-written summary in our own words, with a link to the official page. No page text is copied, fetched or stored.",
+     "pageCopyright": null
+    },
+    "attribution": "Source: Swiss Federal Office of Public Health (BAG).",
+    "refreshDays": null,
+    "robots": {
+     "allowed": true,
+     "rule": null,
+     "checkedAt": "2026-11-27T12:00:00.000Z"
+    },
+    "contentHash": "0e5e47e5",
+    "summariser": "hand-written",
+    "chunks": 0
+   }
+  },
+  {
+   "id": "gp-bag-kommentar-20zu-20den-20-c3-84nderungen-2-9a771d",
+   "pmid": "",
+   "doi": null,
+   "title": "Swiss basic insurance covers a first-trimester pre-eclampsia test from 1 July 2026 (KLV Art. 13 letter b quater)",
+   "source": "BAG",
+   "journal": "BAG",
+   "organisation": "BAG",
+   "year": 2026,
+   "publicationTypes": [
+    "Swiss federal health guidance (BAG)"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://www.bag.admin.ch/dam/it/sd-web/hB7uwEMylr2J/Kommentar%20zu%20den%20%C3%84nderungen%20der%20KLV%20per%201.7.2026%20und%201.1.2027.pdf",
+   "summary": "From 1 July 2026, Swiss basic health insurance pays for a first-trimester test for the risk of pre-eclampsia, a pregnancy condition with new high blood pressure and organ involvement that can be serious for mother and baby. The test is done at the routine scan at weeks 12 to 14 for women expecting one baby. It combines the mother's risk factors, her blood pressure, a Doppler scan of the blood flow in the arteries of the womb and a blood test for placental growth factor (PlGF). Depending on the result, the doctor prescribes low-dose aspirin to lower the risk. Until now, women at risk were picked by their risk factors alone; the BAG says the combined test predicts better and is recommended in Swiss and international guidelines.",
+   "keyPoints": [
+    "Covered by basic insurance from 1 July 2026 (EDI decision of 9 June 2026, new KLV Art. 13 letter b quater).",
+    "Done at the routine weeks 12 to 14 scan, for every woman expecting one baby.",
+    "Combines risk factors, blood pressure, a Doppler scan of the womb arteries and a PlGF blood test.",
+    "Depending on the risk result, low-dose aspirin (acetylsalicylic acid) is prescribed to lower the risk of pre-eclampsia.",
+    "Only doctors carry out this test; until now women at risk were picked by their risk factors alone."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy"
+   ],
+   "topics": [
+    "pre-eclampsia",
+    "aspirin-pregnancy",
+    "prenatal-screening"
+   ],
+   "tags": [
+    "switzerland",
+    "pre-eclampsia",
+    "screening",
+    "plgf",
+    "aspirin",
+    "health insurance"
+   ],
+   "keywords": [
+    "switzerland",
+    "swiss",
+    "pre-eclampsia",
+    "preeclampsia",
+    "screening",
+    "first trimester",
+    "plgf",
+    "aspirin",
+    "covered",
+    "insurance",
+    "blood pressure",
+    "doppler"
+   ],
+   "sourceType": "guideline-page",
+   "page": {
+    "publisher": "BAG",
+    "url": "https://www.bag.admin.ch/dam/it/sd-web/hB7uwEMylr2J/Kommentar%20zu%20den%20%C3%84nderungen%20der%20KLV%20per%201.7.2026%20und%201.1.2027.pdf",
+    "fetchedAt": "2026-11-27T12:00:00.000Z",
+    "published": null,
+    "lastUpdated": null,
+    "lastReviewed": null,
+    "nextReview": null,
+    "licence": {
+     "name": "Copyright, Swiss federal authorities (reproduction needs written consent)",
+     "url": null,
+     "termsUrl": "https://www.admin.ch/gov/de/start/rechtliches.html",
+     "notes": "Summary-only: the library item is a hand-written summary in our own words, with a link to the official page. No page text is copied, fetched or stored.",
+     "pageCopyright": null
+    },
+    "attribution": "Source: Swiss Federal Office of Public Health (BAG).",
+    "refreshDays": null,
+    "robots": {
+     "allowed": true,
+     "rule": null,
+     "checkedAt": "2026-11-27T12:00:00.000Z"
+    },
+    "contentHash": "9f7603ed",
+    "summariser": "hand-written",
+    "chunks": 0
+   }
+  },
+  {
+   "id": "gp-bag-anhang-1-der-krankenpflege-leistungsvero-9067e5",
+   "pmid": "",
+   "doi": null,
+   "title": "Bone density scans (DXA): when Swiss basic insurance pays (KLV Annex 1, edition of 1 July 2026)",
+   "source": "BAG",
+   "journal": "BAG",
+   "organisation": "BAG",
+   "year": 2026,
+   "publicationTypes": [
+    "Swiss federal health guidance (BAG)"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://www.bag.admin.ch/de/anhang-1-der-krankenpflege-leistungsverordnung-klv",
+   "summary": "Annex 1 of the Swiss health insurance benefits ordinance (KLV) lists when basic insurance pays for a bone density scan (DXA). It is not a screening test for everyone: it is covered for set reasons, such as osteoporosis that has already caused a fracture after a minor fall, long-term cortisone treatment, low sex hormones (hypogonadism), gut diseases that reduce absorption (for example Crohn's disease, ulcerative colitis, coeliac disease), primary hyperparathyroidism, HIV, aromatase-inhibitor treatment and anti-epileptic medicines. Follow-up scans are covered while the risk lasts, as a rule at most every two years. Ultrasound and whole-body bone measurements and bone-turnover blood markers for early detection are not covered.",
+   "keyPoints": [
+    "DXA bone density scans are covered only for listed reasons, not as a general screening test.",
+    "Listed reasons include a fracture after a minor fall, long-term cortisone, low sex hormones, gut diseases with poor absorption, primary hyperparathyroidism, HIV, aromatase inhibitors and anti-epileptic medicines.",
+    "Follow-up scans: covered while the risk lasts, as a rule at most every two years.",
+    "Bone ultrasound, peripheral CT and bone-turnover markers for early detection of fracture risk are not covered."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menopause",
+    "post-menopause",
+    "general"
+   ],
+   "topics": [
+    "bone-health",
+    "osteoporosis-treatment"
+   ],
+   "tags": [
+    "switzerland",
+    "bone density",
+    "dxa",
+    "osteoporosis",
+    "health insurance"
+   ],
+   "keywords": [
+    "switzerland",
+    "swiss",
+    "dexa",
+    "dxa",
+    "bone density",
+    "bone scan",
+    "osteoporosis",
+    "covered",
+    "insurance",
+    "how often",
+    "every two years"
+   ],
+   "sourceType": "guideline-page",
+   "page": {
+    "publisher": "BAG",
+    "url": "https://www.bag.admin.ch/de/anhang-1-der-krankenpflege-leistungsverordnung-klv",
+    "fetchedAt": "2026-11-27T12:00:00.000Z",
+    "published": null,
+    "lastUpdated": null,
+    "lastReviewed": null,
+    "nextReview": null,
+    "licence": {
+     "name": "Copyright, Swiss federal authorities (reproduction needs written consent)",
+     "url": null,
+     "termsUrl": "https://www.admin.ch/gov/de/start/rechtliches.html",
+     "notes": "Summary-only: the library item is a hand-written summary in our own words, with a link to the official page. No page text is copied, fetched or stored.",
+     "pageCopyright": null
+    },
+    "attribution": "Source: Swiss Federal Office of Public Health (BAG).",
+    "refreshDays": null,
+    "robots": {
+     "allowed": true,
+     "rule": null,
+     "checkedAt": "2026-11-27T12:00:00.000Z"
+    },
+    "contentHash": "5ad82752",
+    "summariser": "hand-written",
+    "chunks": 0
+   }
+  },
+  {
+   "id": "gp-bag-schweizerischer-impfplan-bd22fa",
+   "pmid": "",
+   "doi": null,
+   "title": "Swiss vaccination schedule 2026: vaccinations before and during pregnancy",
+   "source": "BAG",
+   "journal": "BAG",
+   "organisation": "BAG",
+   "year": 2026,
+   "publicationTypes": [
+    "Swiss federal health guidance (BAG)"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://www.bag.admin.ch/de/schweizerischer-impfplan",
+   "summary": "The Swiss vaccination schedule (BAG and the Federal Commission for Vaccination) recommends checking and completing vaccinations before every pregnancy, especially measles-mumps-rubella, chickenpox and hepatitis B. In every pregnancy it recommends a flu vaccine (any trimester), a pertussis (whooping cough) vaccine in the second or third trimester, preferably the second, whatever the time since the last dose, and a COVID-19 vaccine in the second or third trimester. An RSV vaccine (Abrysvo) is recommended once, not in every pregnancy, between weeks 32+0 and 36+0 when the due date falls between early October and the end of March, as one of two options to protect the baby; the other is an antibody injection for the newborn. Every pregnant woman should be tested for hepatitis B in every pregnancy, with few exceptions.",
+   "keyPoints": [
+    "Before every pregnancy: check and complete MMR, chickenpox and hepatitis B vaccination.",
+    "In every pregnancy: flu vaccine in any trimester; pertussis (dTpa) in the second or third trimester, preferably the second; COVID-19 in the second or third trimester.",
+    "RSV: one dose of Abrysvo between weeks 32+0 and 36+0 if the due date is between early October and end of March; once only, not in every pregnancy; the alternative is an antibody injection for the baby.",
+    "Live vaccines such as MMR and chickenpox are not given in pregnancy; women who are not immune get them soon after the birth.",
+    "Hepatitis B test (HBsAg) in every pregnancy, unless immunity is reliably documented."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy",
+    "conception",
+    "postpartum"
+   ],
+   "topics": [
+    "vaccines-pregnancy"
+   ],
+   "tags": [
+    "switzerland",
+    "vaccination",
+    "pertussis",
+    "flu",
+    "rsv",
+    "covid-19"
+   ],
+   "keywords": [
+    "switzerland",
+    "swiss",
+    "vaccine",
+    "vaccination",
+    "impfung",
+    "whooping cough",
+    "pertussis",
+    "tdap",
+    "flu",
+    "influenza",
+    "rsv",
+    "abrysvo",
+    "covid",
+    "mmr",
+    "hepatitis b",
+    "pregnancy"
+   ],
+   "sourceType": "guideline-page",
+   "page": {
+    "publisher": "BAG",
+    "url": "https://www.bag.admin.ch/de/schweizerischer-impfplan",
+    "fetchedAt": "2026-11-27T12:00:00.000Z",
+    "published": null,
+    "lastUpdated": null,
+    "lastReviewed": null,
+    "nextReview": null,
+    "licence": {
+     "name": "Copyright, Swiss federal authorities (reproduction needs written consent)",
+     "url": null,
+     "termsUrl": "https://www.admin.ch/gov/de/start/rechtliches.html",
+     "notes": "Summary-only: the library item is a hand-written summary in our own words, with a link to the official page. No page text is copied, fetched or stored.",
+     "pageCopyright": null
+    },
+    "attribution": "Source: Swiss Federal Office of Public Health (BAG).",
+    "refreshDays": null,
+    "robots": {
+     "allowed": true,
+     "rule": null,
+     "checkedAt": "2026-11-27T12:00:00.000Z"
+    },
+    "contentHash": "cbd8588d",
+    "summariser": "hand-written",
+    "chunks": 0
+   }
+  },
+  {
+   "id": "gp-blv-ernaehrung-schwangere-und-stillende-d179e9",
+   "pmid": "",
+   "doi": null,
+   "title": "Nutrition before and during pregnancy and while breastfeeding: Swiss federal advice (BLV)",
+   "source": "BLV",
+   "journal": "BLV",
+   "organisation": "BLV",
+   "year": 2018,
+   "publicationTypes": [
+    "Swiss federal nutrition guidance (BLV)"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://www.blv.admin.ch/de/ernaehrung-schwangere-und-stillende",
+   "summary": "The Swiss Federal Food Safety and Veterinary Office (BLV) advises taking folic acid tablets (400 micrograms a day) already before a planned pregnancy, to lower the risk of birth defects, and eating a varied, balanced diet. In pregnancy almost all nutrients can come from food, except folic acid and vitamin D; sometimes a supplement for iron, iodine or omega-3 fats is needed, to be discussed with the gynaecologist. Women of childbearing age, pregnant and breastfeeding women in Switzerland often get too little iodine: the BLV advises iodised salt, dairy and sea fish, and asking the gynaecologist whether an iodine tablet is needed. While breastfeeding it recommends vitamin D drops, enough omega-3 fats and avoiding alcohol.",
+   "keyPoints": [
+    "Folic acid tablets, 400 micrograms a day, from before a planned pregnancy.",
+    "In pregnancy, folic acid and vitamin D are the nutrients food alone does not cover; iron, iodine or omega-3 supplements only after talking with the gynaecologist.",
+    "Iodine: use iodised salt, have dairy products and sea fish, and ask the gynaecologist about an iodine tablet when trying to conceive, pregnant or breastfeeding.",
+    "Breastfeeding: vitamin D drops, omega-3 fats from oily fish, walnuts or rapeseed oil, and no alcohol (a small glass on a special occasion, then wait two hours before the next feed).",
+    "Soft cheese should be avoided in pregnancy."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "pregnancy",
+    "postpartum"
+   ],
+   "topics": [
+    "pregnancy-nutrition",
+    "folic-acid",
+    "iodine-supplements-pregnancy",
+    "vitamin-d-pregnancy"
+   ],
+   "tags": [
+    "switzerland",
+    "nutrition",
+    "folic acid",
+    "iodine",
+    "vitamin d",
+    "breastfeeding"
+   ],
+   "keywords": [
+    "switzerland",
+    "swiss",
+    "folic acid",
+    "folsäure",
+    "iodine",
+    "iodised salt",
+    "vitamin d",
+    "iron",
+    "supplement",
+    "diet",
+    "nutrition",
+    "breastfeeding",
+    "pregnancy",
+    "trying to conceive"
+   ],
+   "sourceType": "guideline-page",
+   "page": {
+    "publisher": "BLV",
+    "url": "https://www.blv.admin.ch/de/ernaehrung-schwangere-und-stillende",
+    "fetchedAt": "2026-11-27T12:00:00.000Z",
+    "published": null,
+    "lastUpdated": null,
+    "lastReviewed": null,
+    "nextReview": null,
+    "licence": {
+     "name": "Copyright, Swiss federal authorities (reproduction needs written consent)",
+     "url": null,
+     "termsUrl": "https://www.admin.ch/gov/de/start/rechtliches.html",
+     "notes": "Summary-only: the library item is a hand-written summary in our own words, with a link to the official page. No page text is copied, fetched or stored.",
+     "pageCopyright": null
+    },
+    "attribution": "Source: Swiss Federal Food Safety and Veterinary Office (BLV).",
+    "refreshDays": null,
+    "robots": {
+     "allowed": true,
+     "rule": null,
+     "checkedAt": "2026-11-27T12:00:00.000Z"
+    },
+    "contentHash": "26b6275a",
+    "summariser": "hand-written",
+    "chunks": 0
+   }
+  },
+  {
+   "id": "gp-blv-naehrstoffzufuhr-2beab6",
+   "pmid": "",
+   "doi": null,
+   "title": "Swiss reference values for nutrient intake (BLV, version of June 2022): calcium, vitamin D and folate for women",
+   "source": "BLV",
+   "journal": "BLV",
+   "organisation": "BLV",
+   "year": 2022,
+   "publicationTypes": [
+    "Swiss federal nutrition guidance (BLV)"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://www.blv.admin.ch/de/naehrstoffzufuhr",
+   "summary": "The BLV publishes the Swiss reference values for nutrient intake, based on a scientific report (HEdS Geneva) and the Federal Commission for Nutrition, mostly taken from EFSA. For women aged 18 to 65 they give calcium 950 mg a day, vitamin D 15 micrograms (600 IU) a day and folate 330 micrograms a day. For women over 65 they give calcium 1000 to 1200 mg a day, vitamin D 20 micrograms (800 IU) a day and folate 300 to 400 micrograms a day. These are amounts for healthy people; individual needs can differ, for example in pregnancy or with illness.",
+   "keyPoints": [
+    "Women 18 to 65: calcium 950 mg a day, vitamin D 15 micrograms (600 IU) a day, folate 330 micrograms a day.",
+    "Women over 65: calcium 1000 to 1200 mg a day, vitamin D 20 micrograms (800 IU) a day.",
+    "The values describe the needs of healthy people; age, activity, pregnancy and genes can change individual needs."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menopause",
+    "post-menopause",
+    "general"
+   ],
+   "topics": [
+    "bone-health",
+    "vitamin-d"
+   ],
+   "tags": [
+    "switzerland",
+    "calcium",
+    "vitamin d",
+    "reference values",
+    "nutrition"
+   ],
+   "keywords": [
+    "switzerland",
+    "swiss",
+    "calcium",
+    "how much calcium",
+    "vitamin d",
+    "how much vitamin d",
+    "iu",
+    "mg",
+    "daily amount",
+    "reference values",
+    "bones",
+    "menopause"
+   ],
+   "sourceType": "guideline-page",
+   "page": {
+    "publisher": "BLV",
+    "url": "https://www.blv.admin.ch/de/naehrstoffzufuhr",
+    "fetchedAt": "2026-11-27T12:00:00.000Z",
+    "published": null,
+    "lastUpdated": null,
+    "lastReviewed": null,
+    "nextReview": null,
+    "licence": {
+     "name": "Copyright, Swiss federal authorities (reproduction needs written consent)",
+     "url": null,
+     "termsUrl": "https://www.admin.ch/gov/de/start/rechtliches.html",
+     "notes": "Summary-only: the library item is a hand-written summary in our own words, with a link to the official page. No page text is copied, fetched or stored.",
+     "pageCopyright": null
+    },
+    "attribution": "Source: Swiss Federal Food Safety and Veterinary Office (BLV).",
+    "refreshDays": null,
+    "robots": {
+     "allowed": true,
+     "rule": null,
+     "checkedAt": "2026-11-27T12:00:00.000Z"
+    },
+    "contentHash": "fa458e3e",
+    "summariser": "hand-written",
+    "chunks": 0
+   }
+  },
+  {
+   "id": "gp-sggg-screening-und-management-der-gestationsd-cec2b3",
+   "pmid": "",
+   "doi": null,
+   "title": "Screening and management of gestational diabetes (SGGG expert letter 81, Gynäkologie 1/2024)",
+   "source": "SGGG",
+   "journal": "SGGG",
+   "organisation": "SGGG",
+   "year": 2024,
+   "publicationTypes": [
+    "Swiss society guideline (SGGG expert letter)"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://www.rosenfluh.ch/media/gynaekologie/2024/01/Screening-und-Management-der-Gestationsdiabetes.pdf",
+   "summary": "The Swiss Society of Gynaecology and Obstetrics (SGGG) recommends an early check for diabetes that existed before the pregnancy at the first pregnancy check-up, with a fasting blood sugar or HbA1c test. Between weeks 24+0 and 28+0 all pregnant women are tested for gestational diabetes: the standard is a 75 g glucose drink test (OGTT) under set conditions, after at least 8 hours without food and starting between 6 and 9 am. Gestational diabetes is diagnosed if one value is at or above the limit: fasting 5.1 mmol/l, 1 hour 10.0 mmol/l or 2 hours 8.5 mmol/l. Women without risk factors can have a fasting blood sugar test first, which spares some of them the drink. After gestational diabetes, a diabetes test after the birth is advised.",
+   "keyPoints": [
+    "First check-up: fasting blood sugar or HbA1c to look for diabetes that existed before the pregnancy.",
+    "Weeks 24+0 to 28+0: a 75 g glucose drink test (OGTT) is the standard test, fasting for at least 8 hours and starting between 6 and 9 am.",
+    "Limits for gestational diabetes: fasting 5.1 mmol/l, after 1 hour 10.0 mmol/l, after 2 hours 8.5 mmol/l; one value at or above the limit is enough.",
+    "Without risk factors, a two-step approach can be used: a fasting blood sugar test first, and the drink test only if needed.",
+    "After a pregnancy with gestational diabetes: a diabetes test after the birth, and support for breastfeeding."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy"
+   ],
+   "topics": [
+    "gestational-diabetes"
+   ],
+   "tags": [
+    "switzerland",
+    "gestational diabetes",
+    "ogtt",
+    "glucose test",
+    "screening"
+   ],
+   "keywords": [
+    "switzerland",
+    "swiss",
+    "gestational diabetes",
+    "glucose test",
+    "sugar test",
+    "ogtt",
+    "glucose drink",
+    "blood sugar",
+    "hba1c",
+    "week 24",
+    "24 to 28 weeks",
+    "fasting"
+   ],
+   "sourceType": "guideline-page",
+   "page": {
+    "publisher": "SGGG",
+    "url": "https://www.rosenfluh.ch/media/gynaekologie/2024/01/Screening-und-Management-der-Gestationsdiabetes.pdf",
+    "fetchedAt": "2026-11-27T12:00:00.000Z",
+    "published": null,
+    "lastUpdated": null,
+    "lastReviewed": null,
+    "nextReview": null,
+    "licence": {
+     "name": "© SGGG / Rosenfluh Publikationen (journal GYNÄKOLOGIE)",
+     "url": null,
+     "termsUrl": "https://www.sggg.ch/",
+     "notes": "Summary-only: the library item is a hand-written summary in our own words, with a link to the official page. No page text is copied, fetched or stored.",
+     "pageCopyright": null
+    },
+    "attribution": "Source: Swiss Society of Gynaecology and Obstetrics (SGGG).",
+    "refreshDays": null,
+    "robots": {
+     "allowed": true,
+     "rule": null,
+     "checkedAt": "2026-11-27T12:00:00.000Z"
+    },
+    "contentHash": "28878f65",
+    "summariser": "hand-written",
+    "chunks": 0
+   }
   }
  ]
 }

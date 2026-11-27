@@ -173,7 +173,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       emoji: '🦴',
       connectedTests: ['Vitamin D', 'Calcium'],
       explanation: 'After menopause, declining estrogen accelerates bone loss. Combined with low vitamin D, this increases your risk of osteoporosis and fractures.',
-      recommendation: 'Ask your doctor how much calcium and vitamin D you need. Everyday amounts: calcium about 1000-1200 mg a day from food and, if needed, supplements; vitamin D 600 IU a day, 800 IU from age 60 (Swiss BLV recommendation). Weight-bearing exercise helps maintain bone density. Ask about a DEXA scan if you haven\'t had one.',
+      recommendation: 'Ask your doctor how much calcium and vitamin D you need. Everyday amounts: calcium about 950 mg a day up to age 65 and 1000-1200 mg from 66, mainly from food and, if needed, supplements; vitamin D 600 IU a day, 800 IU from age 60 (Swiss BLV recommendation). Weight-bearing exercise helps maintain bone density. Ask whether a bone density scan (DXA) makes sense for you.',
       severity: 'attention',
     });
   }

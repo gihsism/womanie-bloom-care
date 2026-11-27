@@ -38,7 +38,7 @@ const MENOPAUSE_TESTS: TestDef[] = [
   { names: ['estradiol', 'e2'], label: 'Estradiol', note: 'Low in menopause — affects bones' },
   { names: ['tsh'], label: 'Thyroid (TSH)', note: 'Thyroid issues common in menopause' },
   { names: ['vitamin d', '25-oh'], label: 'Vitamin D', note: 'Critical for bone density' },
-  { names: ['calcium'], label: 'Calcium', note: 'Bone health — need 1200mg/day' },
+  { names: ['calcium'], label: 'Calcium', note: 'Bone health: about 950-1200 mg a day, by age (Swiss BLV)' },
   { names: ['cholesterol', 'total cholesterol'], label: 'Cholesterol', note: 'Heart risk rises after menopause', exclude: CHOLESTEROL_FRACTIONS },
   { names: ['ldl'], label: 'LDL', note: '"Bad" cholesterol — watch closely' },
   { names: ['hdl'], label: 'HDL', note: '"Good" cholesterol — keep high' },

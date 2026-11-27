@@ -40,6 +40,18 @@ describe('research sources (chat page)', () => {
     expect(stripSourcesFooter(stored)).toBe(answer);
   });
 
+  it('keeps an official non-PubMed source (e.g. BAG) in the stored footer', () => {
+    const swiss = { n: 1, id: 'gp-bag-x', pmid: '', title: 'Maternity benefits', source: 'BAG', year: 2026, evidenceLevel: 'guideline' as const, url: 'https://www.bag.admin.ch/de/krankenversicherung-leistungen-bei-mutterschaft' };
+    const answer = 'Basic insurance covers two scans [1]. Caffeine is fine [2].';
+    const stored = answer + formatSourcesFooter([swiss, { ...SOURCES[0], n: 2 }] as Parameters<typeof formatSourcesFooter>[0], answer);
+    const { sources } = splitSourcesFooter(stored);
+    expect(sources.map((s) => [s.n, s.pmid, s.source, s.url])).toEqual([
+      [1, '', 'BAG', swiss.url],
+      [2, '111', 'Cochrane Database of Systematic Reviews', 'https://pubmed.ncbi.nlm.nih.gov/111/'],
+    ]);
+    expect(sources[1].id).toBe('pmid-111');
+  });
+
   it('leaves messages without our footer untouched', () => {
     const t = 'Plain answer.\n\n---\n**Sources**\n- something the model wrote';
     expect(splitSourcesFooter(t)).toEqual({ body: t, sources: [] });

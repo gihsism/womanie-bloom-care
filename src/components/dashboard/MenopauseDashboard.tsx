@@ -88,7 +88,7 @@ const menoSymptoms = [
 
 // ─── Post-menopause symptoms ───
 const postSymptoms = [
-  { id: 'bone-loss', label: 'Bone Density Loss', emoji: '🦴', description: 'Accelerated bone loss in first 5-7 years. DEXA scans are critical.' },
+  { id: 'bone-loss', label: 'Bone Density Loss', emoji: '🦴', description: 'Bone loss speeds up in the years around and just after the last period. Ask your doctor whether a bone density scan (DXA) makes sense for you.' },
   { id: 'heart-risk', label: 'Heart Health', emoji: '❤️', description: 'Cardiovascular risk increases without estrogen protection.' },
   { id: 'urinary', label: 'Urinary Changes', emoji: '💧', description: 'Increased UTI risk and incontinence. Pelvic floor exercises help.' },
   { id: 'skin-hair', label: 'Skin & Hair', emoji: '✨', description: 'Thinner skin, slower collagen production, hair changes.' },
@@ -102,26 +102,26 @@ const menoWellness = [
   { icon: Dumbbell, title: 'Strength Training', tip: 'Protects bone density and boosts metabolism. 2-3 sessions weekly.', priority: 'Essential' },
   { icon: Salad, title: 'Anti-Inflammatory Diet', tip: 'Omega-3s, leafy greens, berries. Reduce sugar and alcohol.', priority: 'Essential' },
   { icon: Moon, title: 'Sleep Hygiene', tip: 'Cool bedroom (16–19 °C), breathable bedding, consistent schedule.', priority: 'Essential' },
-  { icon: Brain, title: 'Stress Management', tip: 'Meditation and yoga can reduce hot flash frequency by up to 40%.', priority: 'High' },
-  { icon: Bone, title: 'Bone Health', tip: '1200mg calcium + 800IU vitamin D daily. Consider DEXA scan.', priority: 'Essential' },
+  { icon: Brain, title: 'Stress Management', tip: 'Meditation and yoga can help with stress and sleep. For hot flashes, CBT and clinical hypnosis have the best evidence among non-hormonal approaches (Menopause Society 2023).', priority: 'High' },
+  { icon: Bone, title: 'Bone Health', tip: 'Calcium mainly from food: about 950 mg a day up to 65, 1000-1200 mg from 66; vitamin D 600 IU a day, 800 IU from 60 (Swiss BLV). Ask whether a bone density scan makes sense for you.', priority: 'Essential' },
   { icon: Heart, title: 'Heart Health', tip: 'Monitor blood pressure, cholesterol. Stay active.', priority: 'High' },
 ];
 
 const postWellness = [
-  { icon: Bone, title: 'Bone Protection', tip: 'DEXA scan every 2 years. Weight-bearing exercise is critical. 1200mg calcium daily.', priority: 'Critical' },
-  { icon: HeartPulse, title: 'Cardiovascular Care', tip: 'Annual blood pressure and cholesterol checks. 150 min moderate exercise weekly.', priority: 'Critical' },
+  { icon: Bone, title: 'Bone Protection', tip: 'Weight-bearing exercise helps. Calcium mainly from food (Swiss BLV: about 950 mg a day up to 65, 1000-1200 mg from 66). A bone density scan (DXA) is recommended from 65, earlier with risk factors; how often to repeat it depends on your result (USPSTF 2025).', priority: 'Critical' },
+  { icon: HeartPulse, title: 'Cardiovascular Care', tip: 'Blood pressure check at least once a year; cholesterol as often as your doctor advises. At least 150 min of moderate exercise a week (WHO).', priority: 'Critical' },
   { icon: Dumbbell, title: 'Strength & Balance', tip: 'Resistance training 3x/week. Balance exercises prevent falls. Maintain muscle mass.', priority: 'Essential' },
   { icon: Brain, title: 'Brain Health', tip: 'Stay socially active, learn new skills, do puzzles. Mediterranean diet supports cognition.', priority: 'Essential' },
   { icon: Shield, title: 'Cancer Screening', tip: 'Regular mammograms, colonoscopy, skin checks. Follow your doctor\'s schedule.', priority: 'Critical' },
   { icon: Eye, title: 'Eye & Dental Health', tip: 'Annual eye exams for glaucoma/macular degeneration. Gum health affects heart health.', priority: 'High' },
   { icon: Salad, title: 'Nutrition Focus', tip: 'Protein at every meal for muscle. Vitamin B12, D, calcium. Fiber for gut health.', priority: 'Essential' },
-  { icon: Smile, title: 'Social Connection', tip: 'Strong social ties lower dementia risk by 50%. Prioritize relationships and community.', priority: 'High' },
+  { icon: Smile, title: 'Social Connection', tip: 'Loneliness and social isolation are linked with a higher risk of dementia. Prioritize relationships and community.', priority: 'High' },
 ];
 
 const menoMyths = [
   { myth: 'Menopause means getting old', fact: 'It\'s a natural transition, not aging. Many women feel more empowered after.' },
   { myth: 'Weight gain is inevitable', fact: 'Strength training and nutrition adjustments can maintain healthy weight.' },
-  { myth: 'Hot flashes last forever', fact: 'Most resolve within 2-7 years. Many strategies reduce severity.' },
+  { myth: 'Hot flashes last forever', fact: 'They often last several years (a large US study found a median of about 7 years), but they do ease, and many treatments reduce them.' },
   { myth: 'Libido disappears completely', fact: 'Desire may change but doesn\'t disappear. Communication and HRT can help.' },
 ];
 
