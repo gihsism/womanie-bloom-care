@@ -33,7 +33,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
             -- to_jsonb so the directory keeps working before it is applied.
             to_jsonb(dp) ->> 'practice_address' AS practice_address
        FROM doctor_profiles dp
-      WHERE ${APPROVED_DOCTOR_SQL}`,
+      WHERE ${APPROVED_DOCTOR_SQL}
+      LIMIT 500`,
     []
   );
 
@@ -41,14 +42,16 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     `SELECT doctor_id, consultation_price, consultation_duration,
             is_available, currency, video_enabled
        FROM consultation_settings
-      WHERE is_available = true`,
+      WHERE is_available = true
+      LIMIT 2000`,
     []
   );
 
   const schedulePromise = sql.query(
     `SELECT doctor_id, day_of_week, start_time, end_time, is_active
        FROM doctor_schedule
-      WHERE is_active = true`,
+      WHERE is_active = true
+      LIMIT 10000`,
     []
   );
 

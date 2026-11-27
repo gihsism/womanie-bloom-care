@@ -6,6 +6,8 @@ import { isMissingColumnError } from '../../_lib/chatConversation.js';
 
 // Upper bound on a localStorage history import (see POST).
 const MAX_IMPORT = 500;
+// One message longer than this is not a chat turn; it is skipped.
+const MAX_IMPORT_CHARS = 20_000;
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   const user = await getAuthUser(req);
@@ -86,7 +88,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       .filter((m: unknown): m is { role: string; content: string } => {
         const r = m as { role?: unknown; content?: unknown } | null;
         return !!r && (r.role === 'user' || r.role === 'assistant') &&
-          typeof r.content === 'string' && r.content.length > 0;
+          typeof r.content === 'string' && r.content.length > 0 && r.content.length <= MAX_IMPORT_CHARS;
       })
       .slice(-MAX_IMPORT);
     if (valid.length === 0) return res.status(200).json({ imported: 0 });

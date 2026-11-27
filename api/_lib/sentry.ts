@@ -146,6 +146,21 @@ function ensureInit() {
 
 type Handler = (req: VercelRequest, res: VercelResponse) => Promise<unknown> | unknown;
 
+// Set by api/router.ts before it dispatches. Routes behind the router are
+// reached as /api/router?__route=<name>, so the URL path alone would file
+// every one of them under "/api/router".
+export const ROUTE_KEY = Symbol.for('womanie.route');
+
+/** "db", "auth/me", "upload": the API route an event belongs to, never a query. */
+export function routeName(req: VercelRequest): string {
+  const tagged = (req as unknown as Record<symbol, unknown>)[ROUTE_KEY];
+  if (typeof tagged === 'string' && tagged) return tagged;
+  const q = req.query?.__route;
+  if (typeof q === 'string' && q) return q;
+  const path = String(stripUrl(req.url ?? '') ?? '');
+  return path.replace(/^\/?api\//, '').replace(/^\/+|\/+$/g, '') || 'unknown';
+}
+
 export function withSentry(handler: Handler): Handler {
   ensureInit();
   return async (req, res) => {
@@ -160,19 +175,27 @@ export function withSentry(handler: Handler): Handler {
       if (code >= 500) saw5xx = code;
       return origStatus(code);
     };
+    // One report per failed request: a thrown error is reported as the
+    // exception, and then not again as "Handled HTTP 500". Grouped per
+    // route + status so one outage is one issue, not one per URL variant.
+    let reported = false;
     try {
       return await handler(req, res);
     } catch (error) {
+      const route = routeName(req);
       Sentry.captureException(error, {
-        tags: { path: stripUrl(req.url) as string, method: req.method },
+        tags: { route, path: stripUrl(req.url) as string, method: req.method },
       });
+      reported = true;
       await Sentry.flush(2000).catch(() => {});
       throw error;
     } finally {
-      if (saw5xx !== null) {
-        Sentry.captureMessage(`Handled HTTP ${saw5xx}: ${req.method} ${stripUrl(req.url)}`, {
+      if (saw5xx !== null && !reported) {
+        const route = routeName(req);
+        Sentry.captureMessage(`Handled HTTP ${saw5xx}: ${req.method} /api/${route}`, {
           level: 'error',
-          tags: { path: stripUrl(req.url) as string, method: req.method },
+          tags: { route, path: stripUrl(req.url) as string, method: req.method, status: String(saw5xx) },
+          fingerprint: ['api-5xx', route, String(saw5xx)],
         });
         await Sentry.flush(2000).catch(() => {});
       }

@@ -49,6 +49,7 @@ import pushSubscription from './_routes/push/subscription.js';
 import pushTest from './_routes/push/test.js';
 import researchLibrary from './_routes/research/library.js';
 import { blockIfMaintenance } from './_lib/maintenance.js';
+import { ROUTE_KEY } from './_lib/sentry.js';
 
 // Single entry point for the API routes that need no per-function config.
 //
@@ -126,6 +127,8 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   const key = routeKey(req.url, rewritten);
   const route = ROUTES[key];
   if (!route) return res.status(404).json({ error: 'Not found' });
+  // Lets withSentry name the route in an error report (see routeName).
+  (req as unknown as Record<symbol, unknown>)[ROUTE_KEY] = key;
   // Maintenance (read-only) mode, OFF unless MAINTENANCE_MODE is set.
   if (blockIfMaintenance(key, req, res)) return;
   return route(req, res);

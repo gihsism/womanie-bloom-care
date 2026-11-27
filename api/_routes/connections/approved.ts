@@ -29,7 +29,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
          FROM doctor_patient_connections c
          LEFT JOIN doctor_profiles p ON p.user_id = c.doctor_id
         WHERE c.patient_id = $1 AND c.status = 'approved'
-        ORDER BY c.approved_at DESC NULLS LAST`,
+        ORDER BY c.approved_at DESC NULLS LAST
+        LIMIT 200`,
       [user.id]
     );
     return res.status(200).json({ approved: rows });

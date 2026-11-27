@@ -1,5 +1,6 @@
 import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { bodyObject, isEmailLike, isPasswordInput } from '../../_lib/input.js';
 import * as jose from 'jose';
 import bcrypt from 'bcryptjs';
 import { getAuthSecret } from '../../_lib/auth.js';
@@ -19,10 +20,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { email, password } = req.body;
+    const { email, password } = bodyObject(req.body);
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
+    }
+    if (!isEmailLike(email) || !isPasswordInput(password)) {
+      return res.status(400).json({ error: 'Invalid email or password' });
     }
 
     const ip =

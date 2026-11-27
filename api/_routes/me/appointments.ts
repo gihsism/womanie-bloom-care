@@ -51,7 +51,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
             WHERE a.patient_id = $1
               AND a.scheduled_at >= NOW()
               AND COALESCE(a.status, 'scheduled') <> 'cancelled'
-            ORDER BY a.scheduled_at ASC`,
+            ORDER BY a.scheduled_at ASC
+            LIMIT 200`,
           [user.id]
         )
       : await sql.query(

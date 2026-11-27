@@ -6,8 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { insertLifeEvent, useLifeEvents } from '@/hooks/useLifeEvents';
-import { Pill, Plus, Check, Trash2, Bell, X, Pencil } from 'lucide-react';
+import { insertLifeEvent } from '@/hooks/useLifeEvents';
+import { useOfflineLifeEvents } from '@/hooks/useOfflineLifeEvents';
+import { Pill, Plus, Check, Trash2, Bell, X, Pencil, CloudOff } from 'lucide-react';
 import { format, isToday, parseISO } from 'date-fns';
 import { dueReminders } from '@/lib/medicine';
 import { supplyNote } from '@/lib/medicineSupply';
@@ -82,7 +83,19 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
   const [packStartedOn, setPackStartedOn] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [now, setNow] = useState(new Date());
-  const doses = useLifeEvents<DoseData>('med_dose', { limit: 300 });
+  // A "Taken" tap with no signal is kept on the device and sent when the
+  // connection is back (same queue as the kick counter), so it still
+  // counts today instead of being lost.
+  const doses = useOfflineLifeEvents<DoseData>('med_dose', { limit: 300 });
+  const pendingDoses = useMemo(
+    () => doses.pending.map(p => ({ id: p.localId, occurred_at: p.occurred_at, data: p.data, pending: true as const })),
+    [doses.pending],
+  );
+  const allDoses = useMemo(
+    () => [...pendingDoses, ...doses.events.map(e => ({ id: e.id, occurred_at: e.occurred_at, data: e.data, pending: false as const }))]
+      .sort((a, b) => b.occurred_at.localeCompare(a.occurred_at)),
+    [pendingDoses, doses.events],
+  );
 
   useEffect(() => {
     const t = window.setInterval(() => setNow(new Date()), 60_000);
@@ -101,13 +114,13 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
 
   const todayCount = useMemo(() => {
     const m = new Map<string, number>();
-    for (const d of doses.events) {
+    for (const d of allDoses) {
       if (!isToday(parseISO(d.occurred_at))) continue;
       const id = d.data?.medication_id;
       if (id) m.set(id, (m.get(id) ?? 0) + 1);
     }
     return m;
-  }, [doses.events]);
+  }, [allDoses]);
 
   // A yyyy-mm-dd start date that is not in the future, else null.
   const validStart = (v: string) =>
@@ -229,17 +242,19 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
 
   // Home's "Today" list re-reads which medicines are due after each tick.
   const take = async (m: Medication) => {
-    await doses.add({ occurred_at: new Date().toISOString(), data: { medication_id: m.id, name: m.name, dose: m.dose } });
+    await doses.addOrQueue({ occurred_at: new Date().toISOString(), ended_at: null, data: { medication_id: m.id, name: m.name, dose: m.dose } });
     emitHealthDataChange();
   };
 
   const undoLast = (m: Medication) => {
-    const last = doses.events.find(d => d.data?.medication_id === m.id && isToday(parseISO(d.occurred_at)));
-    if (last) void doses.remove(last.id).then(() => emitHealthDataChange());
+    const last = allDoses.find(d => d.data?.medication_id === m.id && isToday(parseISO(d.occurred_at)));
+    if (!last) return;
+    if (last.pending) { doses.removePending(last.id); emitHealthDataChange(); return; }
+    void doses.remove(last.id).then(() => emitHealthDataChange());
   };
 
   const examples = (stage && EXAMPLES[stage]) || DEFAULT_EXAMPLES;
-  const recent = doses.events.slice(0, 8);
+  const recent = allDoses.slice(0, 8);
 
   return (
     <Card className="p-4 space-y-3">
@@ -395,7 +410,10 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
           <ul className="space-y-0.5">
             {recent.map(d => (
               <li key={d.id} className="text-xs flex justify-between text-muted-foreground">
-                <span>{d.data?.name}{d.data?.dose ? ` · ${d.data.dose}` : ''}</span>
+                <span className="flex items-center gap-1">
+                  {d.data?.name}{d.data?.dose ? ` · ${d.data.dose}` : ''}
+                  {d.pending && <CloudOff className="h-3 w-3" aria-label="Not synced yet" />}
+                </span>
                 <span className="tabular-nums">
                   {isToday(parseISO(d.occurred_at)) ? format(parseISO(d.occurred_at), 'HH:mm') : format(parseISO(d.occurred_at), 'MMM d, HH:mm')}
                 </span>
