@@ -149,6 +149,62 @@ as they are; only the explanatory text carries the Swiss timing. Also
 replaced "Start daily kick counts" (week 28 text) with "Get to know your
 baby's usual pattern of movements", matching the movements milestone.
 
+## Round 3 (2026-11-27)
+
+### Vitamin D cards
+
+Checked against the Swiss BLV recommendation (Eidg. Ernährungskommission:
+600 IU a day for ages 3-60, pregnancy and breastfeeding, 800 IU from 60),
+the Endocrine Society guideline 2024 (`pmid-38828931`: for adults 19-74
+without an established reason it suggests no routine 25(OH)D testing and no
+vitamin D above the everyday amount; it sets no 30 ng/mL target) and the
+adult upper limit of 4,000 IU a day (EFSA, US NIH ODS).
+
+| Where | Claim | Done |
+|---|---|---|
+| `PersonalizedInsights` (low D + low calcium; low D + high PTH) | "Start vitamin D supplementation (2000-4000 IU daily)" | The app no longer names a treatment dose: for a confirmed deficiency the doctor sets the dose (often above the everyday amount). The BLV everyday amounts and the 4,000 IU limit are given instead. |
+| same, PTH card | "stop the calcium drain from your bones"; "below ~31, PTH rises"; "bring your levels above 30 ng/mL" | "Raising vitamin D usually lowers PTH again, which can reduce the pull on your bones"; "when vitamin D is low, PTH can rise"; target level left to the doctor. |
+| `PersonalizedInsights` (menopause) | calcium 1200 mg, vitamin D 1000-2000 IU | Ask your doctor; everyday amounts: calcium about 1000-1200 mg, vitamin D 600 / 800 IU (BLV). |
+| `MedicalHistory` (vitamin D low) | "can affect ... fertility"; "usually 1000-4000 IU daily" | Removed; dose left to the doctor, 4,000 IU limit. |
+| `MenopauseNutrition`, `PostpartumNutrition` | 800-2000 / 1000-2000 IU; "baby pulls from your stores" | BLV amounts; breastfed babies get their own vitamin D drops. |
+| `api/analyze-document.ts` prompt | "30-100 sufficient", "PTH rises when vitamin D <31" | 20 ng/mL covers bone needs (NIH, EFSA, BLV), no agreed 30 target; no dose for a deficiency. |
+
+`PregnancyNutrition` (600-2000 IU, "discuss with your provider") was left:
+the Endocrine Society 2024 suggests vitamin D above the everyday amount in
+pregnancy, and the BLV advises daily drops with the dose agreed with a
+professional.
+
+### Summary content check, next 150 items
+
+The next 150 items by app exposure (ranks 171-321 of the round-2 ranking;
+`pmid-37871145` skipped, no PubMed abstract) were checked the same way:
+summary, every key point and the certainty label against the PubMed
+abstract. 145 were fair paraphrases. 5 fixes (text only, embeddings rebuilt
+offline):
+
+| Item | Problem | Fix |
+|---|---|---|
+| `pmid-30570133` myo-inositol in PCOS (Cochrane) | "pregnancy rate may be higher"; abstract: uncertain, not significant, very low quality | "uncertain whether it increases" |
+| `pmid-40985300` misoprostol before IUD placement | "little to no difference to pain during or after"; abstract: high certainty only for after, "may" for during | split |
+| `pmid-29384406` micronised progesterone and breast cancer (expert panel) | certainty "low"; no graded certainty in the abstract | "not stated" |
+| `pmid-33078388` pain relief for after-pains (Cochrane) | NSAIDs "worked better"; abstract: "probably" (moderate certainty) | "probably" |
+| `pmid-34382733` perceived low milk supply | "knowing more ... went along with less worry"; abstract gives an association (OR 7.10) without direction | direction removed |
+
+### Swiss sources
+
+| Where | Added | Source (free, official) |
+|---|---|---|
+| Check-ups and scans card | Swiss note per step: scans at 12-14 and 20-23 weeks covered, first-trimester test covered, NIPT from week 12 at risk 1:1000 or higher, seven check-ups and no cost-sharing for maternity services (week 13 to 8 weeks after birth for all care) | BAG "Krankenversicherung: Leistungen bei Mutterschaft" (KLV Art. 13) |
+| same, glucose test | 75 g OGTT for every pregnant woman at 24-28 weeks | SGGG expert letter 81 (Gynäkologie 1/2024, free on rosenfluh.ch) |
+| `PregnancyNutrition` | folic acid 400 µg as a tablet, from before pregnancy until at least the end of week 12 (was 400-600 µg and a garbled "other tube" sentence); new iodine tip (iodised salt, ask about a tablet); iron tablets only when prescribed | BLV brochure "Ernährung rund um Schwangerschaft und Stillzeit" (2020, on sge-ssn.ch) |
+| `IVFNutrition` | folic acid 400 µg (was 600-800 µg "3 months before", "neural tube starts on implantation") | same |
+| Pregnancy vaccinations card | link to the BAG Swiss vaccination schedule next to the ACOG/CDC reference | bag.admin.ch/de/schweizerischer-impfplan |
+
+Still open: the Swiss sources sit in the app text, not in the research
+library (they have no PubMed record), so the chat cannot cite them. The KLV
+change of 1 July 2026 (first-trimester pre-eclampsia screening, new Art. 13
+letter b quater) was not checked: the BAG commentary PDF was not readable.
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed

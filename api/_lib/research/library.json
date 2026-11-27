@@ -45809,7 +45809,7 @@
     "Women with a uterus who take estrogen need a progestogen to protect the womb lining.",
     "Counseling on combined hormone therapy should cover breast cancer risk whichever progestogen is used, along with other breast cancer risk factors."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menopause",
     "post-menopause"
@@ -50535,7 +50535,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34382733/",
-   "summary": "This review pooled 27 studies on 'perceived insufficient milk supply', which is when a mother feels she isn't making enough milk. About half of mothers who stopped breastfeeding said this was the reason, and 10% to 25% of mothers who were still breastfeeding reported it. Feeling more confident and knowing more about breastfeeding went along with less worry about supply. The authors say support is needed to help mothers at risk keep breastfeeding.",
+   "summary": "This review pooled 27 studies on 'perceived insufficient milk supply', which is when a mother feels she isn't making enough milk. About half of mothers who stopped breastfeeding said this was the reason, and 10% to 25% of mothers who were still breastfeeding reported it. Feeling more confident about breastfeeding went along with less worry about supply, and breastfeeding knowledge was also linked to it. The authors say support is needed to help mothers at risk keep breastfeeding.",
    "keyPoints": [
     "About 50% of mothers who stopped breastfeeding gave perceived low milk supply as the reason.",
     "Among mothers still breastfeeding, 10% to 25% reported perceived low milk supply.",
@@ -56728,7 +56728,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/40985300/",
    "summary": "This Cochrane review pooled 14 trials with 1,972 women to see whether misoprostol, a medicine that softens the cervix, makes getting an IUD (coil) fitted less painful or easier. For routine IUD placement it made little to no difference to pain or to whether the IUD was placed successfully. It did cause more cramping and diarrhoea before the procedure. It may help women who have had a recent failed placement attempt.",
    "keyPoints": [
-    "Misoprostol made little to no difference to pain during or after IUD placement compared with placebo or no treatment.",
+    "Misoprostol made little to no difference to pain after IUD placement, and may make little to no difference to pain during placement, compared with placebo or no treatment.",
     "It probably made little to no difference to placement success, except in women with a recent failed attempt, where success probably increased slightly (based on one trial of 90 women).",
     "Misoprostol probably increases cramping or abdominal pain before placement and slightly increases diarrhoea.",
     "Evidence that it improves satisfaction is very uncertain, and it may make little difference to how easy placement is for providers."
@@ -68983,7 +68983,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/33078388/",
-   "summary": "This Cochrane review looked at 28 trials (2749 women) testing pain relief for cramping pains after a vaginal birth, which happen as the womb shrinks back to its usual size. Anti-inflammatory painkillers (NSAIDs, such as ibuprofen-type medicines) worked better than a dummy pill and better than opioid painkillers for pain relief. The evidence for paracetamol, herbal remedies and TENS (a nerve-stimulation device) was too weak to draw conclusions. Many trials left out breastfeeding women, so the results may not apply to everyone.",
+   "summary": "This Cochrane review looked at 28 trials (2749 women) testing pain relief for cramping pains after a vaginal birth, which happen as the womb shrinks back to its usual size. Anti-inflammatory painkillers (NSAIDs, such as ibuprofen-type medicines) probably worked better than a dummy pill and better than opioid painkillers for pain relief. The evidence for paracetamol, herbal remedies and TENS (a nerve-stimulation device) was too weak to draw conclusions. Many trials left out breastfeeding women, so the results may not apply to everyone.",
    "keyPoints": [
     "NSAIDs probably give better pain relief than placebo and than opioids (moderate-certainty evidence).",
     "NSAIDs may reduce the need for extra pain relief compared with placebo, with a similar risk of side effects for the mother.",
@@ -87360,7 +87360,7 @@
    "summary": "This Cochrane review looked at whether myo-inositol, a popular supplement, helps women with PCOS who are having trouble getting pregnant. It pooled 13 trials with 1,472 women, mostly taking it before IVF. The evidence was low to very low quality, so researchers are uncertain whether it improves live birth or pregnancy rates. Despite widespread use, no high-quality evidence supports it.",
    "keyPoints": [
     "Researchers are uncertain whether myo-inositol improves live birth rates compared with standard treatment in women with PCOS having IVF.",
-    "The clinical pregnancy rate may be higher with myo-inositol, but the evidence is very low quality, so this is uncertain.",
+    "Researchers are also uncertain whether myo-inositol increases the clinical pregnancy rate, as the evidence is very low quality.",
     "An apparent drop in miscarriage depended mainly on one trial with an unusually high miscarriage rate in the control group, and it disappeared when that trial was removed.",
     "Myo-inositol may make little or no difference to multiple pregnancy rates, based on low-quality evidence."
    ],
