@@ -216,7 +216,7 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
         {showBirthForm ? (
           <div className="flex items-end gap-2">
             <div className="flex-1">
-              <Input
+              <Input aria-label="Baby's birth date"
                 type="date"
                 value={pendingDate}
                 onChange={e => setPendingDate(e.target.value)}
@@ -295,7 +295,7 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
         {showBirthForm && (
           <div className="flex items-end gap-2 mt-3">
             <div className="flex-1">
-              <Input type="date" value={pendingDate} onChange={e => setPendingDate(e.target.value)} max={format(new Date(), 'yyyy-MM-dd')} />
+              <Input aria-label="Baby's birth date" type="date" value={pendingDate} onChange={e => setPendingDate(e.target.value)} max={format(new Date(), 'yyyy-MM-dd')} />
             </div>
             <Button onClick={setBirth} size="sm">Save</Button>
             <Button variant="ghost" size="sm" onClick={() => setShowBirthForm(false)}>Cancel</Button>
@@ -376,7 +376,7 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
             {past.length}/{RECOVERY.length} done
           </Badge>
         </div>
-        <Progress value={(past.length / RECOVERY.length) * 100} className="h-1.5 mb-3" />
+        <Progress value={(past.length / RECOVERY.length) * 100} className="h-1.5 mb-3" aria-label="Recovery milestones done" />
 
         {dueNow.length > 0 && (
           <div className="mb-3">

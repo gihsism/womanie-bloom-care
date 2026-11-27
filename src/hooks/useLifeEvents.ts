@@ -118,11 +118,17 @@ export async function importLocalOnce<T, D>(
 
 export function useLifeEvents<D = Record<string, unknown>>(
   kind: LifeEventKind,
-  opts: { limit?: number; babyId?: string | null; beforeLoad?: (userId: string) => Promise<unknown> } = {},
+  opts: {
+    limit?: number;
+    babyId?: string | null;
+    beforeLoad?: (userId: string) => Promise<unknown>;
+    /** false = don't load yet (e.g. until the baby is known); default true. */
+    enabled?: boolean;
+  } = {},
 ) {
   const { user } = useAuth();
   const userId = user?.id ?? '';
-  const { limit = 200, babyId, beforeLoad } = opts;
+  const { limit = 200, babyId, beforeLoad, enabled = true } = opts;
   const [events, setEvents] = useState<LifeEvent<D>[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -146,7 +152,7 @@ export function useLifeEvents<D = Record<string, unknown>>(
   }, [userId, kind, babyId, limit]);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || !enabled) return;
     let cancelled = false;
     (async () => {
       if (beforeLoad) {
@@ -157,7 +163,7 @@ export function useLifeEvents<D = Record<string, unknown>>(
     return () => { cancelled = true; };
     // beforeLoad is intentionally excluded: callers pass inline functions.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, reload]);
+  }, [userId, reload, enabled]);
 
   const add = useCallback(async (e: NewEvent<D>) => {
     if (!userId) return null;

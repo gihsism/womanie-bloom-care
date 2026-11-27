@@ -456,7 +456,7 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
                     <p className="text-xs font-medium">Pack Day</p>
                     <p className="text-xs font-bold">{packDay}/28</p>
                   </div>
-                  <Progress value={(packDay / 28) * 100} className="h-2" />
+                  <Progress value={(packDay / 28) * 100} className="h-2" aria-label="Pack day" />
                   <div className="flex items-center justify-between mt-1">
                     <p className="text-[10px] text-muted-foreground">
                       {packDay <= 21 ? `${21 - packDay + 1} active left` : `${28 - packDay + 1} placebo left`}

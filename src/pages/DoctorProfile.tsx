@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
+import { useOnceTrue } from '@/hooks/useOnceTrue';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, CalendarIcon, CheckCircle, Clock, Languages, MapPin, Star, Video } from 'lucide-react';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -8,7 +9,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import BookingDialog, { doctorDisplayName, type BookableDoctor } from '@/components/booking/BookingDialog';
+import type { BookableDoctor } from '@/components/booking/BookingDialog';
+import { doctorDisplayName } from '@/lib/doctorName';
+// Loaded on first use: it carries the date picker, which the page itself never needs.
+const BookingDialog = lazy(() => import('@/components/booking/BookingDialog'));
 import { formatPrice, formatPracticeShortDate, swissSuffix } from '@/lib/booking';
 import { formatPracticeTime } from '@/lib/practiceTime';
 
@@ -43,6 +47,7 @@ const DoctorProfile = () => {
   const { user, loading } = useAuth();
   const [state, setState] = useState<State>({ kind: 'loading' });
   const [bookingOpen, setBookingOpen] = useState(false);
+  const bookingMounted = useOnceTrue(bookingOpen);
   const [slot, setSlot] = useState<string | null>(null);
   usePageTitle(state.kind === 'ready' ? doctorDisplayName(state.doctor) : 'Doctor');
 
@@ -190,13 +195,17 @@ const DoctorProfile = () => {
                 </Button>
               </Card>
 
-              <BookingDialog
-                doctor={d}
-                open={bookingOpen}
-                initialSlot={slot}
-                onOpenChange={o => { setBookingOpen(o); if (!o) load(true); }}
-                onDoctorUnavailable={() => setState({ kind: 'gone' })}
-              />
+              {bookingMounted && (
+                <Suspense fallback={null}>
+                  <BookingDialog
+                    doctor={d}
+                    open={bookingOpen}
+                    initialSlot={slot}
+                    onOpenChange={o => { setBookingOpen(o); if (!o) load(true); }}
+                    onDoctorUnavailable={() => setState({ kind: 'gone' })}
+                  />
+                </Suspense>
+              )}
             </>
           );
         })()}

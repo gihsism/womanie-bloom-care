@@ -33,10 +33,13 @@ export default function BabyBodyMap() {
   }, [user]);
   useEffect(() => { load(); return onHealthDataChange(load); }, [load]);
 
+  // Wait for the baby before loading her feeds/nappies/sleep: loading with
+  // no baby yet fetched every baby's entries once, then again for this baby.
   const babyId = baby?.id ?? null;
-  const feeds = useLifeEvents('feed', { babyId, limit: 60 });
-  const nappies = useLifeEvents('nappy', { babyId, limit: 60 });
-  const sleeps = useLifeEvents('baby_sleep', { babyId, limit: 40 });
+  const enabled = Boolean(babyId);
+  const feeds = useLifeEvents('feed', { babyId, limit: 60, enabled });
+  const nappies = useLifeEvents('nappy', { babyId, limit: 60, enabled });
+  const sleeps = useLifeEvents('baby_sleep', { babyId, limit: 40, enabled });
 
   const [, tick] = useState(0);
   useEffect(() => { const t = window.setInterval(() => tick(n => n + 1), 60000); return () => window.clearInterval(t); }, []);

@@ -28,6 +28,7 @@ export default function UserMenu() {
         size="sm"
         className="gap-1.5 text-xs text-muted-foreground hover:text-destructive"
         onClick={() => { window.location.href = '/api/auth/logout'; }}
+        aria-label="Log out"
       >
         <LogOut className="h-3.5 w-3.5" />
         <span className="hidden sm:inline">Log out</span>

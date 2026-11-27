@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
+import { useOnceTrue } from '@/hooks/useOnceTrue';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,13 +8,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/integrations/db/client';
 import { CalendarClock, Video, MapPin, Stethoscope, ShieldCheck, X, CalendarCog } from 'lucide-react';
-import RescheduleDialog from './RescheduleDialog';
 import { format, formatDistanceToNowStrict } from 'date-fns';
 import { errorMessage } from '@/lib/errors';
 import { relativeDay } from '@/lib/relative-day';
 import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
 import { useConfirm } from '@/components/ConfirmDialog';
 import { cancelAppointmentConfirm } from '@/lib/confirmCopy';
+
+// Loaded on first use: it carries the date picker, which the card itself never needs.
+const RescheduleDialog = lazy(() => import('./RescheduleDialog'));
 
 // Upcoming consultations on the patient dashboard. Patients can already
 // book through FindDoctor but had nowhere to see their schedule after.
@@ -46,6 +49,7 @@ export default function UpcomingAppointments() {
   const [loaded, setLoaded] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rescheduling, setRescheduling] = useState<AppointmentRow | null>(null);
+  const rescheduleMounted = useOnceTrue(rescheduling !== null);
   const [confirm, confirmDialog] = useConfirm();
 
   const load = useCallback(async () => {
@@ -238,12 +242,16 @@ export default function UpcomingAppointments() {
         </Button>
       </div>
 
-      <RescheduleDialog
-        appointment={rescheduling}
-        open={rescheduling !== null}
-        onOpenChange={(open) => { if (!open) setRescheduling(null); }}
-        onRescheduled={() => { emitHealthDataChange(); load(); }}
-      />
+      {rescheduleMounted && (
+        <Suspense fallback={null}>
+          <RescheduleDialog
+            appointment={rescheduling}
+            open={rescheduling !== null}
+            onOpenChange={(open) => { if (!open) setRescheduling(null); }}
+            onRescheduled={() => { emitHealthDataChange(); load(); }}
+          />
+        </Suspense>
+      )}
       {confirmDialog}
     </Card>
   );

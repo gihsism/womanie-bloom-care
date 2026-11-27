@@ -699,7 +699,7 @@ const Settings = () => {
                 <Label>Cycle Reminders</Label>
                 <p className="text-sm text-muted-foreground">Get notified about your cycle phases</p>
               </div>
-              <Switch
+              <Switch aria-label="Cycle Reminders"
                 checked={notifications.cycleReminders}
                 onCheckedChange={(checked) => {
                   setNotifications(prev => ({ ...prev, cycleReminders: checked }));
@@ -713,7 +713,7 @@ const Settings = () => {
                 <Label>Appointment Reminders</Label>
                 <p className="text-sm text-muted-foreground">Reminders for upcoming doctor appointments</p>
               </div>
-              <Switch
+              <Switch aria-label="Appointment Reminders"
                 checked={notifications.appointmentReminders}
                 onCheckedChange={(checked) => {
                   setNotifications(prev => ({ ...prev, appointmentReminders: checked }));
@@ -727,7 +727,7 @@ const Settings = () => {
                 <Label>Health Tips</Label>
                 <p className="text-sm text-muted-foreground">A short daily tip for your stage</p>
               </div>
-              <Switch
+              <Switch aria-label="Health Tips"
                 checked={notifications.healthTips}
                 onCheckedChange={(checked) => {
                   setNotifications(prev => ({ ...prev, healthTips: checked }));

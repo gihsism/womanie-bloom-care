@@ -178,7 +178,12 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {showTrigger && (
         <DialogTrigger asChild>
-          <Card className="p-5 cursor-pointer hover:bg-primary/5 hover:border-primary/30 transition-all border-dashed border-2">
+          <Card
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.currentTarget.click(); } }}
+            className="p-5 cursor-pointer hover:bg-primary/5 hover:border-primary/30 transition-all border-dashed border-2"
+          >
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/10 flex items-center justify-center flex-shrink-0">
                 <Upload className="h-7 w-7 text-primary" />
@@ -219,7 +224,7 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
               <div className="flex items-center gap-2 p-2 bg-muted rounded-md">
                 <File className="h-4 w-4 text-primary" />
                 <span className="text-sm flex-1">{file.name}</span>
-                <Button
+                <Button aria-label="Remove selected file"
                   variant="ghost"
                   size="sm"
                   onClick={() => setFile(null)}
@@ -235,7 +240,7 @@ const DocumentUpload = ({ open: controlledOpen, onOpenChange, showTrigger = true
           <div className="space-y-2">
             <Label htmlFor="type">Document Type</Label>
             <Select value={documentType} onValueChange={setDocumentType}>
-              <SelectTrigger>
+              <SelectTrigger id="type">
                 <SelectValue placeholder="Select document type" />
               </SelectTrigger>
               <SelectContent>

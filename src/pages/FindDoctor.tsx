@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
+import { lazy, Suspense, useEffect, useState, useCallback } from 'react';
+import { useOnceTrue } from '@/hooks/useOnceTrue';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,9 @@ import { db } from '@/integrations/db/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Search, Star, Clock, Video, Calendar as CalendarIcon, CheckCircle, User, Printer, Share2, MapPin } from 'lucide-react';
 import ShareWithDoctor from '@/components/dashboard/ShareWithDoctor';
-import BookingDialog, { doctorDisplayName } from '@/components/booking/BookingDialog';
+import { doctorDisplayName } from '@/lib/doctorName';
+// Loaded on first use: it carries the date picker, which the page itself never needs.
+const BookingDialog = lazy(() => import('@/components/booking/BookingDialog'));
 import { formatPrice } from '@/lib/booking';
 
 interface Doctor {
@@ -89,6 +92,7 @@ const FindDoctor = () => {
   // (/find-doctor?book=<doctor id>&at=<ISO>).
   const [searchParams, setSearchParams] = useSearchParams();
   const [bookingDoctor, setBookingDoctor] = useState<Doctor | null>(null);
+  const bookingMounted = useOnceTrue(!!bookingDoctor);
   const [bookingSlot, setBookingSlot] = useState<string | null>(null);
   // Patient's life_stage so we can highlight specialties that match
   // her current mode (OB-GYN for pregnancy, menopause specialist for
@@ -298,7 +302,7 @@ const FindDoctor = () => {
         <div className={`flex flex-col sm:flex-row gap-4 mb-6 ${!loadingDoctors && doctors.length === 0 ? 'hidden' : ''}`}>
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
+            <Input aria-label="Search doctors"
               placeholder="Search by name, specialty, language, or keywords..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -306,7 +310,7 @@ const FindDoctor = () => {
             />
           </div>
           <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
-            <SelectTrigger className="w-full sm:w-[200px]">
+            <SelectTrigger aria-label="Filter by specialty" className="w-full sm:w-[200px]">
               <SelectValue placeholder="All Specialties" />
             </SelectTrigger>
             <SelectContent>
@@ -317,7 +321,7 @@ const FindDoctor = () => {
             </SelectContent>
           </Select>
           <Select value={sortBy} onValueChange={v => setSortBy(v as typeof sortBy)}>
-            <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectTrigger aria-label="Sort doctors" className="w-full sm:w-[180px]">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
@@ -470,13 +474,17 @@ const FindDoctor = () => {
         )}
       </div>
 
-      <BookingDialog
-        doctor={bookingDoctor}
-        open={!!bookingDoctor}
-        initialSlot={bookingSlot}
-        onOpenChange={open => { if (!open) { setBookingDoctor(null); setBookingSlot(null); } }}
-        onDoctorUnavailable={handleDoctorUnavailable}
-      />
+      {bookingMounted && (
+        <Suspense fallback={null}>
+          <BookingDialog
+            doctor={bookingDoctor}
+            open={!!bookingDoctor}
+            initialSlot={bookingSlot}
+            onOpenChange={open => { if (!open) { setBookingDoctor(null); setBookingSlot(null); } }}
+            onDoctorUnavailable={handleDoctorUnavailable}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };

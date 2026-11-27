@@ -1,4 +1,5 @@
-import { useEffect, useState, useMemo } from 'react';
+import { lazy, Suspense, useEffect, useState, useMemo } from 'react';
+import { useOnceTrue } from '@/hooks/useOnceTrue';
 import { Link, useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,7 +30,6 @@ import {
   FileText,
 } from 'lucide-react';
 import { downloadIcs } from '@/lib/ics';
-import RescheduleDialog from '@/components/dashboard/RescheduleDialog';
 import VisitPrepCard from '@/components/dashboard/VisitPrepCard';
 import DoctorNotesCard from '@/components/dashboard/DoctorNotesCard';
 import PendingConnections from '@/components/dashboard/PendingConnections';
@@ -38,8 +38,12 @@ import ChartAccessLog from '@/components/dashboard/ChartAccessLog';
 import type { LifeStage } from '@/components/dashboard/DashboardHeader';
 import { normalizeLifeStage } from '@/lib/lifeStage';
 import { formatPracticeTime } from '@/lib/practiceTime';
+
+// Loaded on first use: it carries the date picker, which the list itself never needs.
+const RescheduleDialog = lazy(() => import('@/components/dashboard/RescheduleDialog'));
 import { viewerOutsidePracticeTz } from '@/lib/timeSlots';
 import { formatVisitWhen, swissSuffix } from '@/lib/booking';
+import { LoadFailed } from '@/components/LoadFailed';
 
 // Patient-side full appointments view: upcoming + past in one page.
 // Backed by the same /api/me/appointments endpoint the dashboard widget
@@ -97,8 +101,11 @@ const Appointments = () => {
   const [confirm, confirmDialog] = useConfirm();
   const [rows, setRows] = useState<AppointmentRow[]>([]);
   const [loaded, setLoaded] = useState(false);
+  // Visits could not be loaded: show that with a retry, not "No visits yet".
+  const [loadFailed, setLoadFailed] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rescheduling, setRescheduling] = useState<AppointmentRow | null>(null);
+  const rescheduleMounted = useOnceTrue(rescheduling !== null);
   const [pastFilter, setPastFilter] = useState<PastFilter>('all');
   const [mode, setMode] = useState<LifeStage | null>(null);
 
@@ -123,8 +130,10 @@ const Appointments = () => {
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const payload = await resp.json();
       setRows((payload.appointments ?? []) as AppointmentRow[]);
+      setLoadFailed(false);
     } catch (e) {
       console.error('Failed to load appointments:', e);
+      setLoadFailed(true);
       toast({
         variant: 'destructive',
         title: 'Could not load appointments',
@@ -411,6 +420,8 @@ const Appointments = () => {
           </div>
           {!loaded ? (
             <Skeleton className="h-20 w-full" />
+          ) : loadFailed && rows.length === 0 ? (
+            <LoadFailed message="We couldn't load your visits." onRetry={() => { setLoaded(false); void load(); }} />
           ) : nextVisit ? (
             <ul className="space-y-2">{renderAppointment(nextVisit, 'upcoming')}</ul>
           ) : (
@@ -532,12 +543,16 @@ const Appointments = () => {
         </details>
       </div>
 
-      <RescheduleDialog
-        appointment={rescheduling}
-        open={rescheduling !== null}
-        onOpenChange={(open) => { if (!open) setRescheduling(null); }}
-        onRescheduled={() => { emitHealthDataChange(); load(); }}
-      />
+      {rescheduleMounted && (
+        <Suspense fallback={null}>
+          <RescheduleDialog
+            appointment={rescheduling}
+            open={rescheduling !== null}
+            onOpenChange={(open) => { if (!open) setRescheduling(null); }}
+            onRescheduled={() => { emitHealthDataChange(); load(); }}
+          />
+        </Suspense>
+      )}
       {confirmDialog}
     </div>
   );

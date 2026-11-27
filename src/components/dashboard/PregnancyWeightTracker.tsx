@@ -302,7 +302,7 @@ export default function PregnancyWeightTracker({ dueDate }: PregnancyWeightTrack
               <Label className="text-[11px]">
                 Pre-pregnancy {setup.unit === 'us' ? '(lb)' : '(kg)'}
               </Label>
-              <Input
+              <Input aria-label="Pre-pregnancy weight"
                 type="number"
                 inputMode="decimal"
                 value={draftPre}
@@ -315,7 +315,7 @@ export default function PregnancyWeightTracker({ dueDate }: PregnancyWeightTrack
               <Label className="text-[11px]">
                 Height {setup.unit === 'us' ? '(in)' : '(cm)'}
               </Label>
-              <Input
+              <Input aria-label="Height"
                 type="number"
                 inputMode="decimal"
                 value={draftHeight}
@@ -348,7 +348,7 @@ export default function PregnancyWeightTracker({ dueDate }: PregnancyWeightTrack
           <div className="flex items-end gap-2 mb-3">
             <div className="flex-1 space-y-1">
               <Label className="text-[11px]">Today's weight {setup.unit === 'us' ? '(lb)' : '(kg)'}</Label>
-              <Input
+              <Input aria-label="Today's weight"
                 type="number"
                 inputMode="decimal"
                 value={todayValue}

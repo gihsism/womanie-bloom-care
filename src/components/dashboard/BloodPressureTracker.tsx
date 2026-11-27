@@ -218,7 +218,7 @@ export default function BloodPressureTracker({ mode }: BloodPressureTrackerProps
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
         <div className="space-y-1">
           <Label className="text-[11px]">Systolic</Label>
-          <Input
+          <Input aria-label="Systolic"
             type="number"
             inputMode="numeric"
             value={sys}
@@ -229,7 +229,7 @@ export default function BloodPressureTracker({ mode }: BloodPressureTrackerProps
         </div>
         <div className="space-y-1">
           <Label className="text-[11px]">Diastolic</Label>
-          <Input
+          <Input aria-label="Diastolic"
             type="number"
             inputMode="numeric"
             value={dia}
@@ -240,7 +240,7 @@ export default function BloodPressureTracker({ mode }: BloodPressureTrackerProps
         </div>
         <div className="space-y-1">
           <Label className="text-[11px]">Pulse (opt.)</Label>
-          <Input
+          <Input aria-label="Pulse (opt.)"
             type="number"
             inputMode="numeric"
             value={pulse}

@@ -99,7 +99,7 @@ const BasicInformation = () => {
                     setDateOfBirth(newDate);
                   }}
                 >
-                  <SelectTrigger className="flex-1">
+                  <SelectTrigger aria-label="Birth year" className="flex-1">
                     <SelectValue placeholder="Year" />
                   </SelectTrigger>
                   <SelectContent>
@@ -117,7 +117,7 @@ const BasicInformation = () => {
                     setDateOfBirth(newDate);
                   }}
                 >
-                  <SelectTrigger className="flex-1">
+                  <SelectTrigger aria-label="Birth month" className="flex-1">
                     <SelectValue placeholder="Month" />
                   </SelectTrigger>
                   <SelectContent>
@@ -127,7 +127,7 @@ const BasicInformation = () => {
                   </SelectContent>
                 </Select>
 
-                <Input
+                <Input aria-label="Birth day"
                   type="number"
                   placeholder="Day"
                   min="1"
@@ -194,14 +194,14 @@ const BasicInformation = () => {
                   />
                 ) : (
                   <>
-                    <Input
+                    <Input aria-label="Height (feet)"
                       type="number"
                       placeholder="5"
                       value={heightFeet}
                       onChange={(e) => setHeightFeet(e.target.value)}
                       className="flex-1"
                     />
-                    <Input
+                    <Input aria-label="Height (inches)"
                       type="number"
                       placeholder="7"
                       value={heightInches}
@@ -211,7 +211,7 @@ const BasicInformation = () => {
                   </>
                 )}
                 <Select value={heightUnit} onValueChange={(value: 'cm' | 'ft') => setHeightUnit(value)}>
-                  <SelectTrigger className="w-24">
+                  <SelectTrigger aria-label="Height unit" className="w-24">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -235,7 +235,7 @@ const BasicInformation = () => {
                   className="flex-1"
                 />
                 <Select value={weightUnit} onValueChange={(value: 'kg' | 'lbs') => setWeightUnit(value)}>
-                  <SelectTrigger className="w-24">
+                  <SelectTrigger aria-label="Weight unit" className="w-24">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

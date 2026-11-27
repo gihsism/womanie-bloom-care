@@ -171,9 +171,10 @@ export default defineConfig(() => ({
             // (anchored on /node_modules/ so @sentry/react is not swept in)
             return "react-vendor";
           }
-          if (id.includes("@radix-ui") || id.includes("cmdk") || id.includes("vaul")) {
-            return "ui-vendor";
-          }
+          // Radix / cmdk / vaul are NOT grouped any more: as one forced
+          // "ui-vendor" chunk, every first paint (even the landing page)
+          // downloaded Select, Menu, ScrollArea, RadioGroup... (~470 KB raw).
+          // Left to Rollup, each component ships with the screens that use it.
         },
       },
     },

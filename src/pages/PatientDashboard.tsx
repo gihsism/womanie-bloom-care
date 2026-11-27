@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { useOnceTrue } from '@/hooks/useOnceTrue';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,13 +12,18 @@ import PillRingHero from '@/components/dashboard/PillRingHero';
 import MenopauseBodyMap from '@/components/dashboard/MenopauseBodyMap';
 import IVFTimelineHero from '@/components/dashboard/IVFTimelineHero';
 import { TodayList, PrimaryButton, MoreForStage, useGo, type SheetKind } from '@/components/dashboard/HomeBlocks';
-import LogSheet from '@/components/dashboard/LogSheet';
 import PeriodLateCard from '@/components/dashboard/PeriodLateCard';
 import { useStageProfile } from '@/hooks/useStageProfile';
 import { useTodaySignals } from '@/hooks/useTodaySignals';
 import { todayItems, primaryActionFor, secondaryActionFor, moreFor } from '@/lib/todayItems';
 import { stageLabel } from '@/lib/stageLabels';
 import { usePageTitle } from '@/hooks/usePageTitle';
+
+// The Log sheet (today's log + medicines) is closed when Home opens, so it
+// doesn't hold up the first paint: it downloads just after (see the effect
+// below), so the first tap on "Log today" still opens it straight away.
+const loadLogSheet = () => import('@/components/dashboard/LogSheet');
+const LogSheet = lazy(loadLogSheet);
 
 // Home: the same short template for every life stage —
 //   1. greeting, with the stage as a quiet "· change" link (to Me)
@@ -53,6 +59,11 @@ const PatientDashboard = () => {
   const signals = useTodaySignals(periodData, profile?.full_name, { mode, pregnancyDueDate });
   const [sheet, setSheet] = useState<SheetKind | null>(null);
   const go = useGo(setSheet);
+  const logSheetMounted = useOnceTrue(sheet !== null);
+  useEffect(() => {
+    const t = window.setTimeout(() => { void loadLogSheet().catch(() => { /* retried on first open */ }); }, 1500);
+    return () => window.clearTimeout(t);
+  }, []);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -113,7 +124,11 @@ const PatientDashboard = () => {
         <MoreForStage stage={stageLabel(mode)} rows={moreFor(mode, { weeksPregnant })} go={go} />
       </div>
 
-      <LogSheet open={sheet} onOpenChange={(o) => { if (!o) setSheet(null); }} mode={mode} weeksPregnant={weeksPregnant} />
+      {logSheetMounted && (
+        <Suspense fallback={null}>
+          <LogSheet open={sheet} onOpenChange={(o) => { if (!o) setSheet(null); }} mode={mode} weeksPregnant={weeksPregnant} />
+        </Suspense>
+      )}
     </main>
   );
 };

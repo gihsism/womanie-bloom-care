@@ -1,8 +1,6 @@
 // Application root
 import { lazy, Suspense } from "react";
-import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { OnboardingProvider } from "@/contexts/OnboardingContext";
@@ -45,6 +43,11 @@ const Blog = lazy(() => import("./pages/Blog"));
 const Install = lazy(() => import("./pages/Install"));
 const Welcome = lazy(() => import("./pages/Welcome"));
 const Community = lazy(() => import("./pages/Community"));
+
+// The Radix toaster only matters once something calls toast(); the toast
+// store keeps any early toasts until it mounts, so it needn't block first paint.
+// (Root TooltipProvider removed: no screen used it — the sidebar brings its own.)
+const Toaster = lazy(() => import("@/components/ui/toaster").then((m) => ({ default: m.Toaster })));
 
 // Heavy pages — lazy loaded (dashboard / doctor / features)
 const PatientDashboard = lazy(() => import("./pages/PatientDashboard"));
@@ -92,88 +95,88 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <OnboardingProvider>
+    <AuthProvider>
+      <OnboardingProvider>
+        <Suspense fallback={null}>
           <Toaster />
-          <Sonner />
-          <OfflineIndicator />
-          <MaintenanceBanner />
-          <BrowserRouter>
-            <ScrollToTop />
-            <InstallBanner />
-            <ErrorBoundary>
-              <Suspense fallback={<PageLoader />}>
-                <ConsentGate>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/product" element={<Product />} />
-                  <Route path="/for-patients" element={<ForPatients />} />
-                  <Route path="/for-doctors" element={<ForDoctors />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/pricing" element={<Pricing />} />
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/auth/select-type" element={<SelectUserType />} />
-                  <Route path="/auth/signup" element={<PatientSignUp />} />
-                  <Route path="/auth/login" element={<PatientLogIn />} />
-                  <Route path="/auth/doctor-login" element={<DoctorLogIn />} />
-                  <Route path="/auth/doctor-signup" element={<DoctorSignUp />} />
-                  <Route path="/dashboard" element={<PatientDashboard />} />
-                  <Route path="/dashboard/settings" element={<Settings />} />
-                  <Route path="/find-doctor" element={<FindDoctor />} />
-                  <Route path="/doctors/:doctorId" element={<DoctorProfile />} />
-                  <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
-                  <Route path="/doctor/patient/:patientId" element={<PatientDetails />} />
-                  <Route path="/health-statistics" element={<HealthStatistics />} />
-                  <Route path="/dashboard/medical-history" element={<MedicalHistory />} />
-                  <Route path="/dashboard/ai-doctor" element={<AIDoctorChat />} />
-                  <Route path="/onboarding/basic-info" element={<BasicInformation />} />
-                  <Route path="/onboarding/life-stage" element={<LifeStageSelection />} />
-                  <Route path="/onboarding/mode-setup" element={<ModeSetup />} />
-                  <Route path="/onboarding/success" element={<OnboardingSuccess />} />
-                  <Route path="/install" element={<Install />} />
-                  <Route path="/dashboard/devices" element={<Devices />} />
-                  <Route path="/welcome" element={<Welcome />} />
-                  <Route path="/community" element={<Community />} />
-                  <Route path="/dashboard/recover-documents" element={<RecoverDocuments />} />
-                  <Route path="/admin/doctors" element={<DoctorApprovals />} />
-                  <Route path="/dashboard/notifications" element={<Notifications />} />
-                  <Route path="/dashboard/help" element={<Help />} />
-                  <Route path="/dashboard/privacy" element={<Privacy />} />
-                  {/* Public URL for the App Store / Play listing privacy-policy link. */}
-                  <Route path="/privacy" element={<Privacy />} />
-                  <Route path="/dashboard/emergency" element={<Emergency />} />
-                  <Route path="/dashboard/health-overview" element={<HealthOverview />} />
-                  <Route path="/dashboard/compare" element={<CompareDocs />} />
-                  <Route path="/dashboard/panel/:slug" element={<PanelDetail />} />
-                  <Route path="/dashboard/doc/:id/print" element={<PrintDoc />} />
-                  <Route path="/dashboard/health-record/print" element={<PrintHealthRecord />} />
-                  <Route path="/dashboard/visit-summary/print" element={<PrintVisitSummary />} />
-                  <Route path="/dashboard/appointments/:id/prep" element={<PrintVisitPrep />} />
-                  <Route path="/dashboard/birth-plan/print" element={<PrintBirthPlan />} />
-                  <Route path="/dashboard/appointments" element={<Appointments />} />
-                  <Route path="/dashboard/birth" element={<BirthRecord />} />
-                  <Route path="/dashboard/baby" element={<BabyPage />} />
-                  <Route path="/dashboard/stage" element={<StagePage />} />
-                  <Route path="/library" element={<ResearchLibrary />} />
-                  {/* Dashboard menu entries that historically pointed to
-                      dedicated pages we never shipped. Redirect them to
-                      sensible existing destinations instead of bouncing
-                      the user to a 404. */}
-                  <Route path="/dashboard/about" element={<Navigate to="/about" replace />} />
-                  <Route path="/dashboard/profile" element={<Navigate to="/dashboard/settings" replace />} />
-                  <Route path="/dashboard/terms" element={<Navigate to="/about" replace />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-                </ConsentGate>
-              </Suspense>
-            </ErrorBoundary>
-            <BottomNav />
-          </BrowserRouter>
-        </OnboardingProvider>
-      </AuthProvider>
-    </TooltipProvider>
+        </Suspense>
+        <Sonner />
+        <OfflineIndicator />
+        <MaintenanceBanner />
+        <BrowserRouter>
+          <ScrollToTop />
+          <InstallBanner />
+          <ErrorBoundary>
+            <Suspense fallback={<PageLoader />}>
+              <ConsentGate>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/product" element={<Product />} />
+                <Route path="/for-patients" element={<ForPatients />} />
+                <Route path="/for-doctors" element={<ForDoctors />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/auth/select-type" element={<SelectUserType />} />
+                <Route path="/auth/signup" element={<PatientSignUp />} />
+                <Route path="/auth/login" element={<PatientLogIn />} />
+                <Route path="/auth/doctor-login" element={<DoctorLogIn />} />
+                <Route path="/auth/doctor-signup" element={<DoctorSignUp />} />
+                <Route path="/dashboard" element={<PatientDashboard />} />
+                <Route path="/dashboard/settings" element={<Settings />} />
+                <Route path="/find-doctor" element={<FindDoctor />} />
+                <Route path="/doctors/:doctorId" element={<DoctorProfile />} />
+                <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+                <Route path="/doctor/patient/:patientId" element={<PatientDetails />} />
+                <Route path="/health-statistics" element={<HealthStatistics />} />
+                <Route path="/dashboard/medical-history" element={<MedicalHistory />} />
+                <Route path="/dashboard/ai-doctor" element={<AIDoctorChat />} />
+                <Route path="/onboarding/basic-info" element={<BasicInformation />} />
+                <Route path="/onboarding/life-stage" element={<LifeStageSelection />} />
+                <Route path="/onboarding/mode-setup" element={<ModeSetup />} />
+                <Route path="/onboarding/success" element={<OnboardingSuccess />} />
+                <Route path="/install" element={<Install />} />
+                <Route path="/dashboard/devices" element={<Devices />} />
+                <Route path="/welcome" element={<Welcome />} />
+                <Route path="/community" element={<Community />} />
+                <Route path="/dashboard/recover-documents" element={<RecoverDocuments />} />
+                <Route path="/admin/doctors" element={<DoctorApprovals />} />
+                <Route path="/dashboard/notifications" element={<Notifications />} />
+                <Route path="/dashboard/help" element={<Help />} />
+                <Route path="/dashboard/privacy" element={<Privacy />} />
+                {/* Public URL for the App Store / Play listing privacy-policy link. */}
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/dashboard/emergency" element={<Emergency />} />
+                <Route path="/dashboard/health-overview" element={<HealthOverview />} />
+                <Route path="/dashboard/compare" element={<CompareDocs />} />
+                <Route path="/dashboard/panel/:slug" element={<PanelDetail />} />
+                <Route path="/dashboard/doc/:id/print" element={<PrintDoc />} />
+                <Route path="/dashboard/health-record/print" element={<PrintHealthRecord />} />
+                <Route path="/dashboard/visit-summary/print" element={<PrintVisitSummary />} />
+                <Route path="/dashboard/appointments/:id/prep" element={<PrintVisitPrep />} />
+                <Route path="/dashboard/birth-plan/print" element={<PrintBirthPlan />} />
+                <Route path="/dashboard/appointments" element={<Appointments />} />
+                <Route path="/dashboard/birth" element={<BirthRecord />} />
+                <Route path="/dashboard/baby" element={<BabyPage />} />
+                <Route path="/dashboard/stage" element={<StagePage />} />
+                <Route path="/library" element={<ResearchLibrary />} />
+                {/* Dashboard menu entries that historically pointed to
+                    dedicated pages we never shipped. Redirect them to
+                    sensible existing destinations instead of bouncing
+                    the user to a 404. */}
+                <Route path="/dashboard/about" element={<Navigate to="/about" replace />} />
+                <Route path="/dashboard/profile" element={<Navigate to="/dashboard/settings" replace />} />
+                <Route path="/dashboard/terms" element={<Navigate to="/about" replace />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              </ConsentGate>
+            </Suspense>
+          </ErrorBoundary>
+          <BottomNav />
+        </BrowserRouter>
+      </OnboardingProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

@@ -101,7 +101,7 @@ const HospitalBagChecklist = ({ weeksPregnant }: HospitalBagChecklistProps) => {
       </div>
 
       <div className="space-y-1">
-        <Progress value={progress.percent} className="h-2" />
+        <Progress value={progress.percent} className="h-2" aria-label="Hospital bag packed" />
         <div className="flex items-center justify-between text-[11px] text-muted-foreground">
           <span>{progress.percent}% complete</span>
           <span className="flex items-center gap-3">

@@ -323,7 +323,7 @@ const DoctorSignUp = () => {
                     Specialty
                   </label>
                   <Select value={formData.specialty} onValueChange={(value) => handleInputChange('specialty', value)}>
-                    <SelectTrigger>
+                    <SelectTrigger id="specialty">
                       <SelectValue placeholder="Select your specialty" />
                     </SelectTrigger>
                     <SelectContent>

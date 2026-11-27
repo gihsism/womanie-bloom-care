@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { lazy, Suspense, useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
@@ -12,12 +12,14 @@ import { stageLabel } from '@/lib/doctorDashboard';
 import { cycleDay, normalizePatientTab, pregnancyWeek, type PatientTab } from '@/lib/doctorPatient';
 import PatientSummary from '@/components/doctor/patient/PatientSummary';
 import PatientResults from '@/components/doctor/patient/PatientResults';
-import PatientDocuments from '@/components/doctor/patient/PatientDocuments';
 import PatientNotes from '@/components/doctor/patient/PatientNotes';
 import PatientVisits from '@/components/doctor/patient/PatientVisits';
-import PatientTrends from '@/components/doctor/patient/PatientTrends';
 import PatientBirthPlan, { type PatientBirthPlanRow } from '@/components/doctor/patient/PatientBirthPlan';
 import type { TrendsPayload } from '@/lib/patientTrends';
+// Two tabs with heavy libraries (charts; formatted analysis text) load when
+// the doctor opens them, not with the patient page.
+const PatientTrends = lazy(() => import('@/components/doctor/patient/PatientTrends'));
+const PatientDocuments = lazy(() => import('@/components/doctor/patient/PatientDocuments'));
 import {
   EMPTY_DRAFT,
   type NoteDraft,
@@ -229,12 +231,14 @@ const PatientDetails = () => {
 
           <TabsContent value="trends">
             {patientId && (
-              <PatientTrends
-                key={patientId}
-                patientId={patientId}
-                cached={trends?.patientId === patientId ? trends.data : null}
-                onLoaded={data => setTrends({ patientId, data })}
-              />
+              <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
+                <PatientTrends
+                  key={patientId}
+                  patientId={patientId}
+                  cached={trends?.patientId === patientId ? trends.data : null}
+                  onLoaded={data => setTrends({ patientId, data })}
+                />
+              </Suspense>
             )}
           </TabsContent>
 
@@ -243,16 +247,18 @@ const PatientDetails = () => {
           </TabsContent>
 
           <TabsContent value="documents">
-            <PatientDocuments
-              documents={documents}
-              patientId={patientId}
-              patientName={patient?.full_name}
-              onSent={doc => {
-                setDocuments(prev => [{ ...doc, sent_note: doc.notes }, ...prev]);
-                // The analysis lands in a minute or two; pick it up then.
-                window.setTimeout(() => { void loadChart(); }, 90_000);
-              }}
-            />
+            <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
+              <PatientDocuments
+                documents={documents}
+                patientId={patientId}
+                patientName={patient?.full_name}
+                onSent={doc => {
+                  setDocuments(prev => [{ ...doc, sent_note: doc.notes }, ...prev]);
+                  // The analysis lands in a minute or two; pick it up then.
+                  window.setTimeout(() => { void loadChart(); }, 90_000);
+                }}
+              />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="notes">

@@ -71,7 +71,7 @@ describe('Home template', () => {
     expect(container.textContent).not.toMatch(/\bMenu\b|Upload|Devices|Community|Daily Reminders|Quick Access/);
   });
 
-  it('caps Today at three rows and opens the Log sheet from the primary button', () => {
+  it('caps Today at three rows and opens the Log sheet from the primary button', async () => {
     state.signals = {
       appointmentToday: new Date(new Date().setHours(23, 0, 0, 0)),
       newDoctorNotes: 1,
@@ -83,23 +83,23 @@ describe('Home template', () => {
     expect(within(today).getAllByRole('button')).toHaveLength(3);
     expect(screen.queryByRole('dialog')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Log today' }));
-    expect(screen.getByRole('dialog')).toHaveTextContent('Log sheet: log');
+    expect(await screen.findByRole('dialog')).toHaveTextContent('Log sheet: log');
   });
 
-  it('pregnancy week 30: "Count kicks" is the filled button, and a quiet "Log today" still opens the log', () => {
+  it('pregnancy week 30: "Count kicks" is the filled button, and a quiet "Log today" still opens the log', async () => {
     renderHome('pregnancy', 30);
     const kicks = screen.getByRole('button', { name: 'Count kicks' });
     const log = screen.getByRole('button', { name: 'Log today' });
     expect(kicks.className).not.toMatch(/underline-offset/);
     expect(log.className).toMatch(/underline-offset/); // link variant, not a second filled button
     fireEvent.click(log);
-    expect(screen.getByRole('dialog')).toHaveTextContent('Log sheet: log');
+    expect(await screen.findByRole('dialog')).toHaveTextContent('Log sheet: log');
   });
 
-  it.each([[28], [37]])('pregnancy week %i keeps a way into the log', (w) => {
+  it.each([[28], [37]])('pregnancy week %i keeps a way into the log', async (w) => {
     renderHome('pregnancy', w);
     fireEvent.click(screen.getByRole('button', { name: 'Log today' }));
-    expect(screen.getByRole('dialog')).toHaveTextContent('Log sheet: log');
+    expect(await screen.findByRole('dialog')).toHaveTextContent('Log sheet: log');
   });
 
   it('stages whose filled button is the log get no extra link', () => {

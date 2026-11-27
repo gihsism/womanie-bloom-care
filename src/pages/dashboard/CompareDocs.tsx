@@ -218,7 +218,7 @@ export default function CompareDocs() {
     <div className="min-h-screen bg-background">
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="px-4 py-3 flex items-center gap-3 max-w-4xl mx-auto">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/dashboard/medical-history')}>
+          <Button aria-label="Back" variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/dashboard/medical-history')}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex-1 flex items-center gap-2">
