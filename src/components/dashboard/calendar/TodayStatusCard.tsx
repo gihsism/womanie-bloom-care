@@ -300,7 +300,7 @@ const TodayStatusCard = ({
           </div>
 
           <div className="space-y-2 text-sm text-muted-foreground">
-            {!withHero && prediction.isRegular !== undefined && prediction.cyclesLogged >= 3 && (
+            {!withHero && prediction.isRegular !== undefined && prediction.cyclesCounted >= 3 && (
               <p>
                 Your cycles are <span className="font-medium text-foreground">
                   {prediction.isRegular ? 'regular' : 'somewhat irregular'}

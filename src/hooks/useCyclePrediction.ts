@@ -35,7 +35,10 @@ export interface CyclePrediction {
   fertileWindowEnd: Date;
   pmsWindowStart: Date;
   confidenceLevel: 'low' | 'medium' | 'high';
+  /** Number of logged periods (not cycles). */
   cyclesLogged: number;
+  /** Cycle lengths actually used: gaps that are plausible and don't cross a pregnancy. */
+  cyclesCounted: number;
   dataQualityMessage: string;
   tier: PredictionTier;
   tierLabel: string;
@@ -80,6 +83,8 @@ interface CyclePredictionInput {
   onboardingEstimates?: OnboardingEstimates;
   manualOverrides?: { cycleLength?: number; periodLength?: number };
   healthContext?: UserHealthContext;
+  /** Pregnancy + early postpartum windows ('yyyy-MM-dd'); a gap across one is not a cycle. */
+  breaks?: { start: string; end: string }[];
 }
 
 // Constants
@@ -130,6 +135,7 @@ export function useCyclePrediction({
   onboardingEstimates,
   manualOverrides,
   healthContext,
+  breaks,
 }: CyclePredictionInput): CyclePrediction {
   return useMemo(() => {
     const sortedRecords = [...periodRecords].sort(
@@ -139,8 +145,13 @@ export function useCyclePrediction({
     const cyclesLogged = sortedRecords.length;
 
     // Calculate cycle lengths from consecutive periods
+    // A gap with a pregnancy inside it is not a cycle (and not a logging
+    // error either): leave it out quietly, as "Your cycle, explained" does.
     const rawCycleLengths: number[] = [];
     for (let i = 0; i < sortedRecords.length - 1; i++) {
+      const a = String(sortedRecords[i + 1].period_start_date).slice(0, 10);
+      const b = String(sortedRecords[i].period_start_date).slice(0, 10);
+      if ((breaks ?? []).some(br => br.start < b && br.end > a)) continue;
       const currentStart = parseISO(sortedRecords[i].period_start_date);
       const previousStart = parseISO(sortedRecords[i + 1].period_start_date);
       rawCycleLengths.push(differenceInDays(currentStart, previousStart));
@@ -150,6 +161,7 @@ export function useCyclePrediction({
       len => len >= MIN_VALID_CYCLE && len <= MAX_VALID_CYCLE
     );
     const excludedCycles = rawCycleLengths.length - validCycleLengths.length;
+    const cyclesCounted = validCycleLengths.length;
 
     // Calculate CONFIRMED period lengths (only from records with a real end_date, not legacy end===start)
     const confirmedPeriodLengths = sortedRecords
@@ -279,12 +291,14 @@ export function useCyclePrediction({
       dataQualityMessage = 'Using your onboarding estimates. Log periods for better accuracy.';
     } else if (tier === 3) {
       confidenceLevel = cyclesLogged >= 2 ? 'medium' : 'low';
-      dataQualityMessage = `Based on ${cyclesLogged} tracked cycle${cyclesLogged > 1 ? 's' : ''}. Log more for better accuracy.`;
+      dataQualityMessage = cyclesCounted > 0
+        ? `Based on ${cyclesCounted} tracked cycle${cyclesCounted > 1 ? 's' : ''}. Log more for better accuracy.`
+        : `Based on ${cyclesLogged} logged period${cyclesLogged > 1 ? 's' : ''}. Log more for better accuracy.`;
     } else {
       confidenceLevel = cyclesLogged >= 6 ? 'high' : 'medium';
-      dataQualityMessage = cyclesLogged >= 6
-        ? `Based on ${cyclesLogged} logged cycles`
-        : `Based on ${cyclesLogged} cycles. More data = higher accuracy.`;
+      dataQualityMessage = cyclesCounted >= 6
+        ? `Based on ${cyclesCounted} logged cycles`
+        : `Based on ${cyclesCounted} cycles. More data = higher accuracy.`;
     }
 
     // ─── Trend analysis ───
@@ -315,7 +329,11 @@ export function useCyclePrediction({
         const expected = avgCycleLength + (2 * standardDeviation);
         if (daysSince > expected && daysSince > 45) {
           currentCycleAnomaly = true;
-          anomalyMessage = `Your period is ${Math.round(daysSince - avgCycleLength)} days late. If concerned, consider consulting a healthcare provider.`;
+          // Late = days past the expected start (last start + average cycle),
+          // not days since the period ended minus a cycle (that undercounts
+          // by the length of her period).
+          const lateBy = differenceInDays(now, addDays(parseISO(sortedRecords[0].period_start_date), avgCycleLength));
+          anomalyMessage = `Your period is ${lateBy} days late. If concerned, consider consulting a healthcare provider.`;
         }
       }
     }
@@ -372,13 +390,13 @@ export function useCyclePrediction({
       averageCycleLength: avgCycleLength, averagePeriodLength: avgPeriodLength,
       standardDeviation, isRegular,
       predictedOvulationDate, fertileWindowStart, fertileWindowEnd, pmsWindowStart,
-      confidenceLevel, cyclesLogged, dataQualityMessage,
+      confidenceLevel, cyclesLogged, cyclesCounted, dataQualityMessage,
       tier, tierLabel, cycleTrend,
       currentCycleAnomaly, anomalyMessage, excludedCycles,
       riskFactors, ageAdjusted,
       lutealLength, lutealSource: luteal.source, currentOvulation, learnedCycles: luteal.cycles,
     };
-  }, [periodRecords, daySignals, onboardingEstimates, manualOverrides, healthContext]);
+  }, [periodRecords, daySignals, onboardingEstimates, manualOverrides, healthContext, breaks]);
 }
 
 // Symptom pattern recognition

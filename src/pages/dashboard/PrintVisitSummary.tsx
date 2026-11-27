@@ -106,20 +106,20 @@ export function VisitSummarySheet({ data, sections, now = new Date() }: {
         <thead>
           <tr className="border-b border-gray-300 text-xs text-gray-500">
             <th className="text-left py-1 font-medium">Test</th>
-            <th className="text-right py-1 font-medium">Result</th>
-            <th className="text-right py-1 font-medium">Reference</th>
-            <th className="text-right py-1 font-medium">Note</th>
-            <th className="text-right py-1 font-medium">Date</th>
+            <th className="text-right py-1 pl-2 font-medium">Result</th>
+            <th className="text-right py-1 pl-2 font-medium">Reference</th>
+            <th className="text-right py-1 pl-2 font-medium">Note</th>
+            <th className="text-right py-1 pl-2 font-medium">Date</th>
           </tr>
         </thead>
         <tbody>
           {results.map(r => (
             <tr key={r.name} className="border-b border-gray-100 align-top">
               <td className="py-1 pr-2">{r.name}</td>
-              <td className="py-1 text-right whitespace-nowrap">{r.value}</td>
+              <td className="py-1 pl-2 text-right whitespace-nowrap">{r.value}</td>
               <td className="py-1 pl-2 text-right text-gray-600">{r.range || '—'}</td>
-              <td className="py-1 text-right text-gray-600">{r.flag || '—'}</td>
-              <td className="py-1 pl-2 text-right text-gray-600">{day(r.date)}</td>
+              <td className="py-1 pl-2 text-right text-gray-600">{r.flag || '—'}</td>
+              <td className="py-1 pl-2 text-right text-gray-600 sm:whitespace-nowrap">{day(r.date)}</td>
             </tr>
           ))}
         </tbody>

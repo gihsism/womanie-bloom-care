@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { differenceInDays } from "date-fns";
+import { differenceInDays, format, subDays } from "date-fns";
 import { useCyclePrediction, type PeriodRecord } from "./useCyclePrediction";
 import type { UserHealthContext } from "./useUserHealthContext";
 
@@ -192,5 +192,49 @@ describe("useCyclePrediction — personal ovulation", () => {
     const p = predict({ periodRecords: [rec(back(40)), rec(back(12))], daySignals: {} });
     expect(p.lutealSource).toBe("default");
     expect(differenceInDays(p.predictedPeriodStart, p.predictedOvulationDate)).toBe(14);
+  });
+
+  it("counts cycles, not periods: 4 periods = 3 cycles", () => {
+    const p = predict({
+      periodRecords: [rec("2026-03-26"), rec("2026-02-26"), rec("2026-01-29"), rec("2026-01-01")],
+      daySignals: {},
+    });
+    expect(p.cyclesLogged).toBe(4);
+    expect(p.cyclesCounted).toBe(3);
+    expect(p.dataQualityMessage).toContain("Based on 3 cycles");
+  });
+
+  it("a gap with a pregnancy in it is not a cycle and not a logging error", () => {
+    // Same rule as "Your cycle, explained": a birth on 2026-03-01 covers
+    // the pregnancy before it and 8 weeks after, so none of these gaps count.
+    const p = predict({
+      periodRecords: [rec("2026-08-12"), rec("2026-07-15"), rec("2026-06-17"), rec("2025-04-01")],
+      daySignals: {},
+      breaks: [{ start: "2025-05-25", end: "2026-04-26" }],
+    });
+    expect(p.cyclesCounted).toBe(2);
+    expect(p.excludedCycles).toBe(0);
+    expect(p.tier).toBe(3);
+    expect(p.dataQualityMessage).toContain("Based on 2 tracked cycles");
+  });
+
+  it("several periods but no countable cycle: says periods, not cycles", () => {
+    const p = predict({
+      periodRecords: [rec("2026-06-01"), rec("2026-01-01")], // 151-day gap
+      daySignals: {},
+    });
+    expect(p.cyclesCounted).toBe(0);
+    expect(p.dataQualityMessage).toContain("Based on 2 logged periods");
+  });
+
+  it("days late counts from the expected start, not from the end of the last period", () => {
+    const iso = (n: number) => format(subDays(new Date(), n), "yyyy-MM-dd");
+    // Three 28-day cycles; the last period started 51 days ago and lasted 5 days.
+    const p = predict({
+      periodRecords: [rec(iso(51), iso(47)), rec(iso(79), iso(75)), rec(iso(107), iso(103)), rec(iso(135), iso(131))],
+      daySignals: {},
+    });
+    expect(p.currentCycleAnomaly).toBe(true);
+    expect(p.anomalyMessage).toContain("Your period is 23 days late");
   });
 });
