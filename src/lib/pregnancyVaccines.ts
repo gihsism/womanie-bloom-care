@@ -1,4 +1,5 @@
-// Pregnancy vaccination schedule (ACOG / CDC), shared by the
+// Pregnancy vaccination schedule (ACOG 2026 Maternal Immunization
+// Schedule; CDC), shared by the
 // Pregnancy vaccinations card and Home's "Today" list. The patient's
 // received / "not now" marks live in womanie_preg_vaccinations_{uid}
 // (synced to the account, see lib/account-data.ts).
@@ -51,7 +52,7 @@ export const PREGNANCY_VACCINES: Vaccine[] = [
     windowStartWeek: 0,
     windowEndWeek: 40,
     rationale:
-      'CDC recommends pregnant patients stay current with the most recent COVID-19 vaccine. Pregnancy raises the risk of severe COVID-19.',
+      'ACOG (2026) recommends the current COVID-19 vaccine in any trimester. Since 2025 the CDC leaves it to a decision with your doctor. Pregnancy raises the risk of severe COVID-19.',
     cadence: 'once-per-season',
   },
 ];

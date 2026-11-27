@@ -218,7 +218,7 @@ export default function AmhAgeContext({ mode }: AmhAgeContextProps) {
       )}
 
       <p className="text-[10px] text-muted-foreground mt-2 leading-relaxed">
-        Reference: Seifer 2011 US cohort. AMH is one input among many — full reserve
+        Reference: Seifer 2011, 17,120 US women tested at fertility clinics (an older lab test; labs differ). AMH is one input among many — full reserve
         assessment also weighs FSH, antral follicle count, and age.
       </p>
 

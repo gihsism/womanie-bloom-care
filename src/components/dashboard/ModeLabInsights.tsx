@@ -26,7 +26,7 @@ const IVF_TESTS: TestDef[] = [
   { names: ['lh'], label: 'LH', note: 'Hormone balance' },
   { names: ['estradiol', 'e2'], label: 'Estradiol', note: 'Follicle development marker' },
   { names: ['progesterone'], label: 'Progesterone', note: 'Uterine lining support' },
-  { names: ['tsh'], label: 'Thyroid (TSH)', note: 'Must be <2.5 for IVF' },
+  { names: ['tsh'], label: 'Thyroid (TSH)', note: 'Clinics often aim for under 2.5; guidelines differ' },
   { names: ['prolactin'], label: 'Prolactin', note: 'High = can suppress ovulation' },
   { names: ['vitamin d', '25-oh'], label: 'Vitamin D', note: 'Linked to IVF success rates' },
   { names: ['ferritin'], label: 'Iron Stores', note: 'Energy for treatment' },
@@ -34,7 +34,7 @@ const IVF_TESTS: TestDef[] = [
 ];
 
 const MENOPAUSE_TESTS: TestDef[] = [
-  { names: ['fsh'], label: 'FSH', note: '>25 confirms menopause' },
+  { names: ['fsh'], label: 'FSH', note: 'Swings around menopause; not used alone to diagnose it after 45' },
   { names: ['estradiol', 'e2'], label: 'Estradiol', note: 'Low in menopause — affects bones' },
   { names: ['tsh'], label: 'Thyroid (TSH)', note: 'Thyroid issues common in menopause' },
   { names: ['vitamin d', '25-oh'], label: 'Vitamin D', note: 'Critical for bone density' },

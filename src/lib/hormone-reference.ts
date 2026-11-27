@@ -34,7 +34,9 @@ export interface Range {
   note?: string;
 }
 
-// AMH by age — Seifer 2011 (US national cohort, percentiles).
+// AMH by age — Seifer 2011 (Fertil Steril 95:747; 17,120 women aged
+// 24-50 tested at US fertility centres, first-generation DSL assay;
+// the 20-24 row is extrapolated). Percentile bands are approximate.
 // Each entry: median ng/mL ± p5–p95 band. Used both as a reference
 // range and to compute a rough percentile bucket.
 //
@@ -59,7 +61,7 @@ export const AMH_BY_AGE: Array<{
   { ageFrom: 50, ageTo: 99, median: 0.05, p5: 0.0, p95: 0.3 },
 ];
 
-// FSH thresholds for ovarian reserve (day-3 draw, ACOG/ESHRE).
+// FSH thresholds for ovarian reserve (day-3 draw; ASRM / ESHRE).
 // Values above 10 IU/L suggest diminished ovarian reserve; >25 is
 // menopausal range.
 export const FSH_DAY3_THRESHOLDS = {
@@ -134,10 +136,10 @@ export const PHASE_RANGES: Record<HormoneKey, Partial<Record<CyclePhase, Range>>
     any: { low: 1.0, high: 4.0, unit: 'ng/mL', source: 'see AMH_BY_AGE' },
   },
   fsh: {
-    follicular: { low: 3, high: 10, unit: 'IU/L', source: 'ACOG' },
-    midcycle: { low: 4, high: 25, unit: 'IU/L', source: 'ACOG' },
-    luteal: { low: 1.5, high: 9, unit: 'IU/L', source: 'ACOG' },
-    postmenopausal: { low: 26, high: 135, unit: 'IU/L', source: 'ACOG' },
+    follicular: { low: 3, high: 10, unit: 'IU/L', source: 'Commercial lab reference (LabCorp-style)' },
+    midcycle: { low: 4, high: 25, unit: 'IU/L', source: 'Commercial lab reference (LabCorp-style)' },
+    luteal: { low: 1.5, high: 9, unit: 'IU/L', source: 'Commercial lab reference (LabCorp-style)' },
+    postmenopausal: { low: 26, high: 135, unit: 'IU/L', source: 'Commercial lab reference (LabCorp-style)' },
   },
   lh: {
     follicular: { low: 2, high: 10, unit: 'IU/L', source: 'Mayo' },

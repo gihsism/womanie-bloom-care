@@ -10,8 +10,8 @@ import { PREGNANCY_VACCINES as VACCINES, PREG_VACCINES_KEY, type Vaccine, type V
 
 // Pregnancy vaccination checklist — Tdap (27–36w), flu (any
 // trimester, seasonal), RSV / Abrysvo (32–36w, seasonal), Hep B if
-// indicated. Following ACOG / CDC current guidance (2024–2025
-// season). We can't dispense or schedule shots; what we can do is
+// indicated. Following the ACOG 2026 Maternal Immunization Schedule
+// and CDC guidance. We can't dispense or schedule shots; what we can do is
 // surface the window per shot, prompt at the right gestational
 // week, and let the patient mark what's been received so it stops
 // nudging.
@@ -187,7 +187,7 @@ export default function PregnancyVaccinations({ dueDate }: PregnancyVaccinations
       <p className="text-[10px] text-muted-foreground mt-3 leading-relaxed flex items-start gap-1.5">
         <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
         <span>
-          Reference: ACOG / CDC immunization schedules for pregnancy (2024–2025). Status is saved
+          Reference: ACOG 2026 maternal immunization schedule and CDC guidance for pregnancy. Status is saved
           to your account — share with your OB at the next visit. Schedules update annually.
         </span>
       </p>

@@ -26,8 +26,13 @@ interface LabFreshnessCardProps {
 }
 
 // Per-mode labs to surface. Number = recommended max gap in months
-// before a recheck nudge fires. Sources: USPSTF / ASRM / NAMS general
-// monitoring guidance; conservative thresholds.
+// before a recheck nudge fires. These are Womanie's own reminder
+// intervals, not guideline intervals: USPSTF finds too little evidence to
+// screen the thyroid of women without symptoms, so the reasons below say
+// why a value matters rather than calling a recheck "routine". FSH is not
+// listed for menopause: NICE NG23 (2015, updated 2024) and The Menopause
+// Society say not to use FSH to diagnose menopause after 45.
+// Pregnancy LOWERS the upper TSH limit (ATA 2017: about 4.0 mIU/L).
 const MODE_TARGETS: Record<string, Array<{ key: HormoneKey; label: string; monthsBeforeNudge: number; reason: string }>> = {
   conception: [
     { key: 'amh', label: 'AMH', monthsBeforeNudge: 12, reason: 'Ovarian reserve drifts year over year, especially after 35.' },
@@ -40,23 +45,22 @@ const MODE_TARGETS: Record<string, Array<{ key: HormoneKey; label: string; month
     { key: 'fsh', label: 'FSH (day 3)', monthsBeforeNudge: 6, reason: 'Day-3 FSH is part of standard IVF screening.' },
   ],
   'menstrual-cycle': [
-    { key: 'tsh', label: 'TSH', monthsBeforeNudge: 24, reason: 'Routine thyroid monitoring.' },
+    { key: 'tsh', label: 'TSH', monthsBeforeNudge: 24, reason: 'Thyroid changes can affect your cycle. Worth rechecking if your cycle or energy changes.' },
   ],
   'pre-menstrual': [
-    { key: 'tsh', label: 'TSH', monthsBeforeNudge: 24, reason: 'Routine thyroid monitoring.' },
+    { key: 'tsh', label: 'TSH', monthsBeforeNudge: 24, reason: 'Thyroid changes can feel like PMS (tiredness, low mood). Worth rechecking if symptoms change.' },
   ],
   contraception: [
-    { key: 'tsh', label: 'TSH', monthsBeforeNudge: 36, reason: 'Routine thyroid monitoring.' },
+    { key: 'tsh', label: 'TSH', monthsBeforeNudge: 36, reason: 'Thyroid changes can affect your bleeding pattern. Worth rechecking if it changes.' },
   ],
   menopause: [
-    { key: 'tsh', label: 'TSH', monthsBeforeNudge: 12, reason: 'Thyroid + menopause symptoms overlap; periodic recheck advised.' },
-    { key: 'fsh', label: 'FSH', monthsBeforeNudge: 12, reason: 'FSH trend is the key signal of menopause progression.' },
+    { key: 'tsh', label: 'TSH', monthsBeforeNudge: 12, reason: 'Thyroid and menopause symptoms overlap (tiredness, mood, heat), so a recent value helps tell them apart.' },
   ],
   'post-menopause': [
-    { key: 'tsh', label: 'TSH', monthsBeforeNudge: 24, reason: 'Routine thyroid monitoring.' },
+    { key: 'tsh', label: 'TSH', monthsBeforeNudge: 24, reason: 'Thyroid problems become more common with age. Worth rechecking if you feel more tired or your weight changes.' },
   ],
   pregnancy: [
-    { key: 'tsh', label: 'TSH', monthsBeforeNudge: 3, reason: 'Pregnancy raises TSH targets; periodic recheck per OB.' },
+    { key: 'tsh', label: 'TSH', monthsBeforeNudge: 3, reason: 'Thyroid targets are lower in pregnancy. Your doctor decides how often to check.' },
   ],
 };
 
