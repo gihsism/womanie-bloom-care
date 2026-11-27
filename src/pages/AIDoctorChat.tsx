@@ -540,8 +540,13 @@ export default function AIDoctorChat() {
     // accurate time anchor for them. computeCyclePhase itself returns
     // null on stale/implausible data, so this only ever sends a
     // grounded, current phase.
+    // Also suppressed while she is pregnant or after birth by her life
+    // stage: period rows from before the pregnancy otherwise told the AI
+    // a woman at week 31 was "late-luteal / PMS window, next period in
+    // ~5 days" (seen live 2026-11-27).
+    const stageNow = medicalContext?.match(/Life stage: ([\w-]+)/)?.[1] ?? null;
     const cyclePhase =
-      postpartumWeeks === null
+      postpartumWeeks === null && stageNow !== 'pregnancy' && stageNow !== 'postpartum'
         ? (computeCyclePhase(recentPeriods, Date.now())?.summary ?? null)
         : null;
 
