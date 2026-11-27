@@ -98,20 +98,20 @@ export function VisitSummarySheet({ data, sections, now = new Date() }: {
         <thead>
           <tr className="border-b border-gray-300 text-xs text-gray-500">
             <th className="text-left py-1 font-medium">Test</th>
-            <th className="text-right py-1 font-medium">Result</th>
-            <th className="text-right py-1 font-medium">Reference</th>
-            <th className="text-right py-1 font-medium">Note</th>
-            <th className="text-right py-1 font-medium">Date</th>
+            <th className="text-right py-1 pl-2 font-medium">Result</th>
+            <th className="text-right py-1 pl-2 font-medium">Reference</th>
+            <th className="text-right py-1 pl-2 font-medium">Note</th>
+            <th className="text-right py-1 pl-2 font-medium">Date</th>
           </tr>
         </thead>
         <tbody>
           {results.map(r => (
             <tr key={r.name} className="border-b border-gray-100 align-top">
               <td className="py-1 pr-2">{r.name}</td>
-              <td className="py-1 text-right whitespace-nowrap">{r.value}</td>
-              <td className="py-1 text-right text-gray-600 whitespace-nowrap">{r.range || '—'}</td>
-              <td className="py-1 text-right text-gray-600">{r.flag || '—'}</td>
-              <td className="py-1 text-right text-gray-600 whitespace-nowrap">{day(r.date)}</td>
+              <td className="py-1 pl-2 text-right whitespace-nowrap">{r.value}</td>
+              <td className="py-1 pl-2 text-right text-gray-600">{r.range || '—'}</td>
+              <td className="py-1 pl-2 text-right text-gray-600">{r.flag || '—'}</td>
+              <td className="py-1 pl-2 text-right text-gray-600 sm:whitespace-nowrap">{day(r.date)}</td>
             </tr>
           ))}
         </tbody>
@@ -126,7 +126,7 @@ export function VisitSummarySheet({ data, sections, now = new Date() }: {
   };
 
   return (
-    <article className="max-w-3xl mx-auto px-8 py-8 print:px-0 print:py-0" data-testid="visit-summary-sheet">
+    <article className="max-w-3xl mx-auto px-4 sm:px-8 py-6 sm:py-8 print:px-0 print:py-0" data-testid="visit-summary-sheet">
       <header className="mb-4 pb-3 border-b border-gray-300">
         <p className="text-xs uppercase tracking-wide text-gray-500">Visit summary</p>
         <h1 className="text-xl font-bold">{data.name || 'Patient'}</h1>
