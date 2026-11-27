@@ -34,8 +34,8 @@ export interface BookableDoctor {
   schedule?: { day_of_week: number; start_time: string; end_time: string; is_active?: boolean | null }[];
 }
 
-export const doctorDisplayName = (d: { title?: string | null; full_name: string }) =>
-  `${d.title ? d.title : 'Dr.'} ${d.full_name}`;
+import { doctorDisplayName } from '@/lib/doctorName';
+export { doctorDisplayName };
 
 const BOOK_AHEAD_DAYS = 90;
 

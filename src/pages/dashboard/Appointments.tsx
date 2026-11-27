@@ -1,4 +1,5 @@
-import { useEffect, useState, useMemo } from 'react';
+import { lazy, Suspense, useEffect, useState, useMemo } from 'react';
+import { useOnceTrue } from '@/hooks/useOnceTrue';
 import { Link, useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,7 +30,6 @@ import {
   FileText,
 } from 'lucide-react';
 import { downloadIcs } from '@/lib/ics';
-import RescheduleDialog from '@/components/dashboard/RescheduleDialog';
 import VisitPrepCard from '@/components/dashboard/VisitPrepCard';
 import DoctorNotesCard from '@/components/dashboard/DoctorNotesCard';
 import PendingConnections from '@/components/dashboard/PendingConnections';
@@ -38,6 +38,9 @@ import ChartAccessLog from '@/components/dashboard/ChartAccessLog';
 import type { LifeStage } from '@/components/dashboard/DashboardHeader';
 import { normalizeLifeStage } from '@/lib/lifeStage';
 import { formatPracticeTime } from '@/lib/practiceTime';
+
+// Loaded on first use: it carries the date picker, which the list itself never needs.
+const RescheduleDialog = lazy(() => import('@/components/dashboard/RescheduleDialog'));
 import { viewerOutsidePracticeTz } from '@/lib/timeSlots';
 import { formatVisitWhen, swissSuffix } from '@/lib/booking';
 
@@ -99,6 +102,7 @@ const Appointments = () => {
   const [loaded, setLoaded] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rescheduling, setRescheduling] = useState<AppointmentRow | null>(null);
+  const rescheduleMounted = useOnceTrue(rescheduling !== null);
   const [pastFilter, setPastFilter] = useState<PastFilter>('all');
   const [mode, setMode] = useState<LifeStage | null>(null);
 
@@ -522,12 +526,16 @@ const Appointments = () => {
         </details>
       </div>
 
-      <RescheduleDialog
-        appointment={rescheduling}
-        open={rescheduling !== null}
-        onOpenChange={(open) => { if (!open) setRescheduling(null); }}
-        onRescheduled={() => { emitHealthDataChange(); load(); }}
-      />
+      {rescheduleMounted && (
+        <Suspense fallback={null}>
+          <RescheduleDialog
+            appointment={rescheduling}
+            open={rescheduling !== null}
+            onOpenChange={(open) => { if (!open) setRescheduling(null); }}
+            onRescheduled={() => { emitHealthDataChange(); load(); }}
+          />
+        </Suspense>
+      )}
       {confirmDialog}
     </div>
   );
