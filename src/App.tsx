@@ -61,6 +61,7 @@ const PanelDetail = lazy(() => import("./pages/dashboard/PanelDetail"));
 const PrintDoc = lazy(() => import("./pages/dashboard/PrintDoc"));
 const PrintHealthRecord = lazy(() => import("./pages/dashboard/PrintHealthRecord"));
 const PrintVisitSummary = lazy(() => import("./pages/dashboard/PrintVisitSummary"));
+const PrintVisitPrep = lazy(() => import("./pages/dashboard/PrintVisitPrep"));
 const PrintBirthPlan = lazy(() => import("./pages/dashboard/PrintBirthPlan"));
 const Appointments = lazy(() => import("./pages/dashboard/Appointments"));
 const BirthRecord = lazy(() => import("./pages/dashboard/BirthRecord"));
@@ -148,6 +149,7 @@ const App = () => (
                   <Route path="/dashboard/doc/:id/print" element={<PrintDoc />} />
                   <Route path="/dashboard/health-record/print" element={<PrintHealthRecord />} />
                   <Route path="/dashboard/visit-summary/print" element={<PrintVisitSummary />} />
+                  <Route path="/dashboard/appointments/:id/prep" element={<PrintVisitPrep />} />
                   <Route path="/dashboard/birth-plan/print" element={<PrintBirthPlan />} />
                   <Route path="/dashboard/appointments" element={<Appointments />} />
                   <Route path="/dashboard/birth" element={<BirthRecord />} />

@@ -146,3 +146,13 @@ describe('Visits', () => {
     expect(visits).toContain("const bookVisit = () => navigate('/find-doctor');");
   });
 });
+
+describe('Round 2 placements', () => {
+  it('Records shows the "last checked" notes next to the overdue tests', () => {
+    expect(records).toContain('<RecheckHints stage={mode} dueDate={pregnancyDueDate} />');
+  });
+  it('every upcoming visit links to its prep sheet', () => {
+    expect(visits).toContain('navigate(`/dashboard/appointments/${apt.id}/prep`)');
+    expect(read('../App.tsx')).toContain('path="/dashboard/appointments/:id/prep"');
+  });
+});

@@ -344,6 +344,16 @@ const Appointments = () => {
               variant="ghost"
               size="sm"
               className="text-xs gap-1 text-muted-foreground hover:text-foreground"
+              onClick={() => navigate(`/dashboard/appointments/${apt.id}/prep`)}
+              data-testid="visit-prep-sheet-link"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              Prep sheet
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs gap-1 text-muted-foreground hover:text-foreground"
               onClick={() => setRescheduling(apt)}
               disabled={busyId === apt.id}
             >
