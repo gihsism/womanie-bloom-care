@@ -189,6 +189,30 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-27 — Test coverage: added security-invariant tests for docs/pending-retries
+docs/pending-retries.ts is the endpoint called by a patient when they open Health Records
+to recover lost document analyses (audit #18). It scans their own un-analyzed health_documents,
+looks up each in the pending_jobs retry ledger, and returns a list of documents the client
+should re-dispatch to /api/analyze-document. It had no tests despite carrying two ownership
+invariants. First, the candidates SELECT must bind the session user's id as $1 via
+WHERE h.user_id = $1 so a user can only scan their own un-analyzed documents; a refactor
+substituting a body parameter would let any authenticated user enumerate (and trigger
+re-analysis on) another user's private health records. Second, the pending_jobs INSERT
+must bind user.id as $2 (the user_id column) so the retry ledger row is correctly
+attributed to the owner, preventing a stale or attacker-supplied user_id from silently
+hijacking retry accounting for another user's documents.
+Added api/_routes/docs/pending-retries.test.ts with 9 tests covering: a ROUTES registration
+guard confirming the handler is dispatched through api/router (no new top-level function);
+401 when getAuthUser returns null with no DB query firing; 405 for non-POST methods (GET,
+PUT, DELETE, PATCH) with no DB query firing; an ownership invariant confirming the
+candidates SELECT contains WHERE h.user_id = $1 and $1 is bound to the session user's id
+(not any client-supplied value); a regression guard confirming params[0] is the session
+user's id and not an injected value; 200 with an empty retries array when no candidates
+exist; a pending_jobs INSERT ownership test confirming user.id appears as $2 in the INSERT
+parameters; a MAX_ATTEMPTS cap test confirming a document with attempts >= 3 is marked
+failed and not returned to the client; and 500 on a database error.
+Verified: tsc 0, eslint 0, 2181/2181 tests pass (3 pre-existing skips), vite build clean.
+
 ### 2026-11-26 — Test coverage: added security-invariant tests for me/normalize-titles
 me/normalize-titles.ts is the per-user lab-value backfill endpoint: when triggered
 from Settings it renormalizes every medical_extracted_data row for the session user,
