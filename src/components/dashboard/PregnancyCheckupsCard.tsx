@@ -93,15 +93,15 @@ export default function PregnancyCheckupsCard({ dueDate }: { dueDate: Date | nul
                 Source:{' '}
                 <a href={item.source.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">{item.source.label}</a>
               </p>
-              {item.swiss && (
-                <p className="text-[11px] text-muted-foreground mb-2">
-                  {item.swiss.note}{' '}
+              {[item.swiss, item.swissMore].map((sw) => sw && (
+                <p key={sw.source.url} className="text-[11px] text-muted-foreground mb-2">
+                  {sw.note}{' '}
                   <span className="text-[10px]">
                     Source:{' '}
-                    <a href={item.swiss.source.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">{item.swiss.source.label}</a>
+                    <a href={sw.source.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">{sw.source.label}</a>
                   </span>
                 </p>
-              )}
+              ))}
               {st.kind !== 'done' && (
                 <Button
                   size="sm"

@@ -17,8 +17,8 @@ const TIPS = [
   {
     key: 'calcium',
     label: 'Calcium',
-    amount: '1200 mg/day (post-menopause)',
-    rationale: 'Estrogen falls → bone density drops faster. Adequate calcium + vitamin D is the most evidence-backed nutritional lever for osteoporosis prevention.',
+    amount: '950 mg/day up to 65, 1000–1200 mg/day from 66',
+    rationale: 'Estrogen falls → bone density drops faster. Enough calcium and vitamin D supports bone health. Swiss reference amounts (BLV); food first, a supplement only to fill a gap your doctor or pharmacist agrees on.',
     food: 'Dairy (yogurt, kefir, hard cheese), fortified plant milks, sardines, tofu set with calcium, leafy greens.',
   },
   {

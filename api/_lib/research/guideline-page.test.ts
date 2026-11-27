@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { LIFE_STAGES, getLibrary } from './library';
+import { LIFE_STAGES, getLibrary, selectChatSources } from './library';
 import {
   ITEM_LIFE_STAGES,
   buildGuidelineItem,
@@ -147,6 +147,34 @@ describe('publishers and robots.txt', () => {
     expect(publisherFor('https://www.nice.org.uk/guidance/ng257')?.ingest).toBe('licence-required');
     expect(publisherFor('https://cdn.who.int/x.pdf')?.ingest).toBe('licence-required');
     expect(publisherFor('https://example.com/')).toBeNull();
+  });
+
+  it('Swiss official sources (BAG, BLV, SGGG) are summary-only: hand-written summaries, never fetched', () => {
+    expect(publisherFor('https://www.bag.admin.ch/de/schweizerischer-impfplan')?.ingest).toBe('summary-only');
+    expect(publisherFor('https://www.blv.admin.ch/de/naehrstoffzufuhr')?.publisher).toBe('BLV');
+    expect(publisherFor('https://www.rosenfluh.ch/media/gynaekologie/2024/01/x.pdf')?.publisher).toBe('SGGG');
+    const lib = JSON.parse(readFileSync(join(process.cwd(), 'api', '_lib', 'research', 'library.json'), 'utf8'));
+    const topicIds = new Set<string>(lib.topics.map((t: { id: string }) => t.id));
+    const swiss = lib.items.filter((it: { sourceType?: string }) => it.sourceType === 'guideline-page');
+    expect(swiss.length).toBeGreaterThanOrEqual(7);
+    for (const it of swiss) {
+      expect(validateLibraryItem(it, topicIds), it.id).toEqual([]);
+      expect(it.page.summariser).toBe('hand-written');
+    }
+    // A summary-only item must be hand-written, not an extractive copy of the page.
+    const copied = { ...swiss[0], page: { ...swiss[0].page, summariser: 'extractive-v1', chunks: 3 } };
+    expect(validateLibraryItem(copied, topicIds).join(' ')).toMatch(/hand-written/);
+  });
+
+  it('the chat can pick the Swiss sources for Swiss questions (keyword retrieval)', () => {
+    const top = (q: string, stage: string) => selectChatSources(q, stage)[0]?.id ?? '';
+    expect(top('Does Swiss basic insurance cover the pre-eclampsia test in the first trimester?', 'pregnancy')).toMatch(/^gp-bag-kommentar/);
+    expect(top('What does Swiss health insurance pay for in pregnancy?', 'pregnancy')).toMatch(/^gp-bag-krankenversicherung/);
+    expect(top('How much calcium do I need after menopause in Switzerland?', 'menopause')).toMatch(/^gp-blv-naehrstoffzufuhr/);
+    expect(top('When do I get the whooping cough vaccine in pregnancy in Switzerland?', 'pregnancy')).toMatch(/^gp-bag-schweizerischer-impfplan/);
+    expect(top('Is a DEXA scan covered by insurance in Switzerland?', 'post-menopause')).toMatch(/^gp-bag-anhang-1/);
+    // Questions that do not mention Switzerland keep their PubMed sources.
+    expect(top('Is coffee safe in pregnancy?', 'pregnancy')).toMatch(/^pmid-/);
   });
 
   const robots = parseRobots(`

@@ -40,6 +40,11 @@ describe('PREGNANCY_SCHEDULE sources', () => {
       if (s.swiss) expect(s.swiss.source.url, s.key).toMatch(/^https:\/\/www\.(bag\.admin\.ch|rosenfluh\.ch)\//);
     }
     expect(SWISS_CHECKUPS_LINE.note).toMatch(/seven check-ups/);
+    // KLV Art. 13 b quater (EDI 9 June 2026): first-trimester pre-eclampsia test covered from 1 July 2026.
+    const pe = item('first-trimester-scan').swissMore;
+    expect(pe?.note).toMatch(/1 July 2026/);
+    expect(pe?.note).toMatch(/pre-eclampsia/);
+    expect(pe?.source.url).toMatch(/^https:\/\/www\.bag\.admin\.ch\//);
   });
 
   it('sends the rest of the schedule to the midwife or doctor', () => {
