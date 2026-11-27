@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import ReportChanges from '@/components/records/ReportChanges';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { localDay } from '@/hooks/useStageProfile';
@@ -1587,6 +1588,11 @@ export default function MedicalHistory() {
                             </div>
                           );
                         })()}
+
+                        {/* Compared with her earlier reports, once analysed. */}
+                        {doc.ai_summary && docResults.length > 0 && (
+                          <ReportChanges documentId={doc.id} rows={medicalData} />
+                        )}
 
                         {/* AI Summary inline */}
                         {doc.ai_summary && (

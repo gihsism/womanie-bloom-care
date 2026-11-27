@@ -35,6 +35,8 @@ import {
   ArrowLeft,
   Copy,
   Check,
+  Printer,
+  ClipboardList,
 } from 'lucide-react';
 import { ChatSources } from '@/components/chat/ChatSources';
 import { PastChats } from '@/components/chat/PastChats';
@@ -45,6 +47,9 @@ import type { RecordRef } from '@/lib/recordCitations';
 import { parseChatMeta, type ChatMeta } from '@/lib/chatMeta';
 import { flushPendingFeedback, newAnswerKey, readFeedback, saveFeedback, type FeedbackReason } from '@/lib/chatFeedback';
 import { AnswerFeedback, FollowUpChips, RecordChips } from '@/components/chat/AnswerExtras';
+import { addToVisitList, chatToMarkdown, questionFromAnswer } from '@/lib/chatExport';
+import { UNSCHEDULED_VISIT_ID } from '@/lib/hrtQuestions';
+import { emitHealthDataChange } from '@/lib/data-events';
 import { citedSources, linkCitations, splitSourcesFooter, stripSourcesFooter, stripUnknownCitations, type ChatSource } from '@/lib/research-sources';
 
 // `sources`: research-library items the server gave the model for this
@@ -751,24 +756,8 @@ export default function AIDoctorChat() {
       return;
     }
     const stamp = new Date();
-    const header = [
-      `# Womanie AI Health Assistant`,
-      ``,
-      `Exported: ${stamp.toLocaleString()}`,
-      `Model: ${selectedModel}`,
-      ``,
-      `> This conversation is for reference only. The AI assistant on Womanie is not a substitute for medical advice from a licensed clinician.`,
-      ``,
-      `---`,
-      ``,
-    ].join('\n');
-    const body = real
-      .map(m => {
-        const role = m.role === 'user' ? '## You' : '## Assistant';
-        return `${role}\n\n${m.content.trim()}\n`;
-      })
-      .join('\n---\n\n');
-    const blob = new Blob([header + body], { type: 'text/markdown;charset=utf-8' });
+    const md = chatToMarkdown(real, { exportedAt: stamp, model: selectedModel });
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -778,6 +767,74 @@ export default function AIDoctorChat() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     toast({ title: 'Chat exported', description: 'Saved a markdown file — open it anywhere or share with your doctor.' });
+  };
+
+  // Print / save as PDF: the chat on screen opens on its own print page
+  // (no tab bar). The turns travel in the navigation state, in memory
+  // only: nothing is written to browser storage.
+  const printChat = () => {
+    const real = messages.filter(m => m !== WELCOME_MESSAGE && m.content?.trim());
+    if (real.length === 0) {
+      toast({ title: 'Nothing to print', description: 'Send a message first.' });
+      return;
+    }
+    navigate('/dashboard/ai-doctor/print', {
+      state: { turns: real.map(m => ({ role: m.role, content: m.content, sources: m.sources })) },
+    });
+  };
+
+  // "Ask my doctor about this": her question behind this answer goes to
+  // Questions to bring for her next booked visit (the doctor of that
+  // visit sees it read-only); with no visit booked, to the list kept for
+  // the next one, which Visits carries over once a visit is booked.
+  const [askedIdx, setAskedIdx] = useState<Record<number, string>>({});
+  // Keyed by position in the chat on screen: another chat starts clean.
+  useEffect(() => { setAskedIdx({}); }, [conversationId]);
+  const askDoctor = async (idx: number) => {
+    if (!user) return;
+    const text = questionFromAnswer(messages, idx);
+    if (!text) return;
+    setAskedIdx(a => ({ ...a, [idx]: 'saving' }));
+    try {
+      const resp = await fetch('/api/me/appointments?upcoming=true')
+        .then(r => (r.ok ? r.json() : { appointments: [] }))
+        .catch(() => ({ appointments: [] }));
+      const apts = Array.isArray(resp?.appointments) ? resp.appointments : [];
+      const next = apts.find((a: { scheduled_at: string }) => Date.parse(a.scheduled_at) > Date.now()) as
+        | { id: string | number; scheduled_at: string }
+        | undefined;
+      const appointmentId = next ? String(next.id) : UNSCHEDULED_VISIT_ID;
+      const ids = next ? [appointmentId, UNSCHEDULED_VISIT_ID] : [UNSCHEDULED_VISIT_ID];
+      const { data, error } = await db.from('visit_questions').select('appointment_id, questions')
+        .eq('user_id', user.id).in('appointment_id', ids);
+      if (error) throw error;
+      const rows = (Array.isArray(data) ? data : []) as Array<{ appointment_id: string; questions: unknown }>;
+      const visitRow = rows.find(r => r.appointment_id === appointmentId) ?? null;
+      const unschedRow = next ? rows.find(r => r.appointment_id === UNSCHEDULED_VISIT_ID) ?? null : null;
+      const { list, added, carried } = addToVisitList(visitRow ? visitRow.questions : null, unschedRow?.questions ?? null, text);
+      const where = next
+        ? `your visit on ${new Date(next.scheduled_at).toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' })}`
+        : 'your next visit';
+      if (added) {
+        const { error: upErr } = await db.from('visit_questions').upsert(
+          { user_id: user.id, appointment_id: appointmentId, questions: JSON.stringify(list), updated_at: new Date().toISOString() },
+          { onConflict: 'user_id,appointment_id' },
+        );
+        if (upErr) throw upErr;
+        // Her earlier unscheduled questions now live on this visit.
+        if (carried) await db.from('visit_questions').delete().eq('user_id', user.id).eq('appointment_id', UNSCHEDULED_VISIT_ID);
+        emitHealthDataChange();
+      }
+      setAskedIdx(a => ({ ...a, [idx]: 'saved' }));
+      toast({
+        title: added ? 'Added to Questions to bring' : 'Already on your list',
+        description: added ? `Saved for ${where}. You can edit it under Visits.` : `This question is already saved for ${where}.`,
+      });
+    } catch (err) {
+      console.error('Save question failed:', err);
+      setAskedIdx(a => { const { [idx]: _gone, ...rest } = a; return rest; });
+      toast({ variant: 'destructive', title: 'Could not save the question', description: 'Check your connection and try again.' });
+    }
   };
 
   // At most 3 suggested first questions, from the life stage and what is
@@ -881,6 +938,10 @@ export default function AIDoctorChat() {
                 <Download className="mr-2 h-4 w-4" aria-hidden="true" />
                 Export this chat
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={printChat}>
+                <Printer className="mr-2 h-4 w-4" aria-hidden="true" />
+                Print this chat
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate('/library')}>
                 <BookOpen className="mr-2 h-4 w-4" aria-hidden="true" />
                 Research library
@@ -949,6 +1010,21 @@ export default function AIDoctorChat() {
                                 rating={ratings[(msg.messageId ?? msg.answerKey) as string] ?? null}
                                 onRate={(rating, reason, comment) => rateAnswer(msg, rating, reason, comment)}
                               />
+                            )}
+                            {msg !== WELCOME_MESSAGE && msg.content.trim() && !(isStreaming && i === messages.length - 1) && (
+                              <button
+                                type="button"
+                                onClick={() => { if (!askedIdx[i]) void askDoctor(i); }}
+                                disabled={Boolean(askedIdx[i])}
+                                className="mt-1.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground disabled:hover:text-muted-foreground"
+                                data-testid="ask-doctor"
+                              >
+                                {askedIdx[i] === 'saved'
+                                  ? <><Check className="h-3 w-3" aria-hidden="true" />In Questions to bring</>
+                                  : askedIdx[i] === 'saving'
+                                  ? <><Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />Saving…</>
+                                  : <><ClipboardList className="h-3 w-3" aria-hidden="true" />Ask my doctor about this</>}
+                              </button>
                             )}
                           </>
                         );
