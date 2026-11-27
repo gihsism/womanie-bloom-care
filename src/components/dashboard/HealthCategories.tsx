@@ -13,6 +13,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { labNumber, parseLabRange } from '@/lib/labValue';
+import { isOutsideRange, labFlag, latestPerTest } from '@/lib/labFlags';
 
 interface LabResult {
   title: string;
@@ -84,7 +85,8 @@ export default function HealthCategories({ medicalData }: HealthCategoriesProps)
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const categories = useMemo(() => {
-    const labs = medicalData.filter(d => d.data_type === 'lab_result' && d.value);
+    // One row per test: its latest reading (shared rule, labFlags).
+    const labs = latestPerTest(medicalData.filter(d => d.data_type === 'lab_result' && d.value));
 
     return CATEGORIES.map(cat => {
       const matchingLabs = labs.filter(lab =>
@@ -95,8 +97,8 @@ export default function HealthCategories({ medicalData }: HealthCategoriesProps)
       const normal = matchingLabs.filter(l => l.status === 'normal' || l.status === 'expected').length;
       const total = matchingLabs.length;
       const score = total > 0 ? Math.round((normal / total) * 100) : 0;
-      const hasIssues = matchingLabs.some(l => l.status === 'abnormal' || l.status === 'critical');
-      const hasCritical = matchingLabs.some(l => l.status === 'critical');
+      const hasIssues = matchingLabs.some(l => isOutsideRange(l.status));
+      const hasCritical = matchingLabs.some(l => labFlag(l.status) === 'urgent');
 
       // Sort: critical first, then abnormal, then rest
       const sorted = [...matchingLabs].sort((a, b) => {
@@ -128,7 +130,7 @@ export default function HealthCategories({ medicalData }: HealthCategoriesProps)
         {categories.map(cat => {
           const Icon = cat.icon;
           const isOpen = expanded.has(cat.name);
-          const flagged = cat.matchingLabs.filter(l => l.status === 'abnormal' || l.status === 'critical');
+          const flagged = cat.matchingLabs.filter(l => isOutsideRange(l.status));
 
           return (
             <Card key={cat.name} className={`overflow-hidden ${

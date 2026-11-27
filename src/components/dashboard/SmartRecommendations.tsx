@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Lightbulb } from 'lucide-react';
+import { isOutsideRange, latestPerTest } from '@/lib/labFlags';
 
 interface LabResult {
   title: string;
@@ -74,10 +75,12 @@ export default function SmartRecommendations({ medicalData, lifeStage }: SmartRe
 
     // 2. Stale results — tests older than 6 months
     const sixMonthsAgo = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
-    const staleTests = labs.filter(l => {
+    // Latest reading per test only (shared rule, labFlags): a result that
+    // was re-tested normal does not need a retest.
+    const staleTests = latestPerTest(labs).filter(l => {
       if (!l.date_recorded) return false;
       const testDate = new Date(l.date_recorded);
-      return testDate < sixMonthsAgo && (l.status === 'abnormal' || l.status === 'critical');
+      return testDate < sixMonthsAgo && isOutsideRange(l.status);
     });
 
     if (staleTests.length > 0) {
@@ -92,7 +95,7 @@ export default function SmartRecommendations({ medicalData, lifeStage }: SmartRe
 
     // 3. Abnormal results that haven't been retested
     const abnormalTitles = [...new Set(
-      labs.filter(l => l.status === 'abnormal' || l.status === 'critical').map(l => l.title)
+      labs.filter(l => isOutsideRange(l.status)).map(l => l.title)
     )];
     const unretestedAbnormals = abnormalTitles.filter(title => {
       const testsForTitle = labs.filter(l => l.title === title);

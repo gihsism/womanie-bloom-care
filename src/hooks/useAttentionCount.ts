@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
+import { currentFlagged, labFlag } from '@/lib/labFlags';
 import { fetchDoctorSentDocuments, recentDoctorDocuments } from '@/lib/documentFiles';
 
 // Count of "needs your attention" items across the app — matches the
@@ -57,9 +58,8 @@ export function useAttentionCount(): AttentionCounts {
           .select('id, ai_summary, uploaded_at')
           .eq('user_id', user.id),
         db.from('current_extracted_data')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('status', 'critical'),
+          .select('id, title, status, data_type, date_recorded')
+          .eq('user_id', user.id),
         fetch('/api/me/doctor-notes').then(r => (r.ok ? r.json() : { notes: [] })),
         // Fetch the full history (capped server-side at 200) so we can
         // derive both upcoming + recent doctor-initiated cancellations
@@ -75,7 +75,12 @@ export function useAttentionCount(): AttentionCounts {
       const stalledDocuments = docs.filter(
         d => !d.ai_summary && d.uploaded_at && Date.parse(d.uploaded_at) < threshold,
       ).length;
-      const criticalFindings = Array.isArray(findingsRes.data) ? findingsRes.data.length : 0;
+      // Urgent results, latest reading per test only (shared rule, labFlags):
+      // an urgent result re-tested in range no longer counts.
+      const criticalFindings = Array.isArray(findingsRes.data)
+        ? currentFlagged(findingsRes.data as Array<{ title: string; status: string | null; data_type: string | null; date_recorded: string | null }>)
+          .filter(r => labFlag(r.status) === 'urgent').length
+        : 0;
       const noteCutoff = Date.now() - RECENT_NOTE_WINDOW_MS;
       const notes = Array.isArray(notesResp?.notes)
         ? notesResp.notes as Array<{ created_at: string | null }>

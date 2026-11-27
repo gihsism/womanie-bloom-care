@@ -1,5 +1,7 @@
 // Pure helpers for the doctor's patient chart (PatientDetails).
 
+import { currentFlagged, isOutsideRange } from './labFlags';
+
 export interface LabRow {
   id: string;
   title: string;
@@ -23,25 +25,17 @@ export function statusRank(status: string | null): number {
   return 3;
 }
 
+// Outside the range, by the shared definition (labFlags): critical,
+// abnormal, high, low... Borderline is not.
 export function isFlagged(status: string | null): boolean {
-  return statusRank(status) <= 1;
+  return isOutsideRange(status);
 }
 
-const dateOf = (d: string | null) => (d ? Date.parse(d) || 0 : 0);
-
 // Flagged results, most urgent first, newest first within a tier. Only
-// the newest reading per test title counts, so a high TSH that was
-// re-tested normal does not keep shouting from the summary.
+// the newest reading per test counts (shared rule, labFlags), so a high
+// TSH that was re-tested normal does not keep shouting from the summary.
 export function flaggedResults<T extends LabRow>(rows: T[]): T[] {
-  const latest = new Map<string, T>();
-  for (const r of rows) {
-    const key = (r.title || '').trim().toLowerCase();
-    const prev = latest.get(key);
-    if (!prev || dateOf(r.date_recorded) > dateOf(prev.date_recorded)) latest.set(key, r);
-  }
-  return [...latest.values()]
-    .filter(r => isFlagged(r.status))
-    .sort((a, b) => statusRank(a.status) - statusRank(b.status) || dateOf(b.date_recorded) - dateOf(a.date_recorded));
+  return currentFlagged(rows);
 }
 
 // Pregnancy week from the due date (40 weeks = 280 days), clamped 0-42.

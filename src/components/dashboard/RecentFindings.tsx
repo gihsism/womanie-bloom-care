@@ -7,6 +7,7 @@ import { AlertTriangle, AlertCircle, ArrowRight, Activity, MessageCircle } from 
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
+import { currentFlagged, labFlag } from '@/lib/labFlags';
 import { formatDistanceToNow } from 'date-fns';
 
 // Surfaces critical and abnormal lab/finding values from the user's most
@@ -29,23 +30,15 @@ interface Finding {
 
 const MAX_VISIBLE = 5;
 
-const statusRank = (s: string | null): number => {
-  switch (s) {
-    case 'critical': return 0;
-    case 'abnormal': return 1;
-    default: return 2;
-  }
-};
-
 const statusBadge = (s: string | null) => {
-  if (s === 'critical') {
+  if (labFlag(s) === 'urgent') {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive text-[10px] font-medium uppercase tracking-wide">
         <AlertTriangle className="h-3 w-3" /> Critical
       </span>
     );
   }
-  if (s === 'abnormal') {
+  if (labFlag(s) === 'outside') {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/5 text-destructive text-[10px] font-medium uppercase tracking-wide">
         <AlertCircle className="h-3 w-3" /> Attention
@@ -70,15 +63,10 @@ export default function RecentFindings({ since = null, showViewAll = true }: { s
       .from('current_extracted_data')
       .select('id, document_id, title, value, unit, reference_range, status, data_type, date_recorded, notes')
       .eq('user_id', user.id);
-    const rows = withinWindow((data ?? []) as Finding[], since);
-    const flagged = rows.filter(r => r.status === 'critical' || r.status === 'abnormal');
-    flagged.sort((a, b) => {
-      const r = statusRank(a.status) - statusRank(b.status);
-      if (r !== 0) return r;
-      const aDate = a.date_recorded ? Date.parse(a.date_recorded) : 0;
-      const bDate = b.date_recorded ? Date.parse(b.date_recorded) : 0;
-      return bDate - aDate;
-    });
+    // Latest reading per test first (shared rule, labFlags): an older high
+    // result re-tested normal is not a finding any more. Urgent first,
+    // then newest.
+    const flagged = withinWindow(currentFlagged((data ?? []) as Finding[]), since);
     setFindings(flagged);
     setLoaded(true);
   }, [user, since]);
@@ -94,7 +82,7 @@ export default function RecentFindings({ since = null, showViewAll = true }: { s
 
   if (!loaded || findings.length === 0) return null;
 
-  const criticalCount = findings.filter(f => f.status === 'critical').length;
+  const criticalCount = findings.filter(f => labFlag(f.status) === 'urgent').length;
 
   return (
     <Card className="p-4 mb-4">

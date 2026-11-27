@@ -179,3 +179,24 @@ describe('selectPersonalContext: number hints for comma/apostrophe values', () =
     expect(sel.block).not.toContain('check value');
   });
 });
+
+describe('selectPersonalContext: out-of-range values use the latest reading only', () => {
+  it('an older high TSH re-tested in range is not listed as out of range', () => {
+    const rows = [
+      lab('TSH', '6.8', '2026-03-01', { unit: 'mIU/L', status: 'high', reference_range: '0.4-4.0' }),
+      lab('TSH', '2.1', '2026-09-01', { unit: 'mIU/L', status: 'normal', reference_range: '0.4-4.0' }),
+      lab('Ferritin', '9', '2026-08-01', { unit: 'ng/mL', status: 'low' }),
+    ];
+    const sel = selectPersonalContext({ question: 'How can I sleep better?', labs: rows, docs: [], now });
+    const section = sel.block.split('## Out-of-range values')[1]?.split('##')[0] ?? '';
+    expect(section).toContain('Ferritin');
+    expect(section).not.toContain('TSH');
+    expect(sel.block).not.toContain('6.8 mIU/L');
+  });
+  it('borderline is not out of range (shared definition)', () => {
+    const rows = [lab('B12', '200', '2026-08-01', { unit: 'pg/mL', status: 'borderline' })];
+    const sel = selectPersonalContext({ question: 'hi', labs: rows, docs: [], now });
+    expect(sel.block).not.toContain('## Out-of-range values');
+    expect(sel.block).toContain('B12');
+  });
+});

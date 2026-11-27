@@ -69,7 +69,14 @@ async function fetchForUser(userId: string): Promise<LabResult[]> {
       .select('title, value, unit, reference_range, status, date_recorded')
       .eq('user_id', userId)
       .eq('data_type', 'lab_result');
-    const rows = (data as LabResult[] | null) ?? [];
+    // Newest reading first, so every card's labs.find(...) picks the LATEST
+    // reading of a test (the shared rule in labFlags): a high TSH re-tested
+    // normal must not show as "to discuss". Undated rows go last.
+    const when = (r: LabResult) => {
+      const t = r.date_recorded ? Date.parse(r.date_recorded) : NaN;
+      return Number.isFinite(t) ? t : -Infinity;
+    };
+    const rows = [...((data as LabResult[] | null) ?? [])].sort((a, b) => when(b) - when(a));
     cache.set(userId, { rows, loadedAt: Date.now() });
     inflight.delete(userId);
     return rows;

@@ -34,7 +34,7 @@ export interface TodaySignals {
   appointmentToday?: Date | null;
   /** Doctor notes written in the last 14 days. */
   newDoctorNotes?: number;
-  /** Results marked "talk to your doctor". */
+  /** Results to talk to the doctor about: latest reading per test, outside the range (labFlags). */
   flaggedResults?: number;
   /** Days until the next predicted period; negative = late. Cycle stages only. */
   periodDaysUntil?: number | null;

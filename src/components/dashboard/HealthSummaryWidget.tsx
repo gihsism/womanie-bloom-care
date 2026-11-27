@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
+import { currentFlagged, labFlag, latestPerTest } from '@/lib/labFlags';
 import {
   HeartPulse,
   ArrowRight,
@@ -54,15 +55,17 @@ export default function HealthSummaryWidget({ since = null, showViewAll = true }
   // upload card further down already ask for the first document.
   if (docCount === 0) return null;
 
-  const labs = data.filter(d => d.data_type === 'lab_result');
+  // One line per test: its latest reading (shared rule, labFlags), so a
+  // high result re-tested normal counts as healthy, not "to discuss".
+  const labs = latestPerTest(data.filter(d => d.data_type === 'lab_result'));
   const normalCount = labs.filter(d => d.status === 'normal' || d.status === 'expected').length;
-  const abnormalCount = labs.filter(d => d.status === 'abnormal').length;
-  const criticalCount = labs.filter(d => d.status === 'critical').length;
+  const abnormalCount = labs.filter(d => labFlag(d.status) === 'outside').length;
+  const criticalCount = labs.filter(d => labFlag(d.status) === 'urgent').length;
   const healthScore = labs.length > 0 ? Math.round((normalCount / labs.length) * 100) : null;
   const conditions = data.filter(d => d.data_type === 'condition' && d.status === 'active');
 
   // Top 3 flagged items
-  const flagged = labs.filter(d => d.status === 'abnormal' || d.status === 'critical').slice(0, 3);
+  const flagged = currentFlagged(labs).slice(0, 3);
 
   return (
     <Card className="p-4 mb-6">

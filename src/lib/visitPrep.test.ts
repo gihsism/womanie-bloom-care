@@ -60,6 +60,21 @@ describe('resultsToDiscuss', () => {
   });
 });
 
+describe('resultsToDiscuss uses the shared outside-range definition', () => {
+  it('an older out-of-range TSH is not listed when the newer reading is normal and steady', () => {
+    const out = resultsToDiscuss([
+      lab('TSH', '2.0', '2026-03-01', 'normal'),
+      lab('TSH', '6.0', '2025-06-01', 'abnormal'),
+      lab('TSH ', '2.1', '2026-09-01', 'normal'),
+    ]);
+    expect(out).toEqual([]);
+  });
+  it('high and low statuses read as outside range, like everywhere else', () => {
+    const out = resultsToDiscuss([lab('Ferritin', '9', '2026-10-01', 'low', 'ng/mL'), lab('LDL', '5', '2026-10-01', 'high')]);
+    expect(out.map(r => r.note)).toEqual(['Marked outside range', 'Marked outside range']);
+  });
+});
+
 describe('prepQuestions', () => {
   const q = (text: string, asked = false) => ({ id: text, text, asked });
   it('takes the open questions saved to this visit', () => {
