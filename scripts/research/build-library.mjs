@@ -122,7 +122,14 @@ const all = (xml, re) => [...xml.matchAll(re)].map((m) => m);
 function parseArticle(xml) {
   const isBook = xml.startsWith('<PubmedBookArticle');
   const pmid = first(xml, /<PMID[^>]*>(\d+)<\/PMID>/);
-  const title = first(xml, /<ArticleTitle[^>]*>([\s\S]*?)<\/ArticleTitle>/) || first(xml, /<BookTitle[^>]*>([\s\S]*?)<\/BookTitle>/);
+  // A living database on the NCBI Bookshelf (LactMed: a <BeginningDate>,
+  // one chapter per medicine) gets its book name after the bare chapter
+  // title ("Ibuprofen") and the year the chapter was last revised, not the
+  // year the database started (2006).
+  const livingBook = isBook && /<BeginningDate>/.test(xml);
+  const chapterTitle = first(xml, /<ArticleTitle[^>]*>([\s\S]*?)<\/ArticleTitle>/);
+  const bookTitle = first(xml, /<BookTitle[^>]*>([\s\S]*?)<\/BookTitle>/);
+  const title = livingBook && chapterTitle && bookTitle ? `${chapterTitle.replace(/\.$/, '')} — ${bookTitle}` : chapterTitle || bookTitle;
   const abstractParts = all(xml, /<AbstractText([^>]*)>([\s\S]*?)<\/AbstractText>/g).map((m) => {
     const label = (m[1].match(/Label="([^"]+)"/) || [])[1];
     const text = decode(m[2]);
@@ -133,7 +140,8 @@ function parseArticle(xml) {
     : first(xml, /<Journal>[\s\S]*?<Title>([\s\S]*?)<\/Title>/);
   const journalAbbrev = first(xml, /<ISOAbbreviation>([\s\S]*?)<\/ISOAbbreviation>/) || first(xml, /<MedlineTA>([\s\S]*?)<\/MedlineTA>/);
   const pubDate = (xml.match(/<PubDate>([\s\S]*?)<\/PubDate>/) || [])[1] || '';
-  const year = Number(first(pubDate, /<Year>(\d{4})<\/Year>/) || (first(pubDate, /<MedlineDate>(\d{4})/)) || first(xml, /<ArticleDate[^>]*>\s*<Year>(\d{4})/) || 0);
+  const revised = livingBook ? first(xml, /<ContributionDate>\s*<Year>(\d{4})<\/Year>/) : '';
+  const year = Number(revised || first(pubDate, /<Year>(\d{4})<\/Year>/) || (first(pubDate, /<MedlineDate>(\d{4})/)) || first(xml, /<ArticleDate[^>]*>\s*<Year>(\d{4})/) || 0);
   const doi = first(xml, /<ArticleId IdType="doi">([\s\S]*?)<\/ArticleId>/) || first(xml, /<ELocationID EIdType="doi"[^>]*>([\s\S]*?)<\/ELocationID>/);
   const pubTypes = all(xml, /<PublicationType[^>]*>([\s\S]*?)<\/PublicationType>/g).map((m) => decode(m[1]));
   const collective = all(xml, /<CollectiveName>([\s\S]*?)<\/CollectiveName>/g).map((m) => decode(m[1]));
@@ -151,10 +159,16 @@ async function efetch(pmids) {
   return out;
 }
 
+// Society documents PubMed does not tag as guidelines (NAMS position
+// statements, some ACOG committee opinions, ASRM committee opinions, the
+// CDC's US MEC) are still guidelines for the reader.
+const GUIDELINE_TITLE = /\b(committee opinion|practice bulletin|clinical practice guideline|position statement|obstetric care consensus|medical eligibility criteria)\b/i;
+
 function evidenceLevel(rec) {
   const t = rec.pubTypes.map((x) => x.toLowerCase());
   if (t.some((x) => x === 'guideline' || x === 'practice guideline' || x === 'consensus development conference')) return 'guideline';
-  if (t.some((x) => x === 'systematic review' || x === 'meta-analysis') || /cochrane database/i.test(rec.journal)) return 'systematic review';
+  if (t.some((x) => x === 'systematic review' || x === 'meta-analysis' || x === 'network meta-analysis') || /cochrane database/i.test(rec.journal)) return 'systematic review';
+  if (t.includes('consensus statement') || GUIDELINE_TITLE.test(rec.title)) return 'guideline';
   return 'study';
 }
 
@@ -400,6 +414,9 @@ function assemble(records, cache) {
     const s = cache[rec.pmid];
     if (!s) { rejected.missing++; continue; }
     if (!s.include) { rejected.excluded++; continue; }
+    // A paper retracted after its summary was cached must still drop out
+    // (pmid 37311484, tranexamic acid at caesarean, retracted Dec 2026).
+    if (rec.retracted) { rejected.excluded++; continue; }
     if (/^withdrawn\b/i.test(rec.title)) { rejected.excluded++; continue; }
     const level = evidenceLevel(rec);
     // An organisation is shown as the source only for guidelines, and only

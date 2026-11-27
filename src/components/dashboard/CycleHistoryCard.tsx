@@ -107,8 +107,9 @@ const CycleHistoryCard = ({ enabled = true }: CycleHistoryCardProps) => {
     const max = Math.max(...cycles.map(c => c.lengthDays));
     const variance = cycles.reduce((s, c) => s + (c.lengthDays - mean) ** 2, 0) / cycles.length;
     const stdDev = Math.sqrt(variance);
-    // ACOG considers cycles "regular" within ±2 days variation; "fairly
-    // regular" within ±5; beyond that, irregular.
+    // Womanie's own bands on the standard deviation of cycle length (not a
+    // guideline cut-off; FIGO 2018 judges regularity by the shortest-to-
+    // longest spread, 7-9 days, see cycleInsights.ts).
     let regularity: string;
     let regularityTone: string;
     if (cycles.length < 3) {

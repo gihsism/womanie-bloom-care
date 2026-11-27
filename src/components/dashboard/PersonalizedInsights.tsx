@@ -235,10 +235,10 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       emoji: '🦋',
       connectedTests: connected,
       explanation: tsh.value > 2.5
-        ? `Your TSH (${tsh.value}) is above the pregnancy-safe range of 0.1-2.5 for the first trimester. Untreated hypothyroidism in pregnancy increases risk of miscarriage, preeclampsia, and developmental issues.`
+        ? `Your TSH (${tsh.value}) is above 2.5. Labs should use pregnancy ranges; without them, the American Thyroid Association (2026) uses 0.1-4.0 in the first trimester, and women on thyroid medicine are usually kept below 2.5. Untreated underactive thyroid in pregnancy is linked to miscarriage and preeclampsia.`
         : `Your TSH (${tsh.value}) is very low, suggesting overactive thyroid. This needs close monitoring during pregnancy as it can affect baby's growth.`,
       recommendation: 'Your doctor should monitor TSH every 4-6 weeks during pregnancy. Medication dosage may need adjustment as pregnancy progresses.',
-      severity: 'urgent',
+      severity: tsh.value > 4 || tsh.value < 0.1 ? 'urgent' : 'attention',
     });
   }
 
@@ -400,7 +400,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       title: 'Your hormone levels suggest perimenopause or menopause transition',
       emoji: '🌙',
       connectedTests: ['FSH', 'Estradiol'],
-      explanation: `Your FSH (${fsh.value} IU/L) is elevated and estradiol (${estradiol.value} pg/mL) is declining. This pattern indicates your ovaries are producing less estrogen.${fsh.value > 30 && estradiol.value < 30 ? ' If you\'ve also had 12+ months without a period, this confirms menopause.' : ' With erratic cycles, this is consistent with perimenopause.'}`,
+      explanation: `Your FSH (${fsh.value} IU/L) is elevated and estradiol (${estradiol.value} pg/mL) is declining. This pattern indicates your ovaries are producing less estrogen.${fsh.value > 30 && estradiol.value < 30 ? ' Menopause is defined as 12 months without a period, so if that applies to you, this fits; your doctor can confirm.' : ' With erratic cycles, this is consistent with perimenopause.'}`,
       recommendation: 'Discuss symptom management options with your doctor. Consider bone density screening, cardiovascular risk assessment, and whether hormone therapy might be appropriate for you.',
       severity: 'attention',
     });
@@ -447,7 +447,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       title: 'Positive thyroid antibodies — Hashimoto\'s thyroiditis',
       emoji: '🦋',
       connectedTests: connected,
-      explanation: `Your anti-TPO is ${antiTPO.value} IU/mL (positive >35). This indicates your immune system is attacking your thyroid gland (Hashimoto's). Hashimoto's is 4-10x more common in women.${tsh && tsh.value > 4 ? ` Your elevated TSH (${tsh.value}) confirms the thyroid is already underperforming.` : ' Your thyroid function may still be normal now, but monitoring is important.'}`,
+      explanation: `Your anti-TPO is ${antiTPO.value} IU/mL (positive >35). This indicates your immune system is attacking your thyroid gland (Hashimoto's). Hashimoto's is 4-10x more common in women.${tsh && tsh.value > 4 ? ` Your elevated TSH (${tsh.value}) suggests the thyroid is already underperforming.` : ' Your thyroid function may still be normal now, but monitoring is important.'}`,
       recommendation: tsh && tsh.value > 4
         ? 'Thyroid medication (levothyroxine) is likely needed. Monitor TSH every 6-8 weeks until stable. If trying to conceive, keep TSH below 2.5.'
         : 'Monitor TSH every 6-12 months. Many people with positive antibodies eventually develop hypothyroidism. If you notice fatigue, weight gain, or irregular periods, recheck sooner.',
@@ -499,7 +499,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       title: 'High Lp(a) — an inherited cardiovascular risk factor',
       emoji: '❤️',
       connectedTests: ['Lp(a)', ...(crp && crp.value >= 2 ? ['hs-CRP'] : [])],
-      explanation: `Your Lp(a) is ${lpa.value} nmol/L (high risk >=125). Lp(a) is largely genetic and doesn't respond well to diet or exercise. It's 17% higher in postmenopausal women.${crp && crp.value >= 2 ? ' Combined with your elevated hs-CRP, this compounds your cardiovascular risk.' : ''}`,
+      explanation: `Your Lp(a) is ${lpa.value} nmol/L (high risk >=125). Lp(a) is largely genetic and doesn't respond well to diet or exercise. Levels tend to rise after menopause (about 27% higher in a large Danish study, Simony 2022).${crp && crp.value >= 2 ? ' Combined with your elevated hs-CRP, this compounds your cardiovascular risk.' : ''}`,
       recommendation: 'Discuss with your doctor. While Lp(a) itself is hard to lower, aggressively managing other risk factors (LDL, blood pressure, smoking) becomes even more important. New targeted therapies are in development.',
       severity: 'attention',
     });
@@ -511,7 +511,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
         title: 'Elevated ApoB — a more precise cardiovascular marker',
         emoji: '❤️',
         connectedTests: ['ApoB', ...(ldl ? ['LDL Cholesterol'] : [])],
-        explanation: `Your ApoB is ${apoB.value} mg/dL (optimal <80, elevated >100). Per 2026 ACC/AHA guidelines, ApoB is a better predictor of cardiovascular risk than LDL alone, especially when LDL appears normal.`,
+        explanation: `Your ApoB is ${apoB.value} mg/dL (European ESC/EAS 2019 goals: under 100, or under 80 or 65 at higher heart risk). The 2026 ACC/AHA cholesterol guideline says ApoB reflects heart risk more accurately than LDL alone, especially when LDL looks normal, triglycerides are high or you have diabetes.`,
         recommendation: 'Discuss statin or other lipid-lowering therapy with your doctor. Lifestyle measures (Mediterranean diet, exercise, weight management) also help lower ApoB.',
         severity: 'attention',
       });
@@ -566,7 +566,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       title: bileAcids.value >= 40 ? 'Severe cholestasis of pregnancy — needs immediate attention' : 'Elevated bile acids — possible intrahepatic cholestasis',
       emoji: bileAcids.value >= 40 ? '🚨' : '⚠️',
       connectedTests: ['Bile Acids', ...(alt ? ['ALT'] : []), ...(ast ? ['AST'] : [])],
-      explanation: `Your bile acids are ${bileAcids.value} μmol/L. Values >=10 are diagnostic for intrahepatic cholestasis of pregnancy (ICP).${bileAcids.value >= 40 ? ' Values >=40 carry increased risk of adverse outcomes.' : ''}${bileAcids.value >= 100 ? ' Values >=100 are severe — delivery is typically recommended at 36 weeks.' : ''} ICP causes intense itching and can affect the baby.`,
+      explanation: `Your bile acids are ${bileAcids.value} μmol/L. Together with itching, 10 or more is what US guidance (SMFM 2021) uses to diagnose intrahepatic cholestasis of pregnancy (ICP); UK guidance (RCOG 2022) uses 19. Only your doctor can diagnose it.${bileAcids.value >= 40 ? ' Values >=40 carry increased risk of adverse outcomes.' : ''}${bileAcids.value >= 100 ? ' Values >=100 are severe — birth is usually planned at 35-36 weeks.' : ''} ICP causes intense itching and can affect the baby.`,
       recommendation: bileAcids.value >= 40
         ? 'Contact your doctor TODAY. You may need ursodeoxycholic acid (UDCA) treatment and increased fetal monitoring. Delivery timing will be discussed.'
         : 'Discuss with your doctor at your next appointment. UDCA medication can help. Bile acids should be monitored weekly from 32 weeks.',
@@ -613,7 +613,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
         title: 'Small red blood cells with normal iron — possible thalassemia trait',
         emoji: '🩸',
         connectedTests: ['MCV', 'MCH', 'Ferritin', ...(hba2 ? ['HbA2'] : [])],
-        explanation: `Your MCV (${mcv.value} fL) and MCH (${mch.value} pg) are low, but your iron stores are normal. This pattern is characteristic of thalassemia trait rather than iron deficiency.${hba2 && hba2.value > 3.5 ? ` Your HbA2 of ${hba2.value}% confirms beta-thalassemia trait.` : ' An HbA2 test can confirm this.'} Thalassemia trait is common and usually harmless, but important for family planning.`,
+        explanation: `Your MCV (${mcv.value} fL) and MCH (${mch.value} pg) are low, but your iron stores are normal. This pattern is characteristic of thalassemia trait rather than iron deficiency.${hba2 && hba2.value > 3.5 ? ` Your HbA2 of ${hba2.value}% is in the range typical of beta-thalassemia trait.` : ' An HbA2 test can confirm this.'} Thalassemia trait is common and usually harmless, but important for family planning.`,
         recommendation: 'If you\'re planning a pregnancy, your partner should also be tested for thalassemia. If both partners carry the trait, there\'s a 25% chance each pregnancy could result in thalassemia major.',
         severity: 'neutral',
       });

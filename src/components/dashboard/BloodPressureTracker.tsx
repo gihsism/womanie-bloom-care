@@ -50,7 +50,8 @@ const SHOWN_MODES = new Set(['pregnancy', 'menopause', 'post-menopause']);
 function classify(sys: number, dia: number, isPregnancy: boolean):
   { band: 'normal' | 'elevated' | 'stage1' | 'stage2' | 'severe'; label: string; color: string; urgent: boolean } {
   // Severe line: ≥160/110 in pregnancy (ACOG); outside pregnancy a
-  // hypertensive crisis is ≥180/120 (AHA/ACC 2017).
+  // reading above 180/120 is "severe hypertension" (AHA/ACC 2025, which
+  // kept the 2017 categories).
   if (isPregnancy ? (sys >= 160 || dia >= 110) : (sys >= 180 || dia >= 120)) {
     return {
       band: 'severe',
@@ -330,7 +331,7 @@ export default function BloodPressureTracker({ mode }: BloodPressureTrackerProps
       <p className="text-[10px] text-muted-foreground mt-3 leading-relaxed">
         {isPregnancy
           ? <>Reference: ACOG 2020 hypertension in pregnancy guidance. Home readings supplement, don't replace, clinic measurements. Severe range (≥160/≥110) is an immediate call-your-OB situation.</>
-          : <>Reference: AHA/ACC 2017 blood pressure categories. Blood pressure tends to rise after menopause; home readings supplement, don't replace, clinic measurements. ≥180/≥120 is a hypertensive crisis — call your doctor right away.</>}
+          : <>Reference: AHA/ACC 2025 blood pressure guideline (same categories as 2017). Blood pressure tends to rise after menopause; home readings supplement, don't replace, clinic measurements. ≥180/≥120 is a hypertensive crisis — call your doctor right away.</>}
       </p>
     </Card>
   );

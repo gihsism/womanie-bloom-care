@@ -151,9 +151,8 @@ export function cycleChartPoints(cycleStart: Date, signals: Record<string, Signa
 
 // ─── When to see a doctor ───────────────────────────────────────────
 //
-// NICE CG156 (Fertility problems, 2013, updated 2017) and ASRM Committee
-// Opinion "Definitions of infertility and recurrent pregnancy loss" (2020,
-// reaffirmed 2023): see a doctor after 12 months of regular unprotected
+// NICE NG257 (Fertility problems, March 2026, replaced CG156) and ASRM
+// Committee Opinion "Definition of infertility" (2023): see a doctor after 12 months of regular unprotected
 // sex, or after 6 months if she is 35 or older. ASRM: from 40, an
 // evaluation straight away is reasonable. See a doctor sooner with very
 // irregular or absent periods or a known cause (both say so).

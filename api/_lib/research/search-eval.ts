@@ -170,8 +170,8 @@ export interface AuditQuestion {
 
 export const AUDIT_QUESTIONS: AuditQuestion[] = [
   // Periods
-  { q: 'How long is a normal period and how much bleeding is too much?', stage: 'menstrual-cycle', ids: ['pmid-42932433', 'pmid-29731212', 'pmid-35638592'] },
-  { q: "My periods stopped for 4 months and I'm not pregnant, why?", stage: 'menstrual-cycle', ids: ['pmid-28368518', 'pmid-36777338', 'pmid-40682949', 'pmid-37589624'] },
+  { q: 'How long is a normal period and how much bleeding is too much?', stage: 'menstrual-cycle', ids: ['pmid-42932433', 'pmid-29731212', 'pmid-35638592', 'pmid-30198563', 'pmid-26595586'] },
+  { q: "My periods stopped for 4 months and I'm not pregnant, why?", stage: 'menstrual-cycle', ids: ['pmid-28368518', 'pmid-36777338', 'pmid-40682949', 'pmid-37589624', 'pmid-38456861'] },
   { q: 'Does the pill help with PMS mood swings?', stage: 'menstrual-cycle', ids: ['pmid-37365881', 'pmid-34224688', 'pmid-41468627'] },
   { q: "What's the best painkiller for period cramps?", stage: 'menstrual-cycle', ids: ['pmid-26224322', 'pmid-40216328'] },
   // PCOS
@@ -183,7 +183,7 @@ export const AUDIT_QUESTIONS: AuditQuestion[] = [
   { q: 'What hormone treatments are there for endometriosis pain?', stage: 'menstrual-cycle', ids: ['pmid-41065045', 'pmid-42746927', 'pmid-37341141'] },
   { q: 'Can I still get pregnant with endometriosis?', stage: 'conception', ids: ['pmid-33095458', 'pmid-32106991', 'pmid-36948440'] },
   // Trying to conceive
-  { q: 'How long does it usually take to get pregnant?', stage: 'conception', ids: [], gap: true },
+  { q: 'How long does it usually take to get pregnant?', stage: 'conception', ids: ['pmid-28917614'] }, // gap closed 2026-11-27
   { q: 'Do ovulation tests actually help you conceive faster?', stage: 'conception', ids: ['pmid-37709293', 'pmid-31139458'] },
   { q: 'Does letrozole work better than clomid for PCOS?', stage: 'conception', ids: ['pmid-36735392', 'pmid-36165742', 'pmid-29797697'] },
   { q: "When should we see a fertility doctor if we're not getting pregnant?", stage: 'conception', ids: [], gap: true },
@@ -196,22 +196,22 @@ export const AUDIT_QUESTIONS: AuditQuestion[] = [
   { q: 'Is it safe to take antihistamines for hay fever while pregnant?', stage: 'pregnancy', ids: ['pmid-27878468', 'pmid-33433020'] },
   { q: 'Can I keep taking my thyroid medication (levothyroxine) in pregnancy?', stage: 'pregnancy', ids: ['pmid-42219800', 'pmid-32443080', 'pmid-35523752'] },
   { q: 'What can I take for heartburn when pregnant?', stage: 'pregnancy', ids: ['pmid-26384956', 'pmid-31909512'] },
-  { q: 'Are antibiotics for a UTI safe in pregnancy?', stage: 'pregnancy', ids: ['pmid-31765489', 'pmid-30895288'] },
+  { q: 'Are antibiotics for a UTI safe in pregnancy?', stage: 'pregnancy', ids: ['pmid-31765489', 'pmid-30895288', 'pmid-28832488'] },
   { q: 'Should I take vitamin D during pregnancy?', stage: 'pregnancy', ids: ['pmid-43012372', 'pmid-39077939', 'pmid-38828931'] },
   { q: 'Is it safe to exercise while pregnant?', stage: 'pregnancy', ids: ['pmid-30297272', 'pmid-32217980', 'pmid-34478617', 'pmid-30337460'] },
   // Postpartum and breastfeeding
-  { q: 'How can I tell if I have postpartum depression?', stage: 'postpartum', ids: ['pmid-30629567', 'pmid-35416478', 'pmid-40566968', 'pmid-33177069'] },
+  { q: 'How can I tell if I have postpartum depression?', stage: 'postpartum', ids: ['pmid-37486660', 'pmid-30629567', 'pmid-35416478', 'pmid-40566968', 'pmid-33177069'] },
   { q: 'When can I start exercising again after a C-section?', stage: 'postpartum', ids: ['pmid-32217980', 'pmid-40335351'] },
-  { q: 'How soon after birth can I get pregnant again, and what contraception is safe?', stage: 'postpartum', ids: ['pmid-37124160', 'pmid-27155443', 'pmid-25793657', 'pmid-36302159'] },
-  { q: 'Is ibuprofen safe while breastfeeding?', stage: 'postpartum', ids: [], gap: true },
+  { q: 'How soon after birth can I get pregnant again, and what contraception is safe?', stage: 'postpartum', ids: ['pmid-37124160', 'pmid-27155443', 'pmid-25793657', 'pmid-36302159', 'pmid-30575677'] },
+  { q: 'Is ibuprofen safe while breastfeeding?', stage: 'postpartum', ids: ['pmid-30000045', 'pmid-30000253'] }, // gap closed 2026-11-27 (LactMed)
   { q: 'Can I take the combined pill while breastfeeding?', stage: 'postpartum', ids: ['pmid-26002804', 'pmid-25793657'] },
   { q: 'How do I increase my breast milk supply?', stage: 'postpartum', ids: ['pmid-32421208'] },
   // Perimenopause and HRT
   { q: 'What are the first signs of perimenopause?', stage: 'menopause', ids: ['pmid-41082911', 'pmid-42743436', 'pmid-30182804'] },
   { q: 'Can perimenopause cause anxiety and low mood?', stage: 'menopause', ids: ['pmid-41902367', 'pmid-39856668', 'pmid-30182804'] },
-  { q: "Is HRT safe if I'm over 60?", stage: 'post-menopause', ids: ['pmid-42695385', 'pmid-30358733', 'pmid-26444994'] },
+  { q: "Is HRT safe if I'm over 60?", stage: 'post-menopause', ids: ['pmid-35797481', 'pmid-42695385', 'pmid-30358733', 'pmid-26444994'] },
   { q: 'Does HRT patch or pill have a different blood clot risk?', stage: 'menopause', ids: ['pmid-35713694', 'pmid-40488293'] },
-  { q: 'What non-hormonal treatments help hot flashes?', stage: 'menopause', ids: ['pmid-42832802', 'pmid-43049482'] },
+  { q: 'What non-hormonal treatments help hot flashes?', stage: 'menopause', ids: ['pmid-42832802', 'pmid-43049482', 'pmid-37252752'] },
   { q: 'Is vaginal estrogen safe long term?', stage: 'post-menopause', ids: ['pmid-40298120', 'pmid-39250810', 'pmid-40569036'] },
   // Bone health
   { q: 'Should I get a bone density scan after menopause?', stage: 'post-menopause', ids: ['pmid-39808425', 'pmid-30324412', 'pmid-32427503'] },
