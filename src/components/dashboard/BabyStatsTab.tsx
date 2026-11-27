@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useLifeEvents } from '@/hooks/useLifeEvents';
 import { Button } from '@/components/ui/button';
-import { dailyRows, feedSummary, type DayRow } from '@/lib/babyStats';
+import { Link } from 'react-router-dom';
+import { Printer } from 'lucide-react';
+import { dailyRows, feedSummary, weeklyLines, weeklySummary, type DayRow } from '@/lib/babyStats';
 
 // Feeding and nappy statistics for one baby (last 7 days).
 // Colours: feeds = brand primary (single series, title names it);
@@ -47,11 +49,13 @@ function ChartTip({ active, payload, label }: { active?: boolean; payload?: Arra
 export default function BabyStatsTab({ babyId, onGoTo }: { babyId: string; onGoTo?: (tab: string) => void }) {
   const feeds = useLifeEvents('feed', { babyId, limit: 500 });
   const nappies = useLifeEvents('nappy', { babyId, limit: 500 });
+  const sleeps = useLifeEvents('baby_sleep', { babyId, limit: 500 });
   const [showTable, setShowTable] = useState(false);
   const rows: DayRow[] = useMemo(() => dailyRows(feeds.events, nappies.events, new Date()), [feeds.events, nappies.events]);
   const s = useMemo(() => feedSummary(feeds.events, new Date()), [feeds.events]);
+  const week = useMemo(() => weeklySummary(feeds.events, nappies.events, sleeps.events, new Date()), [feeds.events, nappies.events, sleeps.events]);
 
-  if (!feeds.loaded || !nappies.loaded) return <p className="text-xs text-muted-foreground">Loading…</p>;
+  if (!feeds.loaded || !nappies.loaded || !sleeps.loaded) return <p className="text-xs text-muted-foreground">Loading…</p>;
   const sideTotal = s.left + s.right;
   const hasFeeds = rows.some(r => r.feeds > 0);
   const hasNappies = rows.some(r => r.wet + r.dirty > 0);
@@ -123,6 +127,17 @@ export default function BabyStatsTab({ babyId, onGoTo }: { babyId: string; onGoT
             {onGoTo && <Button size="sm" variant="outline" onClick={() => onGoTo('nappy')}>Log a nappy</Button>}
           </div>
         )}
+      </section>
+
+      <section className="space-y-2" data-testid="baby-week-summary">
+        <h4 className="label-mono">Last 7 days · for the paediatrician</h4>
+        <div className="text-sm space-y-0.5">
+          {weeklyLines(week).map(l => <p key={l}>{l}</p>)}
+        </div>
+        <p className="text-[11px] text-muted-foreground">The 7 full days before today. Averages count only the days with entries.</p>
+        <Button asChild size="sm" variant="outline" className="gap-1.5">
+          <Link to={`/dashboard/baby/summary?baby=${encodeURIComponent(babyId)}`}><Printer className="h-3.5 w-3.5" />Print weekly summary</Link>
+        </Button>
       </section>
 
       <button type="button" className="text-[11px] text-muted-foreground underline" onClick={() => setShowTable(v => !v)}>
