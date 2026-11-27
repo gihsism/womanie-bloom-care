@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { isIsoDate } from '../_lib/input.js';
 import { getAuthUser } from '../_lib/auth.js';
 import { withSentry } from '../_lib/sentry.js';
 import { extractIndicators, type HealthSignal } from '../_lib/ovulation-indicators.js';
@@ -84,11 +85,12 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     cycleData?: CycleData;
   };
 
-  const signals = Array.isArray(healthData) ? healthData : [];
+  // The last ~4 months of daily signals is all the indicators look at.
+  const signals = Array.isArray(healthData) ? healthData.slice(-120) : [];
   const cycleLength = Number(cycleData?.cycleLength);
   const lastPeriodStart = cycleData?.lastPeriodStart;
 
-  if (!lastPeriodStart || !cycleLength || cycleLength < 18 || cycleLength > 60) {
+  if (!isIsoDate(lastPeriodStart) || !cycleLength || cycleLength < 18 || cycleLength > 60) {
     return res.status(400).json({ error: 'Need a valid cycleLength and lastPeriodStart' });
   }
 

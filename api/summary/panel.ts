@@ -95,7 +95,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       `SELECT title, value, unit, reference_range, status, date_recorded, raw_data
          FROM current_extracted_data
         WHERE user_id = $1 AND data_type = 'lab_result'
-        ORDER BY date_recorded DESC NULLS LAST`,
+        ORDER BY date_recorded DESC NULLS LAST
+        LIMIT 2000`,
       [user.id]
     ) as Array<Record<string, unknown>>;
 

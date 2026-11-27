@@ -1,5 +1,6 @@
 import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { bodyObject, isEmailLike, MAX_PASSWORD, optionalText } from '../../_lib/input.js';
 import bcrypt from 'bcryptjs';
 import { withSentry } from '../../_lib/sentry.js';
 import { notifyAdmin } from '../../_lib/notify.js';
@@ -143,13 +144,24 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { email, password, fullName, specialty, licenseNumber, bio, inviteToken } = req.body ?? {};
+    const { email, password, fullName, specialty, licenseNumber, bio, inviteToken } = bodyObject(req.body);
 
     if (!email || !password || !fullName || !licenseNumber) {
       return res.status(400).json({ error: 'Email, password, full name, and license number are required' });
     }
     if (typeof password !== 'string' || password.length < 8) {
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+    if (password.length > MAX_PASSWORD) {
+      return res.status(400).json({ error: `Password must be at most ${MAX_PASSWORD} characters` });
+    }
+    if (!isEmailLike(email)) {
+      return res.status(400).json({ error: 'Please enter a valid email address' });
+    }
+    if (typeof fullName !== 'string' || fullName.length > 200
+        || typeof licenseNumber !== 'string' || licenseNumber.length > 100
+        || !optionalText(specialty, 200) || !optionalText(bio, 5000)) {
+      return res.status(400).json({ error: 'One of the fields is too long or not text' });
     }
 
     const sql = neon(process.env.DATABASE_URL!);
@@ -170,7 +182,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     if (inviteToken !== undefined && inviteToken !== null && inviteToken !== '') {
       return await invitedSignup(req, res, sql, {
         inviteToken, emailLower, passwordHash, userId,
-        fullName: String(fullName), specialty, licenseNumber: String(licenseNumber), bio,
+        fullName: String(fullName), specialty: specialty ?? undefined, licenseNumber: String(licenseNumber), bio: bio ?? undefined,
       });
     }
 

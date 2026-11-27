@@ -38,7 +38,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
          FROM doctor_patient_connections c
          LEFT JOIN doctor_profiles p ON p.user_id = c.doctor_id
         WHERE c.patient_id = $1 AND c.status = 'pending'
-        ORDER BY c.created_at DESC`,
+        ORDER BY c.created_at DESC
+        LIMIT 200`,
       [user.id]
     );
 

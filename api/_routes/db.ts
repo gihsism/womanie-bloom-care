@@ -152,9 +152,21 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       if (!Array.isArray(f) || !isIdent(f[0]) || f[0].startsWith('__')) {
         return res.status(400).json({ error: 'Invalid filter column' });
       }
+      // Only the operators the client facade sends. An unknown one used to
+      // fall through to '=', which silently changed what a query meant.
+      if (!FILTER_OPS.has(f[1])) {
+        return res.status(400).json({ error: 'Invalid filter operator' });
+      }
+      if (f[1] === 'in' && !Array.isArray(f[2])) {
+        return res.status(400).json({ error: 'Invalid filter value' });
+      }
     }
+    if (filters.length > MAX_FILTERS) return res.status(400).json({ error: 'Too many filters' });
 
-    if (!table) return res.status(400).json({ error: 'Missing table' });
+    if (!table || typeof table !== 'string') return res.status(400).json({ error: 'Missing table' });
+    if (typeof operation !== 'string' || !OPERATIONS.has(operation)) {
+      return res.status(400).json({ error: 'Unknown operation' });
+    }
 
     const cols = ownerCols(table);
     if (!cols) return res.status(403).json({ error: `Table not accessible: ${table}` });
@@ -421,13 +433,12 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       if (orderBy.nullsFirst) query += ' NULLS FIRST';
     }
 
-    if (limitCount !== undefined && limitCount !== null) {
-      // Coerce to a bounded positive integer — never interpolate a raw
-      // client value into the LIMIT clause.
-      const lim = Math.floor(Number(limitCount));
-      if (Number.isFinite(lim) && lim > 0) {
-        query += ` LIMIT ${Math.min(lim, 1000)}`;
-      }
+    // LIMIT only on reads (Postgres has no LIMIT on UPDATE/DELETE, so a
+    // client .limit() on a write used to turn into a syntax error), and
+    // every read is bounded: without .limit() it gets SELECT_HARD_CAP, so
+    // one account's years of rows can never come back unbounded.
+    if (operation === 'select') {
+      query += ` LIMIT ${selectLimit(limitCount)}`;
     }
 
     const rows = maskRows(table, await sql.query(query, params));
@@ -466,6 +477,23 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     }));
     return res.status(status).json({ error: message });
   }
+}
+
+const OPERATIONS = new Set(['select', 'insert', 'update', 'upsert', 'delete']);
+const FILTER_OPS = new Set(['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'in']);
+const MAX_FILTERS = 20;
+// An explicit .limit() is capped at 1000 (as before); a read with none gets
+// the hard cap, far above any single account's rows in one table today.
+export const SELECT_EXPLICIT_MAX = 1000;
+export const SELECT_HARD_CAP = 5000;
+
+export function selectLimit(limitCount: unknown): number {
+  if (limitCount === undefined || limitCount === null) return SELECT_HARD_CAP;
+  // Coerce to a bounded positive integer — never interpolate a raw client
+  // value into the LIMIT clause.
+  const lim = Math.floor(Number(limitCount));
+  if (!Number.isFinite(lim) || lim <= 0) return SELECT_HARD_CAP;
+  return Math.min(lim, SELECT_EXPLICIT_MAX);
 }
 
 function pgField(err: unknown, key: 'code' | 'constraint'): string | undefined {

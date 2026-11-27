@@ -104,8 +104,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
       return res.status(200).json(jsonResponse);
     } catch (error: unknown) {
-      console.error('Upload handler error:', error);
-      return res.status(400).json({ error: error instanceof Error ? error.message : 'Upload failed' });
+      console.error('Upload handler error:', error instanceof Error ? error.name : 'unknown');
+      return res.status(400).json({ error: uploadClientError(error) });
     }
   }
 
@@ -153,3 +153,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 }
 
 export default withMaintenance('upload', withSentry(handler));
+
+// Only our own "Forbidden: ..." refusals reach the browser verbatim. Anything
+// else (a database error from the connection check, the Blob SDK's own text,
+// a JSON parse error quoting the body) gets a generic message.
+export function uploadClientError(error: unknown): string {
+  const msg = error instanceof Error ? error.message : '';
+  return /^Forbidden: [\w ,.:-]{1,120}$/.test(msg) ? msg : 'Upload failed';
+}

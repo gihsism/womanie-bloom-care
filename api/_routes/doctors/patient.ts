@@ -66,7 +66,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       sql.query(
         `SELECT * FROM daily_health_signals
            WHERE user_id = $1 AND signal_date >= $2
-           ORDER BY signal_date DESC`,
+           ORDER BY signal_date DESC
+           LIMIT 200`,
         [patientId, signalCutoff]
       ),
       // The Blob URL (file_path) stays server-side: the chart's "Open"
@@ -84,7 +85,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
                 CASE WHEN (to_jsonb(h) ->> 'uploaded_by_doctor_id') = $2 THEN h.notes END AS sent_note
            FROM health_documents h
           WHERE h.user_id = $1
-          ORDER BY h.uploaded_at DESC`,
+          ORDER BY h.uploaded_at DESC
+          LIMIT 500`,
         [patientId, doctor.id]
       ),
       sql.query(
@@ -99,13 +101,15 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       sql.query(
         `SELECT * FROM doctor_notes
            WHERE doctor_id = $1 AND patient_id = $2
-           ORDER BY created_at DESC`,
+           ORDER BY created_at DESC
+           LIMIT 500`,
         [doctor.id, patientId]
       ),
       sql.query(
         `SELECT * FROM appointments
            WHERE doctor_id = $1 AND patient_id = $2
-           ORDER BY scheduled_at DESC`,
+           ORDER BY scheduled_at DESC
+           LIMIT 500`,
         [doctor.id, patientId]
       ),
       // Period records — used by the doctor's lab view to tag each
@@ -115,7 +119,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       sql.query(
         `SELECT period_start_date, cycle_length FROM period_tracking
           WHERE user_id = $1 AND period_start_date >= NOW() - INTERVAL '2 years'
-          ORDER BY period_start_date ASC`,
+          ORDER BY period_start_date ASC
+          LIMIT 100`,
         [patientId]
       ),
     ]) as [unknown[], unknown[], unknown[], unknown[], unknown[], unknown[], unknown[]];
@@ -134,7 +139,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           WHERE vq.user_id = $1 AND a.doctor_id = $2
             AND COALESCE(a.status, 'scheduled') <> 'cancelled'
             AND a.scheduled_at >= NOW() - INTERVAL '1 day'
-          ORDER BY a.scheduled_at ASC`,
+          ORDER BY a.scheduled_at ASC
+          LIMIT 50`,
         [patientId, doctor.id]
       ) as unknown[];
     } catch (vqErr) {
