@@ -20,6 +20,7 @@ import OvulationHistoryCard from './calendar/OvulationHistoryCard';
 
 import { useCyclePrediction, useSymptomPatterns, getCurrentCycleDay, isActivePeriod, type PeriodRecord, type DaySignal } from '@/hooks/useCyclePrediction';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
+import { pregnancyBreaksFromBirths } from '@/lib/cycleInsights';
 
 interface CycleCalendarProps {
   lastPeriodStart?: Date;
@@ -51,6 +52,7 @@ const CycleCalendar = ({
   const [manualPeriodLength, setManualPeriodLength] = useState<number | null>(null);
   const [markedOvulationDays, setMarkedOvulationDays] = useState<Set<string>>(new Set());
   const [daySignals, setDaySignals] = useState<Record<string, DaySignal>>({});
+  const [births, setBirths] = useState<string[]>([]);
   
   const [isDailyLogSheetOpen, setIsDailyLogSheetOpen] = useState(false);
   const [dailyLogTab, setDailyLogTab] = useState<'symptoms' | 'mood' | 'intimacy' | 'discharge'>('symptoms');
@@ -71,12 +73,15 @@ const CycleCalendar = ({
   }), [manualCycleLength, manualPeriodLength]);
 
   const healthContext = useUserHealthContext();
+  // A gap with a pregnancy in it is not a cycle (same rule as "Your cycle, explained").
+  const breaks = useMemo(() => pregnancyBreaksFromBirths(births), [births]);
   const prediction = useCyclePrediction({
     periodRecords,
     daySignals,
     onboardingEstimates,
     manualOverrides,
     healthContext,
+    breaks,
   });
   
   const symptomPatterns = useSymptomPatterns(
@@ -129,6 +134,16 @@ const CycleCalendar = ({
         });
         setDaySignals(signalsMap);
       }
+
+      const [b, r] = await Promise.all([
+        db.from('babies').select('birth_date').eq('user_id', user.id),
+        db.from('birth_records').select('birth_at').eq('user_id', user.id),
+      ]);
+      const day = (v: unknown) => (v ? String(v).slice(0, 10) : null);
+      setBirths([
+        ...((b.data as { birth_date: string | null }[] | null) ?? []).map(x => day(x.birth_date)),
+        ...((r.data as { birth_at: string | null }[] | null) ?? []).map(x => day(x.birth_at)),
+      ].filter((x): x is string => !!x));
     } catch (error) {
       console.error('Error loading calendar data:', error);
       toast({ title: 'Error', description: 'Failed to load calendar data', variant: 'destructive' });
