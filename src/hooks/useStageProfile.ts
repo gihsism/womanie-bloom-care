@@ -51,6 +51,18 @@ export function localDay(raw: string | Date | null | undefined): Date | null {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
+/**
+ * period_tracking.cycle_length as a usable number of days. The column can be
+ * null (or out of range) on older rows; Home and the stage page step through
+ * cycles with it, and a null or 0 there froze the stage page in an endless
+ * loop (FertilityForecast) and crashed the cycle dial. Same 15-60 day bounds
+ * as the push reminders (api/_lib/push-schedule.ts); otherwise 28.
+ */
+export function usableCycleLength(raw: unknown): number {
+  const n = Number(raw);
+  return raw != null && Number.isFinite(n) && n >= 15 && n <= 60 ? Math.round(n) : 28;
+}
+
 export function weeksPregnantFrom(dueDate: Date | null, now = Date.now()): number | null {
   if (!dueDate) return null;
   return Math.max(0, Math.floor((now - (dueDate.getTime() - 280 * 86400000)) / (7 * 86400000)));

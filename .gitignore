@@ -41,3 +41,5 @@ ios/vendor/capacitor-swift-pm/*.xcframework/
 e2e/.auth/
 e2e/.results/
 e2e/.report/
+e2e-local/.results/
+e2e-local/.report/

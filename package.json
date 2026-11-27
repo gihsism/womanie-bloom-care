@@ -13,7 +13,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc -b",
     "e2e": "playwright test",
-    "e2e:report": "playwright show-report e2e/.report"
+    "e2e:report": "playwright show-report e2e/.report",
+    "e2e:local": "npm run build && playwright test -c e2e-local/playwright.config.ts"
   },
   "dependencies": {
     "@capacitor/android": "^8.2.0",
