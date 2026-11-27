@@ -224,7 +224,7 @@ const WEEK_PERSPECTIVES: Record<number, WeekPerspectives> = {
   },
   28: {
     baby: 'Third trimester begins. Eyes can open and close. Baby may show a sleep-wake cycle. Brain is developing rapidly through the rest of pregnancy — much of the weight gain from here is brain growth.',
-    mother: 'Standard prenatal visits shift from monthly to every 2 weeks. Start daily kick counts. Sleep gets harder — heartburn, back pain, more bathroom trips, harder to find a comfortable position. Rhogam at 28 weeks if you\'re Rh-negative.',
+    mother: 'Standard prenatal visits shift from monthly to every 2 weeks. Get to know your baby\'s usual pattern of movements. Sleep gets harder — heartburn, back pain, more bathroom trips, harder to find a comfortable position. Rhogam at 28 weeks if you\'re Rh-negative (in Switzerland only if a blood test shows the baby is Rh-positive).',
     partner: 'Help with anything that involves bending over (shoes, laundry, picking things up). Ask to feel the kicks — at this point they\'re usually visible from outside. Start the conversation about night feedings and parental-leave overlap.',
     employer: 'Begin a detailed handover document — what\'s in flight, where to find docs, who covers what for each project. Have it 80% done by week 32 so you\'re not scrambling if labor starts early.',
   },
@@ -279,16 +279,16 @@ interface PregnancyMilestone {
 const PREGNANCY_MILESTONES: PregnancyMilestone[] = [
   { start: 4, end: 8, label: 'First prenatal visit', description: 'Confirm pregnancy, due-date calc, initial bloodwork (CBC, blood type + Rh, rubella, HIV, hep B, syphilis).', category: 'visit' },
   { start: 8, end: 12, label: 'Dating ultrasound', description: 'Confirms gestational age and heartbeat. Most accurate due-date estimate.', category: 'scan' },
-  { start: 10, end: 13, label: 'First-trimester screening', description: 'Nuchal translucency scan + bloodwork (PAPP-A, β-hCG) to assess Down/Edwards/Patau risk.', category: 'scan' },
-  { start: 10, end: 14, label: 'NIPT (optional)', description: 'Cell-free DNA blood test. More sensitive than the first-trimester combined screen; covered by some insurance for high-risk pregnancies.', category: 'lab' },
-  { start: 15, end: 20, label: 'Quad screen (if no NIPT)', description: 'AFP, hCG, estriol, inhibin-A. Backup screen if first-trimester or NIPT not done.', category: 'lab' },
+  { start: 10, end: 13, label: 'First-trimester screening', description: 'Nuchal translucency scan + bloodwork (PAPP-A, β-hCG) to assess Down/Edwards/Patau risk. In Switzerland basic insurance covers this first-trimester test and two routine scans: one at 12–14 weeks and one at 20–23 weeks (BAG).', category: 'scan' },
+  { start: 10, end: 14, label: 'NIPT (optional)', description: 'Cell-free DNA blood test. More sensitive than the first-trimester combined screen; covered by some insurance for high-risk pregnancies. In Switzerland basic insurance pays for it from week 12 when the first-trimester test shows a risk of 1 in 1,000 or higher (BAG).', category: 'lab' },
+  { start: 15, end: 20, label: 'Quad screen (if no NIPT)', description: 'AFP, hCG, estriol, inhibin-A. Backup screen if first-trimester or NIPT not done. Mainly a US practice; in Switzerland the first-trimester test and NIPT are the usual screens.', category: 'lab' },
   { start: 18, end: 22, label: 'Anatomy scan', description: 'Detailed mid-pregnancy ultrasound — checks organs, placenta, growth. Sex often visible if you want to know.', category: 'scan' },
   { start: 24, end: 28, label: 'Glucose challenge test', description: 'Screens for gestational diabetes. Either a 1-hour sugary-drink test (no fasting needed, a longer test follows if high) or — in Switzerland and much of Europe — one 2-hour fasting test (75 g OGTT).', category: 'lab' },
-  { start: 27, end: 29, label: 'Rhogam (if Rh-negative)', description: 'Anti-D immunoglobulin if your blood type is Rh-negative. Prevents complications in this and future pregnancies.', category: 'lab' },
-  { start: 28, end: 36, label: 'Visits every 2 weeks', description: 'Standard cadence shifts from monthly to biweekly through week 36.', category: 'visit' },
+  { start: 27, end: 29, label: 'Rhogam (if Rh-negative)', description: 'Anti-D immunoglobulin if your blood type is Rh-negative. Prevents complications in this and future pregnancies. In Switzerland a blood test at 18–24 weeks first checks the baby\'s Rh type from your blood; the 28-week anti-D is given only if the baby is Rh-positive (SGGG expert letter 68).', category: 'lab' },
+  { start: 28, end: 36, label: 'Visits every 2 weeks', description: 'Standard cadence shifts from monthly to biweekly through week 36. In Switzerland basic insurance covers seven check-ups in a normal pregnancy; your doctor or midwife sets the timing (BAG).', category: 'visit' },
   { start: 24, end: 40, label: 'Know your baby\'s movements', description: 'Get to know your baby\'s usual pattern. There is no set number that is normal. If movements slow down, change or stop, call your midwife or maternity unit straight away, day or night.', category: 'decision' },
   { start: 30, end: 36, label: 'Childbirth class', description: 'Hospital tour, birth-prep classes, breastfeeding class. Book early — popular classes fill up.', category: 'class' },
-  { start: 36, end: 37, label: 'Group B Strep swab', description: 'Vaginal/rectal swab at 36–37 weeks (ACOG 2020) to test for GBS colonization. If positive, you\'ll get IV antibiotics in labor.', category: 'lab' },
+  { start: 36, end: 37, label: 'Group B Strep swab', description: 'Vaginal/rectal swab at 36–37 weeks (ACOG 2020) to test for GBS colonization. If positive, you\'ll get IV antibiotics in labor. Swiss guidance (SGGG expert letter 86, 2024) places the swab at 35–37 weeks.', category: 'lab' },
   { start: 36, end: 40, label: 'Weekly visits', description: 'Cervical checks, position monitoring, induction discussion if appropriate.', category: 'visit' },
   { start: 36, end: 38, label: 'Hospital bag packed', description: 'Have it ready by week 36. Pack for mom, baby, partner. Include ID, insurance card, birth plan if you have one.', category: 'class' },
   { start: 37, end: 40, label: 'Full term reached', description: '37 weeks is "early term", 39+ is "full term". Most healthy babies arrive between 39 and 41 weeks.', category: 'decision' },
@@ -917,7 +917,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
               Prenatal milestones
             </h4>
             <p className="text-[11px] text-muted-foreground -mt-1">
-              Typical ACOG/NICE schedule — your clinic may differ. Use this as a checklist for
+              Typical ACOG/NICE schedule, with Swiss notes (BAG, SGGG) where practice differs — your clinic may differ. Use this as a checklist for
               what to ask about at your next visit.
             </p>
             {active.length > 0 && (

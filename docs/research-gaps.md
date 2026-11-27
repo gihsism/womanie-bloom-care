@@ -76,21 +76,78 @@ statements, US MEC) as guidelines. LactMed chapters (a living Bookshelf
 database) get the book name in the title and the year last revised, not
 2006.
 
-## Hand-written app guidance: claims still without an adequate source
+## Hand-written app guidance: unsourced claims (resolved 2026-11-27, round 2)
 
-Checked on 2026-11-27 (the cards outside the research library). Left as
-they are, flagged for review:
-- `AmhAgeContext`: "typical 10-20%/yr decline" of AMH.
-- `PersonalizedInsights`: HOMA-IR "PCOS-specific cutoff >=2.0"; CA-125
-  "median ~68 in endometriosis vs ~12"; homocysteine "normal <10";
-  prolactin raising DHEA-S; "Many women are deficient" in magnesium.
-- `LabFreshnessCard`: the reminder intervals are Womanie's own; AMH every
-  12 months while trying to conceive is not advised by ASRM for women
-  without infertility; "most clinics want AMH within 6 months" for IVF.
-- `hormone-reference.ts`: FSH, LH, estradiol and progesterone phase ranges
-  are lab reference ranges (Mayo / LabCorp style), not guideline values.
-- `PregnancyTracker` milestones are US-centred (quad screen, Rhogam at 28
-  weeks); Swiss practice differs in places.
+Listed in round 1 as having no adequate source. No free source gave the
+exact figures, so each claim was softened or removed; nothing new is
+claimed without a source.
+
+| Where | Claim | Done |
+|---|---|---|
+| `AmhAgeContext` | "typical 10-20%/yr decline" of AMH | Removed. The trend line now says AMH falls gradually with age and that results vary between tests and labs; a fall of more than 25%/yr says "worth raising with your doctor or a fertility specialist" without calling it faster than "typical". |
+| `PersonalizedInsights` | HOMA-IR "normal <2.0, PCOS-specific cutoff >=2.0", "Insulin resistance detected", "root driver" | Title is now "a possible sign of insulin resistance"; text says HOMA-IR is a rough estimate with no single agreed cut-off and lab-dependent insulin tests. Trigger (>= 2.0) unchanged. |
+| `PersonalizedInsights` | CA-125 "median ~68 in endometriosis vs ~12"; "may indicate endometriosis" | Medians removed; cites ESHRE endometriosis guideline 2022 (PMID 35350465, free): CA-125 and other blood tests should not be used to diagnose endometriosis; a normal value does not rule it out. |
+| `PersonalizedInsights` | homocysteine "normal <10"; "increases risk"; "increases neural tube defect risk" | Now "many labs give about 15 as the upper limit"; association wording ("is linked with"); NTD link backed by library item `pmid-27633659`, with "folic acid lowers that risk". |
+| `PersonalizedInsights` | prolactin "increase DHEA-S production leading to hair loss or hirsutism" | Replaced by "sometimes a milky discharge from the nipples" (standard hyperprolactinaemia symptom). |
+| `PersonalizedInsights` | magnesium "Many women are deficient"; "supplement ... can help with both PMS and sleep" | Removed. Now "some small studies link low magnesium with cramps, PMS and headaches, but the evidence is limited"; supplement only after asking a doctor or pharmacist (kidney disease, interactions). |
+| `PersonalizedInsights` | "Recheck in 3 months" (vitamin D + PTH, homocysteine) | Labelled in the UI text as "an app reminder, not a guideline". |
+| `LabFreshnessCard` | reminder intervals; AMH every 12 months while trying to conceive; "most clinics want AMH within 6 months"; "Day-3 FSH is part of standard IVF screening" | Card subtitle now "App reminders for your current mode, not guideline intervals"; each row says "app reminder every ...". AMH removed from the conception list (ASRM: AMH does not predict natural fertility). IVF reasons now say the clinic decides how recent tests must be. |
+| `api/analyze-document.ts` (AI lab-reading prompt) | same HOMA-IR, CA-125, homocysteine and prolactin/DHEA-S figures | Same corrections in the prompt, so the AI write-up does not bring them back. |
+
+Still open: `hormone-reference.ts` FSH, LH, estradiol and progesterone
+phase ranges are lab reference ranges (Mayo / LabCorp style), not guideline
+values; they are labelled as lab ranges, no change made.
+
+## Summary content check (2026-11-27, round 2)
+
+168 library items checked: the summary, every key point and the certainty
+label, each against its PubMed abstract (fetched free from E-utilities).
+The sample is the most-shown items: every evidence-note pick next to lab
+results and trackers, plus the top 5 chat sources for 177 everyday questions
+(all eval and audit questions plus 43 pregnancy, cycle, menopause and lab
+questions), ranked by how often and how high they appear. Two more in the
+top 170 (a LactMed chapter and `pmid-42932433`) have no PubMed abstract and
+were skipped.
+
+157 were fair paraphrases. 12 fixes in 11 items (text only; ids, topics
+and evidence-note picks unchanged; embeddings rebuilt offline):
+
+| Item | Problem | Fix |
+|---|---|---|
+| `pmid-29388196` flu vaccine (Cochrane) | "protected about half of mothers and babies against flu" came from one trial of a vaccine with the 2009 pandemic strain; no trial data on seasonal flu in pregnancy | Names the strain and says no seasonal-flu trial data |
+| `pmid-31616947` vaccines in pregnancy | certainty "high" for all vaccines; abstract rates only the flu vaccine as high quality | certainty set to "not stated" |
+| `pmid-37341141` GnRH analogues, endometriosis | bone loss attributed to the placebo comparison | Bone loss now attributed to comparisons with other treatments |
+| `pmid-30480773` omega-3 (Cochrane), 2 key points | percentages in reverse order read as the wrong direction | Reordered, "without" added |
+| `pmid-31236916` thyroxine in fertility treatment | "made little difference" for low-quality evidence | "may make little difference" |
+| `pmid-41031541` FIGO anaemia in pregnancy | anaemia defined as "low iron or low haemoglobin" | low haemoglobin only |
+| `pmid-39651609` IV vs oral iron | "probably" after birth for low-certainty evidence | "may" |
+| `pmid-28837037` freeze-all embryos | "fewer miscarriages" on a borderline result | "possibly fewer, borderline" |
+| `pmid-26068707` diet/exercise in pregnancy | "helped higher-risk women" on a borderline result | borderline wording, outcomes split correctly |
+| `pmid-27353385` school sex education | "Several programs led to" when one trial showed it | names the one trial and the second finding |
+| `pmid-26482110` intermittent iron | "weekly-intermittent"; abstract says 2-3 times a week | corrected |
+
+## Swiss context in the pregnancy checklist (2026-11-27, round 2)
+
+Added next to the US / ACOG text (nothing removed), all from free official
+Swiss sources:
+
+| Item | Swiss note added | Source |
+|---|---|---|
+| Pertussis (Tdap) | one dose in every pregnancy, ideally in the second trimester | BAG-Bulletin 35/2025 (pertussis) |
+| Flu | any trimester and the 4 weeks after birth, mid-October until the flu season starts | BAG-Bulletin 36/2025, table of autumn/winter vaccinations |
+| RSV (Abrysvo) | weeks 32+0 to 36+0 if the due date falls between early October and end of March; informed choice vs nirsevimab for the baby | BAG-Bulletin 36/2025; bag.admin.ch "Der Einsatz der RSV-Impfung bei schwangeren Frauen" (June 2025) |
+| COVID-19 | one dose, preferably in the second or third trimester | BAG-Bulletin 36/2025 |
+| First-trimester test, scans | basic insurance covers the first-trimester test and two scans (12-14 and 20-23 weeks) | bag.admin.ch "Krankenversicherung: Leistungen bei Mutterschaft" |
+| NIPT | covered from week 12 when the first-trimester risk is 1:1000 or higher | same BAG page; SGGG expert letter 52 |
+| Quad screen | marked as mainly US practice | same BAG page |
+| Anti-D (Rhogam) | fetal RhD from maternal blood at 18-24 weeks; 28-week anti-D only if the baby is RhD-positive | SGGG expert letter 68 (Anti-D prophylaxis) |
+| Visits | seven check-ups covered in a normal pregnancy | same BAG page |
+| Group B strep | swab at 35-37 weeks | SGGG Clinical Practice Recommendation 86 (May 2024) |
+
+The vaccine nudge windows (`windowStartWeek` / `windowEndWeek`) were left
+as they are; only the explanatory text carries the Swiss timing. Also
+replaced "Start daily kick counts" (week 28 text) with "Get to know your
+baby's usual pattern of movements", matching the movements milestone.
 
 ## Data-quality notes found during the audit
 
