@@ -127,12 +127,18 @@ export async function installMockApi(page: Page, opts: MockOptions): Promise<Moc
   const userId = String(opts.user.id);
   const extra = opts.json ?? {};
 
+  const isLocal = (url: URL) => /^(localhost|127\.0\.0\.1)$/.test(url.hostname);
+
   // Anything not on the preview server (fonts, Sentry, analytics, CDNs) is
   // answered empty here, so the suite never needs the network.
-  await page.context().route((url) => !/^(localhost|127\.0\.0\.1)$/.test(url.hostname), (route) =>
+  await page.context().route((url) => !isLocal(url), (route) =>
     route.fulfill({ status: 204, body: '' }));
 
-  await page.context().route('**/api/**', async (route) => {
+  // Only the app's own origin. A bare '**/api/**' glob also matches other
+  // hosts' /api paths (Sentry ingest is https://o….sentry.io/api/<id>/envelope/),
+  // and the last-registered route wins, so a build with VITE_SENTRY_DSN set
+  // recorded every Sentry client report as an unhandled endpoint.
+  await page.context().route((url) => isLocal(url) && url.pathname.startsWith('/api/'), async (route) => {
     const req = route.request();
     const url = new URL(req.url());
     const path = url.pathname;

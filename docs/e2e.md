@@ -52,6 +52,14 @@ run in parallel; each starts from a fresh copy of the fixtures.
 Bugs it has caught: a period row with no `cycle_length` froze the stage page
 (endless loop) and crashed Home's cycle dial (fixed in `useStageProfile`).
 
+**Rule: any new `/api` endpoint gets a fixture in the same commit.** Add a
+`case` for it in `e2e-local/mock-api.ts` (or a `json` override in the test)
+in the commit that adds the `fetch`, then run `npm run e2e:local`. Otherwise
+every page that calls it fails on `expect(api.unhandled).toEqual([])`.
+Only same-origin `/api/**` requests count; other hosts (Sentry ingest also
+uses `/api/<id>/envelope/`) get an empty 204. Builds with or without
+`VITE_SENTRY_DSN` in `.env.local` must both pass.
+
 Adding a journey: add data to the fixture JSON if needed, use role/text
 selectors as below, and finish with `expect(api.unhandled).toEqual([])` and
 `expect(consoleErrors).toEqual([])`. No visual assertions (screenshots are
