@@ -46,7 +46,7 @@ export const PRIVACY_TABLES: Record<string, TableRule> = {
   daily_health_signals: { export: 'rows', erase: 'delete' },
   ivf_events: { export: 'rows', erase: 'delete' },
   life_events: { export: 'rows', erase: 'delete' },
-  medications: { export: 'rows', erase: 'delete', why: 'SELECT * includes stopped_on (migration 018)' },
+  medications: { export: 'rows', erase: 'delete', why: 'SELECT * includes stopped_on (migration 018) and ends_on, pack_size, pack_started_on (migration 027)' },
   babies: { export: 'rows', erase: 'delete' },
   birth_records: { export: 'rows', erase: 'delete' },
   birth_plans: { export: 'rows', erase: 'delete' },

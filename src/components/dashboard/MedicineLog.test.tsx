@@ -6,6 +6,8 @@ const h = vi.hoisted(() => ({
   updates: [] as Array<{ table: string; values: Record<string, unknown>; filters: Array<[string, unknown]> }>,
   inserts: [] as Array<{ table: string; values: Record<string, unknown> }>,
   lifeEvents: [] as Array<{ kind: string; data: unknown }>,
+  // Before migration 027: a write naming the supply columns fails.
+  failSupply: false,
 }));
 
 vi.mock('@/integrations/db/client', () => ({
@@ -21,7 +23,8 @@ vi.mock('@/integrations/db/client', () => ({
       chain.insert = (values: Record<string, unknown>) => { h.inserts.push({ table, values }); return chain; };
       chain.then = (ok: (v: unknown) => unknown) => {
         if (pending) h.updates.push({ table, values: pending.values, filters });
-        return Promise.resolve({ data: pending ? null : h.rows, error: null }).then(ok);
+        const error = h.failSupply && pending && 'pack_size' in pending.values ? { message: 'column "pack_size" does not exist' } : null;
+        return Promise.resolve({ data: pending ? null : h.rows, error }).then(ok);
       };
       return chain;
     },
@@ -41,6 +44,7 @@ beforeEach(() => {
   h.updates = [];
   h.inserts = [];
   h.lifeEvents = [];
+  h.failSupply = false;
 });
 
 describe('MedicineLog add form', () => {
@@ -128,5 +132,46 @@ describe('MedicineLog edit', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     expect(h.updates).toHaveLength(0);
     expect(screen.getByText('Iron')).toBeInTheDocument();
+  });
+});
+
+describe('MedicineLog pack and course end (migration 027)', () => {
+  const IRON = { id: 'med-1', name: 'Iron', dose: null, times_per_day: 1, reminder_times: ['08:00'], stage: null, notes: null, active: true };
+
+  it('saves doses in pack with its start day, and shows how long it lasts', async () => {
+    h.rows = [{ ...IRON, ends_on: null, pack_size: null, pack_started_on: null }];
+    render(<MedicineLog stage="pregnancy" />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit Iron' }));
+    fireEvent.change(screen.getByLabelText('Doses in pack (optional)'), { target: { value: '30' } });
+    fireEvent.change(screen.getByLabelText('Pack started on'), { target: { value: '2026-11-01' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(h.updates).toHaveLength(1));
+    expect(h.updates[0].values).toMatchObject({ pack_size: 30, pack_started_on: '2026-11-01', ends_on: null });
+    expect(await screen.findByText(/Pack lasts until/)).toBeInTheDocument();
+  });
+
+  it('a medicine saved before the migration is updated without the new fields', async () => {
+    h.rows = [IRON];
+    render(<MedicineLog stage="pregnancy" />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit Iron' }));
+    fireEvent.change(screen.getByLabelText('Dose (optional)'), { target: { value: '50 mg' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(h.updates).toHaveLength(1));
+    expect(h.updates[0].values).not.toHaveProperty('pack_size');
+    expect(h.updates[0].values).not.toHaveProperty('ends_on');
+  });
+
+  it('without the columns yet, keeps the rest of the edit and says the pack was not stored', async () => {
+    h.rows = [IRON];
+    h.failSupply = true;
+    render(<MedicineLog stage="pregnancy" />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit Iron' }));
+    fireEvent.change(screen.getByLabelText('Dose (optional)'), { target: { value: '50 mg' } });
+    fireEvent.change(screen.getByLabelText('Last day of the course (optional)'), { target: { value: '2026-12-05' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(h.updates).toHaveLength(2));
+    expect(h.updates[1].values).toMatchObject({ dose: '50 mg' });
+    expect(h.updates[1].values).not.toHaveProperty('ends_on');
+    expect(await screen.findByText(/could not be stored yet/)).toBeInTheDocument();
   });
 });

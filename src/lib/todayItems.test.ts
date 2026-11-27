@@ -86,6 +86,20 @@ describe('todayItems', () => {
       expect(ids('ivf', { medicinesDue: [] })).toEqual([]);
     });
 
+    it('medicine running out: one is named, several are counted; opens the medicines card', () => {
+      const [one] = todayItems('menopause', { now: NOW, medicinesRunningOut: [{ name: 'Iron', label: 'Iron: pack runs out in 3 days' }] });
+      expect(one).toEqual({ id: 'medicine-supply', label: 'Iron: pack runs out in 3 days', target: `${STAGE_PAGE}#medicines` });
+      const [two] = todayItems('pregnancy', { now: NOW, medicinesRunningOut: [{ name: 'A', label: 'A' }, { name: 'B', label: 'B' }] });
+      expect(two.label).toBe('2 medicines run out in the next few days');
+      expect(ids('ivf', { medicinesRunningOut: [] })).toEqual([]);
+      // A heads-up: ranks after a medicine that is due now, before a visit later this week.
+      expect(ids('menopause', {
+        medicinesDue: [{ name: 'Vitamin D', time: '08:00' }],
+        medicinesRunningOut: [{ name: 'Iron', label: 'Iron: pack runs out tomorrow' }],
+        nextVisit: at(3),
+      })).toEqual(['medicine-due', 'medicine-supply', 'visit-soon']);
+    });
+
     it('missed pill: today unticked once her reminder time has passed', () => {
       expect(ids('contraception', { pill: pill({ reminderTime: '09:30' }) })).toEqual([]); // 09:00 < 09:30
       const [row] = todayItems('contraception', { now: NOW, pill: pill() });

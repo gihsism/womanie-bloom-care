@@ -41,6 +41,8 @@ export interface TodaySignals {
   nextVisit?: Date | null;
   /** Medicines whose reminder time has passed today without a "Taken" tick (time = HH:MM). */
   medicinesDue?: Array<{ name: string; time: string }>;
+  /** Medicines whose course or pack ends within a few days (lib/medicineSupply.ts), soonest first. */
+  medicinesRunningOut?: Array<{ name: string; label: string }>;
   /**
    * Contraceptive pill ticks (contraception + daily pill only). reminderTime
    * is the HH:MM she set on the contraception card; takenYesterday is null
@@ -172,13 +174,20 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
       items.push({ id: 'period-soon', label: `Period likely ${when}`, target: 'sheet:log' });
     }
   }
-  // 5. Time-limited heads-ups: PMS in the next few days, a visit within 7 days
+  // 5. Time-limited heads-ups: PMS in the next few days, a medicine running
+  // out (course / pack ends within 3 days), a visit within 7 days
   // Same window as the PMS card on the stage page: the 5 days before the period.
   if (mode === 'menstrual-cycle' && pd != null && pd >= 3 && pd <= 7) {
     const label = pd > PMS_WINDOW_DAYS
       ? `PMS likely from ${dayName(now, new Date(now.getFullYear(), now.getMonth(), now.getDate() + pd - PMS_WINDOW_DAYS))}`
       : `PMS days: period in ${pd} days`;
     items.push({ id: 'pms-soon', label, target: `${STAGE_PAGE}#pms` });
+  }
+  const out = s.medicinesRunningOut ?? [];
+  if (out.length === 1) {
+    items.push({ id: 'medicine-supply', label: fit(out[0].label), target: `${STAGE_PAGE}#medicines` });
+  } else if (out.length > 1) {
+    items.push({ id: 'medicine-supply', label: `${out.length} medicines run out in the next few days`, target: `${STAGE_PAGE}#medicines` });
   }
   if (s.nextVisit) {
     const n = daysBetween(now, s.nextVisit);

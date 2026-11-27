@@ -9,6 +9,7 @@ import { RECORDS } from '@/lib/todayItems';
 import type { PeriodData } from '@/hooks/useStageProfile';
 import type { LifeStage } from '@/components/dashboard/DashboardHeader';
 import { dueReminders } from '@/lib/medicine';
+import { supplyReminders, type SupplyMed } from '@/lib/medicineSupply';
 import { parsePillStatus, pillPackDay } from '@/lib/pillLog';
 import { PREG_VACCINES_KEY, gestationalWeek, vaccinesDueNow, type VaccineState } from '@/lib/pregnancyVaccines';
 import { useAccountDataVersion } from '@/lib/account-data';
@@ -17,7 +18,8 @@ import { babyVaccineReminders, type BabyForVaccines } from '@/lib/babyVaccines';
 // Reads the few facts Home's "Today" list ranks (lib/todayItems.ts):
 // visits (today / within a week), recent doctor notes, results marked
 // critical, getting-started progress, the next predicted period, and the
-// stage tasks: medicines due (medications + today's med_dose ticks),
+// stage tasks: medicines due (medications + today's med_dose ticks), a
+// medicine whose course or pack ends within 3 days,
 // an unticked contraceptive pill, pregnancy vaccinations in their window
 // and the 2-weekly EPDS mood check; postpartum, a baby at a common
 // vaccination age (babies + baby_vaccine events); other stages, the last
@@ -83,7 +85,7 @@ export function periodDaysUntil(period: PeriodData | null, now = new Date()): nu
   return Math.round((next - today.getTime()) / 86_400_000);
 }
 
-interface Med { id: string; name: string; reminder_times: string[] | string | null }
+interface Med extends SupplyMed { id: string; name: string; reminder_times: string[] | string | null }
 
 export function useTodaySignals(
   period: PeriodData | null,
@@ -93,7 +95,7 @@ export function useTodaySignals(
   const { user } = useAuth();
   const prefs = useNotificationPrefs();
   const [s, setS] = useState<Omit<TodaySignals, 'periodDaysUntil'>>({});
-  const [tasks, setTasks] = useState<Pick<TodaySignals, 'medicinesDue' | 'pill' | 'babyVaccines' | 'lastMoodLog'>>({});
+  const [tasks, setTasks] = useState<Pick<TodaySignals, 'medicinesDue' | 'medicinesRunningOut' | 'pill' | 'babyVaccines' | 'lastMoodLog'>>({});
   const { mode, pregnancyDueDate } = stage;
   const uid = user?.id;
   // Device copies of account data (synced in lib/account-data.ts).
@@ -151,7 +153,8 @@ export function useTodaySignals(
       const now = new Date();
       const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const [medsRes, dosesRes] = await Promise.all([
-        db.from('medications').select('id, name, reminder_times').eq('user_id', uid).eq('active', true),
+        // '*': ends_on / pack_size / pack_started_on exist only once migration 027 is applied.
+        db.from('medications').select('*').eq('user_id', uid).eq('active', true),
         db.from('life_events').select('data, occurred_at').eq('user_id', uid).eq('kind', 'med_dose')
           .gte('occurred_at', startToday.toISOString()),
       ]);
@@ -170,7 +173,9 @@ export function useTodaySignals(
         const due = dueReminders(Array.isArray(times) ? times : [], taken.get(m.id) ?? 0, now);
         if (due.length) medicinesDue.push({ name: m.name, time: due[0] });
       }
-      setTasks(t => ({ ...t, medicinesDue }));
+      const medicinesRunningOut = supplyReminders((Array.isArray(medsRes.data) ? medsRes.data : []) as Med[], now)
+        .map(r => ({ name: r.name, label: r.label }));
+      setTasks(t => ({ ...t, medicinesDue, medicinesRunningOut }));
     } catch {
       // Keep the last known state.
     }

@@ -10,6 +10,7 @@ import { insertLifeEvent, useLifeEvents } from '@/hooks/useLifeEvents';
 import { Pill, Plus, Check, Trash2, Bell, X, Pencil } from 'lucide-react';
 import { format, isToday, parseISO } from 'date-fns';
 import { dueReminders } from '@/lib/medicine';
+import { supplyNote } from '@/lib/medicineSupply';
 import { emitHealthDataChange } from '@/lib/data-events';
 import EvidenceNote from '@/components/research/EvidenceNote';
 import { medicineMarker, specsForMarkers } from '@/lib/evidenceTopics';
@@ -36,7 +37,13 @@ export interface Medication {
   notes: string | null;
   active: boolean;
   started_on?: string | null;
+  // Migration 027: when it runs out (course end and/or current pack).
+  ends_on?: string | null;
+  pack_size?: number | null;
+  pack_started_on?: string | null;
 }
+
+const SUPPLY_KEYS = ['ends_on', 'pack_size', 'pack_started_on'] as const;
 
 interface DoseData { medication_id: string; name: string; dose: string | null }
 
@@ -68,6 +75,11 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
   // before joining keep their real start, so the menopause symptom trends
   // can line changes up with it.
   const [startedOn, setStartedOn] = useState('');
+  // When it runs out: last day of a course, or doses in the current pack
+  // and the day that pack was started (Home shows a row 3 days before).
+  const [endsOn, setEndsOn] = useState('');
+  const [packSize, setPackSize] = useState('');
+  const [packStartedOn, setPackStartedOn] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [now, setNow] = useState(new Date());
   const doses = useLifeEvents<DoseData>('med_dose', { limit: 300 });
@@ -103,7 +115,21 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
 
   const closeForm = () => {
     setAdding(false); setEditing(null); setName(''); setDose(''); setTimes(['08:00']); setStartedOn('');
+    setEndsOn(''); setPackSize(''); setPackStartedOn('');
   };
+
+  // The supply fields as stored: a pack needs a size; its start defaults to today.
+  const supplyFields = () => {
+    const n = Number(packSize);
+    const size = packSize.trim() && Number.isInteger(n) && n > 0 && n <= 1000 ? n : null;
+    const isDay = (v: string) => /^\d{4}-\d{2}-\d{2}$/.test(v);
+    return {
+      ends_on: isDay(endsOn) ? endsOn : null,
+      pack_size: size,
+      pack_started_on: size ? (isDay(packStartedOn) ? packStartedOn : format(new Date(), 'yyyy-MM-dd')) : null,
+    };
+  };
+  const SUPPLY_NOT_SAVED = 'Saved. The pack and end date could not be stored yet; try again later.';
 
   const startEdit = (m: Medication) => {
     setEditing(m);
@@ -113,6 +139,9 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
     // The start date lines symptom changes up with this medicine (menopause
     // trends, HRT questions), so a wrong one has to be correctable here.
     setStartedOn(m.started_on ? String(m.started_on).slice(0, 10) : '');
+    setEndsOn(m.ends_on ? String(m.ends_on).slice(0, 10) : '');
+    setPackSize(m.pack_size ? String(m.pack_size) : '');
+    setPackStartedOn(m.pack_started_on ? String(m.pack_started_on).slice(0, 10) : '');
     setAdding(true);
     setError(null);
   };
@@ -128,10 +157,20 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
       // Only a valid, changed date is written; clearing the box keeps the old one.
       ...(nextStart && nextStart !== prevStart ? { started_on: nextStart } : {}),
     };
-    const { error: err } = await db.from('medications')
-      .update({ ...changes, updated_at: new Date().toISOString() }).eq('id', m.id).eq('user_id', userId);
+    // Supply columns arrive with migration 027: send them once the row has
+    // them or she filled one in; without the columns, retry without them.
+    const supply = supplyFields();
+    const withSupply = SUPPLY_KEYS.some(k => k in m) || SUPPLY_KEYS.some(k => supply[k] != null);
+    const stamp = { updated_at: new Date().toISOString() };
+    let { error: err } = await db.from('medications')
+      .update({ ...changes, ...(withSupply ? supply : {}), ...stamp }).eq('id', m.id).eq('user_id', userId);
+    let supplySaved = withSupply;
+    if (err && withSupply) {
+      ({ error: err } = await db.from('medications').update({ ...changes, ...stamp }).eq('id', m.id).eq('user_id', userId));
+      supplySaved = false;
+    }
     if (err) { setError('Could not save. Check your connection and try again.'); return; }
-    setMeds(prev => prev.map(x => (x.id === m.id ? { ...x, ...changes } : x)));
+    setMeds(prev => prev.map(x => (x.id === m.id ? { ...x, ...changes, ...(supplySaved ? supply : {}) } : x)));
     // History: what it was before and after (doses keep their own name/dose).
     const before: Record<string, unknown> = { name: m.name, dose: m.dose, reminder_times: m.reminder_times ?? [] };
     const after: Record<string, unknown> = { name: changes.name, dose: changes.dose, reminder_times: cleanTimes };
@@ -139,7 +178,7 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
     if (JSON.stringify(before) !== JSON.stringify(after)) {
       void insertLifeEvent(userId, 'med_change', { occurred_at: new Date().toISOString(), data: { medication_id: m.id, before, after } });
     }
-    closeForm(); setError(null);
+    closeForm(); setError(withSupply && !supplySaved ? SUPPLY_NOT_SAVED : null);
     emitHealthDataChange();
   };
 
@@ -149,7 +188,7 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
     // Sorted and de-duplicated, the way the reminder sender reads them.
     const cleanTimes = [...new Set(times.filter(t => /^\d{2}:\d{2}$/.test(t)))].sort();
     if (editing) { await saveEdit(editing, n, cleanTimes); return; }
-    const { data, error: err } = await db.from('medications').insert({
+    const base = {
       user_id: userId,
       name: n,
       dose: dose.trim() || null,
@@ -157,11 +196,20 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
       reminder_times: cleanTimes,
       stage: stage ?? null,
       started_on: validStart(startedOn) ?? format(new Date(), 'yyyy-MM-dd'),
-    }).select('*');
+    };
+    // Supply fields only when filled in (columns arrive with migration 027).
+    const supply = supplyFields();
+    const withSupply = SUPPLY_KEYS.some(k => supply[k] != null);
+    let { data, error: err } = await db.from('medications').insert(withSupply ? { ...base, ...supply } : base).select('*');
+    let supplySaved = withSupply;
+    if (err && withSupply) {
+      ({ data, error: err } = await db.from('medications').insert(base).select('*'));
+      supplySaved = false;
+    }
     if (err) { setError('Could not save. Check your connection and try again.'); return; }
     const row = (Array.isArray(data) ? data[0] : data) as Medication | undefined;
     if (row) setMeds(prev => [...prev, row]);
-    closeForm(); setError(null);
+    closeForm(); setError(withSupply && !supplySaved ? SUPPLY_NOT_SAVED : null);
     emitHealthDataChange();
   };
 
@@ -235,6 +283,23 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
             <Input id="med-started" type="date" value={startedOn} max={format(now, 'yyyy-MM-dd')}
               onChange={e => setStartedOn(e.target.value)} className="h-8 w-44" />
           </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label htmlFor="med-pack" className="text-xs">Doses in pack (optional)</Label>
+              <Input id="med-pack" type="number" inputMode="numeric" min={1} max={1000} value={packSize}
+                onChange={e => setPackSize(e.target.value)} placeholder="e.g. 30" className="h-8" />
+            </div>
+            <div>
+              <Label htmlFor="med-pack-start" className="text-xs">Pack started on</Label>
+              <Input id="med-pack-start" type="date" value={packStartedOn} max={format(now, 'yyyy-MM-dd')}
+                onChange={e => setPackStartedOn(e.target.value)} className="h-8" disabled={!packSize.trim()} />
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="med-ends" className="text-xs">Last day of the course (optional)</Label>
+            <Input id="med-ends" type="date" value={endsOn}
+              onChange={e => setEndsOn(e.target.value)} className="h-8 w-44" />
+          </div>
           <div>
             <Label className="text-xs">Reminder times</Label>
             <div className="flex flex-wrap items-center gap-2 mt-1">
@@ -298,6 +363,7 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
                       <span className="flex items-center gap-0.5"><Bell className="h-3 w-3" />{(m.reminder_times ?? []).join(', ')}</span>
                     )}
                     {due.length > 0 && <Badge className="h-4 px-1.5 text-[10px]">Due {due[0]}</Badge>}
+                    {supplyNote(m) && <span>· {supplyNote(m)}</span>}
                   </div>
                 </div>
                 <Button size="sm" className="h-8 gap-1" onClick={() => take(m)}>
