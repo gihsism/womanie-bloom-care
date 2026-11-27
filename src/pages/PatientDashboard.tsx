@@ -110,7 +110,7 @@ const PatientDashboard = () => {
         <PeriodLateCard
           userId={user.id}
           mode={mode}
-          periodDaysUntil={signals.periodDaysUntil}
+          periodDaysUntil={signals.periodReminders === false ? null : signals.periodDaysUntil}
           lastPeriodStart={periodData?.lastPeriodStart}
           onLog={() => setSheet('log')}
         />

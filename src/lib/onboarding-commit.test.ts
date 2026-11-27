@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { deriveLifeStage, derivePregnancyDueDate } from "./onboarding-commit";
+import { deriveLifeStage, derivePregnancyDueDate, trackedSymptomsFromConcerns } from "./onboarding-commit";
 import type { OnboardingData } from "@/contexts/OnboardingContext";
 
 // The helpers only read a few fields; build minimal shapes and cast.
@@ -19,6 +19,8 @@ describe("deriveLifeStage", () => {
     ["postpartum", "postpartum"],
     ["menopause", "menopause"],
     ["trying-to-conceive", "conception"],
+    ["contraception", "contraception"],
+    ["ivf", "ivf"],
   ])("maps life stage %s -> %s", (stage, expected) => {
     expect(deriveLifeStage(make({ lifeStage: { stage } as unknown as OnboardingData["lifeStage"] }))).toBe(expected);
   });
@@ -41,6 +43,24 @@ describe("deriveLifeStage", () => {
     expect(deriveLifeStage(make({ lifeStage: { stage: "regular-cycle" } as unknown as OnboardingData["lifeStage"] }))).toBe(
       "menstrual-cycle",
     );
+  });
+});
+
+describe("menopause onboarding", () => {
+  const meno = (lastPeriod?: Date) => make({
+    lifeStage: { stage: "menopause" },
+    menopause: { lastPeriod, dontRememberLastPeriod: !lastPeriod, onHRT: false, mainConcerns: [] },
+  });
+  const now = new Date(2026, 10, 28);
+  it("12 months or more since the last period = post-menopause", () => {
+    expect(deriveLifeStage(meno(new Date(2025, 10, 28)), now)).toBe("post-menopause");
+    expect(deriveLifeStage(meno(new Date(2025, 11, 10)), now)).toBe("menopause");
+    expect(deriveLifeStage(meno(undefined), now)).toBe("menopause");
+  });
+  it("concerns become the symptoms the menopause page tracks (its ids only)", () => {
+    expect(trackedSymptomsFromConcerns(["hot-flashes", "bone-health", "sleep-issues"], "meno")).toEqual(["hot-flashes", "sleep-issues"]);
+    expect(trackedSymptomsFromConcerns(["hot-flashes", "bone-health", "mood-changes"], "post")).toEqual(["bone-loss", "mood"]);
+    expect(trackedSymptomsFromConcerns([], "meno")).toEqual([]);
   });
 });
 

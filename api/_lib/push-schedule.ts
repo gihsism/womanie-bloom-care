@@ -41,13 +41,21 @@
 //   These three follow the "Vaccinations and check-ups" switch (on unless
 //   she switches it off). All four are Womanie-timed: daytime only
 //   (09:00-21:59 her time), discreet wording (no medicine or vaccine names).
+// - The contraceptive pill time (pill-reminder.ts): at the pill time she set
+//   on the contraception card (21:00 if she never changed it), unless today's
+//   pill is already ticked, outside the pill-free week, contraception stage
+//   only. Like medicine times it is her own time, so it goes out in quiet
+//   hours too and up to 60 minutes late; once per day. Own "Pill time"
+//   switch (on unless she switches it off). The lock screen never names the
+//   pill or contraception: it says "Daily reminder".
 
 import { supplyReminders, type SupplyMed } from './medicine-supply.js';
 import { gestationalWeek, vaccinesDueNow, type VaccineState } from './pregnancy-vaccines.js';
 import { babyVaccineReminders } from './baby-vaccines.js';
 import { postnatalCheckDue, pickBirthDate, POSTNATAL_MILESTONE_ID } from './postnatal-check.js';
+import { appText, pillPushDue } from './pill-reminder.js';
 
-export type ReminderType = 'medicine' | 'period' | 'appointment' | 'ivf_trigger' | 'checkups';
+export type ReminderType = 'medicine' | 'pill' | 'period' | 'appointment' | 'ivf_trigger' | 'checkups';
 
 // bookings: doctor side only (a patient booked / cancelled / moved a visit
 // with HER as the doctor); switched in the doctor's Profile & settings.
@@ -57,9 +65,10 @@ export type ReminderType = 'medicine' | 'period' | 'appointment' | 'ivf_trigger'
 // ivf_trigger: opt-in (false unless she switched it on), see above.
 // checkups: pregnancy and baby vaccinations, 6-week postnatal check (on
 // unless she switched it off; devices saved before it existed count as on).
-export interface PushPrefs { medicine: boolean; period: boolean; appointment: boolean; bookings: boolean; documents: boolean; ivf_trigger: boolean; checkups: boolean }
+// pill: contraceptive pill time (on unless she switched it off, same as checkups).
+export interface PushPrefs { medicine: boolean; pill: boolean; period: boolean; appointment: boolean; bookings: boolean; documents: boolean; ivf_trigger: boolean; checkups: boolean }
 
-export const DEFAULT_PREFS: PushPrefs = { medicine: true, period: true, appointment: true, bookings: true, documents: true, ivf_trigger: false, checkups: true };
+export const DEFAULT_PREFS: PushPrefs = { medicine: true, pill: true, period: true, appointment: true, bookings: true, documents: true, ivf_trigger: false, checkups: true };
 
 export interface SubscriptionRow {
   id: string;
@@ -99,6 +108,12 @@ export interface UserData {
   birthAt?: string | null;
   /** Start times of her visits that are not cancelled, past (since before the birth window) and upcoming. */
   visitTimes?: string[];
+  // Contraceptive pill (raw user_app_data values; undefined = could not be read, skip).
+  contraceptionMethod?: unknown;
+  pillReminderTime?: unknown;
+  pillPackStart?: unknown;
+  /** Her daily_health_signals of the last 8 days (pill ticks); undefined = could not be read. */
+  pillSignals?: Array<{ signal_date: string | Date; notes: string | null }>;
 }
 
 export interface BabyRow { id: string; name: string | null; birth_date: string | null; lastVaccineAt?: string | null }
@@ -179,6 +194,7 @@ export function parsePrefs(raw: SubscriptionRow['prefs']): PushPrefs {
   const o = (p && typeof p === 'object' ? p : {}) as Record<string, unknown>;
   return {
     medicine: o.medicine !== false,
+    pill: o.pill !== false,
     period: o.period !== false,
     appointment: o.appointment !== false,
     bookings: o.bookings !== false,
@@ -289,6 +305,26 @@ export function planUserReminders(data: UserData, allSubs: SubscriptionRow[], no
         tag: `med-${med.id}-${t}`,
       }, `med:${med.id}:${today}:slot${slot}`);
     });
+  }
+
+  // Contraceptive pill time: her own time, so before the quiet-hours cut too.
+  if (data.pillSignals !== undefined && data.contraceptionMethod !== undefined) {
+    const due = pillPushDue({
+      stage: data.lifeStage ?? 'menstrual-cycle',
+      method: appText(data.contraceptionMethod),
+      reminderTime: appText(data.pillReminderTime),
+      packStartDate: appText(data.pillPackStart),
+      signals: data.pillSignals,
+      nowWall: wallClock(now, tz),
+    });
+    if (due) {
+      push('pill', `pill:${due.today}`, {
+        title: 'Daily reminder',
+        body: `It's ${due.time} - time for your daily reminder. Tap to tick it off.`,
+        url: '/dashboard/stage#contraception',
+        tag: 'daily-reminder',
+      });
+    }
   }
 
   // IVF trigger shot: before the quiet-hours cut, the clinic set the time.

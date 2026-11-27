@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset } from 'lucide-react';
+import { ArrowLeft, Baby, Calendar, Heart, Flower2, Sunset, Shield, Syringe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -22,10 +22,22 @@ const lifeStages = [
     description: 'Tracking my cycle',
   },
   {
+    value: 'contraception',
+    icon: Shield,
+    title: 'Contraception',
+    description: 'Using the pill or another method',
+  },
+  {
     value: 'trying-to-conceive',
     icon: Heart,
     title: 'Trying to conceive',
     description: 'Planning pregnancy',
+  },
+  {
+    value: 'ivf',
+    icon: Syringe,
+    title: 'IVF or fertility treatment',
+    description: 'Going through a treatment cycle',
   },
   {
     value: 'pregnant',
@@ -47,6 +59,8 @@ const lifeStages = [
   },
 ];
 
+export const STAGES_WITHOUT_SETUP: readonly string[] = ['pre-menstrual', 'ivf'];
+
 const LifeStageSelection = () => {
   const navigate = useNavigate();
   const { data, updateLifeStage, setCurrentStep } = useOnboarding();
@@ -56,7 +70,9 @@ const LifeStageSelection = () => {
     if (selectedStage) {
       updateLifeStage(selectedStage);
       setCurrentStep(3);
-      navigate('/onboarding/mode-setup');
+      // Stages with nothing more to ask go straight to the end (the IVF
+      // tracker asks for its dates on the stage page).
+      navigate(STAGES_WITHOUT_SETUP.includes(selectedStage) ? '/onboarding/success' : '/onboarding/mode-setup');
     }
   };
 

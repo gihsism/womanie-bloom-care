@@ -4,19 +4,24 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 
+// Only the dates: they set profiles.pregnancy_due_date (weeks, scans,
+// vaccinations). "First pregnancy?" (required) and "complications" were
+// asked here but never saved or used anywhere, so they are gone.
+
 const PregnancyForm = () => {
   const navigate = useNavigate();
   const { data, updatePregnancy } = useOnboarding();
+  // One date picker open at a time; picking a day closes it (it used to
+  // stay open over the Finish button on a phone).
+  const [openPicker, setOpenPicker] = useState<number | null>(null);
   
   const [dateType, setDateType] = useState<'lastPeriod' | 'dueDate' | 'currentWeek'>(
     data.pregnancy?.dateType || 'lastPeriod'
@@ -26,16 +31,12 @@ const PregnancyForm = () => {
   );
   const [dueDate, setDueDate] = useState<Date | undefined>(data.pregnancy?.dueDate);
   const [currentWeek, setCurrentWeek] = useState(data.pregnancy?.currentWeek || '');
-  const [firstPregnancy, setFirstPregnancy] = useState(
-    data.pregnancy?.firstPregnancy !== undefined ? data.pregnancy.firstPregnancy.toString() : ''
-  );
-  const [complications, setComplications] = useState(data.pregnancy?.complications || '');
 
   const isFormValid = () => {
     if (dateType === 'lastPeriod' && !lastPeriodDate) return false;
     if (dateType === 'dueDate' && !dueDate) return false;
     if (dateType === 'currentWeek' && (!currentWeek || Number(currentWeek) < 1 || Number(currentWeek) > 42)) return false;
-    return firstPregnancy !== '';
+    return true;
   };
 
   const handleFinish = () => {
@@ -44,8 +45,6 @@ const PregnancyForm = () => {
       lastPeriodDate: dateType === 'lastPeriod' ? lastPeriodDate : undefined,
       dueDate: dateType === 'dueDate' ? dueDate : undefined,
       currentWeek: dateType === 'currentWeek' ? Number(currentWeek) : 0,
-      firstPregnancy: firstPregnancy === 'true',
-      complications,
     });
     navigate('/onboarding/success');
   };
@@ -71,7 +70,7 @@ const PregnancyForm = () => {
               </TabsList>
 
               <TabsContent value="lastPeriod" className="mt-4">
-                <Popover>
+                <Popover open={openPicker === 0} onOpenChange={(o) => setOpenPicker(o ? 0 : null)}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -88,7 +87,7 @@ const PregnancyForm = () => {
                     <Calendar
                       mode="single"
                       selected={lastPeriodDate}
-                      onSelect={setLastPeriodDate}
+                      onSelect={(d) => { setLastPeriodDate(d); setOpenPicker(null); }}
                       disabled={(date) => date > new Date()}
                       initialFocus
                       className="pointer-events-auto"
@@ -98,7 +97,7 @@ const PregnancyForm = () => {
               </TabsContent>
 
               <TabsContent value="dueDate" className="mt-4">
-                <Popover>
+                <Popover open={openPicker === 1} onOpenChange={(o) => setOpenPicker(o ? 1 : null)}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -115,7 +114,7 @@ const PregnancyForm = () => {
                     <Calendar
                       mode="single"
                       selected={dueDate}
-                      onSelect={setDueDate}
+                      onSelect={(d) => { setDueDate(d); setOpenPicker(null); }}
                       disabled={(date) => date < new Date()}
                       initialFocus
                       className="pointer-events-auto"
@@ -135,35 +134,6 @@ const PregnancyForm = () => {
                 />
               </TabsContent>
             </Tabs>
-          </div>
-
-          {/* First Pregnancy */}
-          <div className="space-y-4">
-            <Label>Is this your first pregnancy? *</Label>
-            <RadioGroup value={firstPregnancy} onValueChange={setFirstPregnancy}>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="true" id="first-yes" />
-                <Label htmlFor="first-yes" className="cursor-pointer">Yes</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="false" id="first-no" />
-                <Label htmlFor="first-no" className="cursor-pointer">No</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          {/* Complications */}
-          <div className="space-y-2">
-            <Label htmlFor="complications">
-              Any complications or conditions? <span className="text-muted-foreground text-sm">(Optional)</span>
-            </Label>
-            <Textarea
-              id="complications"
-              placeholder="Please describe any complications or medical conditions..."
-              value={complications}
-              onChange={(e) => setComplications(e.target.value)}
-              rows={4}
-            />
           </div>
         </div>
 

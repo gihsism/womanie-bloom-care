@@ -85,7 +85,7 @@ const OnboardingSuccess = () => {
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => navigate('/welcome', { replace: true })}
+            onClick={() => { resetOnboarding(); navigate('/welcome', { replace: true }); }}
           >
             Show me around first
           </Button>

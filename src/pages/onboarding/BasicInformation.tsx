@@ -16,6 +16,9 @@ import ProgressBar from '@/components/onboarding/ProgressBar';
 const BasicInformation = () => {
   const navigate = useNavigate();
   const { data, updateBasicInfo, setCurrentStep } = useOnboarding();
+  // One date picker open at a time; picking a day closes it (it used to
+  // stay open over the Finish button on a phone).
+  const [openPicker, setOpenPicker] = useState<number | null>(null);
   
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(data.basicInfo.dateOfBirth);
   const [height, setHeight] = useState(data.basicInfo.height || '');
@@ -150,7 +153,7 @@ const BasicInformation = () => {
               </div>
 
               {/* Calendar picker as alternative */}
-              <Popover>
+              <Popover open={openPicker === 0} onOpenChange={(o) => setOpenPicker(o ? 0 : null)}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -167,7 +170,7 @@ const BasicInformation = () => {
                   <Calendar
                     mode="single"
                     selected={dateOfBirth}
-                    onSelect={setDateOfBirth}
+                    onSelect={(d) => { setDateOfBirth(d); setOpenPicker(null); }}
                     disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
                     initialFocus
                     captionLayout="dropdown-buttons"

@@ -6,35 +6,22 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Card } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { format, differenceInDays } from 'date-fns';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 
-// Minimal postpartum form: birth date + (optional) feeding context.
-// Birth date is the only required field — without it the postpartum
-// dashboard can't time-anchor recovery milestones.
+// Minimal postpartum form: the birth date only. It anchors the recovery
+// milestones and the 6-week check. (A "what to focus on" checklist used to
+// be here but was never saved or used.)
 
 const PostpartumForm = () => {
   const navigate = useNavigate();
   const { data, updatePostpartum } = useOnboarding();
+  // One date picker open at a time; picking a day closes it (it used to
+  // stay open over the Finish button on a phone).
+  const [openPicker, setOpenPicker] = useState<number | null>(null);
 
   const [birthDate, setBirthDate] = useState<Date | undefined>(data.postpartum?.birthDate);
-  const [concerns, setConcerns] = useState<string[]>(data.postpartum?.mainConcerns || []);
-
-  const concernOptions = [
-    { id: 'lochia', label: 'Postpartum bleeding (lochia)' },
-    { id: 'feeding', label: 'Breastfeeding / feeding' },
-    { id: 'sleep', label: 'Sleep' },
-    { id: 'mood', label: 'Mood / mental health' },
-    { id: 'pelvic-floor', label: 'Pelvic floor / incision recovery' },
-    { id: 'returning-work', label: 'Returning to work' },
-  ];
-
-  const toggleConcern = (id: string) => {
-    setConcerns(prev => prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]);
-  };
-
   const isFormValid = () => {
     if (!birthDate) return false;
     const days = differenceInDays(new Date(), birthDate);
@@ -43,7 +30,7 @@ const PostpartumForm = () => {
 
   const handleFinish = () => {
     if (!birthDate) return;
-    updatePostpartum({ birthDate, mainConcerns: concerns });
+    updatePostpartum({ birthDate, mainConcerns: [] });
     navigate('/onboarding/success');
   };
 
@@ -62,7 +49,7 @@ const PostpartumForm = () => {
         <div className="space-y-6">
           <div className="space-y-3">
             <Label>When was your baby born? *</Label>
-            <Popover>
+            <Popover open={openPicker === 0} onOpenChange={(o) => setOpenPicker(o ? 0 : null)}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -76,7 +63,7 @@ const PostpartumForm = () => {
                 <Calendar
                   mode="single"
                   selected={birthDate}
-                  onSelect={setBirthDate}
+                  onSelect={(d) => { setBirthDate(d); setOpenPicker(null); }}
                   disabled={(date) => date > new Date()}
                   initialFocus
                   className="pointer-events-auto"
@@ -88,27 +75,6 @@ const PostpartumForm = () => {
                 {differenceInDays(new Date(), birthDate)} days postpartum
               </p>
             )}
-          </div>
-
-          <div className="space-y-3">
-            <Label>What would you like to focus on? (optional)</Label>
-            <div className="space-y-3">
-              {concernOptions.map(option => (
-                <div key={option.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={option.id}
-                    checked={concerns.includes(option.id)}
-                    onCheckedChange={() => toggleConcern(option.id)}
-                  />
-                  <label
-                    htmlFor={option.id}
-                    className="text-sm font-medium leading-none cursor-pointer"
-                  >
-                    {option.label}
-                  </label>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
 
