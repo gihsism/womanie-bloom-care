@@ -22,8 +22,8 @@ const ALWAYS_TIPS = [
   {
     key: 'folate',
     label: 'Folate / folic acid',
-    amount: '600–800 µg/day starting 3 months before transfer',
-    rationale: 'Neural tube development starts immediately on implantation. Pre-loading stores matters.',
+    amount: '400 µg/day as a tablet, before transfer',
+    rationale: 'The neural tube closes in the first weeks of pregnancy. Swiss advice (BLV): 400 µg folic acid a day from before pregnancy until at least the end of week 12. Your clinic may advise a different dose.',
     food: 'Leafy greens, lentils, fortified cereals, citrus + prenatal vitamin.',
   },
   {

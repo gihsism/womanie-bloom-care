@@ -1,8 +1,9 @@
 // Pregnancy: "Check-ups and scans" overview. Lists ONLY the steps whose
 // timing a source in the Womanie research library states (library.json,
-// ids below); for everything else (how many check-ups, when, what your
-// insurance covers in Switzerland) the card says to ask your midwife or
-// doctor. Shows which ones she has marked done, and counts a glucose test
+// ids below); for everything else (how many check-ups, when) the card says
+// to ask your midwife or doctor. Swiss notes (what basic insurance covers,
+// BAG; the SGGG glucose-test advice) sit next to the steps with their own
+// official Swiss source. Shows which ones she has marked done, and counts a glucose test
 // result in her records dated in this pregnancy as done. Pure, unit-tested.
 //
 // Marks live in womanie_preg_checkups_{uid} (synced to the account, see
@@ -25,7 +26,19 @@ export interface ScheduleItem {
   endWeek: number | null;
   note: string;
   source: ScheduleSource;
+  /** What applies in Switzerland, from an official Swiss source (not a library item). */
+  swiss?: { note: string; source: SwissSource };
 }
+
+export interface SwissSource {
+  label: string;
+  url: string;
+}
+
+const BAG_MATERNITY: SwissSource = {
+  label: 'BAG, Krankenversicherung: Leistungen bei Mutterschaft',
+  url: 'https://www.bag.admin.ch/de/krankenversicherung-leistungen-bei-mutterschaft',
+};
 
 const FIRST_TRIMESTER_GUIDELINE: ScheduleSource = {
   id: 'pmid-39353600',
@@ -42,6 +55,10 @@ export const PREGNANCY_SCHEDULE: ScheduleItem[] = [
     endWeek: 13,
     note: 'The guideline calls this the best time to screen for many pregnancy complications, so care can be planned early.',
     source: FIRST_TRIMESTER_GUIDELINE,
+    swiss: {
+      note: 'In Switzerland, basic insurance covers a scan at weeks 12 to 14 in a normal pregnancy.',
+      source: BAG_MATERNITY,
+    },
   },
   {
     key: 'chromosome-screening',
@@ -55,6 +72,10 @@ export const PREGNANCY_SCHEDULE: ScheduleItem[] = [
       label: 'ACOG Practice Bulletin 226, 2020',
       url: 'https://pubmed.ncbi.nlm.nih.gov/32804883/',
     },
+    swiss: {
+      note: 'In Switzerland, basic insurance covers the first-trimester test (risk of trisomy 21, 18 and 13), and a NIPT blood test from week 12 if that risk is 1 in 1000 or higher.',
+      source: BAG_MATERNITY,
+    },
   },
   {
     key: 'mid-pregnancy-scan',
@@ -64,6 +85,10 @@ export const PREGNANCY_SCHEDULE: ScheduleItem[] = [
     endWeek: 22,
     note: 'A second scan to complete the check of how the baby is developing.',
     source: FIRST_TRIMESTER_GUIDELINE,
+    swiss: {
+      note: 'In Switzerland, basic insurance covers a second scan at weeks 20 to 23 in a normal pregnancy.',
+      source: BAG_MATERNITY,
+    },
   },
   {
     key: 'glucose-test',
@@ -77,11 +102,24 @@ export const PREGNANCY_SCHEDULE: ScheduleItem[] = [
       label: 'US Preventive Services Task Force, 2021',
       url: 'https://pubmed.ncbi.nlm.nih.gov/34374716/',
     },
+    swiss: {
+      note: 'In Switzerland, the SGGG recommends a 75 g glucose drink test (OGTT) for every pregnant woman between weeks 24 and 28.',
+      source: {
+        label: 'SGGG expert letter 81, Gynäkologie 1/2024',
+        url: 'https://www.rosenfluh.ch/media/gynaekologie/2024/01/Screening-und-Management-der-Gestationsdiabetes.pdf',
+      },
+    },
   },
 ];
 
 export const SCHEDULE_ASK_LINE =
   'How many check-ups you have, when they are and what your insurance covers: ask your midwife or doctor.';
+
+/** Swiss check-up count, shown under the ask line. */
+export const SWISS_CHECKUPS_LINE = {
+  note: 'In Switzerland, basic insurance covers seven check-ups with a doctor or midwife in a normal pregnancy, more if needed in a high-risk pregnancy. You pay no deductible or co-payment for these maternity services, and from week 13 until eight weeks after the birth none for other medical care either.',
+  source: BAG_MATERNITY,
+};
 
 export interface CheckupMark {
   /** yyyy-mm-dd she marked it done. */

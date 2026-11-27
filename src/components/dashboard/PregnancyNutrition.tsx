@@ -6,7 +6,7 @@ import { Apple, Info, AlertCircle } from 'lucide-react';
 // Trimester-aware nutrition focus for pregnancy mode. Adapts to the
 // week count PregnancyTracker computes from pregnancy_due_date.
 //
-//   T1 (weeks 0-13):  folate, B6 for nausea, hydration
+//   T1 (weeks 0-13):  folate, iodine, B6 for nausea, hydration
 //   T2 (weeks 14-26): iron, calcium, omega-3 DHA, choline
 //   T3 (weeks 27-40): iron, vit D, fibre, steady carbs
 //
@@ -30,9 +30,16 @@ const T1_TIPS: NutrientTip[] = [
   {
     key: 'folate',
     label: 'Folate / folic acid',
-    amount: '400–600 µg/day',
-    rationale: 'Critical for neural tube formation in the first 4-6 weeks; most prenatal vitamins include this. The other tube closes by week 7 — by the time many people know they\'re pregnant, the window is partly past.',
-    food: 'Leafy greens, fortified cereals, citrus, legumes, plus your prenatal.',
+    amount: '400 µg/day as a tablet',
+    rationale: 'The neural tube (the baby\'s brain and spine) closes in the first weeks of pregnancy, often before you know you are pregnant. Swiss advice (BLV): 400 µg folic acid a day on top of a balanced diet, ideally from before pregnancy, until at least the end of week 12. Most prenatal vitamins include it.',
+    food: 'Leafy greens, cabbage, legumes, wholegrains, oranges, plus your tablet.',
+  },
+  {
+    key: 'iodine',
+    label: 'Iodine',
+    amount: 'Iodised salt at home',
+    rationale: 'Pregnancy raises iodine needs (for thyroid hormones), and most foods contain little. Swiss advice (BLV): always use iodised salt and choose bread made with it; ask your gynaecologist whether you also need an iodine tablet.',
+    food: 'Iodised salt, sea fish, dairy, eggs.',
   },
   {
     key: 'b6',
@@ -61,8 +68,8 @@ const T2_TIPS: NutrientTip[] = [
   {
     key: 'iron',
     label: 'Iron',
-    amount: '27 mg/day',
-    rationale: 'Blood volume expands ~50% in T2. Demand spikes; deficiency is the leading nutritional issue of pregnancy.',
+    amount: '27 mg/day from food',
+    rationale: 'Blood volume expands ~50% in T2, so demand rises. In Switzerland (BLV) iron tablets are not advised for everyone, only when your doctor prescribes them.',
     food: 'Red meat, lentils, spinach, fortified cereals + vitamin C for absorption.',
   },
   {

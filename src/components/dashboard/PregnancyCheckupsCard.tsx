@@ -9,7 +9,7 @@ import { onHealthDataChange } from '@/lib/data-events';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 import { gestationalWeek } from '@/lib/pregnancyVaccines';
 import {
-  PREGNANCY_SCHEDULE, PREG_CHECKUPS_KEY, SCHEDULE_ASK_LINE, doneCount, glucoseTestInPregnancy, scheduleStatus,
+  PREGNANCY_SCHEDULE, PREG_CHECKUPS_KEY, SCHEDULE_ASK_LINE, SWISS_CHECKUPS_LINE, doneCount, glucoseTestInPregnancy, scheduleStatus,
   type CheckupState, type LabRow, type ScheduleStatusKind,
 } from '@/lib/pregnancySchedule';
 
@@ -93,6 +93,15 @@ export default function PregnancyCheckupsCard({ dueDate }: { dueDate: Date | nul
                 Source:{' '}
                 <a href={item.source.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">{item.source.label}</a>
               </p>
+              {item.swiss && (
+                <p className="text-[11px] text-muted-foreground mb-2">
+                  {item.swiss.note}{' '}
+                  <span className="text-[10px]">
+                    Source:{' '}
+                    <a href={item.swiss.source.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">{item.swiss.source.label}</a>
+                  </span>
+                </p>
+              )}
               {st.kind !== 'done' && (
                 <Button
                   size="sm"
@@ -120,9 +129,16 @@ export default function PregnancyCheckupsCard({ dueDate }: { dueDate: Date | nul
       </ul>
 
       <p className="text-[11px] text-foreground mt-3 leading-relaxed">{SCHEDULE_ASK_LINE}</p>
+      <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+        {SWISS_CHECKUPS_LINE.note}{' '}
+        <span className="text-[10px]">
+          Source:{' '}
+          <a href={SWISS_CHECKUPS_LINE.source.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">{SWISS_CHECKUPS_LINE.source.label}</a>
+        </span>
+      </p>
       <p className="text-[10px] text-muted-foreground mt-2 leading-relaxed flex items-start gap-1.5">
         <Info className="h-3 w-3 mt-0.5 flex-shrink-0" aria-hidden="true" />
-        <span>Only steps whose timing a source in the Womanie research library states are listed. Your marks are saved to your account.</span>
+        <span>Only steps whose timing a source in the Womanie research library states are listed; the Swiss notes cite official Swiss sources (BAG, SGGG). Your marks are saved to your account.</span>
       </p>
     </Card>
   );
