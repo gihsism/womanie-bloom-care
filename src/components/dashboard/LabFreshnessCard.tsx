@@ -31,18 +31,19 @@ interface LabFreshnessCardProps {
 // screen the thyroid of women without symptoms, so the reasons below say
 // why a value matters rather than calling a recheck "routine". FSH is not
 // listed for menopause: NICE NG23 (2015, updated 2024) and The Menopause
-// Society say not to use FSH to diagnose menopause after 45.
+// Society say not to use FSH to diagnose menopause after 45. AMH is not
+// listed for conception: ASRM says AMH does not predict natural fertility,
+// so a yearly AMH nudge while trying to conceive had no source.
 // Pregnancy LOWERS the upper TSH limit (ATA 2017: about 4.0 mIU/L).
 const MODE_TARGETS: Record<string, Array<{ key: HormoneKey; label: string; monthsBeforeNudge: number; reason: string }>> = {
   conception: [
-    { key: 'amh', label: 'AMH', monthsBeforeNudge: 12, reason: 'Ovarian reserve drifts year over year, especially after 35.' },
     { key: 'tsh', label: 'TSH', monthsBeforeNudge: 12, reason: 'Thyroid affects cycle regularity and fertility.' },
     { key: 'prolactin', label: 'Prolactin', monthsBeforeNudge: 18, reason: 'Elevated levels can suppress ovulation.' },
   ],
   ivf: [
-    { key: 'amh', label: 'AMH', monthsBeforeNudge: 6, reason: 'Most clinics want AMH dated within 6 months of a cycle start.' },
-    { key: 'tsh', label: 'TSH', monthsBeforeNudge: 6, reason: 'Active IVF cycles need recent thyroid status.' },
-    { key: 'fsh', label: 'FSH (day 3)', monthsBeforeNudge: 6, reason: 'Day-3 FSH is part of standard IVF screening.' },
+    { key: 'amh', label: 'AMH', monthsBeforeNudge: 6, reason: 'Clinics use AMH to plan the dose of stimulation medicines. Your clinic decides how recent it must be.' },
+    { key: 'tsh', label: 'TSH', monthsBeforeNudge: 6, reason: 'Clinics usually check the thyroid before treatment. Your clinic decides how recent it must be.' },
+    { key: 'fsh', label: 'FSH (day 3)', monthsBeforeNudge: 6, reason: 'Some clinics still check day-3 FSH before treatment. Your clinic decides whether you need it.' },
   ],
   'menstrual-cycle': [
     { key: 'tsh', label: 'TSH', monthsBeforeNudge: 24, reason: 'Thyroid changes can affect your cycle. Worth rechecking if your cycle or energy changes.' },
@@ -123,7 +124,7 @@ export default function LabFreshnessCard({ mode }: LabFreshnessCardProps) {
         <div>
           <p className="text-sm font-semibold">Worth rechecking</p>
           <p className="text-[11px] text-muted-foreground">
-            Labs we'd expect to see refreshed for your current mode.
+            App reminders for your current mode, not guideline intervals.
           </p>
         </div>
       </div>
@@ -138,7 +139,7 @@ export default function LabFreshnessCard({ mode }: LabFreshnessCardProps) {
                 {item.never
                   ? <span>never uploaded</span>
                   : <span>last {formatDistanceToNowStrict(parseISO(item.lastDate!), { addSuffix: true })}</span>}
-                <span className="text-muted-foreground"> · suggested every {item.monthsBeforeNudge >= 12 ? `${item.monthsBeforeNudge / 12} yr` : `${item.monthsBeforeNudge} mo`}</span>
+                <span className="text-muted-foreground"> · app reminder every {item.monthsBeforeNudge >= 12 ? `${item.monthsBeforeNudge / 12} yr` : `${item.monthsBeforeNudge} mo`}</span>
               </p>
               <p className="text-[11px] text-muted-foreground">{item.reason}</p>
             </div>

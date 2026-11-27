@@ -198,8 +198,8 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       title: 'Low magnesium — may worsen PMS and cramps',
       emoji: '💫',
       connectedTests: ['Magnesium'],
-      explanation: 'Low magnesium is linked to worse period cramps, PMS mood swings, headaches, and sleep problems. Many women are deficient without knowing it.',
-      recommendation: 'Magnesium-rich foods: dark chocolate, nuts, avocados, leafy greens. A magnesium glycinate supplement before bed can help with both PMS and sleep.',
+      explanation: 'Some small studies link low magnesium with period cramps, PMS symptoms and headaches, but the evidence is limited. A single blood value does not always reflect the magnesium stored in your body.',
+      recommendation: 'Magnesium-rich foods: nuts, seeds, whole grains, beans, leafy greens. If you are thinking about a supplement, ask your doctor or pharmacist first, especially if you have kidney problems or take other medicines.',
       severity: 'attention',
     });
   }
@@ -325,10 +325,10 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
     const homaIR = (insulin.value * glucose.value) / 405;
     if (homaIR >= 2.0) {
       insights.push({
-        title: `Insulin resistance detected (HOMA-IR ${homaIR.toFixed(1)})`,
+        title: `HOMA-IR ${homaIR.toFixed(1)}: a possible sign of insulin resistance`,
         emoji: '📊',
         connectedTests: ['Fasting Insulin', 'Glucose'],
-        explanation: `Your HOMA-IR is ${homaIR.toFixed(1)} (normal <2.0, PCOS-specific cutoff >=2.0). This means your body needs more insulin than normal to control blood sugar. Insulin resistance is the root driver of metabolic PCOS and increases risk of type 2 diabetes.`,
+        explanation: `Your HOMA-IR is ${homaIR.toFixed(1)}. HOMA-IR is a rough estimate worked out from fasting insulin and glucose. There is no single agreed cut-off, and insulin tests differ between labs, so one value is only a guide. A higher value can mean your body needs more insulin to control blood sugar. Insulin resistance is common in PCOS and is linked to a higher risk of type 2 diabetes.`,
         recommendation: 'Focus on reducing refined carbohydrates, regular exercise (both cardio and strength training), and maintaining a healthy weight. Your doctor may discuss metformin or inositol supplements.',
         severity: 'attention',
       });
@@ -355,11 +355,11 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
     if (crp) connected.push('CRP');
     if (nlr) connected.push('NLR');
     insights.push({
-      title: 'Elevated CA-125 — may indicate endometriosis',
+      title: 'Raised CA-125: worth discussing with your doctor',
       emoji: '🔍',
       connectedTests: connected,
-      explanation: `Your CA-125 is ${ca125.value} U/mL (normal <35). Elevated CA-125 is found in endometriosis (median ~68 in endo patients vs ~12 in controls), especially stages III-IV. However, CA-125 can also be elevated by menstruation, ovarian cysts, or PID.${crp && crp.value > 3 ? ' Your elevated CRP supports an inflammatory process.' : ''}`,
-      recommendation: 'If you experience painful periods, chronic pelvic pain, or pain during intercourse, discuss endometriosis evaluation with your doctor. CA-125 supports clinical suspicion but is not diagnostic on its own.',
+      explanation: `Your CA-125 is ${ca125.value} U/mL (normal <35). CA-125 is often higher in endometriosis, mostly in more advanced stages, but it can also rise during a period, with ovarian cysts or with pelvic infection. A normal value does not rule endometriosis out.${crp && crp.value > 3 ? ' Your elevated CRP supports an inflammatory process.' : ''}`,
+      recommendation: 'If you experience painful periods, chronic pelvic pain, or pain during intercourse, discuss endometriosis evaluation with your doctor. The ESHRE endometriosis guideline (2022) advises against using CA-125 or other blood tests to diagnose endometriosis.',
       severity: 'attention',
     });
   }
@@ -417,7 +417,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       emoji: '🦴',
       connectedTests: ['Vitamin D', 'PTH', ...(calcium ? ['Calcium'] : [])],
       explanation: `Your vitamin D is very low (${vitD.value} ng/mL) and your PTH is elevated (${pth.value} pg/mL). When vitamin D drops below ~31, PTH rises to maintain calcium levels — but it does this by pulling calcium from your bones (secondary hyperparathyroidism).`,
-      recommendation: 'Start vitamin D supplementation (2000-4000 IU daily) to bring your levels above 30 ng/mL. This should bring PTH back down and stop the calcium drain from your bones. Recheck in 3 months.',
+      recommendation: 'Start vitamin D supplementation (2000-4000 IU daily) to bring your levels above 30 ng/mL. This should bring PTH back down and stop the calcium drain from your bones. A recheck in about 3 months is an app reminder, not a guideline.',
       severity: 'attention',
     });
   }
@@ -523,8 +523,8 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       title: 'Elevated homocysteine — cardiovascular and neural tube risk',
       emoji: '🧪',
       connectedTests: ['Homocysteine', ...(vitB12 ? ['Vitamin B12'] : []), ...(folate ? ['Folate'] : [])],
-      explanation: `Your homocysteine is ${homocysteine.value} μmol/L (normal <10, elevated >15). High homocysteine increases risk of blood clots, heart disease, and stroke.${vitB12 && vitB12.value < 300 ? ' Your low B12 is likely contributing.' : ''}${folate && folate.value < 10 ? ' Low folate is also a factor.' : ''}${lifeStage === 'conception' || lifeStage === 'pregnancy' ? ' In pregnancy, elevated homocysteine also increases neural tube defect risk.' : ''}`,
-      recommendation: 'B12 and folate supplementation usually lowers homocysteine effectively. Recheck in 3 months after starting supplements.',
+      explanation: `Your homocysteine is ${homocysteine.value} μmol/L (many labs give about 15 as the upper limit). High homocysteine is linked with a higher risk of blood clots, heart disease and stroke.${vitB12 && vitB12.value < 300 ? ' Your low B12 is likely contributing.' : ''}${folate && folate.value < 10 ? ' Low folate is also a factor.' : ''}${lifeStage === 'conception' || lifeStage === 'pregnancy' ? ' High homocysteine in pregnancy is linked with neural tube defects in the baby; folic acid lowers that risk.' : ''}`,
+      recommendation: 'B12 and folate usually lower homocysteine; ask your doctor which you need. A recheck about 3 months after starting is an app reminder, not a guideline.',
       severity: lifeStage === 'pregnancy' || lifeStage === 'conception' ? 'urgent' : 'attention',
     });
   }
@@ -536,7 +536,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       title: 'Elevated prolactin — may affect periods and hair',
       emoji: '💇',
       connectedTests: ['Prolactin'],
-      explanation: `Your prolactin is ${prolactin.value} ng/mL (normal 2-29). High prolactin can suppress ovulation, cause irregular or absent periods, and increase DHEA-S production leading to hair loss or hirsutism. Common causes include stress, medications, and rarely, a pituitary adenoma.`,
+      explanation: `Your prolactin is ${prolactin.value} ng/mL (normal 2-29). High prolactin can suppress ovulation, cause irregular or absent periods, and sometimes a milky discharge from the nipples. Common causes include stress, medications, and rarely, a pituitary adenoma.`,
       recommendation: 'Discuss with your doctor. If significantly elevated, they may order a pituitary MRI. Medications (cabergoline or bromocriptine) are very effective at normalizing prolactin.',
       severity: prolactin.value > 100 ? 'urgent' : 'attention',
     });

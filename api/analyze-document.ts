@@ -337,7 +337,7 @@ I. priority is for the patient's reading order:
    - LH/FSH ratio >2:1 (often >3:1) = suggestive
    - Total testosterone >86 ng/dL, Free testosterone >3.6 pg/mL = biochemical hyperandrogenism
    - DHEA-S >200 μg/dL commonly elevated. Androstenedione >4.56 nmol/L
-   - HOMA-IR >=2.0 (PCOS-specific cutoff). Formula: (fasting insulin × fasting glucose mg/dL) / 405
+   - HOMA-IR: rough estimate only; there is NO agreed cut-off and insulin assays differ between labs, so never state a "normal" or "PCOS-specific" cut-off or call insulin resistance "detected". Formula: (fasting insulin × fasting glucose mg/dL) / 405
    - AMH >3.5 ng/mL elevated; >10.35 strongly suggestive (accepted as ultrasound alternative in adults)
    - Fasting insulin >20 μU/mL = insulin resistance
    - PCOS + elevated triglycerides + low HDL + HOMA-IR >2.5 = metabolic PCOS phenotype
@@ -347,7 +347,7 @@ I. priority is for the patient's reading order:
 ═══ ENDOMETRIOSIS ═══
 
 8. ENDOMETRIOSIS MARKERS (supportive, not diagnostic):
-   - CA-125 >35 U/mL (median 68 in endo vs 12 in controls). Most elevated in stages III-IV
+   - CA-125 >35 U/mL is often seen in endometriosis, mostly stages III-IV. ESHRE 2022: do NOT use CA-125 (or any blood test) to diagnose endometriosis
    - IL-6 >1.98 pg/mL. hs-CRP elevated. NLR (Neutrophil-to-Lymphocyte Ratio) elevated
    - CA-125 + elevated NLR together = highest diagnostic performance
    - CA-125 also elevated by menstruation, ovarian cysts, PID, pregnancy — interpret in context
@@ -416,7 +416,7 @@ I. priority is for the patient's reading order:
    - Lp(a): <75 nmol/L low risk. 75-125 intermediate. >=125 high risk (17% higher in postmenopausal women)
    - ApoB: <80 mg/dL optimal. >100-130 high risk. Better predictor than LDL-C alone (2026 ACC/AHA)
    - hs-CRP: <1.0 low risk. 1.0-2.0 moderate. >=2.0 elevated CV risk
-   - Homocysteine: <10 optimal. >15 μmol/L elevated → check B12, folate
+   - Homocysteine: >15 μmol/L elevated (common lab upper limit; do not quote an "optimal" value) → check B12, folate
    - Fibrinogen: >400 mg/dL elevated
    - High ApoB + normal LDL-C = discordant (ApoB is more accurate)
    - Elevated Lp(a) + elevated hs-CRP = compounded cardiovascular risk
@@ -439,7 +439,7 @@ I. priority is for the patient's reading order:
    - Total testosterone >86 ng/dL, Free testosterone >3.6 pg/mL
    - DHEA-S >430 μg/dL. Androstenedione >4.56 nmol/L
    - SHBG <18 nmol/L = high free androgen even with normal total T
-   - Prolactin >29 ng/mL = can increase DHEA-S → hirsutism. Check for prolactinoma
+   - Prolactin >29 ng/mL = can disturb ovulation and periods; repeat test, ask about medicines, doctor may look for a prolactinoma
    - Elevated DHEA-S + normal testosterone = adrenal source → check 17-OHP
    - 2025 Endocrine Society workup: FSH, LH, estradiol, 17-OHP, testosterone, DHEAS, androstenedione, SHBG, prolactin
 

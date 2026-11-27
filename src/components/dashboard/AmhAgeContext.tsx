@@ -60,9 +60,10 @@ export default function AmhAgeContext({ mode }: AmhAgeContextProps) {
   const [history, setHistory] = useState<AmhHistoryPoint[]>([]);
 
   // Pull every AMH reading over time so we can compute a trend
-  // (annualized rate of change) alongside the current value. AMH
-  // typically declines ~10–20%/yr — a steeper decline is worth
-  // discussing with a fertility specialist.
+  // (annualized rate of change) alongside the current value. AMH falls
+  // gradually with age, but no free source gives a usable "typical" yearly
+  // rate, and results vary between tests and labs, so the text names no
+  // percentage (docs/research-gaps.md).
   const loadHistory = useCallback(async () => {
     if (!user) return;
     const { data } = await db
@@ -183,10 +184,9 @@ export default function AmhAgeContext({ mode }: AmhAgeContextProps) {
         </span>
       </p>
 
-      {/* Personal trend across logged AMH readings. AMH typically
-          declines 10–20%/year; faster decline is worth raising with a
-          fertility specialist. Only shown when there are ≥2 readings
-          spanning ≥90 days. */}
+      {/* Personal trend across logged AMH readings. No "typical" yearly
+          rate is quoted (no adequate free source). Only shown when there
+          are ≥2 readings spanning ≥90 days. */}
       {trend && (
         <div className="mt-3 pt-3 border-t border-border/40 flex items-start gap-2">
           {trend.annualizedPct < -25 ? (
@@ -206,9 +206,9 @@ export default function AmhAgeContext({ mode }: AmhAgeContextProps) {
               Annualized change: {trend.annualizedPct > 0 ? '+' : ''}{trend.annualizedPct.toFixed(0)}%/yr.
               {' '}
               {trend.annualizedPct < -25
-                ? 'Faster decline than typical (10–20%/yr) — worth raising with a fertility specialist.'
+                ? 'A marked fall. AMH results also vary between tests and labs, so this is worth raising with your doctor or a fertility specialist.'
                 : trend.annualizedPct < -5
-                  ? 'Within the typical 10–20%/yr decline range.'
+                  ? 'AMH falls gradually with age; results also vary between tests and labs.'
                   : trend.annualizedPct > 25
                     ? 'AMH rose — unusual; could reflect new PCOS workup, supplementation, or lab variability.'
                     : 'Stable across your readings.'}
