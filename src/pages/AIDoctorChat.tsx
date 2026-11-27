@@ -301,7 +301,7 @@ export default function AIDoctorChat() {
         const [profileRes, docsRes, extractedRes, appointmentsResp, notesResp] = await Promise.all([
           db.from('profiles').select('life_stage, pregnancy_due_date, ivf_phase').eq('id', user.id).maybeSingle(),
           db.from('health_documents').select('ai_suggested_name, ai_summary, document_type').eq('user_id', user.id).order('uploaded_at', { ascending: false }).limit(5),
-          db.from('medical_extracted_data').select('title, value, unit, status, data_type').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
+          db.from('current_extracted_data').select('title, value, unit, status, data_type').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
           fetch('/api/me/appointments?upcoming=true').then(r => (r.ok ? r.json() : { appointments: [] })),
           fetch('/api/me/doctor-notes').then(r => (r.ok ? r.json() : { notes: [] })),
         ]);

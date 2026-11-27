@@ -108,7 +108,7 @@ export default function CompareDocs() {
       db.from('health_documents')
         .select('id, file_name, ai_suggested_name, uploaded_at')
         .eq('user_id', user.id),
-      db.from('medical_extracted_data')
+      db.from('current_extracted_data')
         .select('id, title, value, unit, reference_range, status, data_type, document_id, date_recorded')
         .eq('user_id', user.id),
     ]);

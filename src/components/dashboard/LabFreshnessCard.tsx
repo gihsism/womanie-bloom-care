@@ -68,7 +68,7 @@ export default function LabFreshnessCard({ mode }: LabFreshnessCardProps) {
   const load = useCallback(async () => {
     if (!user) return;
     const { data } = await db
-      .from('medical_extracted_data')
+      .from('current_extracted_data')
       .select('title, date_recorded')
       .eq('user_id', user.id)
       .eq('data_type', 'lab_result');

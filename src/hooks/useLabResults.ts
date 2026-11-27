@@ -65,7 +65,7 @@ async function fetchForUser(userId: string): Promise<LabResult[]> {
   if (existing) return existing;
   const promise = (async () => {
     const { data } = await db
-      .from('medical_extracted_data')
+      .from('current_extracted_data')
       .select('title, value, unit, reference_range, status, date_recorded')
       .eq('user_id', userId)
       .eq('data_type', 'lab_result');

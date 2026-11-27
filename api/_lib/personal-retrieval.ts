@@ -63,7 +63,7 @@ export const PERSONAL_DOC_CAP = 200;
 
 export const PERSONAL_LAB_SQL =
   `SELECT id, data_type, title, value, unit, reference_range, status, date_recorded, notes, document_id, raw_data
-     FROM medical_extracted_data
+     FROM current_extracted_data
     WHERE user_id = $1
     ORDER BY date_recorded DESC NULLS LAST, id DESC
     LIMIT $2 OFFSET $3`;

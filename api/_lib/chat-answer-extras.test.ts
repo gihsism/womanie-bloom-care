@@ -83,7 +83,7 @@ describe('ai-doctor-chat answer extras', () => {
     query.mockReset();
     query.mockImplementation(async (sqlText: string) => {
       if (/FROM profiles/.test(sqlText)) return [{ full_name: 'Test', life_stage: 'menstrual-cycle' }];
-      if (/FROM medical_extracted_data/.test(sqlText)) {
+      if (/FROM (medical|current)_extracted_data/.test(sqlText)) {
         return [
           { id: 'lab-1', data_type: 'lab_result', title: 'Ferritin', value: '9', unit: 'ng/mL', status: 'low', date_recorded: '2026-06-01', document_id: 'doc-9' },
         ];

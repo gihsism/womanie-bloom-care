@@ -83,7 +83,7 @@ export default function PrintDoc() {
         .eq('id', id)
         .eq('user_id', user.id)
         .maybeSingle(),
-      db.from('medical_extracted_data')
+      db.from('current_extracted_data')
         .select('id, title, value, unit, reference_range, status, data_type, notes, raw_data')
         .eq('user_id', user.id)
         .eq('document_id', id),

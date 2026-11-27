@@ -34,7 +34,7 @@ export default function HealthSummaryWidget({ since = null, showViewAll = true }
   const load = useCallback(async () => {
     if (!user) return;
     const [medRes, docRes] = await Promise.all([
-      db.from('medical_extracted_data').select('title, value, unit, status, data_type, date_recorded').eq('user_id', user.id),
+      db.from('current_extracted_data').select('title, value, unit, status, data_type, date_recorded').eq('user_id', user.id),
       db.from('health_documents').select('id').eq('user_id', user.id),
     ]);
     if (medRes.data) setData(withinWindow(medRes.data as ExtractedItem[], since));
