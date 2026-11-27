@@ -430,7 +430,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
           {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
           {copied ? 'Copied' : 'Copy all'}
         </Button>
-        <Button size="sm" variant="ghost" className="gap-1.5" onClick={() => navigate('/dashboard/print-health-record')}>
+        <Button size="sm" variant="ghost" className="gap-1.5" onClick={() => navigate('/dashboard/health-record/print')}>
           <ExternalLink className="h-3.5 w-3.5" />
           Print full record
         </Button>
