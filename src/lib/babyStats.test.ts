@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { dailyRows, feedSummary, type StatEvent } from './babyStats';
+import { dailyRows, feedSummary, weeklySummary, weeklyLines, hoursMin, type StatEvent } from './babyStats';
 
 const now = new Date(2026, 10, 10, 20, 0); // Tue 10 Nov 2026, 20:00 local
 const at = (dayOffset: number, h: number, m = 0) => new Date(2026, 10, 10 + dayOffset, h, m).toISOString();
@@ -65,5 +65,66 @@ describe('feedSummary', () => {
     const s = feedSummary([], now);
     expect(s.avgGapMin).toBeNull();
     expect(s.avgFeedsPerDay).toBeNull();
+  });
+});
+
+const sleep = (iso: string, min: number | null): StatEvent => ({
+  occurred_at: iso,
+  ended_at: min == null ? null : new Date(Date.parse(iso) + min * 60000).toISOString(),
+  data: {},
+});
+
+describe('weeklySummary', () => {
+  it('covers the 7 complete days before today, oldest first; today is left out', () => {
+    const s = weeklySummary([feed(at(0, 8), 'bottle', { ml: 90 })], [], [], now);
+    expect(s.days).toHaveLength(7);
+    expect(s.days[0].date).toBe('2026-11-03');
+    expect(s.days[6].date).toBe('2026-11-09');
+    expect(s.totals.feeds).toBe(0);
+    expect(s.feedsPerDay).toBeNull();
+  });
+
+  it('averages over the days that have entries of that kind', () => {
+    const s = weeklySummary(
+      [feed(at(-1, 8), 'breast_l'), feed(at(-1, 11), 'bottle', { ml: 60 }), feed(at(-1, 14), 'breast_r'), feed(at(-2, 9), 'breast_l')],
+      [nappy(at(-1, 9), 'wet'), nappy(at(-1, 10), 'both'), nappy(at(-3, 10), 'dirty')],
+      [],
+      now,
+    );
+    expect(s.feedDays).toBe(2);
+    expect(s.feedsPerDay).toBe(2);
+    expect(s.totals.bottleMl).toBe(60);
+    expect(s.nappyDays).toBe(2);
+    expect(s.wetPerDay).toBe(1);
+    expect(s.dirtyPerDay).toBe(1);
+    expect(s.sleepMinPerDay).toBeNull();
+    expect(weeklyLines(s)).toEqual([
+      'Feeds: 2 a day (2 of 7 days logged). Bottle: 60 ml in total.',
+      'Nappies: 1 wet and 1 dirty a day (2 of 7 days logged).',
+      'Sleep: none logged.',
+    ]);
+  });
+
+  it('splits a sleep over midnight and skips running or never-stopped sleeps', () => {
+    const s = weeklySummary([], [], [
+      sleep(at(-2, 23), 120), // 60 min on day -2, 60 on day -1
+      sleep(at(-1, 13), 90),
+      sleep(at(-1, 15), null), // still running
+      sleep(at(-3, 1), 17 * 60), // never stopped
+    ], now);
+    const d1 = s.days.find(d => d.date === '2026-11-09')!;
+    const d2 = s.days.find(d => d.date === '2026-11-08')!;
+    expect(d2.sleepMin).toBe(60);
+    expect(d1.sleepMin).toBe(150);
+    expect(d2.sleeps).toBe(1);
+    expect(d1.sleeps).toBe(1);
+    expect(s.days.find(d => d.date === '2026-11-07')!.sleepMin).toBe(0);
+    expect(s.sleepDays).toBe(2);
+    expect(hoursMin(s.sleepMinPerDay)).toBe('1h 45m');
+    expect(weeklyLines(s)[2]).toBe('Sleep: 1h 45m a day (2 of 7 days logged).');
+  });
+
+  it('says plainly when nothing is logged', () => {
+    expect(weeklyLines(weeklySummary([], [], [], now))).toEqual(['Feeds: none logged.', 'Nappies: none logged.', 'Sleep: none logged.']);
   });
 });

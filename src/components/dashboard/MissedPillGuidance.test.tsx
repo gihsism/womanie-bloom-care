@@ -20,4 +20,11 @@ describe('MissedPillGuidance sheet', () => {
     );
     expect(screen.getByText('Late, but you are still protected')).toBeInTheDocument();
   });
+  it('names its sources and the 3-hour vomiting rule for the combined pill', () => {
+    render(
+      <MissedPillGuidance open onOpenChange={vi.fn()} pillType="combined" estimatedHours={2} packDay={null} onChangePillType={vi.fn()} />,
+    );
+    expect(screen.getByTestId('missed-pill-sources').textContent).toMatch(/FSRH .*CDC U\.S\. Selected Practice Recommendations/);
+    expect(screen.getByText(/Vomiting within 3 hours of a pill/)).toBeInTheDocument();
+  });
 });

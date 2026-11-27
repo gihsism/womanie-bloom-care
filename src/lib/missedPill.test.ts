@@ -61,6 +61,18 @@ describe('missedPillGuidance', () => {
     expect(g.emergency?.consider).toBe(false);
     expect(g.steps.join(' ')).not.toMatch(/skip the break/);
   });
+  it('combined, two+ missed, pack day unknown: still names the week-1 risk', () => {
+    const g = missedPillGuidance('combined', 50, null);
+    expect(g.emergency?.text).toMatch(/first week of the pack .* emergency contraception may be needed/);
+    expect(g.emergency?.text).toMatch(/not usually needed/);
+  });
+  it('drospirenone missed in week 1: EC question is about the 4 hormone-free days (FSRH POP 2022)', () => {
+    const g = missedPillGuidance('pop-drospirenone', 30, 3);
+    expect(g.emergency?.consider).toBe(true);
+    expect(g.emergency?.text).toContain('4 hormone-free days before this pack');
+    const later = missedPillGuidance('pop-drospirenone', 30, 10);
+    expect(later.emergency?.text).toContain('before you have taken 7 pills in a row again');
+  });
   it('combined, two+ missed in week 3: skip the break', () => {
     const g = missedPillGuidance('combined', 50, 17);
     expect(g.steps.join(' ')).toMatch(/skip the break/);
@@ -104,7 +116,7 @@ describe('hours late helpers', () => {
 
 describe('vomitWindowHours', () => {
   it('is 2 h for the combined pill and 3 h for every mini-pill (the reminders card used to say 2 h for all)', () => {
-    expect(vomitWindowHours('combined')).toBe(2);
+    expect(vomitWindowHours('combined')).toBe(3); // FSRH CHC 2019 / NHS: 3 h, not the older 2 h
     expect(vomitWindowHours('pop-desogestrel')).toBe(3);
     expect(vomitWindowHours('pop-drospirenone')).toBe(3);
     expect(vomitWindowHours('pop-traditional')).toBe(3);

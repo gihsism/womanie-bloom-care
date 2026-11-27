@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   stageLines, lastCycles, medicineLines, summariseSignals, countSentence, openQuestions,
   recentResults, documentNames, footerLine, defaultSelection, selectedSections, localDate,
-  humanLabel, parseDay, isoDay, SECTION_ORDER,
+  humanLabel, parseDay, isoDay, SECTION_ORDER, sectionsForStage,
 } from './visitSummary';
 
 const NOW = new Date(2026, 10, 25, 10, 0); // 25 Nov 2026, local
@@ -141,6 +141,21 @@ describe('footer and selection', () => {
   it('all sections ticked by default; selection keeps page order', () => {
     expect(selectedSections(defaultSelection())).toEqual(SECTION_ORDER);
     expect(selectedSections({ documents: true, stage: true, results: false })).toEqual(['stage', 'documents']);
+  });
+  it('stage decides the extra sections: diary for menopause, the ovulation-test table instead of 3 cycles for TTC', () => {
+    expect(sectionsForStage('menstrual-cycle')).not.toContain('diary');
+    expect(sectionsForStage('menstrual-cycle')).not.toContain('ttcCycles');
+    expect(sectionsForStage('menstrual-cycle')).toContain('cycles');
+    expect(sectionsForStage(null)).toEqual(sectionsForStage('pregnancy'));
+    for (const st of ['menopause', 'post-menopause']) {
+      expect(sectionsForStage(st)).toContain('diary');
+      expect(sectionsForStage(st)).not.toContain('ttcCycles');
+    }
+    const ttc = sectionsForStage('conception');
+    expect(ttc).toContain('ttcCycles');
+    expect(ttc).not.toContain('cycles');
+    expect(ttc).not.toContain('diary');
+    expect(selectedSections(defaultSelection(), ttc)).toEqual(ttc);
   });
   it('parseDay reads dates as local calendar days', () => {
     expect(parseDay('2026-11-25T23:30:00Z')?.getDate()).toBe(25);

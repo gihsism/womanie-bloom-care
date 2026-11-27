@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle, ShieldCheck, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
-  LATE_CHOICES, PILL_TYPES, choiceForHours, missedPillGuidance, vomitWindowHours, type PillType,
+  LATE_CHOICES, PILL_TYPES, SOURCES_LINE, choiceForHours, missedPillGuidance, vomitWindowHours, type PillType,
 } from '@/lib/missedPill';
 
 // The "what to do now" sheet after a late or missed pill. Rules and
-// sources: src/lib/missedPill.ts (FSRH + Swiss practice). The hours are
+// sources: src/lib/missedPill.ts (FSRH / CoSRH, CDC SPR 2024, Swiss practice). The hours are
 // pre-filled from her usual pill time; she can correct them with one tap.
 
 interface Props {
@@ -92,6 +92,8 @@ export default function MissedPillGuidance({ open, onOpenChange, pillType, estim
           <Info className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" aria-hidden="true" />
           <span>{g.footer} Vomiting within {vomitWindowHours(pillType)} hours of a pill, or severe diarrhoea, counts like a missed pill.</span>
         </p>
+
+        <p className="text-[11px] text-muted-foreground" data-testid="missed-pill-sources">{SOURCES_LINE}</p>
 
         <Button variant="outline" onClick={() => onOpenChange(false)}>Done</Button>
       </DialogContent>

@@ -13,8 +13,10 @@ import { monthsBetween } from './ttc';
 export const SUMMARY_SECTIONS = {
   stage: 'Life stage and today',
   cycles: 'Last 3 cycles',
+  ttcCycles: 'Cycles and ovulation tests',
   medicines: 'Current medicines',
   symptoms: 'Symptoms and mood (last 30 days)',
+  diary: 'Symptom diary, last 4 weeks',
   questions: 'Questions to bring',
   results: 'Recent test results',
   documents: 'Uploaded documents (names only)',
@@ -343,6 +345,21 @@ export function footerLine(now = new Date(), locale?: string): string {
 export const defaultSelection = (): Record<SummarySection, boolean> =>
   Object.fromEntries(SECTION_ORDER.map(k => [k, true])) as Record<SummarySection, boolean>;
 
-/** The sections to print, in page order. */
-export const selectedSections = (sel: Partial<Record<SummarySection, boolean>>): SummarySection[] =>
-  SECTION_ORDER.filter(k => sel[k]);
+/**
+ * The sections offered for her stage, in page order. Menopause stages add the
+ * 4-week symptom diary; trying to conceive swaps "Last 3 cycles" for the
+ * 6-cycle table with ovulation tests (it holds the same lengths and more).
+ */
+export function sectionsForStage(stage: string | null | undefined): SummarySection[] {
+  const drop = new Set<SummarySection>();
+  if (stage !== 'menopause' && stage !== 'post-menopause') drop.add('diary');
+  if (stage === 'conception') drop.add('cycles');
+  else drop.add('ttcCycles');
+  return SECTION_ORDER.filter(k => !drop.has(k));
+}
+
+/** The sections to print, in page order (limited to `offered` when given). */
+export const selectedSections = (
+  sel: Partial<Record<SummarySection, boolean>>,
+  offered: SummarySection[] = SECTION_ORDER,
+): SummarySection[] => offered.filter(k => sel[k]);

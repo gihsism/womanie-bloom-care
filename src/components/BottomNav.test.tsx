@@ -28,6 +28,7 @@ describe("BottomNav", () => {
   it("is hidden on print views", () => {
     const { container } = renderAt("/dashboard/health-record/print");
     expect(container).toBeEmptyDOMElement();
+    expect(renderAt("/dashboard/baby/summary/print").container).toBeEmptyDOMElement();
   });
 
   it("is hidden on the visit prep sheet but not on Visits", () => {
