@@ -1,5 +1,7 @@
 // Pregnancy vaccination schedule (ACOG 2026 Maternal Immunization
-// Schedule; CDC), shared by the
+// Schedule; CDC), with the Swiss timing added to each rationale where it
+// differs (BAG-Bulletin 35/2025 pertussis, BAG-Bulletin 36/2025 flu,
+// COVID-19 and RSV, both free on bag.admin.ch). Shared by the
 // Pregnancy vaccinations card and Home's "Today" list. The patient's
 // received / "not now" marks live in womanie_preg_vaccinations_{uid}
 // (synced to the account, see lib/account-data.ts).
@@ -22,7 +24,7 @@ export const PREGNANCY_VACCINES: Vaccine[] = [
     windowStartWeek: 27,
     windowEndWeek: 36,
     rationale:
-      'Given every pregnancy regardless of prior shots — antibodies cross the placenta and protect baby from pertussis (whooping cough) in the first months before they can be vaccinated.',
+      'Given every pregnancy regardless of prior shots — antibodies cross the placenta and protect baby from pertussis (whooping cough) in the first months before they can be vaccinated. In Switzerland the BAG (2025) advises one dose in every pregnancy, ideally in the second trimester.',
     cadence: 'every-pregnancy',
   },
   {
@@ -32,7 +34,7 @@ export const PREGNANCY_VACCINES: Vaccine[] = [
     windowStartWeek: 0,
     windowEndWeek: 40,
     rationale:
-      'Recommended at any gestational age during flu season. Pregnant patients are at higher risk for severe flu; vaccination also passes protection to baby.',
+      'Recommended at any gestational age during flu season. Pregnant patients are at higher risk for severe flu; vaccination also passes protection to baby. In Switzerland the BAG (2025) advises it in any trimester and in the 4 weeks after birth, from mid-October until the flu season starts.',
     cadence: 'once-per-season',
   },
   {
@@ -42,7 +44,7 @@ export const PREGNANCY_VACCINES: Vaccine[] = [
     windowStartWeek: 32,
     windowEndWeek: 36,
     rationale:
-      'Single-dose maternal RSV vaccine during the recommended window passes antibodies to baby. Alternative is monoclonal antibody (nirsevimab) for the infant after birth — discuss with OB which path fits.',
+      'Single-dose maternal RSV vaccine during the recommended window passes antibodies to baby. Alternative is monoclonal antibody (nirsevimab) for the infant after birth — discuss with OB which path fits. In Switzerland the BAG (2025) advises it at weeks 32 to 36 if your due date falls between early October and end of March; you choose between this and the antibody for your baby after birth.',
     cadence: 'once-per-season',
   },
   {
@@ -52,7 +54,7 @@ export const PREGNANCY_VACCINES: Vaccine[] = [
     windowStartWeek: 0,
     windowEndWeek: 40,
     rationale:
-      'ACOG (2026) recommends the current COVID-19 vaccine in any trimester. Since 2025 the CDC leaves it to a decision with your doctor. Pregnancy raises the risk of severe COVID-19.',
+      'ACOG (2026) recommends the current COVID-19 vaccine in any trimester. Since 2025 the CDC leaves it to a decision with your doctor. Pregnancy raises the risk of severe COVID-19. In Switzerland the BAG (2025) advises one dose, preferably in the second or third trimester.',
     cadence: 'once-per-season',
   },
 ];

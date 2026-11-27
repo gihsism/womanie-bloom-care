@@ -5675,7 +5675,7 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/41031541/",
-   "summary": "This is a 2025 guideline from the international obstetrics federation FIGO on anaemia (low iron or low haemoglobin) in pregnancy. It reviewed the best available evidence and made recommendations on screening, diagnosis, prevention and treatment. It also highlights the link between anaemia and heavy bleeding after birth. Anaemia is still very common in pregnancy worldwide, especially in lower-income countries.",
+   "summary": "This is a 2025 guideline from the international obstetrics federation FIGO on anaemia (low haemoglobin) in pregnancy. It reviewed the best available evidence and made recommendations on screening, diagnosis, prevention and treatment. It also highlights the link between anaemia and heavy bleeding after birth. Anaemia is still very common in pregnancy worldwide, especially in lower-income countries.",
    "keyPoints": [
     "All pregnant women should be screened for anaemia at their booking visit and again at 28 weeks, using a full blood count.",
     "Anaemia is diagnosed when haemoglobin is below 11 g/dL, in every trimester and after birth.",
@@ -5986,7 +5986,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/39651609/",
-   "summary": "This Cochrane review pooled 13 trials (3939 pregnant women) comparing iron given through a drip into a vein with iron tablets for iron-deficiency anaemia. Iron through a vein likely raises haemoglobin a little more and leaves fewer women anaemic, both before birth and probably after birth. It likely makes little to no difference to blood transfusion or breastfeeding, and may make little difference to heavy bleeding after birth. Serious side effects were rare and poorly reported, so safety evidence is still limited.",
+   "summary": "This Cochrane review pooled 13 trials (3939 pregnant women) comparing iron given through a drip into a vein with iron tablets for iron-deficiency anaemia. Iron through a vein likely raises haemoglobin a little more and leaves fewer women anaemic before birth, and may do the same after birth. It likely makes little to no difference to blood transfusion or breastfeeding, and may make little difference to heavy bleeding after birth. Serious side effects were rare and poorly reported, so safety evidence is still limited.",
    "keyPoints": [
     "Compared with tablets, iron through a vein likely raises haemoglobin slightly (about 0.5 g/dL) and likely reduces anaemia during pregnancy (moderate-certainty evidence).",
     "After birth, haemoglobin may be slightly higher and anaemia may be less common with iron through a vein (low-certainty evidence).",
@@ -6936,7 +6936,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/26482110/",
    "summary": "This Cochrane review looked at whether taking iron two or three times a week works as well as taking it every day during pregnancy. It combined 21 trials with 5,490 women. Babies had similar outcomes either way, and women taking iron less often reported fewer side effects. The quality of the evidence was low or very low, so the findings are uncertain.",
    "keyPoints": [
-    "No clear differences between weekly-intermittent and daily iron for low birthweight, birthweight, premature birth or newborn death.",
+    "No clear differences between intermittent (two or three times a week) and daily iron for low birthweight, birthweight, premature birth or newborn death.",
     "Women taking iron intermittently had fewer side effects and were less likely to have high haemoglobin levels in mid and late pregnancy.",
     "Mild anaemia near term was more likely with intermittent iron in some of the analyses, though anaemia at term overall showed no clear difference.",
     "The authors say intermittent iron may be a feasible alternative for pregnant women who are not anaemic and have adequate antenatal care."
@@ -28958,7 +28958,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/28837037/",
-   "summary": "This review pooled five randomised trials that compared transferring an embryo right away (fresh) with freezing all embryos and transferring later, in people having IVF or similar treatment. When many eggs were collected, freezing all embryos tended to give somewhat better pregnancy results and fewer miscarriages. When fewer than about 15 eggs were collected on average, freezing everything did not seem to help.",
+   "summary": "This review pooled five randomised trials that compared transferring an embryo right away (fresh) with freezing all embryos and transferring later, in people having IVF or similar treatment. When many eggs were collected, freezing all embryos tended to give somewhat better pregnancy results, and possibly fewer miscarriages, though that result was borderline. When fewer than about 15 eggs were collected on average, freezing everything did not seem to help.",
    "keyPoints": [
     "Freeze-all may be helpful when a high number of eggs is collected during stimulation.",
     "Across trials averaging 12 to 21 eggs, freeze-all had a higher ongoing pregnancy rate than fresh transfer.",
@@ -29764,7 +29764,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/27353385/",
    "summary": "This review looked at 11 trials of school-based programs meant to help teenagers use contraception. Some multi-session programs that included interactive lessons led more students to report using effective contraception and condoms, and fewer to report sex without a condom. A lesson on emergency contraception helped students learn the time limits for using the emergency pill and the copper IUD. The overall quality of the evidence was low.",
    "keyPoints": [
-    "Several interactive, multi-session school programs led to more students reporting effective contraception and condom use at last sex.",
+    "One multi-session school program led more students to report using effective contraception and condoms at last sex, and another led fewer students to report sex without a condom.",
     "Students who had an emergency contraception session were more likely to know the time limits for the emergency pill and the IUD used as emergency contraception.",
     "Most programs focused on preventing STIs/HIV and pregnancy, so they mainly stressed condoms, though some covered a range of methods.",
     "The authors rated the overall evidence as low quality, partly because of limited information on how well programs were delivered and high dropout."
@@ -30586,7 +30586,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/37341141/",
-   "summary": "This Cochrane review pooled 72 trials (7,355 women) to see how well GnRH analogues, a type of hormone treatment, relieve endometriosis pain and what side effects they cause. Compared with placebo, they may reduce pain, including period pain and painful sex, after three months, but they may also cause more hot flushes and some bone density loss. The evidence was low to very low quality, so the results should be read with caution.",
+   "summary": "This Cochrane review pooled 72 trials (7,355 women) to see how well GnRH analogues, a type of hormone treatment, relieve endometriosis pain and what side effects they cause. Compared with placebo, they may reduce pain, including period pain and painful sex, after three months, but they may also cause more hot flushes. They may also lower bone density, though this evidence came from comparisons with other treatments, not placebo. The evidence was low to very low quality, so the results should be read with caution.",
    "keyPoints": [
     "GnRH analogues may reduce overall pain, period pain and painful sex compared with placebo after three months, based on low-certainty evidence.",
     "They may cause more hot flushes and other side effects than placebo or gestrinone.",
@@ -32783,7 +32783,7 @@
     "Diet, exercise, or both reduced the risk of excessive weight gain in pregnancy by about 20% (high-quality evidence).",
     "Low glycaemic load diets, exercise alone, and diet plus exercise all gave similar reductions.",
     "Women in the programmes were slightly more likely to gain less weight than recommended (moderate-quality evidence).",
-    "There was no clear difference in pre-eclampsia, caesarean birth, preterm birth, or large babies overall, though combined diet and exercise helped higher-risk women with large babies and baby breathing problems."
+    "There was no clear difference in pre-eclampsia, caesarean birth, preterm birth, or large babies overall. In higher-risk women, combined diet and exercise counselling was linked to a borderline lower chance of a large baby, and babies of higher-risk women in the programmes had fewer breathing problems."
    ],
    "certainty": "high",
    "lifeStages": [
@@ -109034,8 +109034,8 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/30480773/",
    "summary": "This Cochrane review pooled 70 trials with nearly 20,000 pregnant women to see what happens when omega-3 fatty acids (from supplements or food, such as fish oil) are added during pregnancy. Women who took omega-3 had fewer babies born before 37 weeks and fewer born before 34 weeks, based on high-quality evidence. Pregnancies were probably more likely to go past 42 weeks, and babies were slightly less likely to have low birthweight. Evidence on pre-eclampsia and on longer-term outcomes for mothers and children was weaker.",
    "keyPoints": [
-    "Preterm birth before 37 weeks was lower with omega-3 (13.4% vs 11.9%), and birth before 34 weeks was also lower (4.6% vs 2.7%), both with high-quality evidence.",
-    "Pregnancies going past 42 weeks were probably more common with omega-3 (1.6% vs 2.6%), and there may be a small increase in larger-than-expected babies.",
+    "Preterm birth before 37 weeks was lower with omega-3 (11.9% vs 13.4% without), and birth before 34 weeks was also lower (2.7% vs 4.6% without), both with high-quality evidence.",
+    "Pregnancies going past 42 weeks were probably more common with omega-3 (2.6% vs 1.6% without), and there may be a small increase in larger-than-expected babies.",
     "Low birthweight was less common, and perinatal death and neonatal care admissions were possibly reduced.",
     "Pre-eclampsia may be slightly reduced, but this evidence was low quality; few differences were seen in children's development, mostly based on low or very low quality evidence."
    ],
@@ -120136,7 +120136,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/31236916/",
-   "summary": "This Cochrane review looked at whether levothyroxine (thyroid hormone) helps women having fertility treatment who have mildly underactive thyroid (subclinical hypothyroidism) or thyroid antibodies with normal thyroid levels. It combined four trials with 820 women. In women with thyroid antibodies but normal thyroid function, thyroxine made little difference to live birth or miscarriage rates. The evidence was low or very low quality, so the authors could draw no clear conclusions.",
+   "summary": "This Cochrane review looked at whether levothyroxine (thyroid hormone) helps women having fertility treatment who have mildly underactive thyroid (subclinical hypothyroidism) or thyroid antibodies with normal thyroid levels. It combined four trials with 820 women. In women with thyroid antibodies but normal thyroid function, thyroxine may make little difference to live birth or miscarriage rates. The evidence was low or very low quality, so the authors could draw no clear conclusions.",
    "keyPoints": [
     "In women with subclinical hypothyroidism, one small trial (64 women) suggested thyroxine may improve live birth rates, but the evidence was low quality.",
     "In women with thyroid antibodies and normal thyroid function, thyroxine may make little difference to live birth or miscarriage rates (two trials, 686 women, low-quality evidence).",
@@ -120672,7 +120672,7 @@
     "Meningococcal vaccines are probably safe, and observational data support hepatitis A, hepatitis B, rabies and live yellow fever vaccines.",
     "Little or no data exist for polio, typhoid, Japanese encephalitis, tick-borne encephalitis and MMR vaccines in pregnancy."
    ],
-   "certainty": "high",
+   "certainty": "not stated",
    "lifeStages": [
     "pregnancy"
    ],
@@ -125011,7 +125011,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/29388196/",
-   "summary": "This Cochrane review pooled 52 trials of over 80,000 healthy adults to see how well flu vaccines work and how safe they are. Inactivated (injected) flu vaccine probably lowers the chance of getting flu from about 2.3% to 0.9%. In the few studies of pregnant women, the vaccine protected about half of mothers and babies (up to 24 weeks old) against flu, and no clear link to serious side effects was found. The authors describe the protection in pregnant women and newborns as modest.",
+   "summary": "This Cochrane review pooled 52 trials of over 80,000 healthy adults to see how well flu vaccines work and how safe they are. Inactivated (injected) flu vaccine probably lowers the chance of getting flu from about 2.3% to 0.9%. In one trial in pregnant women, a flu vaccine containing the 2009 pandemic strain protected about half of mothers and babies (up to 24 weeks old) against flu. The review found no trial data on protection against seasonal flu in pregnancy, and no clear link to serious side effects. The authors describe the protection in pregnant women and newborns as modest.",
    "keyPoints": [
     "Inactivated flu vaccine probably reduces flu in healthy adults from 2.3% to 0.9% (moderate-certainty evidence).",
     "In one trial in pregnant women, vaccine efficacy against pH1N1 flu was about 50% in mothers and 49% in infants up to 24 weeks.",
