@@ -11,6 +11,9 @@ import {
 const W = 320;
 const H = 220;
 
+/** A plate can carry another figure number when a page shows a selection (the landing's FIG. 1-4). */
+export type PlateProps = ArtProps & { fig?: number };
+
 export type PlateStage =
   | 'cycle' | 'conception' | 'pregnancy' | 'postpartum'
   | 'contraception' | 'ivf' | 'menopause' | 'general';
@@ -60,10 +63,10 @@ function Scale({ x, y0, y1, steps, at, major, first, last }: {
 }
 
 /** Menstrual cycle: the uterus with its lining shed, and the cycle ring at day 1. */
-export function CyclePlate({ title = 'Drawing of a uterus with its lining, beside a 28-day cycle ring at day 1', className }: ArtProps) {
+export function CyclePlate({ title = 'Drawing of a uterus with its lining, beside a 28-day cycle ring at day 1', className, fig }: PlateProps) {
   const today = ringPoint(254, 118, 34, 0.5 / 28);
   return (
-    <Plate fig={1} name="plate-cycle" title={title} className={className}>
+    <Plate fig={fig ?? 1} name="plate-cycle" title={title} className={className}>
       {(ids) => (
         <>
           <g transform="translate(118,108) scale(1.15)"><Uterus ids={ids} lining={0.8} /></g>
@@ -84,9 +87,9 @@ export function CyclePlate({ title = 'Drawing of a uterus with its lining, besid
 }
 
 /** Trying to conceive: an egg leaving the ovary, and the fertile days on a strip. */
-export function ConceptionPlate({ title = 'Drawing of an ovary releasing an egg, with the fertile window marked on a strip of cycle days', className }: ArtProps) {
+export function ConceptionPlate({ title = 'Drawing of an ovary releasing an egg, with the fertile window marked on a strip of cycle days', className, fig }: PlateProps) {
   return (
-    <Plate fig={2} name="plate-conception" title={title} className={className}>
+    <Plate fig={fig ?? 2} name="plate-conception" title={title} className={className}>
       {(ids) => (
         <>
           <g transform="translate(112,104) scale(1.1)"><Uterus ids={ids} follicle /></g>
@@ -110,9 +113,9 @@ export function ConceptionPlate({ title = 'Drawing of an ovary releasing an egg,
 }
 
 /** Pregnancy: the body-map figure with the bump, beside the 40-week scale. */
-export function PregnancyPlate({ title = 'Drawing of a pregnant woman in profile beside a 40-week scale at week 24', className }: ArtProps) {
+export function PregnancyPlate({ title = 'Drawing of a pregnant woman in profile beside a 40-week scale at week 24', className, fig }: PlateProps) {
   return (
-    <Plate fig={3} name="plate-pregnancy" title={title} className={className}>
+    <Plate fig={fig ?? 3} name="plate-pregnancy" title={title} className={className}>
       {(ids) => (
         <>
           <Ground cx={136} cy={203} rx={30} ry={3} />
@@ -128,9 +131,9 @@ export function PregnancyPlate({ title = 'Drawing of a pregnant woman in profile
 }
 
 /** Postpartum: the figure holding a swaddled baby against her chest. */
-export function PostpartumPlate({ title = 'Drawing of a woman in profile holding a swaddled newborn', className }: ArtProps) {
+export function PostpartumPlate({ title = 'Drawing of a woman in profile holding a swaddled newborn', className, fig }: PlateProps) {
   return (
-    <Plate fig={4} name="plate-postpartum" title={title} className={className}>
+    <Plate fig={fig ?? 4} name="plate-postpartum" title={title} className={className}>
       {(ids) => (
         <>
           <Ground cx={136} cy={203} rx={28} ry={3} />
@@ -153,11 +156,11 @@ export function PostpartumPlate({ title = 'Drawing of a woman in profile holding
 }
 
 /** Contraception: a 28-day blister pack, ten pills taken, today ringed. */
-export function ContraceptionPlate({ title = 'Drawing of a 28-day pill pack with ten pills taken and today marked', className }: ArtProps) {
+export function ContraceptionPlate({ title = 'Drawing of a 28-day pill pack with ten pills taken and today marked', className, fig }: PlateProps) {
   const pill = (i: number) => ({ x: 64 + (i % 7) * 19, y: 76 + Math.floor(i / 7) * 22 });
   const TODAY = 10;
   return (
-    <Plate fig={5} name="plate-contraception" title={title} className={className}>
+    <Plate fig={fig ?? 5} name="plate-contraception" title={title} className={className}>
       {(ids) => (
         <>
           <Ground cx={124} cy={174} rx={70} ry={4} />
@@ -188,9 +191,9 @@ export function ContraceptionPlate({ title = 'Drawing of a 28-day pill pack with
 }
 
 /** IVF: a lab dish, and a magnified day-5 embryo. */
-export function IvfPlate({ title = 'Drawing of a lab dish with a magnified view of a day-5 embryo', className }: ArtProps) {
+export function IvfPlate({ title = 'Drawing of a lab dish with a magnified view of a day-5 embryo', className, fig }: PlateProps) {
   return (
-    <Plate fig={6} name="plate-ivf" title={title} className={className}>
+    <Plate fig={fig ?? 6} name="plate-ivf" title={title} className={className}>
       {(ids) => (
         <>
           <Ground cx={94} cy={162} rx={70} ry={5} />
@@ -223,9 +226,9 @@ export function IvfPlate({ title = 'Drawing of a lab dish with a magnified view 
 }
 
 /** Menopause: the figure with heat at the neck, beside the 12-month scale. */
-export function MenopausePlate({ title = 'Drawing of a woman in profile beside a scale counting 12 months without a period', className }: ArtProps) {
+export function MenopausePlate({ title = 'Drawing of a woman in profile beside a scale counting 12 months without a period', className, fig }: PlateProps) {
   return (
-    <Plate fig={7} name="plate-menopause" title={title} className={className}>
+    <Plate fig={fig ?? 7} name="plate-menopause" title={title} className={className}>
       {(ids) => (
         <>
           <Ground cx={134} cy={203} rx={26} ry={3} />
@@ -244,9 +247,9 @@ export function MenopausePlate({ title = 'Drawing of a woman in profile beside a
 }
 
 /** General health: a blood tube and a lab sheet with one value inside its range. */
-export function GeneralHealthPlate({ title = 'Drawing of a blood test tube beside a lab report with one value inside its range', className }: ArtProps) {
+export function GeneralHealthPlate({ title = 'Drawing of a blood test tube beside a lab report with one value inside its range', className, fig }: PlateProps) {
   return (
-    <Plate fig={8} name="plate-general" title={title} className={className}>
+    <Plate fig={fig ?? 8} name="plate-general" title={title} className={className}>
       {(ids) => (
         <>
           <Ground cx={90} cy={176} rx={24} ry={3} />

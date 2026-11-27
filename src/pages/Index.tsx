@@ -1,27 +1,23 @@
 import Navigation from '@/components/Navigation';
-import Hero from '@/components/Hero';
-import WhatIsWomanie from '@/components/WhatIsWomanie';
-import KeyFeatures from '@/components/KeyFeatures';
-import WhoItsFor from '@/components/WhoItsFor';
-import Testimonials from '@/components/Testimonials';
-import TrustSecurity from '@/components/TrustSecurity';
-import FinalCTA from '@/components/FinalCTA';
-import Footer from '@/components/Footer';
+import LandingHero from '@/components/landing/LandingHero';
+import LandingPlates from '@/components/landing/LandingPlates';
+import LabSample from '@/components/landing/LabSample';
+import LandingPrivacy from '@/components/landing/LandingPrivacy';
+import LandingFooter from '@/components/landing/LandingFooter';
 
+// The public landing page, laid out like a catalogue of plates:
+// I the figure, II what it does, III a report explained, IV your data.
 const Index = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-clip bg-background">
       <Navigation />
       <main>
-        <Hero />
-        <WhatIsWomanie />
-        <KeyFeatures />
-        <WhoItsFor />
-        <Testimonials />
-        <TrustSecurity />
-        <FinalCTA />
+        <LandingHero />
+        <LandingPlates />
+        <LabSample />
+        <LandingPrivacy />
       </main>
-      <Footer />
+      <LandingFooter />
     </div>
   );
 };

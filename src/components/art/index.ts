@@ -7,7 +7,7 @@ export {
 export { LandingHeroFigure } from './LandingHeroFigure';
 export {
   CyclePlate, ConceptionPlate, ContraceptionPlate, GeneralHealthPlate, IvfPlate, LIFE_STAGE_PLATES,
-  MenopausePlate, PostpartumPlate, PregnancyPlate, plateForStage, type PlateStage,
+  MenopausePlate, PostpartumPlate, PregnancyPlate, plateForStage, type PlateProps, type PlateStage,
 } from './LifeStagePlates';
 export { MOOD_FACES, MOOD_VALUES, isMoodValue, type MoodValue } from './MoodFaces';
 export type { ArtProps } from './primitives';
