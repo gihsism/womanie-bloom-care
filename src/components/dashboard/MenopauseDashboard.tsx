@@ -103,7 +103,7 @@ const menoWellness = [
   { icon: Salad, title: 'Anti-Inflammatory Diet', tip: 'Omega-3s, leafy greens, berries. Reduce sugar and alcohol.', priority: 'Essential' },
   { icon: Moon, title: 'Sleep Hygiene', tip: 'Cool bedroom (16–19 °C), breathable bedding, consistent schedule.', priority: 'Essential' },
   { icon: Brain, title: 'Stress Management', tip: 'Meditation and yoga can help with stress and sleep. For hot flashes, CBT and clinical hypnosis have the best evidence among non-hormonal approaches (Menopause Society 2023).', priority: 'High' },
-  { icon: Bone, title: 'Bone Health', tip: 'Calcium mainly from food: about 950 mg a day up to 65, 1000-1200 mg from 66; vitamin D 600 IU a day, 800 IU from 60 (Swiss BLV). Ask whether a bone density scan makes sense for you.', priority: 'Essential' },
+  { icon: Bone, title: 'Bone Health', tip: 'Calcium mainly from food: about 950 mg a day up to 65, 1000-1200 mg from 66; vitamin D 600 IU a day up to 65, 800 IU from 66 (Swiss BLV). Ask whether a bone density scan makes sense for you.', priority: 'Essential' },
   { icon: Heart, title: 'Heart Health', tip: 'Monitor blood pressure, cholesterol. Stay active.', priority: 'High' },
 ];
 

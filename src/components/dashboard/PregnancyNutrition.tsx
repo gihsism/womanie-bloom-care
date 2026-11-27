@@ -44,14 +44,14 @@ const T1_TIPS: NutrientTip[] = [
   {
     key: 'b6',
     label: 'Vitamin B6',
-    amount: '~25 mg/day if nauseous',
-    rationale: 'Evidence-backed for morning sickness relief at typical-pregnancy doses. Often combined with doxylamine (Unisom) under provider guidance.',
+    amount: 'Ask your doctor or pharmacist about the dose',
+    rationale: 'Can ease mild morning sickness, alone or combined with an anti-sickness medicine (RCOG 2024 guideline). Ask before you take it.',
     food: 'Bananas, chicken, fortified cereals, baked potato; talk to your provider before supplementing high-dose.',
   },
   {
     key: 'fluids',
     label: 'Fluids',
-    amount: '2.3 L/day + extra if nauseous',
+    amount: '1.5–2 L of drinks a day (Swiss BLV), more if you are being sick',
     rationale: 'Dehydration worsens nausea and headaches. Small sips often beats large gulps if drinks are hard to keep down.',
     food: 'Water, herbal tea, broth, electrolyte drinks; cold or fizzy options help if nauseous.',
   },
@@ -68,23 +68,23 @@ const T2_TIPS: NutrientTip[] = [
   {
     key: 'iron',
     label: 'Iron',
-    amount: '27 mg/day from food',
-    rationale: 'Blood volume expands ~50% in T2, so demand rises. In Switzerland (BLV) iron tablets are not advised for everyone, only when your doctor prescribes them.',
+    amount: 'Iron-rich food every day',
+    rationale: 'Blood volume rises by about 40–50%, so needs go up (US advice: 27 mg a day; the European Food Safety Authority: 16 mg). In Switzerland (BLV) iron tablets are not advised for everyone, only when your doctor prescribes them.',
     food: 'Red meat, lentils, spinach, fortified cereals + vitamin C for absorption.',
   },
   {
     key: 'calcium',
     label: 'Calcium',
-    amount: '1000 mg/day',
-    rationale: 'Baby\'s skeleton is mineralising. If intake is low, baby draws from your bones — adequate calcium spares yours.',
+    amount: 'About 950 mg/day, no extra in pregnancy',
+    rationale: 'Baby\'s skeleton is mineralising. Your body absorbs calcium better in pregnancy, so the Swiss reference amount (BLV) stays at about 950 mg a day, mainly from food.',
     food: 'Dairy, fortified plant milks, leafy greens, sardines, tofu set with calcium.',
   },
   {
     key: 'dha',
     label: 'Omega-3 DHA',
-    amount: '~300 mg/day',
-    rationale: 'T2-T3 is the peak window for brain development. DHA crosses the placenta; maternal stores predict outcomes.',
-    food: 'Low-mercury fish 2-3×/week (salmon, sardines, anchovies), walnuts, flax, algae-based DHA supplement.',
+    amount: 'Oily fish regularly',
+    rationale: 'DHA helps the baby\'s brain and eyes develop; the European Food Safety Authority advises about 100–200 mg extra DHA a day in pregnancy. Swiss advice (BLV): eat oily fish regularly; capsules from fish oil or algae only after talking to your doctor.',
+    food: 'Salmon, sardines, anchovies (see the fish limits below), walnuts, rapeseed oil.',
   },
   {
     key: 'choline',
@@ -99,41 +99,41 @@ const T3_TIPS: NutrientTip[] = [
   {
     key: 'iron-t3',
     label: 'Iron (continued)',
-    amount: '27 mg/day',
-    rationale: 'Demand stays high; you\'re also building stores that will get tested during delivery + the first weeks postpartum.',
+    amount: 'Iron-rich food every day',
+    rationale: 'Needs stay high. Your doctor checks your blood count; take iron tablets only if they are prescribed.',
     food: 'Red meat, lentils, fortified cereals; pair with vitamin C.',
   },
   {
     key: 'vit-d',
     label: 'Vitamin D',
-    amount: '600–2000 IU/day',
-    rationale: 'Supports baby\'s bones + your immune system. Many practitioners now recommend 1000-2000 IU for pregnancy — discuss with your provider.',
+    amount: '600 IU/day as drops (Swiss BLV)',
+    rationale: 'Important for the baby\'s bones. Swiss advice (BLV): take vitamin D drops every day throughout pregnancy and agree the dose with your midwife or doctor. More than 4,000 IU a day only on medical advice.',
     food: 'Fatty fish, fortified milk; supplement is the most reliable source.',
   },
   {
     key: 'fibre',
     label: 'Fibre + fluids',
-    amount: '25–30 g fibre, 2.3+ L water',
+    amount: 'At least 25 g fibre, 1.5–2 L of drinks',
     rationale: 'Constipation peaks in T3 (progesterone slows gut transit, baby compresses bowel). Fibre + water + walking + iron supplement timing all matter.',
     food: 'Whole grains, beans, fruit (prunes especially), vegetables.',
   },
   {
     key: 'complex-carbs',
     label: 'Complex carbs + protein at every meal',
-    amount: '300–500 extra kcal/day in T3',
-    rationale: 'Energy needs rise; blood sugar volatility worsens (insulin resistance is normal in pregnancy but extreme spikes feel awful). Steady protein + complex carbs steady the curve.',
+    amount: 'About 500 extra kcal/day from month 7',
+    rationale: 'Swiss advice (BLV, for women of normal weight): about 250 extra kcal a day from month 4 and about 500 from month 7, "not twice as much, but twice as well"; the UK NICE guideline says about 200 extra in the last 3 months. Blood sugar volatility worsens (insulin resistance is normal in pregnancy but extreme spikes feel awful). Steady protein + complex carbs steady the curve.',
     food: 'Oats, sweet potato, quinoa, brown rice + lean protein each meal.',
   },
 ];
 
 const AVOID = [
   'Raw fish / sushi (listeria + parasite risk)',
-  'High-mercury fish (shark, swordfish, king mackerel, bigeye tuna)',
+  'Fish high in mercury: no shark, swordfish or marlin; fresh or tinned tuna at most once a week (Swiss BLV)',
   'Unpasteurised dairy + soft cheeses unless labelled pasteurised',
   'Deli meats unless heated to steaming (listeria)',
   'Raw or undercooked eggs and meat',
-  'Alcohol — no safe known threshold',
-  'Limit caffeine to ~200 mg/day (1 large coffee)',
+  'Alcohol: none in pregnancy; no safe amount is known (BLV, NHS)',
+  'Caffeine in moderation: for example 1 to 2 cups of coffee or up to 4 cups of black or green tea a day (Swiss BLV); the EU food safety authority and the NHS set the limit at 200 mg a day. Avoid energy drinks',
 ];
 
 export default function PregnancyNutrition({ weeksPregnant }: Props) {
@@ -189,6 +189,7 @@ export default function PregnancyNutrition({ weeksPregnant }: Props) {
         <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
         General references — your provider may tailor doses for your specific situation
         (vegan, twins, gestational diabetes, anaemia, etc.). Always keep them in the loop.
+        Swiss amounts and limits: BLV brochure &quot;Ernährung rund um Schwangerschaft und Stillzeit&quot; (August 2025).
       </p>
     </Card>
   );

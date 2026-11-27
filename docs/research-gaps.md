@@ -297,6 +297,89 @@ summary says "low or very low"); four "low" labels whose abstracts call the
 evidence weak without a formal grade (`pmid-30461693`, `pmid-40577932`,
 `pmid-26641959`, `pmid-27132058`).
 
+## Round 5 (2026-11-28)
+
+### Vitamin D: the app follows the current BLV table
+
+Decision: the app uses the current BLV reference values (June 2022):
+600 IU (15 µg) a day up to 65, 800 IU (20 µg) over 65. The older "800 IU
+from 60" (EEK 2012 report) is gone from `MenopauseNutrition`,
+`MenopauseDashboard`, `PersonalizedInsights` (3 places) and the AI
+lab-reading prompt (`api/analyze-document.ts`). The library's BLV
+reference-values item already said "over 65". Also replaced in
+`PersonalizedInsights`: "most adults need 1000-4000 IU daily, test again in
+3 months" with "ask your doctor; BLV everyday amount; 4,000 IU limit".
+Tests: `src/lib/healthClaims.test.ts`.
+
+### SGGG anti-D (letter 68) and GBS (recommendation 86): found, added
+
+| Item | Free link | Used for |
+|---|---|---|
+| SGGG expert letter 68, anti-D in pregnancy (Gynäkologie 1/2020, German) | rosenfluh.ch PDF (sggg.ch hosts only the French and Italian versions) | library item + new checklist step "Baby's RhD blood group test" (weeks 18 to 24; anti-D at 28 to 30 and after the birth only if the baby is RhD positive) |
+| SGGG clinical practice recommendation 86, GBS (May 2024, English) | sggg.ch PDF | library item + new checklist step "Swab for group B streptococcus" (weeks 35 to 37) |
+
+Both are hand-written summaries in our own words (`summary-only`, never
+stored), built by `scripts/research/swiss-sources.mjs`. The two new steps
+cite them as their library source, so the check-ups card now has six
+steps. Note: the Swiss transfusion service announced (25 Nov 2025) a
+revised letter 68 that adds written consent for the fetal blood group
+test; the new text was not published when checked, so the 2020 letter is
+the source.
+
+### Pregnancy and postpartum screens: numeric claims
+
+Checked against free sources: BLV brochure "Ernährung rund um
+Schwangerschaft und Stillzeit" (August 2025, linked from the BLV page; now
+in the BLV library item's key points), BLV FAQ (July 2026), EFSA dietary
+reference values, IOM 2009, ACOG CO 804 (2020), WHO, NHS ("Your body after
+the birth", "Keeping fit and healthy with a baby"), CDC Hear Her warning
+signs, Cochrane PFMT 2020, perineal-massage reviews in the library, RCOG
+2024 nausea guideline, Tommy's / MiNESS on sleep position.
+
+| Where | Claim | Now |
+|---|---|---|
+| `PregnancyWeightTracker` | IOM 2009 ranges (12.5-18 / 11.5-16 / 7-11.5 / 5-9 kg; weekly rates) | correct, unchanged; note that the BLV brochure uses the same ranges |
+| `PregnancyNutrition` caffeine | "~200 mg/day (1 large coffee)" | 1-2 cups of coffee or up to 4 cups of tea a day (BLV); 200 mg limit (EFSA, NHS); avoid energy drinks |
+| `PregnancyNutrition` fish | US high-mercury list; "low-mercury fish 2-3×/week" | no shark, swordfish, marlin; fresh or tinned tuna at most once a week (BLV 2025); oily fish regularly |
+| `PregnancyNutrition` alcohol | "no safe known threshold" | none in pregnancy; no safe amount known (BLV, NHS) |
+| `PregnancyNutrition` vitamin D | "600-2000 IU, many practitioners now recommend 1000-2000 IU" | 600 IU drops daily, dose agreed with midwife/doctor (BLV); 4,000 IU limit |
+| `PregnancyNutrition` other amounts | fluids 2.3 L; iron 27 mg; calcium 1000 mg; DHA ~300 mg; +300-500 kcal in T3; B6 "~25 mg" | 1.5-2 L (BLV); iron-rich food (27 mg US vs 16 mg EFSA), tablets only if prescribed; ~950 mg, no extra in pregnancy (BLV); DHA +100-200 mg (EFSA); +250 kcal from month 4, +500 from month 7 (BLV), NICE ~200 in the last 3 months; B6 dose from doctor/pharmacist |
+| `PregnancyExercise` | "ACOG 150 min/week"; "stop supine after ~20 weeks"; Kegels "pay off for labour"; perineal massage "reduces tearing"; "most evidence-backed labour-prep" | 150 min (ACOG, WHO) + 30 min a day (BLV); keep lying flat short from ~20 weeks; PFMT lowers urine leakage (Cochrane); massage from ~34 weeks lowered tears in trials, mainly first births; staying active linked to fewer caesarean/assisted births |
+| `PregnancyTracker` week notes | combined screen "weeks 10 and 13"; "sleep on your left side from now on" (week 20); "visits every 2 weeks" / "weekly visits"; Rhogam at 28 | weeks 11 to 14 (Swiss 12 to 14); side sleeping, either side, from 28 weeks; "check-ups often more frequent, ask your midwife"; anti-D at 28 to 30, Swiss RhD test 18 to 24 (SGGG) |
+| `PostpartumDashboard`, `PostpartumLochiaCard` | bleeding "over 4-6 weeks"; "soaked pad/hour or clots larger than a golf ball, call your provider"; re-bleeding "often a sign of activity overdone" | several weeks, often 4 to 6, sometimes longer (NHS "a few weeks"); pad in an hour or clots bigger than an egg = urgent (CDC), get help now (144); re-bleeding can follow a busier day but can also mean retained tissue or infection |
+| `PostpartumPelvicFloor`, dashboard | "Kegels from week 2; after the 6-week visit if C-section" | NHS: gentle exercise incl. pelvic floor as soon as she feels up to it after a straightforward birth; caesarean: ask first; running / high impact after the 6-week check; swimming 7 days after the bleeding stops |
+| `PostpartumNutrition`, dashboard tips | fluids 2.5-3 L; protein 1.5 g/kg; iron 18 mg; calcium 1000-1300 mg; DHA ~300 mg; B12 2.8 µg; "stores low 6-12 months"; "sleep deprivation the single biggest risk factor" | at least 2 L while breastfeeding, no drink raises milk supply (BLV FAQ); protein +19 g/day while breastfeeding (EFSA); iron-rich food + blood test after heavy loss; ~950 mg, no extra (BLV); DHA +100-200 mg (EFSA); B12 from food, supplement if vegan; "months to refill"; "too little sleep makes recovery and mood harder" |
+
+Tests: `src/lib/healthClaims.test.ts`, `pregnancySchedule.test.ts`,
+`PregnancyCheckupsCard.test.tsx`.
+
+### Summary content check, next 150 items
+
+Ranks 472-621 of the round-2 exposure ranking (none skipped; all had
+PubMed abstracts), checked the same way. 138 fair. 12 fixes in 11 items,
+text only (10 re-embedded offline):
+
+| Item | Problem | Fix |
+|---|---|---|
+| `pmid-38901794` SOGC endometrial thickening | key point "often not serious"; abstract does not say so | "often found on ultrasound" |
+| `pmid-41470910` fish and depression (observational) | "a clear benefit appeared" | "a clear link" |
+| `pmid-36744416` vitamin D for asthma | calcidiol trial called "small" | "one trial" |
+| `pmid-37188442` early postpartum OGTT | "wrongly flagged some women"; specificity 56% | "about 44%" |
+| `pmid-31318420` endometriosis and IVF | "ovarian endometriosis reduced egg numbers most" | "also linked to fewer eggs" |
+| `pmid-38197853` abstinence time and sperm | firm "more benefit ... mostly within 4 days"; authors say "could be" | "possibly", "may" |
+| `pmid-36302159` immediate postpartum IUD/implant (Cochrane) | "were more likely to come out" on low-certainty evidence | "may be" |
+| `pmid-34449251` acupuncture after breast cancer | "many trials" at high risk of bias (abstract: "some"); certainty "low" ungraded | "some"; "not stated" |
+| `pmid-25722103` | certainty "low", abstract grades nothing | "not stated" |
+| `pmid-41147529` acupuncture for PCOS (Cochrane) | "made little or no difference" on low certainty | "may make" |
+| `pmid-29168557` probiotics for thrush | "improved short-term cure" on low quality | "may have improved" |
+
+Left as is (judgement calls): about 30 labels where the abstract gives a
+range ("moderate to low") or calls the evidence weak without a formal
+grade, e.g. `pmid-30342643`, `pmid-28237870`, `pmid-29910107`,
+`pmid-27534637`, `pmid-42372649`, `pmid-27364100`, `pmid-28276140`,
+`pmid-35325124`, `pmid-25864059`, `pmid-36449274` (could be "not stated"
+under a strict reading).
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed
