@@ -73,7 +73,7 @@ const IVFEventSheet = ({ open, onClose, date, events, onAddEvent, onToggleComple
                     <span className="text-xs text-muted-foreground ml-2">{ev.event_time.slice(0, 5)}</span>
                   )}
                 </div>
-                <button onClick={() => onDeleteEvent(ev.id)} className="text-destructive/40 hover:text-destructive flex-shrink-0 p-1">
+                <button aria-label={`Delete ${ev.title}`} onClick={() => onDeleteEvent(ev.id)} className="text-destructive/40 hover:text-destructive flex-shrink-0 p-1">
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>

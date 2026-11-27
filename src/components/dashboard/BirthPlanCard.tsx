@@ -115,7 +115,7 @@ const BirthPlanCard = () => {
       </p>
 
       <div className="space-y-1">
-        <Progress value={percent} className="h-2" />
+        <Progress value={percent} className="h-2" aria-label="Birth plan filled in" />
       </div>
 
       <ul className="divide-y divide-border rounded-lg border border-border">

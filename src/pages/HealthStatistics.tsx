@@ -175,7 +175,7 @@ export default function HealthStatistics() {
     return (
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
+          <Button aria-label="Back" variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>

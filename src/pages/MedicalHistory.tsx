@@ -1285,7 +1285,7 @@ export default function MedicalHistory() {
               <div className="px-4 pb-3">
                 <div className="relative">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                  <input
+                  <input aria-label="Search documents"
                     type="search"
                     placeholder="Search by name, category, or what's inside the analysis…"
                     value={docSearch}
@@ -1799,7 +1799,7 @@ export default function MedicalHistory() {
                       {/* Shrinks instead of pushing the page wider than a phone. */}
                       <div className="relative ml-auto min-w-0 w-40 sm:w-52">
                         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                        <input
+                        <input aria-label="Search results"
                           type="text"
                           placeholder="Search results..."
                           value={searchQuery}

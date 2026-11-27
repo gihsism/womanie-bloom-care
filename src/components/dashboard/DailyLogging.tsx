@@ -417,7 +417,7 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
               <div className="space-y-1.5">
                 <Label className="text-xs">LH Test</Label>
                 <Select value={data.lhTest} onValueChange={(v) => update('lhTest', v)}>
-                  <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectTrigger aria-label="LH Test" className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="not-tested">Not tested</SelectItem>
                     <SelectItem value="negative">Negative</SelectItem>
@@ -431,7 +431,7 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
               <div className="space-y-1.5">
                 <Label className="text-xs">Intercourse</Label>
                 <Select value={data.intercourse} onValueChange={(v) => update('intercourse', v)}>
-                  <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectTrigger aria-label="Intercourse" className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="no">No</SelectItem>
                     <SelectItem value="yes-protected">Yes (protected)</SelectItem>
@@ -444,7 +444,7 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
               <div className="space-y-1.5">
                 <Label className="text-xs">Pill taken?</Label>
                 <Select value={data.pillTaken} onValueChange={(v) => update('pillTaken', v)}>
-                  <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectTrigger aria-label="Pill taken?" className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="on-time">On time</SelectItem>
                     <SelectItem value="late">Late</SelectItem>
@@ -457,7 +457,7 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
               <div className="space-y-1.5">
                 <Label className="text-xs">Medication</Label>
                 <Select value={data.medicationTaken} onValueChange={(v) => update('medicationTaken', v)}>
-                  <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectTrigger aria-label="Medication" className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all-on-time">All on time</SelectItem>
                     <SelectItem value="late">Late</SelectItem>
@@ -469,13 +469,13 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
             {showHotFlashes && (
               <div className="space-y-1.5">
                 <Label className="text-xs">Hot flashes today</Label>
-                <Input type="number" placeholder="0" className="h-9" value={data.hotFlashCount} onChange={(e) => update('hotFlashCount', e.target.value)} />
+                <Input aria-label="Hot flashes today" type="number" placeholder="0" className="h-9" value={data.hotFlashCount} onChange={(e) => update('hotFlashCount', e.target.value)} />
               </div>
             )}
             {showBBT && (
               <div className="space-y-1.5">
                 <Label className="text-xs">Basal temp (°C)</Label>
-                <Input type="number" step="0.01" inputMode="decimal" placeholder="36.5" className="h-9" value={data.basalTemp} onChange={(e) => update('basalTemp', e.target.value)} />
+                <Input aria-label="Basal temp (°C)" type="number" step="0.01" inputMode="decimal" placeholder="36.5" className="h-9" value={data.basalTemp} onChange={(e) => update('basalTemp', e.target.value)} />
               </div>
             )}
           </div>
@@ -486,7 +486,7 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label className="text-xs">Sleep (hours)</Label>
-            <Input
+            <Input aria-label="Sleep (hours)"
               type="number"
               step="0.5"
               min="0"
@@ -500,7 +500,7 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
           <div className="space-y-1.5">
             <Label className="text-xs">Sleep quality</Label>
             <Select value={data.sleepQuality} onValueChange={(v) => update('sleepQuality', v)}>
-              <SelectTrigger className="h-9"><SelectValue placeholder="Rate 1–5" /></SelectTrigger>
+              <SelectTrigger aria-label="Sleep quality" className="h-9"><SelectValue placeholder="Rate 1–5" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="1">😩 1 — Terrible</SelectItem>
                 <SelectItem value="2">😪 2 — Poor</SelectItem>
@@ -515,7 +515,7 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
         {/* Optional note */}
         <div>
           <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Notes (optional)</Label>
-          <Input
+          <Input aria-label="Notes (optional)"
             placeholder="Anything else to note today..."
             value={data.notes}
             onChange={(e) => update('notes', e.target.value)}

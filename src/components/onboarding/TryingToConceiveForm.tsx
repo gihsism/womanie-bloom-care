@@ -74,7 +74,7 @@ const TryingToConceiveForm = () => {
           <div className="space-y-2">
             <Label>How long have you been trying? *</Label>
             <Select value={tryingDuration} onValueChange={setTryingDuration}>
-              <SelectTrigger>
+              <SelectTrigger aria-label="How long have you been trying?">
                 <SelectValue placeholder="Select duration" />
               </SelectTrigger>
               <SelectContent>
@@ -120,7 +120,7 @@ const TryingToConceiveForm = () => {
           <div className="space-y-2">
             <Label>Average cycle length (days) *</Label>
             <Select value={cycleLength.toString()} onValueChange={(v) => setCycleLength(Number(v))}>
-              <SelectTrigger>
+              <SelectTrigger aria-label="Average cycle length (days)">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

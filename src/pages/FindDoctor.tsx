@@ -302,7 +302,7 @@ const FindDoctor = () => {
         <div className={`flex flex-col sm:flex-row gap-4 mb-6 ${!loadingDoctors && doctors.length === 0 ? 'hidden' : ''}`}>
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
+            <Input aria-label="Search doctors"
               placeholder="Search by name, specialty, language, or keywords..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -310,7 +310,7 @@ const FindDoctor = () => {
             />
           </div>
           <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
-            <SelectTrigger className="w-full sm:w-[200px]">
+            <SelectTrigger aria-label="Filter by specialty" className="w-full sm:w-[200px]">
               <SelectValue placeholder="All Specialties" />
             </SelectTrigger>
             <SelectContent>
@@ -321,7 +321,7 @@ const FindDoctor = () => {
             </SelectContent>
           </Select>
           <Select value={sortBy} onValueChange={v => setSortBy(v as typeof sortBy)}>
-            <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectTrigger aria-label="Sort doctors" className="w-full sm:w-[180px]">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>

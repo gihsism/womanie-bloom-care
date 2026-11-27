@@ -459,7 +459,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
           {setupMethod === 'due_date' ? (
             <div className="space-y-2 max-w-xs mx-auto">
               <label className="text-sm font-medium">Due Date</label>
-              <Input
+              <Input aria-label="Due Date"
                 type="date"
                 value={dueDateInput}
                 onChange={(e) => setDueDateInput(e.target.value)}
@@ -468,7 +468,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
           ) : setupMethod === 'lmp' ? (
             <div className="space-y-2 max-w-xs mx-auto">
               <label className="text-sm font-medium">First day of last period</label>
-              <Input
+              <Input aria-label="First day of last period"
                 type="date"
                 value={lmpInput}
                 onChange={(e) => setLmpInput(e.target.value)}
@@ -478,7 +478,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
             <div className="space-y-3 max-w-xs mx-auto">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Embryo transfer date</label>
-                <Input
+                <Input aria-label="Embryo transfer date"
                   type="date"
                   value={ivfTransferInput}
                   onChange={(e) => setIvfTransferInput(e.target.value)}
@@ -626,7 +626,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
             {editMethod === 'due_date' ? (
               <div className="space-y-2">
                 <label className="text-sm font-medium">New Due Date</label>
-                <Input
+                <Input aria-label="New Due Date"
                   type="date"
                   value={editDueDateInput}
                   onChange={(e) => setEditDueDateInput(e.target.value)}
@@ -635,7 +635,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
             ) : (
               <div className="space-y-2">
                 <label className="text-sm font-medium">Current Week of Pregnancy (1-42)</label>
-                <Input
+                <Input aria-label="Current Week of Pregnancy (1-42)"
                   type="number"
                   min="1"
                   max="42"

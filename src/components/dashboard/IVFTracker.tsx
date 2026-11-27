@@ -186,7 +186,7 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase, with
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Phase start date</label>
-              <Input type="date" value={startDateInput} onChange={(e) => setStartDateInput(e.target.value)} />
+              <Input aria-label="Phase start date" type="date" value={startDateInput} onChange={(e) => setStartDateInput(e.target.value)} />
             </div>
           </div>
           <Button

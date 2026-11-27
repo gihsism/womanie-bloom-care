@@ -195,7 +195,7 @@ const DailyLogSheet = ({
                           {entry.protected ? 'Protected' : 'Unprotected'}
                         </span>
                       </div>
-                      <Button
+                      <Button aria-label="Remove this entry"
                         variant="ghost"
                         size="sm"
                         onClick={() => removeIntercourse(idx)}

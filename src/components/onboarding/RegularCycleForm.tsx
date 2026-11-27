@@ -76,7 +76,7 @@ const RegularCycleForm = () => {
           <div className="space-y-2">
             <Label>Average cycle length (days) *</Label>
             <Select value={cycleLength.toString()} onValueChange={(v) => setCycleLength(Number(v))}>
-              <SelectTrigger>
+              <SelectTrigger aria-label="Average cycle length (days)">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

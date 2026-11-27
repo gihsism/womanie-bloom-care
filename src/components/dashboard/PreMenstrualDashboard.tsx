@@ -298,7 +298,7 @@ export default function PreMenstrualDashboard() {
               <span className="text-sm font-medium">Your readiness</span>
               <span className="text-sm font-bold text-primary">{readinessPercent}%</span>
             </div>
-            <Progress value={readinessPercent} className="h-2 mb-4" />
+            <Progress value={readinessPercent} className="h-2 mb-4" aria-label="Your readiness" />
 
             <div className="space-y-2">
               {periodPrepChecklist.map((item) => {
