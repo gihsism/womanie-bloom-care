@@ -3,6 +3,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import * as jose from 'jose';
 import { getAuthSecret } from '../../_lib/auth.js';
 import { withSentry } from '../../_lib/sentry.js';
+import { readCookie } from '../../_lib/oauth-state.js';
 import { isVerifiedAdmin } from '../../_lib/admin.js';
 import { isMaintenanceOn } from '../../_lib/maintenance.js';
 import { POLICY_VERSIONS } from '../../_lib/policy-versions.js';
@@ -16,14 +17,12 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     // Get token from cookie
-    const cookies = req.headers.cookie || '';
-    const match = cookies.match(/womanie_session=([^;]+)/);
-    if (!match) return res.status(200).json({ user: null });
-
-    const token = match[1];
+    // Same anchored lookup as getAuthUser (api/_lib/auth.ts readSessionCookie).
+    const token = readCookie(req.headers.cookie, 'womanie_session');
+    if (!token) return res.status(200).json({ user: null });
 
     // Verify JWT
-    const { payload } = await jose.jwtVerify(token, getAuthSecret());
+    const { payload } = await jose.jwtVerify(token, getAuthSecret(), { algorithms: ['HS256'] });
 
     // Check session still exists and not expired
     const sql = neon(process.env.DATABASE_URL!);

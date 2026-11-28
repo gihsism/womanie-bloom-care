@@ -56,6 +56,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           WHERE user_id = c.patient_id
        ) u ON TRUE
        WHERE c.doctor_id = $1
+         -- A revoked doctor (role deleted, rows kept) sees no patients.
+         AND EXISTS (SELECT 1 FROM user_roles r WHERE r.user_id = c.doctor_id AND r.role = 'doctor')
        ORDER BY c.created_at DESC
        LIMIT 500`,
       [doctor.id]

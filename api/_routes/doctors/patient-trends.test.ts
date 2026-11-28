@@ -90,6 +90,13 @@ describe('doctors/patient-trends access', () => {
     expect(params).toEqual([DOCTOR.id, PATIENT_ID]);
   });
 
+  it('the consent gate also requires the doctor role (a revoked doctor reads nothing)', async () => {
+    routeQueries({ approved: false });
+    await handler(mockReq(PATIENT_ID), mockRes());
+    const [sql] = query.mock.calls[0] as [string, unknown[]];
+    expect(sql).toMatch(/JOIN user_roles r ON r\.user_id = c\.doctor_id AND r\.role = 'doctor'/);
+  });
+
   it('logs the read and scopes every data query to the gated patient', async () => {
     routeQueries({ approved: true });
     const res = mockRes();

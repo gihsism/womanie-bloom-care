@@ -132,4 +132,23 @@ describe('auth/logout security invariants', () => {
     await handler(mockReq(''), res);
     expect(query).not.toHaveBeenCalled();
   });
+
+  // Logout is a plain GET the app navigates to. A link or <img> on another
+  // site must not be able to sign her out (Sec-Fetch-Site: cross-site).
+  it('ignores a cross-site request: no session deleted, no cookie cleared', async () => {
+    const res = mockRes();
+    const req = { method: 'GET', headers: { cookie: 'womanie_session=valid.jwt.token', 'sec-fetch-site': 'cross-site' } } as unknown as VercelRequest;
+    await handler(req, res);
+    expect(query).not.toHaveBeenCalled();
+    expect(res._headers['set-cookie']).toBeUndefined();
+    expect(res._redirectTo).toBe('/');
+  });
+
+  it('still logs out a same-origin navigation', async () => {
+    const res = mockRes();
+    const req = { method: 'GET', headers: { cookie: 'womanie_session=valid.jwt.token', 'sec-fetch-site': 'same-origin' } } as unknown as VercelRequest;
+    await handler(req, res);
+    expect(query.mock.calls.some((c: unknown[]) => /DELETE FROM auth_sessions/i.test(String(c[0])))).toBe(true);
+    expect(res._headers['set-cookie']).toMatch(/Max-Age=0/);
+  });
 });

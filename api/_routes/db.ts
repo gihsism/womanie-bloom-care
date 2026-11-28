@@ -6,6 +6,7 @@ import { isIdent, isIdentList } from '../_lib/sql-ident.js';
 import { checkAppointmentUpdate } from '../_lib/appointment-update.js';
 import { DOCTOR_ONLY_WRITE_TABLES, hasDoctorRole } from '../_lib/doctor-account.js';
 import { notifyDoctorOfBooking } from '../_lib/doctor-notify.js';
+import { checkAccessCodeInsert } from '../_lib/access-code.js';
 
 // Which column identifies "mine" for each table accessible via /api/db.
 // - string: single owner column; its value must equal the session user id.
@@ -206,6 +207,29 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         .filter(k => k !== 'updated_at' && !allowed.includes(k));
       if (extra.length) {
         return res.status(403).json({ error: `Column(s) not writable via /api/db: ${extra.join(', ')}` });
+      }
+    }
+
+    // Share codes: created and cancelled (deleted) by the patient, never
+    // edited, and the row must follow the app's rules (api/_lib/access-code.ts).
+    // A code that is already live for someone else is refused, so a
+    // doctor's redemption can only ever match one patient.
+    if (table === 'patient_access_codes') {
+      if (operation === 'update' || operation === 'upsert') {
+        return res.status(403).json({ error: 'Share codes cannot be changed; cancel it and create a new one' });
+      }
+      if (operation === 'insert') {
+        const row = Array.isArray(insertData) ? insertData[0] : insertData;
+        if (Array.isArray(insertData) && insertData.length !== 1) {
+          return res.status(400).json({ error: 'One share code at a time' });
+        }
+        const check = checkAccessCodeInsert(row);
+        if (!check.ok) return res.status(400).json({ error: check.error });
+        const live = await sql.query(
+          'SELECT 1 FROM patient_access_codes WHERE code = $1 AND is_used = false AND expires_at > now() LIMIT 1',
+          [(row as { code: string }).code]
+        );
+        if (live.length > 0) return res.status(409).json({ error: 'Please generate the code again.' });
       }
     }
 

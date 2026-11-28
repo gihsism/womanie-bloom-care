@@ -5,7 +5,7 @@ const query = vi.fn();
 vi.mock('@neondatabase/serverless', () => ({ neon: () => ({ query }) }));
 vi.mock('../../_lib/auth.js', () => ({ getAuthSecret: vi.fn() }));
 vi.mock('../../_lib/sentry.js', () => ({ withSentry: (h: unknown) => h }));
-vi.mock('../../_lib/ratelimit.js', () => ({ checkAndConsume: vi.fn() }));
+vi.mock('../../_lib/ratelimit.js', () => ({ checkAndConsume: vi.fn(), peekLimit: vi.fn() }));
 vi.mock('bcryptjs', () => ({ default: { compare: vi.fn() } }));
 vi.mock('jose', () => ({
   SignJWT: vi.fn().mockImplementation(() => ({
@@ -15,8 +15,8 @@ vi.mock('jose', () => ({
   })),
 }));
 
-import handler from './login';
-import { checkAndConsume } from '../../_lib/ratelimit.js';
+import handler, { DUMMY_HASH } from './login';
+import { checkAndConsume, peekLimit } from '../../_lib/ratelimit.js';
 import bcrypt from 'bcryptjs';
 
 const STORED_USER = [{
@@ -58,8 +58,9 @@ function mockReq(b: unknown, ip = '1.2.3.4'): VercelRequest {
 
 describe('auth/login security invariants', () => {
   beforeEach(() => {
-    vi.mocked(checkAndConsume).mockResolvedValue({ ok: true, remaining: 9, limit: 10, retryInSec: 0 });
-    vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
+    vi.mocked(checkAndConsume).mockReset().mockResolvedValue({ ok: true, remaining: 9, limit: 10, retryInSec: 0 });
+    vi.mocked(peekLimit).mockReset().mockResolvedValue({ ok: true, remaining: 9, limit: 10, retryInSec: 0 });
+    vi.mocked(bcrypt.compare).mockReset().mockResolvedValue(true as never);
     query.mockReset();
     query
       .mockResolvedValueOnce(STORED_USER) // SELECT auth_users
@@ -89,9 +90,7 @@ describe('auth/login security invariants', () => {
   });
 
   it('returns 429 when the per-email rate limit is exceeded', async () => {
-    vi.mocked(checkAndConsume)
-      .mockResolvedValueOnce({ ok: true, remaining: 9, limit: 10, retryInSec: 0 })
-      .mockResolvedValueOnce({ ok: false, remaining: 0, limit: 10, retryInSec: 1800 });
+    vi.mocked(peekLimit).mockResolvedValueOnce({ ok: false, remaining: 0, limit: 10, retryInSec: 1800 });
     const res = mockRes();
     await handler(mockReq({ email: 'user@test.com', password: 'pass1234' }), res);
     expect(res._status).toBe(429);
@@ -106,6 +105,45 @@ describe('auth/login security invariants', () => {
     await handler(mockReq({ email: 'user@test.com', password: 'pass1234' }), res);
     expect(res._status).toBe(429);
     expect(query).not.toHaveBeenCalled();
+  });
+
+  it('does not query the database when the per-email limit fires', async () => {
+    vi.mocked(peekLimit).mockResolvedValue({ ok: false, remaining: 0, limit: 10, retryInSec: 3600 });
+    const res = mockRes();
+    await handler(mockReq({ email: 'user@test.com', password: 'pass1234' }), res);
+    expect(res._status).toBe(429);
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  // Only failures use up the per-email allowance, so someone signing in on
+  // several devices a day can never lock herself out.
+  it('a successful sign-in does not count against the per-email limit', async () => {
+    const res = mockRes();
+    await handler(mockReq({ email: 'User@Test.com', password: 'pass1234' }), res);
+    expect(res._status).toBe(200);
+    expect(vi.mocked(peekLimit)).toHaveBeenCalledWith('login-email', 'user@test.com', 30);
+    const buckets = vi.mocked(checkAndConsume).mock.calls.map(c => c[0]);
+    expect(buckets).toEqual(['login-ip']);
+  });
+
+  it('a wrong password counts once against the per-email limit', async () => {
+    vi.mocked(bcrypt.compare).mockResolvedValue(false as never);
+    const res = mockRes();
+    await handler(mockReq({ email: 'User@Test.com', password: 'wrong_pass' }), res);
+    expect(res._status).toBe(401);
+    const emailCalls = vi.mocked(checkAndConsume).mock.calls.filter(c => c[0] === 'login-email');
+    expect(emailCalls).toEqual([['login-email', 'user@test.com', 30]]);
+  });
+
+  it('an unknown email still runs a bcrypt compare (no timing difference) and counts as a failure', async () => {
+    query.mockReset();
+    query.mockResolvedValue([]);
+    vi.mocked(bcrypt.compare).mockResolvedValue(false as never);
+    const res = mockRes();
+    await handler(mockReq({ email: 'nobody@test.com', password: 'pass1234' }), res);
+    expect(res._status).toBe(401);
+    expect(vi.mocked(bcrypt.compare)).toHaveBeenCalledWith('pass1234', DUMMY_HASH);
+    expect(vi.mocked(checkAndConsume).mock.calls.some(c => c[0] === 'login-email')).toBe(true);
   });
 
   it('returns 401 when the email is not registered', async () => {

@@ -105,6 +105,15 @@ describe('doctors/day access', () => {
     expect(params[0]).toBe('doc_1');
   });
 
+  // A revoked doctor (admin deleted the role, connection rows stay) must
+  // see her visits as times only, like a pending patient.
+  it('counts a connection as approved only while the doctor still holds the doctor role', async () => {
+    routeQueries();
+    await handler(mockReq(), mockRes());
+    const [sql] = query.mock.calls[0] as [string, unknown[]];
+    expect(sql).toMatch(/JOIN user_roles r ON r\.user_id = c\.doctor_id AND r\.role = 'doctor'/);
+  });
+
   it('gives a pending patient no health fields and never queries her data', async () => {
     routeQueries();
     const res = mockRes();
