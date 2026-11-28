@@ -141,8 +141,15 @@ test('doctor side: dashboard, settings, chart and the confirm dialog', async ({ 
   await page.goto('/doctor/patient/pat-1');
   await expect(page.locator('[aria-labelledby="visit-brief-title"]')).toBeVisible();
   findings.push(...await axe(page, 'chart summary'));
-  for (const name of ['Results', 'Trends']) {
+  // Wait for each tab's content: Trends fetches on first open, and a scan
+  // of its loading skeleton would check the wrong screen.
+  const loaded = {
+    Results: page.getByText('Latest reading of each test, most urgent first.'),
+    Trends: page.getByText('Cycles 28 days, regular (last 2).'),
+  };
+  for (const name of ['Results', 'Trends'] as const) {
     await page.getByRole('tab', { name }).click();
+    await expect(loaded[name]).toBeVisible();
     findings.push(...await axe(page, `chart ${name}`));
   }
 

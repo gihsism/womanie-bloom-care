@@ -72,7 +72,7 @@ export default function PatientTrends({ patientId, cached, onLoaded }: PatientTr
 
   if (state.kind === 'loading') {
     return (
-      <div className="space-y-3" aria-busy="true" aria-label="Loading trends">
+      <div className="space-y-3" role="status" aria-busy="true" aria-label="Loading trends">
         <Skeleton className="h-40 rounded-xl" />
         <Skeleton className="h-40 rounded-xl" />
       </div>
