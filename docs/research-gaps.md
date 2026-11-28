@@ -882,6 +882,115 @@ units ("4-10x more common", "1 in 10", "every 6-12 months") in
 `PersonalizedInsights`. Tests: `src/lib/healthClaims.test.ts` (round 10
 block, checked with code comments stripped).
 
+## Round 11 (2026-11-28)
+
+### New exposure ranking
+
+167 new everyday questions (17 or so per stage: first periods, cycle,
+conception, pregnancy, postpartum, contraception, IVF, menopause, after
+menopause, plus 15 general ones), in plain words and with the worries
+German-speaking Swiss users bring (Krankenkasse, Hebamme, Frauenärztin,
+Pille danach, Rohmilchkäse, FSME, Ersttrimestertest, maternity leave).
+Retrieval run locally with the bundled model (no model calls): top-10
+hybrid hits (10 down to 1 points) plus the chat sources (6 down to 1).
+1,032 items got some exposure; 367 of them had never been checked (12
+Swiss hand-written items among them, checked in rounds 3-5 and skipped).
+
+### Summary content check, top 120 newly exposed items
+
+The first 120 PubMed items of the new ranking (none skipped; all had
+abstracts). 87 fair. 41 fixes in 33 items, text only (23 re-embedded
+offline with the incremental script; label-only changes need no
+re-embed):
+
+- Certainty -> "not stated" where the abstract grades nothing:
+  `pmid-30294771`, `pmid-41270961`, `pmid-37267890`, `pmid-41168677`,
+  `pmid-27771476`, `pmid-33251770`, `pmid-38065008`, `pmid-32597116`,
+  `pmid-28646871`, `pmid-27603786`, `pmid-38190884`, `pmid-37015836`.
+- Hedges restored to match the GRADE level: `pmid-38597126` (midwife
+  continuity), `pmid-28681500` (continuous labour support),
+  `pmid-27572944` (pacifiers), `pmid-32215906`, `pmid-26422811`
+  (exercise for pregnancy back pain), `pmid-33765343`, `pmid-29781504`
+  (epidurals, 3 places), `pmid-39535297`, `pmid-41307301`,
+  `pmid-42456370` and `pmid-41639685` (coffee after caesarean),
+  `pmid-30411804`, `pmid-37815037`, `pmid-36288631` (2 places),
+  `pmid-41421750` (blood pressure after birth, 3 places),
+  `pmid-37267890`.
+- Causal wording on observational data: `pmid-30142609` ("linked to").
+- Advice in the app's voice now credited to the authors or ACOG:
+  `pmid-34979320`, `pmid-41270961`, `pmid-33093423`, `pmid-26748390`,
+  `pmid-39885489`, `pmid-28231607`.
+
+Left as is: 31 judgement calls (labels picked from a graded range), e.g.
+`pmid-38009552`, `pmid-35506389`, `pmid-30264405`, `pmid-32103270`,
+`pmid-31663890` (an FDA mesh sentence not in the abstract, but true),
+`pmid-41123921`. 247 exposed items stay unchecked for round 12.
+
+### Numbers without units in lab insights and cards
+
+Grep of non-test `src/` for "Nx more", "-fold", "1 in N", "every N
+months / years", "N% of / risk / chance", "twice", "doubles", plus a
+script listing every number in a user-facing string not followed by a
+unit (lab insight files, cycle and menopause insight libs):
+
+| Where | Claim | Now |
+|---|---|---|
+| `PersonalizedInsights` anti-TPO | "Hashimoto's is 4-10x more common in women" | no source in the library: "much more common in women than in men" |
+| `PersonalizedInsights` anti-TPO, normal TSH | "Monitor TSH every 6-12 months. Many people with positive antibodies eventually develop hypothyroidism" | unsourced interval, overstated: "Ask your doctor when to recheck your TSH. Some people ... develop an underactive thyroid over the years" |
+| `PersonalizedInsights` RA markers | "RA is 2-3x more common in women" | "more common in women than in men" |
+| `PersonalizedInsights` LH/FSH | "normal is ~1:1, PCOS-suggestive is >2:1"; "PCOS affects 1 in 10 women" | the ratio is not a criterion of the 2023 international PCOS guideline (`pmid-37589624`), said so; 1 in 10 sourced: about 8 to 12 in 100 by criteria (2026 global review, `pmid-41528735`) |
+| `PersonalizedInsights` pregnancy nutrients | "Ferritin x (need ≥30)", "Vitamin D x (need ≥30)", "Folate (need ≥5)", "B12 (need ≥200)"; "below optimal pregnancy levels" | values only; cut-offs differ, doctor or midwife judges (the 30 ng/mL vitamin D "need" contradicted the round-3 decision; the trigger thresholds are unchanged, labelled in code as the app's own check) |
+| `PersonalizedInsights` LDL/HDL | "ideal is below 3.0" | unsourced: doctors judge risk on LDL or non-HDL cholesterol and other risk factors, not this ratio |
+| `PersonalizedInsights` thalassaemia | "25% chance each pregnancy could result in thalassemia major" | true only when both carry beta trait (NHS "Thalassaemia: carriers"): scoped, 1 in 4, genetic counselling for other trait types |
+| `PostpartumDashboard` mood check | "Postpartum depression affects 10–20% of new parents" | ACOG CO 757 (`pmid-30629567`): about 1 in 7 mothers |
+| `MenopauseDashboard` after menopause | "Resistance training 3x/week. Balance exercises prevent falls"; "Annual eye exams" | WHO 2020: strength on at least 2 days, from 65 balance and strength on 3 or more days to help prevent falls; eye checks "ask your eye doctor how often" |
+
+Checked and left: Lp(a) "about 27% higher" (named study), "2x the upper
+limit" (the app's trigger on her value), NIPT "1 in 1000" (BAG item),
+ScreeningTracker intervals (pinned in round 8), "half of all people"
+have periods. Tests: `src/lib/healthClaims.test.ts` (round 11 block,
+code comments stripped).
+
+### First source for the 167 questions: off-topic or non-Swiss
+
+Each question's chat sources (bundled model) were read. Fixed:
+
+| Question | Problem | Fix |
+|---|---|---|
+| "Can I eat Rohmilchkäse (raw milk cheese) in pregnancy?" | BLV 3rd behind an iodine-in-dairy review | keywords on the BLV item (cheese, soft cheese, raw milk cheese, rohmilchkäse, listeria; not embedded). BLV now first, also for "soft cheese" |
+| "Chlamydia test, how often should young women get one?" | SGGG cervical letter 1st, SGGG GBS letter 2nd (both matched "test"/"swab" and the Swiss lift) | two `SUBJECT_MISMATCH` rules: another test asked (no smear / HPV / cancer / check-up / screening word) -> cervical-screening title x0.6; an STI asked -> cervical, GBS or pre-eclampsia-test title x0.6. "chlamydia test" keywords on CDC STI 2021. CDC first; the cervical letter also left "What blood tests check for PCOS?" and the Swiss fertility-tests question |
+| "Does the Krankenkasse pay the yearly gynaecology check-up?" | BAG maternity benefits 1st | rule: insurance / pay / cover asked with no pregnancy, birth, midwife, baby or scan word -> "maternity" title x0.6. Fedlex screening cover now first, SGGG letter 2nd |
+| "Is the pill safe while breastfeeding?" | triple-negative breast cancer risk-factor review 1st | rule: breastfeeding asked without a cancer word -> cancer title not naming breastfeeding x0.6. Cochrane lactation contraception first |
+| "Can I have a vaginal birth after a caesarean?" | 3 general Cochrane caesarean / labour-support reviews ahead of FIGO 2025 and ACOG PB 205 | rule: birth after a caesarean asked -> titles not about birth after a previous caesarean x0.6. FIGO first, ACOG 2nd |
+| "Itching on hands and feet in pregnancy" | toxoplasmosis hygiene review 1st: the library had **no cholestasis-of-pregnancy item** | new item SMFM Consult #53 (2021, `pmid-33197417`, summary from the PubMed abstract, own words; the source the app's bile-acid insight already names) |
+| "How long after stopping the pill can I get pregnant?" | anticoagulant-recurrence review 1st, nothing on fertility after contraception | new item: return of fertility after contraception, systematic review (2018, `pmid-30062044`; 83% pregnant within 12 months, no difference by method). Kept off "trying to conceive" (it took the TTC question on the first try) |
+| "When will my period come back after birth?" | postplacental-IUD guideline 1st | keywords on the Cochrane LAM review |
+| "Can I get pregnant in perimenopause?" | CANMAT depression guideline 1st | keywords on the contraception-over-40 consensus |
+| "Does my baby need vitamin D drops?" | vitamin D for asthma review 1st | keywords (baby, vitamin D drops) on the Cochrane review on breastfed babies: now first |
+| "Are fertility apps reliable for avoiding or getting pregnant?" | antioxidant reviews 1st to 3rd, nothing on apps | app keywords on the fertility-awareness effectiveness review (`pmid-30095777`) and the wearables review: the former is now 4th; antioxidant reviews still lead (partial fix) |
+
+Before / after on the 138 round-6 questions: 3 changed, all on topic
+(BLV now first for soft cheese; a filler swap for period-tracking apps;
+the cholestasis item replaces a haemorrhoid guideline as a filler for
+"Can I dye my hair while pregnant?", which has no on-topic source either
+way). Search evals unchanged. Tests: `ask-ai-audit.test.ts` (round 11
+blocks: keyword and bundled model, including the questions the rules
+must leave alone: smear interval, midwife cover, pregnancy cover,
+breastfeeding and breast cancer).
+
+Not fixed, no fitting free item in the library yet (candidates for a
+later round): toxic shock syndrome / tampons, ovulation pain, lubricants
+and sperm, breech and turning the baby, planned home birth, magnesium
+for night cramps, high prolactin, the pill and cervical cancer or
+libido, hair dye. **Swiss gaps** (no Swiss item answers them, the
+non-Swiss or off-topic first source stays): what basic insurance pays
+for fertility tests, IVF, contraception and HRT (KLV); egg freezing
+storage and the egg-donation ban (FMedG); maternity leave start (EO).
+Weak first sources left for the same reason: teen breast growth, a teen
+fainting or sad before her period, first gynaecology visit, sore
+breasts before a period, swollen feet late in pregnancy, travel or
+bleeding after embryo transfer.
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed

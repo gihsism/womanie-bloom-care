@@ -338,8 +338,8 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
             <div className="text-xs flex-1">
               <p className="font-medium mb-1">Quick mood check-in</p>
               <p className="text-muted-foreground leading-relaxed mb-2">
-                Postpartum depression affects 10–20% of new parents and can develop any time
-                in the first year. Quick self-check — any of these for more than two weeks?
+                Depression in pregnancy or after birth affects about 1 in 7 mothers (ACOG) and
+                can develop any time in the first year. Quick self-check — any of these for more than two weeks?
               </p>
               <ul className="space-y-1 list-disc list-inside text-foreground/80">
                 {PPD_FLAGS.map((f, i) => (

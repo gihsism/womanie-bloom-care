@@ -349,3 +349,86 @@ describe.skipIf(!hasModel)('Research round 10: sneeze question (bundled model)',
     expect(await sources('What surgery is there for bladder leaks?', null)).toContain(SLING);
   }, 30_000);
 });
+
+// Round 11 (docs/research-gaps.md): 167 new everyday questions. Where the
+// first source was off-topic, or a Swiss source existed but was not first,
+// the fix is pinned here: five SUBJECT_MISMATCH rules, keywords, and two
+// new PubMed items (SMFM #53 on cholestasis of pregnancy, return of
+// fertility after contraception).
+const BAG_MATERNITY = 'gp-bag-krankenversicherung-leistungen-bei-mutte-0036e3';
+const SGGG_GBS = 'gp-sggg-86-prophylaxe-gbs-sepsis-des-neugeborene-52360b';
+const FEDLEX_SCREENING = KLV_SCREENING;
+const SMFM_ICP = 'pmid-33197417';
+const FERTILITY_AFTER = 'pmid-30062044';
+const TNBC_RISK = 'pmid-38445713';
+const VBAC = ['pmid-40728304', 'pmid-30681543'];
+
+describe('Research round 11: library data and ranking rules', () => {
+  const lib = getLibrary();
+  const byId = new Map(lib.items.map((i) => [i.id, i]));
+
+  it('the two new items are in, with their sources and no fertility-wide keywords', () => {
+    expect(byId.get(SMFM_ICP)!.keyPoints.join(' ')).toMatch(/100 micromol\/L or more: birth offered at 36 weeks/);
+    expect(byId.get(SMFM_ICP)!.keywords).toContain('itching on hands and feet');
+    expect(byId.get(FERTILITY_AFTER)!.keyPoints.join(' ')).toMatch(/About 83% became pregnant within 12 months/);
+    expect(byId.get(FERTILITY_AFTER)!.keywords).not.toContain('trying to conceive');
+  });
+
+  it('keyword retrieval: Swiss BLV leads the raw-milk cheese question', () => {
+    expect(selectChatSources('Can I eat Rohmilchkäse (raw milk cheese) in pregnancy?', 'pregnancy')[0]?.id).toBe(BLV_PREGNANCY);
+  });
+
+  it('keyword retrieval: cervical letter and GBS letter stay out of an STI test question', () => {
+    const ids = selectChatSources('Chlamydia test, how often should young women get one?', null).map((i) => i.id);
+    expect(ids).toContain('pmid-34292926');
+    expect(ids).not.toContain(SGGG_CERVICAL);
+    expect(ids).not.toContain(SGGG_GBS);
+  });
+
+  it('keyword retrieval: the new items and the VBAC guidance answer their questions', () => {
+    expect(selectChatSources('Itching on hands and feet in pregnancy', 'pregnancy')[0]?.id).toBe(SMFM_ICP);
+    expect(selectChatSources('How long after stopping the pill can I get pregnant?', 'conception')[0]?.id).toBe(FERTILITY_AFTER);
+    expect(VBAC).toContain(selectChatSources('Can I have a vaginal birth after a caesarean?', 'pregnancy')[0]?.id);
+  });
+
+  it('the rules leave the questions they are not about alone', () => {
+    expect(selectChatSources('How often should I have a cervical smear?', null)[0]?.id).toBe(SGGG_CERVICAL);
+    expect(selectChatSources('Does the Krankenkasse pay for a midwife (Hebamme) after birth?', 'postpartum')[0]?.id).toBe(BAG_MATERNITY);
+    expect(selectChatSources('What does the Krankenkasse pay in pregnancy?', 'pregnancy')[0]?.id).toBe(BAG_MATERNITY);
+    expect(selectChatSources('Does breastfeeding lower breast cancer risk?', null).map((i) => i.id)).toContain(TNBC_RISK);
+  });
+});
+
+describe.skipIf(!hasModel)('Research round 11: sources the chat sends (bundled model)', () => {
+  const sources = async (q: string, stage: string | null) =>
+    (await selectChatSourcesHybrid(q, stage, { timeoutMs: 20_000 })).map((i) => i.id);
+
+  it.each([
+    ['Can I eat Rohmilchkäse (raw milk cheese) in pregnancy?', 'pregnancy', BLV_PREGNANCY],
+    ['Chlamydia test, how often should young women get one?', null, 'pmid-34292926'],
+    ['Does the Krankenkasse pay the yearly gynaecology check-up?', null, FEDLEX_SCREENING],
+    ['Can I have a vaginal birth after a caesarean?', 'pregnancy', 'pmid-40728304'],
+    ['Itching on hands and feet in pregnancy', 'pregnancy', SMFM_ICP],
+    ['How long after stopping the pill can I get pregnant?', 'conception', FERTILITY_AFTER],
+    ['When will my period come back after birth?', 'postpartum', 'pmid-26457821'],
+    ['Can I get pregnant in perimenopause?', 'menopause', 'pmid-40838950'],
+    ['Is the pill safe while breastfeeding?', 'postpartum', 'pmid-25793657'],
+    ['Does my baby need vitamin D drops?', 'postpartum', 'pmid-33305822'],
+  ] as const)('%s -> first source %s', async (q, stage, id) => {
+    expect((await sources(q, stage))[0]).toBe(id);
+  }, 30_000);
+
+  it('off-topic sources that used to come first are gone', async () => {
+    expect(await sources('Is the pill safe while breastfeeding?', 'postpartum')).not.toContain(TNBC_RISK);
+    expect(await sources('How long after stopping the pill can I get pregnant?', 'conception')).not.toContain('pmid-35877546');
+    const sti = await sources('Chlamydia test, how often should young women get one?', null);
+    expect(sti).not.toContain(SGGG_CERVICAL);
+    expect(sti).not.toContain(SGGG_GBS);
+    expect(await sources('What blood tests check for PCOS?', 'menstrual-cycle')).not.toContain(SGGG_CERVICAL);
+  }, 60_000);
+
+  it('the smear and midwife-cover questions keep their Swiss sources first', async () => {
+    expect((await sources('How often should I have a cervical smear?', null))[0]).toBe(SGGG_CERVICAL);
+    expect((await sources('Does the Krankenkasse pay for a midwife (Hebamme) after birth?', 'postpartum'))[0]).toBe(BAG_MATERNITY);
+  }, 60_000);
+});
