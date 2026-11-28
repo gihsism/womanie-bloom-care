@@ -189,6 +189,28 @@ The pipeline could be production-ready with 12–16 hours of focused work on aut
 
 ## Work log
 
+### 2026-11-28 — Test coverage: added security-invariant tests for doctors/list
+doctors/list.ts is the patient-facing directory endpoint: it returns the joined view
+of verified, available doctors (doctor_profiles + consultation_settings + doctor_schedule)
+to any authenticated patient. It had no tests despite carrying two important invariants.
+First, the SQL for doctor_profiles must include APPROVED_DOCTOR_SQL — both clauses
+(is_verified = true and verification_status = 'approved') — so a pending or rejected
+practitioner can never appear in the directory even if one flag were left behind.
+Second, the response is built through publicDoctor() / publicConsultation() /
+publicSchedule() helpers which copy only named fields; a row that carries email, phone
+or licence_number can never ride along. Only doctors with a matching consultation_settings
+row appear (in-memory join), so unavailable doctors are silently dropped.
+Added api/_routes/doctors/list.test.ts with 8 tests covering: 401 when getAuthUser
+returns null with no DB query firing; 405 for write methods (POST, PUT, DELETE, PATCH)
+with no DB query firing; 200 for OPTIONS before auth (preflight must never 401); an
+approved-only filter guard confirming the doctor_profiles SQL contains both clauses of
+APPROVED_DOCTOR_SQL (dropping either would surface unverified practitioners); an
+in-memory join guard confirming a doctor without consultation_settings is excluded from
+the response; a private-column leak guard confirming email, phone and licence_number
+values in the DB row do not appear anywhere in the JSON response; 200 with an empty
+doctors array when no approved+available doctors exist; and 500 on a database error.
+Verified: tsc 0, eslint 0, 2915/2915 tests pass (3 pre-existing skips), vite build clean.
+
 ### 2026-11-27 — Test coverage: added security-invariant tests for docs/pending-retries
 docs/pending-retries.ts is the endpoint called by a patient when they open Health Records
 to recover lost document analyses (audit #18). It scans their own un-analyzed health_documents,
