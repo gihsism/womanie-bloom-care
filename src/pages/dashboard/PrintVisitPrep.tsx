@@ -15,7 +15,10 @@ import { prepQuestions, resultsToDiscuss, type PrepResultRow } from '@/lib/visit
 import { symptomDiary } from '@/lib/menopauseDiary';
 import type { SignalInput } from '@/lib/menopauseInsights';
 import { ttcCycleSummary } from '@/lib/ttcPrep';
-import { DiaryBlock, TtcCyclesBlock, MENOPAUSE_STAGES } from '@/components/print/StageSummaryBlocks';
+import { DiaryBlock, TtcCyclesBlock, IvfDatesBlock, ContraceptionBlock, MENOPAUSE_STAGES } from '@/components/print/StageSummaryBlocks';
+import { deviceTz } from '@/components/dashboard/ivf/ivfFormat';
+import { IVF_PLAN_LOCAL_KEY } from '@/lib/ivfJourney';
+import { METHOD_DATES_KEY } from '@/lib/contraceptionSchedule';
 import {
   stageLines, lastCycles, medicineLines, footerLine, localDate, isoDay,
   type PeriodRow, type MedicineRow,
@@ -40,10 +43,14 @@ export interface VisitPrepData {
   results: PrepResultRow[];
   /** daily_health_signals of the last ~200 days: the menopause diary and the TTC LH tests. */
   signals?: SignalInput[];
+  /** IVF: her treatment plan (ivf_plans.plan, or the device copy). */
+  ivfPlan?: unknown;
+  /** Contraception: the method and its dates (account-synced device keys). */
+  contraception?: { method: unknown; dates: unknown } | null;
 }
 
 const H2 = 'text-[11px] font-bold uppercase tracking-wide text-gray-500 mb-1';
-export function VisitPrepSheet({ data, now = new Date() }: { data: VisitPrepData; now?: Date }) {
+export function VisitPrepSheet({ data, now = new Date(), tz }: { data: VisitPrepData; now?: Date; tz?: string }) {
   const cycles = lastCycles(data.periods);
   const meds = medicineLines(data.medicines);
   const { questions, fromVisit } = prepQuestions(data.visitQuestions, data.unscheduledQuestions);
@@ -80,6 +87,20 @@ export function VisitPrepSheet({ data, now = new Date() }: { data: VisitPrepData
         <section className="mb-4 break-inside-avoid" data-section="symptom-diary">
           <h2 className={H2}>Symptom diary, last 4 weeks</h2>
           <DiaryBlock diary={diary} />
+        </section>
+      )}
+
+      {data.stage === 'ivf' && (
+        <section className="mb-4 break-inside-avoid" data-section="ivf-dates">
+          <h2 className={H2}>Treatment dates</h2>
+          <IvfDatesBlock plan={data.ivfPlan ?? null} tz={tz} />
+        </section>
+      )}
+
+      {data.stage === 'contraception' && (
+        <section className="mb-4 break-inside-avoid" data-section="contraception">
+          <h2 className={H2}>Contraception</h2>
+          <ContraceptionBlock method={data.contraception?.method ?? null} dates={data.contraception?.dates ?? null} now={now} />
         </section>
       )}
 
@@ -163,7 +184,7 @@ export default function PrintVisitPrep() {
     if (!user || !id) return;
     const rows = <T,>(r: { data: unknown }) => (Array.isArray(r.data) ? r.data : []) as T[];
     const since = new Date(Date.now() - 200 * 86_400_000);
-    const [aptResp, profileRes, periodRes, medsRes, qRes, resultRes, signalRes] = await Promise.all([
+    const [aptResp, profileRes, periodRes, medsRes, qRes, resultRes, signalRes, ivfRes] = await Promise.all([
       fetch('/api/me/appointments').then(r => (r.ok ? r.json() : { appointments: [] })).catch(() => ({ appointments: [] })),
       // '*': ttc_start_date exists only once migration 025 is applied.
       db.from('profiles').select('*').eq('id', user.id).maybeSingle(),
@@ -178,7 +199,13 @@ export default function PrintVisitPrep() {
       // Menopause diary (last 4 weeks) and TTC ovulation tests (last 6 cycles).
       db.from('daily_health_signals').select('signal_date, symptoms, mood, notes').eq('user_id', user.id)
         .gte('signal_date', isoDay(since)),
+      // IVF treatment dates (absent before migration 022: the device copy is used).
+      db.from('ivf_plans').select('plan').eq('user_id', user.id).maybeSingle(),
     ]);
+    const device = (k: string): unknown => {
+      try { const raw = localStorage.getItem(k); return raw ? JSON.parse(raw) : null; } catch { return null; }
+    };
+    const ivfRow = (ivfRes.error ? null : ivfRes.data) as { plan: unknown } | null;
     const apts = (Array.isArray(aptResp?.appointments) ? aptResp.appointments : []) as Array<{ id: string; scheduled_at: string; doctor_name: string | null; doctor_title: string | null }>;
     const apt = apts.find(a => String(a.id) === String(id)) ?? null;
     const p = (profileRes.data ?? null) as { full_name: string | null; life_stage: string | null; pregnancy_due_date: string | null; ttc_start_date?: string | null } | null;
@@ -195,6 +222,8 @@ export default function PrintVisitPrep() {
       unscheduledQuestions: qs.find(r => r.appointment_id === UNSCHEDULED_VISIT_ID) ?? null,
       results: rows<PrepResultRow>(resultRes),
       signals: rows<SignalInput>(signalRes),
+      ivfPlan: ivfRow?.plan ?? device(IVF_PLAN_LOCAL_KEY(user.id)),
+      contraception: { method: device(`contraception:${user.id}:method`), dates: device(METHOD_DATES_KEY(user.id)) },
     });
   }, [user, id]);
 
@@ -225,7 +254,7 @@ export default function PrintVisitPrep() {
           </Button>
         </div>
       </div>
-      <VisitPrepSheet data={data} />
+      <VisitPrepSheet data={data} tz={deviceTz()} />
     </div>
   );
 }

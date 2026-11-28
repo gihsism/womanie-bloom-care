@@ -152,16 +152,20 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase, with
   }, [events]);
 
   // ─── Setup screen ───
+  // A brand-new account: the clinic's dates first (the phase then follows
+  // them); picking the phase by hand is the fallback for no dates yet.
   if (!ivfStartDate || !ivfPhase) {
     return (
       <div className="space-y-4">
+        {journey}
+        <p className="text-xs text-center text-muted-foreground">No dates from your clinic yet? Pick your current phase instead.</p>
         <Card className="p-6 text-center space-y-4 border-dashed border-2 border-primary/30 bg-primary/5">
           <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
             <FlaskConical className="h-7 w-7 text-primary" />
           </div>
-          <h3 className="text-lg font-semibold">Set up IVF Tracking</h3>
+          <h3 className="text-lg font-semibold">Your current phase</h3>
           <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-            Enter your clinic dates to see each phase, what is next, and reminders.
+            Choose the phase you are in and the day it started.
           </p>
           <div className="space-y-3 max-w-xs mx-auto text-left">
             <div className="space-y-2">
@@ -197,8 +201,6 @@ const IVFTracker = ({ ivfStartDate, ivfPhase, onSetIVFStart, onUpdatePhase, with
             Start Tracking
           </Button>
         </Card>
-        <p className="text-xs text-center text-muted-foreground">Or add the dates from your clinic's plan and the phase follows them.</p>
-        {journey}
       </div>
     );
   }

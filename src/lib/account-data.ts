@@ -62,6 +62,8 @@ export const ACCOUNT_ITEMS: AccountItem[] = [
   { template: 'contraception:{uid}:packStartDate', format: 'json' },
   // Combined / mini-pill type for the missed-pill steps (lib/missedPill.ts).
   { template: 'contraception:{uid}:pillType', format: 'json' },
+  // Dates for the other methods: IUD / implant / injection / ring / patch (lib/contraceptionSchedule.ts).
+  { template: 'contraception:{uid}:methodDates', format: 'json' },
   { template: 'pre-menstrual:{uid}:checkedItems', format: 'json' },
   { template: 'menopause:{uid}:meno:trackedSymptoms', format: 'json' },
   { template: 'menopause:{uid}:post:trackedSymptoms', format: 'json' },

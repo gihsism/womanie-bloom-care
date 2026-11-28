@@ -96,4 +96,38 @@ describe('VisitPrepSheet', () => {
     expect(section.textContent).toContain('1 test; day 14 peak');
     expect(section.textContent).toContain('current');
   });
+
+  it('IVF: prints the treatment dates she entered, or says none are entered', () => {
+    const data: VisitPrepData = {
+      ...base, stage: 'ivf', periods: [],
+      ivfPlan: { stimStart: '2026-11-28', scans: ['2026-12-03'], triggerAt: '2026-12-08T20:30:00Z', triggerTz: 'Europe/Zurich', retrieval: '2026-12-10' },
+    };
+    const { container } = render(<VisitPrepSheet data={data} now={NOW} tz="Europe/Zurich" />);
+    const section = container.querySelector('[data-section="ivf-dates"]')!;
+    expect(section.textContent).toContain('Treatment dates');
+    expect(section.querySelectorAll('tr')).toHaveLength(4);
+    expect(section.textContent).toContain('Monitoring scan');
+    expect(section.textContent).toMatch(/Trigger shot.*2026, 21:30/);
+    expect(container.querySelector('[data-section="contraception"]')).toBeNull();
+
+    const { container: empty } = render(<VisitPrepSheet data={{ ...data, ivfPlan: null }} now={NOW} />);
+    expect(empty.querySelector('[data-section="ivf-dates"]')!.textContent).toContain('No treatment dates entered in Womanie.');
+  });
+
+  it('contraception: prints the method and its dates; other stages do not get the section', () => {
+    const data: VisitPrepData = {
+      ...base, stage: 'contraception',
+      contraception: { method: 'implant', dates: { implant: { fitted: '2025-03-04', replace: '2028-03-04' } } },
+    };
+    const { container } = render(<VisitPrepSheet data={data} now={NOW} />);
+    const section = container.querySelector('[data-section="contraception"]')!;
+    expect(section.textContent).toContain('Method: Implant');
+    expect(section.textContent).toContain('Replace by: 4 Mar 2028');
+
+    const { container: none } = render(<VisitPrepSheet data={{ ...data, contraception: null }} now={NOW} />);
+    expect(none.querySelector('[data-section="contraception"]')!.textContent).toContain('Method not entered in Womanie.');
+    const { container: other } = render(<VisitPrepSheet data={base} now={NOW} />);
+    expect(other.querySelector('[data-section="contraception"]')).toBeNull();
+    expect(other.querySelector('[data-section="ivf-dates"]')).toBeNull();
+  });
 });

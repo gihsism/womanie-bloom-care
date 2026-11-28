@@ -28,12 +28,23 @@ export default function IVFTimelineHero({ startDate, phase: pickedPhase }: { sta
     ?? (status.phaseStart ? daysBetween(status.phaseStart, localDate(now, tz)) + 1
       : startDate ? Math.max(0, differenceInDays(now, startDate)) + 1 : null);
   if (!phase || day == null) {
+    // Dates entered but none reached yet: say what comes first.
+    if (next) {
+      return (
+        <section className="mb-6 border-t border-foreground pt-4" aria-label="Your IVF cycle">
+          <p className="label-mono">IVF</p>
+          <h2 className="font-display text-[34px] leading-[1.05] font-normal mt-1">{next.label}<br /><span className="text-muted-foreground">{inDays(next.daysUntil)}</span></h2>
+          <p className="text-[13px] text-muted-foreground mt-2 max-w-[34ch]">{next.at ? fmtMoment(next.at, tz) : fmtDay(next.date)}, from your clinic's dates.</p>
+          <DetailsLink to="/dashboard/stage#ivf-tracker" label="Your IVF timeline" />
+        </section>
+      );
+    }
     return (
       <section className="mb-6 border-t border-foreground pt-4" aria-label="Your IVF cycle">
         <p className="label-mono">IVF</p>
         <h2 className="font-display text-[34px] leading-[1.05] font-normal mt-1">Your cycle<br /><span className="text-muted-foreground">starts here</span></h2>
-        <p className="text-[13px] text-muted-foreground mt-2 max-w-[34ch]">Set your start date and phase — the timeline, tips and today’s injections fill in from there.</p>
-        <DetailsLink to="/dashboard/stage#ivf-tracker" label="Set up IVF tracking" />
+        <p className="text-[13px] text-muted-foreground mt-2 max-w-[34ch]">Add the dates from your clinic's treatment plan (or just your current phase): the timeline, next step and reminders fill in from there.</p>
+        <DetailsLink to="/dashboard/stage#ivf-tracker" label="Add your clinic's dates" />
       </section>
     );
   }

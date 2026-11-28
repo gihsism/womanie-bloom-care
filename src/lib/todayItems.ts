@@ -57,6 +57,21 @@ export interface TodaySignals {
    * packDay 22–28 is the pill-free week of a 21/7 pack, as the card assumes.
    */
   pill?: { reminderTime: string; takenToday: boolean; takenYesterday: boolean | null; packDay?: number | null } | null;
+  /**
+   * Contraception, methods other than the pill: change / check /
+   * replacement rows from the dates she entered (lib/contraceptionSchedule.ts).
+   * urgent rows rank with the stage tasks, the rest as heads-ups.
+   */
+  contraceptionDue?: Array<{ id: string; label: string; urgent: boolean }>;
+  /** Contraception: no method chosen yet (a brand-new account) -> "Choose your method". */
+  methodMissing?: boolean;
+  /**
+   * IVF: the clinic dates she set for today (daysUntil 0) and tomorrow (1)
+   * (lib/ivfJourney.ts ivfTodayDates); time = the trigger shot's HH:MM.
+   */
+  ivfDates?: Array<{ key: string; label: string; daysUntil: number; time?: string | null }>;
+  /** IVF: no clinic date and no phase yet (a brand-new account) -> "Add your clinic's dates". */
+  ivfSetupNeeded?: boolean;
   /** Pregnancy vaccines in their window and not marked received / "not now". */
   vaccinesDue?: string[];
   /** Date of the last EPDS mood check; null = never taken; undefined = not known yet. */
@@ -144,6 +159,20 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
       items.push({ id: 'pill-missed', label: "Yesterday's pill not ticked. Missed it?", target: `${STAGE_PAGE}#contraception` });
     }
   }
+  const method = mode === 'contraception' ? s.contraceptionDue ?? [] : [];
+  for (const r of method.filter(r => r.urgent)) items.push({ id: r.id, label: fit(r.label), target: `${STAGE_PAGE}#contraception` });
+  const ivfTarget = (key: string) => `${STAGE_PAGE}#${key === 'trigger' ? 'ivf-trigger' : 'ivf-tracker'}`;
+  const ivfLabel = (d: { label: string; daysUntil: number; time?: string | null }) =>
+    fit(`${d.label} ${d.daysUntil === 0 ? 'today' : 'tomorrow'}${d.time ? ` at ${d.time}` : ''}`);
+  const ivfDates = mode === 'ivf' ? s.ivfDates ?? [] : [];
+  for (const d of ivfDates.filter(d => d.daysUntil === 0)) items.push({ id: `ivf-${d.key}`, label: ivfLabel(d), target: ivfTarget(d.key) });
+  // First data for a brand-new account: the method / the clinic's dates.
+  if (mode === 'contraception' && s.methodMissing) {
+    items.push({ id: 'method-setup', label: 'Choose your contraception method', target: `${STAGE_PAGE}#contraception` });
+  }
+  if (mode === 'ivf' && s.ivfSetupNeeded) {
+    items.push({ id: 'ivf-setup', label: "Add the dates from your clinic's plan", target: `${STAGE_PAGE}#ivf-tracker` });
+  }
   const meds = s.medicinesDue ?? [];
   if (meds.length === 1) {
     items.push({ id: 'medicine-due', label: fit(`${meds[0].name} due (${meds[0].time})`), target: 'sheet:medicines' });
@@ -195,6 +224,8 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
       : `PMS days: period in ${pd} days`;
     items.push({ id: 'pms-soon', label, target: `${STAGE_PAGE}#pms` });
   }
+  for (const d of ivfDates.filter(d => d.daysUntil === 1)) items.push({ id: `ivf-${d.key}`, label: ivfLabel(d), target: ivfTarget(d.key) });
+  for (const r of method.filter(r => !r.urgent)) items.push({ id: r.id, label: fit(r.label), target: `${STAGE_PAGE}#contraception` });
   const out = s.medicinesRunningOut ?? [];
   if (out.length === 1) {
     items.push({ id: 'medicine-supply', label: fit(out[0].label), target: `${STAGE_PAGE}#medicines` });

@@ -1,22 +1,24 @@
 import { useMemo, useState } from 'react';
-import { CalendarDays, Pencil } from 'lucide-react';
+import { CalendarDays, Pencil, Plus, X } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import {
-  hasAnyDate, ivfStatus, ivfTimeline, nextKeyDate, planIssues, type IvfPlan,
+  MAX_IVF_SCANS, hasAnyDate, ivfStatus, ivfTimeline, nextKeyDate, planIssues, type IvfPlan,
 } from '@/lib/ivfJourney';
 import type { IvfSaveState } from '@/hooks/useIvfPlan';
 import { fmtDay, fmtMoment, inDays } from './ivfFormat';
 
 // IVF timeline (stage page): the steps of this treatment cycle with the
 // dates her clinic gave her, where she is today, stim day N and the next
-// key date. She sets / edits the dates here; the trigger-shot time is set
+// key date. She sets / edits the dates here (monitoring scans as a short
+// list under stimulation); the trigger-shot time is set
 // in the trigger timer card below (#ivf-trigger), because it needs a time.
 
 type DateField = 'downregStart' | 'stimStart' | 'retrieval' | 'transfer' | 'testDate';
+type EditField = DateField | 'scans';
 
 const FIELDS: Array<{ key: DateField; label: string; hint?: string }> = [
   { key: 'downregStart', label: 'Down-regulation starts', hint: 'Only if your protocol has one (some start with the pill or an injection before stimulation).' },
@@ -88,7 +90,8 @@ export default function IVFJourneyCard({ plan, tz, now, fallbackPhase, serverOk,
                 s.state === 'upcoming' && 'bg-background border-foreground/60',
               )}
             />
-            <div className="flex-1 min-w-0 flex items-baseline justify-between gap-2">
+            <div className="flex-1 min-w-0">
+            <div className="flex items-baseline justify-between gap-2">
               <span className={cn('text-sm', s.state === 'current' ? 'font-medium' : s.state === 'done' ? 'text-muted-foreground' : '')}>
                 {s.label}
                 {s.state === 'current' && <span className="sr-only"> (now)</span>}
@@ -98,6 +101,12 @@ export default function IVFJourneyCard({ plan, tz, now, fallbackPhase, serverOk,
                   : s.key === 'trigger' ? <a href="#ivf-trigger" className="underline">Set time</a>
                   : s.date ? fmtDay(s.date) : '—'}
               </span>
+            </div>
+            {s.key === 'stims' && plan.scans.length > 0 && (
+              <p className="text-xs text-muted-foreground" data-testid="ivf-scans">
+                Monitoring scans: {plan.scans.map(fmtDay).join(', ')}
+              </p>
+            )}
             </div>
           </li>
         ))}
@@ -113,8 +122,8 @@ export default function IVFJourneyCard({ plan, tz, now, fallbackPhase, serverOk,
         </Button>
       ) : (
         <div className="space-y-3 rounded-xl bg-muted/40 p-3">
-          {FIELDS.map(f => (
-            <div key={f.key} className="space-y-1">
+          {FIELDS.map(f => (<div key={f.key} className="space-y-3">
+            <div className="space-y-1">
               <label htmlFor={`ivf-${f.key}`} className="text-sm font-medium">{f.label}</label>
               <Input
                 id={`ivf-${f.key}`}
@@ -124,7 +133,38 @@ export default function IVFJourneyCard({ plan, tz, now, fallbackPhase, serverOk,
               />
               {f.hint && <p className="text-xs text-muted-foreground">{f.hint}</p>}
             </div>
-          ))}
+            {f.key === 'stimStart' && (
+              <fieldset className="space-y-1" data-testid="ivf-scan-dates">
+                <legend className="text-sm font-medium">Monitoring scans</legend>
+                {draft.scans.map((d, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Input
+                      type="date"
+                      aria-label={`Monitoring scan ${i + 1}`}
+                      value={d}
+                      onChange={e => setDraft({ ...draft, scans: draft.scans.map((x, j) => (j === i ? e.target.value : x)) })}
+                    />
+                    <Button
+                      type="button" variant="ghost" size="icon" className="h-9 w-9 flex-shrink-0"
+                      aria-label={`Remove monitoring scan ${i + 1}`}
+                      onClick={() => setDraft({ ...draft, scans: draft.scans.filter((_, j) => j !== i) })}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                {draft.scans.length < MAX_IVF_SCANS && (
+                  <Button
+                    type="button" variant="ghost" size="sm" className="gap-1.5 px-2"
+                    onClick={() => setDraft({ ...draft, scans: [...draft.scans, ''] })}
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Add a scan date
+                  </Button>
+                )}
+                <p className="text-xs text-muted-foreground">The ultrasound and blood-test appointments your clinic books during stimulation. Add each one as it is booked.</p>
+              </fieldset>
+            )}
+          </div>))}
           <p className="text-xs text-muted-foreground">Leave out any date you don't have yet. Your clinic's plan always comes first; this is your own overview.</p>
           <div className="flex gap-2">
             <Button size="sm" onClick={() => void save()} disabled={saveState === 'saving'} data-testid="ivf-save-dates">Save dates</Button>
@@ -141,6 +181,7 @@ export default function IVFJourneyCard({ plan, tz, now, fallbackPhase, serverOk,
   );
 }
 
-function pickDates(p: IvfPlan): Pick<IvfPlan, DateField> {
-  return { downregStart: p.downregStart, stimStart: p.stimStart, retrieval: p.retrieval, transfer: p.transfer, testDate: p.testDate };
+function pickDates(p: IvfPlan): Pick<IvfPlan, EditField> {
+  // Empty scan rows are dropped; parseIvfPlan (on save) sorts and dedupes.
+  return { downregStart: p.downregStart, stimStart: p.stimStart, scans: p.scans.filter(Boolean), retrieval: p.retrieval, transfer: p.transfer, testDate: p.testDate };
 }

@@ -28,6 +28,8 @@ import { parsePillStatus, yesterdayPillUnanswered, pillPackDay, type PillStatus 
 import { PILL_TYPES, DEFAULT_PILL_TYPE, isPillType, hoursLateSince, vomitWindowHours, type PillType } from '@/lib/missedPill';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MissedPillGuidance from './MissedPillGuidance';
+import MethodDatesCard from './contraception/MethodDatesCard';
+import { isMethodId } from '@/lib/contraceptionSchedule';
 
 const CONTRACEPTION_METHODS = [
   { id: 'pill', label: 'Birth Control Pill', emoji: '💊', effectiveness: '91-99%', schedule: 'Daily', description: 'Take at the same time every day for best protection.' },
@@ -102,6 +104,10 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
   const { toast } = useToast();
 
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
+  // false on a brand-new account until she picks a method: the picker is
+  // open with a question, and nothing is saved for her (Home then keeps
+  // asking instead of reminding her about a pill she may not take).
+  const [methodChosen, setMethodChosen] = useState(true);
   const [trackedSideEffects, setTrackedSideEffects] = useState<Set<string>>(new Set());
   const [showMethodPicker, setShowMethodPicker] = useState(false);
   const [reminderTime, setReminderTime] = useState('21:00');
@@ -118,7 +124,10 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
   // ─── Persisted preferences via localStorage ───
   useEffect(() => {
     if (!userId) return;
-    setSelectedMethod(readLS<string | null>(userId, 'method', 'pill'));
+    const storedMethod = readLS<unknown>(userId, 'method', null);
+    setSelectedMethod(isMethodId(storedMethod) ? storedMethod : 'pill');
+    setMethodChosen(storedMethod != null);
+    if (storedMethod == null) setShowMethodPicker(true);
     setTrackedSideEffects(new Set(readLS<string[]>(userId, 'sideEffects', [])));
     setReminderTime(readLS<string>(userId, 'reminderTime', '21:00'));
     setPackStartDate(readLS<string | null>(userId, 'packStartDate', null));
@@ -145,9 +154,9 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
   };
 
   useEffect(() => {
-    if (!userId || selectedMethod === null) return;
+    if (!userId || selectedMethod === null || !methodChosen) return;
     writeLS(userId, 'method', selectedMethod);
-  }, [userId, selectedMethod]);
+  }, [userId, selectedMethod, methodChosen]);
 
   useEffect(() => {
     if (!userId) return;
@@ -190,8 +199,10 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
-  const currentMethod = CONTRACEPTION_METHODS.find((m) => m.id === selectedMethod);
-  const isPillBased = ['pill', 'patch', 'ring'].includes(selectedMethod || '');
+  const currentMethod = methodChosen ? CONTRACEPTION_METHODS.find((m) => m.id === selectedMethod) : undefined;
+  // Daily ticks and the pack are for the pill only; the patch and the ring
+  // have change days instead (MethodDatesCard).
+  const isPillBased = methodChosen && selectedMethod === 'pill';
 
   // Compute "today logged" + streak from real DB rows.
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -301,11 +312,11 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <h2 className="text-lg font-bold">{currentMethod?.label || 'Select Method'}</h2>
-              <Badge variant="secondary" className="text-[10px]">{currentMethod?.effectiveness}</Badge>
+              <Badge variant="secondary" className="text-[10px]">{currentMethod?.effectiveness ?? 'Not set yet'}</Badge>
             </div>
             <p className="text-sm text-muted-foreground mb-2">{currentMethod?.description}</p>
             <Button variant="outline" size="sm" className="text-xs h-7" onClick={() => setShowMethodPicker(!showMethodPicker)}>
-              {showMethodPicker ? 'Close' : 'Change Method'}
+              {showMethodPicker ? 'Close' : methodChosen ? 'Change Method' : 'Choose Method'}
             </Button>
           </div>
         </div>
@@ -313,16 +324,19 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
 
       {/* Method Picker */}
       {showMethodPicker && (
-        <Card className="p-4">
-          <h4 className="text-sm font-semibold mb-3">Select Your Method</h4>
+        <Card className="p-4" data-testid="method-picker">
+          <h4 className="text-sm font-semibold mb-3">{methodChosen ? 'Select Your Method' : 'Which method do you use?'}</h4>
+          {!methodChosen && (
+            <p className="text-xs text-muted-foreground mb-3">Pick yours to see the right tracking: daily pill ticks, ring or patch change days, or your IUD, implant or injection dates.</p>
+          )}
           <div className="grid grid-cols-2 gap-2">
             {CONTRACEPTION_METHODS.map((method) => (
               <button
                 key={method.id}
-                onClick={() => { setSelectedMethod(method.id); setShowMethodPicker(false); }}
+                onClick={() => { setSelectedMethod(method.id); setMethodChosen(true); setShowMethodPicker(false); }}
                 className={cn(
                   'flex items-center gap-2 p-3 rounded-xl border text-left transition-all',
-                  selectedMethod === method.id ? 'border-primary bg-primary/10' : 'border-border hover:bg-muted/50'
+                  methodChosen && selectedMethod === method.id ? 'border-primary bg-primary/10' : 'border-border hover:bg-muted/50'
                 )}
               >
                 <span className="text-xl">{method.emoji}</span>
@@ -336,7 +350,12 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
         </Card>
       )}
 
-      {/* Daily Tracking (for pill/patch/ring) */}
+      {/* Dates she enters for the other methods (change / check / replacement). */}
+      {methodChosen && isMethodId(selectedMethod) && selectedMethod !== 'pill' && userId && (
+        <MethodDatesCard userId={userId} method={selectedMethod} />
+      )}
+
+      {/* Daily Tracking (pill) */}
       {isPillBased && (
         <Card className="p-4">
           <div className="flex items-center justify-between mb-4">

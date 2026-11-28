@@ -5,6 +5,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
 import { pillRing, pillFromNotes } from '@/lib/bodyMap';
 import { DetailsLink } from '@/components/dashboard/HomeBlocks';
+import {
+  METHOD_DATES_KEY, METHOD_LABELS, contraceptionRows, isMethodId, localDay, parseMethodDates, ringPatchState, shortDay,
+} from '@/lib/contraceptionSchedule';
 
 // Version 8 hero for contraception: the pill pack as a ring of 28 pills.
 // Solid ink = taken, ink with a halo = taken late, red cross = missed,
@@ -14,6 +17,9 @@ import { DetailsLink } from '@/components/dashboard/HomeBlocks';
 // Home keeps it to one fact (pill day), one sentence (taken today?) and
 // one Details link; logging is Home's primary button and the method card
 // on the stage page.
+// Other methods (IUD, implant, injection, ring, patch) get the method name
+// and the next date she entered instead of the ring; a brand-new account
+// with no method chosen (and no pill ticks) is asked to choose one.
 
 const CX = 160; const CY = 135; const R = 104;
 const lsKey = (userId: string, key: string) => `contraception:${userId}:${key}`;
@@ -46,7 +52,44 @@ export default function PillRingHero(_props: { name?: string | null }) {
   if (!user || !loaded) return null;
   const now = new Date();
   const packStart = readLS(user.id, 'packStartDate');
-  const method = readLS(user.id, 'method') ?? 'pill';
+  const storedMethod = readLS(user.id, 'method');
+  const method = storedMethod ?? 'pill';
+  if (storedMethod == null && byDate.size === 0) {
+    return (
+      <section className="mb-6 border-t border-foreground pt-4" aria-label="Your contraception">
+        <p className="label-mono">Contraception</p>
+        <h2 className="font-display text-[34px] leading-[1.05] font-normal mt-1">Your method<br /><span className="text-muted-foreground">starts here</span></h2>
+        <p className="text-[13px] text-muted-foreground mt-2 max-w-[34ch]">Choose the method you use: pill ticks, ring or patch change days, or your IUD, implant or injection dates fill in from there.</p>
+        <DetailsLink to="/dashboard/stage#contraception" label="Choose your method" />
+      </section>
+    );
+  }
+  if (isMethodId(method) && method !== 'pill') {
+    let dates;
+    try { dates = parseMethodDates(localStorage.getItem(METHOD_DATES_KEY(user.id)))[method]; } catch { dates = undefined; }
+    const today = localDay(now);
+    const isCycle = method === 'ring' || method === 'patch';
+    const cycle = isCycle && dates ? ringPatchState(method, dates, today) : null;
+    const row = contraceptionRows(method, dates, now)[0];
+    const sentence = row ? `${row.label}.`
+      : cycle?.next ? `Next: ${cycle.next.label.toLowerCase()} on ${shortDay(cycle.next.date)}.`
+      : dates?.replace ? `Replace by ${shortDay(dates.replace)} ${dates.replace.slice(0, 4)}.`
+      : method === 'injection' && dates?.next ? `Next injection on ${shortDay(dates.next)}.`
+      : null;
+    return (
+      <section className="mb-6" aria-label="Your contraception at a glance">
+        <p className="label-mono">{format(now, 'EEE d MMM')}</p>
+        <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
+          {METHOD_LABELS[method]}
+          {cycle?.cycleDay != null && <span className="text-muted-foreground"> · day {cycle.cycleDay}</span>}
+        </h2>
+        <p className="mt-1 text-[15px]">
+          {sentence ?? (isCycle ? 'Add the day this cycle started to see your change days.' : 'Add the dates from your clinic card to see what is next.')}
+        </p>
+        <DetailsLink to="/dashboard/stage#contraception" label={sentence ? 'Details' : 'Add your dates'} />
+      </section>
+    );
+  }
   const reminder = readLS(user.id, 'reminderTime') ?? '21:00';
   const isPill = method === 'pill';
   const ring = pillRing(byDate, packStart, now);
