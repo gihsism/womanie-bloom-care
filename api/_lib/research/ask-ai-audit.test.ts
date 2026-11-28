@@ -781,3 +781,36 @@ describe('Research round 15: one-risk-word content check', () => {
     for (const id of ['pmid-37881498', 'pmid-37922258', 'pmid-29286987', 'pmid-40639456', 'pmid-37708365', 'pmid-33608901', 'pmid-32200197', 'pmid-34755503', 'pmid-27244847']) expect(byId.get(id)!.certainty).toBe('not stated');
   });
 });
+
+// Round 16: the remaining one-risk-word items (mostly "should" or
+// "recommend" alone) and the first 100 plain-number items, pregnancy,
+// breastfeeding, medicine and lab topics first, checked against abstracts.
+describe('Research round 16: one-risk-word and plain-number content check', () => {
+  const lib = getLibrary();
+  const byId = new Map(lib.items.map((i) => [i.id, i]));
+  const text = (id: string) => [byId.get(id)!.summary, ...byId.get(id)!.keyPoints].join(' ');
+
+  it('wrong or overstated results are corrected', () => {
+    expect(byId.get('pmid-33773630')!.summary).toMatch(/17-OHPC injections showed a similar trend/);
+    expect(byId.get('pmid-35665911')!.summary).not.toMatch(/similar number of false alarms in most studies/);
+    expect(byId.get('pmid-33368142')!.summary).not.toMatch(/received a single course/);
+    expect(text('pmid-29376559')).not.toMatch(/\) gave small-to-moderate|activity gave small-to-moderate/);
+    expect(text('pmid-34559424')).toMatch(/may get pain relief/);
+    expect(text('pmid-34488087')).toMatch(/twice the odds/);
+  });
+
+  it('"similar" / "did not lower" where the abstract found no clear difference', () => {
+    for (const id of ['pmid-31709403', 'pmid-26036214', 'pmid-34432115', 'pmid-27827818', 'pmid-39461793', 'pmid-34247796', 'pmid-36987390']) expect(text(id)).toMatch(/no clear (difference|reduction)/);
+    expect(text('pmid-31709403')).not.toMatch(/about the same/);
+    expect(text('pmid-34247796')).not.toMatch(/did not lower/);
+  });
+
+  it('facts not in the abstract are removed', () => {
+    expect(text('pmid-32332417')).not.toMatch(/Committee Opinion 721/);
+    expect(text('pmid-41671440')).not.toMatch(/Version 3\.2019/);
+  });
+
+  it('certainty labels the abstracts never gave are "not stated"', () => {
+    for (const id of ['pmid-34521386', 'pmid-38766683', 'pmid-35042510', 'pmid-30529576', 'pmid-34928300', 'pmid-32968801', 'pmid-28647726', 'pmid-30920314', 'pmid-31801099', 'pmid-38902658']) expect(byId.get(id)!.certainty).toBe('not stated');
+  });
+});

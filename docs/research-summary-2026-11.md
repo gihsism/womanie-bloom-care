@@ -30,18 +30,21 @@ thyroid, screening tests, infections).
 
 ## How much has been checked
 
-Over 15 rounds of review, **1,872 source summaries** were read side by side
+Over 16 rounds of review, **2,098 source summaries** were read side by side
 with the original research abstract. Rounds 1-13 started with the sources
 users are most likely to see (the order came from running several hundred
 everyday questions through the app and counting which sources came up
 most). Round 14 picked the riskiest of the rest: summaries that give doses
 or numbers, call something "safe", say what women "should" do, or talk
 about medicines in pregnancy or breastfeeding. Round 15 took the next 150,
-which had one of those risk words.
+which had one of those risk words. Round 16 took the rest of those and
+the first 100 that only give a plain number, pregnancy, breastfeeding,
+medicine and lab topics first.
 
 - About 5 in 6 summaries were fine as written.
-- **514 corrections** were made in total (153 of them in round 14, in 70
-  of the 150 risky summaries checked; 64 in round 15, in 41 of 150).
+- **656 corrections** were made in total (153 of them in round 14, in 70
+  of the 150 risky summaries checked; 64 in round 15, in 41 of 150; 142 in
+  round 16, in 87 of 226).
 - Almost every source that comes up for the questions we tested has now
   been checked once.
 
@@ -130,14 +133,15 @@ them, and these come up first in the chat:
 - **Ten higher-priority gaps** from the first audit, such as painkillers
   while breastfeeding, how long it usually takes to get pregnant, and IVF
   success rates by age (the list is at the top of `docs/research-gaps.md`).
-- **About 680 summaries have never been checked.** They did not come up
+- **About 455 summaries have never been checked.** They did not come up
   for any of the questions we tested, and they are the lower-risk ones.
-  Round 15 checked 150 more against their abstracts (64 fixes in 41
-  summaries: overstated results toned down, "as effective" changed to "no
-  clear difference", nine certainty labels set to "not stated", and advice
-  credited to the guideline that gave it). Still open: about 135 with one
-  risk word (such as "should" alone), about 500 with only a plain number,
-  about 50 none. The next step is the 135.
+  Round 16 checked 226 more against their abstracts (142 fixes in 87
+  summaries: results that were wrong or too strong corrected, "similar" or
+  "did not lower" changed to "no clear difference", two facts not in the
+  abstract removed, ten certainty labels set to "not stated", and advice
+  credited to the body that gave it). Still open: about 400 with only a
+  plain number, 8 with a risk word but no abstract to check against, about
+  50 none. The next step is the 400.
 - **A few labels are judgement calls** (for example a review that grades
   its findings from "moderate" to "low" and carries one label). These were
   left as they are and are listed in the detailed file.

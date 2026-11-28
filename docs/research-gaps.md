@@ -724,7 +724,7 @@ no re-embed):
 - Blanket safety claim in the app's voice: `pmid-30762623` (creatine
   "safe" is now the authors' judgement for these trials).
 
-Left as is: 22 judgement calls (labels where the abstract grades a range
+Left as is: 26 judgement calls (labels where the abstract grades a range
 or only the main outcome; evidence levels instead of GRADE), e.g.
 `pmid-32683695`, `pmid-35922074`, `pmid-26415762`, `pmid-34994399`,
 `pmid-32303295`, `pmid-29117320`, `pmid-43055207`.
@@ -1330,6 +1330,63 @@ About 680 PubMed items remain unchecked: about 135 with one risk word
 (score 4 and below: mostly "should", "recommend" or "safe" alone), about
 500 with only a plain number, and about 50 with none of the risk words.
 Tests: `ask-ai-audit.test.ts` (round 15 block).
+
+## Round 16 (2026-11-28)
+
+### Summary content check: the rest of the one-risk-word tier and 100 plain-number items
+
+Same method as round 15. Of the 681 PubMed items still unchecked, 134 had
+one risk word (score 2-4); 126 were checked against their abstracts (the
+other 8 have no abstract on PubMed and were skipped: `pmid-30000103`,
+`pmid-26598775`, `pmid-31393678`, `pmid-37871145`, `pmid-42932433`,
+`pmid-31940155`, `pmid-30070803`, `pmid-33369898`). Then the first 100
+plain-number items, ranked so pregnancy, breastfeeding, medicine, screening
+and lab topics come first. **226 checked, 139 fair; 142 fixes in 87 items**,
+text only (81 re-embedded offline; the 6 certainty-only changes need no
+re-embed):
+
+- Wrong or overstated results: `pmid-33773630` (17-OHPC injections did not
+  clearly reduce births before 34 weeks; the interval includes no effect,
+  now "a similar trend"), `pmid-35665911` (guaiac vs immunochemical stool
+  tests: false alarms not "similar in most studies"; no clear difference
+  in one group, fewer with guaiac in the other), `pmid-33368142` (antenatal
+  steroid benefit was not limited to "a single course"), `pmid-29376559`
+  (exercise after breast cancer "may give" benefits; very low to moderate
+  evidence), `pmid-34559424` (paracetamol after birth: low certainty, now
+  "may"), `pmid-34488087` (PMDD and suicidality: odds, not "twice as
+  likely"), `pmid-32756565` (oxytocin and breastfeeding: causal wording
+  from small exploratory studies), `pmid-39504810` (early- vs late-onset
+  pre-eclampsia never compared in the abstract), `pmid-26650969`,
+  `pmid-38056353`, `pmid-35136186`, `pmid-34928300` ("linked to", not
+  caused).
+- "Similar", "about the same", "did not lower" or "did not differ" where
+  the abstract found no clear difference: `pmid-31709403` (home vs
+  hospital birth, baby deaths), `pmid-26036214` (corifollitropin vs daily
+  FSH), `pmid-34432115`, `pmid-27827818`, `pmid-39461793` (tranexamic acid,
+  blood clots), `pmid-36987390` (blood pressure treatment in pregnancy,
+  small babies), `pmid-34247796` (magnesium for leg cramps),
+  `pmid-31124186`, `pmid-38311812` and about 12 more.
+- Facts not in the abstract removed: `pmid-32332417` ("replaces Committee
+  Opinion 721"), `pmid-41671440` ("replaces Version 3.2019").
+- Certainty -> "not stated" (the abstract grades nothing): `pmid-34521386`,
+  `pmid-38766683`, `pmid-35042510`, `pmid-30529576`, `pmid-34928300` (was
+  "high"), `pmid-32968801`, `pmid-28647726`, `pmid-30920314`,
+  `pmid-31801099`, `pmid-38902658`.
+- Advice in the app's voice credited to ACOG, CDC, ASRM, NAMS, the US Task
+  Force, the WPSI, the guideline, committee, expert panel or authors: about
+  75 edits (tobacco in pregnancy, Zika testing, labour epidurals, VBAC,
+  teen contraception, PCOS hirsutism, fertility preservation, thyroid storm,
+  alcohol screening in pregnancy, menopause treatments and others).
+
+Left as is: 26 judgement calls (certainty picked from a graded range),
+e.g. `pmid-34432115`, `pmid-27827818`, `pmid-29376559`, `pmid-33368142`.
+`pmid-33942364` keeps its key point on older age: the abstract's results
+and conclusion disagree, and the key point follows the conclusion.
+
+About 455 PubMed items remain unchecked: 8 with one risk word but no
+abstract, about 400 with only a plain number (lower-priority topics), and
+about 50 with none of the risk words.
+Tests: `ask-ai-audit.test.ts` (round 16 block).
 
 ## Data-quality notes found during the audit
 

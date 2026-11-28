@@ -2945,12 +2945,12 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/39470676/",
-   "summary": "These Italian guidelines look at how to spot alcohol drinking during pregnancy, because alcohol exposure before birth can cause Fetal Alcohol Spectrum Disorders (FASD). FASD can affect the brain, growth and facial features, and there is no known treatment, so finding alcohol use early matters. The guidelines say questionnaires may miss drinking because women may not feel able to answer honestly. They recommend adding tests for alcohol markers in blood, urine, hair or the baby's first stool to pregnancy care.",
+   "summary": "These Italian guidelines look at how to spot alcohol drinking during pregnancy, because alcohol exposure before birth can cause Fetal Alcohol Spectrum Disorders (FASD). FASD can affect the brain, growth and facial features, and there is no known treatment, so the guidelines stress finding alcohol use early. The guidelines say questionnaires may miss drinking because women may not feel able to answer honestly. They recommend adding tests for alcohol markers in blood, urine, hair or the baby's first stool to pregnancy care.",
    "keyPoints": [
     "FASD is caused by alcohol exposure during pregnancy and mainly affects the brain, growth and facial features.",
-    "There are no known treatments for FASD, so early screening in pregnancy is important.",
+    "There are no known treatments for FASD, so the authors stress early screening in pregnancy.",
     "Questionnaires such as AUDIT-C, T-ACE and TWEAK may under-report drinking because of social pressure to answer in an expected way.",
-    "Alcohol marker tests (for example PEth in blood and EtG in urine) are recommended as part of pregnancy monitoring; urine EtG is very sensitive and can pick up occasional drinking."
+    "Alcohol marker tests (for example PEth in blood and EtG in urine) are recommended by the authors as part of pregnancy monitoring; urine EtG is very sensitive and can pick up occasional drinking."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -3606,7 +3606,7 @@
     "FASD is a lifelong condition caused by alcohol exposure before birth, and it is preventable.",
     "All ten studies reviewed were rated as poor quality, with problems like people dropping out, no comparison groups and reliance on self-reported drinking.",
     "There is little evidence that earlier prevention programs in Indigenous communities have been effective.",
-    "Future programs should address cultural factors and historical context and be evaluated rigorously."
+    "The authors say future programs should address cultural factors and historical context and be evaluated rigorously."
    ],
    "certainty": "low",
    "lifeStages": [
@@ -7652,7 +7652,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/32510990/",
    "summary": "The Women's Preventive Services Initiative, a group of women's health organisations and patient representatives, recommends that clinicians screen for anxiety in girls and women aged 13 and older who have not already been diagnosed with an anxiety disorder. This includes pregnant and postpartum women. No studies directly tested whether screening itself improves outcomes, but the screening questionnaires were moderately to highly accurate, and both talking therapies and certain medicines helped symptoms. A positive screen is a first step, and further assessment is needed to confirm a diagnosis.",
    "keyPoints": [
-    "Screening for anxiety is recommended for women and girls aged 13 or older without a current anxiety diagnosis, including during pregnancy and after birth.",
+    "The WPSI recommends screening for anxiety in women and girls aged 13 or older without a current anxiety diagnosis, including during pregnancy and after birth.",
     "No studies directly looked at the overall benefits or harms of screening itself.",
     "Twenty-seven screening tools were moderately to highly accurate at spotting anxiety.",
     "Psychological therapies and SSRI or SNRI medicines improved symptoms and reduced relapse; the best screening interval is unknown, and a positive screen needs further evaluation."
@@ -10413,7 +10413,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/40716213/",
-   "summary": "This review pooled seven studies on pelvic belts for low back and pelvic girdle pain in pregnancy. Belts gave a modest drop in pain and little change in disability. The quality of the evidence was low to very low, so no firm recommendations can be made yet.",
+   "summary": "This review pooled seven studies on pelvic belts for low back and pelvic girdle pain in pregnancy. Belts may give a modest drop in pain and little change in disability. The quality of the evidence was low to very low, so no firm recommendations can be made yet.",
    "keyPoints": [
     "Across 6 studies, pain scores fell by about 20 points on average with a pelvic belt, but the range of results was wide and included no change.",
     "Across 5 studies, disability improved only slightly, and the range of results also included no change.",
@@ -11557,12 +11557,12 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/31124186/",
-   "summary": "This review pooled results from 10 studies comparing a planned vaginal birth (trial of labour) with a planned repeat caesarean in women pregnant with twins who had a previous caesarean. About 7 in 10 women who tried labour gave birth vaginally, and uterine rupture was rare (under 1%). Trying labour was linked to a higher risk of newborn death, but the authors say this may be influenced by prematurity and needs more research. Women who tried labour had fewer infections, and the risks of blood transfusion and hysterectomy were similar between the two groups.",
+   "summary": "This review pooled results from 10 studies comparing a planned vaginal birth (trial of labour) with a planned repeat caesarean in women pregnant with twins who had a previous caesarean. About 7 in 10 women who tried labour gave birth vaginally, and uterine rupture was rare (under 1%). Trying labour was linked to a higher risk of newborn death, but the authors say this may be influenced by prematurity and needs more research. Women who tried labour had fewer infections, and there was no clear difference in the risks of blood transfusion and hysterectomy between the two groups.",
    "keyPoints": [
     "Around 72% of twin pregnancies that attempted labour after a previous caesarean ended in a successful vaginal birth.",
     "Uterine rupture occurred in about 0.87% of women who tried labour.",
     "Trying labour was linked to a higher risk of neonatal death (relative risk about 3), which may be influenced by prematurity and needs further investigation.",
-    "Maternal infection was lower with trial of labour, while risks of blood transfusion, hysterectomy and uterine dehiscence were similar to a repeat caesarean."
+    "Maternal infection was lower with trial of labour, while there was no clear difference from a repeat caesarean in blood transfusion, hysterectomy or uterine dehiscence."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -11705,10 +11705,10 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/29064964/",
    "summary": "This guideline looks at trying to give birth vaginally after a previous caesarean, called a trial of labor after cesarean (TOLAC). A successful vaginal birth after caesarean (VBAC) is linked to fewer health problems for the mother and fewer complications in future pregnancies. A trial of labor that ends in a repeat caesarean is linked to more health problems for mother and baby than either a successful VBAC or a planned repeat caesarean. Because of this, the guideline stresses checking each woman's chance of success and her individual risks when deciding if a trial of labor is a good fit.",
    "keyPoints": [
-    "TOLAC is appropriate for many women who have had a previous caesarean.",
+    "The guideline says TOLAC is appropriate for many women who have had a previous caesarean.",
     "A successful VBAC is linked to less maternal illness and fewer complications in future pregnancies.",
     "A failed trial of labor is linked to more maternal and baby health problems than VBAC or a planned repeat caesarean.",
-    "Doctors should assess the likelihood of VBAC and each woman's individual risks when counselling about who is a good candidate."
+    "The guideline says doctors should assess the likelihood of VBAC and each woman's individual risks when counselling about who is a good candidate."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -11750,12 +11750,12 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/29064970/",
-   "summary": "This guideline looks at planned attempts to give birth vaginally after a previous caesarean, called a trial of labor after cesarean (TOLAC). When it works, it is called a vaginal birth after cesarean (VBAC). VBAC is linked to fewer complications for the mother and fewer problems in future pregnancies. However, a trial of labor that does not succeed carries more risk than a successful VBAC or a planned repeat caesarean, so it is important to check each woman's chances and risks.",
+   "summary": "This guideline looks at planned attempts to give birth vaginally after a previous caesarean, called a trial of labor after cesarean (TOLAC). When it works, it is called a vaginal birth after cesarean (VBAC). VBAC is linked to fewer complications for the mother and fewer problems in future pregnancies. However, a trial of labor that does not succeed carries more risk than a successful VBAC or a planned repeat caesarean, so the guideline says it is important to check each woman's chances and risks.",
    "keyPoints": [
-    "TOLAC is appropriate for many women who have had a previous caesarean and want a vaginal birth.",
+    "The guideline says TOLAC is appropriate for many women who have had a previous caesarean and want a vaginal birth.",
     "A successful VBAC is linked to lower maternal complications and fewer complications in future pregnancies.",
     "A failed trial of labor is linked to more maternal and newborn complications than a successful VBAC or an elective repeat caesarean.",
-    "Doctors should assess the likelihood of VBAC and the individual risks when counseling about who is a good candidate."
+    "The guideline says doctors should assess the likelihood of VBAC and the individual risks when counseling about who is a good candidate."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -14910,7 +14910,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/38056353/",
    "summary": "This review pooled 16 studies testing whether text messages can support breastfeeding. Mothers who got text messages were more likely to be exclusively breastfeeding, and they felt more confident about breastfeeding, than mothers who got no messages or general health information. Messages that started in pregnancy, continued after birth and were sent weekly worked best.",
    "keyPoints": [
-    "Text messaging raised exclusive breastfeeding rates at under 3 months, at 3-6 months, and at 6 months or more.",
+    "Text messaging was linked to higher exclusive breastfeeding rates at under 3 months, at 3-6 months, and at 6 months or more.",
     "Mothers who received texts reported higher breastfeeding self-efficacy (confidence in their ability to breastfeed).",
     "Weekly texts covering both pregnancy and the time after birth were the most effective approach.",
     "Texts were compared with no messages or general health information."
@@ -17596,7 +17596,7 @@
     "Success after the first treatment was about 86% with ultrasound-guided suction curettage, 72% with systemic methotrexate and 82% with local methotrexate.",
     "Laparoscopy (96%), hysteroscopy (90%) and high intensity focused ultrasound (93%) had high success rates when used on their own.",
     "Combined treatments, such as curettage with a balloon or focused ultrasound followed by curettage, reached success rates of 96-98%.",
-    "Systemic and local methotrexate did not differ in success, and curettage was linked to a higher chance of successful treatment in comparison studies."
+    "There was no clear difference in success between systemic and local methotrexate, and curettage was linked to a higher chance of successful treatment in comparison studies."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -18929,7 +18929,7 @@
     "Dietary intake of carbohydrate, folate, omega-3 fats, vitamin C or sodium was not linked with telomere length.",
     "The evidence is limited, and larger long-term studies of pregnant women are needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "pregnancy"
@@ -19739,10 +19739,10 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/39461793/",
-   "summary": "Researchers combined data from five large, well-run trials involving over 54,000 women giving birth to see if tranexamic acid, a medicine that helps blood clot, reduces dangerous bleeding after birth. Life-threatening bleeding was less common in women who got the medicine (0.65%) than in those who got a placebo (0.85%). Blood clot problems were equally rare in both groups (0.2%). The authors do not suggest giving it to every woman who gives birth, but say it could be considered earlier for women at high risk of death from bleeding.",
+   "summary": "Researchers combined data from five large, well-run trials involving over 54,000 women giving birth to see if tranexamic acid, a medicine that helps blood clot, reduces dangerous bleeding after birth. Life-threatening bleeding was less common in women who got the medicine (0.65%) than in those who got a placebo (0.85%). Blood clot problems were rare, with no clear difference between groups (0.2% in both). The authors do not suggest giving it to every woman who gives birth, but say it could be considered earlier for women at high risk of death from bleeding.",
    "keyPoints": [
     "Life-threatening bleeding after birth occurred in 0.65% of women given tranexamic acid versus 0.85% given placebo.",
-    "No difference was found in blood clots (thromboembolic events): 0.2% in both groups.",
+    "No clear difference was found in blood clots (thromboembolic events): 0.2% in both groups.",
     "The benefit did not clearly differ by type of birth, anaemia, underlying bleeding risk, or timing of the dose.",
     "The authors do not recommend routine use for all births but suggest considering it early for women at high risk of death."
    ],
@@ -22052,12 +22052,12 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/35665911/",
-   "summary": "This Cochrane review compared two stool-based bowel cancer screening tests, the older guaiac test (gFOBT) and the newer faecal immunochemical test (FIT), in people at average risk. It pooled results from dozens of studies. FIT was better than the guaiac test at picking up bowel cancer and advanced pre-cancerous growths, and the two tests gave a similar number of false alarms in most studies. Neither test is perfect, and both can miss some cancers.",
+   "summary": "This Cochrane review compared two stool-based bowel cancer screening tests, the older guaiac test (gFOBT) and the newer faecal immunochemical test (FIT), in people at average risk. It pooled results from dozens of studies. FIT was better than the guaiac test at picking up bowel cancer and advanced pre-cancerous growths, and there was no clear difference in false alarms in one group of studies, while the guaiac test gave fewer false alarms in the other. Neither test is perfect, and both can miss some cancers.",
    "keyPoints": [
     "FIT found more bowel cancers than the guaiac test: about 76% versus 39% in studies where everyone also had a colonoscopy.",
     "In studies following people with negative tests, FIT detected about 89% of cancers versus 59% for the guaiac test.",
     "For advanced growths (advanced adenomas and cancer combined), FIT picked up about 26% to 33% compared with 15% for the guaiac test, so both tests still miss many.",
-    "Specificity (correctly clearing people without disease) was similar in some studies, but in others the guaiac test had fewer false alarms leading to unnecessary colonoscopy."
+    "Specificity (correctly clearing people without disease) showed no clear difference in some studies, but in others the guaiac test had fewer false alarms leading to unnecessary colonoscopy."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -24179,10 +24179,10 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/33595253/",
-   "summary": "This guidance from the American College of Obstetricians and Gynecologists (ACOG) covers inclusive, affirming health care for transgender and gender diverse people, including hormone therapy and preventive care. It says gender-affirming hormone therapy is not effective contraception. People who are sexually active and still have their gonads, and who do not want a pregnancy (or do not want to cause one), should be counselled about the chance of pregnancy.",
+   "summary": "This guidance from the American College of Obstetricians and Gynecologists (ACOG) covers inclusive, affirming health care for transgender and gender diverse people, including hormone therapy and preventive care. It says gender-affirming hormone therapy is not effective contraception. ACOG says people who are sexually active and still have their gonads, and who do not want a pregnancy (or do not want to cause one), should be counselled about the chance of pregnancy.",
    "keyPoints": [
     "Gender-affirming hormone therapy is not effective contraception.",
-    "Sexually active people with retained gonads who want to avoid pregnancy should be counselled about pregnancy risk when sexual activity involves sperm and oocytes.",
+    "ACOG says sexually active people with retained gonads who want to avoid pregnancy should be counselled about pregnancy risk when sexual activity involves sperm and oocytes.",
     "Not every transgender person has gender dysphoria or wants hormone treatment.",
     "Inclusive, affirming care is essential to reduce the health inequities transgender people face."
    ],
@@ -29580,12 +29580,12 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/28742669/",
-   "summary": "This is a guideline summary from the American College of Obstetricians and Gynecologists on how doctors should talk with teenagers about birth control. It says modern contraceptives work very well when used correctly, and that talks should start with the most effective methods. Emergency contraception should always be part of the conversation, including how teens can get it. Teens should be able to choose their own method and keep their visits private where possible.",
+   "summary": "This is a guideline summary from the American College of Obstetricians and Gynecologists on how doctors should talk with teenagers about birth control. It says modern contraceptives work very well when used correctly, and that talks should start with the most effective methods. It says emergency contraception should routinely be part of the conversation, including how teens can get it. It also says teens should be able to choose their own method and keep their visits private where possible.",
    "keyPoints": [
     "Modern contraceptives are very effective when used correctly, so good counseling and access matter in teen health care.",
-    "Contraception talks should begin with the most effective methods first.",
-    "Emergency contraception should routinely be included in contraception discussions, including how to access it.",
-    "A teenager should never be forced to use a method chosen by someone else, such as a parent, partner or health care provider."
+    "ACOG recommends that contraception talks begin with the most effective methods first.",
+    "ACOG says emergency contraception should routinely be included in contraception discussions, including how to access it.",
+    "ACOG says a teenager should never be forced to use a method chosen by someone else, such as a parent, partner or health care provider."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -31838,7 +31838,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/34841649/",
    "summary": "Researchers compared 13 clinical guidelines on physical activity during pregnancy. The guidelines from the World Health Organization and NICE were rated as the best quality. Most guidelines agreed on how long, how often, how hard and what type of activity to do. They disagreed on a few details, such as how to screen before exercising, the best heart rate, and when in pregnancy to start.",
    "keyPoints": [
-    "Physical activity is recommended for healthy pregnant women.",
+    "Guidelines recommend physical activity for healthy pregnant women.",
     "Across 13 guidelines, advice on exercise duration, frequency, intensity and type was consistent.",
     "Guidelines differed on pre-exercise screening tools, how to measure exertion, target heart rate, and when to start exercising.",
     "Only 2 of the 13 guidelines were judged to have good methodological quality (WHO and NICE)."
@@ -33581,9 +33581,9 @@
    "summary": "This review looked at published research on how uterine fibroids (leiomyomas) show up, are diagnosed and are treated in women of reproductive age. It concluded that women who become pregnant while having fibroids are at higher risk of pregnancy and newborn complications. The authors recommend against simply watching and waiting in women of childbearing age, and suggest surgery that removes the fibroids while keeping the uterus. The abstract does not describe how strong the evidence is.",
    "keyPoints": [
     "Pregnancy with uterine fibroids is considered high risk for complications for the mother and baby.",
-    "Hospital care in a specialised obstetric unit is recommended during the riskiest periods of pregnancy.",
+    "The authors recommend hospital care in a specialised obstetric unit during the riskiest periods of pregnancy.",
     "The authors advise against passive watch-and-wait management in women of childbearing age with fibroids.",
-    "Fibroid removal surgery that keeps the uterus (leiomyomectomy) is recommended to protect the ability to have children."
+    "Fibroid removal surgery that keeps the uterus (leiomyomectomy) is recommended by the authors to protect the ability to have children."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -37928,7 +37928,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/37347387/",
-   "summary": "This review combined results from 35 studies covering almost 24 million pregnant women to see whether smoking during pregnancy raises the chance of gestational diabetes. Overall, smoking was not linked to a higher risk of gestational diabetes. The studies differed a lot in how they diagnosed gestational diabetes, which makes the picture less clear.",
+   "summary": "This review combined results from 35 studies covering almost 24 million pregnant women to see whether smoking during pregnancy raises the chance of gestational diabetes. Overall, there was no clear link between smoking and a higher risk of gestational diabetes. The studies differed a lot in how they diagnosed gestational diabetes, which makes the picture less clear.",
    "keyPoints": [
     "Across 35 studies, smoking during pregnancy was not clearly linked to gestational diabetes (pooled odds ratio 1.06, not statistically significant).",
     "A smaller group of studies using the same two-step diagnostic method also showed no clear link.",
@@ -38483,7 +38483,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/32074479/",
-   "summary": "This review pooled 27 U.S. studies covering about 96,000 women who had gestational diabetes. It looked at how many were screened for diabetes after giving birth, and whether this differed by race and ethnicity. Fewer than half were screened (about 42%). Screening was lowest among white and black women and higher among Hispanic and Asian women, though studies varied a lot in how they measured and reported this.",
+   "summary": "This review pooled 27 U.S. studies covering about 96,000 women who had gestational diabetes. It looked at how many were screened for diabetes after giving birth, and whether this differed by race and ethnicity. Fewer than half were screened (about 42%). Screening rates appeared lower among white and black women than among Hispanic and Asian women, though studies varied a lot in how they measured and reported this.",
    "keyPoints": [
     "About half of women with gestational diabetes may go on to develop type 2 diabetes, with the highest risk among black women.",
     "Only about 42% of women with gestational diabetes had diabetes screening after pregnancy.",
@@ -38940,7 +38940,7 @@
     "Metformin had the highest chance of being the most effective medicine compared with insulin or glibenclamide, based on indirect comparisons.",
     "The trials often included few women, were poorly reported and measured few outcomes, so large, well-run trials are urgently needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "pregnancy",
     "postpartum"
@@ -47093,10 +47093,10 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/36987390/",
-   "summary": "This review pooled 12 randomized trials with 4,461 pregnant women who had mild to moderate high blood pressure. Women who took blood pressure medicine had better outcomes in 7 of the 19 areas checked, including less severe high blood pressure, less preeclampsia and fewer newborn deaths. The medicine did not raise the chance of the baby being small for its age. The authors say this supports treating mild high blood pressure in pregnancy, even though current guidelines do not recommend it.",
+   "summary": "This review pooled 12 randomized trials with 4,461 pregnant women who had mild to moderate high blood pressure. Women who took blood pressure medicine had better outcomes in 7 of the 19 areas checked, including less severe high blood pressure, less preeclampsia and fewer newborn deaths. There was no clear difference in the chance of the baby being small for its age. The authors say this supports treating mild high blood pressure in pregnancy, even though current guidelines do not recommend it.",
    "keyPoints": [
     "Treatment lowered the risk of severe high blood pressure, preeclampsia, placental abruption, kidney problems, pulmonary edema and newborn death.",
-    "Babies being small for gestational age was not different between treated and untreated groups.",
+    "Babies being small for gestational age showed no clear difference between treated and untreated groups.",
     "No significant harms to the baby were found.",
     "Guidelines do not currently recommend treating mild hypertension in pregnancy, but recent trials support it."
    ],
@@ -47248,7 +47248,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/35136186/",
-   "summary": "This review pooled 40 randomized trials with 6,355 pregnant women who had mild to moderate high blood pressure. Treatment that lowered blood pressure cut the risk of developing severe high blood pressure by more than half. It also lowered the risk of preeclampsia, placental abruption and preterm birth, but small-for-gestational-age babies were more common. Reaching a top (systolic) number under 130 mmHg lowered the risk of severe hypertension to about one-third of the risk at 140 or above.",
+   "summary": "This review pooled 40 randomized trials with 6,355 pregnant women who had mild to moderate high blood pressure. Treatment that lowered blood pressure cut the risk of developing severe high blood pressure by more than half. It also lowered the risk of preeclampsia, placental abruption and preterm birth, but small-for-gestational-age babies were more common. Reaching a top (systolic) number under 130 mmHg was linked to about one-third of the risk of severe hypertension seen at 140 or above.",
    "keyPoints": [
     "Blood pressure-lowering treatment reduced severe hypertension (risk ratio 0.46) and also reduced preeclampsia, severe preeclampsia, placental abruption and preterm birth before 37 weeks.",
     "The risk of having a small for gestational age baby was higher with treatment (risk ratio 1.25).",
@@ -49311,11 +49311,11 @@
    "summary": "The European paediatric gastroenterology and nutrition society (ESPGHAN) reviewed the evidence on special infant formulas sold for spit-up, colic and constipation in babies. These problems are common, usually normal in the early months, and often need no treatment. The evidence that special formulas help is limited, and the group says they should only be used on medical advice.",
    "keyPoints": [
     "Spit-up, colic and constipation are common and usually normal in young babies, and typically do not need treatment or a switch to a special formula.",
-    "Breastfed babies with these problems should not be moved from breastfeeding to commercial formula.",
+    "The committee says breastfed babies with these problems should not be moved from breastfeeding to commercial formula.",
     "Specialized formulas are not advised for colic because there is a lack of clinical evidence that they work.",
     "Thickened formulas may be considered in specific cases of spit-up, and formulas with high β-palmitate and extra magnesium may be considered to soften stools in constipation."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "postpartum"
    ],
@@ -50910,7 +50910,7 @@
    "keyPoints": [
     "Six of eight studies found an association between low vitamin D and depression in pregnancy or after birth.",
     "The authors conclude there is a probable relationship between vitamin D deficiency and a higher chance of gestational and postpartum depression.",
-    "Vitamin D supplementation appears to be a promising way to reduce the risk of depressive symptoms.",
+    "The authors say vitamin D supplementation appears to be a promising way to reduce the risk of depressive symptoms.",
     "The review covered 8,583 women from seven countries."
    ],
    "certainty": "not stated",
@@ -51061,7 +51061,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/30173219/",
-   "summary": "This review combined five randomized trials with 310 women who had gestational diabetes. It looked at whether taking vitamin D supplements changed their blood sugar and cholesterol, and how their babies did. Women who took vitamin D had better fasting blood sugar, cholesterol and inflammation markers, and their newborns were less likely to have high bilirubin (a cause of newborn jaundice). The review is small and the abstract does not rate how certain the evidence is.",
+   "summary": "This review combined five randomized trials with 310 women who had gestational diabetes. It looked at whether taking vitamin D supplements changed their blood sugar and cholesterol, and how their babies did. Women who took vitamin D had better fasting blood sugar, cholesterol and inflammation markers, and their newborns were less likely to have high bilirubin (a cause of newborn jaundice). The authors say vitamin D may lead to these improvements, but the review is small and the abstract does not rate how certain the evidence is.",
    "keyPoints": [
     "Vitamin D supplements in women with gestational diabetes were linked to lower fasting blood sugar.",
     "Total and LDL (\"bad\") cholesterol were lower and HDL (\"good\") cholesterol was higher with vitamin D.",
@@ -61544,12 +61544,12 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/26036214/",
-   "summary": "This study pooled the results of seven randomized trials comparing two IVF stimulation medicines: corifollitropin alfa (a long-lasting FSH given less often) and daily FSH injections. Live birth, ongoing pregnancy and clinical pregnancy rates were similar with both. The long-lasting medicine gave more mature eggs and more embryos, but more cycles were cancelled because of overstimulation, so it should be used cautiously in women who tend to respond strongly.",
+   "summary": "This study pooled the results of seven randomized trials comparing two IVF stimulation medicines: corifollitropin alfa (a long-lasting FSH given less often) and daily FSH injections. Live birth, ongoing pregnancy and clinical pregnancy rates showed no clear difference between them. The long-lasting medicine gave more mature eggs and more embryos, but more cycles were cancelled because of overstimulation, so the authors say it should be used cautiously in women who tend to respond strongly.",
    "keyPoints": [
-    "Live birth, ongoing pregnancy and clinical pregnancy rates were comparable between corifollitropin alfa and daily FSH.",
+    "Live birth, ongoing pregnancy and clinical pregnancy rates showed no clear difference between corifollitropin alfa and daily FSH.",
     "Corifollitropin alfa led to more mature (metaphase II) eggs collected and more embryos formed.",
     "Cycle cancellation due to overstimulation was significantly more common with corifollitropin alfa.",
-    "Ovarian hyperstimulation syndrome (OHSS) rates were statistically similar between the two approaches."
+    "Ovarian hyperstimulation syndrome (OHSS) rates showed no clear difference between the two approaches."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -62007,7 +62007,7 @@
    "summary": "This review pooled 58 randomised trials with nearly 11,000 women having IVF to see whether acupuncture improves pregnancy results. Overall, acupuncture was linked to higher clinical pregnancy and live birth rates than comparison groups. However, the quality of the evidence was low or extremely low, and the studies varied a lot in how they were done, so the findings should be treated with caution.",
    "keyPoints": [
     "Acupuncture was linked to a higher clinical pregnancy rate (relative risk 1.19) and live birth rate (relative risk 1.11) than control groups, but the evidence was rated extremely low and low quality.",
-    "Only transcutaneous electrical acupoint stimulation, a type of acupuncture using mild electrical pulses, showed a benefit for both pregnancy and live birth rates.",
+    "Only transcutaneous electrical acupoint stimulation, a type of acupuncture using mild electrical pulses, was linked to better pregnancy and live birth rates, with moderate to extremely low quality evidence.",
     "No studies were graded as high-quality evidence, and results differed across studies.",
     "The authors concluded that the evidence linking acupuncture to better IVF outcomes is relatively weak."
    ],
@@ -62059,7 +62059,7 @@
     "Live birth and clinical pregnancy rates after IUI did not differ significantly between women with a BMI under 25 and those with a BMI of 25 or more.",
     "Miscarriage and ectopic pregnancy rates also showed no statistically significant difference.",
     "The authors concluded that a raised female BMI did not affect IUI treatment outcomes.",
-    "Weight loss counselling should still be offered to women with a raised BMI undergoing IUI, to reduce related obstetric complications."
+    "The authors say weight loss counselling should still be offered to women with a raised BMI undergoing IUI, to reduce related obstetric complications."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -64164,7 +64164,7 @@
    "keyPoints": [
     "Worldwide, severe bleeding was the leading cause of maternal death (27%), followed by indirect causes (23%) and high blood pressure disorders (16%).",
     "Bleeding deaths were most common in sub-Saharan Africa and in Western Asia and Northern Africa; high blood pressure deaths were highest in Latin America and the Caribbean.",
-    "Most deaths from bleeding and infection (sepsis) happened in the postpartum period, so care after birth matters as well as care during labour.",
+    "Most deaths from bleeding and infection (sepsis) happened in the postpartum period, and the authors call for better care after birth as well as during labour.",
     "Data on maternal suicide and deaths after 42 days postpartum were very limited, with only 12 countries recording any maternal suicides."
    ],
    "certainty": "not stated",
@@ -64779,10 +64779,10 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/30801474/",
    "summary": "This is a guideline from the American College of Obstetricians and Gynecologists (ACOG) about pain relief and anesthesia during labor and delivery. It states that labor causes severe pain for many women, and that a woman's request for pain relief is a sufficient medical reason to provide it when there is no medical reason against it. It also says access to pain relief such as an epidural should not depend on a woman's health insurance or ability to pay.",
    "keyPoints": [
-    "Unless there is a medical reason not to, a woman's own request is enough of a reason to receive pain relief in labor.",
-    "A woman who asks for an epidural should not be denied it because of her health insurance status, and the methods a hospital offers should not depend on ability to pay.",
-    "Anesthesia services should be available to provide labor pain relief and surgical anesthesia in all hospitals that offer maternity care.",
-    "Trained labor nurses, under appropriate physician supervision, can help manage epidural pain relief so more women can benefit."
+    "According to ACOG, unless there is a medical reason not to, a woman's own request is enough of a reason to receive pain relief in labor.",
+    "ACOG says a woman who asks for an epidural should not be denied it because of her health insurance status, and the methods a hospital offers should not depend on ability to pay.",
+    "ACOG says anesthesia services should be available to provide labor pain relief and surgical anesthesia in all hospitals that offer maternity care.",
+    "ACOG says trained labor nurses, under appropriate physician supervision, should be able to help manage epidural pain relief so more women can benefit."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -64885,7 +64885,7 @@
     "Women report mixed experiences of different labour pain relief methods.",
     "Pharmacological methods (such as epidural and opioids) can reduce pain but have negative side-effects.",
     "Non-pharmacological methods (such as relaxation and massage) may not reduce labour pain but can help bonding with professionals and birth supporters.",
-    "Women need information on the risks and benefits of all available pain relief methods."
+    "The authors say women need information on the risks and benefits of all available pain relief methods."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -67032,7 +67032,7 @@
     "The best time to start luteal support seems to be 24-72 hours after egg retrieval, continuing at least until a positive pregnancy test.",
     "Most IVF centres worldwide give progesterone support up to 8 weeks of pregnancy.",
     "Oral dydrogesterone and subcutaneous progesterone had pregnancy and pregnancy loss rates comparable to vaginal and intramuscular progesterone, with possibly better patient acceptance.",
-    "In frozen-thawed embryo transfer, dydrogesterone and vaginal progesterone were not effective on their own, but there is no reason to avoid either when they are combined."
+    "In frozen-thawed embryo transfer, dydrogesterone and vaginal progesterone were not effective on their own, but the authors see no reason to avoid either when they are combined."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -68909,7 +68909,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34559424/",
-   "summary": "This Cochrane review looked at whether a single dose of paracetamol (acetaminophen) eases pain around the vaginal opening and perineum in the first days after childbirth. It pooled 10 placebo-controlled trials, using data from 1301 women. More women had pain relief with paracetamol than with placebo, and fewer needed extra pain medicine. The trials were old (1970s to early 1990s) and the evidence was rated low certainty.",
+   "summary": "This Cochrane review looked at whether a single dose of paracetamol (acetaminophen) eases pain around the vaginal opening and perineum in the first days after childbirth. It pooled 10 placebo-controlled trials, using data from 1301 women. More women may get pain relief with paracetamol than with placebo, and fewer may need extra pain medicine. The trials were old (1970s to early 1990s) and the evidence was rated low certainty.",
    "keyPoints": [
     "A single dose of paracetamol may give more women pain relief after vaginal birth than placebo.",
     "Fewer women taking paracetamol may need additional pain relief.",
@@ -69835,8 +69835,8 @@
    "keyPoints": [
     "Breastfeeding triggers a short release of oxytocin lasting about 20 minutes, which causes milk ejection.",
     "More oxytocin pulses early on were linked to more milk and longer breastfeeding, and stress reduced the pulses.",
-    "Emergency caesarean section reduced oxytocin and prolactin release, and epidural pain relief reduced prolactin and the mother's mental adaptation.",
-    "Synthetic oxytocin infusions increased prolactin and mental adaptation and restored the negative effects linked to caesarean section and epidural."
+    "In these small exploratory studies, emergency caesarean section was linked to lower oxytocin and prolactin release, and epidural pain relief to lower prolactin and less mental adaptation in the mother.",
+    "Synthetic oxytocin infusions were linked to higher prolactin and mental adaptation and appeared to restore the negative effects linked to caesarean section and epidural."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -74053,10 +74053,10 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/26382310/",
    "summary": "The North American Menopause Society reviewed the evidence on treatments for hot flushes and night sweats that do not use hormones. These options matter for women who cannot or prefer not to take hormone therapy. Cognitive-behavioural therapy and, to a lesser extent, hypnosis were found to help, as were certain prescription medicines. Many popular remedies, such as herbal supplements, acupuncture and exercise, did not have enough good evidence to be recommended as proven.",
    "keyPoints": [
-    "Cognitive-behavioural therapy and, to a lesser extent, clinical hypnosis are recommended as effective for reducing hot flushes and night sweats.",
+    "Cognitive-behavioural therapy and, to a lesser extent, clinical hypnosis are recommended by NAMS as effective for reducing hot flushes and night sweats.",
     "Paroxetine is the only non-hormonal medicine approved by the US FDA for these symptoms; other antidepressants, gabapentinoids and clonidine also show evidence of benefit.",
     "Weight loss, mindfulness-based stress reduction, S-equol (a soy isoflavone derivative) and stellate ganglion block may help but need more study.",
-    "Cooling techniques, avoiding triggers, exercise, yoga, paced breathing, over-the-counter and herbal supplements, acupuncture and chiropractic care are not recommended as proven treatments at this time."
+    "Cooling techniques, avoiding triggers, exercise, yoga, paced breathing, over-the-counter and herbal supplements, acupuncture and chiropractic care are not recommended by NAMS as proven treatments at this time."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -75814,7 +75814,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34851759/",
-   "summary": "This review pooled 13 studies to see whether blood fats (lipids) differ in women with breast cancer before menopause compared with women without it. Triglycerides and LDL ('bad') cholesterol were higher in the women with breast cancer, while total cholesterol and HDL ('good') cholesterol did not differ. The studies varied a lot from one another, and there was signs of publication bias in the triglyceride results, so the findings should be read with caution.",
+   "summary": "This review pooled 13 studies to see whether blood fats (lipids) differ in women with breast cancer before menopause compared with women without it. Triglycerides and LDL ('bad') cholesterol were higher in the women with breast cancer, while total cholesterol and HDL ('good') cholesterol showed no clear difference. The studies varied a lot from one another, and there was signs of publication bias in the triglyceride results, so the findings should be read with caution.",
    "keyPoints": [
     "Triglycerides were higher in premenopausal women with breast cancer than in women without.",
     "LDL cholesterol was also higher in premenopausal women with breast cancer.",
@@ -77219,7 +77219,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/40128683/",
-   "summary": "This review looked at antiphospholipid syndrome (APS), an autoimmune condition that can cause blood clots and problems in pregnancy, including repeated miscarriage. It brought together studies on how APS works, how it is diagnosed and how it is treated in pregnancy. The review found that low-dose aspirin and heparin help reduce miscarriage rates, and that hydroxychloroquine may help in higher-risk cases. The authors say treatment should be tailored to each person and that more research is needed.",
+   "summary": "This review looked at antiphospholipid syndrome (APS), an autoimmune condition that can cause blood clots and problems in pregnancy, including repeated miscarriage. It brought together studies on how APS works, how it is diagnosed and how it is treated in pregnancy. The review found evidence supporting low-dose aspirin and heparin to reduce miscarriage rates, and that hydroxychloroquine may help in higher-risk cases. The authors say treatment should be tailored to each person and that more research is needed.",
    "keyPoints": [
     "APS affects about 0.5% of people and is a leading contributor to recurrent pregnancy loss, preeclampsia and poor fetal growth.",
     "Evidence supports low-dose aspirin and heparin to reduce miscarriage rates.",
@@ -80646,9 +80646,9 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/28281303/",
-   "summary": "This Cochrane review pooled 15 trials (1,889 babies) that compared formula milk with added omega-3 and omega-6 fats (DHA and AA) to ordinary formula in full-term babies. Most trials found no clear benefit for thinking and movement development, and results for eyesight were mixed. Growth was mostly similar between groups, though one pooled analysis found slightly lower weight at one year in babies given the added fats. The reviewers rated the overall evidence as low quality.",
+   "summary": "This Cochrane review pooled 15 trials (1,889 babies) that compared formula milk with added omega-3 and omega-6 fats (DHA and AA) to ordinary formula in full-term babies. Most trials found no clear benefit for thinking and movement development, and results for eyesight were mixed. Growth showed mostly no clear difference between groups, though one pooled analysis found slightly lower weight at one year in babies given the added fats. The reviewers rated the overall evidence as low quality.",
    "keyPoints": [
-    "Most trials found no benefit of added DHA and AA for babies' mental or movement development, including at 18 months and in follow-up to age 9.",
+    "Most trials found no clear benefit of added DHA and AA for babies' mental or movement development, including at 18 months and in follow-up to age 9.",
     "Eyesight results were mixed: one type of test showed a benefit at 12 months, while another type showed none.",
     "No study found clear benefit or harm for growth, though one pooled analysis showed slightly lower weight scores at one year in supplemented babies.",
     "The authors concluded that routine addition of these fats to full-term infant formula cannot be recommended at this time."
@@ -81311,12 +81311,12 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34432115/",
-   "summary": "This review pooled 10 randomised trials of romosozumab, a bone-building injection, in women with osteoporosis after menopause. Compared with control treatment, it lowered the risk of spine fractures, other bone fractures and falls, and it raised bone density at the spine, hip and femoral neck. Overall side effects were similar to the control groups. The authors recommend romosozumab for postmenopausal osteoporosis.",
+   "summary": "This review pooled 10 randomised trials of romosozumab, a bone-building injection, in women with osteoporosis after menopause. Compared with control treatment, it lowered the risk of spine fractures, other bone fractures and falls, and it raised bone density at the spine, hip and femoral neck. Overall side effects showed no clear difference from the control groups. The authors recommend romosozumab for postmenopausal osteoporosis.",
    "keyPoints": [
     "Romosozumab lowered spine fracture risk (odds ratio 0.43), other non-spine fractures (0.78) and clinical fractures (0.70) at 24 months, rated high-quality evidence.",
     "Falls were less common with romosozumab (odds ratio 0.87), rated high-quality evidence.",
     "Bone mineral density rose at the lumbar spine, total hip and femoral neck at 12 months.",
-    "Total and serious side effects were similar to the control group, rated moderate-quality evidence."
+    "Total and serious side effects showed no clear difference from the control group, rated moderate-quality evidence."
    ],
    "certainty": "high",
    "lifeStages": [
@@ -81822,10 +81822,10 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/37557903/",
    "summary": "European paediatric surgeons reviewed the evidence and agreed on how to manage simple ovarian cysts found in newborn girls. They advise that babies with cysts larger than 4 cm be offered keyhole surgery within the first 2 weeks of life, while smaller cysts can be watched with repeat ultrasound scans. The statement notes there is still limited data on the benefits and risks of draining a cyst before birth.",
    "keyPoints": [
-    "Newborns with simple ovarian cysts larger than 4 cm should be offered surgery within the first 2 weeks of life.",
+    "The statement says newborns with simple ovarian cysts larger than 4 cm should be offered surgery within the first 2 weeks of life.",
     "The preferred surgery is keyhole (laparoscopic) draining and opening of the cyst using bipolar instruments.",
     "After surgery, ultrasound follow-up is advised at 3 months; if surgery is not done, scans are advised every 3 to 4 months until 1 year.",
-    "Data on the benefits and complications of draining a cyst with ultrasound before birth are still limited; babies who had this should be followed for 6 months."
+    "Data on the benefits and complications of draining a cyst with ultrasound before birth are still limited; the statement says babies who had this should be followed for 6 months."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -83119,7 +83119,7 @@
     "The studies had methodological problems and risk of bias, and the Mediterranean diet studies gave very mixed results.",
     "The review does not support recommending any single dietary pattern to improve pregnancy or live birth rates during IVF."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "ivf"
@@ -83685,11 +83685,11 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/27827818/",
-   "summary": "This review pooled results from trials comparing two ways of freezing eggs and embryos in fertility treatment: slow-freezing and vitrification (ultra-fast freezing into a glass-like state). Vitrification led to more eggs and embryos surviving the freeze-thaw process and was linked to better pregnancy outcomes. The evidence for pregnancy outcomes was low quality, while the evidence for survival was moderate quality. Frozen-then-warmed eggs gave similar pregnancy rates to fresh eggs in the one trial that compared them.",
+   "summary": "This review pooled results from trials comparing two ways of freezing eggs and embryos in fertility treatment: slow-freezing and vitrification (ultra-fast freezing into a glass-like state). Vitrification led to more eggs and embryos surviving the freeze-thaw process and was linked to better pregnancy outcomes. The evidence for pregnancy outcomes was low quality, while the evidence for survival was moderate quality. Frozen-then-warmed eggs showed no clear difference in pregnancy rates compared with fresh eggs in the one trial that compared them.",
    "keyPoints": [
     "Embryos survived freezing and warming more often with vitrification than with slow-freezing (moderate quality evidence).",
     "Pregnancy rates were higher with vitrification for eggs and embryos, but the evidence was low quality and based on few trials.",
-    "In one trial, vitrified eggs gave about the same ongoing pregnancy rate as fresh eggs.",
+    "In one trial, vitrified eggs showed no clear difference in ongoing pregnancy rate compared with fresh eggs.",
     "The authors suggest clinics still using slow-freezing should consider switching to vitrification."
    ],
    "certainty": "low",
@@ -84400,8 +84400,8 @@
    "summary": "This is a practice guideline from the American College of Obstetricians and Gynecologists on pain relief during labour and anaesthesia for common procedures around delivery. It says labour is severely painful for many women and that a woman's request for pain relief is, by itself, a good enough medical reason to provide it when there is no medical reason against it. It also says access to epidural pain relief should not depend on a woman's health insurance or ability to pay.",
    "keyPoints": [
     "Maternal request is a sufficient medical reason for pain relief in labour when there is no medical contraindication.",
-    "A woman who asks for an epidural should not be denied it because of her health insurance status.",
-    "Anaesthesia services should be available for labour pain relief and surgical anaesthesia in all hospitals that offer maternity care.",
+    "The guideline says a woman who asks for an epidural should not be denied it because of her health insurance status.",
+    "The guideline says anaesthesia services should be available for labour pain relief and surgical anaesthesia in all hospitals that offer maternity care.",
     "Non-drug options such as massage, water immersion, acupuncture, relaxation and hypnotherapy are not covered but may help as add-ons or alternatives."
    ],
    "certainty": "not stated",
@@ -85780,7 +85780,7 @@
    "keyPoints": [
     "Smoking during pregnancy was linked to childhood ADHD after adjusting for parental psychiatric history and socioeconomic status.",
     "Stopping smoking during the first trimester was still associated with childhood ADHD.",
-    "Stopping smoking before pregnancy was not significantly linked to childhood ADHD, and quitting before conceiving is strongly recommended for women who smoke.",
+    "Stopping smoking before pregnancy was not significantly linked to childhood ADHD, and the authors strongly recommend quitting before conceiving for women who smoke.",
     "Results on passive smoking from a partner's smoking during pregnancy were inconsistent, and the risk varied across world regions."
    ],
    "certainty": "not stated",
@@ -87121,7 +87121,7 @@
     "PCOS is defined by high androgen (male-type hormone) levels, problems with ovulation, and polycystic ovaries.",
     "The cause of PCOS is not known, and treatment is mainly based on managing symptoms.",
     "PCOS can lead to metabolic problems, including a higher risk of diabetes and cardiovascular disease.",
-    "Long-term treatment plans should take these metabolic risks into account."
+    "The guideline says long-term treatment plans should take these metabolic risks into account."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -87551,12 +87551,12 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/29080721/",
-   "summary": "This Canadian guideline reviews the causes, assessment and treatment of hirsutism, which is excess, coarse hair growth in a male-like pattern. It says a careful history, physical exam and selected lab tests confirm the diagnosis and guide treatment. Hirsutism can improve slowly but markedly with a three-part approach: mechanical hair removal, medicines that lower androgen (male-type hormone) production, and medicines that block androgen receptors. Improvement usually takes at least 6 to 9 months of therapy.",
+   "summary": "This Canadian guideline reviews the causes, assessment and treatment of hirsutism, which is excess, coarse hair growth in a male-like pattern. It says a careful history, physical exam and selected lab tests confirm the diagnosis and guide treatment. The guideline says hirsutism can improve slowly but markedly with a three-part approach: mechanical hair removal, medicines that lower androgen (male-type hormone) production, and medicines that block androgen receptors. Improvement usually takes at least 6 to 9 months of therapy.",
    "keyPoints": [
-    "Treatment works best with three parts together: mechanical hair removal, suppressing androgen production, and blocking androgen receptors.",
+    "The guideline recommends a three-part approach: mechanical hair removal, suppressing androgen production, and blocking androgen receptors.",
     "At least 6 to 9 months of therapy are needed before hirsutism improves.",
-    "In people with PCOS, weight loss and exercise lower androgen levels and improve self-esteem.",
-    "Patients should be told about health problems linked to high androgens, including irregular periods, infertility, diabetes and heart disease."
+    "The guideline says that in people with PCOS, weight loss and exercise lower androgen levels and improve self-esteem.",
+    "The guideline says patients should be told about health problems linked to high androgens, including irregular periods, infertility, diabetes and heart disease."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -90490,8 +90490,8 @@
    "keyPoints": [
     "Thyroid disease is common in women in their late reproductive years, so it can exist alongside menopause.",
     "Thyroid disease and menopause can both cause a wide range of symptoms, which can make diagnosis difficult and delayed.",
-    "Treatment decisions for both conditions should be made with caution and take this age group's specific characteristics into account.",
-    "A personalised approach should include family history, involve the woman in decisions, and respect her preferences."
+    "The experts say treatment decisions for both conditions should be made with caution and take this age group's specific characteristics into account.",
+    "The experts say a personalised approach should include family history, involve the woman in decisions, and respect her preferences."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -91419,7 +91419,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/37338872/",
    "summary": "The US Preventive Services Task Force reviewed the evidence on checking adults for depression and suicide risk in primary care, including pregnant and postpartum women. It recommends screening for depression, finding moderate certainty that screening has a moderate overall benefit. For suicide risk screening, it found there is not enough evidence to say whether the benefits outweigh the harms.",
    "keyPoints": [
-    "Screening adults for depression is recommended, including pregnant and postpartum women (B recommendation).",
+    "The Task Force recommends screening adults for depression, including pregnant and postpartum women (B recommendation).",
     "The Task Force has moderate certainty that depression screening gives a moderate net benefit.",
     "Evidence is insufficient to judge the benefits and harms of screening for suicide risk in adults, including pregnant and postpartum women.",
     "Untreated major depression can interfere with daily life and is linked to higher risks of heart problems and death."
@@ -91578,7 +91578,7 @@
    "keyPoints": [
     "Perinatal depression and anxiety affect about 1 in 10 women in Singapore and are linked to low birthweight, preterm birth and effects on infant development, temperament and behaviour.",
     "Ten consensus statements cover preconception mental health advice, screening and assessment, and optimising care and treatment.",
-    "Special care is recommended for women who had severe maternal events, for adolescents and for women with special needs.",
+    "The statements recommend special care for women who had severe maternal events, for adolescents and for women with special needs.",
     "The guidelines also address the mental health needs of the infant."
    ],
    "certainty": "not stated",
@@ -91932,7 +91932,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/26650969/",
-   "summary": "This review looked at 97 studies to find out which factors make anxiety and depression more likely during pregnancy. The most common risk factors were having little partner or social support, a history of abuse or domestic violence, past mental illness, an unplanned or unwanted pregnancy, high stress, pregnancy complications and pregnancy loss. The authors say the causes are complex and that screening for anxiety and depression should be offered to all pregnant women.",
+   "summary": "This review looked at 97 studies to find out which factors are linked to anxiety and depression during pregnancy. The most common risk factors were having little partner or social support, a history of abuse or domestic violence, past mental illness, an unplanned or unwanted pregnancy, high stress, pregnancy complications and pregnancy loss. The authors say the causes are complex and that screening for anxiety and depression should be offered to all pregnant women.",
    "keyPoints": [
     "Risk factors linked to anxiety and depression in pregnancy included lack of partner or social support, and a history of abuse or domestic violence.",
     "Other factors were a personal history of mental illness, an unplanned or unwanted pregnancy, adverse life events and high perceived stress.",
@@ -92398,7 +92398,7 @@
     "26% of women had ultrasound evidence of anal sphincter damage after a first vaginal birth.",
     "20% of women had sphincter damage on ultrasound that was not reported clinically at the birth.",
     "Forceps delivery, shoulder dystocia, labor augmentation, episiotomy and a shorter perineal body before birth were linked to higher odds of damage.",
-    "Antenatal perineal massage and a pelvic floor muscle dilator in labor did not change the odds; age, BMI, induced labor, epidural and baby's birth weight showed no difference."
+    "Antenatal perineal massage and a pelvic floor muscle dilator in labor showed no clear effect on the odds; age, BMI, induced labor, epidural and baby's birth weight showed no clear difference."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -92716,7 +92716,7 @@
     "Spontaneous and directed pushing showed no clear difference in third or fourth degree tears, episiotomy, or the length of the second stage of labour.",
     "With an epidural, delayed pushing meant less time actually pushing (about 19 minutes less) and slightly more spontaneous vaginal births, but the second stage lasted about 56 minutes longer overall.",
     "Delayed pushing was linked to a higher chance of low umbilical cord blood pH, based on four studies, while newborn intensive care admissions and low five-minute Apgar scores showed no clear difference.",
-    "There is no conclusive evidence for any one pushing style, so the woman's preference, comfort and clinical situation should guide the choice."
+    "The authors found no conclusive evidence for any one pushing style and say the woman's preference, comfort and clinical situation should guide the choice."
    ],
    "certainty": "low",
    "lifeStages": [
@@ -94835,9 +94835,9 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/29376559/",
-   "summary": "This review pooled 63 trials with 5,761 women who had finished chemotherapy or radiation for breast cancer. Physical activity programmes (aerobic exercise, resistance training, or both) gave small-to-moderate improvements in quality of life, emotional and physical function, anxiety and fitness. Few minor side effects were reported. The evidence was very low to moderate quality, so the results should be read with caution.",
+   "summary": "This review pooled 63 trials with 5,761 women who had finished chemotherapy or radiation for breast cancer. Physical activity programmes (aerobic exercise, resistance training, or both) may give small-to-moderate improvements in quality of life, emotional and physical function, anxiety and fitness. Few minor side effects were reported. The evidence was very low to moderate quality, so the results should be read with caution.",
    "keyPoints": [
-    "Physical activity gave small-to-moderate gains in quality of life, emotional function, perceived physical function, anxiety and cardiorespiratory fitness.",
+    "Physical activity may give small-to-moderate gains in quality of life, emotional function, perceived physical function, anxiety and cardiorespiratory fitness.",
     "Some benefits, such as less fatigue, better fitness and more self-reported activity, lasted three months or longer after programmes ended.",
     "No data were available on breast cancer deaths, deaths from any cause, or cancer coming back, so no conclusions were possible on these.",
     "Trials varied a lot in the type, amount and length of activity and had a high risk of bias, so the best type of exercise is still unclear."
@@ -96598,7 +96598,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34488087/",
-   "summary": "This review pooled six studies with about 8,500 participants to see whether premenstrual dysphoric disorder (PMDD) is linked to suicidal thoughts and behaviour. People with PMDD were about twice as likely to report suicidal thoughts, suicide attempts and suicide plans. The authors note that PMDD was only a provisional diagnosis in all the included studies, and they conclude that clinicians treating PMDD should watch for signs of suicidal thoughts and behaviour.",
+   "summary": "This review pooled six studies with about 8,500 participants to see whether premenstrual dysphoric disorder (PMDD) is linked to suicidal thoughts and behaviour. People with PMDD had roughly twice the odds of reporting suicidal thoughts, suicide attempts and suicide plans. The authors note that PMDD was only a provisional diagnosis in all the included studies, and they conclude that clinicians treating PMDD should watch for signs of suicidal thoughts and behaviour.",
    "keyPoints": [
     "PMDD was linked to higher odds of suicidal ideation (odds ratio 2.34).",
     "PMDD was linked to higher odds of a suicide attempt (odds ratio 2.13) and of a suicide plan (odds ratio 2.24).",
@@ -98411,7 +98411,7 @@
     "Both parents had depression at the same time in about 1.7% of couples during pregnancy.",
     "Both parents had depression in about 2.4% of couples in the first 12 weeks after birth, and about 3.2% of couples from 3 to 12 months after birth.",
     "Only 3 studies reported on anxiety in both parents, so no combined figure could be calculated.",
-    "Perinatal care should consider parents' mental health both as individuals and as a couple."
+    "The authors say perinatal care should consider parents' mental health both as individuals and as a couple."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -99612,7 +99612,7 @@
     "Four groups of factors shape postpartum contraception choice: demographic and economic, clinical, health care delivery, and sociocultural.",
     "Clinical factors include number of previous births, how the pregnancy and birth went, past contraception use and whether the pregnancy was planned.",
     "Counselling sessions about contraception, place of delivery and the health care system also play a role.",
-    "The main influences are number of births, education level, knowledge and beliefs about contraception, and family influence, and clinicians should address these in consultations."
+    "The main influences are number of births, education level, knowledge and beliefs about contraception, and family influence, and the authors say clinicians should address these in consultations."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -100169,7 +100169,7 @@
     "One study found a 35-44% lower risk of postpartum depression with progestin-only pills and levonorgestrel IUDs compared with no hormonal contraception.",
     "The same study saw a small rise in antidepressant use with the etonogestrel implant and vaginal ring, and a lower rate with progestin-only pills."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "postpartum",
     "contraception"
@@ -100913,12 +100913,12 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/34521386/",
    "summary": "This review pooled results from ten small trials (1,194 women) testing non-drug ways to ease tiredness after birth. Exercise and drinking tea were linked to less fatigue, and tea was also linked to lower depression scores. Talking-based education programmes did not show a benefit. The authors say the findings should be read with caution because the studies were few, small and varied in quality.",
    "keyPoints": [
-    "Exercise was linked to a clear reduction in postpartum fatigue after the intervention.",
+    "Exercise was linked to less postpartum fatigue after the intervention.",
     "Drinking tea was linked to less fatigue and may also help with low mood.",
     "Psychoeducational (education and counselling) programmes did not show benefits for fatigue or depression.",
     "Skin-to-skin contact, warm showers and lavender aroma were also tried, but the abstract does not report firm results for them."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "postpartum"
    ],
@@ -101613,7 +101613,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/38336124/",
-   "summary": "This review looked at 'care bundles', which are sets of three or more steps that hospitals carry out together to prevent or treat heavy bleeding after birth. It pooled 22 studies. One bundle used to treat bleeding, called E-MOTIVE, clearly improved outcomes for women giving birth vaginally, and the evidence for it was rated high certainty. A California bundle that covers both prevention and treatment may lower severe complications, but the evidence for that is weaker.",
+   "summary": "This review looked at 'care bundles', which are sets of three or more steps that hospitals carry out together to prevent or treat heavy bleeding after birth. It pooled 22 studies. One bundle used to treat bleeding, called E-MOTIVE, improved outcomes for women giving birth vaginally, and the evidence for it was rated high certainty. A California bundle that covers both prevention and treatment may lower severe complications, but the evidence for that is weaker.",
    "keyPoints": [
     "The E-MOTIVE treatment bundle cut the risk of severe complications from bleeding (risk ratio 0.40) and also reduced blood transfusions, severe bleeding and average blood loss, based on high-certainty evidence.",
     "The California Maternal Quality Care Collaborative bundle, which covers prevention and treatment, may reduce severe maternal complications (risk ratio 0.64), but this evidence is low certainty.",
@@ -103798,11 +103798,11 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/35954901/",
-   "summary": "This review pooled seven trials with 1,873 pregnant women who had mild, sub-clinical mood symptoms. It looked at online or app-based programs using cognitive-behavioral therapy (CBT), which helps people change unhelpful thoughts and habits. The programs reduced depression and anxiety symptoms by the end of the program, but the depression benefit did not last into the postpartum follow-up. They did not improve sleep quality. The authors say no firm conclusions can be drawn about which type of program works best.",
+   "summary": "This review pooled seven trials with 1,873 pregnant women who had mild, sub-clinical mood symptoms. It looked at online or app-based programs using cognitive-behavioral therapy (CBT), which helps people change unhelpful thoughts and habits. The programs reduced depression and anxiety symptoms by the end of the program, but the depression benefit did not last into the postpartum follow-up. No clear effect on sleep quality was found. The authors say no firm conclusions can be drawn about which type of program works best.",
    "keyPoints": [
     "Digital CBT programs reduced mild depression symptoms in pregnancy by the end of the program.",
     "The depression benefit was not maintained at follow-up after birth.",
-    "The programs reduced anxiety symptoms but had no effect on sleep quality.",
+    "The programs reduced anxiety symptoms but showed no clear effect on sleep quality.",
     "The programs were well accepted, and no firm conclusions could be drawn about which type works best."
    ],
    "certainty": "not stated",
@@ -103956,7 +103956,7 @@
     "All of the treatments showed preliminary support, but only six studies were randomised controlled trials and only four followed women over time.",
     "The authors call for better-quality trials and for effective sleep programmes to be built into routine pregnancy care."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "pregnancy",
     "postpartum",
@@ -104253,7 +104253,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/42907780/",
-   "summary": "This review pooled 34 studies to look at anxiety in women with diabetes during pregnancy. Women with gestational diabetes were more likely to have anxiety during pregnancy than women without diabetes. After birth, anxiety levels in women who had gestational diabetes were about the same as in other women. There was too little evidence to say anything firm about diabetes that was present before pregnancy.",
+   "summary": "This review pooled 34 studies to look at anxiety in women with diabetes during pregnancy. Women with gestational diabetes were more likely to have anxiety during pregnancy than women without diabetes. After birth, anxiety levels in women who had gestational diabetes showed no clear difference from other women. There was too little evidence to say anything firm about diabetes that was present before pregnancy.",
    "keyPoints": [
     "Women with gestational diabetes had higher odds of anxiety during pregnancy than healthy women (OR 1.69).",
     "About 36% of women with gestational diabetes screened positive for anxiety in eight Asian studies, but results varied hugely between studies, so this number is very uncertain.",
@@ -104502,11 +104502,11 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/39504810/",
-   "summary": "Researchers combined 12 studies (583 women who had pre-eclampsia and 610 who had uncomplicated pregnancies) to see whether pre-eclampsia leads to early thickening of the neck (carotid) artery walls, a sign of artery disease. On average the women were checked about 8.5 years after giving birth, and up to 20 years. Overall, artery thickness was not meaningfully different between the two groups, though the studies varied a lot in their results. The authors note that women with a past history of pre-eclampsia do carry more heart disease risk factors.",
+   "summary": "Researchers combined 12 studies (583 women who had pre-eclampsia and 610 who had uncomplicated pregnancies) to see whether pre-eclampsia leads to early thickening of the neck (carotid) artery walls, a sign of artery disease. On average the women were checked about 8.5 years after giving birth, and up to 20 years. Overall, there was no clear difference in artery thickness between the two groups, though the studies varied a lot in their results. The authors note that women with a past history of pre-eclampsia do carry more heart disease risk factors.",
    "keyPoints": [
     "Overall, carotid artery wall thickness was not significantly different in women with past pre-eclampsia compared with women with uncomplicated pregnancies.",
     "Only 5 of the 12 studies found thicker artery walls in women with past pre-eclampsia; the rest found no difference or even thinner walls.",
-    "Results did not differ meaningfully between early-onset and late-onset pre-eclampsia.",
+    "Neither early-onset nor late-onset pre-eclampsia showed a clear difference in artery thickness.",
     "Women with past pre-eclampsia have more cardiovascular risk factors, even though significant artery changes were not seen up to 20 years after birth."
    ],
    "certainty": "not stated",
@@ -104960,7 +104960,7 @@
     "Prevention programmes (diet and behaviour changes, counselling, dietary consultation) were potentially cost-effective or cost-saving.",
     "The studies were of poor quality, so more good economic studies are needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "postpartum",
     "general"
@@ -109183,7 +109183,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/29174030/",
    "summary": "Italian nutrition experts reviewed 295 studies on key nutrients in vegetarian diets. They concluded that well-planned vegetarian diets with plenty of variety and a reliable source of vitamin B12 can give enough of the nutrients people need. The paper gives practical tips on B12, protein, calcium, iron, zinc and omega-3 fats. The abstract does not look specifically at pregnancy or babies.",
    "keyPoints": [
-    "Vegetarians should get vitamin B12 from fortified foods or supplements.",
+    "The authors say vegetarians should get vitamin B12 from fortified foods or supplements.",
     "Plant protein is digested less well than animal protein, so vegetarians may need to eat somewhat more protein.",
     "Good sources of calcium, iron and zinc include low-oxalate vegetables like Brassicaceae, nuts, seeds and calcium-rich mineral water; soaking, germinating and sour-dough leavening help the body absorb minerals from pulses and cereals.",
     "Omega-3 status can be kept up with walnuts, flaxseeds, chia seeds and their oils, while limiting corn and sunflower oils."
@@ -109342,9 +109342,9 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/41494900/",
    "summary": "This is a committee opinion from the American Society for Reproductive Medicine. It says people who are about to have treatments that could harm their fertility, or who are at risk of premature ovarian insufficiency (POI), should be offered counseling about fertility preservation options quickly. It also says care is best given by comprehensive programs set up for these patients' particular challenges. It replaces the group's 2019 guidance.",
    "keyPoints": [
-    "Patients about to have treatments that risk their fertility should get prompt counseling about fertility preservation options.",
-    "People at risk of premature ovarian insufficiency should also be offered this counseling.",
-    "Fertility preservation is best provided by comprehensive programs designed for these patients' unique challenges.",
+    "ASRM says patients about to have treatments that risk their fertility should get prompt counseling about fertility preservation options.",
+    "ASRM says people at risk of premature ovarian insufficiency should also be offered this counseling.",
+    "ASRM says fertility preservation is best provided by comprehensive programs designed for these patients' unique challenges.",
     "This opinion replaces the 2019 committee opinion on fertility preservation."
    ],
    "certainty": "not stated",
@@ -109961,7 +109961,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/30715359/",
-   "summary": "This review pooled 12 studies of 783 women who had surgery to remove endometriomas (cysts on the ovary caused by endometriosis). Before surgery, women with cysts on one or both ovaries had similar levels of AMH, a blood marker of egg supply. After surgery, AMH was lower in women who had both ovaries operated on, and AMH fell in both groups, by about 39.5% with one ovary and 57.0% with both. The authors suggest the surgery, rather than the cyst itself, is what reduces ovarian reserve, so removal should be considered carefully, especially when both ovaries are affected.",
+   "summary": "This review pooled 12 studies of 783 women who had surgery to remove endometriomas (cysts on the ovary caused by endometriosis). Before surgery, women with cysts on one or both ovaries showed no clear difference in AMH, a blood marker of egg supply. After surgery, AMH was lower in women who had both ovaries operated on, and AMH fell in both groups, by about 39.5% with one ovary and 57.0% with both. The authors suggest the surgery, rather than the cyst itself, is what reduces ovarian reserve, so removal should be considered carefully, especially when both ovaries are affected.",
    "keyPoints": [
     "Before surgery, AMH levels were not significantly different between women with one-sided and two-sided endometriomas.",
     "After cyst removal, AMH was significantly lower in women who had both ovaries operated on than in those who had one.",
@@ -110973,7 +110973,7 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/26938573/",
-   "summary": "This guideline explains the difference between prenatal genetic screening, which estimates the chance of a genetic condition, and diagnostic testing, which aims to confirm whether a condition is present. Definitive diagnosis for most genetic conditions needs amniocentesis or chorionic villus sampling (CVS), though imaging such as ultrasound can sometimes point to a condition. Testing cannot find every problem, and results cannot predict all outcomes, so choices should fit each person's own risks, goals and preferences.",
+   "summary": "This guideline explains the difference between prenatal genetic screening, which estimates the chance of a genetic condition, and diagnostic testing, which aims to confirm whether a condition is present. Definitive diagnosis for most genetic conditions needs amniocentesis or chorionic villus sampling (CVS), though imaging such as ultrasound can sometimes point to a condition. Testing cannot find every problem, and results cannot predict all outcomes, so the guideline says choices should fit each person's own risks, goals and preferences.",
    "keyPoints": [
     "Screening shows whether the chance of a genetic condition is raised; diagnostic testing aims to say whether a specific condition is present.",
     "Amniocentesis or CVS is needed to definitively diagnose most genetic disorders, although ultrasound, echocardiography or MRI may sometimes be diagnostic of a structural abnormality.",
@@ -111772,7 +111772,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/33773630/",
-   "summary": "This review pooled individual data from 31 trials (11,644 women) testing progesterone-type medicines to prevent preterm birth in women at higher risk. In single-baby pregnancies with a past early birth or a short cervix, vaginal progesterone and 17-OHPC injections reduced births before 34 weeks. For twins and triplets, progesterone treatment did not reduce early birth, and 17-OHPC was linked to more early waters breaking. Some other benefits looked favourable but were less certain, and a possible rise in maternal complications was also uncertain.",
+   "summary": "This review pooled individual data from 31 trials (11,644 women) testing progesterone-type medicines to prevent preterm birth in women at higher risk. In single-baby pregnancies with a past early birth or a short cervix, vaginal progesterone reduced births before 34 weeks, and 17-OHPC injections showed a similar trend. For twins and triplets, progesterone treatment did not reduce early birth, and 17-OHPC was linked to more early waters breaking. Some other benefits looked favourable but were less certain, and a possible rise in maternal complications was also uncertain.",
    "keyPoints": [
     "In high-risk single-baby pregnancies, vaginal progesterone reduced birth before 34 weeks (relative risk 0.78) and 17-OHPC showed a similar trend (0.83).",
     "The benefit may be greatest for women with a short cervix, because their underlying risk is higher.",
@@ -112019,7 +112019,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/33368142/",
-   "summary": "This Cochrane review pooled 27 trials (over 11,000 women) of steroid injections given before an expected preterm birth to help the baby's lungs mature. Babies of women who received a single course were less likely to die around the time of birth or to develop breathing problems (respiratory distress syndrome). The steroids probably also lowered the risk of bleeding in the baby's brain and of developmental delay in childhood. The review found little to no difference in serious maternal outcomes such as infection of the womb lining, though the evidence there is less precise.",
+   "summary": "This Cochrane review pooled 27 trials (over 11,000 women) of steroid injections given before an expected preterm birth to help the baby's lungs mature. Babies of women who received steroids were less likely to die around the time of birth or to develop breathing problems (respiratory distress syndrome). The steroids probably also lowered the risk of bleeding in the baby's brain and of developmental delay in childhood. There was probably little to no difference in serious maternal outcomes such as infection of the womb lining, though the evidence there is less precise.",
    "keyPoints": [
     "Antenatal corticosteroids reduced perinatal death (about 15% lower risk) and neonatal death (about 22% lower risk), based on high-certainty evidence.",
     "They reduced respiratory distress syndrome in newborns by about 29%, also high-certainty evidence.",
@@ -112889,7 +112889,7 @@
    "keyPoints": [
     "CDC rates progestin-only injectables (including DMPA) as category 2 for women at high risk of HIV, meaning the advantages outweigh the theoretical or proven risks.",
     "There is evidence of a possible increased risk of getting HIV with progestin-only injections, but it is uncertain whether this is a real biological effect or due to study methods.",
-    "Women should not be denied the injection because of this concern, but should be told about the uncertainty and how to lower their HIV risk.",
+    "The guidance says women should not be denied the injection because of this concern, but should be told about the uncertainty and how to lower their HIV risk.",
     "Combined hormonal methods, implants and progestin-only pills have no restrictions (category 1) for women at high risk of HIV."
    ],
    "certainty": "not stated",
@@ -116125,7 +116125,7 @@
    "keyPoints": [
     "Exercise-only programmes improved sleep quality after birth compared with no exercise (moderate certainty of evidence).",
     "Exercise reduced daytime and general fatigue compared with no exercise (high certainty of evidence).",
-    "No effect was found on sleep duration, time to fall asleep, sleep efficiency or sleep disturbance.",
+    "No clear effect was found on sleep duration, time to fall asleep, sleep efficiency or sleep disturbance.",
     "The authors conclude that postpartum physical activity improves maternal sleep quality and fatigue."
    ],
    "certainty": "moderate",
@@ -117125,12 +117125,12 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/38902658/",
    "summary": "This review pulled together 26 studies, covering over 765,000 women, on vaping during pregnancy. Most studies found no clear extra risk from vaping compared with using no nicotine, and risks that looked similar to smoking. But most of the studies were of poor quality, so firm conclusions can't be drawn.",
    "keyPoints": [
-    "More studies found no increased risk from exclusive vaping than compared with using no nicotine or tobacco.",
+    "More studies found no increased risk from exclusive vaping than found increased risk, when compared with using no nicotine or tobacco.",
     "When vaping was compared with smoking, most studies found a similar level of risk.",
     "One trial comparing vaping with nicotine replacement therapy for quitting smoking found no evidence of risk for either.",
     "Most studies did not measure vaping and smoking exposure well, so results can't be reliably linked to vaping alone."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "pregnancy",
@@ -117178,7 +117178,7 @@
    "keyPoints": [
     "Varenicline, nicotine replacement therapy, bupropion and cytisine are more effective than placebo for quitting smoking.",
     "Varenicline and combined nicotine therapy were better than the other treatments.",
-    "In pregnancy, behavioral treatment (counselling and support) is the priority.",
+    "The guideline says behavioral treatment (counselling and support) should come first in pregnancy.",
     "There is no scientific evidence that quit-smoking medicines work in adolescents."
    ],
    "certainty": "not stated",
@@ -119182,7 +119182,7 @@
    "summary": "These are 2021 European expert guidelines on how to treat Graves' orbitopathy, an eye condition linked to Graves' disease (an overactive thyroid). Treatment depends on how active and how severe the eye disease is, and early referral to a specialist centre is advised for most people. The guidelines cover mild, moderate-to-severe and sight-threatening disease, and surgery for lasting changes once the disease has settled.",
    "keyPoints": [
     "Risk factors include smoking, thyroid dysfunction, high levels of thyrotropin receptor antibodies, radioactive iodine treatment and high cholesterol.",
-    "In mild, active disease, controlling risk factors, local treatments and selenium (in areas where selenium is low) are usually enough; low-dose oral prednisone is needed alongside radioactive iodine, especially if risk factors are present.",
+    "In mild, active disease, controlling risk factors, local treatments and selenium (in areas where selenium is low) are usually enough; the guidelines say low-dose oral prednisone is needed if radioactive iodine is used, especially if risk factors are present.",
     "For active moderate-to-severe disease, glucocorticoids given into a vein work better and are better tolerated than tablets, and are recommended together with mycophenolate sodium as first-line treatment.",
     "Sight-threatening disease is treated with high doses of intravenous methylprednisolone and, if there is no response, urgent surgery to relieve pressure around the eye."
    ],
@@ -119427,12 +119427,12 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/27746415/",
-   "summary": "This is a clinical guideline from Japanese thyroid and endocrine societies on thyroid storm, a rare emergency where severe overactive thyroid causes multiple organs to fail. Looking at 356 patients in Japan, about 11% still died, most often from multiple organ failure or acute heart failure. The guideline sets out 15 recommendations for treatment, intensive care admission and prevention, based on national surveys and literature searches.",
+   "summary": "This is a clinical guideline from Japanese thyroid and endocrine societies on thyroid storm, a rare emergency where severe overactive thyroid causes multiple organs to fail. Looking at 356 patients in Japan, about 11% still died, most often from multiple organ failure or acute heart failure. The guideline sets out 15 recommendations for treatment and intensive care admission, plus proposed ways to prevent it, based on national surveys and literature searches.",
    "keyPoints": [
-    "Thyroid storm is an endocrine emergency; early suspicion, prompt diagnosis and intensive treatment improve survival.",
+    "Thyroid storm is an endocrine emergency; the guideline says early suspicion, prompt diagnosis and intensive treatment improve survival.",
     "In 356 patients in Japan, mortality was about 11%, with multiple organ failure and acute heart failure the common causes of death.",
     "Combined treatment with antithyroid drugs, inorganic iodide, corticosteroids and beta-blockers has been suggested to improve survival.",
-    "The guideline gives 15 recommendations covering treatment, ICU admission criteria, prognosis and preventive approaches."
+    "The guideline gives 15 recommendations covering treatment, ICU admission criteria, and prognosis, plus proposed preventive approaches."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -119676,12 +119676,12 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/38311812/",
-   "summary": "This review pooled ten studies to ask whether pregnancy makes thyroid cancer more likely to come back in women who were already treated for differentiated thyroid cancer. About 13 in 100 pregnant women had a recurrence, and the risk was no different from women who were not pregnant. Women whose cancer had not fully responded to earlier treatment had a higher chance of recurrence, so the authors say these women need closer watching during pregnancy.",
+   "summary": "This review pooled ten studies to ask whether pregnancy makes thyroid cancer more likely to come back in women who were already treated for differentiated thyroid cancer. About 13 in 100 pregnant women had a recurrence, and there was no clear difference in risk compared with women who were not pregnant. Women whose cancer had not fully responded to earlier treatment had a higher chance of recurrence, so the authors say these women need closer watching during pregnancy.",
    "keyPoints": [
     "Pregnancy showed little or no link to the cancer coming back in women previously treated for differentiated thyroid cancer.",
     "Pooled recurrence was about 13% in pregnant women, with no significant difference compared with women who were not pregnant.",
     "Recurrence risk rose as the response to earlier treatment got worse, from excellent to structurally incomplete.",
-    "Clinicians should pay more attention to pregnant women whose cancer shows ongoing signs in blood tests or scans."
+    "The authors say clinicians should pay more attention to pregnant women whose cancer shows ongoing signs in blood tests or scans."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -120918,10 +120918,10 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/31194720/",
-   "summary": "This CDC guidance explains how doctors should test for dengue and Zika virus in people who have symptoms and live in or have recently travelled to areas where both viruses occur. Pregnant women with symptoms should have blood and urine tests taken as soon as possible, within 12 weeks of symptoms starting. Women who may have had Zika during pregnancy, and their babies, should be checked and followed up for possible problems.",
+   "summary": "This CDC guidance explains how doctors should test for dengue and Zika virus in people who have symptoms and live in or have recently travelled to areas where both viruses occur. CDC says pregnant women with symptoms should have blood and urine tests taken as soon as possible, within 12 weeks of symptoms starting. The guidance also says women who may have had Zika during pregnancy, and their babies, should be checked and followed up for possible problems.",
    "keyPoints": [
     "For symptomatic non-pregnant people, virus-detecting (NAAT) tests should be done on blood taken within 7 days of symptoms starting; antibody (IgM) tests are used on later samples or when NAAT is negative.",
-    "For symptomatic pregnant women, blood and urine samples should be collected as soon as possible within 12 weeks of symptom onset for both NAAT and IgM antibody testing.",
+    "CDC says that for symptomatic pregnant women, blood and urine samples should be collected as soon as possible within 12 weeks of symptom onset for both NAAT and IgM antibody testing.",
     "Antibody tests can cross-react between dengue and Zika, so positive antibody results with a negative NAAT should be confirmed with neutralizing antibody tests, including for all pregnant women.",
     "Women with lab evidence of possible Zika infection in pregnancy and their infants should be evaluated and managed for possible adverse outcomes; screening advice for pregnant women without symptoms is unchanged."
    ],
@@ -129181,7 +129181,7 @@
    "keyPoints": [
     "Two trials (211 people) compared acetazolamide with placebo, with weight loss support given to both groups.",
     "Change in vision was similar between the acetazolamide and placebo groups.",
-    "Acetazolamide gave a greater reduction in spinal fluid pressure and eye swelling, and better quality of life scores in one study, but also more side effects such as nausea, tiredness and tingling.",
+    "Acetazolamide gave a greater reduction in spinal fluid pressure and eye swelling, and better quality of life scores in one study, but also more side effects such as nausea, tiredness and tingling (these estimates were uncertain).",
     "There is not enough good evidence to recommend or reject acetazolamide or other IIH treatments; more high-quality trials are needed."
    ],
    "certainty": "low",
@@ -129539,9 +129539,9 @@
     "Lifestyle programs were linked to about 1.15 kg less weight gain and a lower risk of gestational diabetes compared with routine care.",
     "Diet-based programs had the largest effect on weight gain (about 2.6 kg less) and were linked to lower risks of preterm birth, large babies and neonatal intensive care admission.",
     "Physical activity programs were linked to less weight gain and lower risks of gestational diabetes, high blood pressure disorders of pregnancy and cesarean section.",
-    "Less structured mixed programs, such as written information or behavioral support alone, reduced weight gain but not other outcomes."
+    "Less structured mixed programs, such as written information or behavioral support alone, were linked to less weight gain only."
    ],
-   "certainty": "high",
+   "certainty": "not stated",
    "lifeStages": [
     "pregnancy"
    ],
@@ -129778,12 +129778,12 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/32925496/",
-   "summary": "This review pooled 11 studies of 2,256 women to see how pregnancy goes for elite athletes who were competing right before they conceived. Elite athletes seemed less likely to have low back pain in pregnancy, but may be more likely to gain more weight than recommended. The evidence for both findings is weak, and there were no differences between athletes and other women for most other outcomes.",
+   "summary": "This review pooled 11 studies of 2,256 women to see how pregnancy goes for elite athletes who were competing right before they conceived. Elite athletes seemed less likely to have low back pain in pregnancy, but may be more likely to gain more weight than recommended. The evidence for both findings is weak, and there were no clear differences between athletes and other women for most other outcomes.",
    "keyPoints": [
     "Low certainty evidence: elite athletes had lower odds of pregnancy-related low back pain than active or sedentary women.",
     "Very low certainty evidence: elite athletes had higher odds of gaining more weight than recommended in pregnancy.",
     "Low certainty evidence from two small studies noted three episodes of slow fetal heart rate after high-intensity exercise, which settled within 10 minutes of stopping.",
-    "No differences were found between athletes and controls for the other outcomes studied, and more research is needed."
+    "No clear differences were found between athletes and controls for the other outcomes studied, and more research is needed."
    ],
    "certainty": "low",
    "lifeStages": [
@@ -130548,7 +130548,7 @@
    "summary": "Runners who have had a baby often say there is little clear guidance on when to start running again. In this international consensus study, 118 clinicians and exercise professionals who work with postpartum runners answered three survey rounds; agreement was set at 75% or more. They agreed that after at least 3 weeks of rest and recovery, a gradual, individual return to running can be considered. Before starting, they recommend checking for medical and psychological concerns, current physical capacity (such as strength and pelvic floor symptoms) and past training. The authors say this is initial guidance from expert opinion and needs testing in research.",
    "keyPoints": [
     "After a minimum of 3 weeks of rest and recovery, a gradual return to running can be considered, on an individual timeline.",
-    "Before running, check medical and psychological concerns, current physical capacity and training history.",
+    "Before running, the experts advise checking medical and psychological concerns, current physical capacity and training history.",
     "Based on expert agreement (75% or more of 95 to 118 professionals over three rounds), not on trials.",
     "The authors call it initial guidance that research still needs to confirm."
    ],
@@ -130597,11 +130597,11 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/38191239/",
-   "summary": "This international consensus study asked clinicians and exercise professionals how to build a training plan for running again after childbirth. Across three survey rounds (118, 107 and 95 participants), they agreed on 42 of 47 statements. The plan should start with a period of relative rest, then increase duration and intensity gradually, begin with walk-run intervals and include strength training. It should be adjusted for muscle or joint pain, pelvic floor symptoms such as leaking or heaviness, sleep, mental health, breastfeeding and whether she is eating enough for her activity. Cost and access to experienced professionals can be barriers.",
+   "summary": "This international consensus study asked clinicians and exercise professionals how to build a training plan for running again after childbirth. Across three survey rounds (118, 107 and 95 participants), they agreed on 42 of 47 statements. The experts agreed the plan should start with a period of relative rest, then increase duration and intensity gradually, begin with walk-run intervals and include strength training. It should be adjusted for muscle or joint pain, pelvic floor symptoms such as leaking or heaviness, sleep, mental health, breastfeeding and whether she is eating enough for her activity. Cost and access to experienced professionals can be barriers.",
    "keyPoints": [
-    "Start with relative rest, then build up duration and intensity gradually.",
-    "Begin with walk-run intervals and add strength training.",
-    "Adjust the plan for pain, pelvic floor symptoms (leaking, heaviness), sleep, mood, breastfeeding and energy intake.",
+    "Experts agreed to start with relative rest, then build up duration and intensity gradually.",
+    "Experts agreed to begin with walk-run intervals and add strength training.",
+    "Experts agreed to adjust the plan for pain, pelvic floor symptoms (leaking, heaviness), sleep, mood, breastfeeding and energy intake.",
     "Consensus was reached on 42 of 47 statements; it reflects expert opinion, not trial results."
    ],
    "certainty": "not stated",
@@ -130854,7 +130854,7 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/29086160/",
-   "summary": "Migraine, especially migraine with aura, is linked with a higher risk of ischaemic stroke (a stroke from a blocked blood vessel). European headache and contraception experts reviewed the evidence on whether hormonal contraception adds to this risk and agreed on statements for safe prescribing. The evidence is of low quality, but it suggests that combined hormonal contraception (with oestrogen) may raise the stroke risk further in women with migraine, especially migraine with aura. Their statements therefore put safety first, and they call for more research.",
+   "summary": "Migraine, especially migraine with aura, is linked with a higher risk of ischaemic stroke (a stroke from a blocked blood vessel). European headache and contraception experts reviewed the evidence on whether hormonal contraception adds to this risk and agreed on statements to guide prescribing with cardiovascular safety in mind. The evidence is of low quality, but it suggests that combined hormonal contraception (with oestrogen) may raise the stroke risk further in women with migraine, especially migraine with aura. Their statements therefore put safety first, and they call for more research.",
    "keyPoints": [
     "Migraine with aura is linked with a higher risk of ischaemic stroke.",
     "Combined (oestrogen-containing) contraception may raise this risk further, especially with aura.",
@@ -132763,7 +132763,7 @@
    "keyPoints": [
     "Covers diagnosis, staging, surgery and main treatments for early and advanced cervical cancer.",
     "Gives an overview of drug (systemic) treatments.",
-    "Replaces older versions such as Version 3.2019.",
+    "This is Version 2.2026 of the guideline.",
     "The abstract does not list specific recommendations."
    ],
    "certainty": "not stated",
@@ -132808,12 +132808,12 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/32332417/",
-   "summary": "This guidance from US obstetricians (ACOG) explains the risks of tobacco in pregnancy and how to help women stop. Smoking in pregnancy is linked to cleft lip and palate, a baby who grows poorly, placenta problems, waters breaking early, low birth weight, ectopic pregnancy and more deaths around birth; children have more chest infections, asthma, colic and obesity. About 54% of women who smoke stop just before or during pregnancy. Stopping at any point helps mother and baby, with the greatest benefit before 15 weeks. E-cigarettes, vaping, hookahs and cigars are increasingly used, and ACOG advises stopping all forms. Care should be individual, with counselling, behavioural support and, where needed, medicines, and support should be discussed at prenatal and postnatal visits.",
+   "summary": "This guidance from US obstetricians (ACOG) explains the risks of tobacco in pregnancy and how to help women stop. Smoking in pregnancy is linked to cleft lip and palate, a baby who grows poorly, placenta problems, waters breaking early, low birth weight, ectopic pregnancy and more deaths around birth; children have more chest infections, asthma, colic and obesity. About 54% of women who smoke stop just before or during pregnancy. Stopping at any point helps mother and baby, with the greatest benefit before 15 weeks. E-cigarettes, vaping, hookahs and cigars are increasingly used, and ACOG advises stopping all forms. ACOG says care should be individual, with counselling, behavioural support and, where needed, medicines, and support should be discussed at prenatal and postnatal visits.",
    "keyPoints": [
-    "Replaces Committee Opinion 721 (2017).",
+    "This is ACOG Committee Opinion number 807.",
     "Stopping smoking at any point in pregnancy helps; the greatest benefit is before 15 weeks.",
     "About 54% of women who smoke stop just before or during pregnancy.",
-    "All forms of tobacco and nicotine, including e-cigarettes and vaping, should be stopped.",
+    "ACOG advises stopping all forms of tobacco and nicotine, including e-cigarettes and vaping.",
     "Support can include counselling, behavioural help and medicines, offered at prenatal and postnatal visits."
    ],
    "certainty": "not stated",
@@ -133224,10 +133224,10 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/31709403/",
-   "summary": "This systematic review pooled 14 observational studies with about 500,000 planned home births in well-resourced countries, comparing low-risk women who started labour planning a home birth with low-risk women planning a hospital birth. Where midwives who attend home births are well integrated into the health system, the risk of the baby dying around the birth was about the same for first and later births. In less integrated settings the estimates were higher but very imprecise, so no clear difference could be shown. The authors conclude that for low-risk women the risk of losing the baby did not differ by planned place of birth.",
+   "summary": "This systematic review pooled 14 observational studies with about 500,000 planned home births in well-resourced countries, comparing low-risk women who started labour planning a home birth with low-risk women planning a hospital birth. Where midwives who attend home births are well integrated into the health system, there was no clear difference in the risk of the baby dying around the birth, for first or later births. In less integrated settings the estimates were higher but very imprecise, so no clear difference could be shown. The authors conclude that for low-risk women the risk of losing the baby did not differ by planned place of birth.",
    "keyPoints": [
     "14 observational studies, about 500,000 planned home births, all low-risk women.",
-    "Well-integrated midwife systems: about the same risk of baby death for first births and for later births.",
+    "Well-integrated midwife systems: no clear difference in risk of baby death for first births or later births.",
     "Less integrated systems: higher but very uncertain estimates, no clear difference shown.",
     "The authors conclude the risk did not differ between planned home and planned hospital birth for low-risk women."
    ],
@@ -133377,10 +133377,10 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34247796/",
-   "summary": "This meta-analysis pooled four randomised trials with 332 pregnant women with leg cramps. Magnesium tablets did not lower how often cramps happened and did not make women more likely to be free of cramps, compared with placebo or no treatment. Side effects were not significantly more common with magnesium. The authors conclude that oral magnesium does not work for leg cramps in pregnancy. The trials were few and small.",
+   "summary": "This meta-analysis pooled four randomised trials with 332 pregnant women with leg cramps. Magnesium tablets showed no clear reduction in how often cramps happened and no clear improvement in the chance of being free of cramps, compared with placebo or no treatment. Side effects were not significantly more common with magnesium. The authors conclude that oral magnesium does not work for leg cramps in pregnancy. The trials were few and small.",
    "keyPoints": [
     "Four trials, 332 pregnant women.",
-    "Magnesium did not reduce how often leg cramps happened, compared with control.",
+    "Magnesium showed no clear reduction in how often leg cramps happened, compared with control.",
     "No clear increase in side effects with magnesium.",
     "The authors conclude oral magnesium is not effective for pregnancy leg cramps."
    ],
