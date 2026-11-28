@@ -630,6 +630,35 @@ Still open: Swiss IVF success by age (no text figures), a free Swiss
 breast-screening programme page (swisscancerscreening.ch could not be
 fetched; which cantons run programmes is not in the library).
 
+### Summary content check, next 100 items
+
+Next 100 items on the round-6 exposure ranking (none skipped; all had
+PubMed abstracts). 82 fair. 19 fixes in 18 items, text only (12
+re-embedded offline with the incremental script; label-only changes need
+no re-embed):
+
+- Certainty "low" -> "not stated" where the abstract grades nothing:
+  `pmid-31135656`, `pmid-28333357`, `pmid-31618674`, `pmid-40420105`,
+  `pmid-31711271`, `pmid-26629884`, `pmid-34217581`.
+- Hedges restored to match the GRADE level: `pmid-25758061`
+  (paracetamol vs ibuprofen, "may"), `pmid-41701618` ("may"),
+  `pmid-37330773` (Pilates, "probably"), `pmid-27038134` (scar fillers,
+  "probably"), `pmid-31845767` (ovulation "may", pregnancy "probably"),
+  `pmid-39465967` (satisfaction "probably", was "may"), `pmid-32710657`
+  (infant growth, "probably").
+- Wrong scope or number: `pmid-28937705` (only erythromycin, and
+  possibly clindamycin, beat placebo, not "antibiotics"), `pmid-43010994`
+  (under one extra egg, not "a few more").
+- Overstated: `pmid-37192834` (frozen vs fresh transfer, mostly
+  retrospective: "linked to better results"), `pmid-27887710` (results
+  too imprecise to call the treatment safe for babies), `pmid-27228266`
+  (orlistat: "meaningful" drop not in the abstract).
+
+Left as is: 18 judgement calls (labels where the abstract grades a range
+or only some outcomes, one self-contradicting abstract), e.g.
+`pmid-41448220`, `pmid-30738885`, `pmid-26172878`, `pmid-32972380`,
+`pmid-30103263`, `pmid-41498229`, `pmid-32124980`, `pmid-41184155`.
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed
