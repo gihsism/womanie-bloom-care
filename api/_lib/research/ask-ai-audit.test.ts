@@ -814,3 +814,47 @@ describe('Research round 16: one-risk-word and plain-number content check', () =
     for (const id of ['pmid-34521386', 'pmid-38766683', 'pmid-35042510', 'pmid-30529576', 'pmid-34928300', 'pmid-32968801', 'pmid-28647726', 'pmid-30920314', 'pmid-31801099', 'pmid-38902658']) expect(byId.get(id)!.certainty).toBe('not stated');
   });
 });
+
+// Round 17: the next 200 plain-number items, pregnancy, cycle, menopause,
+// contraception and lab topics first, checked against abstracts.
+describe('Research round 17: plain-number content check', () => {
+  const lib = getLibrary();
+  const byId = new Map(lib.items.map((i) => [i.id, i]));
+  const text = (id: string) => [byId.get(id)!.summary, ...byId.get(id)!.keyPoints].join(' ');
+
+  it('wrong or overstated results are corrected', () => {
+    expect(text('pmid-39553313')).not.toMatch(/two bone breakdown markers/);
+    expect(text('pmid-39553313')).toMatch(/two bone turnover markers/);
+    expect(text('pmid-42138261')).not.toMatch(/more than 2-fold/);
+    expect(text('pmid-37603500')).not.toMatch(/common acupuncture were more effective/);
+    expect(text('pmid-36781584')).not.toMatch(/both spontaneous and induced abortions/);
+    expect(text('pmid-38627233')).not.toMatch(/Combining all three approaches did best/);
+    expect(text('pmid-40753992')).not.toMatch(/lowered the odds of transmission/);
+    expect(text('pmid-34627229')).toMatch(/probably more likely to keep using/);
+    expect(text('pmid-30339316')).not.toMatch(/three times as likely/);
+  });
+
+  it('"similar" / "did not" where the abstract found no clear difference', () => {
+    for (const id of ['pmid-40626388', 'pmid-32415128', 'pmid-28806964', 'pmid-36033779', 'pmid-30062044', 'pmid-26171896', 'pmid-34329948', 'pmid-30521671']) expect(text(id)).toMatch(/no clear difference/);
+    expect(text('pmid-39205682')).not.toMatch(/did not raise live birth/);
+    expect(text('pmid-40626388')).not.toMatch(/about as (effective|well)/);
+    expect(text('pmid-34329948')).not.toMatch(/about the same|similar number of cancers/);
+    expect(text('pmid-26756588')).not.toMatch(/did not (change|reduce)/);
+  });
+
+  it('facts not in the abstract are removed', () => {
+    expect(text('pmid-21558332')).not.toMatch(/rates have risen since/);
+    expect(text('pmid-25828903')).not.toMatch(/too small to judge rare outcomes|the trials were small/);
+    expect(text('pmid-41450176')).not.toMatch(/may go undiagnosed/);
+    expect(text('pmid-27018154')).not.toMatch(/may be too low/);
+  });
+
+  it('advice in the app voice is credited', () => {
+    expect(text('pmid-27121914')).toMatch(/The authors say that with mild thrombophilia/);
+    expect(text('pmid-28472862')).toMatch(/The authors say both 2D and 3D/);
+  });
+
+  it('certainty labels the abstracts never gave are "not stated"', () => {
+    for (const id of ['pmid-37960761', 'pmid-36576445', 'pmid-39358652', 'pmid-33112163', 'pmid-34564868', 'pmid-39067455', 'pmid-34593482', 'pmid-36271388', 'pmid-28777972', 'pmid-31160241', 'pmid-39767456', 'pmid-25835269', 'pmid-39946383', 'pmid-35286547', 'pmid-33656703']) expect(byId.get(id)!.certainty).toBe('not stated');
+  });
+});

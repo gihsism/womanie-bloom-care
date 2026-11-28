@@ -1388,6 +1388,70 @@ abstract, about 400 with only a plain number (lower-priority topics), and
 about 50 with none of the risk words.
 Tests: `ask-ai-audit.test.ts` (round 16 block).
 
+## Round 17 (2026-11-28)
+
+### Summary content check: the next 200 plain-number items
+
+Same method as round 16. The 400 plain-number items were ranked by how
+often their topics, life stages and title hit the app's main subjects
+(pregnancy, birth, cycle and periods, menopause, contraception, labs and
+screening, thyroid, iron, vitamins, PCOS, fertility); the top 200 all had
+a PubMed abstract and were checked. **200 checked, 150 fair; 67 fixes in
+50 items**, text only (37 re-embedded offline; the 13 certainty-only
+changes need no re-embed):
+
+- Wrong or overstated results: `pmid-39553313` (probiotics after
+  menopause: BALP is a bone-building marker, so "two bone breakdown
+  markers" is now "two bone turnover markers"), `pmid-42138261` (travel
+  time to hospital: the 30-minute odds ratio was 1.92, so "roughly
+  2-fold", not "more than"), `pmid-37603500` (acupuncture for
+  perimenopausal depression: confidence ranges reach or cross no
+  difference; common acupuncture no longer called "more effective"),
+  `pmid-36781584` (past abortion and cervical problems: spontaneous
+  abortion was not analysed on its own), `pmid-38627233` (weight loss
+  before conception: diet plus weight-lowering drugs, not all three
+  approaches, did best for BMI), `pmid-30339316` (PCOS and metabolic
+  syndrome: odds, not "three times as likely"), `pmid-33832303` (womb lining and hormone
+  effects only "potential"), `pmid-34627229` (self-injected contraceptive
+  "probably" improves continuation), `pmid-36961547`, `pmid-40753992`
+  ("linked to", not caused), `pmid-31529625` and `pmid-35944931` (hedges
+  from the abstract).
+- "Similar", "about as well", "did not differ", "did not reduce" or "did
+  not change" where the abstract found no clear difference:
+  `pmid-40626388` (hormonal coil vs progestin tablets for womb-lining
+  overgrowth), `pmid-34329948` (synthesized mammography, 4 places),
+  `pmid-26171896` (routine early scans, perinatal deaths),
+  `pmid-26756588` and `pmid-27133893` (screening and deaths from any
+  cause), `pmid-39205682` (IVIG), `pmid-32415128`, `pmid-28806964`,
+  `pmid-36033779`, `pmid-30062044`, `pmid-30521671`, `pmid-37960761`,
+  `pmid-34564868`, `pmid-25505231`, `pmid-36075371`, `pmid-36235862`,
+  `pmid-33357834`.
+- Facts not in the abstract removed or replaced: `pmid-21558332` ("success
+  rates have risen since" now the abstract's own point that the live birth
+  rate per egg rose over the study years), `pmid-25828903` ("trials too
+  small to judge rare outcomes"), `pmid-41450176` ("some cases may go
+  undiagnosed"), `pmid-27018154` ("so they may be too low"),
+  `pmid-32926075` (the authors never say "not proof of cause"),
+  `pmid-29108135` (hospital admissions, not stays).
+- Certainty -> "not stated" (the abstract grades nothing): 15 items,
+  among them `pmid-37960761`, `pmid-36576445`, `pmid-39358652`,
+  `pmid-34564868`, `pmid-39067455`, `pmid-39767456`, `pmid-35286547`.
+- Advice in the app's voice credited to the authors: `pmid-27121914` (the
+  pill with mild thrombophilia), `pmid-28472862` (2D and 3D saline
+  sonography).
+
+Left as is: about 25 judgement calls, e.g. `pmid-27731292` and
+`pmid-26675773` keep "low" (the abstract calls most included studies low
+quality), `pmid-28599068`, `pmid-30883666` and `pmid-35943347` (graded
+range), `pmid-31684687` (fortified rice: results and conclusion differ in
+tone), `pmid-33619722` and `pmid-28756647` ("similar" is the abstract's
+own word).
+
+About 255 PubMed items remain unchecked: 8 with one risk word but no
+abstract, about 200 with only a plain number (the topics the app shows
+least), and about 47 with none of the risk words.
+Tests: `ask-ai-audit.test.ts` (round 17 block).
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed

@@ -3307,7 +3307,7 @@
     "The quality of the studies varied widely, with small sample sizes and little testing of actual behaviour change.",
     "More research is needed to find the best way to prevent FASD."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "pregnancy",
@@ -3358,7 +3358,7 @@
     "Low-to-moderate exposure showed a trend towards greater odds of attention-related behaviour problems.",
     "Many analyses had too few studies or showed no significant result, and the authors call for better research on low-to-moderate drinking."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "pregnancy"
@@ -8215,7 +8215,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/39205682/",
-   "summary": "This review pooled 12 trials with 751 women who had repeated miscarriages with no known cause, to see whether intravenous immunoglobulin (IVIG) helps more babies to be born alive. Overall, IVIG did not raise live birth rates compared with other treatments or placebo. For women who tested positive for antiphospholipid antibodies, a combination of low-molecular-weight heparin plus low-dose aspirin gave a higher live birth rate than IVIG.",
+   "summary": "This review pooled 12 trials with 751 women who had repeated miscarriages with no known cause, to see whether intravenous immunoglobulin (IVIG) helps more babies to be born alive. Overall, IVIG showed no clear difference in live birth rates compared with other treatments or placebo. For women who tested positive for antiphospholipid antibodies, a combination of low-molecular-weight heparin plus low-dose aspirin gave a higher live birth rate than IVIG.",
    "keyPoints": [
     "IVIG did not significantly increase live birth rates compared with the non-IVIG groups overall (OR 1.07, 95% CI 0.65 to 1.75).",
     "Compared with placebo (multivitamins, albumin or saline), IVIG showed a possible benefit that was not statistically significant (OR 1.43, 95% CI 0.99 to 2.07).",
@@ -14237,12 +14237,12 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34329948/",
-   "summary": "This review pooled 13 studies with more than 1.3 million women having breast cancer screening. It compared a newer 3D scan (tomosynthesis) paired with a computer-made 2D image against the same 3D scan paired with a standard 2D mammogram, and against standard 2D mammography alone. The computer-made image found about the same number of cancers as the standard image but led to fewer women being called back or needing a biopsy. Compared with standard mammography alone, the 3D approach found more cancers, but the rate of cancers appearing between screens was similar. The authors suggest it could replace the standard pairing and reduce radiation dose.",
+   "summary": "This review pooled 13 studies with more than 1.3 million women having breast cancer screening. It compared a newer 3D scan (tomosynthesis) paired with a computer-made 2D image against the same 3D scan paired with a standard 2D mammogram, and against standard 2D mammography alone. The computer-made image showed no clear difference in the number of cancers found compared with the standard image but led to fewer women being called back or needing a biopsy. Compared with standard mammography alone, the 3D approach found more cancers, but there was no clear difference in the rate of cancers appearing between screens. The authors suggest it could replace the standard pairing and reduce radiation dose.",
    "keyPoints": [
-    "Computer-made 2D images plus 3D scanning found a similar number of cancers as standard 2D plus 3D scanning.",
+    "Computer-made 2D images plus 3D scanning showed no clear difference in the number of cancers found compared with standard 2D plus 3D scanning.",
     "The computer-made approach led to fewer recalls and fewer biopsies than standard 2D plus 3D scanning.",
     "Compared with standard mammography alone, it found about 2 more cancers per 1000 screens and reduced recalls.",
-    "Cancers appearing between screening rounds were similar to standard mammography, and the authors suggest it could replace standard 2D plus 3D scanning to lower radiation dose."
+    "There was no clear difference from standard mammography in cancers appearing between screening rounds, and the authors suggest it could replace standard 2D plus 3D scanning to lower radiation dose."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -14445,11 +14445,11 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/26756588/",
-   "summary": "This review pooled results from many studies to see whether mammogram screening for breast cancer helps average-risk women. Screening generally lowered the chance of dying from breast cancer, but the effect was small, and it was strongest for women in their 60s. Screening did not change the chance of dying from any cause. The authors note that most trials used older technology and treatments.",
+   "summary": "This review pooled results from many studies to see whether mammogram screening for breast cancer helps average-risk women. Screening generally lowered the chance of dying from breast cancer, but the effect was small, and it was strongest for women in their 60s. Screening was not shown to reduce the chance of dying from any cause. The authors note that most trials used older technology and treatments.",
    "keyPoints": [
     "Breast cancer deaths prevented over 10 years per 10,000 women screened: about 3 (ages 39-49), 8 (ages 50-59), 21 (ages 60-69) and 13 (ages 70-74).",
     "Results were not statistically certain at every age, including the 40s and the 70-74 group, and the size of benefit was small.",
-    "Screening did not reduce deaths from all causes.",
+    "Screening was not shown to reduce deaths from all causes.",
     "Advanced breast cancer was less common with screening in women aged 50 and older, but not in women aged 39 to 49."
    ],
    "certainty": "moderate",
@@ -19842,7 +19842,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/35944931/",
-   "summary": "This Cochrane review pooled 26 trials (about 35,000 adults) comparing low-sodium salt substitutes, which swap some of the sodium for potassium, with regular salt. In adults, the substitutes probably lower blood pressure slightly and probably cause slightly fewer non-fatal heart problems and heart-related deaths. They also probably raise blood potassium slightly, though the trials found little to no difference in high potassium (hyperkalaemia) overall. No studies in pregnant women were found, and the evidence in children is very uncertain.",
+   "summary": "This Cochrane review pooled 26 trials (about 35,000 adults) comparing low-sodium salt substitutes, which swap some of the sodium for potassium, with regular salt. In adults, the substitutes probably lower blood pressure slightly and probably cause slightly fewer non-fatal heart problems and heart-related deaths. They also probably raise blood potassium slightly, though they may make little to no difference in high potassium (hyperkalaemia) overall. No studies in pregnant women were found, and the evidence in children is very uncertain.",
    "keyPoints": [
     "In adults, low-sodium salt substitutes probably lower blood pressure slightly (about 4.8 mmHg for the top number and 2.4 mmHg for the bottom number), based on moderate-certainty evidence.",
     "They probably slightly reduce non-fatal stroke, non-fatal acute coronary syndrome and cardiovascular deaths in adults.",
@@ -22255,11 +22255,11 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/27133893/",
-   "summary": "This review pooled results from randomised trials to see whether bowel cancer screening helps adults with no symptoms. Stool blood tests (guaiac fecal occult blood test) and a camera test of the lower bowel (flexible sigmoidoscopy) both lowered deaths from bowel cancer and cases of late-stage disease. The benefit was clearer for adults aged 60 and over. Neither test changed the overall chance of dying from any cause, and sigmoidoscopy carries some risks such as bleeding or bowel perforation.",
+   "summary": "This review pooled results from randomised trials to see whether bowel cancer screening helps adults with no symptoms. Stool blood tests (guaiac fecal occult blood test) and a camera test of the lower bowel (flexible sigmoidoscopy) both lowered deaths from bowel cancer and cases of late-stage disease. The benefit was clearer for adults aged 60 and over. Neither test clearly changed the overall chance of dying from any cause, and sigmoidoscopy carries some risks such as bleeding or bowel perforation.",
    "keyPoints": [
     "Stool blood testing (gFOBT) cut bowel cancer deaths by 18%, and flexible sigmoidoscopy cut them by 26%, compared with no screening.",
     "About 377 people needed screening with gFOBT, and about 864 with sigmoidoscopy, to prevent one bowel cancer death.",
-    "Neither test reduced deaths from all causes combined.",
+    "Neither test clearly reduced deaths from all causes combined.",
     "Benefit was much greater in adults aged 60 and over, so younger adults may face the harms of screening without much benefit."
    ],
    "certainty": "not stated",
@@ -23425,7 +23425,7 @@
     "The other study found women with varicose veins who used the pill had a higher rate of VTE (1.85 per 1000 women-years) than pill users without varicose veins (0.84) or non-users with varicose veins (0.31).",
     "The authors say no definitive conclusions can be made and more research is needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "contraception",
     "general"
@@ -23527,7 +23527,7 @@
     "Among pill users, mild thrombophilia raised clot risk almost 6-fold and severe thrombophilia about 7-fold.",
     "Absolute clot risk was far higher with severe thrombophilia (4.3 to 4.6 per 100 pill-years) than with mild (0.49 to 2.0 per 100 pill-years).",
     "The results support discouraging the combined pill in women with severe inherited thrombophilia.",
-    "With mild thrombophilia and no other risk factors such as family history, the pill can be offered if reliable alternatives are not tolerated."
+    "The authors say that with mild thrombophilia and no other risk factors such as family history, the pill can be offered if reliable alternatives are not tolerated."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -29683,7 +29683,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/28806964/",
    "summary": "This review looked at programmes meant to stop teenagers and young women from having another unplanned pregnancy, including one emergency contraception programme. Overall, there was little or no good evidence that any of the programmes worked to reduce repeat pregnancy. Fewer of the young women in the programmes went on to have a baby, but the number of repeat pregnancies was not clearly different. Young women's circumstances, motivation and having a real say in how programmes are designed seemed to matter.",
    "keyPoints": [
-    "Repeat pregnancy rates were similar with or without the programmes (43% vs 48%), a difference that was not statistically significant.",
+    "There was no clear difference in repeat pregnancy rates with or without the programmes (43% vs 48%); the difference was not statistically significant.",
     "Fewer young women in the programmes had a subsequent birth (12% vs 21%), based on four studies.",
     "Many repeat pregnancies happened alongside poverty, low expectations and few opportunities.",
     "The authors say more carefully designed and tested programmes are needed, with young women playing an active role."
@@ -30194,7 +30194,7 @@
     "Endometriosis fibrosis shares features with other fibrotic diseases, which may help researchers find new non-hormonal treatments.",
     "Treatments aimed at fibrosis have mostly been tested only in animals, and most studies had a moderate to high risk of bias."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menstrual-cycle",
     "conception",
@@ -30297,7 +30297,7 @@
     "Supplements did not significantly reduce chronic pelvic pain or pain during sex.",
     "Studies with low risk of bias did not show significant results versus placebo, so more and better trials are needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menstrual-cycle",
     "conception",
@@ -33952,7 +33952,7 @@
     "3D saline infusion sonography found womb-cavity abnormalities with about 94.5% sensitivity and 99.4% specificity across 11 studies.",
     "When 2D and 3D were compared directly, 3D scored slightly higher, but the difference was not statistically significant.",
     "Because 2D is already very accurate, the room for improvement with 3D is small.",
-    "Both 2D and 3D saline sonography can be considered alternatives to diagnostic hysteroscopy in women with abnormal uterine bleeding or subfertility."
+    "The authors say both 2D and 3D saline sonography should be considered alternatives to diagnostic hysteroscopy in women with abnormal uterine bleeding or subfertility."
    ],
    "certainty": "low",
    "lifeStages": [
@@ -40334,7 +40334,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/36235862/",
-   "summary": "This review pooled results from randomized trials of whey protein supplements in women aged 55 and over. Whey protein helped build leg muscle and arm strength only when women were also doing resistance (strength) training. Without strength training, whey protein did not improve muscle strength or lean mass, and it did not change fat mass or body weight either way.",
+   "summary": "This review pooled results from randomized trials of whey protein supplements in women aged 55 and over. Whey protein helped build leg muscle and arm strength only when women were also doing resistance (strength) training. Without strength training, whey protein showed no clear benefit for muscle strength or lean mass, and no clear difference in fat mass or body weight.",
    "keyPoints": [
     "With resistance training, whey protein improved biceps curl strength and lower-leg lean muscle mass compared with placebo.",
     "Without resistance training, whey protein showed no significant benefit for muscle strength or lean mass.",
@@ -40492,7 +40492,7 @@
     "High-intensity exercise improved lumbar spine bone density more than moderate or low intensity exercise.",
     "Low and moderate intensity exercise had similar effects at the femoral neck (top of the thigh bone); no effect was seen for high intensity, which may be due to too few studies.",
     "Resistance training, possibly combined with impact training, appeared the most effective type of exercise for spine and hip bone.",
-    "Adding exercise did not change how well bone medication worked, and few high-intensity trials were available."
+    "No clear effect of adding exercise on how well bone medication worked was seen, and few high-intensity trials were available."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -40856,7 +40856,7 @@
     "About 26% of people worldwide had haemorrhoids at a given time, and around 27% over a lifetime.",
     "Haemorrhoids were more common in women (27.33%) than in men.",
     "Pregnancy and constipation were among the factors linked to a higher chance of haemorrhoids.",
-    "Studies using invasive tests (such as examination inside the bowel) found more haemorrhoids, which suggests some cases may go undiagnosed."
+    "Studies using invasive tests (such as examination inside the bowel) found more haemorrhoids than non-invasive methods."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -43389,7 +43389,7 @@
     "Older age was the only factor that predicted a bigger effect.",
     "Results varied widely and had a risk of bias, so the real effect of different approaches remains unclear."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menopause",
     "post-menopause"
@@ -52163,7 +52163,7 @@
     "Only a few trials measured pregnancy rate, so the effect on actually conceiving is less clear.",
     "The authors note small numbers of studies and participants and call for better-designed trials."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "ivf"
@@ -55955,7 +55955,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/33832303/",
-   "summary": "This review pooled 26 randomised trials with 2,389 women who had oligomenorrhea (infrequent periods) to see whether traditional Chinese medicine (TCM) helps. Adding TCM to standard medical treatment was linked to heavier menstrual flow, longer periods, a thicker womb lining and higher estradiol and progesterone levels. Side effects did not differ between the groups. The authors say the quality of the evidence was relatively low, so more rigorous trials are needed.",
+   "summary": "This review pooled 26 randomised trials with 2,389 women who had oligomenorrhea (infrequent periods) to see whether traditional Chinese medicine (TCM) helps. Adding TCM to standard medical treatment was linked to heavier menstrual flow, longer periods, and possibly a thicker womb lining and higher estradiol and progesterone levels. There was no clear difference in side effects between the groups. The authors say the quality of the evidence was relatively low, so more rigorous trials are needed.",
    "keyPoints": [
     "TCM added to standard medical treatment was linked to increased menstrual blood volume and longer periods.",
     "TCM plus standard treatment also showed possible improvements in endometrial thickness and estradiol and progesterone levels.",
@@ -57326,7 +57326,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34627229/",
-   "summary": "This review pooled three randomized trials (1,264 participants) comparing women injecting themselves with subcutaneous depot medroxyprogesterone acetate (a contraceptive injection) against having a provider give it. Women who self-injected were more likely to keep using the contraceptive. The benefit seemed larger for women under 25 and for women in low- and middle-income countries. The effects on other outcomes are uncertain because the evidence for them was very low quality.",
+   "summary": "This review pooled three randomized trials (1,264 participants) comparing women injecting themselves with subcutaneous depot medroxyprogesterone acetate (a contraceptive injection) against having a provider give it. Women who self-injected were probably more likely to keep using the contraceptive. The benefit seemed larger for women under 25 and for women in low- and middle-income countries. The effects on other outcomes are uncertain because the evidence for them was very low quality.",
    "keyPoints": [
     "Self-injection probably increases continuation of contraceptive use compared with provider-given injections (risk ratio 1.35, moderate-certainty evidence).",
     "The effect on continuation appeared larger for younger women (under 25) and for women in low- and middle-income countries.",
@@ -57885,7 +57885,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/30521671/",
-   "summary": "This Cochrane review looked for trials comparing a hormone coil (the levonorgestrel IUS) with oral progestogen tablets for treating atypical endometrial hyperplasia, a pre-cancer change in the womb lining. It found only one trial, and just 19 of its women had this exact condition. In that small group there was not enough evidence to say whether the coil or the tablets worked better. Across all 153 women in the trial, vaginal bleeding was more common with the coil, while nausea rates were similar. The evidence was low or very low quality.",
+   "summary": "This Cochrane review looked for trials comparing a hormone coil (the levonorgestrel IUS) with oral progestogen tablets for treating atypical endometrial hyperplasia, a pre-cancer change in the womb lining. It found only one trial, and just 19 of its women had this exact condition. In that small group there was not enough evidence to say whether the coil or the tablets worked better. Across all 153 women in the trial, vaginal bleeding was more common with the coil, while there was no clear difference in nausea. The evidence was low or very low quality.",
    "keyPoints": [
     "No trials were found that were done only in women with atypical endometrial hyperplasia; results came from a 19-woman subgroup of one larger trial.",
     "All 6 women using the hormone coil had their atypical hyperplasia regress, versus 10 of 13 on oral progestogen, but this was too little evidence to say which works better.",
@@ -65569,11 +65569,11 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/40626388/",
-   "summary": "This Cochrane review looked at ways to treat atypical endometrial hyperplasia (an overgrowth of the womb lining) and early womb cancer without removing the womb, for women who hope to have children. It found 12 studies with 904 women, but the evidence was low certainty and the studies had a high risk of bias. Adding metformin to progestin tablets may slightly improve how often the condition fully clears. A hormonal coil (levonorgestrel IUS) seemed about as effective as progestin tablets and may cause slightly less weight gain.",
+   "summary": "This Cochrane review looked at ways to treat atypical endometrial hyperplasia (an overgrowth of the womb lining) and early womb cancer without removing the womb, for women who hope to have children. It found 12 studies with 904 women, but the evidence was low certainty and the studies had a high risk of bias. Adding metformin to progestin tablets may slightly improve how often the condition fully clears. A hormonal coil (levonorgestrel IUS) showed no clear difference in effect compared with progestin tablets and may cause slightly less weight gain.",
    "keyPoints": [
     "It is unclear which treatment, route or dose of progestin works best for fertility-sparing care, because the evidence is low certainty.",
     "Adding metformin to progestin may slightly increase the chance of complete response, but may make little to no difference to live birth rate.",
-    "The levonorgestrel IUS (hormonal coil) may work about as well as oral progestin for complete response and may reduce severe weight gain slightly.",
+    "The levonorgestrel IUS (hormonal coil) may make no clear difference to complete response compared with oral progestin and may reduce severe weight gain slightly.",
     "No studies gave evidence on overall survival, progression-free survival or quality of life."
    ],
    "certainty": "low",
@@ -66253,7 +66253,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/30339316/",
-   "summary": "This review pooled results from many studies to look at metabolic syndrome (a cluster of problems such as extra belly fat, high blood pressure, and abnormal blood fats and sugar) in women with polycystic ovary syndrome (PCOS). Women with PCOS were found to be about three times as likely to have metabolic syndrome. The higher risk was seen in women with PCOS who were overweight or obese, but not clearly in lean women. It was linked to weight and metabolic features such as insulin resistance, not to male-type hormone levels.",
+   "summary": "This review pooled results from many studies to look at metabolic syndrome (a cluster of problems such as extra belly fat, high blood pressure, and abnormal blood fats and sugar) in women with polycystic ovary syndrome (PCOS). Women with PCOS had about three times the odds of having metabolic syndrome. The higher risk was seen in women with PCOS who were overweight or obese, but not clearly in lean women. It was linked to weight and metabolic features such as insulin resistance, not to male-type hormone levels.",
    "keyPoints": [
     "Women with PCOS had about 3.35 times the odds of metabolic syndrome compared with women without PCOS.",
     "The higher risk was seen in overweight or obese women with PCOS, but not clearly in lean women with PCOS.",
@@ -73177,9 +73177,9 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/37603500/",
-   "summary": "This review pooled 27 trials with 2,269 women who had depression during perimenopause (the years around menopause). It compared different acupuncture-based treatments with each other and with the antidepressant fluoxetine plus menopausal hormone treatment. Several acupuncture types, especially warm acupuncture, scored better than fluoxetine plus hormone treatment, and warm acupuncture ranked best on depression scores. The authors suggest the findings could help patients and therapists choose among acupuncture options, but the abstract does not rate how certain the evidence is.",
+   "summary": "This review pooled 27 trials with 2,269 women who had depression during perimenopause (the years around menopause). It compared different acupuncture-based treatments with each other and with the antidepressant fluoxetine plus menopausal hormone treatment. Several acupuncture types, especially warm acupuncture, were reported as more effective than fluoxetine plus hormone treatment, though the differences were borderline, and warm acupuncture ranked best on depression scores. The authors suggest the findings could help patients and therapists choose among acupuncture options, but the abstract does not rate how certain the evidence is.",
    "keyPoints": [
-    "Warm acupuncture, electroacupuncture and common acupuncture were more effective than fluoxetine plus menopausal hormone treatment, though some confidence ranges were close to showing no difference.",
+    "Warm acupuncture and electroacupuncture were reported as more effective than fluoxetine plus menopausal hormone treatment, though their confidence ranges reached the line of no difference; for common and abdominal acupuncture the difference was not clear.",
     "Warm acupuncture was ranked the best treatment for perimenopausal depression and beat the other four acupuncture-related treatments on depression scores.",
     "The analysis covered 27 randomised trials, 2,269 women and 8 treatment approaches."
    ],
@@ -74670,7 +74670,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/36961547/",
-   "summary": "This review pulled together 22 studies to ask whether menopause raises the risk of depression and anxiety. It found that depression and anxiety are common during menopause and afterwards. Hot flushes and night sweats, a past history of major depression, and stressful life events or social factors seemed to raise the risk. The authors suggest changing estrogen levels may play a part, but the studies cannot prove this.",
+   "summary": "This review pulled together 22 studies to ask whether menopause raises the risk of depression and anxiety. It found that depression and anxiety are common during menopause and afterwards. Hot flushes and night sweats, a past history of major depression, and stressful life events or social factors were linked to a higher risk. The authors suggest changing estrogen levels may play a part, but the studies cannot prove this.",
    "keyPoints": [
     "Depression and anxiety are common during menopause and after it.",
     "Hot flushes and night sweats (vasomotor symptoms) and a past history of major depression were linked with higher risk of depression.",
@@ -74835,10 +74835,10 @@
    "keyPoints": [
     "Acupuncture plus Chinese herbal medicine seemed more effective than Western medicine alone for perimenopausal insomnia.",
     "Sleep quality scores (PSQI) and anxiety scores (HAMA) improved more with the combined treatment.",
-    "Follicle-stimulating hormone levels were lower with the combined treatment, but estradiol and LH levels did not differ.",
+    "Follicle-stimulating hormone levels were lower with the combined treatment, but there was no clear difference in estradiol and LH levels.",
     "The included studies had a higher risk of bias, so more rigorous trials are needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menopause",
     "post-menopause",
@@ -74943,7 +74943,7 @@
     "Caffeine intake and the type of fat eaten were linked to how strong menopausal symptoms were.",
     "The evidence is inconsistent and inconclusive, and comes from only a small number of studies."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menopause",
     "post-menopause"
@@ -76965,7 +76965,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/25505231/",
-   "summary": "Researchers followed over 115,000 nurses for 20 years to see whether having migraine changes the chance of getting breast cancer. Women with migraine did not have a higher or lower risk of breast cancer, and their natural sex hormone levels were no different from women without migraine. A pooled review of earlier studies found a lower risk only in case-control studies, not in the stronger long-term cohort studies, so the overall evidence does not support a link.",
+   "summary": "Researchers followed over 115,000 nurses for 20 years to see whether having migraine changes the chance of getting breast cancer. There was no clear link between migraine and breast cancer risk, and their natural sex hormone levels were no different from women without migraine. A pooled review of earlier studies found a lower risk only in case-control studies, not in the stronger long-term cohort studies, so the overall evidence does not support a link.",
    "keyPoints": [
     "In a large 20-year study, migraine was not linked to breast cancer risk, whether in situ or invasive.",
     "Natural sex hormone levels did not differ between women with and without migraine.",
@@ -81107,7 +81107,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/39553313/",
-   "summary": "This review pooled 12 randomized trials with 1,183 postmenopausal women to see whether probiotic supplements affect bone health. Women taking probiotics had higher bone density in the lower spine and hip than comparison groups, and lower levels of two bone breakdown markers. The effect looked stronger in women with osteopenia (thinner bones) than in women with osteoporosis. The authors say more trials are needed to confirm these findings.",
+   "summary": "This review pooled 12 randomized trials with 1,183 postmenopausal women to see whether probiotic supplements affect bone health. Women taking probiotics had higher bone density in the lower spine and hip than comparison groups, and lower levels of two bone turnover markers. The effect looked stronger in women with osteopenia (thinner bones) than in women with osteoporosis. The authors say more trials are needed to confirm these findings.",
    "keyPoints": [
     "Probiotic supplementation was linked to higher bone mineral density in both the lumbar spine and the hip in postmenopausal women.",
     "Probiotics were associated with lower levels of CTX and BALP, which are markers of bone turnover.",
@@ -81465,7 +81465,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/36033779/",
-   "summary": "This review pooled 16 randomised trials with 6,425 postmenopausal women to see whether vitamin K2 supplements help bone health. Vitamin K2 was linked with better bone density in the lower spine. Overall, fracture rates did not differ between groups, but they were lower after one study that differed from the others was left out. Side effects were similar to the comparison groups.",
+   "summary": "This review pooled 16 randomised trials with 6,425 postmenopausal women to see whether vitamin K2 supplements help bone health. Vitamin K2 was linked with better bone density in the lower spine. Overall, there was no clear difference in fracture rates between groups, but they were lower after one study that differed from the others was left out. There was no clear difference in side effects compared with the comparison groups.",
    "keyPoints": [
     "Vitamin K2 was linked with maintained or improved bone density in the lower spine (lumbar spine) in postmenopausal women.",
     "Across six trials there was no clear difference in fractures overall; removing one very different study showed fewer fractures with vitamin K2.",
@@ -90948,12 +90948,12 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/32415128/",
-   "summary": "Researchers combined results from seven randomized trials (1,676 women, average age about 53) that compared antidepressants with placebo in women with depression during and after the menopausal transition. Antidepressants improved depressive symptoms more than placebo, and more women responded to treatment or reached remission. Women taking antidepressants were more likely to stop treatment because of side effects, although overall dropout rates were similar to placebo.",
+   "summary": "Researchers combined results from seven randomized trials (1,676 women, average age about 53) that compared antidepressants with placebo in women with depression during and after the menopausal transition. Antidepressants improved depressive symptoms more than placebo, and more women responded to treatment or reached remission. Women taking antidepressants were more likely to stop treatment because of side effects, although there was no clear difference from placebo in overall dropout rates.",
    "keyPoints": [
     "Antidepressants reduced depressive symptoms more than placebo in women during and after menopausal transition.",
     "Response and remission rates were higher with antidepressants than with placebo.",
     "Antidepressants also helped depressive symptoms in women who did not have a formal diagnosis of major depression.",
-    "Stopping treatment because of side effects was more common with antidepressants, while overall dropout rates did not differ."
+    "Stopping treatment because of side effects was more common with antidepressants, while there was no clear difference in overall dropout rates."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -91727,7 +91727,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/32926075/",
-   "summary": "This review pooled results from 191 studies covering almost 196,000 mother-child pairs. It looked at whether depression and anxiety around pregnancy and birth were linked to how children develop from infancy to age 18. Maternal depression and anxiety were linked to poorer social-emotional, thinking (cognitive) and adaptive behaviour outcomes in children, and the links continued into childhood and adolescence. The authors say these links are not proof of cause, and for language and motor development the results were less clear.",
+   "summary": "This review pooled results from 191 studies covering almost 196,000 mother-child pairs. It looked at whether depression and anxiety around pregnancy and birth were linked to how children develop from infancy to age 18. Maternal depression and anxiety were linked to poorer social-emotional, thinking (cognitive) and adaptive behaviour outcomes in children, and the links continued into childhood and adolescence. These are links, not proof of cause, and for language and motor development the results were less clear.",
    "keyPoints": [
     "Depression and anxiety in pregnancy and after birth were linked to poorer social-emotional development in children.",
     "Links with thinking (cognitive) skills and adaptive behaviour were also found, and they extended beyond infancy into childhood and adolescence.",
@@ -94440,7 +94440,7 @@
     "Benefits were also reported for mental health, pelvic floor problems and bone density across the included trials.",
     "Study quality was limited and treatment periods were short, so higher-quality, longer trials are needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menstrual-cycle",
     "general"
@@ -99012,7 +99012,7 @@
     "Findings on infant cortisol levels and eating or sleeping difficulties came from single studies and need confirming.",
     "The authors say early screening for PTSD in the perinatal period may be advisable, with referral for effective treatment if appropriate."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "pregnancy",
     "postpartum"
@@ -100968,7 +100968,7 @@
     "Three studies showed no negative effect of exercise on breastfeeding.",
     "Most studies were small with low quality and a high risk of bias, and the exercise programmes varied a lot, so better research is needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "postpartum"
    ],
@@ -109704,7 +109704,7 @@
     "Evidence linking PFAS to early menopause and primary ovarian insufficiency was limited but suggestive.",
     "Findings on menstrual cycle changes and fetal growth were inconsistent."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "pregnancy",
@@ -110924,7 +110924,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/29108135/",
-   "summary": "This Cochrane review looked for trials comparing different ultrasound check-up schedules for twin pregnancies. It found only one small trial of 526 women. Adding Doppler scans (which check blood flow) at 25, 30 and 35 weeks to regular growth scans made no clear difference to baby deaths, birth timing, caesarean births or hospital stays. The trial was too small to pick up rare outcomes, so there is not enough evidence to say which ultrasound schedule is best for twins.",
+   "summary": "This Cochrane review looked for trials comparing different ultrasound check-up schedules for twin pregnancies. It found only one small trial of 526 women. Adding Doppler scans (which check blood flow) at 25, 30 and 35 weeks to regular growth scans made no clear difference to baby deaths, birth timing, caesarean births or hospital admissions. The trial was too small to pick up rare outcomes, so there is not enough evidence to say which ultrasound schedule is best for twins.",
    "keyPoints": [
     "Only one trial (526 women with twins) met the review's criteria.",
     "Growth plus Doppler scans at 25, 30 and 35 weeks showed no clear difference from growth scans alone for baby deaths, stillbirth, caesarean birth or hospital admission.",
@@ -111072,12 +111072,12 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/26171896/",
-   "summary": "This large review combined 11 trials with over 37,000 women to see what routine ultrasound scans in early pregnancy (before 24 weeks) actually achieve, compared with scans only when there is a specific reason. Routine early scans were better at spotting twins or other multiple pregnancies and major fetal abnormalities, and were linked to fewer inductions for 'post term' pregnancy. They did not reduce deaths around the time of birth or other poor outcomes for babies. Follow-up of children scanned before birth found no harm to their physical or thinking development.",
+   "summary": "This large review combined 11 trials with over 37,000 women to see what routine ultrasound scans in early pregnancy (before 24 weeks) actually achieve, compared with scans only when there is a specific reason. Routine early scans were better at spotting twins or other multiple pregnancies and major fetal abnormalities, and were linked to fewer inductions for 'post term' pregnancy. They made no clear difference to deaths around the time of birth or other poor outcomes for babies. Follow-up of children scanned before birth found no harm to their physical or thinking development.",
    "keyPoints": [
     "Routine early ultrasound greatly reduced the chance that a multiple pregnancy (such as twins) was missed by 24 weeks (moderate quality evidence).",
     "Routine scans found more major fetal abnormalities before 24 weeks (moderate quality evidence).",
     "Routine scans were linked to fewer inductions of labour for 'post term' pregnancy, but this evidence is low quality, and better dating may explain it.",
-    "Routine scans did not change the rate of perinatal death, and long-term follow-up showed no harmful effect on children's development."
+    "Routine scans made no clear difference to the rate of perinatal death, and long-term follow-up showed no harmful effect on children's development."
    ],
    "certainty": "moderate",
    "lifeStages": [
@@ -113291,7 +113291,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/36781584/",
-   "summary": "This review pooled six studies covering over 2.5 million pregnancies to see whether a past miscarriage or induced abortion is linked to cervical problems in a later pregnancy, such as a short cervix or cervical insufficiency (when the cervix opens too early). Women with a history of abortion had higher odds of cervical dysfunction, and the odds rose with the number of previous abortions. The link was seen for both spontaneous and induced abortions, and it was strongest in studies of surgical abortion. This type of study shows an association, not that abortion directly causes the problem.",
+   "summary": "This review pooled six studies covering over 2.5 million pregnancies to see whether a past miscarriage or induced abortion is linked to cervical problems in a later pregnancy, such as a short cervix or cervical insufficiency (when the cervix opens too early). Women with a history of abortion had higher odds of cervical dysfunction, and the odds rose with the number of previous abortions. The link was seen for spontaneous and induced abortions combined and for induced abortions alone, and it was strongest in studies of surgical abortion. This type of study shows an association, not that abortion directly causes the problem.",
    "keyPoints": [
     "A history of spontaneous or induced abortion was linked to about 2.7 times higher odds of cervical dysfunction in the current pregnancy.",
     "For induced abortions alone the odds were about 2.5 times higher, and about 4 times higher in studies limited to surgical abortions.",
@@ -117900,10 +117900,10 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/40753992/",
-   "summary": "Researchers combined results from 110 studies to estimate how likely HIV is to pass from a mother to her baby, and what changes that chance. The chance of passing on HIV was lower when the mother had a higher CD4 count (a measure of immune health) and when she had been on HIV medicine for longer before delivery. Starting treatment earlier in pregnancy also made it more likely that the virus was undetectable at delivery. The authors say more evidence is needed on how newer treatments affect transmission.",
+   "summary": "Researchers combined results from 110 studies to estimate how likely HIV is to pass from a mother to her baby, and what changes that chance. The chance of passing on HIV was lower when the mother had a higher CD4 count (a measure of immune health) and when she had been on HIV medicine for longer before delivery. Starting treatment earlier in pregnancy was also linked to a higher chance that the virus was undetectable at delivery. The authors say more evidence is needed on how newer treatments affect transmission.",
    "keyPoints": [
     "For women not on HIV treatment, a higher CD4 count was linked to lower odds of passing HIV to the baby around birth.",
-    "For women on treatment, each extra week on HIV medicine before delivery lowered the odds of transmission by 5.6%.",
+    "For women on treatment, each extra week on HIV medicine before delivery was linked to 5.6% lower odds of transmission.",
     "Starting HIV treatment late in pregnancy was linked to lower odds of an undetectable viral load at delivery.",
     "Integrase inhibitor-based treatment looked better than another type, but the authors note this was confounded by study region."
    ],
@@ -120672,7 +120672,7 @@
    "keyPoints": [
     "Across studies, shorter travel times to health facilities were linked to better survival for babies around birth.",
     "Journeys of under 30 minutes to a hospital had the highest survival rates.",
-    "Pooled estimates showed more than 2-fold higher odds of survival for journeys to hospital at 30 minute, 1 hour and 2 hour limits, but results varied widely between studies.",
+    "Pooled estimates showed roughly 2-fold higher odds of survival for journeys to hospital at 30 minute, 1 hour and 2 hour limits, but results varied widely between studies.",
     "The authors suggest a 30-minute or 1-hour travel norm is preferable to the 2-hour limit used in many low- and middle-income countries, alongside good quality of care."
    ],
    "certainty": "not stated",
@@ -122911,7 +122911,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/36075371/",
-   "summary": "This review looked at whether pelvic floor muscle training helps women who leak urine while doing high-impact sports. It pooled five small studies with 104 women in total. Training reduced how often and how much women leaked, and some studies also found stronger pelvic floor muscles. The two studies that measured quality of life found no difference after training.",
+   "summary": "This review looked at whether pelvic floor muscle training helps women who leak urine while doing high-impact sports. It pooled five small studies with 104 women in total. Training reduced how often and how much women leaked, and some studies also found stronger pelvic floor muscles. The two studies that measured quality of life found no clear difference after training.",
    "keyPoints": [
     "Pelvic floor muscle training improved urine leakage symptoms in female athletes, reducing both how often and how much they leaked.",
     "Two of three studies that measured pelvic floor function found stronger maximal muscle contraction, and one found better vaginal resting pressure.",
@@ -128560,7 +128560,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/38627233/",
-   "summary": "This review pooled 95 trials (9,910 women) of women with overweight or obesity of reproductive age. It compared exercise, diet and medicines, alone and combined, on BMI, ovulation and hormone levels. Combining all three approaches did best for weight loss, ovulation and lowering male-type hormones such as testosterone. The authors note that over half the trials had a high or unclear risk of bias, so better-quality studies are still needed.",
+   "summary": "This review pooled 95 trials (9,910 women) of women with overweight or obesity of reproductive age. It compared exercise, diet and medicines, alone and combined, on BMI, ovulation and hormone levels. Combinations of exercise, diet and medicines did best for weight loss, ovulation and lowering male-type hormones such as testosterone. The authors note that over half the trials had a high or unclear risk of bias, so better-quality studies are still needed.",
    "keyPoints": [
     "Diet plus weight-lowering drugs gave the biggest drop in BMI, and adding exercise gave a similar result.",
     "Exercise plus diet plus ovulation-inducing drugs gave the biggest rise in ovulation rate.",
@@ -129029,7 +129029,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/31529625/",
    "summary": "This Cochrane review looked at whether support such as education, peer or professional contact, or a breast pump helps women who are overweight or obese start and keep up breastfeeding. It found seven small trials with 831 women, mostly in the USA. The quality of the evidence was very low, so it is unclear whether any of these supports make a difference. The authors say better-designed trials are needed.",
    "keyPoints": [
-    "Women who are overweight or obese are less likely to start breastfeeding and tend to breastfeed for a shorter time.",
+    "Evidence suggests women who are overweight or obese are less likely to start breastfeeding and tend to breastfeed for a shorter time.",
     "Only one small trial (39 women) tested a breast pump, and it could not show whether it helped.",
     "Six trials used education and social support (phone or face-to-face); results for starting and continuing breastfeeding were uncertain.",
     "The authors conclude there is not enough evidence to say which type of support works best and call for larger, better-designed trials."
@@ -129483,14 +129483,14 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34564868/",
-   "summary": "This review pulled together six randomized trials (482 women) comparing continuous glucose monitoring, where a sensor tracks sugar levels all day, with usual finger-prick testing in gestational diabetes. Women using continuous monitoring had slightly lower average blood sugar (HbA1c) at the end of pregnancy, gained a little less weight, and had babies with slightly lower birth weights. No differences were seen in the other outcomes studied. The authors say the evidence is limited because there were few studies and they were small.",
+   "summary": "This review pulled together six randomized trials (482 women) comparing continuous glucose monitoring, where a sensor tracks sugar levels all day, with usual finger-prick testing in gestational diabetes. Women using continuous monitoring had slightly lower average blood sugar (HbA1c) at the end of pregnancy, gained a little less weight, and had babies with slightly lower birth weights. No clear differences were seen in the other outcomes studied. The authors say the evidence is limited because there were few studies and they were small.",
    "keyPoints": [
     "Continuous glucose monitoring was linked to slightly lower HbA1c at the end of pregnancy than finger-prick testing.",
     "Women using it gained somewhat less weight in pregnancy, and their babies had lower birth weight.",
-    "No differences were found in the other maternal and newborn outcomes checked.",
+    "No clear differences were found in the other maternal and newborn outcomes checked.",
     "The evidence is limited by few and small studies, so larger trials are needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "pregnancy"
    ],
@@ -129737,7 +129737,7 @@
     "Results were mixed for how fast weight was gained each week, with some studies finding no link.",
     "The authors say the evidence is limited and more consistent studies are needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "pregnancy"
    ],
@@ -130803,7 +130803,7 @@
    ],
    "evidenceLevel": "study",
    "url": "https://pubmed.ncbi.nlm.nih.gov/27018154/",
-   "summary": "This study used survey answers from women in 43 countries to estimate how often contraception fails in everyday (typical) use. In the first 12 months, failures per 100 episodes of use were lowest with implants (0.6), IUDs (1.4) and injections (1.7), in the middle with the pill (5.5) and male condoms (5.4), and highest with withdrawal (13.4) and calendar-based abstinence (13.9). The figures come from what women recalled and were not corrected for under-reported abortions, so they may be too low.",
+   "summary": "This study used survey answers from women in 43 countries to estimate how often contraception fails in everyday (typical) use. In the first 12 months, failures per 100 episodes of use were lowest with implants (0.6), IUDs (1.4) and injections (1.7), in the middle with the pill (5.5) and male condoms (5.4), and highest with withdrawal (13.4) and calendar-based abstinence (13.9). The figures come from what women recalled and were not corrected for possible reporting errors or under-reported abortions.",
    "keyPoints": [
     "12-month typical-use failures per 100 uses: implant 0.6, IUD 1.4, injection 1.7.",
     "Pill 5.5 and male condom 5.4.",
@@ -130960,12 +130960,12 @@
    ],
    "evidenceLevel": "study",
    "url": "https://pubmed.ncbi.nlm.nih.gov/21558332/",
-   "summary": "This study used the UK national register (HFEA) of 400,135 IVF cycles from 1991 to 2008 to see how the number of eggs collected and the woman's age relate to the chance of a baby. Overall, 21.3% of fresh IVF cycles led to a live birth. The chance rose with the number of eggs up to about 15, levelled off between 15 and 20, and fell above 20. Age mattered a lot: in 2006-2007, with 15 eggs collected, the predicted live birth rate was 40% at ages 18 to 34, 36% at 35 to 37, 27% at 38 to 39 and 16% at 40 and over. These are older averages; success rates have risen since.",
+   "summary": "This study used the UK national register (HFEA) of 400,135 IVF cycles from 1991 to 2008 to see how the number of eggs collected and the woman's age relate to the chance of a baby. Overall, 21.3% of fresh IVF cycles led to a live birth. The chance rose with the number of eggs up to about 15, levelled off between 15 and 20, and fell above 20. Age mattered a lot: in 2006-2007, with 15 eggs collected, the predicted live birth rate was 40% at ages 18 to 34, 36% at 35 to 37, 27% at 38 to 39 and 16% at 40 and over. These are older averages; the live birth rate per egg rose steadily over the study years.",
    "keyPoints": [
     "Overall live birth rate: 21.3% per fresh IVF cycle (UK, 1991 to 2008).",
     "The chance rose with egg number up to about 15 eggs, levelled off at 15 to 20 and fell above 20.",
     "Predicted live birth rate with 15 eggs (2006-2007): 40% at 18-34, 36% at 35-37, 27% at 38-39, 16% at 40 and over.",
-    "Older data; national success rates have risen since."
+    "Older data; the live birth rate per egg rose steadily over the study years."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -132968,7 +132968,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/30062044/",
-   "summary": "This review pooled 22 studies of 14,884 women who stopped using contraception in order to see how quickly they became pregnant. About 83 in 100 became pregnant within the first year after stopping. The rate was much the same after hormonal methods and after an IUD, and neither the type of progestogen nor how long the pill had been taken made a clear difference. The authors conclude that using contraception, whatever the method or for how long, does not harm or clearly delay the ability to get pregnant afterwards. The evidence was not graded.",
+   "summary": "This review pooled 22 studies of 14,884 women who stopped using contraception in order to see how quickly they became pregnant. About 83 in 100 became pregnant within the first year after stopping. There was no clear difference in the rate between hormonal methods and IUDs, and neither the type of progestogen nor how long the pill had been taken made a clear difference. The authors conclude that using contraception, whatever the method or for how long, does not harm or clearly delay the ability to get pregnant afterwards. The evidence was not graded.",
    "keyPoints": [
     "22 studies, 14,884 women who stopped contraception.",
     "About 83% became pregnant within 12 months of stopping.",
@@ -133121,11 +133121,11 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/25828903/",
-   "summary": "This Cochrane review looked at trying to turn a breech baby (bottom or feet first) to head-down by pressing on the belly, called external cephalic version (ECV), at or near the end of pregnancy. Eight trials with 1,308 women compared an ECV attempt with no attempt. With an ECV attempt, fewer babies were still not head-down at birth, and fewer women had a caesarean (very low-certainty evidence). There was no clear difference in the baby's condition at birth, admission to neonatal care or perinatal death, but the trials were too small to judge rare outcomes. The trials had design flaws. The trials could not assess complications; the authors note that large observational studies suggest complications are rare.",
+   "summary": "This Cochrane review looked at trying to turn a breech baby (bottom or feet first) to head-down by pressing on the belly, called external cephalic version (ECV), at or near the end of pregnancy. Eight trials with 1,308 women compared an ECV attempt with no attempt. With an ECV attempt, fewer babies were still not head-down at birth, and fewer women had a caesarean (very low-certainty evidence). There was no clear difference in the baby's condition at birth, admission to neonatal care or perinatal death. The trials had design flaws. The trials could not assess complications; the authors note that large observational studies suggest complications are rare.",
    "keyPoints": [
     "An ECV attempt near term made it less likely that the baby was still breech at birth (8 trials, 1,305 women).",
     "Fewer caesareans with an ECV attempt (very low-certainty evidence).",
-    "No clear difference in Apgar scores, neonatal admission or perinatal death; the trials were small.",
+    "No clear difference in Apgar scores, neonatal admission or perinatal death.",
     "Trials could not judge complications; large observational studies suggest they are rare.",
     "All trials had design limitations (low or very low certainty)."
    ],
