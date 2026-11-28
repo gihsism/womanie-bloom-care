@@ -730,3 +730,28 @@ describe.skipIf(!hasModel)('Research round 14: sources the chat sends (bundled m
     for (const id of [NHS_BREAST_PAIN, NHS_BREAST_CHECK]) expect(late).not.toContain(id);
   }, 90_000);
 });
+
+// Round 14: 150 unchecked items picked by risk (numbers, doses, "safe",
+// "recommend", "should", medicines in pregnancy or breastfeeding) checked
+// against their abstracts. These pin the most serious fixes.
+describe('Research round 14: risk-ranked content check', () => {
+  const lib = getLibrary();
+  const byId = new Map(lib.items.map((i) => [i.id, i]));
+  const text = (id: string) => [byId.get(id)!.summary, ...byId.get(id)!.keyPoints].join(' ');
+
+  it('figures and advice not in the abstract are gone', () => {
+    expect(text('pmid-26637088')).not.toMatch(/4-8%|2\.3 planned caesareans|safely have a vaginal birth/);
+    expect(text('pmid-39891165')).not.toMatch(/World Health Organization/);
+    expect(text('pmid-38018434')).not.toMatch(/200 mg/);
+  });
+
+  it('results the summaries had left out or overstated are corrected', () => {
+    expect(text('pmid-41640554')).toMatch(/zinc was linked to higher/);
+    expect(text('pmid-26144877')).toMatch(/probably reduced newborn tetanus deaths/);
+    expect(byId.get('pmid-26113232')!.summary).toMatch(/no clear difference/);
+  });
+
+  it('certainty labels the abstracts never gave are "not stated"', () => {
+    for (const id of ['pmid-32619725', 'pmid-41596408', 'pmid-35636626', 'pmid-28390010', 'pmid-37788418']) expect(byId.get(id)!.certainty).toBe('not stated');
+  });
+});

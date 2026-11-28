@@ -10,11 +10,11 @@ the research library and sends the chat a handful of sources to base its
 answer on. The same library feeds the short "what the research says" notes
 next to lab results and trackers.
 
-The library now holds **2,580 sources**:
+The library now holds **2,589 sources**:
 
-- about 2,080 summaries of research reviews (mostly from PubMed, many of
+- about 2,085 summaries of research reviews (mostly from PubMed, many of
   them Cochrane reviews),
-- about 470 guidelines from medical societies (for example ACOG, RCOG,
+- about 480 guidelines and official health pages (for example ACOG, RCOG,
   NICE, FIGO, the Swiss gynaecology society SGGG),
 - a small number of single studies,
 - **20 Swiss sources** written for Swiss users (listed below).
@@ -30,13 +30,17 @@ thyroid, screening tests, infections).
 
 ## How much has been checked
 
-Over 13 rounds of review, **1,572 source summaries** were read side by side
-with the original research abstract, starting with the sources users are
-most likely to see. The order came from running several hundred everyday
-questions through the app and counting which sources came up most.
+Over 14 rounds of review, **1,722 source summaries** were read side by side
+with the original research abstract. Rounds 1-13 started with the sources
+users are most likely to see (the order came from running several hundred
+everyday questions through the app and counting which sources came up
+most). Round 14 picked the riskiest of the rest: summaries that give doses
+or numbers, call something "safe", say what women "should" do, or talk
+about medicines in pregnancy or breastfeeding.
 
 - About 5 in 6 summaries were fine as written.
-- **297 corrections** were made in total.
+- **450 corrections** were made in total (153 of them in round 14, in 70
+  of the 150 risky summaries checked).
 - Almost every source that comes up for the questions we tested has now
   been checked once.
 
@@ -58,6 +62,11 @@ questions through the app and counting which sources came up most.
    intervals or the wrong group of people (for example a study of young egg
    donors described as a study of IVF patients). Each was corrected
    against the abstract.
+6. **Figures that were not in the source.** Round 14 found a few summaries
+   that added numbers or advice the abstract never gave (for example a
+   repeat-tear rate and "most women can safely have a vaginal birth" in a
+   guideline whose abstract only lists its scope, or a folic acid dose
+   credited to the WHO). These were removed.
 
 Alongside the summaries, we also fixed how sources are matched to
 questions, so that the chat no longer gets sources on a different subject
@@ -91,11 +100,28 @@ Written in our own words from official Swiss pages and laws, read in full:
 Legal and insurance sources only come up when a question is about money,
 the law or work, so they do not crowd out medical sources.
 
+## Added in round 14
+
+Four topics that had only nearby sources now have sources that answer
+them, and these come up first in the chat:
+
+- **Sore breasts before a period:** the NHS breast pain page (pain often
+  starts up to two weeks before a period; on its own it is unlikely to be
+  cancer; when to see a GP) and two breast pain reviews.
+- **Breasts of different sizes:** the NHS breast-check page ("it's common
+  for breasts to be different sizes", and which changes to get checked).
+- **Thyroid problems after birth:** two reviews of postpartum thyroiditis
+  (about 5 in 100 women; often an overactive phase, then an underactive
+  one, then back to normal).
+- **Warning signs of ovarian cancer:** the NHS symptoms page, a review of
+  how well symptoms point to it, and the US Task Force advice against
+  screening women without symptoms.
+
 ## What is still open
 
-- **Topics with no good free source yet:** ovulation pain, cyclical breast
-  pain, breast growth in teenagers, thyroid problems after birth, warning
-  signs of ovarian cancer, high prolactin, lubricants and fertility, the
+- **Topics with no good free source yet:** ovulation pain, breast growth
+  in teenagers (only the general NHS point that breasts of different sizes
+  are common), high prolactin, lubricants and fertility, the
   pill and cervical cancer, hair dye in pregnancy, swollen feet in late
   pregnancy, and travel or bleeding after embryo transfer. For these the
   chat leans on nearby sources or says its research does not cover the
@@ -103,10 +129,10 @@ the law or work, so they do not crowd out medical sources.
 - **Ten higher-priority gaps** from the first audit, such as painkillers
   while breastfeeding, how long it usually takes to get pregnant, and IVF
   success rates by age (the list is at the top of `docs/research-gaps.md`).
-- **About 1,000 summaries have never been checked.** They are the sources
-  that did not come up for any of the questions we tested. The next step is
-  a new set of everyday questions to find which of them users would
-  actually see.
+- **About 830 summaries have never been checked.** They did not come up
+  for any of the questions we tested, and they are the lower-risk ones:
+  about 290 have one risk word (such as a dose or "should"), about 500
+  only a plain number, about 50 none. The next step is the 290.
 - **A few labels are judgement calls** (for example a review that grades
   its findings from "moderate" to "low" and carries one label). These were
   left as they are and are listed in the detailed file.

@@ -1178,6 +1178,111 @@ high prolactin, ovulation pain, lubricants and sperm, the pill and
 cervical cancer, hair dye in pregnancy, swollen feet, travel or bleeding
 after embryo transfer.
 
+## Round 14 (2026-11-28)
+
+### Weak topics: sources that answer them (all free)
+
+Nine new items. The three NHS pages were read in full on 2026-11-28 and
+written up by hand in our own words (`OTHER_SOURCES` in
+`scripts/research/swiss-sources.mjs`, OGL v3.0). The six PubMed items were
+summarised from their abstracts only; certainty is "not stated" where the
+abstract grades nothing, and narrative reviews are labelled "study".
+
+| Topic | Items | First source now (bundled model) |
+|---|---|---|
+| Sore breasts before a period | NHS "Breast pain" (reviewed Oct 2026: starts up to two weeks before a period, unlikely to be cancer on its own, when to see a GP), `pmid-32138883` (Mayo Clin Proc 2020 review), `pmid-26541567` (French breast pain recommendations 2015: pain calendar, no screening change, bra, NSAID gel) | NHS breast pain, then the French recommendations |
+| Breasts of different sizes / one growing faster | NHS "How to check your breasts or chest" (reviewed Jul 2024: "common for breasts to be different sizes", which changes to get checked) | NHS breast check |
+| Postpartum thyroiditis | `pmid-30844908` (Clin Obstet Gynecol 2019: about 5% of women, first year after birth, risk of recurrence and lasting hypothyroidism), `pmid-22443972` (Med Clin North Am 2012: overactive 1-3 months, underactive up to 6 months, then normal) | `pmid-30844908`, then `pmid-22443972`; iodine and ATA 2026 follow |
+| Ovarian cancer warning signs | NHS "Ovarian cancer symptoms" (reviewed Nov 2025: bloating, pain, feeling full, peeing more, about 12 times a month or more; CA125 and scan), `pmid-26541098` (systematic review of symptoms, 2016), `pmid-29450531` (USPSTF 2018: against screening women without symptoms, D, moderate certainty) | symptom review and NHS (places 1-2); NHS for persistent bloating; USPSTF for "Is there a screening test?" |
+
+Teen breast growth is now covered only by the general NHS line that
+breasts of different sizes are common; no free source with an abstract
+covers breast development in puberty.
+
+Two new `SUBJECT_MISMATCH` rules (x0.6) in `library.ts`: ovarian cancer
+titles step back when the question has no cancer word (the NHS and review
+items had come up for "What are the warning signs of OHSS?"), and the
+breast pain / breast check titles step back without a breast word (the
+NHS breast pain page had come up for a late-first-period question). The
+"warning signs" keywords were left off the ovarian items: with them, the
+OHSS question lost its fourth source (the Cochrane OHSS overview) through
+the 0.5 x top cutoff.
+
+Before / after on 169 questions (all eval and audit questions, every
+question in `ask-ai-audit.test.ts`, 12 new weak-topic questions): only the
+12 new questions and "Thyroid problems after giving birth" changed; the
+round-13 test for that question now expects the two thyroiditis reviews
+first. Spot checks left alone: breast lump, HRT and breast cancer,
+mastitis and nipple pain while breastfeeding, fertility drugs and ovarian
+cancer, bloating before a period or in pregnancy. Search evals unchanged.
+Tests: `ask-ai-audit.test.ts` (round 14 blocks).
+
+### Summary content check, ranked by risk instead of exposure
+
+The exposure lists were used up in round 13, so this round ranked the
+983 never-checked PubMed items by risk: summaries or key points with a
+dose (weight 5), a medicine named next to pregnancy or breastfeeding (4),
+"safe" (4), "should" (3), "recommend" (2), any number (1). The 149 items
+scoring 6 or more, plus one from the next tier, were checked against
+their PubMed abstracts (150 checked; the LactMed ibuprofen chapter, with
+no abstract, was skipped). 80 fair. **153 fixes in 70 items**, text only
+(67 re-embedded offline; certainty-only changes need no re-embed):
+
+- Figures or advice that are not in the abstract, removed:
+  `pmid-26637088` (Canadian OASIS guideline: a 4-8% repeat rate, "2.3
+  planned caesareans to prevent one case of bowel leakage", "most women
+  can safely have a vaginal birth", antibiotics and laxatives advice; the
+  abstract only gives the guideline's scope), `pmid-38018434` (a 200 mg
+  caffeine limit and "low intake"), `pmid-39891165` (a 5 mg folic acid dose
+  credited to the WHO; the abstract says advice differs between
+  countries), `pmid-32407785` (a stray food-safety sentence; heparin
+  advice is about preventing growth restriction coming back, not
+  treatment), `pmid-33276704` (a claim about combination thyroid
+  treatment), `pmid-32473687` (examples of the target group),
+  `pmid-31161393` ("the authors did not claim a benefit").
+- Results left out or wrong: `pmid-41640554` (the authors recommend zinc,
+  but their own pooled result links zinc to higher odds of neural tube
+  defects, OR 2.37; now said), `pmid-33197417` (when checks on the baby
+  start in cholestasis of pregnancy), `pmid-40652453` (the diabetes
+  guideline keeps the standard pregnancy targets, not "as close to target
+  as possible"), `pmid-26144877` (tetanus vaccine: "probably" for
+  moderate evidence; fewer cases after at least one dose, not the full
+  course), `pmid-34155622` (fewer caesareans with oral misoprostol only
+  against the named comparisons), `pmid-29358245` and `pmid-26389730`
+  (each summary had left out a main recommendation).
+- "Safe" / "as effective" where the abstract found only no clear
+  difference: `pmid-26113232` (nifedipine vs labetalol), `pmid-26171903`
+  (long-acting FSH), `pmid-25579834` (statins and cancer),
+  `pmid-39683510` (zinc for period pain: side-effect odds ratio now
+  given with its wide interval).
+- Hedges restored: `pmid-39800868`, `pmid-29589650`, `pmid-39032163`,
+  `pmid-39277776`, `pmid-35502787`, `pmid-28426619`.
+- Certainty -> "not stated" (the abstract grades nothing):
+  `pmid-32619725`, `pmid-41596408`, `pmid-35636626`, `pmid-28390010`,
+  `pmid-37788418`.
+- Advice in the app's voice now credited to the guideline, panel, Task
+  Force, CDC/ACIP, WHO or authors: 108 edits in 53 items (marijuana in
+  pregnancy, imaging and gadolinium while breastfeeding, RSV vaccine and
+  antibody, self-injected DMPA, caesarean scar pregnancy, stopping
+  smoking, amniotic fluid embolism, POI, vitamin D, chronic pelvic pain
+  and others).
+
+Left as is: 19 judgement calls (labels picked from a graded range, study
+quality instead of GRADE, the authors' own conclusions), e.g.
+`pmid-34155622`, `pmid-38754603`, `pmid-34014910` (CDC's own "safe"
+wording), `pmid-31161393` (no higher ADHD risk up to 70 g of alcohol a
+week, reported faithfully but easy to read as permission),
+`pmid-33631841`.
+
+About 830 PubMed items remain unchecked: about 290 with a lower risk
+score (one risk word, such as a dose or "should" alone), about 500 with
+only a plain number, and about 50 with none of the risk words.
+
+Still without a fitting free item: teen breast development, high
+prolactin, ovulation pain, lubricants and sperm, the pill and cervical
+cancer, hair dye in pregnancy, swollen feet, travel or bleeding after
+embryo transfer.
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed
