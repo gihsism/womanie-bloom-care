@@ -128,7 +128,7 @@ export const SWISS_SOURCES = [
     lifeStages: ['conception', 'pregnancy', 'postpartum'],
     topics: ['pregnancy-nutrition', 'folic-acid', 'iodine-supplements-pregnancy', 'vitamin-d-pregnancy'],
     tags: ['switzerland', 'nutrition', 'folic acid', 'iodine', 'vitamin d', 'breastfeeding'],
-    keywords: ['switzerland', 'swiss', 'folic acid', 'folsäure', 'iodine', 'iodised salt', 'vitamin d', 'iron', 'supplement', 'diet', 'nutrition', 'breastfeeding', 'pregnancy', 'trying to conceive', 'caffeine', 'coffee', 'alcohol', 'tuna', 'mercury', 'fish', 'weight gain', 'calories', 'exercise'],
+    keywords: ['switzerland', 'swiss', 'folic acid', 'folsäure', 'iodine', 'iodised salt', 'vitamin d', 'iron', 'supplement', 'diet', 'nutrition', 'breastfeeding', 'pregnancy', 'trying to conceive', 'before pregnancy', 'folic acid before pregnancy', 'caffeine', 'coffee', 'alcohol', 'tuna', 'mercury', 'fish', 'weight gain', 'calories', 'exercise'],
   },
   {
     url: 'https://www.blv.admin.ch/de/naehrstoffzufuhr',
@@ -208,6 +208,25 @@ export const SWISS_SOURCES = [
     topics: ['prenatal-screening'],
     tags: ['switzerland', 'group b streptococcus', 'gbs', 'swab', 'antibiotics in labour', 'newborn infection'],
     keywords: ['switzerland', 'swiss', 'group b strep', 'group b streptococcus', 'gbs', 'strep b', 'swab', 'vaginal swab', 'antibiotics in labour', 'newborn sepsis', 'week 36', '35 to 37 weeks', 'penicillin'],
+  },
+  {
+    url: 'https://www.bag.admin.ch/de/humane-papillomaviren-hpv',
+    title: 'HPV vaccination in Switzerland: recommended ages, doses and costs (BAG and Federal Commission for Vaccination)',
+    year: 2025,
+    fetchedAt: '2026-11-28T01:00:00.000Z',
+    summary:
+      'The Swiss Federal Office of Public Health (BAG) and the Federal Commission for Vaccination recommend the HPV vaccine for all young people aged 11 to 14, girls and boys alike. It protects against cancers caused by human papillomaviruses, such as cervical cancer, and against genital warts. People aged 15 to 26 are advised to catch up. Before the 15th birthday two injections six months apart are needed; from the 15th birthday three injections over at least six months. In the cantonal vaccination programmes the vaccine is exempt from the deductible for people aged 11 to 26; the co-payment is still paid by the person.',
+    keyPoints: [
+      'Recommended for all young people aged 11 to 14, girls and boys.',
+      'Catch-up vaccination is recommended from 15 to 26 years.',
+      'Before the 15th birthday: two injections six months apart; from the 15th birthday: three injections over at least six months.',
+      'In the cantonal vaccination programmes, no deductible for people aged 11 to 26; the co-payment remains.',
+      'It protects against HPV-related cancers, such as cervical cancer, and genital warts.',
+    ],
+    lifeStages: ['menstrual-cycle', 'contraception', 'general'],
+    topics: ['cervical-screening'],
+    tags: ['switzerland', 'hpv vaccine', 'vaccination', 'cervical cancer', 'adolescents'],
+    keywords: ['switzerland', 'swiss', 'hpv', 'hpv vaccine', 'hpv vaccination', 'papillomavirus', 'gardasil', 'vaccine', 'impfung', 'cervical cancer', 'genital warts', 'teenager', 'daughter', 'catch-up', 'kanton'],
   },
 ];
 

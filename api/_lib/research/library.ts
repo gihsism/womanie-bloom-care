@@ -385,6 +385,17 @@ export const FOCUS_MIN_ITEMS = 200;
  * guideline into an endometriosis answer): it gets this factor.
  */
 export const ANCHOR_MISS_FACTOR = 0.8;
+
+/**
+ * Womanie is a Swiss app: official Swiss guidance (BAG, BLV, SGGG items,
+ * tagged "switzerland") steps forward when it matches the question's own
+ * words and topic, so "whooping cough vaccine in pregnancy" or "folic acid
+ * before pregnancy" cite the Swiss schedule / BLV advice ahead of US or
+ * Canadian documents saying much the same (Ask AI audit, round 7). Items
+ * found only by meaning, or missing the question's topic, get no lift.
+ */
+export const SWISS_SOURCE_FACTOR = 1.25;
+const isSwissItem = (item: ResearchItem) => item.tags.includes('switzerland');
 const topicVocabCache = new WeakMap<ResearchItem[], Set<string>>();
 
 function topicVocabulary(items: ResearchItem[], idx: IndexedItem[]): Set<string> {
@@ -555,6 +566,7 @@ export const SUPERSEDED: Record<string, string> = {
   'pmid-30629567': 'pmid-37486660', // ACOG perinatal depression screening CO 757 (2018) -> CPG 4 (2023)
   'pmid-28934178': 'pmid-39106314', // US MEC 2016 updates -> US MEC 2024
   'pmid-32271729': 'pmid-39106314',
+  'pmid-28492856': 'pmid-36592456', // ACP osteoporosis treatment 2017 -> 2023 living guideline
 };
 /**
  * Factor for a superseded guideline, and for an ACOG "Summary:" record
@@ -629,7 +641,8 @@ function stageFactor(item: ResearchItem, stage: LifeStage | null): number {
  * Citation-audit factors (Nov 2026): rare subject words lift items naming
  * them (focus terms, like medicines); items that miss every topic word of
  * the question x0.8; IVF-population titles x0.85 outside fertility
- * questions; superseded guidelines and duplicate "Summary:" records x0.6.
+ * questions; superseded guidelines and duplicate "Summary:" records x0.6;
+ * Swiss (BAG / BLV / SGGG) items that match the question words x1.25.
  */
 export function searchItems(
   items: ResearchItem[],
@@ -666,7 +679,9 @@ export function searchItems(
   const anchors = qTokens.filter((t) => vocab.has(t) && !SUBJECT_CONTEXT_WORDS.has(t) && !PREGNANCY_WORDS.has(t) && !/^\d+$/.test(t));
   const fertilityTreatmentContext = (stage !== null && IVF_STAGES.has(stage)) || IVF_QUERY.test(query);
   const subjectTokens = opts.requireSubject ? qTokens.filter((t) => !SUBJECT_CONTEXT_WORDS.has(t) && !/^\d+$/.test(t)) : [];
-  const candidates: { it: IndexedItem; base: number; strength: number; cos: number; subject: boolean; anchored: boolean }[] = [];
+  // Subject words for the Swiss lift (not "pregnant", "swiss" or other context words).
+  const ownTokens = qTokens.filter((t) => !SUBJECT_CONTEXT_WORDS.has(t) && !PREGNANCY_WORDS.has(t) && !/^\d+$/.test(t));
+  const candidates: { it: IndexedItem; base: number; strength: number; cos: number; subject: boolean; anchored: boolean; own: boolean }[] = [];
 
   for (const it of indexed) {
     if (opts.topic && !it.item.topics.includes(opts.topic)) continue;
@@ -687,6 +702,7 @@ export function searchItems(
     for (const p of it.phrases) if (qLower.includes(` ${p} `)) raw += 2;
 
     const subject = subjectTokens.some((t) => matched.has(t) || (SYNONYMS[t] ?? []).some((x) => matched.has(stem(x))));
+    const own = ownTokens.some((t) => matched.has(t) || (SYNONYMS[t] ?? []).some((x) => matched.has(stem(x))));
     const anchored = anchors.length === 0 || anchors.some((t) => matched.has(t) || (SYNONYMS[t] ?? []).some((x) => matched.has(stem(x))));
     const coverage = qTokens.length
       ? qTokens.filter((t) => matched.has(t) || (SYNONYMS[t] ?? []).some((s) => matched.has(stem(s)))).length / qTokens.length
@@ -697,11 +713,11 @@ export function searchItems(
       const cos = doc ? dotProduct(sem.query, doc) : 0;
       const strength = doc ? semanticStrength(cos, sem.floor, sem.ceil) : 0;
       if (raw === 0 && strength === 0) continue;
-      candidates.push({ it, base: raw === 0 ? 0 : base, strength, cos, subject, anchored });
+      candidates.push({ it, base: raw === 0 ? 0 : base, strength, cos, subject, anchored, own });
       continue;
     }
     if (qTokens.length > 0 && raw === 0) continue;
-    candidates.push({ it, base, strength: 0, cos: 0, subject, anchored });
+    candidates.push({ it, base, strength: 0, cos: 0, subject, anchored, own });
   }
   // Relevance floor: no item mentions any subject word of the question,
   // so every candidate only shares its life stage or a loose semantic
@@ -717,7 +733,7 @@ export function searchItems(
   // Hybrid: normalise the keyword part against the best keyword match of
   // this query (at least KEYWORD_REF) and blend in the semantic strength.
   const ref = sem ? Math.max(KEYWORD_REF, ...candidates.map((c) => c.base)) : 0;
-  for (const { it, base: kwBase, strength, anchored } of candidates) {
+  for (const { it, base: kwBase, strength, anchored, own } of candidates) {
     const base = sem ? blendScores(kwBase, strength, sem.weight, ref) : kwBase;
     const recency = 1 + Math.max(0, 10 - (nowYear - it.item.year)) * 0.005;
     const cochrane = /cochrane/i.test(it.item.journal) ? COCHRANE_BOOST : 1;
@@ -732,8 +748,9 @@ export function searchItems(
           : 1;
     const ivf = !fertilityTreatmentContext && IVF_TITLE.test(it.item.title) ? IVF_TITLE_FACTOR : 1;
     const anchor = anchored ? 1 : ANCHOR_MISS_FACTOR;
+    const swiss = anchored && own && isSwissItem(it.item) ? SWISS_SOURCE_FACTOR : 1;
     const score =
-      base * stageFactor(it.item, stage) * EVIDENCE_BOOST[it.item.evidenceLevel] * cochrane * recency * substance * pregnancy * ivf * anchor * current;
+      base * stageFactor(it.item, stage) * EVIDENCE_BOOST[it.item.evidenceLevel] * cochrane * recency * substance * pregnancy * ivf * anchor * swiss * current;
     if (opts.minScore && score < opts.minScore) continue;
     results.push({ item: it.item, score: Math.round(score * 100) / 100 });
   }

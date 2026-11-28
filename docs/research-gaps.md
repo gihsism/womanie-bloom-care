@@ -464,6 +464,111 @@ or only the main outcome), e.g. `pmid-30064002`, `pmid-37753821`,
 `pmid-27153744`, `pmid-28694152`, `pmid-34339416`, `pmid-40803331`,
 `pmid-28432791`, `pmid-41689846`, `pmid-39887989`.
 
+## Round 7 (2026-11-28)
+
+### Summary content check, next 150 items
+
+Next 150 items on the round-6 exposure ranking that had PubMed abstracts.
+Skipped: 2 BAG hand-written items (checked in rounds 3-5) and 2 records
+with no abstract (`pmid-30000103`, `pmid-31393678`). 130 fair. 29 fixes
+in 20 items, text only (17 re-embedded offline with the incremental script;
+label-only changes need no re-embed):
+
+- Certainty "low"/"moderate" -> "not stated" where the abstract grades
+  nothing: `pmid-26544652` ("moderate" was risk of bias, not GRADE),
+  `pmid-38950419`, `pmid-35716207`.
+- Hedges restored to match the GRADE level ("probably" for moderate,
+  "may" for low): `pmid-28236310` (clomiphene and OHSS, 2 places),
+  `pmid-32666584` (induction at 37+ weeks, caesareans), `pmid-28472859`,
+  `pmid-42746921` (vitamin D doses), `pmid-26031211`, `pmid-31647106`
+  (letrozole vs clomiphene, 3 places), `pmid-26342714` (laxatives in
+  pregnancy, 4 places), `pmid-34187385`, `pmid-30288727` (pelvic floor
+  training), `pmid-29656433` (tranexamic acid, 2 places),
+  `pmid-37839720`.
+- Wrong scope or attribution: `pmid-38364208` (all remaining
+  recommendations rest on low or very low evidence, not "most"),
+  `pmid-31264709` (dizziness, nausea and bruising came from other
+  comparisons, not sham acupuncture), `pmid-36884238` ("many", not
+  "some", may worry or be induced unnecessarily), `pmid-30747971` (would
+  benefit, not "benefit most"), `pmid-31425838` (studies not described as
+  small, 2 places).
+- Claim not in the abstract: `pmid-34360381` (egg freezing "may help"
+  women feel in control, not "many women feel").
+
+Left as is: 49 judgement calls (labels where the abstract grades a range
+or only the main outcome), e.g. `pmid-26092137`, `pmid-40335350`,
+`pmid-31867625`, `pmid-36592455`, `pmid-34148587`, `pmid-30609970`.
+
+### Ask AI answer audit (offline, no paid calls)
+
+40 of the 268 ranking questions (spread over all stages: 6 cycle, 8
+contraception, 6 IVF, 3 first periods, 3 postpartum, 5 pregnancy, 3
+menopause, 2 conception, 4 general), run through the chat's real source
+selection (`selectChatSourcesHybrid`) with the bundled model, no AI call.
+For each, the six sources the chat would send were read for topic,
+guideline version and Swiss alternatives.
+
+| Question | Problem | Fix |
+|---|---|---|
+| Whooping cough vaccine in pregnancy; gestational diabetes test | Swiss source (BAG schedule, SGGG letter 81) ranked 3rd / 2nd behind US documents or prevention reviews | Swiss items (tag `switzerland`) that match a subject word of the question and its topic get x1.25 (`SWISS_SOURCE_FACTOR`); now first. Context words such as "pregnant" do not count, so the vaccine schedule no longer rides into "soft cheese when pregnant" |
+| Folic acid before pregnancy | BLV advice (400 µg from before a planned pregnancy) not sent; a malaria review first | Swiss lift + BLV keywords "before pregnancy"; BLV now 2nd |
+| When should girls get the HPV vaccine? | Non-Swiss only; no Swiss source in the library | New hand-written item from the BAG HPV page (11 to 14 years, catch-up 15 to 26, 2 doses before 15 / 3 after, no deductible in cantonal programmes, co-payment remains); now first, not sent for smear-test questions |
+| How to prevent osteoporosis after menopause? | ACP 2017 guideline sent; replaced by the ACP 2023 living guideline | `pmid-36592456` added (summary from the abstract), 2017 version in `SUPERSEDED` |
+| Natural remedies for hot flashes | Only supplement reviews; NAMS 2023 (supplements and herbal remedies not recommended) missing | NAMS 2023 keywords "natural remedies"; now among the sources |
+| Contraception after 40 | Education-intervention reviews; Italian consensus on contraception beyond 40 missing | keywords "contraception after 40 / over 40"; now 3rd |
+
+No change needed (on-topic, current): heavy periods (NICE 2026),
+endometriosis diagnosis, tranexamic acid, blood clots, antibiotics,
+breastfeeding contraception (US MEC 2024), OHSS, frozen transfer, HRT
+safety (NAMS 2022), fertility doctor (ASRM 2026), vitamin D (BLV first),
+ferritin, soft cheese (BLV), nausea (RCOG 2024).
+
+Left open (gaps, no free source with a usable abstract): what to do after
+a forgotten pill and migraine with aura on the pill (the US SPR / MEC
+2024 abstracts do not state the rules; the app's own missed-pill card
+cites FSRH); typical-use pill effectiveness; normal cycle length (FIGO
+abstract gives no figures); thyroid and the menstrual cycle (no review);
+no period at 15 (no primary amenorrhoea guideline; a dysmenorrhoea
+guideline ranks first); returning to running after birth; IVF success by
+age; Swiss cervical screening and mammography programmes (no free SGGG /
+Swiss Cancer Screening text checked yet). Tests:
+`api/_lib/research/ask-ai-audit.test.ts`; the existing search evals are
+unchanged (hybrid main set, audit set and no-source questions pass).
+
+### AI lab-reading prompt (`api/analyze-document.ts`)
+
+The prompt carried about 150 numeric cut-offs from memory (trimester TSH
+0.1-2.5 from ATA 2011, trimester ferritin 25.8 / 18.3 / 19.0, IVF hCG
+"means", AMH age medians, IL-6, cortisol ratios, CTX / P1NP, Lp(a),
+ApoB, hs-CRP, fibrinogen, B12, magnesium, tumour markers, Cushing's /
+adrenal limits ...), several contradicting each other (HOMA-IR "no
+agreed cut-off" next to "HOMA-IR >= 2.5 = insulin resistance") and
+diagnostic shortcuts ("Anti-TPO > 35 = Hashimoto's", "discontinue
+combined pills", "aspirin + LMWH"). Most had no source in the library.
+
+Now:
+- **Status follows the lab's own reference range**, the same rule every
+  screen uses (`api/_lib/lab-flags.ts`): the lab's flag or printed range
+  decides normal / abnormal; "critical" only when the lab or doctor marks
+  it; no range and no listed figure = "informational", with a note that
+  her doctor can say what it means. No figure in the prompt can override
+  the lab's range.
+- **Four reference figures kept**, each with a library source, used only
+  when the lab printed no range: haemoglobin below 11 g/dL in pregnancy
+  (FIGO 2025), ferritin below 30 µg/L (Cochrane 2021), 75 g OGTT limits
+  5.1 / 10.0 / 8.5 mmol/L (SGGG letter 81), vitamin D below 50 nmol/L
+  (guideline review 2018; BLV everyday amounts unchanged).
+- Reading rules without numbers: hCG trend, pregnancy thyroid ranges (ATA
+  2026), no blood test for endometriosis (Cochrane 2016), HOMA-IR,
+  cycle-day hormones, tumour markers are not screening tests.
+- Notes: plain language, never a diagnosis, name who to ask (doctor or
+  gynaecologist, midwife, pharmacist), no doses; "possible conditions"
+  are possibilities only (the Records screen already says so).
+
+Tests: `src/lib/healthClaims.test.ts` (lab range wins; 20 removed
+cut-offs stay out; every number in the reference block is on an
+allow-list of sourced figures).
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed

@@ -45893,6 +45893,63 @@
    ]
   },
   {
+   "id": "pmid-36592456",
+   "pmid": "36592456",
+   "doi": "10.7326/M22-1034",
+   "title": "Pharmacologic Treatment of Primary Osteoporosis or Low Bone Mass to Prevent Fractures in Adults: A Living Clinical Guideline From the American College of Physicians",
+   "source": "American College of Physicians",
+   "journal": "Annals of Internal Medicine",
+   "organisation": "American College of Physicians",
+   "year": 2023,
+   "publicationTypes": [
+    "Journal Article",
+    "Practice Guideline"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/36592456/",
+   "summary": "This 2023 guideline from the American College of Physicians updates its 2017 advice on medicines for weak bones (osteoporosis) and low bone mass to prevent fractures. For women after menopause with osteoporosis, it recommends bisphosphonates as the first medicine (strong recommendation, high-certainty evidence). Denosumab is suggested as a second choice when bisphosphonates are not suitable or cause side effects. For women at very high fracture risk, romosozumab or teriparatide followed by a bisphosphonate may be used. For women over 65 with low bone mass (osteopenia), whether to start a bisphosphonate should be decided individually.",
+   "keyPoints": [
+    "Bisphosphonates are recommended as the first medicine for women after menopause with osteoporosis, to lower fracture risk (strong recommendation, high-certainty evidence).",
+    "Denosumab is suggested as a second choice for women who cannot take bisphosphonates or have side effects (conditional recommendation, moderate-certainty evidence).",
+    "For women with osteoporosis at very high fracture risk, romosozumab (moderate certainty) or teriparatide (low certainty), followed by a bisphosphonate, is suggested.",
+    "For women over 65 with low bone mass (osteopenia), starting a bisphosphonate is an individual decision (conditional recommendation, low-certainty evidence).",
+    "It replaces the 2017 ACP recommendations."
+   ],
+   "certainty": "high",
+   "lifeStages": [
+    "menopause",
+    "post-menopause",
+    "general"
+   ],
+   "topics": [
+    "osteoporosis-treatment"
+   ],
+   "tags": [
+    "osteoporosis",
+    "bone density",
+    "fracture prevention",
+    "bisphosphonates",
+    "denosumab"
+   ],
+   "keywords": [
+    "osteoporosis",
+    "weak bones",
+    "bone loss",
+    "osteopenia",
+    "fracture",
+    "hip fracture",
+    "bisphosphonate",
+    "alendronate",
+    "zoledronic acid",
+    "denosumab",
+    "prolia",
+    "romosozumab",
+    "teriparatide",
+    "prevent osteoporosis",
+    "osteoporosis treatment"
+   ]
+  },
+  {
    "id": "pmid-28492856",
    "pmid": "28492856",
    "doi": "10.7326/M15-1361",
@@ -74054,7 +74111,10 @@
     "herbal remedies menopause",
     "black cohosh",
     "soy menopause",
-    "night sweats"
+    "night sweats",
+    "natural remedies",
+    "natural remedies hot flashes",
+    "supplements hot flashes"
    ]
   },
   {
@@ -112327,7 +112387,9 @@
     "blood clots",
     "heart risk",
     "bone density",
-    "heavy periods"
+    "heavy periods",
+    "contraception after 40",
+    "contraception over 40"
    ]
   },
   {
@@ -130654,6 +130716,8 @@
     "breastfeeding",
     "pregnancy",
     "trying to conceive",
+    "before pregnancy",
+    "folic acid before pregnancy",
     "caffeine",
     "coffee",
     "alcohol",
@@ -131008,6 +131072,89 @@
      "checkedAt": "2026-11-28T12:00:00.000Z"
     },
     "contentHash": "3e791a61",
+    "summariser": "hand-written",
+    "chunks": 0
+   }
+  },
+  {
+   "id": "gp-bag-humane-papillomaviren-hpv-d8e9aa",
+   "pmid": "",
+   "doi": null,
+   "title": "HPV vaccination in Switzerland: recommended ages, doses and costs (BAG and Federal Commission for Vaccination)",
+   "source": "BAG",
+   "journal": "BAG",
+   "organisation": "BAG",
+   "year": 2025,
+   "publicationTypes": [
+    "Swiss federal health guidance (BAG)"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://www.bag.admin.ch/de/humane-papillomaviren-hpv",
+   "summary": "The Swiss Federal Office of Public Health (BAG) and the Federal Commission for Vaccination recommend the HPV vaccine for all young people aged 11 to 14, girls and boys alike. It protects against cancers caused by human papillomaviruses, such as cervical cancer, and against genital warts. People aged 15 to 26 are advised to catch up. Before the 15th birthday two injections six months apart are needed; from the 15th birthday three injections over at least six months. In the cantonal vaccination programmes the vaccine is exempt from the deductible for people aged 11 to 26; the co-payment is still paid by the person.",
+   "keyPoints": [
+    "Recommended for all young people aged 11 to 14, girls and boys.",
+    "Catch-up vaccination is recommended from 15 to 26 years.",
+    "Before the 15th birthday: two injections six months apart; from the 15th birthday: three injections over at least six months.",
+    "In the cantonal vaccination programmes, no deductible for people aged 11 to 26; the co-payment remains.",
+    "It protects against HPV-related cancers, such as cervical cancer, and genital warts."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menstrual-cycle",
+    "contraception",
+    "general"
+   ],
+   "topics": [
+    "cervical-screening"
+   ],
+   "tags": [
+    "switzerland",
+    "hpv vaccine",
+    "vaccination",
+    "cervical cancer",
+    "adolescents"
+   ],
+   "keywords": [
+    "switzerland",
+    "swiss",
+    "hpv",
+    "hpv vaccine",
+    "hpv vaccination",
+    "papillomavirus",
+    "gardasil",
+    "vaccine",
+    "impfung",
+    "cervical cancer",
+    "genital warts",
+    "teenager",
+    "daughter",
+    "catch-up",
+    "kanton"
+   ],
+   "sourceType": "guideline-page",
+   "page": {
+    "publisher": "BAG",
+    "url": "https://www.bag.admin.ch/de/humane-papillomaviren-hpv",
+    "fetchedAt": "2026-11-28T01:00:00.000Z",
+    "published": null,
+    "lastUpdated": null,
+    "lastReviewed": null,
+    "nextReview": null,
+    "licence": {
+     "name": "Copyright, Swiss federal authorities (reproduction needs written consent)",
+     "url": null,
+     "termsUrl": "https://www.admin.ch/gov/de/start/rechtliches.html",
+     "notes": "Summary-only: the library item is a hand-written summary in our own words, with a link to the official page. No page text is copied, fetched or stored.",
+     "pageCopyright": null
+    },
+    "attribution": "Source: Swiss Federal Office of Public Health (BAG).",
+    "refreshDays": null,
+    "robots": {
+     "allowed": true,
+     "rule": null,
+     "checkedAt": "2026-11-28T01:00:00.000Z"
+    },
+    "contentHash": "de857873",
     "summariser": "hand-written",
     "chunks": 0
    }
