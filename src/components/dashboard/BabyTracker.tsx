@@ -13,6 +13,8 @@ import { useLifeEvents, importLocalOnce, type LifeEvent } from '@/hooks/useLifeE
 import { Baby, Milk, Moon, Droplets, Ruler, Syringe, Trash2, Play, Square, BarChart3, Plus, Timer } from 'lucide-react';
 // Stats tab draws charts (recharts, ~110 KB gzip): load it when opened.
 const BabyStatsTab = lazy(() => import('./BabyStatsTab'));
+// WHO weight chart + "Add a weight" (recharts, WHO table): loaded with the Growth tab.
+const BabyGrowthChart = lazy(() => import('./BabyGrowthChart'));
 import { differenceInMinutes, format, isToday, isYesterday, parseISO } from 'date-fns';
 
 // Baby tracker: feeds, sleep, nappies, growth and vaccinations, per baby
@@ -24,7 +26,7 @@ interface BabyRow { id: string; name: string; birth_date: string | null; sex: st
 type FeedMethod = 'breast_l' | 'breast_r' | 'bottle';
 interface FeedData { method: FeedMethod; ml?: number | null; milk?: 'breast_milk' | 'formula' | null }
 interface NappyData { type: 'wet' | 'dirty' | 'both' }
-interface GrowthData { weight_g?: number | null; length_cm?: number | null; head_cm?: number | null }
+interface GrowthData { weight_g?: number | null; length_cm?: number | null; head_cm?: number | null; source?: 'typed' | 'photo' }
 interface VaccineData { name: string }
 
 const OLD_FEEDS_KEY = (userId: string) => `postpartum:${userId}:feeds`;
@@ -331,8 +333,11 @@ function NappyTab({ babyId }: { babyId: string }) {
   );
 }
 
-function GrowthTab({ babyId }: { babyId: string }) {
+function GrowthTab({ baby, onBabyChange }: { baby: BabyRow; onBabyChange: (patch: Partial<BabyRow>) => Promise<boolean> }) {
+  const babyId = baby.id;
   const growth = useLifeEvents<GrowthData>('baby_growth', { babyId, limit: 100 });
+  const saveWeight = async (w: { measuredOn: string; weightG: number; source: 'typed' | 'photo' }) =>
+    growth.add({ occurred_at: new Date(`${w.measuredOn}T12:00:00`).toISOString(), data: { weight_g: w.weightG, length_cm: null, head_cm: null, source: w.source } });
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [w, setW] = useState(''); const [l, setL] = useState(''); const [h, setH] = useState('');
   const num = (v: string) => { const n = parseFloat(v.replace(',', '.')); return Number.isFinite(n) ? n : null; };
@@ -345,6 +350,12 @@ function GrowthTab({ babyId }: { babyId: string }) {
   return (
     <div className="space-y-3">
       {growth.error && <p className="text-xs text-destructive">{growth.error}</p>}
+      <Suspense fallback={<p className="text-xs text-muted-foreground">Loading the chart…</p>}>
+        <BabyGrowthChart babyName={baby.name} birthDate={baby.birth_date} sex={baby.sex} events={growth.events}
+          onSaveWeight={async w => !!(await saveWeight(w))}
+          onSetSex={sex => onBabyChange({ sex })} onSetBirthDate={birth_date => onBabyChange({ birth_date })} />
+      </Suspense>
+      <p className="label-mono border-t pt-3">Weight, length and head</p>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <div><Label htmlFor="g-date" className="text-xs">Date</Label><Input id="g-date" type="date" value={date} onChange={e => setDate(e.target.value)} /></div>
         <div><Label htmlFor="g-w" className="text-xs">Weight (g)</Label><Input id="g-w" inputMode="numeric" value={w} onChange={e => setW(e.target.value)} placeholder="4200" /></div>
@@ -483,6 +494,13 @@ export default function BabyTracker({ initialTab = 'feed', openAdd = false }: { 
   };
 
   const baby = useMemo(() => babies.find(b => b.id === babyId) ?? null, [babies, babyId]);
+  const updateBaby = async (patch: Partial<BabyRow>): Promise<boolean> => {
+    if (!baby) return false;
+    const { error: err } = await db.from('babies').update({ ...patch, updated_at: new Date().toISOString() }).eq('id', baby.id).eq('user_id', userId);
+    if (err) return false;
+    setBabies(prev => prev.map(b => (b.id === baby.id ? { ...b, ...patch } : b)));
+    return true;
+  };
   const ageText = baby?.birth_date ? (() => {
     const days = Math.floor((Date.now() - new Date(`${baby.birth_date}T00:00:00`).getTime()) / 86400000);
     if (days < 0) return null;
@@ -533,7 +551,7 @@ export default function BabyTracker({ initialTab = 'feed', openAdd = false }: { 
           <TabsContent value="feed" className="pt-3"><FeedTab babyId={baby.id} openAdd={openAdd} /></TabsContent>
           <TabsContent value="sleep" className="pt-3"><SleepTab babyId={baby.id} /></TabsContent>
           <TabsContent value="nappy" className="pt-3"><NappyTab babyId={baby.id} /></TabsContent>
-          <TabsContent value="growth" className="pt-3"><GrowthTab babyId={baby.id} /></TabsContent>
+          <TabsContent value="growth" className="pt-3"><GrowthTab baby={baby} onBabyChange={updateBaby} /></TabsContent>
           <TabsContent value="vax" className="pt-3"><VaccineTab babyId={baby.id} /></TabsContent>
           <TabsContent value="stats" className="pt-3"><Suspense fallback={null}><BabyStatsTab babyId={baby.id} onGoTo={setTab} /></Suspense></TabsContent>
         </Tabs>

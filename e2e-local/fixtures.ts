@@ -47,13 +47,14 @@ export async function mockAccount(
   page: Page,
   stage = 'menstrual-cycle',
   /** Replace whole fixture tables (e.g. { medications: [] }) or the appointment list. */
-  override: { tables?: Tables; appointments?: Row[] } = {},
+  override: { tables?: Tables; appointments?: Row[]; json?: Record<string, unknown> } = {},
 ): Promise<MockApi & { account: ReturnType<typeof accountFor> }> {
   const account = accountFor(stage);
   const api = await installMockApi(page, {
     user: account.user,
     tables: { ...account.tables, ...override.tables },
     appointments: override.appointments ?? account.appointments,
+    json: override.json,
   });
   return Object.assign(api, { account });
 }

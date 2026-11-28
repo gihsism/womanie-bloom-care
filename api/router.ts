@@ -13,6 +13,7 @@ import authLogin from './_routes/auth/login.js';
 import authLogout from './_routes/auth/logout.js';
 import authMe from './_routes/auth/me.js';
 import authSignup from './_routes/auth/signup.js';
+import babyScalePhoto from './_routes/baby/scale-photo.js';
 import chatConversation from './_routes/chat/conversation.js';
 import chatFeedback from './_routes/chat/feedback.js';
 import chatMessages from './_routes/chat/messages.js';
@@ -79,6 +80,7 @@ export const ROUTES: Record<string, Handler> = {
   'auth/logout': authLogout,
   'auth/me': authMe,
   'auth/signup': authSignup,
+  'baby/scale-photo': babyScalePhoto,
   'chat/conversation': chatConversation,
   'chat/feedback': chatFeedback,
   'chat/messages': chatMessages,
