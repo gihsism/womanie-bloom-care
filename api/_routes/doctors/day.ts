@@ -119,11 +119,14 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     // The doctor's own visits in the window. `approved` is decided here,
-    // server-side, against doctor_patient_connections, never by the client.
+    // server-side, against doctor_patient_connections, never by the client,
+    // and only while she still holds the doctor role (a revoked doctor
+    // keeps her old connection rows).
     const appts = await sql.query(
       `SELECT a.id, a.patient_id, a.scheduled_at, a.status, a.consultation_type, a.duration,
               EXISTS (
                 SELECT 1 FROM doctor_patient_connections c
+                 JOIN user_roles r ON r.user_id = c.doctor_id AND r.role = 'doctor'
                  WHERE c.doctor_id = a.doctor_id AND c.patient_id = a.patient_id
                    AND c.status = 'approved'
               ) AS approved

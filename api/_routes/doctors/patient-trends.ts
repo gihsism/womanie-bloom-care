@@ -97,8 +97,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const sql = neon(process.env.DATABASE_URL!);
 
   const conn = await sql.query(
-    `SELECT id FROM doctor_patient_connections
-       WHERE doctor_id = $1 AND patient_id = $2 AND status = 'approved'
+    // ...and she must still hold the doctor role (an admin revoke deletes
+    // the role but leaves the connection rows), as in /api/doctors/patient.
+    `SELECT c.id FROM doctor_patient_connections c
+       JOIN user_roles r ON r.user_id = c.doctor_id AND r.role = 'doctor'
+       WHERE c.doctor_id = $1 AND c.patient_id = $2 AND c.status = 'approved'
        LIMIT 1`,
     [doctor.id, patientId]
   ) as unknown[];

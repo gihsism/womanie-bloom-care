@@ -108,6 +108,12 @@ describe('doctors/connections security invariants', () => {
     expect(sql).toMatch(/recent_doc_count/i);
   });
 
+  it('lists nothing for a doctor whose role was revoked', async () => {
+    await handler(mockReq(), mockRes());
+    const [sql] = query.mock.calls[0] as [string, unknown[]];
+    expect(sql).toMatch(/EXISTS \(SELECT 1 FROM user_roles r WHERE r\.user_id = c\.doctor_id AND r\.role = 'doctor'\)/);
+  });
+
   it('returns 200 with a connections array', async () => {
     const res = mockRes();
     await handler(mockReq(), res);
