@@ -52,12 +52,12 @@ describe("generateFallbackNote", () => {
 
   it("returns the normal explanation for a normal result of a known test", () => {
     const note = generateFallbackNote(item({ title: "Ferritin", status: "normal" }));
-    expect(note).toBe("Your iron stores look good.");
+    expect(note).toBe("Your Ferritin is within the lab's range.");
   });
 
   it("returns the normal explanation for an 'expected' result too", () => {
     const note = generateFallbackNote(item({ title: "Ferritin", status: "expected" }));
-    expect(note).toBe("Your iron stores look good.");
+    expect(note).toBe("Your Ferritin is marked as expected for your situation.");
   });
 
   it("returns null for a normal result of an unknown test", () => {
@@ -74,10 +74,10 @@ describe("generateFallbackNote", () => {
         status: "abnormal",
       }),
     );
-    expect(note).toContain("below the healthy range");
+    expect(note).toContain("below the lab's range");
     expect(note).toContain("8 ng/mL");
-    expect(note).toContain("healthy range: 15-150 ng/mL");
-    expect(note).toContain("iron stores are depleted"); // explanation.low
+    expect(note).toContain("lab's range: 15-150 ng/mL");
+    expect(note).toContain("iron stores are low"); // explanation.low
   });
 
   it("builds an 'above range' note when value is over the reference range", () => {
@@ -90,7 +90,7 @@ describe("generateFallbackNote", () => {
         status: "abnormal",
       }),
     );
-    expect(note).toContain("above the healthy range");
+    expect(note).toContain("above the lab's range");
     expect(note).toContain("underactive"); // explanation.high
   });
 
@@ -98,20 +98,20 @@ describe("generateFallbackNote", () => {
     const note = generateFallbackNote(
       item({ title: "Ferritin", value: "8", reference_range: "15–150", status: "abnormal" }),
     );
-    expect(note).toContain("below the healthy range");
+    expect(note).toContain("below the lab's range");
   });
 
   it("matches a known test by substring when the title isn't an exact key", () => {
     const note = generateFallbackNote(
       item({ title: "Vitamin D, 25-Hydroxy", value: "12", reference_range: "30-100", status: "abnormal" }),
     );
-    expect(note).toContain("below the healthy range");
+    expect(note).toContain("below the lab's range");
     expect(note).toContain("bone health"); // vitamin d explanation.low
   });
 
   it("falls back to a generic note when direction is unknown (no range)", () => {
     const note = generateFallbackNote(item({ title: "Ferritin", value: "8", status: "critical" }));
-    expect(note).toContain("outside the healthy range");
-    expect(note).toContain("next doctor visit");
+    expect(note).toContain("outside the lab's range");
+    expect(note).toContain("contact your doctor soon");
   });
 });

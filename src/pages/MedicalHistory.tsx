@@ -70,7 +70,7 @@ import {
 } from 'lucide-react';
 import { fetchDoctorSentDocuments } from '@/lib/documentFiles';
 import { LoadFailed } from '@/components/LoadFailed';
-import { currentFlagged, labFlag } from '@/lib/labFlags';
+import { currentFlagged } from '@/lib/labFlags';
 import { deviationPct } from '@/lib/labValue';
 import { format, differenceInDays, addDays } from 'date-fns';
 import {
@@ -79,9 +79,8 @@ import {
   priorityOrder,
   getStatusInfo,
   getFriendlyName,
-  // NB: generateFallbackNote is intentionally NOT imported — this file
-  // defines its own local generateFallbackNote below, which shadowed the
-  // import and won at runtime. Importing it too was a conflicting no-op.
+  // The "what high / low can mean" note: one shared map (testExplanations).
+  generateFallbackNote,
 } from '@/lib/medical-utils';
 
 // The chart views pull in recharts (~110 KB gzip); they only show on the
@@ -91,210 +90,6 @@ const loadMyCharts = () => import('@/components/records/MyCharts');
 const loadTestTrend = () => import('@/components/records/TestTrend');
 const MyCharts = lazy(loadMyCharts);
 const TestTrend = lazy(loadTestTrend);
-
-// Specific explanations for common tests — what the result means when high or low
-const testExplanations: Record<string, { high: string; low: string; normal: string }> = {
-  'hemoglobin': {
-    low: 'Low hemoglobin means your blood carries less oxygen, which can cause fatigue, dizziness, and shortness of breath. Common causes include iron deficiency, heavy periods, or vitamin deficiency.',
-    high: 'Elevated hemoglobin can be caused by dehydration, smoking, or living at high altitude. Rarely, it can indicate a blood disorder.',
-    normal: 'Your hemoglobin is healthy — your blood is carrying oxygen well.',
-  },
-  'ferritin': {
-    low: 'Low ferritin means your iron stores are depleted. This is very common in women due to menstrual blood loss. You may feel tired, have brain fog, or experience hair loss. Iron supplements and iron-rich foods can help.',
-    high: 'Elevated ferritin can indicate inflammation, liver issues, or iron overload. Your doctor may want to investigate the cause.',
-    normal: 'Your iron stores look good.',
-  },
-  'tsh': {
-    low: 'A low TSH can mean the thyroid is working too fast (overactive). That can cause weight loss, anxiety, a fast heartbeat and shorter or lighter periods. Your doctor usually checks other thyroid results (T4, T3) before saying more.',
-    high: 'A raised TSH can mean the thyroid is working slowly (underactive). That can cause tiredness, weight gain, feeling cold and heavier or irregular periods. Your doctor usually re-tests and checks T4 before saying more; if treatment is needed, it works well.',
-    normal: 'Your thyroid function is healthy.',
-  },
-  'vitamin d': {
-    low: 'Low vitamin D is common. Over time it can weaken bones. Your doctor can tell you whether you need a supplement and in what dose; for a confirmed deficiency the dose is set by the doctor. Do not take more than 4,000 IU a day without medical advice.',
-    high: 'Very high vitamin D is rare and usually only from excessive supplementation. Your doctor may adjust your dose.',
-    normal: 'Your vitamin D level is healthy.',
-  },
-  'glucose': {
-    low: 'Low blood sugar can cause shakiness, dizziness, and confusion. If fasting, mildly low values are usually not concerning.',
-    high: 'Elevated blood sugar may indicate prediabetes or diabetes. Lifestyle changes (diet, exercise) can make a big difference. Your doctor may recommend a follow-up HbA1c test.',
-    normal: 'Your blood sugar is in a healthy range.',
-  },
-  'hba1c': {
-    low: 'Very low HbA1c is uncommon and rarely a concern.',
-    high: 'Elevated HbA1c means your average blood sugar has been high over the past 3 months. Above 5.7% suggests prediabetes; above 6.5% suggests diabetes. Diet, exercise, and sometimes medication can help.',
-    normal: 'Your average blood sugar over the past 3 months is healthy.',
-  },
-  'iron': {
-    low: 'Low iron can cause anemia, fatigue, weakness, and pale skin. Women with heavy periods are especially prone. Iron-rich foods (red meat, spinach, lentils) and supplements can help.',
-    high: 'Elevated iron may indicate hemochromatosis or liver issues. Your doctor may want to check ferritin and transferrin levels.',
-    normal: 'Your iron level is healthy.',
-  },
-  'platelets': {
-    low: 'Low platelets mean your blood may not clot as well, leading to easy bruising or prolonged bleeding. Causes range from viral infections to autoimmune conditions.',
-    high: 'Elevated platelets can indicate inflammation, infection, or iron deficiency. Persistently high levels may need further investigation.',
-    normal: 'Your platelet count is healthy — blood clotting looks normal.',
-  },
-  'white blood cells': {
-    low: 'Low white blood cells may mean your immune system is weakened. This can be caused by viral infections, certain medications, or autoimmune conditions.',
-    high: 'Elevated white blood cells usually indicate your body is fighting an infection or inflammation. Stress and certain medications can also raise them.',
-    normal: 'Your white blood cell count is normal — your immune system looks healthy.',
-  },
-  'creatinine': {
-    low: 'Low creatinine is usually not a concern and can occur with low muscle mass.',
-    high: 'Elevated creatinine may indicate reduced kidney function. Your doctor may want to check your GFR (kidney filtration rate).',
-    normal: 'Your kidney function looks healthy.',
-  },
-  'alt': {
-    low: 'Low ALT is normal and not a concern.',
-    high: 'Elevated ALT suggests liver stress or inflammation. Common causes include fatty liver, alcohol, medications, or viral hepatitis. Your doctor may recommend lifestyle changes or further tests.',
-    normal: 'Your liver health marker looks good.',
-  },
-  'ast': {
-    low: 'Low AST is normal and not a concern.',
-    high: 'Elevated AST can indicate liver or muscle issues. It\'s often checked alongside ALT for a clearer picture of liver health.',
-    normal: 'Your liver marker is in a healthy range.',
-  },
-  'cholesterol': {
-    low: 'Very low cholesterol is uncommon but can occur with certain conditions or diets.',
-    high: 'Elevated total cholesterol increases cardiovascular risk. Diet, exercise, and sometimes medication can bring it down.',
-    normal: 'Your cholesterol level is healthy.',
-  },
-  'total cholesterol': {
-    low: 'Very low total cholesterol is uncommon.',
-    high: 'Elevated total cholesterol increases cardiovascular risk. A heart-healthy diet, regular exercise, and sometimes statins can help.',
-    normal: 'Your total cholesterol is in a healthy range.',
-  },
-  'ldl': {
-    low: 'Low LDL is generally good for heart health.',
-    high: 'Elevated LDL ("bad" cholesterol) increases risk of heart disease. Diet changes (less saturated fat, more fiber) and exercise can help lower it.',
-    normal: 'Your LDL cholesterol is in a healthy range.',
-  },
-  'hdl': {
-    low: 'Low HDL ("good" cholesterol) increases cardiovascular risk. Regular exercise, healthy fats (olive oil, nuts, avocado), and reducing processed foods can raise it.',
-    high: 'High HDL is generally protective for heart health.',
-    normal: 'Your HDL cholesterol is healthy — good for your heart.',
-  },
-  'estradiol': {
-    low: 'Low estradiol can affect cycle regularity, bone density, and mood. In menopause this is expected. In reproductive years, it may indicate hormonal imbalance.',
-    high: 'Elevated estradiol often occurs around ovulation or can indicate conditions like endometriosis. During IVF stimulation, elevated levels are expected.',
-    normal: 'Your estradiol level is in a healthy range for your cycle phase.',
-  },
-  'progesterone': {
-    low: 'Low progesterone may indicate you haven\'t ovulated recently, or can affect your ability to maintain a pregnancy. This is normal in the first half of your cycle.',
-    high: 'Elevated progesterone confirms ovulation has occurred. During pregnancy, high progesterone is expected and supports the baby.',
-    normal: 'Your progesterone level looks appropriate.',
-  },
-  'fsh': {
-    low: 'Low FSH can indicate hormonal suppression, which may affect ovulation.',
-    high: 'Elevated FSH can indicate diminished ovarian reserve (fewer eggs remaining). In menopause, high FSH is expected. If you\'re of reproductive age, a fertility specialist can discuss options.',
-    normal: 'Your FSH level is in a healthy range.',
-  },
-  'lh': {
-    low: 'Low LH can indicate hormonal imbalance affecting ovulation.',
-    high: 'Elevated LH can indicate an LH surge (ovulation is near!) or, if persistently high, may be associated with PCOS.',
-    normal: 'Your LH level is in a healthy range.',
-  },
-  'hcg': {
-    low: 'Low HCG in early pregnancy may need monitoring — rising HCG is a good sign. Outside of pregnancy, HCG should be very low.',
-    high: 'Elevated HCG typically indicates pregnancy. The level helps estimate how far along the pregnancy is.',
-    normal: 'Your HCG level is in the expected range.',
-  },
-  'amh': {
-    low: 'A low AMH can mean a lower egg reserve. On its own it doesn\'t tell you whether you can get pregnant; if you\'re planning to conceive, a fertility specialist can explain what it means for you.',
-    high: 'Elevated AMH can indicate a high egg reserve (good for fertility) or may be associated with PCOS.',
-    normal: 'Your ovarian reserve looks healthy.',
-  },
-  'vitamin b12': {
-    low: 'Low B12 can cause fatigue, tingling in hands/feet, memory issues, and mood changes. Vegans/vegetarians are especially at risk. B12 supplements or injections can help.',
-    high: 'Elevated B12 is usually not a concern, often from supplements.',
-    normal: 'Your B12 level is healthy.',
-  },
-  'folate': {
-    low: 'Low folate is important to address, especially if planning pregnancy — folate prevents neural tube defects. Eat leafy greens and take a prenatal vitamin with folic acid.',
-    high: 'Elevated folate from food or supplements is not a concern.',
-    normal: 'Your folate level is healthy.',
-  },
-  'calcium': {
-    low: 'Low calcium can affect bone density and cause muscle cramps. Dairy, leafy greens, and supplements can help.',
-    high: 'Elevated calcium may indicate a parathyroid issue. Your doctor may want to check your PTH level.',
-    normal: 'Your calcium level is healthy for bone and muscle function.',
-  },
-  'magnesium': {
-    low: 'Low magnesium can worsen PMS cramps, cause muscle cramps, sleep problems, and anxiety. Magnesium supplements (especially glycinate) before bed can help.',
-    high: 'Elevated magnesium is rare from diet alone and usually only from excessive supplementation.',
-    normal: 'Your magnesium level is healthy.',
-  },
-  'crp': {
-    low: 'Low CRP indicates minimal inflammation — this is good.',
-    high: 'Elevated CRP indicates inflammation somewhere in your body. Causes range from infection to autoimmune conditions. Chronic inflammation can worsen PMS and affect fertility.',
-    normal: 'No significant inflammation detected.',
-  },
-  'prolactin': {
-    low: 'Low prolactin is usually not a concern.',
-    high: 'Elevated prolactin can suppress ovulation, causing irregular or missed periods. Causes include stress, certain medications, or a small pituitary issue. It\'s treatable.',
-    normal: 'Your prolactin level is in a healthy range.',
-  },
-  'testosterone': {
-    low: 'Low testosterone in women can cause low libido and fatigue.',
-    high: 'Elevated testosterone in women can cause acne, excess hair growth, and irregular periods. This is commonly seen in PCOS.',
-    normal: 'Your testosterone level is in a healthy range for women.',
-  },
-};
-
-// Generate a helpful explanation when the AI didn't provide notes
-function generateFallbackNote(item: MedicalDataItem): string | null {
-  if (item.notes) return null; // AI already provided notes
-
-  const val = item.value ? parseFloat(item.value) : null;
-  const hasValue = val !== null && !isNaN(val);
-
-  // Find a matching explanation
-  const titleLower = item.title.toLowerCase();
-  const explanation = testExplanations[titleLower]
-    || Object.entries(testExplanations).find(([key]) => titleLower.includes(key))?.[1];
-
-  // Determine direction (high/low)
-  let direction: 'high' | 'low' | 'unknown' = 'unknown';
-  if (hasValue && item.reference_range) {
-    const match = item.reference_range.match(/([\d.]+)\s*[-–]\s*([\d.]+)/);
-    if (match) {
-      const low = parseFloat(match[1]);
-      const high = parseFloat(match[2]);
-      if (val! < low) direction = 'low';
-      else if (val! > high) direction = 'high';
-    }
-  }
-
-  const status = String(item.status ?? '').trim().toLowerCase();
-  if (status === 'normal' || status === 'expected') {
-    if (explanation) return explanation.normal;
-    return null;
-  }
-
-  // Same tiers as everywhere else (lab-flags): high / low / elevated …
-  // are outside the range too, and a critical one is not for "your next visit".
-  const flag = labFlag(status);
-  if (flag === 'urgent' || flag === 'outside') {
-    const next = flag === 'urgent'
-      ? ' The lab marked this as urgent: contact your doctor soon rather than waiting for your next visit.'
-      : ' Bring this up at your next doctor visit for personalised advice.';
-    if (explanation && direction !== 'unknown') {
-      const rangeText = item.reference_range ? ` (healthy range: ${item.reference_range}${item.unit ? ' ' + item.unit : ''})` : '';
-      return `Your ${item.title} (${item.value}${item.unit ? ' ' + item.unit : ''}) is ${direction === 'low' ? 'below' : 'above'} the healthy range${rangeText}. ${explanation[direction]}${flag === 'urgent' ? next : ''}`;
-    }
-
-    // Generic but still specific about the value
-    const dirLabel = direction === 'low' ? 'lower than' : direction === 'high' ? 'higher than' : 'outside';
-    return `Your ${item.title} (${item.value || ''}${item.unit ? ' ' + item.unit : ''}) is ${dirLabel} the healthy range${item.reference_range ? ` (${item.reference_range}${item.unit ? ' ' + item.unit : ''})` : ''}.${next}`;
-  }
-
-  // Borderline, or no status but the number sits outside the printed
-  // range: never call it healthy.
-  if (flag === 'borderline' || direction !== 'unknown') return null;
-  // informational or unknown status
-  if (explanation) return explanation.normal;
-  return null;
-}
 
 // Render a value with a visual "gauge" showing where it falls in range.
 //
@@ -1063,7 +858,6 @@ export default function MedicalHistory() {
     });
 
     // Health score
-    const overallHealthScore = labResults.length > 0 ? Math.round((normalLabs / labResults.length) * 100) : null;
 
     // Checkup timing
     const sortedDates = documents.filter(d => d.uploaded_at).map(d => new Date(d.uploaded_at!)).sort((a, b) => a.getTime() - b.getTime());
@@ -1082,7 +876,6 @@ export default function MedicalHistory() {
       activeConditions, activeMedications,
       labsByPanel: sortedPanels,
       labTrendData, repeatedTests, predictions,
-      overallHealthScore,
       avgDaysBetweenDocs, nextCheckupEstimate, daysSinceLastDoc,
     };
   }, [medicalData, documents]);

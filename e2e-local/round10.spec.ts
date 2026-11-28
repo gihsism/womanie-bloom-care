@@ -30,6 +30,9 @@ test('a critical result tops Today; Records lists the flagged results once, in p
   await expect(page.getByText(/The lab marked this as urgent/)).toBeVisible();
   // 12 against a lower limit of 15 is 20% below (not "2%", the share of the range width).
   await expect(page.getByText('20% below').first()).toBeVisible();
+  // Health Overview: a plain summary linking to the list, no "wellness %".
+  await expect(page.getByTestId('results-summary')).toContainText(/^\d+ of \d+ latest results outside the lab's range \(1 marked urgent\)/);
+  await expect(page.getByText('wellness', { exact: true })).toHaveCount(0);
 
   expect(base.unhandled).toEqual([]);
   expect(consoleErrors).toEqual([]);

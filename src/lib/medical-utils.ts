@@ -1,6 +1,5 @@
 // Types shared across medical components
 
-import { labNumber, parseLabRange } from './labValue';
 import { labFlag } from './labFlags';
 
 export interface MedicalDataItem {
@@ -142,57 +141,5 @@ export function getFriendlyName(title: string): string {
   return friendlyTestNames[title] || title;
 }
 
-// Test-specific explanations
-export const testExplanations: Record<string, { high: string; low: string; normal: string }> = {
-  'hemoglobin': { low: 'Low hemoglobin means your blood carries less oxygen, which can cause fatigue, dizziness, and shortness of breath.', high: 'Elevated hemoglobin can be caused by dehydration, smoking, or living at high altitude.', normal: 'Your hemoglobin is healthy — your blood is carrying oxygen well.' },
-  'ferritin': { low: 'Low ferritin means your iron stores are depleted. Very common in women due to menstrual blood loss. You may feel tired, have brain fog, or experience hair loss.', high: 'Elevated ferritin can indicate inflammation, liver issues, or iron overload.', normal: 'Your iron stores look good.' },
-  'tsh': { low: 'A low TSH can mean the thyroid is working too fast (overactive). That can cause weight loss, anxiety and shorter periods. Your doctor usually checks other thyroid results before saying more.', high: 'A raised TSH can mean the thyroid is working slowly (underactive). That can cause tiredness, weight gain and heavier periods. Your doctor usually re-tests before saying more.', normal: 'Your thyroid function is healthy.' },
-  'vitamin d': { low: 'Low vitamin D is very common and can affect bone health, mood, immunity, and fertility. A supplement can bring it back to healthy levels.', high: 'Very high vitamin D is rare and usually from excessive supplementation.', normal: 'Your vitamin D level is healthy.' },
-  'glucose': { low: 'Low blood sugar can cause shakiness and dizziness. If fasting, mildly low is usually fine.', high: 'Elevated blood sugar may indicate prediabetes or diabetes. Lifestyle changes can help.', normal: 'Your blood sugar is in a healthy range.' },
-  'estradiol': { low: 'Low estradiol can affect cycle regularity and bone density. In menopause this is expected.', high: 'Elevated estradiol often occurs around ovulation. During IVF stimulation, elevated levels are expected.', normal: 'Your estradiol level is in a healthy range.' },
-  'progesterone': { low: 'Low progesterone may indicate you haven\'t ovulated recently. Normal in the first half of your cycle.', high: 'Elevated progesterone confirms ovulation has occurred. During pregnancy, high progesterone is expected.', normal: 'Your progesterone level looks appropriate.' },
-  'fsh': { low: 'Low FSH can indicate hormonal suppression affecting ovulation.', high: 'Elevated FSH can indicate diminished ovarian reserve. In menopause, high FSH is expected.', normal: 'Your FSH level is in a healthy range.' },
-  'lh': { low: 'Low LH can indicate hormonal imbalance affecting ovulation.', high: 'Elevated LH can indicate an LH surge (ovulation!) or, if persistently high, PCOS.', normal: 'Your LH level is in a healthy range.' },
-  'hcg': { low: 'Low HCG in early pregnancy may need monitoring. Outside pregnancy, HCG should be very low.', high: 'Elevated HCG typically indicates pregnancy.', normal: 'Your HCG level is in the expected range.' },
-  'amh': { low: 'Low AMH indicates a lower ovarian reserve. If planning to conceive, timing matters.', high: 'Elevated AMH can indicate high egg reserve or may be associated with PCOS.', normal: 'Your ovarian reserve looks healthy.' },
-  'crp': { low: 'Low CRP indicates minimal inflammation — this is good.', high: 'Elevated CRP indicates inflammation. Can worsen PMS and affect fertility.', normal: 'No significant inflammation detected.' },
-  'calcium': { low: 'Low calcium can affect bone density and cause muscle cramps.', high: 'Elevated calcium may indicate a parathyroid issue.', normal: 'Your calcium level is healthy.' },
-  'magnesium': { low: 'Low magnesium is linked to worse period cramps, PMS mood swings, and sleep problems.', high: 'Elevated magnesium is rare from diet alone.', normal: 'Your magnesium level is healthy.' },
-};
-
-export function generateFallbackNote(item: MedicalDataItem): string | null {
-  if (item.notes) return null;
-
-  const val = item.value ? labNumber(item.value, { title: item.title, unit: item.unit }) : null;
-  const hasValue = val !== null;
-
-  const titleLower = item.title.toLowerCase();
-  const explanation = testExplanations[titleLower]
-    || Object.entries(testExplanations).find(([key]) => titleLower.includes(key))?.[1];
-
-  let direction: 'high' | 'low' | 'unknown' = 'unknown';
-  if (hasValue && item.reference_range) {
-    const range = parseLabRange(item.reference_range, { sex: 'female' });
-    if (range) {
-      if (range.low != null && val! < range.low) direction = 'low';
-      else if (range.high != null && val! > range.high) direction = 'high';
-    }
-  }
-
-  if (item.status === 'normal' || item.status === 'expected') {
-    if (explanation) return explanation.normal;
-    return null;
-  }
-
-  if (item.status === 'abnormal' || item.status === 'critical') {
-    if (explanation && direction !== 'unknown') {
-      const rangeText = item.reference_range ? ` (healthy range: ${item.reference_range}${item.unit ? ' ' + item.unit : ''})` : '';
-      return `Your ${item.title} (${item.value}${item.unit ? ' ' + item.unit : ''}) is ${direction === 'low' ? 'below' : 'above'} the healthy range${rangeText}. ${explanation[direction]}`;
-    }
-    const dirLabel = direction === 'low' ? 'lower than' : direction === 'high' ? 'higher than' : 'outside';
-    return `Your ${item.title} (${item.value || ''}${item.unit ? ' ' + item.unit : ''}) is ${dirLabel} the healthy range${item.reference_range ? ` (${item.reference_range}${item.unit ? ' ' + item.unit : ''})` : ''}. Bring this up at your next doctor visit for personalized advice.`;
-  }
-
-  if (explanation) return explanation.normal;
-  return null;
-}
+// Test-specific explanations and the fallback note: one shared module.
+export { testExplanations, findExplanation, generateFallbackNote } from './testExplanations';

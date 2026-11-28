@@ -21,7 +21,7 @@ const lab = (title: string, status: string, date: string) => ({
 });
 
 describe("HealthSummaryWidget", () => {
-  it("counts each test once, by its latest reading (a re-tested TSH is healthy, not to discuss)", async () => {
+  it("states a plain summary (latest reading per test), no wellness %, no repeated flagged list", async () => {
     state.rows = [
       lab("TSH", "abnormal", "2026-03-01"),
       lab("TSH", "normal", "2026-09-01"),
@@ -32,11 +32,30 @@ describe("HealthSummaryWidget", () => {
         <HealthSummaryWidget />
       </MemoryRouter>,
     );
-    expect(await screen.findByText(/1 healthy/)).toBeInTheDocument();
-    expect(screen.getByText(/1 to discuss/)).toBeInTheDocument();
-    expect(screen.getByText("50%")).toBeInTheDocument();
-    // The flagged preview lists Ferritin only.
-    expect(container.innerHTML).toContain("Ferritin");
-    expect(container.innerHTML).not.toContain("TSH");
+    const summary = await screen.findByTestId("results-summary");
+    expect(summary).toHaveTextContent(
+      "1 of 2 latest results outside the lab's range · 1 moved in or out of range since the previous test",
+    );
+    expect(summary.tagName).toBe("BUTTON"); // links to the list on Records
+    expect(container.textContent).not.toMatch(/%|wellness/i);
+    expect(screen.queryByRole("progressbar")).toBeNull();
+    // The flagged list is "Talk to your doctor about" on Records; the card does not repeat it.
+    expect(container.textContent).not.toContain("Ferritin");
+  });
+
+  it("scrolls to the list when tapped", async () => {
+    state.rows = [lab("Ferritin", "abnormal", "2026-05-01")];
+    const target = document.createElement("div");
+    target.id = "attention";
+    target.scrollIntoView = vi.fn();
+    document.body.appendChild(target);
+    render(
+      <MemoryRouter>
+        <HealthSummaryWidget />
+      </MemoryRouter>,
+    );
+    (await screen.findByTestId("results-summary")).click();
+    expect(target.scrollIntoView).toHaveBeenCalled();
+    target.remove();
   });
 });
