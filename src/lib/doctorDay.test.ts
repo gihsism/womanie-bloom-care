@@ -131,6 +131,18 @@ describe('newSinceLastVisit', () => {
     expect(items[0]).toMatchObject({ title: 'TSH 6.1 mU/L', flagged: true, detail: 'Result · high' });
   });
 
+  it('flags only the latest reading of a test (shared rule): an old high report re-tested normal is not flagged', () => {
+    const { items } = newSinceLastVisit({
+      ...base,
+      medicalData: [
+        { id: 'old', document_id: 'd_new', title: 'TSH', value: 6.1, unit: 'mU/L', status: 'high', data_type: 'lab_result', date_recorded: '2026-06-01' },
+        { id: 'new', document_id: 'd_new', title: 'tsh', value: 2.0, unit: 'mU/L', status: 'normal', data_type: 'lab_result', date_recorded: '2026-11-10' },
+      ],
+    });
+    expect(items.find(i => i.key === 'res-old')).toMatchObject({ flagged: false, detail: 'Result · high on an older test, re-tested since' });
+    expect(items.some(i => i.flagged)).toBe(false);
+  });
+
   it('is a first visit when nothing was completed', () => {
     expect(newSinceLastVisit({ ...base, appointments: [{ scheduled_at: '2026-11-01T09:00:00Z', status: 'scheduled' }] }))
       .toEqual({ lastVisitAt: null, items: [] });

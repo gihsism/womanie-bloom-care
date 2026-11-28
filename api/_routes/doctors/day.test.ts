@@ -36,12 +36,26 @@ const APPTS = [
   { id: 'a2', patient_id: 'p_pending', scheduled_at: '2026-11-26T10:00:00Z', status: 'scheduled', consultation_type: null, duration: 30, approved: false },
 ];
 
-function routeQueries(opts: { appts?: typeof APPTS; vqFails?: boolean; vqRows?: unknown[] } = {}) {
+// Lab rows of p_ok (last completed visit 2026-10-01): ferritin low on a
+// report uploaded after it (counts); TSH high on an OLD report uploaded
+// after it, but re-tested normal later (latest reading in range: does not
+// count); prolactin high before the visit (not new: does not count);
+// vitamin D "elevated" after it (same tier as high: counts).
+const LAB_ROWS = [
+  { user_id: 'p_ok', title: 'Ferritin', data_type: 'lab_result', date_recorded: '2026-11-10', status: 'low', uploaded_at: '2026-11-11T08:00:00Z' },
+  { user_id: 'p_ok', title: 'TSH', data_type: 'lab_result', date_recorded: '2026-11-10', status: 'normal', uploaded_at: '2026-11-11T08:00:00Z' },
+  { user_id: 'p_ok', title: 'tsh ', data_type: 'lab_result', date_recorded: '2026-06-01', status: 'high', uploaded_at: '2026-11-20T08:00:00Z' },
+  { user_id: 'p_ok', title: 'Prolactin', data_type: 'lab_result', date_recorded: '2026-09-01', status: 'high', uploaded_at: '2026-09-02T08:00:00Z' },
+  { user_id: 'p_ok', title: 'Vitamin D', data_type: 'lab_result', date_recorded: '2026-11-10', status: 'elevated', uploaded_at: '2026-11-11T08:00:00Z' },
+];
+
+function routeQueries(opts: { appts?: typeof APPTS; vqFails?: boolean; vqRows?: unknown[]; labRows?: unknown[] } = {}) {
   query.mockImplementation(async (sql: string) => {
     if (/FROM appointments a/.test(sql)) return opts.appts ?? APPTS;
     if (/chart_access_log/.test(sql)) return [];
     if (/FROM profiles/.test(sql)) return [{ id: 'p_ok', life_stage: 'pregnancy', pregnancy_due_date: '2027-03-01', ivf_phase: null }];
-    if (/WITH last_visit/.test(sql)) return [{ patient_id: 'p_ok', last_visit_at: '2026-10-01T09:00:00Z', new_docs: '2', new_abnormal: '1' }];
+    if (/WITH last_visit/.test(sql)) return [{ patient_id: 'p_ok', last_visit_at: '2026-10-01T09:00:00Z', new_docs: '2' }];
+    if (/FROM current_extracted_data/.test(sql)) return opts.labRows ?? LAB_ROWS;
     if (/daily_health_signals/.test(sql)) return [
       { user_id: 'p_ok', signal_date: '2026-11-25', mood: ['sad'] },
       { user_id: 'p_ok', signal_date: '2026-11-24', mood: ['anxious'] },
@@ -143,7 +157,7 @@ describe('doctors/day access', () => {
         open_questions: 1,
         last_visit_at: '2026-10-01T09:00:00Z',
         new_docs: 2,
-        new_abnormal: 1,
+        new_abnormal: 2,
         low_mood_streak: 3,
       });
       // Counts only: no document names, values, question text or moods.
@@ -161,6 +175,31 @@ describe('doctors/day access', () => {
     expect(call[0]).toMatch(/status = 'completed'/);
     expect(call[1][0]).toBe('doc_1');
     expect(call[1][1]).toEqual(['p_ok']);
+  });
+
+  it('counts new out-of-range results by the shared rule: latest reading per test only', async () => {
+    routeQueries();
+    const res = mockRes();
+    await handler(mockReq(), res);
+    const ok = (res._body as { visits: Array<Record<string, unknown>> }).visits.find(v => v.patient_id === 'p_ok')!;
+    // Ferritin + vitamin D; not the superseded TSH, not the pre-visit prolactin.
+    expect(ok.new_abnormal).toBe(2);
+    const lab = query.mock.calls.find(([sql]) => /FROM current_extracted_data/.test(sql as string)) as [string, unknown[]];
+    expect(lab[1]).toEqual([['p_ok']]);
+  });
+
+  it('still answers when the results read fails (count 0)', async () => {
+    routeQueries();
+    const base = query.getMockImplementation()!;
+    query.mockImplementation(async (sql: string, params: unknown[]) => {
+      if (/FROM current_extracted_data/.test(sql)) throw new Error('boom');
+      return base(sql, params);
+    });
+    const res = mockRes();
+    await handler(mockReq(), res);
+    expect(res._status).toBe(200);
+    const ok = (res._body as { visits: Array<Record<string, unknown>> }).visits.find(v => v.patient_id === 'p_ok')!;
+    expect(ok.new_abnormal).toBe(0);
   });
 
   it("ignores a questions row that is not the patient's own visit", async () => {

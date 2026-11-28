@@ -54,7 +54,7 @@ const PatientDetails = () => {
   const { patientId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
-  const { loading } = useRequireRole('doctor', '/auth/doctor-login');
+  const { loading, hasRole } = useRequireRole('doctor', '/auth/doctor-login');
   const { user } = useAuth();
 
   const [patient, setPatient] = useState<PatientProfile | null>(null);
@@ -105,7 +105,9 @@ const PatientDetails = () => {
   }, [searchParams, setSearchParams]);
 
   const loadChart = useCallback(async () => {
-    if (!user || !patientId) return;
+    // Wait for the role check: a doctor whose role was revoked is sent to
+    // the login page without asking for the chart at all.
+    if (!user || !patientId || hasRole !== true) return;
     try {
       const resp = await fetch(`/api/doctors/patient?id=${encodeURIComponent(patientId)}`);
       if (resp.status === 403) {
@@ -132,7 +134,7 @@ const PatientDetails = () => {
       setHasLoaded(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, patientId]);
+  }, [user, patientId, hasRole]);
 
   useEffect(() => {
     loadChart();
@@ -192,7 +194,8 @@ const PatientDetails = () => {
           </Button>
           <div className="min-w-0 flex-1">
             <h1 className="text-lg font-bold truncate">{patient?.full_name || 'Patient'}</h1>
-            <p className="text-sm text-muted-foreground truncate">{facts.join(' · ')}</p>
+            {/* Wraps instead of cutting "Cycle day 13" to "Cycle d…" beside the button on a phone. */}
+            <p className="text-sm text-muted-foreground">{facts.join(' · ')}</p>
           </div>
           <Button onClick={() => writeNote()} size="sm" className="shrink-0 gap-1.5">
             <PenLine className="h-4 w-4" aria-hidden="true" />

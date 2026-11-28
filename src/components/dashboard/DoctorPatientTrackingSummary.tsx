@@ -1,8 +1,8 @@
-import { DATE_FMT } from '@/lib/dateFormat';
+import { formatDate } from '@/lib/dateFormat';
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { differenceInDays, differenceInMonths, format, parseISO } from 'date-fns';
+import { differenceInDays, differenceInMonths, parseISO } from 'date-fns';
 import { CalendarRange, Activity, Thermometer } from 'lucide-react';
 
 // Condensed tracking-summary card for the doctor's PatientDetails
@@ -131,7 +131,7 @@ export default function DoctorPatientTrackingSummary({
               Last period
             </span>
             <span className="font-medium">
-              {format(cycleStats.lastStart, DATE_FMT)}{' '}
+              {formatDate(cycleStats.lastStart)}{' '}
               <span className="text-muted-foreground">
                 ({cycleStats.daysSince === 0
                   ? 'today'
@@ -160,7 +160,7 @@ export default function DoctorPatientTrackingSummary({
           <div>
             <div className="flex items-center gap-1.5 text-muted-foreground mb-1.5">
               <Activity className="h-3.5 w-3.5" />
-              Top symptoms (last 30 days, {topSymptoms.daysLogged} {topSymptoms.daysLogged === 1 ? 'day' : 'days'} logged)
+              Top symptoms (last 30 days, on {topSymptoms.daysLogged} {topSymptoms.daysLogged === 1 ? 'day' : 'days'} with symptoms)
             </div>
             <div className="flex flex-wrap gap-1.5">
               {topSymptoms.ranked.map(s => (

@@ -1,4 +1,5 @@
 import type { Page, Route } from '@playwright/test';
+import { outsideRangeSince } from '../api/_lib/lab-flags';
 
 // In-browser fake of the Womanie API for the local end-to-end suite.
 // Every request to /api/** is answered here from fixture JSON; nothing
@@ -203,8 +204,118 @@ export async function installMockApi(page: Page, opts: MockOptions): Promise<Moc
           generatedAt: new Date().toISOString(), cached: true, weekBucket: 'e2e',
         });
     }
+    if (path.startsWith('/api/doctors/')) {
+      const answer = doctorRoute(tables, userId, path, url);
+      if (answer) return json(route, answer.body, answer.status);
+    }
     api.unhandled.push(`${method} ${path}`);
     return json(route, {});
   });
   return api;
+}
+
+// ---- Doctor side -------------------------------------------------------
+// The consent-gated doctor endpoints, answered from the same tables the
+// page writes through /api/db (so a note saved in the chart comes back on
+// the next chart load). Same gates as the server: the doctor role AND an
+// APPROVED connection; a revoked doctor (no role row) gets 403 everywhere.
+
+const ymd = (v: unknown) => (typeof v === 'string' ? v.slice(0, 10) : null);
+const byTime = (col: string, asc = false) => (a: Row, z: Row) =>
+  (String(a[col] ?? '') < String(z[col] ?? '') ? -1 : 1) * (asc ? 1 : -1);
+
+function doctorRoute(tables: Tables, doctorId: string, path: string, url: URL): { status: number; body: unknown } | null {
+  const rows = (t: string) => tables[t] ?? [];
+  const isDoctor = rows('user_roles').some((r) => r.user_id === doctorId && r.role === 'doctor');
+  const forbidden = { status: 403, body: { error: 'No approved connection to this patient' } };
+  // Revoked: no patients in the list, every visit unapproved, charts 403.
+  const conns = isDoctor ? rows('doctor_patient_connections').filter((c) => c.doctor_id === doctorId) : [];
+  const approved = (pid: unknown) => conns.some((c) => c.patient_id === pid && c.status === 'approved');
+  const profile = (pid: unknown) => rows('profiles').find((p) => p.id === pid) ?? null;
+  const mine = (t: string, pid: unknown) => rows(t).filter((r) => r.user_id === pid);
+
+  switch (path) {
+    case '/api/doctors/connections':
+      return { status: 200, body: { connections: conns.map((c) => {
+        const ok = c.status === 'approved';
+        const docs = mine('health_documents', c.patient_id).sort(byTime('uploaded_at'));
+        return {
+          ...c,
+          patient_full_name: profile(c.patient_id)?.full_name ?? null,
+          patient_life_stage: ok ? profile(c.patient_id)?.life_stage ?? null : null,
+          last_upload_at: ok ? docs[0]?.uploaded_at ?? null : null,
+          recent_doc_count: ok ? docs.filter((d) => Date.parse(String(d.uploaded_at)) > Date.now() - 14 * 86_400_000).length : 0,
+        };
+      }) } };
+    case '/api/doctors/patient': {
+      const pid = url.searchParams.get('id');
+      if (!approved(pid)) return forbidden;
+      const cutoff = new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0, 10);
+      const appts = rows('appointments').filter((a) => a.doctor_id === doctorId && a.patient_id === pid);
+      const apptIds = new Set(appts.filter((a) => a.status !== 'cancelled').map((a) => a.id));
+      return { status: 200, body: {
+        profile: profile(pid),
+        healthSignals: mine('daily_health_signals', pid).filter((s) => String(s.signal_date) >= cutoff).sort(byTime('signal_date')),
+        documents: mine('health_documents', pid).sort(byTime('uploaded_at')).map((d) => ({ ...d, has_file: !!d.file_path, sent_by_me: false, sent_note: null })),
+        medicalData: mine('current_extracted_data', pid).sort(byTime('date_recorded')),
+        notes: rows('doctor_notes').filter((n) => n.doctor_id === doctorId && n.patient_id === pid).sort(byTime('created_at')),
+        appointments: [...appts].sort(byTime('scheduled_at')),
+        periodRecords: mine('period_tracking', pid).sort(byTime('period_start_date', true))
+          .map((p) => ({ period_start_date: p.period_start_date, cycle_length: p.cycle_length })),
+        visitQuestions: mine('visit_questions', pid).filter((q) => apptIds.has(q.appointment_id)).map((q) => ({
+          appointment_id: q.appointment_id, questions: q.questions, updated_at: q.updated_at,
+          scheduled_at: appts.find((a) => a.id === q.appointment_id)?.scheduled_at,
+        })),
+        medicines: mine('medications', pid).filter((m) => m.active !== false),
+        birthPlan: null,
+      } };
+    }
+    case '/api/doctors/patient-trends': {
+      const pid = url.searchParams.get('id');
+      if (!approved(pid)) return forbidden;
+      return { status: 200, body: {
+        periods: mine('period_tracking', pid).sort(byTime('period_start_date', true))
+          .map((p) => ({ start: ymd(p.period_start_date), end: ymd(p.period_end_date) })),
+        signals: mine('daily_health_signals', pid).sort(byTime('signal_date', true))
+          .map((s) => ({ date: ymd(s.signal_date), symptoms: (s.symptoms as string[] | null) ?? [], bbt: null })),
+        weights: [],
+        bloodPressure: [],
+      } };
+    }
+    case '/api/doctors/day': {
+      const from = Date.parse(url.searchParams.get('from') ?? '');
+      const to = Date.parse(url.searchParams.get('to') ?? '');
+      const visits = rows('appointments')
+        .filter((a) => a.doctor_id === doctorId && a.status !== 'cancelled')
+        .filter((a) => { const at = Date.parse(String(a.scheduled_at)); return at >= from && at < to; })
+        .sort(byTime('scheduled_at', true))
+        .map((a) => {
+          const base = { appointment_id: a.id, patient_id: a.patient_id, scheduled_at: a.scheduled_at, status: a.status,
+            consultation_type: a.consultation_type, duration: a.duration, approved: approved(a.patient_id) };
+          if (!base.approved) return base;
+          const p = profile(a.patient_id);
+          const last = rows('appointments')
+            .filter((x) => x.doctor_id === doctorId && x.patient_id === a.patient_id && x.status === 'completed' && Date.parse(String(x.scheduled_at)) < Date.now())
+            .map((x) => Date.parse(String(x.scheduled_at))).sort((x, y) => y - x)[0];
+          const docs = mine('health_documents', a.patient_id);
+          const uploaded = new Map(docs.map((d) => [d.id, Date.parse(String(d.uploaded_at))]));
+          const q = mine('visit_questions', a.patient_id).find((v) => v.appointment_id === a.id);
+          const open = Array.isArray(q?.questions) ? (q.questions as Row[]).filter((x) => x.asked !== true).length : 0;
+          const labs = mine('current_extracted_data', a.patient_id).map((r) => ({
+            title: r.title as string, data_type: r.data_type as string, date_recorded: r.date_recorded as string, status: r.status as string,
+            arrived: uploaded.get(r.document_id) ?? NaN,
+          }));
+          return { ...base,
+            life_stage: p?.life_stage ?? null, pregnancy_due_date: p?.pregnancy_due_date ?? null, ivf_phase: p?.ivf_phase ?? null,
+            open_questions: open,
+            last_visit_at: last ? new Date(last).toISOString() : null,
+            new_docs: last ? docs.filter((d) => Date.parse(String(d.uploaded_at)) > last).length : 0,
+            new_abnormal: last ? outsideRangeSince(labs, last, (r) => r.arrived).length : 0,
+            low_mood_streak: 0,
+          };
+        });
+      return { status: 200, body: { visits } };
+    }
+  }
+  return null;
 }

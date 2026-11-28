@@ -1,0 +1,94 @@
+{
+  "_comment": "One fake doctor with two patients: Lena (approved, shared her chart) and Sara (request still waiting for her approval). Tokens as in account.json, plus {{min:N}} = ISO timestamp N minutes from now. Lena's TSH: high on an old report she uploaded only 5 days ago (drawn 100 days ago), normal on the newer one, so the latest-reading rule must count it as in range everywhere.",
+  "user": {
+    "id": "e2e-doc-1",
+    "email": "e2e-doctor@womanie.test",
+    "name": "Anna Weber",
+    "hasPassword": true,
+    "isAdmin": false,
+    "created_at": "{{at:-200}}",
+    "consentRequired": false,
+    "consentReason": null
+  },
+  "tables": {
+    "user_roles": [
+      { "id": "role-1", "user_id": "e2e-doc-1", "role": "doctor" }
+    ],
+    "doctor_profiles": [
+      {
+        "id": "dp-1",
+        "user_id": "e2e-doc-1",
+        "full_name": "Dr. Anna Weber",
+        "specialty": "Gynaecology",
+        "specialties": ["Gynaecology"],
+        "languages": ["English", "German"],
+        "practice_address": "Bahnhofstrasse 1, 8001 Zürich",
+        "avatar_url": "/placeholder.svg",
+        "bio": "Gynaecologist.",
+        "is_verified": true,
+        "verification_status": "approved",
+        "years_of_experience": 12,
+        "license_number": "GLN 7601000000000"
+      }
+    ],
+    "consultation_settings": [
+      {
+        "id": "cs-1",
+        "doctor_id": "e2e-doc-1",
+        "is_available": true,
+        "consultation_price": 150,
+        "video_enabled": true,
+        "in_person_enabled": true,
+        "default_duration": 30,
+        "currency": "CHF"
+      }
+    ],
+    "doctor_schedule": [
+      { "id": "ds-1", "doctor_id": "e2e-doc-1", "day_of_week": 1, "start_time": "09:00", "end_time": "17:00", "is_active": true },
+      { "id": "ds-2", "doctor_id": "e2e-doc-1", "day_of_week": 3, "start_time": "09:00", "end_time": "17:00", "is_active": true }
+    ],
+    "doctor_patient_connections": [
+      { "id": "conn-1", "doctor_id": "e2e-doc-1", "patient_id": "pat-1", "status": "approved", "connection_type": "share_code", "created_at": "{{at:-60}}" },
+      { "id": "conn-2", "doctor_id": "e2e-doc-1", "patient_id": "pat-2", "status": "pending", "connection_type": "share_code", "created_at": "{{at:-1}}" }
+    ],
+    "appointments": [
+      { "id": "apt-past", "doctor_id": "e2e-doc-1", "patient_id": "pat-1", "scheduled_at": "{{at:-40}}", "status": "completed", "consultation_type": "in_person", "duration": 30, "notes": null, "created_at": "{{at:-50}}" },
+      { "id": "apt-next", "doctor_id": "e2e-doc-1", "patient_id": "pat-1", "scheduled_at": "{{min:90}}", "status": "scheduled", "consultation_type": "in_person", "duration": 30, "notes": null, "created_at": "{{at:-3}}" },
+      { "id": "apt-sara", "doctor_id": "e2e-doc-1", "patient_id": "pat-2", "scheduled_at": "{{at:1}}", "status": "scheduled", "consultation_type": "video", "duration": 30, "notes": null, "created_at": "{{at:-1}}" }
+    ],
+    "profiles": [
+      { "id": "pat-1", "full_name": "Lena Muster", "life_stage": "menstrual-cycle", "pregnancy_due_date": null, "ivf_phase": null },
+      { "id": "pat-2", "full_name": "Sara Beispiel", "life_stage": "pregnancy", "pregnancy_due_date": "{{day:100}}", "ivf_phase": null }
+    ],
+    "health_documents": [
+      { "id": "doc-old", "user_id": "pat-1", "file_name": "thyroid-2025.pdf", "file_path": "blob://x", "mime_type": "application/pdf", "ai_suggested_name": "Thyroid test (old report)", "ai_summary": "TSH above the range.", "ai_suggested_category": "lab_results", "document_type": "lab_results", "uploaded_at": "{{at:-5}}" },
+      { "id": "doc-new", "user_id": "pat-1", "file_name": "blood-test.pdf", "file_path": "blob://y", "mime_type": "application/pdf", "ai_suggested_name": "Blood test - iron, thyroid, vitamin D", "ai_summary": "Ferritin is below the range; TSH and vitamin D are in range.", "ai_suggested_category": "lab_results", "document_type": "lab_results", "uploaded_at": "{{at:-10}}" }
+    ],
+    "current_extracted_data": [
+      { "id": "r-tsh-old", "user_id": "pat-1", "document_id": "doc-old", "data_type": "lab_result", "title": "TSH", "value": "5.9", "unit": "mU/L", "reference_range": "0.4-4.0", "status": "high", "date_recorded": "{{day:-100}}", "notes": null, "raw_data": { "panel": "Thyroid" } },
+      { "id": "r-tsh-new", "user_id": "pat-1", "document_id": "doc-new", "data_type": "lab_result", "title": "TSH", "value": "2.1", "unit": "mU/L", "reference_range": "0.4-4.0", "status": "normal", "date_recorded": "{{day:-11}}", "notes": null, "raw_data": { "panel": "Thyroid" } },
+      { "id": "r-ferritin", "user_id": "pat-1", "document_id": "doc-new", "data_type": "lab_result", "title": "Ferritin", "value": "12", "unit": "ng/mL", "reference_range": "15-150", "status": "abnormal", "date_recorded": "{{day:-11}}", "notes": null, "raw_data": { "panel": "Iron" } },
+      { "id": "r-vitd", "user_id": "pat-1", "document_id": "doc-new", "data_type": "lab_result", "title": "Vitamin D (25-OH)", "value": "38", "unit": "ng/mL", "reference_range": "30-100", "status": "normal", "date_recorded": "{{day:-11}}", "notes": null, "raw_data": { "panel": "Vitamins" } }
+    ],
+    "daily_health_signals": [
+      { "id": "sig-1", "user_id": "pat-1", "signal_date": "{{day:-1}}", "symptoms": ["headache"], "mood": ["sad"], "discharge": null, "notes": null },
+      { "id": "sig-2", "user_id": "pat-1", "signal_date": "{{day:-2}}", "symptoms": ["fatigue"], "mood": ["sad"], "discharge": null, "notes": "Tired all day, headache after lunch" },
+      { "id": "sig-3", "user_id": "pat-1", "signal_date": "{{day:-3}}", "symptoms": ["fatigue"], "mood": ["anxious"], "discharge": null, "notes": null },
+      { "id": "sig-4", "user_id": "pat-1", "signal_date": "{{day:-6}}", "symptoms": [], "mood": ["happy"], "discharge": null, "notes": null }
+    ],
+    "period_tracking": [
+      { "id": "per-1", "user_id": "pat-1", "period_start_date": "{{day:-68}}", "period_end_date": "{{day:-64}}", "cycle_length": 28 },
+      { "id": "per-2", "user_id": "pat-1", "period_start_date": "{{day:-40}}", "period_end_date": "{{day:-35}}", "cycle_length": 28 },
+      { "id": "per-3", "user_id": "pat-1", "period_start_date": "{{day:-12}}", "period_end_date": "{{day:-8}}", "cycle_length": 28 }
+    ],
+    "medications": [
+      { "id": "med-1", "user_id": "pat-1", "name": "Iron", "dose": "100 mg", "times_per_day": 1, "active": true, "started_on": "{{day:-9}}", "created_at": "{{at:-9}}" }
+    ],
+    "visit_questions": [
+      { "id": "vq-1", "user_id": "pat-1", "appointment_id": "apt-next", "questions": [{ "id": "q1", "text": "How long should I take iron?", "asked": false }], "updated_at": "{{at:-1}}" }
+    ],
+    "doctor_notes": [
+      { "id": "note-1", "doctor_id": "e2e-doc-1", "patient_id": "pat-1", "title": "First visit", "content": "Heavy periods. Ordered ferritin.", "note_type": "observation", "is_visible_to_patient": true, "created_at": "{{at:-40}}" }
+    ]
+  }
+}

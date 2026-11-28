@@ -160,13 +160,19 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => navigate(`/doctor/patient/${apt.patient_id}`)}
-                    >
-                      Open chart
-                    </Button>
+                    {/* The chart opens only once she approved the request;
+                        before that the button led to a "no access" page. */}
+                    {patients.some(p => p.patient_id === apt.patient_id && p.status === 'approved') ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => navigate(`/doctor/patient/${apt.patient_id}`)}
+                      >
+                        Open chart
+                      </Button>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Chart opens once she approves</span>
+                    )}
                     <Button
                       size="sm"
                       variant="ghost"

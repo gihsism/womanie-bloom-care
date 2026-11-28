@@ -97,7 +97,7 @@ const PatientDocuments = ({ documents, patientId, patientName, onSent }: Props) 
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium truncate">{doc.ai_suggested_name || doc.file_name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {(doc.document_type || 'Document').replace(/_/g, ' ')} · {doc.uploaded_at ? formatDate(doc.uploaded_at) : 'date unknown'}
+                    {(doc.document_type || 'Document').replace(/_/g, ' ').replace(/^./, c => c.toUpperCase())} · {doc.uploaded_at ? formatDate(doc.uploaded_at) : 'date unknown'}
                     {doc.sent_by_me && <Badge variant="secondary" className="ml-2 text-[10px] py-0">Sent by you</Badge>}
                   </p>
                   {doc.sent_by_me && doc.sent_note && (
@@ -117,12 +117,13 @@ const PatientDocuments = ({ documents, patientId, patientName, onSent }: Props) 
                     aria-expanded={openSummary === doc.id}
                     onClick={() => setOpenSummary(s => (s === doc.id ? null : doc.id))}
                   >
-                    Summary
+                    AI summary
                     <ChevronDown className={`h-3 w-3 transition-transform ${openSummary === doc.id ? 'rotate-180' : ''}`} aria-hidden="true" />
                   </button>
                   {openSummary === doc.id && (
                     <div className="mt-2 ml-8 prose prose-sm max-w-none dark:prose-invert text-sm">
                       <ReactMarkdown disallowedElements={NO_REMOTE_IMAGES}>{doc.ai_summary}</ReactMarkdown>
+                      <p className="text-xs text-muted-foreground not-prose">Written automatically from the document, not a diagnosis. Check the original.</p>
                     </div>
                   )}
                 </>

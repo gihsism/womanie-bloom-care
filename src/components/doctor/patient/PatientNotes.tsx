@@ -248,6 +248,7 @@ const PatientNotes = ({ doctorId, patientId, notes, formOpen, draft, onDraftChan
                   className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive"
                   onClick={() => remove(note.id)}
                   disabled={deletingId === note.id}
+                  aria-label={`Delete note: ${note.title}`}
                 >
                   {deletingId === note.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Delete'}
                 </Button>
