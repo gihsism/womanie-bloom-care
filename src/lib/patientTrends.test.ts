@@ -10,9 +10,9 @@ describe('cycleTrend', () => {
     expect(t.summary).toBe('Cycles 27–30 days, regular (last 4).');
   });
 
-  it('flags irregular cycles and ones outside 21–35', () => {
+  it('flags irregular cycles and ones outside 24–38', () => {
     const t = cycleTrend(starts('2026-03-01', '2026-03-25', '2026-05-05', '2026-06-02'))!;
-    expect(t.summary).toMatch(/irregular \(varies by 17 days\); 1 outside 21–35 days/);
+    expect(t.summary).toMatch(/irregular \(varies by 17 days\); 1 outside 24–38 days \(FIGO\)/);
   });
 
   it('drops gaps that are missed logs and needs two cycles', () => {

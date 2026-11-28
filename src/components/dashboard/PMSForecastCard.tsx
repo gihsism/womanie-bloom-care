@@ -61,10 +61,10 @@ const SYMPTOM_LABEL: Record<string, string> = {
 };
 
 const PREP_TIPS = [
-  'Magnesium (almonds, dark chocolate, leafy greens) — strongest single-nutrient evidence',
+  'Calcium-rich foods (dairy, fortified plant drinks, tofu) have some of the better evidence for PMS; magnesium-rich foods may help too (ACOG)',
   'Steady protein + complex carbs to flatten blood-sugar dips',
   'Reduce caffeine + alcohol if you notice they sharpen symptoms',
-  'Prioritise sleep — even one extra hour helps mood + cramp tolerance',
+  'Prioritise sleep — being well rested can make mood and cramps easier to handle',
   'Plan a lower-intensity training week if you train',
   'Bring forward any social commitments you can — late-luteal days are not your peak energy',
 ];

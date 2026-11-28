@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   vomitWindowHours,
   classifyLate, missedPillGuidance, hoursLateSince, choiceForHours, LATE_CHOICES,
-  isPillType, MISSED_AFTER_HOURS, EC_OPTIONS, UNSURE_FOOTER, PILL_TYPES,
+  isPillType, MISSED_AFTER_HOURS, EC_OPTIONS, UNSURE_FOOTER, PILL_TYPES, RING_OUT_RULE, PATCH_OFF_RULE, EFFECTIVENESS_NOTE,
 } from './missedPill';
 
 describe('classifyLate: hour limits by pill type (FSRH)', () => {
@@ -120,5 +120,20 @@ describe('vomitWindowHours', () => {
     expect(vomitWindowHours('pop-desogestrel')).toBe(3);
     expect(vomitWindowHours('pop-drospirenone')).toBe(3);
     expect(vomitWindowHours('pop-traditional')).toBe(3);
+  });
+});
+
+describe('ring and patch rules (leaflet limits, stricter than FSRH)', () => {
+  it('ring: 3 hours, then 7 days of condoms', () => {
+    expect(RING_OUT_RULE).toMatch(/less than 3 hours/);
+    expect(RING_OUT_RULE).toMatch(/condoms for 7 days/);
+    expect(RING_OUT_RULE).toMatch(/pharmacist/);
+  });
+  it('patch: 24 hours, then a new cycle and 7 days of condoms', () => {
+    expect(PATCH_OFF_RULE).toMatch(/less than 24 hours/);
+    expect(PATCH_OFF_RULE).toMatch(/new cycle, use condoms for 7 days/);
+  });
+  it('effectiveness note explains typical vs perfect use', () => {
+    expect(EFFECTIVENESS_NOTE).toMatch(/lower number is typical use[\s\S]*higher number is perfect use/);
   });
 });

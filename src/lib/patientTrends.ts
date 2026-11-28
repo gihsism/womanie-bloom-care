@@ -40,8 +40,8 @@ export function cycleTrend(periods: TrendsPayload['periods']): Trend | null {
   // Variation of up to 7 days between the shortest and longest cycle is
   // the usual definition of "regular".
   const pattern = hi - lo <= 7 ? 'regular' : `irregular (varies by ${hi - lo} days)`;
-  const outside = last.filter(p => p.value < 21 || p.value > 35).length;
-  const extra = outside ? `; ${outside} outside 21–35 days` : '';
+  const outside = last.filter(p => p.value < 24 || p.value > 38).length;
+  const extra = outside ? `; ${outside} outside 24–38 days (FIGO)` : '';
   return { points: last, unit: 'days', summary: `Cycles ${fmtRange(lo, hi)} days, ${pattern}${extra} (last ${last.length}).` };
 }
 

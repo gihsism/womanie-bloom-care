@@ -31,7 +31,7 @@ const bodyChangesData = [
 
 const wellnessTips = [
   { icon: Apple, title: 'Nutrition', tip: 'Eat iron-rich foods like leafy greens, lean meat, and beans to prepare your body.', color: 'text-primary' },
-  { icon: Moon, title: 'Sleep', tip: 'Aim for 9–11 hours of sleep. Your body is growing and needs plenty of rest.', color: 'text-indigo-500' },
+  { icon: Moon, title: 'Sleep', tip: 'Aim for 9–12 hours of sleep up to age 12 and 8–10 hours as a teenager. Your body is growing and needs plenty of rest.', color: 'text-indigo-500' },
   { icon: Activity, title: 'Exercise', tip: 'Stay active with activities you enjoy — dance, swimming, cycling, or yoga.', color: 'text-primary' },
   { icon: Heart, title: 'Emotional Health', tip: 'Journaling and talking to trusted friends or family can help with big emotions.', color: 'text-pink-500' },
   { icon: Shield, title: 'Hygiene', tip: 'Use gentle unscented products. Learn about period products so you feel prepared.', color: 'text-blue-500' },
@@ -49,8 +49,8 @@ const periodPrepChecklist = [
 
 const funFacts = [
   "Your first period is called 'menarche' (say: meh-NAR-kee).",
-  'Most people get their first period between ages 10 and 15.',
-  'Periods usually last 3–7 days and come every 21–35 days.',
+  'Most people get their first period between ages 10 and 15; about 12 is typical (ACOG).',
+  'In the first years, periods usually last up to 7 days and come every 21–45 days, and they are often irregular at first (ACOG).',
   'The uterus is about the size of your fist!',
   'Exercise can actually help reduce cramps when you get your period.',
   "Everyone's cycle is different - there is no wrong way.",
@@ -208,8 +208,9 @@ export default function PreMenstrualDashboard() {
         <div className="mt-4 pt-3 border-t border-pink-200/40 dark:border-pink-800/20">
           <p className="text-[11px] text-muted-foreground leading-relaxed">
             <span className="font-medium">When to ask for help right away:</span> very heavy bleeding (soaking
-            a pad in under an hour), severe cramps you can’t stand, or bleeding before age 8 or after a
-            year of regular periods. Tell a parent or call your doctor.
+            a pad in under an hour) or severe cramps you can’t stand. See a doctor soon for bleeding before
+            age 8, a period that lasts more than 7 days, more than 3 months without a period, or no period
+            by 15 (or 3 years after your breasts started to grow). Tell a parent or call your doctor.
           </p>
         </div>
       </Card>

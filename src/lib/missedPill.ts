@@ -104,6 +104,27 @@ export function vomitWindowHours(_pillType: PillType): number {
 export const SOURCES_LINE =
   'Based on: FSRH (UK) missed-pill guidance for combined and progestogen-only pills, and the CDC U.S. Selected Practice Recommendations for Contraceptive Use (2024).';
 
+/**
+ * Ring out / patch off (checked 2026-11-28). The package leaflets are
+ * stricter than UK guidance, and the leaflet wins: NuvaRing leaflet (DE/CH
+ * text) = out for up to 3 hours, rinse and put back; longer = 7 days of
+ * condoms, and in week 3 a new ring straight away (or a break per the
+ * leaflet). Evra patch leaflet (EU SmPC) = off for under 24 hours, stick it
+ * back or apply a new one; 24 hours or more = start a new patch cycle and
+ * use condoms for 7 days. FSRH CEU "Recommended actions after incorrect use
+ * of combined hormonal contraception" (2020, amended 2021) allows up to
+ * 48 hours for both.
+ */
+export const RING_OUT_RULE =
+  'Ring out: if it was out for less than 3 hours, rinse it in cool or lukewarm water and put it back. If it was out longer, or you are not sure, put it back (or a new one), use condoms for 7 days, follow your ring leaflet and ask a pharmacist today whether you need emergency contraception.';
+
+export const PATCH_OFF_RULE =
+  'Patch off: if it came off less than 24 hours ago, stick it back on, or put on a new one if it no longer sticks. If it was off for 24 hours or more, or you are not sure, put on a new patch to start a new cycle, use condoms for 7 days and ask a pharmacist today whether you need emergency contraception.';
+
+/** Under the effectiveness ranges (NHS / FSRH figures: typical vs perfect use, first year). */
+export const EFFECTIVENESS_NOTE =
+  'Effectiveness ranges: the lower number is typical use, when pills are sometimes missed or a ring or patch is late; the higher number is perfect use (NHS, FSRH).';
+
 /** Hours since the pill was due: due day (yyyy-MM-dd) at her usual time (HH:mm). */
 export function hoursLateSince(dueDay: string, usualTime: string, now = new Date()): number {
   const [y, m, d] = dueDay.split('-').map(Number);

@@ -17228,7 +17228,7 @@
     "Early eating and drinking, early removal of the urinary catheter and drip, and getting up and walking early are all recommended.",
     "Pain relief should be scheduled: regular acetaminophen (paracetamol) and regular anti-inflammatory drugs, with oral opioids as rescue pain relief and a standard plan for managing side effects.",
     "Other recommended steps are blood clot prevention, treating anaemia, breastfeeding support and education, rest periods, and a patient-centred plan for going home.",
-    "Most recommendations are strong, but the evidence behind many is low; anti-inflammatory drugs have high-quality evidence and acetaminophen and anaemia treatment moderate."
+    "All 13 recommendations are strong, but the evidence behind many is low; anti-inflammatory drugs have high-quality evidence and acetaminophen and anaemia treatment moderate."
    ],
    "certainty": "low",
    "lifeStages": [
@@ -23016,7 +23016,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/30742315/",
    "summary": "This Cochrane review pooled eight trials (805 women) to see whether combined hormonal contraceptives (the pill, vaginal ring or patch) reduce heavy periods. Moderate-quality evidence found the combined pill reduced heavy bleeding compared with placebo over six months. A hormonal coil (LNG IUS) worked better than the pill, and the pill and vaginal ring looked similar. For other comparisons the evidence was too limited to draw firm conclusions.",
    "keyPoints": [
-    "The combined pill improved heavy bleeding compared with placebo: about 77% of women had a successful response versus about 3% on placebo (moderate-quality evidence).",
+    "The combined pill improved heavy bleeding compared with placebo: between about 12% and 77% of women had a successful response versus about 3% on placebo (moderate-quality evidence).",
     "Minor side effects, especially breast pain, were more common with the combined pill.",
     "The hormonal coil (LNG IUS) was more effective than the combined pill at reducing heavy bleeding (low-quality evidence).",
     "There was not enough evidence to compare combined hormonal contraceptives with anti-inflammatory painkillers (NSAIDs) or long-course progestogens; the pill and vaginal ring appeared to have similar effects."
@@ -23870,12 +23870,12 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/40476466/",
-   "summary": "This Cochrane review pooled four randomised trials (9,726 women) in places where HIV is common, comparing hormonal contraceptives with the copper coil and with each other. The contraceptive injection (DMPA) and the hormonal implant (LNG) made little to no difference to HIV risk compared with the copper coil. The injection probably slightly raised HIV risk compared with the implant, though the range of possible effects was wide. All methods prevented pregnancy well, and many women reported condomless sex whichever method they used.",
+   "summary": "This Cochrane review pooled four randomised trials (9,726 women) in places where HIV is common, comparing hormonal contraceptives with the copper coil and with each other. The contraceptive injection (DMPA) and the hormonal implant (LNG) probably made little to no difference to HIV risk compared with the copper coil. The injection probably slightly raised HIV risk compared with the implant, though the range of possible effects was wide. All methods prevented pregnancy well, and many women reported condomless sex whichever method they used.",
    "keyPoints": [
     "DMPA injection compared with the copper IUD likely made little to no difference to HIV acquisition (moderate-certainty evidence).",
     "The LNG implant compared with the copper IUD likely made little to no difference to HIV acquisition (moderate-certainty evidence).",
     "DMPA compared with the LNG implant probably slightly increased HIV acquisition (about 11 more women per 1000, moderate-certainty evidence).",
-    "Both DMPA and the LNG implant slightly reduced pregnancy compared with the copper IUD, and DMPA users were less likely to stop their method than copper IUD or implant users (high-certainty evidence)."
+    "DMPA slightly reduced pregnancy compared with the copper IUD (the LNG implant probably did too, moderate-certainty evidence), and DMPA users were less likely to stop their method than copper IUD or implant users (high-certainty evidence)."
    ],
    "certainty": "moderate",
    "lifeStages": [
@@ -24276,7 +24276,7 @@
    "keyPoints": [
     "Eight main reasons for rejecting hormonal contraception emerged: physical side effects, altered mental health, negative impact on sexuality, concerns about future fertility, invocation of nature, concerns about menstruation, fears and anxiety, and side effects not being taken seriously.",
     "The reasons given were complex and multifactorial, not only a general fear of hormones.",
-    "Many people felt their reported side effects were dismissed, so the authors call for more research on the provider-patient relationship.",
+    "Some people felt their reported side effects were dismissed, and the authors call for more research on the provider-patient relationship.",
     "The authors say birth control should better meet the needs and expectations of both women and men."
    ],
    "certainty": "not stated",
@@ -24589,7 +24589,7 @@
     "Neither study found differences in self-reported consistency of use, knowledge of method effectiveness, or condom use and intention.",
     "The authors concluded there is little evidence that social networking sites improve contraceptive use or adherence."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "contraception",
     "general"
@@ -25421,7 +25421,7 @@
     "Other studies were inconsistent, ranging from no change to increased appetite in the first six months of use.",
     "The available data are not enough to conclude whether DMPA leads to weight gain through changes in eating."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "contraception"
    ],
@@ -33510,7 +33510,7 @@
    "summary": "This Cochrane review looked at whether removing fibroids during a caesarean birth (caesarean myomectomy) is safe and helpful. It pooled 23 non-randomised studies with 7504 women. The evidence for every outcome was very low certainty, so the review could not draw firm conclusions about blood transfusion, bleeding, hospital stay, operation time, major surgery or postpartum fever. No studies reported on future fertility.",
    "keyPoints": [
     "All 23 included studies were non-randomised, and the evidence for every key outcome was very low certainty.",
-    "Women who had caesarean myomectomy had slightly longer operations (about 11 minutes more) and hospital stays (about 0.3 days more), but the review says no firm conclusions can be drawn.",
+    "Women who had caesarean myomectomy may have had slightly longer operations (about 11 minutes more) and hospital stays (about 0.3 days more), but the review says no firm conclusions can be drawn.",
     "No clear conclusions could be made about transfusion, haemorrhage, major surgery or postpartum fever.",
     "No studies reported whether the procedure affects later fertility."
    ],
@@ -38008,7 +38008,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/37815094/",
-   "summary": "This Cochrane review looked at four trials (1731 women) comparing tighter versus less-tight blood sugar targets for women with gestational diabetes. Tighter targets may slightly raise the chance of high blood pressure disorders in pregnancy, but the result was uncertain and could point either way. Tighter control made little to no difference to caesarean rates, induction of labour, or babies being born large. The evidence was low to moderate quality, and the review says more good-quality trials are needed.",
+   "summary": "This Cochrane review looked at four trials (1731 women) comparing tighter versus less-tight blood sugar targets for women with gestational diabetes. Tighter targets may slightly raise the chance of high blood pressure disorders in pregnancy, but the result was uncertain and could point either way. Tighter control probably made little to no difference to caesarean rates, induction of labour, or babies being born large. The evidence was low to moderate quality, and the review says more good-quality trials are needed.",
    "keyPoints": [
     "Tighter blood sugar targets may increase hypertensive disorders of pregnancy (low certainty), but the range of possible effects includes both benefit and harm.",
     "Caesarean section, induction of labour, large-for-gestational-age babies and newborn low blood sugar were likely similar between tighter and less-tight control (moderate certainty).",
@@ -41739,7 +41739,7 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/40927887/",
-   "summary": "This international guidance from FIGO looks at medicines for uterine fibroids, which are common non-cancerous growths in the womb. Only a few drugs are officially approved for fibroids, mainly certain GnRH antagonists, and these medicines are mostly used before surgery because of side effects with long-term use. Other medicines, such as the combined pill, progestin tablets, the hormonal coil (LNG-IUS) and tranexamic acid, are not specifically approved for fibroids but can lighten heavy periods. This can ease symptoms and improve quality of life.",
+   "summary": "This international guidance from FIGO looks at medicines for uterine fibroids, which are common non-cancerous growths in the womb. Only a few drugs are officially approved for fibroids, mainly certain GnRH antagonists, while a related group of medicines (GnRH analogs) is mostly used before surgery because of side effects with long-term use. Other medicines, such as the combined pill, progestin tablets, the hormonal coil (LNG-IUS) and tranexamic acid, are not specifically approved for fibroids but can lighten heavy periods. This can ease symptoms and improve quality of life.",
    "keyPoints": [
     "Only a few medicines are officially approved to treat fibroids, including some GnRH antagonists.",
     "GnRH analogs are mainly used before surgery because of their long-term side effects.",
@@ -41902,7 +41902,7 @@
     "Menstrual changes were described as short-lived and mostly mild.",
     "Many studies had important design limitations, so more longitudinal studies are needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menstrual-cycle",
     "general"
@@ -45541,7 +45541,7 @@
     "HRT may slightly improve overall survival after surgery for epithelial ovarian cancer (low-certainty evidence).",
     "HRT may make little or no difference to progression-free survival (low-certainty evidence).",
     "Researchers are uncertain about effects on quality of life, breast cancer, stroke, mini-stroke and heart attack because the evidence was very low quality.",
-    "The evidence is too limited to show that HRT is very harmful in this group, and better trials are needed."
+    "The evidence is too limited to say whether or not HRT is very harmful in this group, and better trials are needed."
    ],
    "certainty": "low",
    "lifeStages": [
@@ -52135,7 +52135,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/31486548/",
-   "summary": "This Cochrane review pooled 27 trials (4,349 couples) to compare ways of managing unexplained infertility: waiting and trying naturally, ovarian stimulation (OS), intrauterine insemination (IUI), OS with IUI, and IVF/ICSI. Across all couples, there was not enough evidence to show that any treatment gave more live births than waiting. In couples with a poor chance of conceiving naturally, OS with IUI and IVF/ICSI did increase live births. Ovarian stimulation, with or without IUI, raised the chance of multiple pregnancy, though the overall chances stayed low.",
+   "summary": "This Cochrane review pooled 27 trials (4,349 couples) to compare ways of managing unexplained infertility: waiting and trying naturally, ovarian stimulation (OS), intrauterine insemination (IUI), OS with IUI, and IVF/ICSI. Across all couples, there was not enough evidence to show that any treatment gave more live births than waiting. In couples with a poor chance of conceiving naturally, OS with IUI and IVF/ICSI probably increased live births. Ovarian stimulation, with or without IUI, may raise the chance of multiple pregnancy, though the overall chances stayed low.",
    "keyPoints": [
     "Across all couples with unexplained infertility, there was insufficient evidence that OS, IUI, OS-IUI or IVF/ICSI gave more live births than expectant management (low-certainty evidence).",
     "In couples with a poor chance of natural conception, OS-IUI and IVF/ICSI increased live birth compared with waiting (moderate-certainty evidence), with no clear difference between the two.",
@@ -54055,7 +54055,7 @@
     "Maximal aerobic capacity improved by 6-15% after iron supplements, but effects on strength and anaerobic power varied a lot.",
     "Study quality was moderate and most studies had 20 or fewer athletes, limiting how firmly effects could be detected."
    ],
-   "certainty": "moderate",
+   "certainty": "not stated",
    "lifeStages": [
     "menstrual-cycle",
     "general"
@@ -55310,7 +55310,7 @@
     "Studies of night shift or rotating work and fertility outcomes found no significant differences.",
     "The review concludes that high-level evidence is insufficient and better-designed studies are needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menstrual-cycle",
     "conception",
@@ -57654,10 +57654,10 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/31425626/",
-   "summary": "This Cochrane review looked at 15 trials (1071 women) of progestogen tablets taken for part of the menstrual cycle to treat heavy periods. Short-course tablets (taken for 7 to 10 days mid-cycle) and longer-course tablets (days 5 to 26) both reduced bleeding less than other treatments such as tranexamic acid or the levonorgestrel hormonal coil (LNG-IUS). The evidence was low or very low quality, so the authors are uncertain about the findings and they could change with new trials.",
+   "summary": "This Cochrane review looked at 15 trials (1071 women) of progestogen tablets taken for part of the menstrual cycle to treat heavy periods. Short-course tablets (taken for 7 to 10 days mid-cycle) and longer-course tablets (days 5 to 26) may both reduce bleeding less than other treatments such as tranexamic acid or the levonorgestrel hormonal coil (LNG-IUS). The evidence was low or very low quality, so the authors are uncertain about the findings and they could change with new trials.",
    "keyPoints": [
-    "Short-course progestogen tablets reduced menstrual blood loss less than tranexamic acid, danazol or a progesterone-releasing coil.",
-    "Long-course progestogen tablets reduced bleeding less than the LNG-IUS, tranexamic acid or ormeloxifene, but may work similarly to the combined vaginal ring.",
+    "Short-course progestogen tablets may reduce menstrual blood loss less than tranexamic acid, danazol or a progesterone-releasing coil.",
+    "Long-course progestogen tablets may reduce bleeding less than the LNG-IUS, tranexamic acid or ormeloxifene, but may work similarly to the combined vaginal ring.",
     "Breast tenderness and bleeding between periods were more likely with the LNG-IUS than with long-course progestogen tablets.",
     "Evidence quality was low or very low, partly because most women knew which treatment they were getting."
    ],
@@ -63256,7 +63256,7 @@
     "CoQ10 and DHEA improved clinical pregnancy rates compared with standard stimulation alone.",
     "CoQ10 ranked best for live birth rate; DHEA improved embryo implantation, embryo quality and number of eggs retrieved.",
     "Growth hormone ranked second for some outcomes, and TEAS was the least effective of the four add-ons.",
-    "None of the add-ons clearly reduced the chance of an IVF cycle being cancelled."
+    "Several of the add-ons did not clearly reduce the chance of an IVF cycle being cancelled."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -74967,7 +74967,7 @@
     "In women without breast cancer, vaginal estrogen (cream, pessary or ring) and lubricants or moisturisers can usually be used safely.",
     "Safe use of vaginal estrogen after breast cancer has not been tested in long randomised trials, so the guidance reflects clinical consensus."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menopause",
     "post-menopause"
@@ -89946,7 +89946,7 @@
     "No studies looked at diet-only interventions.",
     "Large differences between studies and inconsistent methods mean evidence-based guidelines are not yet possible; better research is needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menopause"
    ],
@@ -92360,7 +92360,7 @@
    "keyPoints": [
     "Anal sphincter injury was linked to higher odds of sexual dysfunction (OR 3.00) and painful sex (OR 1.92).",
     "Episiotomy was linked to painful sex (OR 1.64) but not clearly to sexual dysfunction overall.",
-    "Caesarean birth lowered the odds of painful sex compared with spontaneous vaginal birth, but did not clearly change the odds of sexual dysfunction.",
+    "Caesarean birth was linked to lower odds of painful sex compared with spontaneous vaginal birth, but did not clearly change the odds of sexual dysfunction.",
     "Instrument-assisted vaginal birth was linked to sexual dysfunction (OR 1.70), with no clear difference for painful sex."
    ],
    "certainty": "not stated",
@@ -93190,9 +93190,9 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/38242565/",
-   "summary": "Researchers pooled results from 33 randomised trials testing eight non-drug treatments for period pain with no known cause (primary dysmenorrhoea). All eight, including exercise, herbs, acupuncture, aromatherapy, TENS, topical heat, acupressure and yoga, reduced pain compared with placebo or no treatment. Exercise, acupuncture and topical heat showed the biggest drops in pain scores. The authors say these may help in the short term, but larger and better-quality studies are needed.",
+   "summary": "Researchers pooled results from 33 randomised trials testing eight non-drug treatments for period pain with no known cause (primary dysmenorrhoea). All eight, including exercise, herbs, acupuncture, aromatherapy, TENS, topical heat, acupressure and yoga, may reduce pain compared with placebo or no treatment. Exercise, acupuncture and topical heat showed the biggest drops in pain scores. The authors say these may help in the short term, but larger and better-quality studies are needed.",
    "keyPoints": [
-    "Eight non-drug approaches all reduced period pain compared with placebo or no treatment.",
+    "Eight non-drug approaches may all reduce period pain compared with placebo or no treatment.",
     "Exercise, acupuncture and topical heat probably gave the largest reduction in pain scores.",
     "Exercise and acupuncture are considered potentially effective for short-term treatment.",
     "Larger, higher-quality research is still needed."
@@ -94099,7 +94099,7 @@
     "One trial found heat reduced period pain compared with no treatment.",
     "The results rest on few trials with small numbers of participants, so stronger trials are needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menstrual-cycle"
    ],
@@ -112351,7 +112351,7 @@
     "Breast cancer may be possibly more common in current and recent users, especially women younger than 35.",
     "Long-term use did not lead to a higher risk, and further studies are needed to confirm the findings."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "contraception"
    ],
@@ -127934,10 +127934,10 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/33305822/",
-   "summary": "This Cochrane review pooled 19 trials (2,837 mother-baby pairs) to see whether vitamin D given to breastfed babies, or to breastfeeding mothers, helps prevent low vitamin D and supports bone health. Giving babies 400 IU a day raised their vitamin D levels and lowered the chance of vitamin D insufficiency. Giving vitamin D to breastfeeding mothers also raised babies' levels, but only in groups already at high risk of deficiency. The evidence was low to very low certainty, and there was not enough evidence to say whether either approach improves bone health or prevents rickets.",
+   "summary": "This Cochrane review pooled 19 trials (2,837 mother-baby pairs) to see whether vitamin D given to breastfed babies, or to breastfeeding mothers, helps prevent low vitamin D and supports bone health. Giving babies 400 IU a day may raise their vitamin D levels and lower the chance of vitamin D insufficiency. Giving vitamin D to breastfeeding mothers also raised babies' levels, but only in groups already at high risk of deficiency. The evidence was low to very low certainty, and there was not enough evidence to say whether either approach improves bone health or prevents rickets.",
    "keyPoints": [
-    "Vitamin D at 400 IU a day for breastfed babies, for up to six months, raised their vitamin D levels and reduced vitamin D insufficiency.",
-    "Vitamin D given to breastfeeding mothers raised their babies' vitamin D levels and lowered insufficiency and deficiency, but all these studies were in high-risk populations.",
+    "Vitamin D at 400 IU a day for breastfed babies, for up to six months, may raise their vitamin D levels and reduce vitamin D insufficiency.",
+    "Vitamin D given to breastfeeding mothers may raise their babies' vitamin D levels and lower insufficiency and deficiency, but all these studies were in high-risk populations.",
     "Direct supplements for babies raised infant vitamin D levels more than supplements for mothers did, though the evidence was very uncertain.",
     "There was not enough evidence on bone strength, rickets or side effects such as high blood calcium; certainty was low to very low for all outcomes."
    ],

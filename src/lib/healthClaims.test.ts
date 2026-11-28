@@ -141,3 +141,80 @@ describe('research library: Swiss pregnancy sources', () => {
     expect(k).toMatch(/30 minutes a day/);
   });
 });
+
+// Research round 6: cycle, contraception, IVF and first-period screens.
+describe('cycle screens: FIGO ranges everywhere, PMS evidence not overstated', () => {
+  it('cycle length is judged against FIGO 24-38 days in the overview and the doctor trends', () => {
+    expect(read('src/lib/healthOverview.ts')).toMatch(/CYCLE_RANGE = \{ low: 24, high: 38 \}/);
+    expect(read('src/lib/patientTrends.ts')).toMatch(/p\.value < 24 \|\| p\.value > 38/);
+    expect(read('src/components/doctor/patient/PatientTrends.tsx')).toContain('refBand={[24, 38]}');
+  });
+
+  it('no "magnesium = strongest evidence" for PMS; calcium named (ACOG)', () => {
+    for (const f of [`${D}CyclePhaseNutrition.tsx`, `${D}PMSForecastCard.tsx`]) {
+      const s = read(f);
+      expect(s, f).not.toMatch(/strongest/i);
+      expect(s, f).toMatch(/calcium[^']*better evidence[^']*PMS/i);
+    }
+    expect(read(`${D}CyclePhaseNutrition.tsx`)).not.toMatch(/most evidence-backed/);
+  });
+
+  it('heavy-flow card uses the NHS signs, not "heavy for more than 2-3 days"', () => {
+    const s = read(`${D}PeriodFlowCard.tsx`);
+    expect(s).not.toMatch(/2–3 days/);
+    expect(s).toMatch(/every 1–2 hours/);
+    expect(s).toMatch(/more than 7 days/);
+  });
+});
+
+describe('first-period screen: ACOG adolescent ranges', () => {
+  const s = read(`${D}PreMenstrualDashboard.tsx`);
+  it('teen cycles 21-45 days, periods up to 7 days', () => {
+    expect(s).not.toMatch(/every 21–35 days/);
+    expect(s).toMatch(/every 21–45 days/);
+  });
+  it('when to see a doctor: no period by 15 or 3 years after breast growth, bleeding before 8', () => {
+    expect(s).toMatch(/no period\s+by 15 \(or 3 years after your breasts started to grow\)/);
+    expect(s).toMatch(/bleeding before\s+age 8/);
+    expect(s).not.toMatch(/after a\s+year of regular periods/);
+  });
+  it('sleep follows AASM by age', () => {
+    expect(s).toMatch(/9–12 hours of sleep up to age 12 and 8–10 hours as a teenager/);
+  });
+});
+
+describe('contraception screen', () => {
+  const s = read(`${D}ContraceptionDashboard.tsx`);
+  it('device durations: implant 3 years, hormonal IUD 3/5/8, copper 5-10 (not 12)', () => {
+    expect(s).toMatch(/schedule: 'Every 3 years', description: 'Small rod under the skin of the arm, licensed for 3 years\.'/);
+    expect(s).toMatch(/3, 5 or 8 years depending on the type/);
+    expect(s).toMatch(/schedule: 'Every 5-10 years'/);
+    expect(s).not.toMatch(/up to 12 years|3-5 years/);
+  });
+  it('medicine interactions: enzyme inducers, not "antibiotics" in general (FSRH)', () => {
+    expect(s).not.toMatch(/\(antibiotics, St\. John's Wort\)/);
+    expect(s).toMatch(/rifampicin, some epilepsy medicines and St John's wort\. Most antibiotics do not\./);
+  });
+  it('shows ring-out / patch-off rules and what the effectiveness range means', () => {
+    expect(s).toContain('RING_OUT_RULE');
+    expect(s).toContain('PATCH_OFF_RULE');
+    expect(s).toContain('EFFECTIVENESS_NOTE');
+  });
+});
+
+describe('IVF screens', () => {
+  const n = read(`${D}IVFNutrition.tsx`);
+  const p = read(`${D}ivfPhases.ts`);
+  it('no protein g/kg targets, no 30 ng/mL vitamin D target, no 2.5-3 L water', () => {
+    expect(n).not.toMatch(/g\/kg/);
+    expect(n).not.toMatch(/30\+ ng\/mL/);
+    expect(n).not.toMatch(/2\.5–3 L/);
+  });
+  it('OHSS warning signs say to call the clinic straight away', () => {
+    for (const s of [n, p]) expect(s).toMatch(/Call your clinic straight away[^']*shortness of breath: these can be signs of OHSS/);
+  });
+  it('no CoQ10 advice, no "fast from midnight", single embryo is the usual', () => {
+    expect(p).not.toMatch(/CoQ10|Fast from midnight|One or two embryos|painless/);
+    expect(p).toMatch(/Usually one embryo/);
+  });
+});

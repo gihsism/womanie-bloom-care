@@ -16,7 +16,7 @@ const ALWAYS_TIPS = [
     key: 'mediterranean',
     label: 'Mediterranean pattern',
     amount: 'Daily baseline',
-    rationale: 'The largest observational + RCT evidence base for IVF success — olive oil, fish, whole grains, legumes, vegetables, modest dairy, minimal processed meat / sugar / refined grains.',
+    rationale: 'Linked to better IVF results in some observational studies; trials are few and the evidence is weak (ESHRE). A healthy pattern either way: olive oil, fish, whole grains, legumes, vegetables, modest dairy, little processed meat / sugar / refined grains.',
     food: 'Olive oil instead of butter; fish 2-3×/week; veggies + legumes at lunch + dinner; whole-grain bread / pasta / rice.',
   },
   {
@@ -29,8 +29,8 @@ const ALWAYS_TIPS = [
   {
     key: 'protein',
     label: 'Protein',
-    amount: '~1.2 g/kg/day',
-    rationale: 'Egg quality + ovarian response are linked to adequate protein in trials. Aim for steady intake across the day.',
+    amount: 'Some at every meal',
+    rationale: 'Part of a balanced diet. No particular amount of protein has been shown to improve egg quality or IVF results. Aim for steady intake across the day.',
     food: 'Eggs, fish, poultry, legumes, dairy; distribute across meals.',
   },
 ];
@@ -40,18 +40,18 @@ const PHASE_TIPS: Record<NonNullable<Phase>, { headline: string; bullets: string
     headline: 'Preparation: 3+ months out from transfer.',
     bullets: [
       'Begin or continue your prenatal vitamin with folate now',
-      'Start tapering caffeine to ≤200 mg/day (one 12oz coffee)',
-      'No alcohol from this point — the evidence on even moderate intake during IVF is consistently negative',
-      'Optimise vitamin D (test if you haven\'t): aim 30+ ng/mL',
+      'Keep caffeine moderate: up to 200 mg a day, about 1-2 cups of coffee (EFSA, BLV)',
+      'Best to stop alcohol from this point: it is advised against when trying to get pregnant, and some studies link it to lower IVF success',
+      'Vitamin D: the everyday amount is 600 IU a day (BLV); if a test shows a low level, your doctor will advise you',
       'Strength + cardio 4-5×/week unless your clinician says otherwise',
     ],
   },
   stimulation: {
     headline: 'Stimulation: focus on hydration and steady protein.',
     bullets: [
-      '2.5–3 L water/day to help with bloating + reduce OHSS-related thirst',
+      'Drink to thirst, about 1.5–2 L a day (BLV). Call your clinic straight away if you get severe tummy pain or swelling, sickness or vomiting, much less urine, sudden weight gain or shortness of breath: these can be signs of OHSS (HFEA, RCOG)',
       'Electrolytes (broth, coconut water, sports drinks) if bloating intensifies',
-      'Higher protein (~1.5 g/kg) — some clinicians recommend during stim for ovarian support',
+      'Steady protein at each meal; no extra amount has been shown to help the ovaries',
       'Avoid strenuous core exercise (twisted ovaries risk); walking + gentle yoga are fine',
     ],
   },
@@ -59,7 +59,7 @@ const PHASE_TIPS: Record<NonNullable<Phase>, { headline: string; bullets: string
     headline: 'Trigger to retrieval: rest the digestive system.',
     bullets: [
       'Light meals the day before retrieval — bloating is worst here',
-      'Hydrate well but stop fluids 6+ hours before anaesthesia per your clinic\'s instructions',
+      'Follow your clinic\'s fasting instructions before the anaesthetic exactly (often no food for about 6 hours, clear drinks until about 2 hours before)',
       'Electrolyte focus, lower-residue foods (white rice, plain bread, broth)',
     ],
   },

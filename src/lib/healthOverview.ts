@@ -171,7 +171,8 @@ export function labMetrics(rows: LabRow[]): OverviewMetric[] {
 
 // --------------------------------------------------------- cycle length
 
-export const CYCLE_RANGE = { low: 21, high: 35 };
+// FIGO 2018 normal frequency, as in cycleInsights.ts and CycleExplainedCard.
+export const CYCLE_RANGE = { low: 24, high: 38 };
 
 /** Days between consecutive period starts (gaps outside 15–90 days are missed logs). */
 export function cycleMetric(periodStarts: unknown[]): OverviewMetric | null {

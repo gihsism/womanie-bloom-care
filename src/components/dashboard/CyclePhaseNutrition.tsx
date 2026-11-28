@@ -53,7 +53,7 @@ const GUIDANCE: Record<Phase, PhaseGuidance> = {
       'Lean protein for tissue repair',
       'Cruciferous vegetables (broccoli, kale, cauliflower) — DIM compound aids estrogen detox',
     ],
-    rationale: 'Estrogen peaks across this phase. Eating to support its healthy metabolism reduces some PMS-window symptoms later.',
+    rationale: 'Estrogen peaks across this phase. A varied diet with fibre and vegetables supports overall health across the cycle.',
   },
   ovulation: {
     label: 'Ovulation',
@@ -70,13 +70,13 @@ const GUIDANCE: Record<Phase, PhaseGuidance> = {
     label: 'Luteal phase',
     description: 'Post-ovulation — PMS prevention through diet.',
     focus: [
-      'Magnesium-rich foods (almonds, pumpkin seeds, dark chocolate, leafy greens) — strongest evidence for PMS symptom relief',
+      'Magnesium-rich foods (almonds, pumpkin seeds, dark chocolate, leafy greens) — small studies suggest they may ease PMS; results are mixed',
       'Complex carbs (oats, sweet potato, brown rice) for stable mood',
       'Steady protein with each meal — blood-sugar dips amplify PMS irritability',
       'Reduce caffeine + alcohol if you\'re sensitive — both can worsen breast tenderness, anxiety, sleep',
-      'Calcium-rich foods — some evidence for PMS support',
+      'Calcium-rich foods (dairy, fortified plant drinks, tofu) — calcium has some of the better evidence for easing PMS (ACOG)',
     ],
-    rationale: 'Progesterone rises then drops in the last 5–7 days. Stable blood sugar + magnesium + B6 are the most evidence-backed nutritional levers for PMS.',
+    rationale: 'Progesterone rises then drops in the last 5–7 days. Among food approaches, calcium has some of the better evidence for PMS; magnesium and vitamin B6 have mixed results (ACOG). Ask a pharmacist before taking supplements.',
   },
 };
 

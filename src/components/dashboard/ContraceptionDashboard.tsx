@@ -25,7 +25,7 @@ import {
 import { cn } from '@/lib/utils';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
 import { parsePillStatus, yesterdayPillUnanswered, pillPackDay, type PillStatus } from '@/lib/pillLog';
-import { PILL_TYPES, DEFAULT_PILL_TYPE, isPillType, hoursLateSince, vomitWindowHours, type PillType } from '@/lib/missedPill';
+import { PILL_TYPES, DEFAULT_PILL_TYPE, isPillType, hoursLateSince, vomitWindowHours, RING_OUT_RULE, PATCH_OFF_RULE, EFFECTIVENESS_NOTE, type PillType } from '@/lib/missedPill';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MissedPillGuidance from './MissedPillGuidance';
 
@@ -34,9 +34,9 @@ const CONTRACEPTION_METHODS = [
   { id: 'patch', label: 'Patch', emoji: '🩹', effectiveness: '91-99%', schedule: 'Weekly', description: 'Change weekly for 3 weeks, then 1 week off.' },
   { id: 'ring', label: 'Vaginal Ring', emoji: '⭕', effectiveness: '91-99%', schedule: 'Monthly', description: 'Insert for 3 weeks, remove for 1 week.' },
   { id: 'injection', label: 'Injection (Depo)', emoji: '💉', effectiveness: '94-99%', schedule: 'Every 3 months', description: 'Get a shot every 12-13 weeks.' },
-  { id: 'implant', label: 'Implant', emoji: '📍', effectiveness: '99%+', schedule: 'Every 3-5 years', description: 'Small rod under skin, lasts 3-5 years.' },
-  { id: 'iud-hormonal', label: 'Hormonal IUD', emoji: '🔷', effectiveness: '99%+', schedule: 'Every 3-8 years', description: 'T-shaped device, lasts 3-8 years depending on brand.' },
-  { id: 'iud-copper', label: 'Copper IUD', emoji: '🔶', effectiveness: '99%+', schedule: 'Every 10-12 years', description: 'Non-hormonal, lasts up to 12 years.' },
+  { id: 'implant', label: 'Implant', emoji: '📍', effectiveness: '99%+', schedule: 'Every 3 years', description: 'Small rod under the skin of the arm, licensed for 3 years.' },
+  { id: 'iud-hormonal', label: 'Hormonal IUD', emoji: '🔷', effectiveness: '99%+', schedule: 'Every 3-8 years', description: 'T-shaped device, lasts 3, 5 or 8 years depending on the type. Your insertion card gives the date.' },
+  { id: 'iud-copper', label: 'Copper IUD', emoji: '🔶', effectiveness: '99%+', schedule: 'Every 5-10 years', description: 'Non-hormonal, lasts 5 to 10 years depending on the type. Your insertion card gives the date.' },
 ];
 
 const SIDE_EFFECTS = [
@@ -636,13 +636,23 @@ export default function ContraceptionDashboard({ onNavigateToDoctorChat }: Contr
               )}
             </span>
           </div>
+          {(selectedMethod === 'ring' || selectedMethod === 'patch') && (
+            <div className="flex items-start gap-2">
+              <span className="text-primary">•</span>
+              <span data-testid="ring-patch-rule">{selectedMethod === 'ring' ? RING_OUT_RULE : PATCH_OFF_RULE}</span>
+            </div>
+          )}
+          <div className="flex items-start gap-2">
+            <span className="text-primary">•</span>
+            <span>{EFFECTIVENESS_NOTE}</span>
+          </div>
           <div className="flex items-start gap-2">
             <span className="text-primary">•</span>
             <span>Vomiting or diarrhea within {vomitWindowHours(pillType)} hours of taking a pill may reduce effectiveness.</span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-primary">•</span>
-            <span>Some medications (antibiotics, St. John's Wort) can interfere with hormonal contraception.</span>
+            <span>Some medicines can make the pill, patch, ring or implant less effective, for example rifampicin, some epilepsy medicines and St John's wort. Most antibiotics do not. Ask your pharmacist when you start a new medicine.</span>
           </div>
         </div>
       </Card>

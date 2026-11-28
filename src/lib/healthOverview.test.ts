@@ -122,7 +122,7 @@ describe('labMetrics', () => {
 });
 
 describe('cycleMetric', () => {
-  it('cycle length between consecutive starts, judged against 21–35', () => {
+  it('cycle length between consecutive starts, judged against 24–38 (FIGO)', () => {
     const m = cycleMetric(['2026-01-01', '2026-01-29', '2026-03-10'])!;
     expect(m.points).toEqual([{ date: '2026-01-01', value: 28 }, { date: '2026-01-29', value: 40 }]);
     expect(m.last).toEqual({ display: '40', date: '2026-01-29' });

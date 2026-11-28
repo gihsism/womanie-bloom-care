@@ -380,6 +380,90 @@ grade, e.g. `pmid-30342643`, `pmid-28237870`, `pmid-29910107`,
 `pmid-35325124`, `pmid-25864059`, `pmid-36449274` (could be "not stated"
 under a strict reading).
 
+## Round 6 (2026-11-28)
+
+### Cycle, contraception, IVF and first-period screens: numeric claims
+
+Checked against free sources: FIGO 2018 menstrual definitions, NHS
+("Heavy periods", contraception pages), ACOG FAQ "Premenstrual Syndrome",
+ACOG CO 651 (menstruation in girls and adolescents), AASM sleep
+consensus, FSRH CEU "Recommended actions after incorrect use of CHC"
+(2020/2021) and FSRH "Drug interactions with hormonal contraception",
+NuvaRing and Evra package leaflets (DE/EU text), Mirena label (8 years),
+HFEA and RCOG OHSS patient pages, ESHRE lifestyle evidence, BLV and EFSA
+for fluids, caffeine and vitamin D.
+
+| Where | Claim | Now |
+|---|---|---|
+| `healthOverview` (Health overview tile), `patientTrends` + doctor `PatientTrends` | cycle length judged against 21-35 days | FIGO 24-38, the same range `cycleInsights` and `CycleExplainedCard` already use |
+| `CyclePhaseNutrition`, `PMSForecastCard` | magnesium "strongest evidence for PMS"; "magnesium + B6 the most evidence-backed levers"; follicular eating "reduces PMS later"; "one extra hour of sleep helps" | calcium has some of the better evidence, magnesium and B6 mixed (ACOG); ask a pharmacist before supplements; no unsupported claims |
+| `PeriodFlowCard` | "heavy flow for more than 2-3 days" worth flagging | NHS signs: pad/tampon every 1-2 hours, clots over ~2.5 cm, bleeding more than 7 days, sudden change |
+| `PreMenstrualDashboard` | "periods last 3-7 days, every 21-35 days"; sleep 9-11 h; help line "bleeding ... after a year of regular periods" | first years: up to 7 days, every 21-45 days, often irregular (ACOG); menarche about 12; sleep 9-12 h to age 12, 8-10 h as a teen (AASM); see a doctor for bleeding before 8, a period over 7 days, more than 3 months without one, no period by 15 or 3 years after breast growth |
+| `ContraceptionDashboard` methods | implant "3-5 years"; copper IUD "10-12 years, up to 12"; ranges like "91-99%" unexplained | implant licensed 3 years; hormonal IUD 3, 5 or 8 years by type; copper 5-10 years by type; insertion card gives the date; new line: lower number = typical use, higher = perfect use (NHS, FSRH). Percentages unchanged (they match NHS typical / perfect use) |
+| `ContraceptionDashboard` reminders | "antibiotics, St John's Wort can interfere" | enzyme inducers (rifampicin, some epilepsy medicines, St John's wort); most antibiotics do not (FSRH) |
+| `ContraceptionDashboard` (new, ring / patch users) | no rule for a ring out or a patch off | ring under 3 hours: rinse and put back; patch under 24 hours: stick back or new one; longer: 7 days of condoms, ask a pharmacist about EC (`missedPill.ts`; leaflets are stricter than FSRH's 48 h and win) |
+| `IVFNutrition` | Mediterranean diet "largest RCT evidence base"; protein 1.2-1.5 g/kg; vitamin D "aim 30+ ng/mL"; water 2.5-3 L "to reduce OHSS thirst"; "stop fluids 6+ h"; alcohol evidence "consistently negative" | weak evidence (ESHRE); protein at each meal, no proven amount; BLV 600 IU, doctor advises on a low test; drink to thirst ~1.5-2 L plus OHSS warning signs (call the clinic straight away); clinic fasting rules (often food 6 h, clear drinks 2 h); alcohol advised against, some studies link it to lower success |
+| `ivfPhases` | "start CoQ10"; "fast from midnight"; "one or two embryos"; transfer "painless" | folic acid, ask the clinic before other supplements; clinic fasting rules; usually one embryo; feels like a smear test; OHSS warning signs after retrieval |
+
+The IVF screens make no success-rate percentages (checked); the TTC
+"see a doctor after 12 / 6 months" text was already sourced (ASRM 2023).
+Missed-pill rules were checked on 2026-11-27 and are unchanged. Tests:
+`src/lib/healthClaims.test.ts`, `src/lib/missedPill.test.ts`.
+
+### Ask AI system prompt
+
+`buildChatSystemPrompt` (`api/_lib/research/chat-prompt.ts`) had the
+dose rules only in the sources block (`MEDICINE_RULES`), said "consult a
+healthcare professional" without naming who, and nothing about Swiss
+sources. Added three rules: name who to ask (doctor or gynaecologist,
+midwife, pharmacist) and never diagnose; never say how much of a medicine
+or supplement to take or when to change it, except reporting a dose a
+numbered source states with "check the label or ask your pharmacist or
+doctor"; Womanie is a Swiss app, so for insurance, vaccine, nutrition and
+care questions prefer BAG, BLV, SGGG and Swissmedic sources, say when a
+figure is from another country, emergency number 144. Note: the
+"source-stated dose" exception from the November QA is kept on purpose (a
+flat "never give doses" would undo it). Tests:
+`api/_lib/research/chat-prompt.test.ts`.
+
+### Summary content check, next 150 items
+
+The round-2 exposure list was used up (all 623 items with any top-5
+exposure were done). New ranking: top-10 hybrid hits for 268 questions
+(138 new everyday questions on periods,
+contraception, IVF, first periods and the other stages, plus the audit and eval questions), weighted by
+position, minus everything checked before. The first 150 with PubMed
+abstracts were checked (4 Swiss hand-written guidance items skipped; they
+were checked in rounds 3-5). 127 fair. 30 fixes in 23 items, text only
+(14 re-embedded offline; label-only changes need no re-embed):
+
+- Certainty "low"/"moderate" -> "not stated" where the abstract grades
+  nothing: `pmid-39419587`, `pmid-30818414`, `pmid-30348046`,
+  `pmid-40979395`, `pmid-37966517`, `pmid-30389956`, `pmid-29694506`,
+  `pmid-40992413`, `pmid-39536912` (study-quality checklist, not GRADE).
+- Hedges restored to match the GRADE level: `pmid-31486548` (stimulation
+  with IUI / IVF, "probably", "may"), `pmid-38242565` (non-drug period
+  pain treatments, "may"), `pmid-31425626` (progestogen tablets for heavy
+  periods, 3 places), `pmid-33305822` (vitamin D for babies, 3 places),
+  `pmid-37815094` (tighter diabetes control, "probably"),
+  `pmid-39868519` (caesarean myomectomy), `pmid-40476466` (contraception
+  and HIV; implant vs copper IUD moderate, not high).
+- Wrong number or scope: `pmid-30742315` (combined pill for heavy
+  periods: 12% to 77%, not "about 77%"), `pmid-40335351` (all 13
+  recommendations strong, not "most"), `pmid-40927887` (FIGO fibroids:
+  GnRH analogs, not the approved antagonists, are mainly used before
+  surgery), `pmid-37464357` ("several" add-ons, not "none"),
+  `pmid-34339927` ("some", not "many").
+- Causal wording on observational data: `pmid-34536325` (caesarean
+  "linked to" lower odds of painful sex). One-sided reassurance:
+  `pmid-31989588` (HRT evidence too limited "to say whether or not" it is
+  very harmful).
+
+Left as is: 33 judgement calls (labels where the abstract grades a range
+or only the main outcome), e.g. `pmid-30064002`, `pmid-37753821`,
+`pmid-27153744`, `pmid-28694152`, `pmid-34339416`, `pmid-40803331`,
+`pmid-28432791`, `pmid-41689846`, `pmid-39887989`.
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed

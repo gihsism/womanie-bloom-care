@@ -96,7 +96,7 @@ export default function PatientTrends({ patientId, cached, onLoaded }: PatientTr
 
   return (
     <div className="space-y-3">
-      {t.cycle && <LineTrendCard title="Cycle length" trend={t.cycle} valueLabel="Cycle starting" refBand={[21, 35]} />}
+      {t.cycle && <LineTrendCard title="Cycle length" trend={t.cycle} valueLabel="Cycle starting" refBand={[24, 38]} />}
       {t.period && <LineTrendCard title="Period length" trend={t.period} valueLabel="Period starting" />}
       {t.weight && <LineTrendCard title="Weight" trend={t.weight} valueLabel="Date" decimals={1} />}
       {t.bp && <BloodPressureCard trend={t.bp} />}

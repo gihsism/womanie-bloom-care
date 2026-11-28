@@ -170,8 +170,8 @@ const PeriodFlowCard = ({ lastPeriodStart }: PeriodFlowCardProps) => {
       </div>
       <p className="text-xs text-muted-foreground -mt-1">
         Flow per day across your last {cycles.length} {cycles.length === 1 ? 'cycle' : 'cycles'}.
-        Heavy flow lasting more than 2–3 days, or any cycle with sudden flow changes, is worth
-        flagging with your provider.
+        Changing a pad or tampon every 1–2 hours, clots bigger than about 2.5 cm, bleeding for
+        more than 7 days, or a sudden change in your flow is worth raising with your doctor (NHS).
       </p>
 
       {cycles.map((cycle, ci) => (
