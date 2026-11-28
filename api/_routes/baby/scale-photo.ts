@@ -2,8 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from '../../_lib/auth.js';
 import { checkAndConsume } from '../../_lib/ratelimit.js';
 import { withSentry } from '../../_lib/sentry.js';
-import { callAnthropicWithRetry, SONNET_MODEL, SONNET_NO_THINKING, replyText, type ClaudeReply } from '../../_lib/anthropic.js';
-import { parseScaleReply, parseScaleRequest, SCALE_PROMPT, SCALE_SCHEMA } from '../../_lib/scale-photo.js';
+import { parseScaleRequest, readScalePhoto } from '../../_lib/scale-photo.js';
 
 // POST /api/baby/scale-photo - read the weight on a photo of a baby scale.
 //
@@ -15,8 +14,6 @@ import { parseScaleReply, parseScaleRequest, SCALE_PROMPT, SCALE_SCHEMA } from '
 // retries, thinking off). The photo is sent to Claude and not stored
 // anywhere; nothing is written to the database here: the app pre-fills
 // the number and saves only after she taps Save.
-
-type ClaudeReplyWithStop = ClaudeReply & { stop_reason?: string };
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -36,22 +33,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const resp = await callAnthropicWithRetry(apiKey, {
-      model: SONNET_MODEL,
-      max_tokens: 300,
-      thinking: SONNET_NO_THINKING,
-      output_config: { format: { type: 'json_schema', schema: SCALE_SCHEMA } },
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'image', source: { type: 'base64', media_type: parsed.mediaType, data: parsed.image } },
-          { type: 'text', text: SCALE_PROMPT },
-        ],
-      }],
-    });
-    const data = (await resp.json()) as ClaudeReplyWithStop;
-    if (data.stop_reason === 'refusal') return res.status(200).json({ weight_kg: null, confidence: 0 });
-    return res.status(200).json(parseScaleReply(replyText(data)));
+    return res.status(200).json(await readScalePhoto(apiKey, parsed.image, parsed.mediaType));
   } catch (err) {
     console.error('baby/scale-photo failed:', (err as Error)?.message);
     return res.status(502).json({ error: 'The photo could not be read right now. Type the weight in instead.' });

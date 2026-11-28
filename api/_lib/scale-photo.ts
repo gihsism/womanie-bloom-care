@@ -3,6 +3,8 @@
 // api/_routes/baby/scale-photo.ts. The photo is never stored: only the
 // number goes back to the app, and she confirms it before anything is saved.
 
+import { callAnthropicWithRetry, SONNET_MODEL, SONNET_NO_THINKING, replyText, type ClaudeReply } from './anthropic.js';
+
 export const SCALE_MEDIA_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
 export type ScaleMediaType = typeof SCALE_MEDIA_TYPES[number];
 
@@ -72,4 +74,27 @@ export function parseScaleReply(text: string | undefined | null): ScaleReading {
   const c = typeof o.confidence === 'number' && Number.isFinite(o.confidence) ? Math.min(1, Math.max(0, o.confidence)) : 0;
   if (c === 0) return none;
   return { weight_kg: Math.round(w * 1000) / 1000, confidence: Math.round(c * 100) / 100 };
+}
+
+/**
+ * Send the photo to Claude and turn the answer into a reading (the model
+ * call behind POST /api/baby/scale-photo). Throws when the API call fails.
+ */
+export async function readScalePhoto(apiKey: string, image: string, mediaType: ScaleMediaType): Promise<ScaleReading> {
+  const resp = await callAnthropicWithRetry(apiKey, {
+    model: SONNET_MODEL,
+    max_tokens: 300,
+    thinking: SONNET_NO_THINKING,
+    output_config: { format: { type: 'json_schema', schema: SCALE_SCHEMA } },
+    messages: [{
+      role: 'user',
+      content: [
+        { type: 'image', source: { type: 'base64', media_type: mediaType, data: image } },
+        { type: 'text', text: SCALE_PROMPT },
+      ],
+    }],
+  });
+  const data = (await resp.json()) as ClaudeReply & { stop_reason?: string };
+  if (data.stop_reason === 'refusal') return { weight_kg: null, confidence: 0 };
+  return parseScaleReply(replyText(data));
 }

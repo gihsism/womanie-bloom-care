@@ -13,7 +13,7 @@ import handler from './scale-photo';
 import { getAuthUser } from '../../_lib/auth.js';
 import { checkAndConsume } from '../../_lib/ratelimit.js';
 import { callAnthropicWithRetry, SONNET_MODEL, SONNET_NO_THINKING } from '../../_lib/anthropic.js';
-import { parseScaleReply, parseScaleRequest, MAX_IMAGE_BASE64 } from '../../_lib/scale-photo';
+import { parseScaleReply, parseScaleRequest, readScalePhoto, MAX_IMAGE_BASE64 } from '../../_lib/scale-photo';
 import { ROUTES } from '../../router';
 
 const USER = { id: 'user_s1', email: 's@test.com', sessionId: 's' };
@@ -127,5 +127,37 @@ describe('POST /api/baby/scale-photo', () => {
     const r2 = mockRes(); await handler(req('POST', { image: IMG, mediaType: 'image/jpeg' }), r2);
     expect(r2._status).toBe(502);
     expect((r2._body as { error: string }).error).toMatch(/Type the weight in/);
+  });
+});
+
+// What the real model (claude-sonnet-5-5, this prompt) answered for synthetic
+// scale photos on 2026-11-28, one live call each. The model is mocked here;
+// these pin what the app shows for each answer.
+describe('readScalePhoto with the replies the real model gave', () => {
+  const none = { weight_kg: null, confidence: 0 };
+  const cases: Array<[string, string, { weight_kg: number | null; confidence: number }]> = [
+    ['4.62 kg display', '{"weight_kg":4.62,"confidence":0.97}', { weight_kg: 4.62, confidence: 0.97 }],
+    ['4620 g display (grams converted by the model)', '{"weight_kg":4.62,"confidence":0.97}', { weight_kg: 4.62, confidence: 0.97 }],
+    ['10.2 lb display (10.2 lb = 4.627 kg)', '{"weight_kg":4.63,"confidence":0.97}', { weight_kg: 4.63, confidence: 0.97 }],
+    ['3,85 kg display (comma decimal)', '{"weight_kg":3.85,"confidence":0.97}', { weight_kg: 3.85, confidence: 0.97 }],
+    ['10 lb 3 oz display', '{"weight_kg":4.621,"confidence":0.97}', { weight_kg: 4.621, confidence: 0.97 }],
+    ['3.21 kg with HOLD and a smaller MEM 2.98', '{"weight_kg":3.21,"confidence":0.93}', { weight_kg: 3.21, confidence: 0.93 }],
+    ['blurry display', '{"weight_kg":null,"confidence":0}', none],
+    // The model reads TARE 0.00 as a confident 0 kg: the 0.5 kg floor turns it into "could not read".
+    ['TARE 0.00 display', '{"weight_kg":0.0,"confidence":0.9}', none],
+    ['clock showing 12:45', '{"weight_kg":null,"confidence":0}', none],
+    ['photo with no scale', '{"weight_kg":null,"confidence":0}', none],
+  ];
+  for (const [name, reply, want] of cases) {
+    it(name, async () => {
+      vi.mocked(callAnthropicWithRetry).mockReset().mockResolvedValue(claude(reply));
+      expect(await readScalePhoto('k', IMG, 'image/jpeg')).toEqual(want);
+    });
+  }
+  it('a weight returned in grams or pounds by mistake never pre-fills a wrong kg value when out of range', async () => {
+    vi.mocked(callAnthropicWithRetry).mockReset().mockResolvedValue(claude('{"weight_kg":4620,"confidence":0.9}'));
+    expect(await readScalePhoto('k', IMG, 'image/jpeg')).toEqual(none);
+    vi.mocked(callAnthropicWithRetry).mockReset().mockResolvedValue(claude('{"weight_kg":-0.02,"confidence":0.8}'));
+    expect(await readScalePhoto('k', IMG, 'image/jpeg')).toEqual(none);
   });
 });
