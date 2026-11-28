@@ -1,5 +1,19 @@
 import { describe, it, expect } from 'vitest';
-import { FOLLOWUPS_CLOSE, FOLLOWUPS_OPEN, FOLLOWUPS_PROMPT, parseFollowUps, visibleWhileStreaming } from './chat-followups';
+import { FOLLOWUPS_CLOSE, FOLLOWUPS_OPEN, FOLLOWUPS_PROMPT, freshFollowUps, parseFollowUps, visibleWhileStreaming } from './chat-followups';
+
+describe('freshFollowUps', () => {
+  it('drops a follow-up she already asked in this chat (case and punctuation aside)', () => {
+    expect(freshFollowUps(['Is coffee safe in pregnancy?', 'What about green tea?', 'Is decaf fine?'], ['is coffee safe in pregnancy', null]))
+      .toEqual(['What about green tea?', 'Is decaf fine?']);
+  });
+  it('fewer than 2 left: no chips', () => {
+    expect(freshFollowUps(['Is coffee safe in pregnancy?', 'What about green tea?'], ['Is coffee safe in pregnancy?'])).toEqual([]);
+  });
+  it('the prompt asks for her current stage and no repeats', () => {
+    expect(FOLLOWUPS_PROMPT).toMatch(/life stage she is in now/);
+    expect(FOLLOWUPS_PROMPT).toMatch(/never repeat a question she already asked/);
+  });
+});
 
 const ANSWER = 'Your ferritin of 9 ng/mL is low [1]. Low iron stores are common after heavy periods.';
 const tail = (lines: string[]) => `\n\n${FOLLOWUPS_OPEN}\n${lines.join('\n')}\n${FOLLOWUPS_CLOSE}`;

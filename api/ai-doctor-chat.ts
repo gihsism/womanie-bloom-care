@@ -11,7 +11,7 @@ import { assembleChatSystemPrompt, buildChatContext } from './_lib/chat-context.
 import { SOURCES_FOOTER_MARK, formatSourcesFooter, stripUnknownCitations } from './_lib/research/library.js';
 import { selectChatEvidenceForTurn } from './_lib/research/chat-prompt.js';
 import { checkCitations, evidenceTexts } from './_lib/research/citation-check.js';
-import { parseFollowUps, visibleWhileStreaming } from './_lib/chat-followups.js';
+import { freshFollowUps, parseFollowUps, visibleWhileStreaming } from './_lib/chat-followups.js';
 import { recordsUsedInAnswer } from './_lib/record-citations.js';
 
 export const config = {
@@ -234,7 +234,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     if (assistantText) {
       // The follow-up tail goes first, so the citation check and the saved
       // reply see only the answer (a missing or broken tail = no chips).
-      const { text: answerText, followUps } = parseFollowUps(assistantText);
+      const parsed = parseFollowUps(assistantText);
+      const answerText = parsed.text;
+      // A chip that re-asks one of her questions in this chat is dropped.
+      const followUps = freshFollowUps(parsed.followUps,
+        messages.filter((m) => m.role === 'user').map((m) => m.content));
       // Drop any [n] that is not one of the sources we gave the model, so
       // the saved reply never points at a source that does not exist.
       // Then drop any [n] whose sentence names a medicine, a number or an

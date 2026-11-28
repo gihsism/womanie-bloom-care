@@ -36,7 +36,7 @@ ${FOLLOWUPS_OPEN}
 - <a short follow-up question she might ask next>
 - <another one>
 ${FOLLOWUPS_CLOSE}
-Give 2 or 3 questions, each under 12 words, written as HER question ("What foods raise my ferritin?"), in the language of her message. No citations, no doses, no numbers she has not mentioned. Do not mention this block in the answer.`;
+Give 2 or 3 questions, each under 12 words, written as HER question ("What foods raise my ferritin?"), in the language of her message. No citations, no doses, no numbers she has not mentioned. Keep them to the life stage she is in now, and never repeat a question she already asked in this chat. Do not mention this block in the answer.`;
 
 export interface ParsedFollowUps {
   /** The answer with any tail (or stray marker) removed. */
@@ -104,6 +104,18 @@ export function parseFollowUps(raw: string): ParsedFollowUps {
   }
   // A single usable question is not enough to be worth chips.
   return { text: before, followUps: followUps.length >= 2 ? followUps : [] };
+}
+
+const sameQuestion = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+
+/**
+ * Follow-ups minus any she has already asked in this chat (the chip would
+ * just re-ask it). Fewer than 2 left = no chips, as in parseFollowUps.
+ */
+export function freshFollowUps(followUps: string[], askedBefore: Array<string | null | undefined>): string[] {
+  const asked = new Set(askedBefore.filter((q): q is string => typeof q === 'string').map(sameQuestion));
+  const fresh = followUps.filter((q) => !asked.has(sameQuestion(q)));
+  return fresh.length >= 2 ? fresh : [];
 }
 
 /**

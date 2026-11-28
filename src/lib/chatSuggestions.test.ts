@@ -116,3 +116,59 @@ describe('starter question rules', () => {
     expect(momentQuestion({ lifeStage: 'ivf', hasContext: true, ivfPhase: 'unknown-phase' })).toBeNull();
   });
 });
+
+// Round 13 chip audit: every starter chip each stage can show, over every
+// moment it can be in, with and without records, a visit and flagged labs.
+describe('starter chip audit, every stage', () => {
+  const ALL_PHASES = ['menstrual', 'follicular', 'ovulation', 'luteal', 'late-luteal'] as const;
+  const variants = (stage: string | null) => {
+    const out: string[][] = [];
+    for (const hasContext of [true, false])
+      for (const hasUpcomingVisit of [true, false])
+        for (const flaggedLabs of [[], [{ title: 'Ferritin', status: 'low' }], [{ title: 'Beta hCG', status: 'high' }, { title: 'TSH', status: 'high' }]])
+          for (const week of [null, 6, 16, 24, 31, 38])
+            for (const pp of [null, 1, 4, 9, 30])
+              for (const ivfPhase of [null, ...Object.keys(IVF_PHASE_QUESTIONS)])
+                for (const cyclePhase of [null, ...ALL_PHASES])
+                  out.push(pickSuggestions({
+                    lifeStage: stage, hasContext, hasUpcomingVisit, hasFlaggedResults: flaggedLabs.length > 0, flaggedLabs,
+                    pregnancyWeek: week, postpartumWeeks: pp, ivfPhase, cyclePhase,
+                  }));
+    return out;
+  };
+  // Words that belong to one stage only: a chip with them anywhere else is stale.
+  const OWN_WORDS: Record<string, RegExp> = {
+    pregnancy: /\b(week \d+|anatomy scan|glucose test|labour|swelling in my feet|pregnancy progressing)\b/i,
+    postpartum: /\b(after birth|since birth|postpartum|6-week check-up|exercising again)\b/i,
+    ivf: /\b(ivf|stimulation|trigger|egg collection|embryo|two-week wait)\b/i,
+    'pre-menstrual': /\b(first period|period kit)\b/i,
+    menopause: /\bmenopause transition\b/i,
+  };
+  const norm = (q: string) => q.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+
+  for (const stage of [...LIFE_STAGES, null]) {
+    it(`${stage ?? 'no stage'}: 4 distinct chips, none from another stage, all answerable`, () => {
+      for (const out of variants(stage)) {
+        expect(out).toHaveLength(MAX_SUGGESTIONS);
+        expect(new Set(out.map(norm)).size, out.join(' | ')).toBe(out.length);
+        for (const q of out) {
+          for (const [own, re] of Object.entries(OWN_WORDS)) {
+            if (own !== stage) expect(re.test(q), `${stage}: "${q}" belongs to ${own}`).toBe(false);
+          }
+          // Ask AI gets no period history and no temperature chart.
+          expect(q).not.toMatch(/based on my history|temperature chart|\bbbt\b/i);
+          expect(q.length).toBeLessThanOrEqual(90);
+        }
+      }
+    });
+  }
+
+  it('a high hCG is not an opening question while pregnant, in IVF or after birth', () => {
+    const hcg = { title: 'Beta hCG', status: 'high' };
+    for (const s of ['pregnancy', 'ivf', 'postpartum']) {
+      expect(flaggedLabQuestion(hcg, s)).toBeNull();
+      expect(pickSuggestions({ lifeStage: s, hasContext: true, flaggedLabs: [hcg, { title: 'TSH', status: 'high' }] })[0]).toBe('What does my high TSH mean?');
+    }
+    expect(flaggedLabQuestion(hcg, 'menstrual-cycle')).toBe('What does my high beta hCG mean?');
+  });
+});

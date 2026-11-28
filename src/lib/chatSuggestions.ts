@@ -6,6 +6,12 @@
 //   3. an upcoming visit;
 //   4. the stage's standard questions fill the rest.
 // Same inputs, same questions.
+//
+// Every chip must be answerable from what Ask AI is given (her records,
+// visits, app logs, stage line and cycle-phase line; see
+// api/_lib/chat-context.ts). It does not get her period history or her
+// temperature chart, so "Are my cycles regular based on my history?" and
+// "What does my temperature chart say?" were replaced (round 13).
 
 import type { CyclePhase } from './cycle-phase';
 
@@ -15,10 +21,10 @@ export const STAGE_SUGGESTIONS: Record<string, string[]> = {
   'pre-menstrual': [
     'What changes should I expect before my first period?',
     'How do I prepare a period kit for school?',
-    'When should I tell a trusted adult?',
+    'Who can I talk to about my first period?',
   ],
   'menstrual-cycle': [
-    'Are my cycles regular based on my history?',
+    'What counts as a regular cycle?',
     'Which lab results are most relevant for my cycle?',
     'What symptoms should I track this month?',
   ],
@@ -29,7 +35,7 @@ export const STAGE_SUGGESTIONS: Record<string, string[]> = {
   ],
   conception: [
     'When are my fertile days this cycle?',
-    'What does my temperature chart (BBT) say about ovulation?',
+    'How can I tell when I am ovulating?',
     'Which supplements help when trying to conceive?',
   ],
   ivf: [
@@ -54,7 +60,7 @@ export const STAGE_SUGGESTIONS: Record<string, string[]> = {
   ],
   'post-menopause': [
     'What should I focus on for long-term health?',
-    'Are any of my results worth asking my doctor about?',
+    'How can I keep my bones strong?',
     'Which checkups are overdue?',
   ],
 };
@@ -91,7 +97,14 @@ export function labNameForQuestion(title: string): string | null {
 const LOW = new Set(['low', 'decreased', 'below range']);
 const HIGH = new Set(['high', 'elevated', 'above range']);
 
-export function flaggedLabQuestion(lab: FlaggedLab): string | null {
+// The pregnancy hormone is "high" against a non-pregnant range: expected
+// while pregnant, after a positive IVF test and in the weeks after birth,
+// so "What does my high hCG mean?" is no question to open with there.
+const HCG_TITLE = /\b(?:beta[\s-]?)?hcg\b|chorionic gonadotropin/i;
+const HCG_EXPECTED_STAGES = new Set(['pregnancy', 'ivf', 'postpartum']);
+
+export function flaggedLabQuestion(lab: FlaggedLab, lifeStage: string | null = null): string | null {
+  if (lifeStage && HCG_EXPECTED_STAGES.has(lifeStage) && HCG_TITLE.test(lab.title || '')) return null;
   const name = labNameForQuestion(lab.title);
   if (!name) return null;
   const s = (lab.status || '').trim().toLowerCase();
@@ -168,7 +181,7 @@ export function pickSuggestions(input: SuggestionInput): string[] {
   }
 
   // 1. One out-of-range value, by name.
-  const flagged = (input.flaggedLabs ?? []).map(flaggedLabQuestion).find(Boolean) ?? null;
+  const flagged = (input.flaggedLabs ?? []).map((l) => flaggedLabQuestion(l, input.lifeStage)).find(Boolean) ?? null;
   add(flagged);
   // 2. This moment of her stage.
   add(moment);
