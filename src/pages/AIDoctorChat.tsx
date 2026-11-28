@@ -54,6 +54,7 @@ import { addToVisitList, chatToMarkdown, questionFromAnswer } from '@/lib/chatEx
 import { UNSCHEDULED_VISIT_ID } from '@/lib/hrtQuestions';
 import { emitHealthDataChange } from '@/lib/data-events';
 import { currentFlagged, latestPerTest } from '@/lib/labFlags';
+import { chatErrorText, type ChatErrorKind, type ChatErrorState } from '@/lib/chatErrors';
 import { citedSources, linkCitations, splitSourcesFooter, stripSourcesFooter, stripUnknownCitations, type ChatSource } from '@/lib/research-sources';
 
 // `sources`: research-library items the server gave the model for this
@@ -107,6 +108,31 @@ function localToday(d = new Date()): string {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 
+// Why an answer did not arrive (src/lib/chatErrors.ts):
+// - timeout: no response, or the stream went silent, for too long;
+// - rate-limit: her daily limit, or the AI service is busy (429);
+// - network: offline, or the connection dropped mid-answer;
+// - server: anything else (5xx, an error event, an empty reply).
+
+/** No response headers within this long = timeout (server handshake + retries fit). */
+export const CHAT_FIRST_BYTE_TIMEOUT_MS = 45_000;
+/** No new chunk within this long once streaming = timeout. */
+export const CHAT_IDLE_TIMEOUT_MS = 30_000;
+
+class ChatTimeout extends Error {}
+
+function withTimeout<T>(p: Promise<T>, ms: number, onTimeout: () => void): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  return Promise.race([
+    p,
+    new Promise<never>((_, reject) => {
+      // Reject first: onTimeout cancels the read, which would otherwise
+      // win the race as an ordinary end of stream.
+      timer = setTimeout(() => { reject(new ChatTimeout()); onTimeout(); }, ms);
+    }),
+  ]).finally(() => clearTimeout(timer));
+}
+
 export async function streamChat({
   messages,
   model,
@@ -118,6 +144,7 @@ export async function streamChat({
   onMeta,
   onDone,
   onError,
+  timeouts,
 }: {
   messages: Msg[];
   model: string;
@@ -130,25 +157,43 @@ export async function streamChat({
   /** Follow-ups, record chips and the stored reply id, after the answer. */
   onMeta?: (meta: ChatMeta) => void;
   onDone: () => void;
-  onError: (err: string) => void;
+  /** Called once instead of onDone when no complete answer arrived. */
+  onError: (err: string, kind: ChatErrorKind) => void;
+  timeouts?: { firstByteMs?: number; idleMs?: number };
 }) {
-  const resp = await fetch(CHAT_URL, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    // Her own calendar date, so "days to go" / "week N" are counted in
-    // her timezone, not the server's UTC.
-    body: JSON.stringify({ messages, model, personalContext, conversationId, today: localToday() }),
-  });
+  const firstByteMs = timeouts?.firstByteMs ?? CHAT_FIRST_BYTE_TIMEOUT_MS;
+  const idleMs = timeouts?.idleMs ?? CHAT_IDLE_TIMEOUT_MS;
+  const controller = new AbortController();
+  let gotContent = false;
+
+  let resp: Response;
+  try {
+    resp = await withTimeout(fetch(CHAT_URL, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      // Her own calendar date, so "days to go" / "week N" are counted in
+      // her timezone, not the server's UTC.
+      body: JSON.stringify({ messages, model, personalContext, conversationId, today: localToday() }),
+      signal: controller.signal,
+    }), firstByteMs, () => controller.abort());
+  } catch (err) {
+    if (err instanceof ChatTimeout) onError('Ask AI took too long to answer.', 'timeout');
+    else onError('Could not reach Ask AI. Check your internet connection.', 'network');
+    return;
+  }
 
   if (!resp.ok) {
-    const body = await resp.json().catch(() => ({ error: 'Unknown error' }));
-    onError(body.error || `Error ${resp.status}`);
+    const body = await resp.json().catch(() => ({} as { error?: string }));
+    const msg = typeof body?.error === 'string' && body.error ? body.error : '';
+    if (resp.status === 429) onError(msg || 'Ask AI is busy right now. Please wait a minute.', 'rate-limit');
+    else if (resp.status === 504) onError(msg || 'Ask AI took too long to answer.', 'timeout');
+    else onError(msg || `Ask AI could not answer just now (error ${resp.status}).`, 'server');
     return;
   }
 
   if (!resp.body) {
-    onError('No response stream');
+    onError('Ask AI could not answer just now.', 'server');
     return;
   }
 
@@ -156,36 +201,53 @@ export async function streamChat({
   const decoder = new TextDecoder();
   let buffer = '';
   let done = false;
+  let streamError: string | null = null;
 
-  while (!done) {
-    const { done: readerDone, value } = await reader.read();
-    if (readerDone) break;
-    buffer += decoder.decode(value, { stream: true });
+  const handle = (parsed: Record<string, unknown> & { choices?: Array<{ delta?: { content?: string } }> }) => {
+    if (Array.isArray(parsed.sources)) onSources?.(parsed.sources as ChatSource[]);
+    if (typeof parsed.replace === 'string') onReplace?.(parsed.replace);
+    if (parsed.meta) { const meta = parseChatMeta(parsed.meta); if (meta) onMeta?.(meta); }
+    if (parsed.error) {
+      const e = parsed.error as { message?: unknown };
+      streamError = typeof e.message === 'string' && e.message ? e.message : 'The answer stopped before it was finished.';
+    }
+    const content = parsed.choices?.[0]?.delta?.content;
+    if (content) { gotContent = true; onDelta(content); }
+  };
 
-    let newlineIdx: number;
-    while ((newlineIdx = buffer.indexOf('\n')) !== -1) {
-      let line = buffer.slice(0, newlineIdx);
-      buffer = buffer.slice(newlineIdx + 1);
-      if (line.endsWith('\r')) line = line.slice(0, -1);
-      if (line.startsWith(':') || line.trim() === '') continue;
-      if (!line.startsWith('data: ')) continue;
-      const jsonStr = line.slice(6).trim();
-      if (jsonStr === '[DONE]') {
-        done = true;
-        break;
-      }
-      try {
-        const parsed = JSON.parse(jsonStr);
-        if (Array.isArray(parsed.sources)) onSources?.(parsed.sources as ChatSource[]);
-        if (typeof parsed.replace === 'string') onReplace?.(parsed.replace);
-        if (parsed.meta) { const meta = parseChatMeta(parsed.meta); if (meta) onMeta?.(meta); }
-        const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-        if (content) onDelta(content);
-      } catch {
-        buffer = line + '\n' + buffer;
-        break;
+  try {
+    while (!done && !streamError) {
+      const { done: readerDone, value } = await withTimeout(reader.read(), idleMs, () => {
+        controller.abort();
+        reader.cancel().catch(() => { /* already closed */ });
+      });
+      if (readerDone) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      let newlineIdx: number;
+      while ((newlineIdx = buffer.indexOf('\n')) !== -1) {
+        let line = buffer.slice(0, newlineIdx);
+        buffer = buffer.slice(newlineIdx + 1);
+        if (line.endsWith('\r')) line = line.slice(0, -1);
+        if (line.startsWith(':') || line.trim() === '') continue;
+        if (!line.startsWith('data: ')) continue;
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === '[DONE]') {
+          done = true;
+          break;
+        }
+        try {
+          handle(JSON.parse(jsonStr));
+        } catch {
+          buffer = line + '\n' + buffer;
+          break;
+        }
       }
     }
+  } catch (err) {
+    if (err instanceof ChatTimeout) onError('Ask AI stopped answering partway through.', 'timeout');
+    else onError('The connection dropped before the answer was finished.', 'network');
+    return;
   }
 
   if (buffer.trim()) {
@@ -195,17 +257,17 @@ export async function streamChat({
       if (raw.startsWith(':') || raw.trim() === '') continue;
       if (!raw.startsWith('data: ')) continue;
       const jsonStr = raw.slice(6).trim();
-      if (jsonStr === '[DONE]') continue;
+      if (jsonStr === '[DONE]') { done = true; continue; }
       try {
-        const parsed = JSON.parse(jsonStr);
-        if (typeof parsed.replace === 'string') onReplace?.(parsed.replace);
-        if (parsed.meta) { const meta = parseChatMeta(parsed.meta); if (meta) onMeta?.(meta); }
-        const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-        if (content) onDelta(content);
+        handle(JSON.parse(jsonStr));
       } catch { /* ignore */ }
     }
   }
 
+  if (streamError) { onError(streamError, 'server'); return; }
+  // The stream closed without its end marker: the connection dropped.
+  if (!done) { onError('The connection dropped before the answer was finished.', 'network'); return; }
+  if (!gotContent) { onError('Ask AI could not answer just now.', 'server'); return; }
   onDone();
 }
 
@@ -240,6 +302,8 @@ export default function AIDoctorChat() {
   const [loadingEarlier, setLoadingEarlier] = useState(false);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
+  // The last answer that did not arrive: message + Try again under the chat.
+  const [chatError, setChatError] = useState<ChatErrorState | null>(null);
   // Tracks which assistant message was just copied so the Copy button
   // can flip to a checkmark for 1.5s. Indexed by message position.
   const [justCopiedIdx, setJustCopiedIdx] = useState<number | null>(null);
@@ -495,15 +559,22 @@ export default function AIDoctorChat() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, historyLoaded, isStreaming, searchParams, setSearchParams]);
 
-  // `override`: a tapped follow-up chip, sent without touching the input.
+  // `override`: a tapped follow-up chip or Try again, sent without touching the input.
   const handleSend = async (override?: string) => {
     const text = (override ?? input).trim();
     if (!text || isStreaming || !user) return;
 
+    // After a failed answer the failed question (and any half answer) is
+    // replaced by this send, so the chat never holds a question twice.
+    const base = chatError ? messages.slice(0, chatError.userIdx) : messages;
+    const userIdx = base.length;
+    setChatError(null);
     const userMsg: Msg = { role: 'user', content: text };
-    const newMessages = [...messages, userMsg];
+    const newMessages = [...base, userMsg];
     setMessages(newMessages);
+    // Try again re-sends the question that was put back in the box: clear it.
     if (override === undefined) setInput('');
+    else setInput(i => (i.trim() === text ? '' : i));
     setIsStreaming(true);
     // Keys her rating of this answer until the server hands back its id.
     const answerKey = newAnswerKey();
@@ -620,10 +691,11 @@ export default function AIDoctorChat() {
           ]);
         }
       },
-      onError: (err) => {
-        // If we got partial response, keep it and add error note
+      onError: (err, kind) => {
+        // A half answer stays on screen, marked as cut off; Try again
+        // replaces it with a full one.
         if (assistantSoFar) {
-          assistantSoFar += '\n\n*[Response interrupted — try asking again]*';
+          assistantSoFar += '\n\n*[Answer interrupted]*';
           setMessages(prev => {
             const last = prev[prev.length - 1];
             if (last?.role === 'assistant' && last !== WELCOME_MESSAGE) {
@@ -632,7 +704,10 @@ export default function AIDoctorChat() {
             return prev;
           });
         }
-        toast({ variant: 'destructive', title: 'AI Error', description: err });
+        // The message and Try again sit under the chat; her question goes
+        // back in the box too (unless she has started typing another).
+        setChatError({ kind, message: err, question: text, userIdx });
+        setInput(i => (i.trim() ? i : text));
         setIsStreaming(false);
       },
     });
@@ -795,7 +870,7 @@ export default function AIDoctorChat() {
   // the next one, which Visits carries over once a visit is booked.
   const [askedIdx, setAskedIdx] = useState<Record<number, string>>({});
   // Keyed by position in the chat on screen: another chat starts clean.
-  useEffect(() => { setAskedIdx({}); }, [conversationId]);
+  useEffect(() => { setAskedIdx({}); setChatError(null); }, [conversationId]);
   const askDoctor = async (idx: number) => {
     if (!user) return;
     const text = questionFromAnswer(messages, idx);
@@ -1079,6 +1154,20 @@ export default function AIDoctorChat() {
                 </div>
               </div>
             )}
+
+            {chatError && !isStreaming && (() => {
+              const { title, detail } = chatErrorText(chatError.kind, chatError.message);
+              return (
+                <div role="alert" data-testid="chat-error" data-kind={chatError.kind} className="rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm">
+                  <p className="font-medium text-destructive">{title}</p>
+                  <p className="text-muted-foreground mt-0.5">{detail}</p>
+                  <p className="text-muted-foreground text-xs mt-1">Your question is kept, so nothing is lost.</p>
+                  <Button variant="outline" size="sm" className="mt-2 h-8 text-xs" onClick={() => { void handleSend(chatError.question); }}>
+                    Try again
+                  </Button>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Suggested Questions */}

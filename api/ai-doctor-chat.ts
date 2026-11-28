@@ -8,6 +8,7 @@ import { applyChatLimits } from './_lib/chat-limits.js';
 import { parseConversationId, persistChatTurn } from './_lib/chatConversation.js';
 import { fetchPersonalRows } from './_lib/personal-retrieval.js';
 import { assembleChatSystemPrompt, buildChatContext } from './_lib/chat-context.js';
+import { MODEL_HANDSHAKE_TIMEOUT_MS, isTimeoutError, streamErrorEvent, upstreamFailure, type UpstreamFailure } from './_lib/chat-errors.js';
 import { SOURCES_FOOTER_MARK, formatSourcesFooter, stripUnknownCitations } from './_lib/research/library.js';
 import { selectChatEvidenceForTurn } from './_lib/research/chat-prompt.js';
 import { checkCitations, evidenceTexts } from './_lib/research/citation-check.js';
@@ -155,18 +156,41 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     messages: anthropicMessages,
     stream: true,
   };
+  // A handshake slower than MODEL_HANDSHAKE_TIMEOUT_MS is a timeout (504,
+  // not retried: the function has 60 s in all); the page shows "took too
+  // long" with Try again. Errors go out in the page's words (chat-errors.ts).
   const initialDelays = [250, 1000];
   let aiResponse: Response | null = null;
+  let failure: UpstreamFailure | null = null;
   for (let attempt = 0; attempt <= initialDelays.length; attempt++) {
-    aiResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-    });
+    // Only the handshake is timed: the timer is cleared once headers
+    // arrive, so a long answer can keep streaming.
+    const handshake = new AbortController();
+    const timer = setTimeout(() => handshake.abort(), MODEL_HANDSHAKE_TIMEOUT_MS);
+    try {
+      aiResponse = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+        signal: handshake.signal,
+      });
+    } catch (err) {
+      clearTimeout(timer);
+      aiResponse = null;
+      if (isTimeoutError(err)) { failure = 'timeout'; break; }
+      failure = 'network';
+      if (attempt < initialDelays.length) {
+        await new Promise(r => setTimeout(r, initialDelays[attempt]));
+        continue;
+      }
+      break;
+    }
+    clearTimeout(timer);
+    failure = null;
     if (aiResponse.ok) break;
     if (aiResponse.status >= 500 && attempt < initialDelays.length) {
       console.warn(`Anthropic ${aiResponse.status} on chat handshake (attempt ${attempt + 1}); retrying`);
@@ -177,11 +201,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (!aiResponse || !aiResponse.ok) {
-    if (aiResponse?.status === 429) return res.status(429).json({ error: 'Rate limit exceeded. Please try again shortly.' });
-    if (aiResponse?.status === 402) return res.status(402).json({ error: 'AI usage limit reached.' });
-    const errText = aiResponse ? await aiResponse.text() : '';
-    console.error('Anthropic error:', aiResponse?.status, errText);
-    return res.status(500).json({ error: 'AI service unavailable' });
+    const why: UpstreamFailure = failure ?? aiResponse?.status ?? 'network';
+    if (aiResponse) console.error('Anthropic error:', aiResponse.status, await aiResponse.text().catch(() => ''));
+    else console.error('Anthropic handshake failed:', why);
+    const { status, error } = upstreamFailure(why);
+    return res.status(status).json({ error });
   }
 
   res.setHeader('Content-Type', 'text/event-stream');
@@ -198,9 +222,14 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   // How much of the visible text (the reply minus its follow-up tail) the
   // page has been sent: the tail is never streamed.
   let sentChars = 0;
+  // Set when the answer broke off (an error event from the model API, or
+  // the connection to it dropped): the page gets an error event instead of
+  // the end of the answer, and the half answer is not saved, so Try again
+  // does not leave a cut-off reply in Past chats.
+  let interrupted = false;
 
   try {
-    while (true) {
+    while (!interrupted) {
       const { done, value } = await reader.read();
       if (done) break;
       buffer += decoder.decode(value, { stream: true });
@@ -212,6 +241,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         if (!jsonStr || jsonStr === '[DONE]') continue;
         try {
           const event = JSON.parse(jsonStr);
+          if (event.type === 'error') {
+            console.error('Anthropic stream error:', event.error?.type ?? 'unknown');
+            interrupted = true;
+            break;
+          }
           if (event.type === 'content_block_delta' && event.delta?.text) {
             assistantText += event.delta.text;
             const visible = visibleWhileStreaming(assistantText);
@@ -227,11 +261,16 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         }
       }
     }
+  } catch (err) {
+    console.error('Anthropic stream dropped:', (err as Error)?.name ?? err);
+    interrupted = true;
   } finally {
     // Persist the pair together. If the stream yielded no assistant
-    // text we also skip the user message — keeps chat history
-    // internally consistent instead of half-logged conversations.
-    if (assistantText) {
+    // text (or broke off) we also skip the user message — keeps chat
+    // history internally consistent instead of half-logged conversations.
+    if (interrupted) {
+      try { res.write(streamErrorEvent()); } catch { /* client gone */ }
+    } else if (assistantText) {
       // The follow-up tail goes first, so the citation check and the saved
       // reply see only the answer (a missing or broken tail = no chips).
       const parsed = parseFollowUps(assistantText);
