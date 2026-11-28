@@ -13,7 +13,7 @@ import handler from './scale-photo';
 import { getAuthUser } from '../../_lib/auth.js';
 import { checkAndConsume } from '../../_lib/ratelimit.js';
 import { callAnthropicWithRetry, SONNET_MODEL, SONNET_NO_THINKING } from '../../_lib/anthropic.js';
-import { parseScaleReply, parseScaleRequest, readScalePhoto, MAX_IMAGE_BASE64 } from '../../_lib/scale-photo';
+import { parseScaleReply, parseScaleRequest, readScalePhoto, toKg, MAX_IMAGE_BASE64, SCALE_SCHEMA } from '../../_lib/scale-photo';
 import { ROUTES } from '../../router';
 
 const USER = { id: 'user_s1', email: 's@test.com', sessionId: 's' };
@@ -32,23 +32,59 @@ const claude = (text: string, extra: Record<string, unknown> = {}) =>
   ({ json: async () => ({ content: [{ type: 'text', text }], ...extra }) }) as unknown as Response;
 
 describe('parseScaleReply', () => {
-  it('reads the strict JSON', () => {
-    expect(parseScaleReply('{"weight_kg": 4.62, "confidence": 0.93}')).toEqual({ weight_kg: 4.62, confidence: 0.93 });
+  it('reads the strict JSON (number + unit on the display)', () => {
+    expect(parseScaleReply('{"value": 4.62, "unit": "kg", "confidence": 0.93}')).toEqual({ weight_kg: 4.62, confidence: 0.93 });
+  });
+  it('converts grams and pounds in our code and says what the display showed', () => {
+    expect(parseScaleReply('{"value": 4620, "unit": "g", "confidence": 0.9}')).toEqual({ weight_kg: 4.62, confidence: 0.9, shown: '4620 g' });
+    expect(parseScaleReply('{"value": 10.2, "unit": "lb", "confidence": 0.9}')).toEqual({ weight_kg: 4.63, confidence: 0.9, shown: '10.2 lb' });
+    expect(parseScaleReply('{"value": 10, "unit": "lb_oz", "ounces": 3, "confidence": 0.9}')).toEqual({ weight_kg: 4.62, confidence: 0.9, shown: '10 lb 3 oz' });
+    // "lb" with ounces is pounds and ounces; "lb_oz" without ounces is whole pounds
+    expect(parseScaleReply('{"value": 7, "unit": "lb", "ounces": 8, "confidence": 0.9}')).toEqual({ weight_kg: 3.4, confidence: 0.9, shown: '7 lb 8 oz' });
+    expect(parseScaleReply('{"value": 8, "unit": "lb_oz", "confidence": 0.9}')).toEqual({ weight_kg: 3.63, confidence: 0.9, shown: '8 lb 0 oz' });
   });
   it('tolerates fences, prose and a number as text', () => {
-    expect(parseScaleReply('```json\n{"weight_kg":"4,2","confidence":0.8}\n```')).toEqual({ weight_kg: 4.2, confidence: 0.8 });
-    expect(parseScaleReply('Here: {"weight_kg": 3.9, "confidence": 0.7} done')).toEqual({ weight_kg: 3.9, confidence: 0.7 });
+    expect(parseScaleReply('```json\n{"value":"4,2","unit":"kg","confidence":0.8}\n```')).toEqual({ weight_kg: 4.2, confidence: 0.8 });
+    expect(parseScaleReply('Here: {"value": 3.9, "unit": "kg", "confidence": 0.7} done')).toEqual({ weight_kg: 3.9, confidence: 0.7 });
   });
-  it('treats null, out-of-range, zero confidence and junk as unreadable', () => {
+  it('treats no unit, null, out-of-range after conversion, bad ounces, zero confidence and junk as unreadable', () => {
     const none = { weight_kg: null, confidence: 0 };
-    for (const t of ['{"weight_kg": null, "confidence": 0}', '{"weight_kg": 4620, "confidence": 0.9}', '{"weight_kg": 0.2, "confidence": 0.9}',
-      '{"weight_kg": 4.6, "confidence": 0}', 'I cannot see a scale', '', '[1,2]', '{"weight_kg": "abc", "confidence": 1}']) {
+    for (const t of [
+      '{"value": null, "unit": null, "confidence": 0}',
+      '{"value": 4.62, "unit": null, "confidence": 0.9}',          // number without a unit: no guessing
+      '{"value": 4.62, "unit": "stone", "confidence": 0.9}',
+      '{"value": 4620, "unit": "kg", "confidence": 0.9}',          // grams labelled kg -> over 25 kg
+      '{"value": 4.62, "unit": "g", "confidence": 0.9}',           // kg labelled g -> under 0.5 kg
+      '{"value": 0.2, "unit": "kg", "confidence": 0.9}',
+      '{"value": 60, "unit": "lb", "confidence": 0.9}',
+      '{"value": -1, "unit": "kg", "confidence": 0.9}',
+      '{"value": 10, "unit": "lb_oz", "ounces": 16, "confidence": 0.9}',
+      '{"value": 4.6, "unit": "kg", "confidence": 0}',
+      '{"weight_kg": 4.6, "confidence": 0.9}',                     // the old shape has no unit
+      'I cannot see a scale', '', '[1,2]', '{"value": "abc", "unit": "kg", "confidence": 1}']) {
       expect(parseScaleReply(t)).toEqual(none);
     }
     expect(parseScaleReply(undefined)).toEqual(none);
   });
   it('clamps confidence to 0-1', () => {
-    expect(parseScaleReply('{"weight_kg": 5, "confidence": 7}')).toEqual({ weight_kg: 5, confidence: 1 });
+    expect(parseScaleReply('{"value": 5, "unit": "kg", "confidence": 7}')).toEqual({ weight_kg: 5, confidence: 1 });
+  });
+  it('the 0.5-25 kg floor and ceiling apply to the converted weight', () => {
+    expect(parseScaleReply('{"value": 500, "unit": "g", "confidence": 0.9}')).toMatchObject({ weight_kg: 0.5 });
+    expect(parseScaleReply('{"value": 499, "unit": "g", "confidence": 0.9}')).toEqual({ weight_kg: null, confidence: 0 });
+    expect(parseScaleReply('{"value": 55, "unit": "lb", "confidence": 0.9}')).toMatchObject({ weight_kg: 24.95 });
+    expect(parseScaleReply('{"value": 56, "unit": "lb", "confidence": 0.9}')).toEqual({ weight_kg: null, confidence: 0 });
+  });
+});
+
+describe('toKg', () => {
+  it('kg and g keep gram precision, pounds round to 10 g', () => {
+    expect(toKg(3.8549, 'kg')).toBe(3.855);
+    expect(toKg(4620, 'g')).toBe(4.62);
+    expect(toKg(3215.4, 'g')).toBe(3.215);
+    expect(toKg(10.2, 'lb')).toBe(4.63);   // 4.6266 kg
+    expect(toKg(10, 'lb_oz', 3)).toBe(4.62); // 4.6211 kg
+    expect(toKg(1, 'lb')).toBe(0.45);
   });
 });
 
@@ -87,7 +123,7 @@ describe('POST /api/baby/scale-photo', () => {
   });
 
   it('sends the photo with the document-analysis model setup and returns only the number', async () => {
-    vi.mocked(callAnthropicWithRetry).mockResolvedValue(claude('{"weight_kg": 4.62, "confidence": 0.9}'));
+    vi.mocked(callAnthropicWithRetry).mockResolvedValue(claude('{"value": 4.62, "unit": "kg", "confidence": 0.9}'));
     const res = mockRes();
     await handler(req('POST', { image: IMG, mediaType: 'image/png' }), res);
     expect(res._status).toBe(200);
@@ -96,13 +132,14 @@ describe('POST /api/baby/scale-photo', () => {
     expect(key).toBe('test-key');
     expect(body.model).toBe(SONNET_MODEL);
     expect(body.thinking).toEqual(SONNET_NO_THINKING);
-    expect((body.output_config as { format: { type: string } }).format.type).toBe('json_schema');
+    expect(body.output_config).toEqual({ format: { type: 'json_schema', schema: SCALE_SCHEMA } });
+    expect(Object.keys(SCALE_SCHEMA.properties)).toEqual(['value', 'unit', 'ounces', 'confidence']);
     const content = (body.messages as Array<{ content: Array<Record<string, unknown>> }>)[0].content;
     expect(content[0]).toEqual({ type: 'image', source: { type: 'base64', media_type: 'image/png', data: IMG } });
   });
 
   it('an unreadable photo or a refusal is 200 with weight_kg null', async () => {
-    vi.mocked(callAnthropicWithRetry).mockResolvedValue(claude('{"weight_kg": null, "confidence": 0}'));
+    vi.mocked(callAnthropicWithRetry).mockResolvedValue(claude('{"value": null, "unit": null, "confidence": 0}'));
     const r1 = mockRes(); await handler(req('POST', { image: IMG, mediaType: 'image/jpeg' }), r1);
     expect(r1._body).toEqual({ weight_kg: null, confidence: 0 });
     vi.mocked(callAnthropicWithRetry).mockResolvedValue(claude('', { stop_reason: 'refusal' }));
@@ -130,23 +167,24 @@ describe('POST /api/baby/scale-photo', () => {
   });
 });
 
-// What the real model (claude-sonnet-5-5, this prompt) answered for synthetic
-// scale photos on 2026-11-28, one live call each. The model is mocked here;
-// these pin what the app shows for each answer.
+// What the real model (claude-sonnet-5-5, this prompt and schema) answered
+// for the synthetic scale photos on 2026-11-28, one live call each, after the
+// unit guard (the model reads number + unit, our code converts). The model is
+// mocked here; these pin what the app gets for each answer.
 describe('readScalePhoto with the replies the real model gave', () => {
   const none = { weight_kg: null, confidence: 0 };
-  const cases: Array<[string, string, { weight_kg: number | null; confidence: number }]> = [
-    ['4.62 kg display', '{"weight_kg":4.62,"confidence":0.97}', { weight_kg: 4.62, confidence: 0.97 }],
-    ['4620 g display (grams converted by the model)', '{"weight_kg":4.62,"confidence":0.97}', { weight_kg: 4.62, confidence: 0.97 }],
-    ['10.2 lb display (10.2 lb = 4.627 kg)', '{"weight_kg":4.63,"confidence":0.97}', { weight_kg: 4.63, confidence: 0.97 }],
-    ['3,85 kg display (comma decimal)', '{"weight_kg":3.85,"confidence":0.97}', { weight_kg: 3.85, confidence: 0.97 }],
-    ['10 lb 3 oz display', '{"weight_kg":4.621,"confidence":0.97}', { weight_kg: 4.621, confidence: 0.97 }],
-    ['3.21 kg with HOLD and a smaller MEM 2.98', '{"weight_kg":3.21,"confidence":0.93}', { weight_kg: 3.21, confidence: 0.93 }],
-    ['blurry display', '{"weight_kg":null,"confidence":0}', none],
+  const cases: Array<[string, string, { weight_kg: number | null; confidence: number; shown?: string }]> = [
+    ['4.62 kg display', '{"value":4.62,"unit":"kg","confidence":0.97}', { weight_kg: 4.62, confidence: 0.97 }],
+    ['4620 g display (converted here)', '{"value":4620,"unit":"g","confidence":0.97}', { weight_kg: 4.62, confidence: 0.97, shown: '4620 g' }],
+    ['10.2 lb display (10.2 lb = 4.627 kg)', '{"value":10.2,"unit":"lb","confidence":0.97}', { weight_kg: 4.63, confidence: 0.97, shown: '10.2 lb' }],
+    ['3,85 kg display (comma decimal)', '{"value":3.85,"unit":"kg","confidence":0.97}', { weight_kg: 3.85, confidence: 0.97 }],
+    ['blurry display', '{"value":null,"unit":null,"confidence":0}', none],
     // The model reads TARE 0.00 as a confident 0 kg: the 0.5 kg floor turns it into "could not read".
-    ['TARE 0.00 display', '{"weight_kg":0.0,"confidence":0.9}', none],
-    ['clock showing 12:45', '{"weight_kg":null,"confidence":0}', none],
-    ['photo with no scale', '{"weight_kg":null,"confidence":0}', none],
+    ['TARE 0.00 display', '{"value":0,"unit":"kg","confidence":0.95}', none],
+    ['clock showing 12:45', '{"value":null,"unit":null,"confidence":0}', none],
+    ['photo with no scale', '{"value":null,"unit":null,"confidence":0}', none],
+    ['10 lb 3 oz display (= 4.621 kg)', '{"value":10,"unit":"lb_oz","ounces":3,"confidence":0.97}', { weight_kg: 4.62, confidence: 0.97, shown: '10 lb 3 oz' }],
+    ['3.21 kg with HOLD and a smaller MEM 2.98', '{"value":3.21,"unit":"kg","confidence":0.95}', { weight_kg: 3.21, confidence: 0.95 }],
   ];
   for (const [name, reply, want] of cases) {
     it(name, async () => {
@@ -154,10 +192,10 @@ describe('readScalePhoto with the replies the real model gave', () => {
       expect(await readScalePhoto('k', IMG, 'image/jpeg')).toEqual(want);
     });
   }
-  it('a weight returned in grams or pounds by mistake never pre-fills a wrong kg value when out of range', async () => {
-    vi.mocked(callAnthropicWithRetry).mockReset().mockResolvedValue(claude('{"weight_kg":4620,"confidence":0.9}'));
+  it('a wrong unit never pre-fills a wrong kg value when out of range', async () => {
+    vi.mocked(callAnthropicWithRetry).mockReset().mockResolvedValue(claude('{"value":4620,"unit":"kg","confidence":0.9}'));
     expect(await readScalePhoto('k', IMG, 'image/jpeg')).toEqual(none);
-    vi.mocked(callAnthropicWithRetry).mockReset().mockResolvedValue(claude('{"weight_kg":-0.02,"confidence":0.8}'));
+    vi.mocked(callAnthropicWithRetry).mockReset().mockResolvedValue(claude('{"value":-0.02,"unit":"kg","confidence":0.8}'));
     expect(await readScalePhoto('k', IMG, 'image/jpeg')).toEqual(none);
   });
 });

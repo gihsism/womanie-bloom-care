@@ -30,32 +30,65 @@ export function parseScaleRequest(body: unknown):
   return { ok: true, image, mediaType: mediaType as ScaleMediaType };
 }
 
-/** The JSON shape the model must return (structured outputs). */
+/**
+ * The JSON shape the model must return (structured outputs). The model only
+ * reads the display - the number and the unit it shows; the conversion to
+ * kg is done here (toKg), never by the model.
+ */
+export const SCALE_UNITS = ['kg', 'g', 'lb', 'lb_oz'] as const;
+export type ScaleUnit = typeof SCALE_UNITS[number];
+
 export const SCALE_SCHEMA = {
   type: 'object',
   properties: {
-    weight_kg: { anyOf: [{ type: 'number' }, { type: 'null' }] },
+    value: { anyOf: [{ type: 'number' }, { type: 'null' }] },
+    unit: { anyOf: [{ type: 'string', enum: [...SCALE_UNITS] }, { type: 'null' }] },
+    ounces: { type: 'number' },
     confidence: { type: 'number' },
   },
-  required: ['weight_kg', 'confidence'],
+  required: ['value', 'unit', 'confidence'],
   additionalProperties: false,
 } as const;
 
 export const SCALE_PROMPT = [
   'This photo should show the display of a scale with a baby (or a baby on a scale).',
-  'Read the weight shown on the display.',
-  'Return weight_kg as the weight in kilograms: convert grams (4620 g -> 4.62), pounds and ounces (10 lb 3 oz -> 4.621) if the display uses them.',
+  'Read the weight shown on the display exactly as shown. Do not convert it.',
+  'Return value as the number on the display and unit as the unit the display shows:',
+  '"kg" for kilograms, "g" for grams, "lb" for pounds shown as one number (10.2 lb),',
+  'or "lb_oz" for pounds and ounces (10 lb 3 oz -> value 10, ounces 3).',
+  'Include ounces only for "lb_oz".',
+  'If the display shows no unit and you cannot tell the unit, return unit null.',
   'Return confidence from 0 to 1: how sure you are that the number is the weight on the display and that you read every digit correctly.',
-  'If there is no scale display, the digits are not readable, or the number is not a weight, return weight_kg null and confidence 0.',
+  'If there is no scale display, the digits are not readable, or the number is not a weight, return value null, unit null and confidence 0.',
   'Do not guess digits you cannot see.',
 ].join(' ');
 
-export interface ScaleReading { weight_kg: number | null; confidence: number }
+export interface ScaleReading {
+  weight_kg: number | null;
+  confidence: number;
+  /** What the display showed, when it was not kg ("10.2 lb", "4620 g", "10 lb 3 oz"). */
+  shown?: string;
+}
+
+const KG_PER_LB = 0.45359237;
+const num = (v: unknown): number =>
+  typeof v === 'number' ? v : typeof v === 'string' && v.trim() !== '' ? Number(v.replace(',', '.')) : NaN;
 
 /**
- * The model's text -> a reading the app can use. A weight outside
- * 0.5-25 kg, a non-number, or unparsable text comes back as
- * { weight_kg: null, confidence: 0 } ("could not read").
+ * The model's display reading -> kg, in our code. Kilograms and grams keep
+ * gram precision (4620 g -> 4.62); pounds round to 10 g (10.2 lb -> 4.63),
+ * finer than any pound display shows.
+ */
+export function toKg(value: number, unit: ScaleUnit, ounces = 0): number {
+  if (unit === 'kg') return Math.round(value * 1000) / 1000;
+  if (unit === 'g') return Math.round(value) / 1000;
+  return Math.round((value + (unit === 'lb_oz' ? ounces / 16 : 0)) * KG_PER_LB * 100) / 100;
+}
+
+/**
+ * The model's text -> a reading the app can use. No unit, a weight outside
+ * 0.5-25 kg after conversion, zero confidence, a non-number, or unparsable
+ * text comes back as { weight_kg: null, confidence: 0 } ("could not read").
  */
 export function parseScaleReply(text: string | undefined | null): ScaleReading {
   const none: ScaleReading = { weight_kg: null, confidence: 0 };
@@ -67,13 +100,24 @@ export function parseScaleReply(text: string | undefined | null): ScaleReading {
     if (s < 0 || e <= s) return none;
     try { obj = JSON.parse(cleaned.slice(s, e + 1)); } catch { return none; }
   }
-  if (!obj || typeof obj !== 'object') return none;
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return none;
   const o = obj as Record<string, unknown>;
-  const w = typeof o.weight_kg === 'number' ? o.weight_kg : typeof o.weight_kg === 'string' ? Number(o.weight_kg.replace(',', '.')) : NaN;
+  const value = num(o.value);
+  let unit = (SCALE_UNITS as readonly unknown[]).includes(o.unit) ? (o.unit as ScaleUnit) : null;
+  const hasOz = o.ounces !== undefined && o.ounces !== null;
+  const ounces = hasOz ? num(o.ounces) : 0;
+  if (unit === 'lb' && hasOz && ounces !== 0) unit = 'lb_oz';
+  if (!unit || !Number.isFinite(value) || value < 0) return none;
+  if (unit === 'lb_oz' && (!Number.isFinite(ounces) || ounces < 0 || ounces >= 16)) return none;
+  const w = toKg(value, unit, ounces);
   if (!Number.isFinite(w) || w < MIN_KG || w > MAX_KG) return none;
   const c = typeof o.confidence === 'number' && Number.isFinite(o.confidence) ? Math.min(1, Math.max(0, o.confidence)) : 0;
   if (c === 0) return none;
-  return { weight_kg: Math.round(w * 1000) / 1000, confidence: Math.round(c * 100) / 100 };
+  const reading: ScaleReading = { weight_kg: w, confidence: Math.round(c * 100) / 100 };
+  if (unit === 'g') reading.shown = `${value} g`;
+  else if (unit === 'lb') reading.shown = `${value} lb`;
+  else if (unit === 'lb_oz') reading.shown = `${value} lb ${ounces} oz`;
+  return reading;
 }
 
 /**

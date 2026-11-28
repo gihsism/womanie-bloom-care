@@ -133,6 +133,19 @@ describe('BabyGrowthChart', () => {
     vi.unstubAllGlobals();
   });
 
+  it('photo of a scale in pounds or grams: says what the scale showed and the kg it pre-filled', async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ weight_kg: 4.63, confidence: 0.97, shown: '10.2 lb' }), { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+    setup();
+    await userEvent.upload(screen.getByTestId('scale-photo-input'), new File(['x'], 'scale.jpg', { type: 'image/jpeg' }));
+    await waitFor(() => expect((screen.getByLabelText('Weight (kg)') as HTMLInputElement).value).toBe('4.63'));
+    expect(screen.getByTestId('scale-photo-note').textContent).toBe('Read from the photo: 10.2 lb (4.63 kg). Check it matches the scale, correct it if needed, then tap Save measurement.');
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ weight_kg: 4.62, confidence: 0.97, shown: '4620 g' }), { status: 200 }));
+    await userEvent.upload(screen.getByTestId('scale-photo-input'), new File(['x'], 'scale2.jpg', { type: 'image/jpeg' }));
+    await waitFor(() => expect(screen.getByTestId('scale-photo-note').textContent).toMatch(/^Read from the photo: 4620 g \(4\.62 kg\)\. Check it matches the scale/));
+    vi.unstubAllGlobals();
+  });
+
   it('photo that cannot be read: friendly message, field stays empty', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ weight_kg: null, confidence: 0 }), { status: 200 })));
     const p = setup();

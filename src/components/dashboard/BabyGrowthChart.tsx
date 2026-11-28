@@ -225,7 +225,7 @@ function AddMeasurement({ onSaveMeasurement, birthDate }: { onSaveMeasurement: P
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image, mediaType: 'image/jpeg' }),
       });
-      const body = (await resp.json().catch(() => ({}))) as { weight_kg?: number | null; confidence?: number; error?: string };
+      const body = (await resp.json().catch(() => ({}))) as { weight_kg?: number | null; confidence?: number; shown?: string; error?: string };
       if (!resp.ok) { setNote(body.error || 'The photo could not be read right now. Type the weight in instead.'); return; }
       if (typeof body.weight_kg !== 'number') {
         setNote('We couldn’t read a number on this photo. Try again with the display sharp and filling more of the picture, or type the weight in.');
@@ -235,7 +235,8 @@ function AddMeasurement({ onSaveMeasurement, birthDate }: { onSaveMeasurement: P
       setValue(String(body.weight_kg));
       setSource('photo');
       const unsure = (body.confidence ?? 0) < 0.6 ? ' We are not fully sure of every digit.' : '';
-      setNote(`Read from the photo: ${body.weight_kg} kg.${unsure} Check it matches the scale, correct it if needed, then tap Save measurement.`);
+      const read = body.shown ? `${body.shown} (${body.weight_kg} kg)` : `${body.weight_kg} kg`;
+      setNote(`Read from the photo: ${read}.${unsure} Check it matches the scale, correct it if needed, then tap Save measurement.`);
     } catch {
       setNote('The photo could not be read right now. Type the weight in instead.');
     } finally {

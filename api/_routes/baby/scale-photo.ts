@@ -7,8 +7,11 @@ import { parseScaleRequest, readScalePhoto } from '../../_lib/scale-photo.js';
 // POST /api/baby/scale-photo - read the weight on a photo of a baby scale.
 //
 // Body: { image: base64 (no data: prefix needed), mediaType: image/jpeg|png|webp }
-// Reply: 200 { weight_kg: number | null, confidence: 0-1 }. weight_kg null
-// means "could not read it" (the app asks her to type it in).
+// Reply: 200 { weight_kg: number | null, confidence: 0-1, shown?: '10.2 lb' }.
+// weight_kg null means "could not read it" (the app asks her to type it in).
+// The model reads the number and unit on the display; the kg conversion is
+// ours (api/_lib/scale-photo.ts toKg). shown is what the display said when
+// it was grams or pounds, so the app can echo it.
 //
 // Same Claude setup as document analysis (api/_lib/anthropic.ts: model,
 // retries, thinking off). The photo is sent to Claude and not stored
