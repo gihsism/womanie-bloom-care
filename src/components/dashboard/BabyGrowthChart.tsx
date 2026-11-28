@@ -6,14 +6,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  ageLabel, curveRows, kgLabel, CURVES, DAYS_PER_MONTH, latestLine, MAX_AGE_DAYS, normaliseSex, parseWeight,
-  weightPoints, type GrowthSex,
+  ageLabel, curveRows, CURVES, DAYS_PER_MONTH, latestLine, MAX_AGE_DAYS, MEASURES, measurePoints, normaliseSex, parseCm,
+  parseWeight, UNIT, valueLabel, type GrowthEventData, type GrowthMeasure, type GrowthSex, type MeasurePoint,
 } from '@/lib/babyGrowth';
 
-// Weight-for-age chart (WHO Child Growth Standards, birth-24 months) and
-// "Add a weight" (typed, or read from a photo of the scale and confirmed
-// by her). Loaded lazily from the Growth tab: recharts + the WHO table
-// stay out of the main bundle.
+// WHO Child Growth Standards charts (birth-24 months): weight-, length- and
+// head-circumference-for-age, picked with small tabs above the chart, and
+// "Add a measurement" (date, weight typed or read from a photo of the
+// scale and confirmed by her, optional length and head; one record).
+// Loaded lazily from the Growth tab: recharts + the WHO tables stay out of
+// the main bundle.
 //
 // Colours: WHO curves in muted greys (50th a little stronger, 3rd/97th
 // dashed), her baby's points in the brand primary - one series stands out,
@@ -23,17 +25,24 @@ import {
 export interface GrowthEventLike {
   id: string;
   occurred_at: string;
-  data?: { weight_g?: number | null } | null;
+  data?: GrowthEventData | null;
 }
 
-export interface WeightToSave { measuredOn: string; weightG: number; source: 'typed' | 'photo' }
+/** One measurement record: any of weight, length and head (at least one). */
+export interface MeasurementToSave {
+  measuredOn: string;
+  weightG: number | null;
+  lengthCm: number | null;
+  headCm: number | null;
+  source: 'typed' | 'photo';
+}
 
 interface Props {
   babyName: string;
   birthDate: string | null;
   sex: string | null;
   events: GrowthEventLike[];
-  onSaveWeight: (w: WeightToSave) => Promise<boolean>;
+  onSaveMeasurement: (m: MeasurementToSave) => Promise<boolean>;
   onSetSex: (sex: GrowthSex) => Promise<boolean>;
   onSetBirthDate: (date: string) => Promise<boolean>;
 }
@@ -49,6 +58,21 @@ const BABY = 'hsl(var(--primary))';
 const axis = { fontSize: 10, fill: 'hsl(var(--muted-foreground))' };
 const localDate = (iso: string) => format(parseISO(iso), 'yyyy-MM-dd');
 const today = () => format(new Date(), 'yyyy-MM-dd');
+
+const TITLE: Record<GrowthMeasure, string> = { weight: 'Weight for age', length: 'Length for age', head: 'Head circumference for age' };
+const TAB: Record<GrowthMeasure, string> = { weight: 'Weight', length: 'Length', head: 'Head' };
+const NOUN: Record<GrowthMeasure, string> = { weight: 'weight', length: 'length', head: 'head circumference' };
+
+/** Round y-axis ticks for the visible range. */
+function yAxis(lo: number, hi: number) {
+  const span = hi - lo;
+  const step = span > 40 ? 10 : span > 16 ? 5 : span > 8 ? 2 : 1;
+  const min = Math.max(0, Math.floor(lo / step) * step);
+  const max = Math.ceil(hi / step) * step;
+  const ticks: number[] = [];
+  for (let v = min; v <= max; v += step) ticks.push(v);
+  return { min, max, ticks };
+}
 
 /** X range and ticks: weeks for the first ~3 months, then months. */
 function xScale(lastDay: number) {
@@ -104,7 +128,7 @@ function SexPicker({ babyName, onSetSex }: { babyName: string; onSetSex: Props['
   };
   return (
     <div className="rounded-lg bg-muted/50 p-3 space-y-2" data-testid="growth-sex-picker">
-      <p className="text-sm">The WHO weight charts are different for girls and boys. Is {babyName} a girl or a boy?</p>
+      <p className="text-sm">The WHO growth charts are different for girls and boys. Is {babyName} a girl or a boy?</p>
       <div className="flex gap-2">
         <Button size="sm" variant="outline" disabled={busy} onClick={() => { void pick('female'); }}>Girl</Button>
         <Button size="sm" variant="outline" disabled={busy} onClick={() => { void pick('male'); }}>Boy</Button>
@@ -123,7 +147,7 @@ function BirthDatePicker({ babyName, onSetBirthDate }: { babyName: string; onSet
   };
   return (
     <div className="rounded-lg bg-muted/50 p-3 space-y-2">
-      <p className="text-sm">Add {babyName}’s birth date to place the weights on the chart.</p>
+      <p className="text-sm">Add {babyName}’s birth date to place the measurements on the chart.</p>
       <div className="flex items-end gap-2">
         <div className="flex-1"><Label htmlFor="gc-birth" className="text-xs">Birth date</Label><Input id="gc-birth" type="date" max={today()} value={date} onChange={e => setDate(e.target.value)} /></div>
         <Button size="sm" onClick={() => { void save(); }}>Save</Button>
@@ -133,27 +157,27 @@ function BirthDatePicker({ babyName, onSetBirthDate }: { babyName: string; onSet
   );
 }
 
-function Chart({ sex, points }: { sex: GrowthSex; points: ReturnType<typeof weightPoints> }) {
+function Chart({ sex, points, measure }: { sex: GrowthSex; points: MeasurePoint[]; measure: GrowthMeasure }) {
   const last = points[points.length - 1];
   const x = xScale(last?.day ?? 0);
-  const curves = useMemo(() => curveRows(sex, x.end, x.end <= 98 ? 2 : 7), [sex, x.end]);
-  const yMin = Math.floor(Math.min(curves[0].p3, ...points.map(p => p.kg)) - 0.2);
-  const yMax = Math.ceil(Math.max(curves[curves.length - 1].p97, ...points.map(p => p.kg)) + 0.2);
-  const yStep = yMax - yMin > 8 ? 2 : 1;
-  const yTicks: number[] = [];
-  for (let v = Math.max(0, yMin); v <= yMax; v += yStep) yTicks.push(v);
-  const babyRows = points.map(p => ({ day: p.day, baby: p.kg }));
+  const curves = useMemo(() => curveRows(sex, x.end, x.end <= 98 ? 2 : 7, measure), [sex, x.end, measure]);
+  const pad = UNIT[measure] === 'kg' ? 0.2 : 0.5;
+  const y = yAxis(
+    Math.min(curves[0].p3, ...points.map(p => p.value)) - pad,
+    Math.max(curves[curves.length - 1].p97, ...points.map(p => p.value)) + pad,
+  );
+  const babyRows = points.map(p => ({ day: p.day, baby: p.value }));
   const lastIdx = curves.length - 1;
 
   return (
     <div className="h-64 w-full" data-testid="growth-chart">
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart margin={{ top: 8, right: 34, bottom: 0, left: -12 }}>
+        <ComposedChart margin={{ top: 8, right: 34, bottom: 0, left: UNIT[measure] === 'kg' ? -12 : -2 }}>
           <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.6} />
           <XAxis type="number" dataKey="day" domain={[0, x.end]} ticks={x.ticks} tickFormatter={x.label}
             tick={axis} tickLine={false} axisLine={false} allowDuplicatedCategory={false} />
-          <YAxis type="number" domain={[Math.max(0, yMin), yMax]} ticks={yTicks} tick={axis} tickLine={false} axisLine={false}
-            width={40} tickFormatter={(v: number) => `${v}`} unit=" kg" />
+          <YAxis type="number" domain={[y.min, y.max]} ticks={y.ticks} tick={axis} tickLine={false} axisLine={false}
+            width={UNIT[measure] === 'kg' ? 40 : 46} tickFormatter={(v: number) => `${v}`} unit={` ${UNIT[measure]}`} />
           {CURVES.map(c => {
             const st = CURVE_STROKE[c.p];
             const key = `p${c.p}`;
@@ -173,12 +197,16 @@ function Chart({ sex, points }: { sex: GrowthSex; points: ReturnType<typeof weig
   );
 }
 
-function AddWeight({ onSaveWeight, birthDate }: { onSaveWeight: Props['onSaveWeight']; birthDate: string | null }) {
+type Field = 'date' | 'weight' | 'length' | 'head';
+
+function AddMeasurement({ onSaveMeasurement, birthDate }: { onSaveMeasurement: Props['onSaveMeasurement']; birthDate: string | null }) {
   const [date, setDate] = useState(today());
   const [value, setValue] = useState('');
   const [unit, setUnit] = useState<'kg' | 'g'>('kg');
+  const [length, setLength] = useState('');
+  const [head, setHead] = useState('');
   const [source, setSource] = useState<'typed' | 'photo'>('typed');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ field: Field; text: string } | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [reading, setReading] = useState(false);
   const [saved, setSaved] = useState<string | null>(null);
@@ -186,15 +214,27 @@ function AddWeight({ onSaveWeight, birthDate }: { onSaveWeight: Props['onSaveWei
 
   const save = async () => {
     setSaved(null);
-    const r = parseWeight(value, unit);
-    if (!r.ok) { setError(r.error); return; }
-    if (!date || date > today()) { setError('Choose a date up to today.'); return; }
-    if (birthDate && date < birthDate) { setError('Choose a date on or after the birth date.'); return; }
+    const hasWeight = value.trim() !== '';
+    if (!hasWeight && !length.trim() && !head.trim()) { setError({ field: 'weight', text: 'Enter a weight, length or head circumference.' }); return; }
+    const w = hasWeight ? parseWeight(value, unit) : null;
+    if (w && !w.ok) { setError({ field: 'weight', text: w.error }); return; }
+    const l = parseCm(length, 'length');
+    if (!l.ok) { setError({ field: 'length', text: l.error }); return; }
+    const h = parseCm(head, 'head');
+    if (!h.ok) { setError({ field: 'head', text: h.error }); return; }
+    if (!date || date > today()) { setError({ field: 'date', text: 'Choose a date up to today.' }); return; }
+    if (birthDate && date < birthDate) { setError({ field: 'date', text: 'Choose a date on or after the birth date.' }); return; }
     setError(null);
-    const ok = await onSaveWeight({ measuredOn: date, weightG: Math.round(r.kg * 1000), source });
-    if (!ok) { setError('Could not save. Try again.'); return; }
-    setValue(''); setNote(null); setSource('typed'); setDate(today());
-    setSaved('Weight saved.');
+    const ok = await onSaveMeasurement({
+      measuredOn: date,
+      weightG: w && w.ok ? Math.round(w.kg * 1000) : null,
+      lengthCm: l.cm,
+      headCm: h.cm,
+      source: hasWeight ? source : 'typed',
+    });
+    if (!ok) { setError({ field: 'weight', text: 'Could not save. Try again.' }); return; }
+    setValue(''); setLength(''); setHead(''); setNote(null); setSource('typed'); setDate(today());
+    setSaved('Measurement saved.');
     window.setTimeout(() => setSaved(null), 2500);
   };
 
@@ -223,7 +263,7 @@ function AddWeight({ onSaveWeight, birthDate }: { onSaveWeight: Props['onSaveWei
       setValue(String(body.weight_kg));
       setSource('photo');
       const unsure = (body.confidence ?? 0) < 0.6 ? ' We are not fully sure of every digit.' : '';
-      setNote(`Read from the photo: ${body.weight_kg} kg.${unsure} Check it matches the scale, correct it if needed, then tap Save weight.`);
+      setNote(`Read from the photo: ${body.weight_kg} kg.${unsure} Check it matches the scale, correct it if needed, then tap Save measurement.`);
     } catch {
       setNote('The photo could not be read right now. Type the weight in instead.');
     } finally {
@@ -232,15 +272,16 @@ function AddWeight({ onSaveWeight, birthDate }: { onSaveWeight: Props['onSaveWei
     }
   };
 
+  const errFor = (f: Field) => (error?.field === f ? { 'aria-invalid': true as const, 'aria-describedby': 'am-error' } : {});
+
   return (
-    <div className="space-y-2 border-t pt-3" data-testid="add-weight">
-      <p className="label-mono">Add a weight</p>
+    <div className="space-y-2 border-t pt-3" data-testid="add-measurement">
+      <p className="label-mono">Add a measurement</p>
       <div className="grid grid-cols-2 gap-2">
-        <div><Label htmlFor="aw-date" className="text-xs">Date</Label><Input id="aw-date" type="date" max={today()} min={birthDate ?? undefined} value={date} onChange={e => setDate(e.target.value)} /></div>
+        <div><Label htmlFor="am-date" className="text-xs">Date</Label><Input id="am-date" type="date" max={today()} min={birthDate ?? undefined} value={date} {...errFor('date')} onChange={e => { setDate(e.target.value); setError(null); }} /></div>
         <div>
-          <Label htmlFor="aw-weight" className="text-xs">Weight ({unit})</Label>
-          <Input id="aw-weight" inputMode="decimal" value={value} placeholder={unit === 'kg' ? '4.6' : '4600'}
-            aria-invalid={error ? true : undefined} aria-describedby={error ? 'aw-error' : undefined}
+          <Label htmlFor="am-weight" className="text-xs">Weight ({unit})</Label>
+          <Input id="am-weight" inputMode="decimal" value={value} placeholder={unit === 'kg' ? '4.6' : '4600'} {...errFor('weight')}
             onChange={e => { setValue(e.target.value); setError(null); }} />
         </div>
       </div>
@@ -251,51 +292,68 @@ function AddWeight({ onSaveWeight, birthDate }: { onSaveWeight: Props['onSaveWei
               className={`text-xs px-3 py-1.5 rounded ${unit === u ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>{u}</button>
           ))}
         </div>
-        <Button size="sm" onClick={() => { void save(); }} disabled={reading}>Save weight</Button>
         <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()} disabled={reading}>
           <Camera className="h-3.5 w-3.5 mr-1" />{reading ? 'Reading the scale…' : 'Photo of the scale'}
         </Button>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" data-testid="scale-photo-input"
           aria-label="Photo of the scale" onChange={e => { void onPhoto(e.target.files?.[0]); }} />
       </div>
-      {error && <p id="aw-error" className="text-xs text-destructive">{error}</p>}
       {note && <p role="status" className="text-xs text-foreground bg-muted/50 rounded-md p-2" data-testid="scale-photo-note">{note}</p>}
+      <div className="grid grid-cols-2 gap-2">
+        <div><Label htmlFor="am-length" className="text-xs">Length (cm)</Label><Input id="am-length" inputMode="decimal" value={length} placeholder="54" {...errFor('length')} onChange={e => { setLength(e.target.value); setError(null); }} /></div>
+        <div><Label htmlFor="am-head" className="text-xs">Head circumference (cm)</Label><Input id="am-head" inputMode="decimal" value={head} placeholder="37" {...errFor('head')} onChange={e => { setHead(e.target.value); setError(null); }} /></div>
+      </div>
+      {error && <p id="am-error" className="text-xs text-destructive">{error.text}</p>}
+      <Button size="sm" onClick={() => { void save(); }} disabled={reading}>Save measurement</Button>
       {saved && <p role="status" className="text-sm text-primary">{saved}</p>}
-      <p className="text-[10px] text-muted-foreground">A photo is sent to Claude (Anthropic) only to read the number; it is not stored. Nothing is saved until you tap Save weight.</p>
+      <p className="text-[10px] text-muted-foreground">Length and head circumference are optional. A photo is sent to Claude (Anthropic) only to read the number; it is not stored. Nothing is saved until you tap Save measurement.</p>
     </div>
   );
 }
 
-export default function BabyGrowthChart({ babyName, birthDate, sex, events, onSaveWeight, onSetSex, onSetBirthDate }: Props) {
+function MeasureTabs({ measure, onChange }: { measure: GrowthMeasure; onChange: (m: GrowthMeasure) => void }) {
+  return (
+    <div role="tablist" aria-label="Chart" className="inline-flex rounded-md border p-0.5">
+      {MEASURES.map(m => (
+        <button key={m} type="button" role="tab" aria-selected={measure === m} onClick={() => onChange(m)}
+          className={`text-xs px-3 py-1.5 rounded ${measure === m ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>{TAB[m]}</button>
+      ))}
+    </div>
+  );
+}
+
+export default function BabyGrowthChart({ babyName, birthDate, sex, events, onSaveMeasurement, onSetSex, onSetBirthDate }: Props) {
+  const [measure, setMeasure] = useState<GrowthMeasure>('weight');
   const growthSex = normaliseSex(sex);
-  const points = useMemo(() => (birthDate ? weightPoints(birthDate, events, localDate) : []), [birthDate, events]);
+  const points = useMemo(() => (birthDate ? measurePoints(measure, birthDate, events, localDate) : []), [measure, birthDate, events]);
   const last = points[points.length - 1];
-  const line = growthSex && last ? latestLine(growthSex, last.day, last.kg) : null;
-  const label = line ?? (last ? `${kgLabel(last.kg)} at ${ageLabel(last.day)}` : null);
+  const line = growthSex && last ? latestLine(growthSex, last.day, last.value, measure) : null;
+  const label = line ?? (last ? `${valueLabel(measure, last.value)} at ${ageLabel(last.day)}` : null);
 
   return (
     <section className="space-y-3" aria-labelledby="gc-title">
       <div>
-        <h4 id="gc-title" className="font-semibold text-sm">Weight for age</h4>
+        <h4 id="gc-title" className="font-semibold text-sm">{TITLE[measure]}</h4>
         <p className="text-[11px] text-muted-foreground">WHO Child Growth Standards, {growthSex === 'male' ? 'boys' : growthSex === 'female' ? 'girls' : 'girls and boys'}, birth to 2 years</p>
       </div>
       {!birthDate && <BirthDatePicker babyName={babyName} onSetBirthDate={onSetBirthDate} />}
       {birthDate && !growthSex && <SexPicker babyName={babyName} onSetSex={onSetSex} />}
       {birthDate && growthSex && (
         <>
-          <div role="img" aria-label={`Weight-for-age chart with the 3rd, 15th, 50th, 85th and 97th percentile curves${line ? `. Latest: ${line}` : ''}`}>
-            <Chart sex={growthSex} points={points} />
+          <MeasureTabs measure={measure} onChange={setMeasure} />
+          <div role="img" aria-label={`${TITLE[measure]} chart with the 3rd, 15th, 50th, 85th and 97th percentile curves${line ? `. Latest: ${line}` : ''}`}>
+            <Chart sex={growthSex} points={points} measure={measure} />
           </div>
           <div className="space-y-1">
             {line
               ? <p className="text-sm font-medium" data-testid="growth-latest">{line}</p>
-              : <p className="text-sm text-muted-foreground">Add a weight to see where {babyName} is on the chart.</p>}
+              : <p className="text-sm text-muted-foreground">Add a {NOUN[measure]} to see where {babyName} is on the chart.</p>}
             <p className="text-xs text-muted-foreground">Babies often move between lines in the first weeks. Your midwife or paediatrician looks at the trend.</p>
           </div>
         </>
       )}
       {birthDate && !growthSex && label && <p className="text-sm" data-testid="growth-latest">{label}</p>}
-      <AddWeight onSaveWeight={onSaveWeight} birthDate={birthDate} />
+      <AddMeasurement onSaveMeasurement={onSaveMeasurement} birthDate={birthDate} />
     </section>
   );
 }

@@ -9,14 +9,15 @@ class RO { observe() {} unobserve() {} disconnect() {} }
 (globalThis as unknown as { ResizeObserver: unknown }).ResizeObserver ??= RO;
 
 const birth = format(subDays(new Date(), 56), 'yyyy-MM-dd');
-const ev = (id: string, daysAgo: number, g: number) => ({
-  id, occurred_at: new Date(`${format(subDays(new Date(), daysAgo), 'yyyy-MM-dd')}T12:00:00`).toISOString(), data: { weight_g: g },
+const ev = (id: string, daysAgo: number, g: number | null, length_cm: number | null = null, head_cm: number | null = null) => ({
+  id, occurred_at: new Date(`${format(subDays(new Date(), daysAgo), 'yyyy-MM-dd')}T12:00:00`).toISOString(), data: { weight_g: g, length_cm, head_cm },
 });
+const todayIso = () => format(new Date(), 'yyyy-MM-dd');
 
 function setup(over: Partial<Parameters<typeof BabyGrowthChart>[0]> = {}) {
   const props = {
     babyName: 'Lou', birthDate: birth, sex: 'female', events: [ev('a', 56, 3300), ev('b', 0, 4600)],
-    onSaveWeight: vi.fn(async () => true), onSetSex: vi.fn(async () => true), onSetBirthDate: vi.fn(async () => true),
+    onSaveMeasurement: vi.fn(async () => true), onSetSex: vi.fn(async () => true), onSetBirthDate: vi.fn(async () => true),
     ...over,
   };
   render(<BabyGrowthChart {...props} />);
@@ -54,15 +55,63 @@ describe('BabyGrowthChart', () => {
     const p = setup();
     const input = screen.getByLabelText('Weight (kg)');
     await userEvent.type(input, '30');
-    await userEvent.click(screen.getByRole('button', { name: 'Save weight' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Save measurement' }));
     expect(screen.getByText('Enter a weight between 0.5 kg and 25 kg.')).toBeTruthy();
-    expect(p.onSaveWeight).not.toHaveBeenCalled();
+    expect(p.onSaveMeasurement).not.toHaveBeenCalled();
     await userEvent.click(screen.getByRole('button', { name: 'g' }));
     await userEvent.clear(screen.getByLabelText('Weight (g)'));
     await userEvent.type(screen.getByLabelText('Weight (g)'), '4720');
-    await userEvent.click(screen.getByRole('button', { name: 'Save weight' }));
-    expect(p.onSaveWeight).toHaveBeenCalledWith({ measuredOn: format(new Date(), 'yyyy-MM-dd'), weightG: 4720, source: 'typed' });
-    expect(await screen.findByText('Weight saved.')).toBeTruthy();
+    await userEvent.click(screen.getByRole('button', { name: 'Save measurement' }));
+    expect(p.onSaveMeasurement).toHaveBeenCalledWith({ measuredOn: todayIso(), weightG: 4720, lengthCm: null, headCm: null, source: 'typed' });
+    expect(await screen.findByText('Measurement saved.')).toBeTruthy();
+  });
+
+  it('one form, one record: weight, length and head saved together', async () => {
+    const p = setup();
+    expect(screen.getAllByRole('button', { name: 'Save measurement' })).toHaveLength(1);
+    await userEvent.type(screen.getByLabelText('Weight (kg)'), '4,7');
+    await userEvent.type(screen.getByLabelText('Length (cm)'), '57.5');
+    await userEvent.type(screen.getByLabelText('Head circumference (cm)'), '38,2');
+    await userEvent.click(screen.getByRole('button', { name: 'Save measurement' }));
+    expect(p.onSaveMeasurement).toHaveBeenCalledTimes(1);
+    expect(p.onSaveMeasurement).toHaveBeenCalledWith({ measuredOn: todayIso(), weightG: 4700, lengthCm: 57.5, headCm: 38.2, source: 'typed' });
+    await screen.findByText('Measurement saved.');
+    expect((screen.getByLabelText('Length (cm)') as HTMLInputElement).value).toBe('');
+  });
+
+  it('length or head alone is fine; empty form and out-of-range values are not', async () => {
+    const p = setup();
+    await userEvent.click(screen.getByRole('button', { name: 'Save measurement' }));
+    expect(screen.getByText('Enter a weight, length or head circumference.')).toBeTruthy();
+    await userEvent.type(screen.getByLabelText('Head circumference (cm)'), '90');
+    await userEvent.click(screen.getByRole('button', { name: 'Save measurement' }));
+    expect(screen.getByText('Enter a head circumference between 20 cm and 60 cm.')).toBeTruthy();
+    expect(screen.getByLabelText('Head circumference (cm)').getAttribute('aria-invalid')).toBe('true');
+    expect(p.onSaveMeasurement).not.toHaveBeenCalled();
+    await userEvent.clear(screen.getByLabelText('Head circumference (cm)'));
+    await userEvent.type(screen.getByLabelText('Length (cm)'), '56');
+    await userEvent.click(screen.getByRole('button', { name: 'Save measurement' }));
+    expect(p.onSaveMeasurement).toHaveBeenCalledWith({ measuredOn: todayIso(), weightG: null, lengthCm: 56, headCm: null, source: 'typed' });
+  });
+
+  it('Weight / Length / Head tabs switch the chart and its sentence', async () => {
+    setup({ events: [ev('a', 56, 3300, 50, 34), ev('b', 0, 4600, 57.5, 38.5)] });
+    expect(screen.getByRole('heading', { name: 'Weight for age' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Weight' }).getAttribute('aria-selected')).toBe('true');
+    await userEvent.click(screen.getByRole('tab', { name: 'Length' }));
+    expect(screen.getByRole('heading', { name: 'Length for age' })).toBeTruthy();
+    expect(screen.getByTestId('growth-latest').textContent).toMatch(/^57\.5 cm at 8 weeks, around the \d+(st|nd|rd|th) percentile$/);
+    await userEvent.click(screen.getByRole('tab', { name: 'Head' }));
+    expect(screen.getByRole('heading', { name: 'Head circumference for age' })).toBeTruthy();
+    expect(screen.getByTestId('growth-latest').textContent).toMatch(/^38\.5 cm at 8 weeks, around the \d+(st|nd|rd|th) percentile$/);
+    expect(screen.getByText('Babies often move between lines in the first weeks. Your midwife or paediatrician looks at the trend.')).toBeTruthy();
+  });
+
+  it('a tab with no measurements yet asks for one, neutrally', async () => {
+    setup();
+    await userEvent.click(screen.getByRole('tab', { name: 'Head' }));
+    expect(screen.queryByTestId('growth-latest')).toBeNull();
+    expect(screen.getByText('Add a head circumference to see where Lou is on the chart.')).toBeTruthy();
   });
 
   it('photo: pre-fills the read value, never saves until she taps Save, saves her correction as a photo reading', async () => {
@@ -71,15 +120,16 @@ describe('BabyGrowthChart', () => {
     const p = setup();
     await userEvent.upload(screen.getByTestId('scale-photo-input'), new File(['x'], 'scale.jpg', { type: 'image/jpeg' }));
     await waitFor(() => expect((screen.getByLabelText('Weight (kg)') as HTMLInputElement).value).toBe('4.62'));
-    expect(screen.getByTestId('scale-photo-note').textContent).toMatch(/Read from the photo: 4\.62 kg\. Check it matches the scale/);
+    expect(screen.getByTestId('scale-photo-note').textContent).toMatch(/Read from the photo: 4\.62 kg\. Check it matches the scale, correct it if needed, then tap Save measurement\./);
     const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe('/api/baby/scale-photo');
     expect(JSON.parse(String(init.body))).toEqual({ image: 'QUJD', mediaType: 'image/jpeg' });
-    expect(p.onSaveWeight).not.toHaveBeenCalled();
+    expect(p.onSaveMeasurement).not.toHaveBeenCalled();
     await userEvent.clear(screen.getByLabelText('Weight (kg)'));
     await userEvent.type(screen.getByLabelText('Weight (kg)'), '4.68');
-    await userEvent.click(screen.getByRole('button', { name: 'Save weight' }));
-    expect(p.onSaveWeight).toHaveBeenCalledWith({ measuredOn: format(new Date(), 'yyyy-MM-dd'), weightG: 4680, source: 'photo' });
+    await userEvent.type(screen.getByLabelText('Length (cm)'), '57');
+    await userEvent.click(screen.getByRole('button', { name: 'Save measurement' }));
+    expect(p.onSaveMeasurement).toHaveBeenCalledWith({ measuredOn: todayIso(), weightG: 4680, lengthCm: 57, headCm: null, source: 'photo' });
     vi.unstubAllGlobals();
   });
 
@@ -89,7 +139,7 @@ describe('BabyGrowthChart', () => {
     await userEvent.upload(screen.getByTestId('scale-photo-input'), new File(['x'], 'blurry.jpg', { type: 'image/jpeg' }));
     expect((await screen.findByTestId('scale-photo-note')).textContent).toMatch(/couldn’t read a number on this photo/);
     expect((screen.getByLabelText('Weight (kg)') as HTMLInputElement).value).toBe('');
-    expect(p.onSaveWeight).not.toHaveBeenCalled();
+    expect(p.onSaveMeasurement).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
   });
 });

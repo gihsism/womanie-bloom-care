@@ -13,7 +13,7 @@ import { useLifeEvents, importLocalOnce, type LifeEvent } from '@/hooks/useLifeE
 import { Baby, Milk, Moon, Droplets, Ruler, Syringe, Trash2, Play, Square, BarChart3, Plus, Timer } from 'lucide-react';
 // Stats tab draws charts (recharts, ~110 KB gzip): load it when opened.
 const BabyStatsTab = lazy(() => import('./BabyStatsTab'));
-// WHO weight chart + "Add a weight" (recharts, WHO table): loaded with the Growth tab.
+// WHO growth charts + "Add a measurement" (recharts, WHO tables): loaded with the Growth tab.
 const BabyGrowthChart = lazy(() => import('./BabyGrowthChart'));
 import { differenceInMinutes, format, isToday, isYesterday, parseISO } from 'date-fns';
 
@@ -336,33 +336,17 @@ function NappyTab({ babyId }: { babyId: string }) {
 function GrowthTab({ baby, onBabyChange }: { baby: BabyRow; onBabyChange: (patch: Partial<BabyRow>) => Promise<boolean> }) {
   const babyId = baby.id;
   const growth = useLifeEvents<GrowthData>('baby_growth', { babyId, limit: 100 });
-  const saveWeight = async (w: { measuredOn: string; weightG: number; source: 'typed' | 'photo' }) =>
-    growth.add({ occurred_at: new Date(`${w.measuredOn}T12:00:00`).toISOString(), data: { weight_g: w.weightG, length_cm: null, head_cm: null, source: w.source } });
-  const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-  const [w, setW] = useState(''); const [l, setL] = useState(''); const [h, setH] = useState('');
-  const num = (v: string) => { const n = parseFloat(v.replace(',', '.')); return Number.isFinite(n) ? n : null; };
-  const save = async () => {
-    const data = { weight_g: num(w) !== null ? Math.round(num(w) as number) : null, length_cm: num(l), head_cm: num(h) };
-    if (data.weight_g === null && data.length_cm === null && data.head_cm === null) return;
-    const ok = await growth.add({ occurred_at: new Date(`${date}T12:00:00`).toISOString(), data });
-    if (ok) { setW(''); setL(''); setH(''); }
-  };
+  // One record per measurement (weight, length and head together), as before.
+  const saveMeasurement = async (m: { measuredOn: string; weightG: number | null; lengthCm: number | null; headCm: number | null; source: 'typed' | 'photo' }) =>
+    growth.add({ occurred_at: new Date(`${m.measuredOn}T12:00:00`).toISOString(), data: { weight_g: m.weightG, length_cm: m.lengthCm, head_cm: m.headCm, source: m.source } });
   return (
     <div className="space-y-3">
       {growth.error && <p className="text-xs text-destructive">{growth.error}</p>}
       <Suspense fallback={<p className="text-xs text-muted-foreground">Loading the chart…</p>}>
         <BabyGrowthChart babyName={baby.name} birthDate={baby.birth_date} sex={baby.sex} events={growth.events}
-          onSaveWeight={async w => !!(await saveWeight(w))}
+          onSaveMeasurement={async m => !!(await saveMeasurement(m))}
           onSetSex={sex => onBabyChange({ sex })} onSetBirthDate={birth_date => onBabyChange({ birth_date })} />
       </Suspense>
-      <p className="label-mono border-t pt-3">Weight, length and head</p>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        <div><Label htmlFor="g-date" className="text-xs">Date</Label><Input id="g-date" type="date" value={date} onChange={e => setDate(e.target.value)} /></div>
-        <div><Label htmlFor="g-w" className="text-xs">Weight (g)</Label><Input id="g-w" inputMode="numeric" value={w} onChange={e => setW(e.target.value)} placeholder="4200" /></div>
-        <div><Label htmlFor="g-l" className="text-xs">Length (cm)</Label><Input id="g-l" inputMode="decimal" value={l} onChange={e => setL(e.target.value)} placeholder="54" /></div>
-        <div><Label htmlFor="g-h" className="text-xs">Head (cm)</Label><Input id="g-h" inputMode="decimal" value={h} onChange={e => setH(e.target.value)} placeholder="37" /></div>
-      </div>
-      <Button size="sm" onClick={save}>Save measurement</Button>
       <EntryList events={growth.events} onRemove={growth.remove} dateOnly render={e => (
         <>
           {[e.data?.weight_g ? `${(Number(e.data.weight_g) / 1000).toFixed(2)} kg` : null,

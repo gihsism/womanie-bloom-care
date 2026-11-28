@@ -1,17 +1,29 @@
-// Weight-for-age percentiles from the WHO Child Growth Standards (LMS
-// method). Pure functions; the chart (BabyGrowthChart.tsx) and the tests
-// use them.
+// Weight-, length- and head-circumference-for-age percentiles from the WHO
+// Child Growth Standards (LMS method). Pure functions; the chart
+// (BabyGrowthChart.tsx) and the tests use them.
 //
-//   z = ((weight / M)^L - 1) / (L * S)        (L != 0)
-//   weight at z = M * (1 + L * S * z)^(1 / L)
+//   z = ((value / M)^L - 1) / (L * S)        (L != 0; L = 1 for length and head)
+//   value at z = M * (1 + L * S * z)^(1 / L)
 //   percentile = 100 * Phi(z)
 //
 // WHO recommends a restricted form beyond |z| > 3; the chart never draws
 // those curves and the sentence then says "below the 1st" / "above the
 // 99th", so the plain formula is enough here.
 import { WHO_WFA_BOYS, WHO_WFA_GIRLS, type LmsRow } from './whoWeightForAge';
+import { WHO_HCFA_BOYS, WHO_HCFA_GIRLS, WHO_LFA_BOYS, WHO_LFA_GIRLS } from './whoLengthHeadForAge';
 
 export type GrowthSex = 'female' | 'male';
+/** What a chart shows: weight (kg), length (cm) or head circumference (cm). */
+export type GrowthMeasure = 'weight' | 'length' | 'head';
+export const MEASURES: readonly GrowthMeasure[] = ['weight', 'length', 'head'];
+
+const TABLES: Record<GrowthMeasure, Record<GrowthSex, readonly LmsRow[]>> = {
+  weight: { female: WHO_WFA_GIRLS, male: WHO_WFA_BOYS },
+  length: { female: WHO_LFA_GIRLS, male: WHO_LFA_BOYS },
+  head: { female: WHO_HCFA_GIRLS, male: WHO_HCFA_BOYS },
+};
+/** Unit each measure is charted in. */
+export const UNIT: Record<GrowthMeasure, 'kg' | 'cm'> = { weight: 'kg', length: 'cm', head: 'cm' };
 export interface Lms { L: number; M: number; S: number }
 
 /** Last age (days) the WHO 0-24 month table covers. */
@@ -37,11 +49,12 @@ export function normaliseSex(v: string | null | undefined): GrowthSex | null {
 }
 
 /** L, M, S at an age in days (linear between table rows); null outside 0-731 days. */
-export function lmsAt(sex: GrowthSex, ageDays: number): Lms | null {
+export function lmsAt(sex: GrowthSex, ageDays: number, measure: GrowthMeasure = 'weight'): Lms | null {
   if (!Number.isFinite(ageDays) || ageDays < 0 || ageDays > MAX_AGE_DAYS) return null;
-  const t: readonly LmsRow[] = sex === 'female' ? WHO_WFA_GIRLS : WHO_WFA_BOYS;
-  let hi = t.findIndex(r => r[0] >= ageDays);
-  if (hi < 0) hi = t.length - 1;
+  const t = TABLES[measure][sex];
+  const hi = t.findIndex(r => r[0] >= ageDays);
+  // Past the last row (length ends at day 730): that row, never extrapolated.
+  if (hi < 0) { const r = t[t.length - 1]; return { L: r[1], M: r[2], S: r[3] }; }
   const b = t[hi];
   if (b[0] === ageDays || hi === 0) return { L: b[1], M: b[2], S: b[3] };
   const a = t[hi - 1];
@@ -49,11 +62,13 @@ export function lmsAt(sex: GrowthSex, ageDays: number): Lms | null {
   return { L: a[1] + (b[1] - a[1]) * f, M: a[2] + (b[2] - a[2]) * f, S: a[3] + (b[3] - a[3]) * f };
 }
 
+/** z of a value (kg or cm) for the L, M, S of its measure. */
 export function zScore(weightKg: number, { L, M, S }: Lms): number {
   if (Math.abs(L) < 1e-9) return Math.log(weightKg / M) / S;
   return (Math.pow(weightKg / M, L) - 1) / (L * S);
 }
 
+/** Value (kg or cm) at a z, for the L, M, S of any measure. */
 export function weightAtZ(z: number, { L, M, S }: Lms): number {
   if (Math.abs(L) < 1e-9) return M * Math.exp(S * z);
   return M * Math.pow(1 + L * S * z, 1 / L);
@@ -67,11 +82,16 @@ export function normalCdf(z: number): number {
   return z >= 0 ? 0.5 * (1 + y) : 0.5 * (1 - y);
 }
 
+/** Percentile (0-100) of a measurement at an age; null outside birth-24 months. */
+export function percentileOf(measure: GrowthMeasure, sex: GrowthSex, ageDays: number, value: number): number | null {
+  const lms = lmsAt(sex, ageDays, measure);
+  if (!lms || !(value > 0)) return null;
+  return 100 * normalCdf(zScore(value, lms));
+}
+
 /** Percentile (0-100) of a weight at an age; null outside birth-24 months. */
 export function weightPercentile(sex: GrowthSex, ageDays: number, weightKg: number): number | null {
-  const lms = lmsAt(sex, ageDays);
-  if (!lms || !(weightKg > 0)) return null;
-  return 100 * normalCdf(zScore(weightKg, lms));
+  return percentileOf('weight', sex, ageDays, weightKg);
 }
 
 /** Whole days from the birth date to the measurement date (both 'yyyy-mm-dd'). */
@@ -104,22 +124,24 @@ export function percentilePhrase(p: number): string {
 
 /** "4.6 kg" (one decimal, as the official charts read). */
 export const kgLabel = (kg: number) => `${(Math.round(kg * 10) / 10).toFixed(1)} kg`;
+/** "4.6 kg" / "57.5 cm" (one decimal). */
+export const valueLabel = (measure: GrowthMeasure, v: number) => `${(Math.round(v * 10) / 10).toFixed(1)} ${UNIT[measure]}`;
 
-/** "4.6 kg at 8 weeks, around the 40th percentile"; null when no percentile applies. */
-export function latestLine(sex: GrowthSex, ageDays: number, weightKg: number): string | null {
-  const p = weightPercentile(sex, ageDays, weightKg);
+/** "4.6 kg at 8 weeks, around the 40th percentile" (or cm for length/head); null when no percentile applies. */
+export function latestLine(sex: GrowthSex, ageDays: number, value: number, measure: GrowthMeasure = 'weight'): string | null {
+  const p = percentileOf(measure, sex, ageDays, value);
   if (p === null) return null;
-  return `${kgLabel(weightKg)} at ${ageLabel(ageDays)}, ${percentilePhrase(p)}`;
+  return `${valueLabel(measure, value)} at ${ageLabel(ageDays)}, ${percentilePhrase(p)}`;
 }
 
 /** Curve points every `step` days from 0 to `toDays` (inclusive). */
-export function curveRows(sex: GrowthSex, toDays: number, step = 7): Array<Record<string, number>> {
+export function curveRows(sex: GrowthSex, toDays: number, step = 7, measure: GrowthMeasure = 'weight'): Array<Record<string, number>> {
   const end = Math.min(MAX_AGE_DAYS, Math.max(0, toDays));
   const ages: number[] = [];
   for (let d = 0; d < end; d += step) ages.push(d);
   ages.push(end);
   return ages.map(d => {
-    const lms = lmsAt(sex, d) as Lms;
+    const lms = lmsAt(sex, d, measure) as Lms;
     const row: Record<string, number> = { day: d };
     for (const c of CURVES) row[`p${c.p}`] = Math.round(weightAtZ(c.z, lms) * 1000) / 1000;
     return row;
@@ -145,22 +167,62 @@ export function parseWeight(raw: string, unit: 'kg' | 'g'): { ok: true; kg: numb
   return { ok: true, kg: Math.round(kg * 1000) / 1000 };
 }
 
+/** Length and head circumference she may type, in cm. */
+export const CM_RANGE: Record<'length' | 'head', { min: number; max: number }> = {
+  length: { min: 25, max: 130 },
+  head: { min: 20, max: 60 },
+};
+
+/**
+ * Her typed length or head circumference -> cm (one decimal). Empty is
+ * fine (both are optional): { ok: true, cm: null }.
+ */
+export function parseCm(raw: string, measure: 'length' | 'head'): { ok: true; cm: number | null } | { ok: false; error: string } {
+  const s = raw.trim().replace(/\s/g, '').replace(',', '.');
+  if (!s) return { ok: true, cm: null };
+  const what = measure === 'length' ? 'length' : 'head circumference';
+  if (!/^\d+(\.\d+)?$/.test(s)) return { ok: false, error: `Enter the ${what} as a number in cm, for example ${measure === 'length' ? '57.5' : '38'}.` };
+  const n = Number(s);
+  const { min, max } = CM_RANGE[measure];
+  if (n < min || n > max) return { ok: false, error: `Enter a ${what} between ${min} cm and ${max} cm.` };
+  return { ok: true, cm: Math.round(n * 10) / 10 };
+}
+
+export interface GrowthEventData { weight_g?: number | null; length_cm?: number | null; head_cm?: number | null }
+export interface MeasurePoint { day: number; value: number; on: string }
 export interface WeightPoint { day: number; kg: number; on: string }
+
+/** The value of one measure in a saved record (kg for weight, cm otherwise); null when not recorded. */
+export function valueOf(measure: GrowthMeasure, data: GrowthEventData | null | undefined): number | null {
+  const raw = Number(measure === 'weight' ? data?.weight_g : measure === 'length' ? data?.length_cm : data?.head_cm);
+  if (!Number.isFinite(raw) || raw <= 0) return null;
+  return measure === 'weight' ? raw / 1000 : raw;
+}
+
+/** Her measurements of one kind, as chart points within birth-24 months, oldest first. */
+export function measurePoints(
+  measure: GrowthMeasure,
+  birthDate: string,
+  events: Array<{ occurred_at: string; data?: GrowthEventData | null }>,
+  localDate: (iso: string) => string,
+): MeasurePoint[] {
+  const out: MeasurePoint[] = [];
+  for (const e of events) {
+    const value = valueOf(measure, e.data);
+    if (value === null) continue;
+    const on = localDate(e.occurred_at);
+    const day = ageInDays(birthDate, on);
+    if (day < 0 || day > MAX_AGE_DAYS) continue;
+    out.push({ day, value, on });
+  }
+  return out.sort((a, b) => a.day - b.day || a.on.localeCompare(b.on));
+}
 
 /** Her measurements with a weight, as chart points within birth-24 months, oldest first. */
 export function weightPoints(
   birthDate: string,
-  events: Array<{ occurred_at: string; data?: { weight_g?: number | null } | null }>,
+  events: Array<{ occurred_at: string; data?: GrowthEventData | null }>,
   localDate: (iso: string) => string,
 ): WeightPoint[] {
-  const out: WeightPoint[] = [];
-  for (const e of events) {
-    const g = Number(e.data?.weight_g);
-    if (!Number.isFinite(g) || g <= 0) continue;
-    const on = localDate(e.occurred_at);
-    const day = ageInDays(birthDate, on);
-    if (day < 0 || day > MAX_AGE_DAYS) continue;
-    out.push({ day, kg: g / 1000, on });
-  }
-  return out.sort((a, b) => a.day - b.day || a.on.localeCompare(b.on));
+  return measurePoints('weight', birthDate, events, localDate).map(p => ({ day: p.day, kg: p.value, on: p.on }));
 }
