@@ -858,3 +858,48 @@ describe('Research round 17: plain-number content check', () => {
     for (const id of ['pmid-37960761', 'pmid-36576445', 'pmid-39358652', 'pmid-33112163', 'pmid-34564868', 'pmid-39067455', 'pmid-34593482', 'pmid-36271388', 'pmid-28777972', 'pmid-31160241', 'pmid-39767456', 'pmid-25835269', 'pmid-39946383', 'pmid-35286547', 'pmid-33656703']) expect(byId.get(id)!.certainty).toBe('not stated');
   });
 });
+
+describe('Research round 18: last unchecked items content check', () => {
+  const lib = getLibrary();
+  const byId = new Map(lib.items.map((i) => [i.id, i]));
+  const text = (id: string) => [byId.get(id)!.summary, ...byId.get(id)!.keyPoints].join(' ');
+
+  it('wrong or overstated results are corrected', () => {
+    expect(text('pmid-41692034')).not.toMatch(/small (amount of )?extra weight loss/);
+    expect(text('pmid-41692034')).toMatch(/likely makes little to no difference to weight loss/);
+    expect(text('pmid-31309536')).toMatch(/probably improves psoriasis severity/);
+    expect(text('pmid-39500369')).toMatch(/possible but uncertain rise in stillbirth/);
+    expect(text('pmid-26148507')).toMatch(/while hCG showed no clear difference/);
+    expect(text('pmid-40596934')).not.toMatch(/three times as likely/);
+    expect(text('pmid-24853164')).toMatch(/Infant colic was linked to higher odds of migraine/);
+    expect(text('pmid-40827602')).toMatch(/polyp detection rate \(high-certainty evidence\)/);
+    expect(text('pmid-41268817')).toMatch(/may have made little or no difference/);
+  });
+
+  it('"similar" / "did not" / "no effect" where the abstract found no clear difference', () => {
+    for (const id of ['pmid-37851421', 'pmid-38042118', 'pmid-37787793', 'pmid-36693931', 'pmid-38034000', 'pmid-37290111', 'pmid-30648738', 'pmid-34979465', 'pmid-26577241', 'pmid-33725837', 'pmid-32722824']) expect(text(id)).toMatch(/no clear difference/);
+    expect(text('pmid-26755330')).not.toMatch(/found no effect on deaths/);
+    expect(text('pmid-31322731')).not.toMatch(/No effect was found/);
+    expect(text('pmid-38451843')).not.toMatch(/about as well/);
+  });
+
+  it('facts not in the abstract are removed', () => {
+    expect(text('pmid-39097395')).not.toMatch(/9-valent/);
+    expect(text('pmid-35698149')).not.toMatch(/oral L\. rhamnosus did better/);
+    expect(text('pmid-26888713')).not.toMatch(/did not appear to stop people/);
+    expect(text('pmid-28597983')).not.toMatch(/did not study pregnancy/);
+    expect(text('pmid-28597983')).toMatch(/abstract does not mention pregnancy/);
+  });
+
+  it('advice in the app voice is credited (LactMed, guidelines, authors)', () => {
+    expect(text('pmid-30000045')).toMatch(/LactMed calls it a preferred painkiller/);
+    expect(text('pmid-30000253')).toMatch(/LactMed calls paracetamol/);
+    expect(text('pmid-26598775')).toMatch(/The guideline says women should be told/);
+    expect(text('pmid-25590212')).toMatch(/The guideline says that, where possible/);
+    expect(text('pmid-38564922')).toMatch(/The authors advise providers/);
+  });
+
+  it('certainty labels the abstracts never gave are "not stated"', () => {
+    for (const id of ['pmid-33050979', 'pmid-34425187', 'pmid-40971619', 'pmid-33041224', 'pmid-38426798', 'pmid-39064816', 'pmid-30466985', 'pmid-30307509', 'pmid-39365239', 'pmid-30594197', 'pmid-26281028', 'pmid-29939939', 'pmid-29356580', 'pmid-38215463']) expect(byId.get(id)!.certainty).toBe('not stated');
+  });
+});

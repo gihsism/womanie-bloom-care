@@ -30,8 +30,13 @@ thyroid, screening tests, infections).
 
 ## How much has been checked
 
-Over 17 rounds of review, **2,298 source summaries** were read side by side
-with the original research abstract. Rounds 1-13 started with the sources
+**The whole library has now been checked.** Over 18 rounds of review,
+**2,555 source summaries** were read side by side with the original
+research abstract; the other 6 PubMed sources were written straight from
+their abstracts when they were added, so all 2,561 PubMed summaries have
+been checked. The 28 sources that are not on PubMed (Swiss official pages
+and laws, NHS and a few guideline bodies) were written from the full
+document itself. Rounds 1-13 started with the sources
 users are most likely to see (the order came from running several hundred
 everyday questions through the app and counting which sources came up
 most). Round 14 picked the riskiest of the rest: summaries that give doses
@@ -41,13 +46,19 @@ which had one of those risk words. Round 16 took the rest of those and
 the first 100 that only give a plain number, pregnancy, breastfeeding,
 medicine and lab topics first. Round 17 took the next 200 plain-number
 ones, pregnancy, cycle, menopause, contraception and lab topics first.
+Round 18 took everything left (257 summaries), including 10 LactMed, NICE
+and WHO entries that earlier rounds had skipped as "no abstract": PubMed
+files their abstract under a book record, which our first script missed.
 
-- Most summaries were fine as written. The later rounds deliberately picked riskier ones (doses, "safe", medicines in pregnancy), and there about 2 in 5 needed a fix. In round 17 (plain numbers only) about 1 in 4 did.
-- **723 corrections** were made in total (153 of them in round 14, in 70
-  of the 150 risky summaries checked; 64 in round 15, in 41 of 150; 142 in
-  round 16, in 87 of 226; 67 in round 17, in 50 of 200).
-- Almost every source that comes up for the questions we tested has now
-  been checked once.
+- **About 4 in 5 summaries were fine as written** (2,011 of 2,555). The
+  later rounds deliberately picked riskier ones (doses, "safe", medicines
+  in pregnancy), and there about 2 in 5 needed a fix. In rounds 17 and 18
+  (plain numbers and the rest) about 1 in 4 did.
+- **805 corrections** were made in total, in 544 summaries (153 of them in
+  round 14, in 70 of the 150 risky summaries checked; 64 in round 15, in
+  41 of 150; 142 in round 16, in 87 of 226; 67 in round 17, in 50 of 200;
+  82 in round 18, in 66 of 257).
+- Every source in the library has now been checked once.
 
 ## The main kinds of errors found
 
@@ -134,19 +145,23 @@ them, and these come up first in the chat:
 - **Ten higher-priority gaps** from the first audit, such as painkillers
   while breastfeeding, how long it usually takes to get pregnant, and IVF
   success rates by age (the list is at the top of `docs/research-gaps.md`).
-- **About 255 summaries have never been checked.** They did not come up
-  for any of the questions we tested, and they are the lower-risk ones.
-  Round 16 checked 226 more against their abstracts (142 fixes in 87
-  summaries: results that were wrong or too strong corrected, "similar" or
-  "did not lower" changed to "no clear difference", two facts not in the
-  abstract removed, ten certainty labels set to "not stated", and advice
-  credited to the body that gave it). Round 17 checked the next 200
-  (67 fixes in 50 summaries: "similar", "did not differ" or "about as
-  well" changed to "no clear difference", a bone-building marker that was
-  called a breakdown marker, numbers and claims not in the abstract
-  removed, 15 certainty labels set to "not stated"). Still open: about
-  200 with only a plain number, 8 with a risk word but no abstract to
-  check against, about 50 none. The next step is the last 200.
+- **No summaries are left unchecked.** Round 16 checked 226 against their
+  abstracts (142 fixes in 87 summaries: results that were wrong or too
+  strong corrected, "similar" or "did not lower" changed to "no clear
+  difference", two facts not in the abstract removed, ten certainty labels
+  set to "not stated", and advice credited to the body that gave it).
+  Round 17 checked the next 200 (67 fixes in 50 summaries: "similar",
+  "did not differ" or "about as well" changed to "no clear difference", a
+  bone-building marker that was called a breakdown marker, numbers and
+  claims not in the abstract removed, 15 certainty labels set to "not
+  stated"). Round 18 checked the last 257 (82 fixes in 66 summaries: an
+  intermittent-fasting review that found little to no extra weight loss,
+  not "a small extra loss"; a psoriasis result with the wrong direction;
+  heat and stillbirth now "possible but uncertain"; "no effect" or
+  "similar" changed to "no clear difference" in 17 summaries; 14
+  certainty labels set to "not stated"; LactMed's ibuprofen and
+  paracetamol advice credited to LactMed). New sources should be checked
+  against their abstract when they are added.
 - **A few labels are judgement calls** (for example a review that grades
   its findings from "moderate" to "low" and carries one label). These were
   left as they are and are listed in the detailed file.

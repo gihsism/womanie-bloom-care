@@ -1452,6 +1452,81 @@ abstract, about 200 with only a plain number (the topics the app shows
 least), and about 47 with none of the risk words.
 Tests: `ask-ai-audit.test.ts` (round 17 block).
 
+## Round 18 (2026-11-28)
+
+### Summary content check: the rest of the library
+
+Same method as rounds 16-17, on everything left: the 247 PubMed items
+never checked (about 200 plain-number items and 47 with none of the risk
+words; all 247 have a PubMed abstract) and the 10 items skipped in
+earlier rounds as "no abstract" (`pmid-30000045`, `pmid-30000253`,
+`pmid-30000103`, `pmid-26598775`, `pmid-31393678`, `pmid-37871145`,
+`pmid-42932433`, `pmid-31940155`, `pmid-30070803`, `pmid-33369898`). Those
+10 are NCBI Bookshelf records (LactMed, NICE, WHO): PubMed files their
+abstract under a book record, which the earlier fetch script did not read.
+They do have an abstract, so they were checked like the rest and no
+"no abstract" decision is needed. **257 checked, 191 fair; 82 fixes in
+66 items**, text only (53 re-embedded offline; the 13 certainty-only
+changes need no re-embed):
+
+- Wrong or overstated results: `pmid-41692034` (intermittent fasting vs
+  no intervention: the abstract says "likely little to no difference" in
+  weight loss, not "a small extra weight loss"), `pmid-31309536`
+  (psoriasis: diet plus exercise "probably improves" severity, the key
+  point had said "may make little or no difference"), `pmid-39500369`
+  (heat and stillbirth: interval crosses no effect, now "possible but
+  uncertain"), `pmid-26148507` (luteal support: hCG vs placebo showed no
+  clear difference, only progesterone was linked to more live births),
+  `pmid-40596934` (odds ratio, not "three times as likely"),
+  `pmid-24853164` (colic and migraine: direction of the link),
+  `pmid-40827602` (polyp detection is high-certainty, not moderate),
+  hedges restored in `pmid-34515991`, `pmid-41268817`, `pmid-40511642`,
+  `pmid-42720098`, `pmid-32956536`, `pmid-28291302`, `pmid-28597983`,
+  `pmid-38894745`; cause wording to "linked to" in `pmid-31692365`,
+  `pmid-33065811`, `pmid-25793972`, `pmid-37970801`, `pmid-36869857`.
+- "Similar", "did not differ", "no effect" or "not linked" where the
+  abstract found no clear difference: `pmid-37851421`, `pmid-38042118`,
+  `pmid-37787793`, `pmid-36693931`, `pmid-38034000`, `pmid-32993147`,
+  `pmid-31322731`, `pmid-26755330` (5 places), `pmid-37290111`,
+  `pmid-30648738`, `pmid-37592098`, `pmid-34979465`, `pmid-26577241`,
+  `pmid-38451843`, `pmid-33725837`, `pmid-32722824`, `pmid-25946084`.
+- Facts not in the abstract removed or replaced: `pmid-39097395`
+  ("9-valent vaccine-style grouping"), `pmid-35698149` (oral vs vaginal
+  probiotic), `pmid-26888713` (the gene "did not stop people benefiting"),
+  `pmid-37831686` (a remark about the abstract's wording), and
+  `pmid-28597983` / `pmid-31553478` ("did not study pregnancy" is now "the
+  abstract does not mention pregnancy", which can be checked).
+- Certainty -> "not stated" (the abstract grades nothing): 14 items, among
+  them `pmid-33050979`, `pmid-34425187`, `pmid-30466985`, `pmid-39365239`,
+  `pmid-26281028`, `pmid-38215463`.
+- Advice in the app's voice credited to LactMed, the guideline or the
+  authors: `pmid-30000045` and `pmid-30000253` (LactMed calls ibuprofen and
+  paracetamol good choices while breastfeeding), `pmid-26598775`,
+  `pmid-42932433`, `pmid-25590212`, `pmid-41505334`, `pmid-39365239`,
+  `pmid-29761478`, `pmid-38609849`, `pmid-38564922`.
+
+Left as is: 37 judgement calls, mostly certainty labels picked from a
+graded range (e.g. `pmid-29037623`, `pmid-32199406`, `pmid-35996124`) or
+wording that is the abstract's own ("does not", "did not differ",
+"protected": `pmid-39147376`, `pmid-34154604`, `pmid-26869575`).
+
+### The whole library has now been checked
+
+- **All 2,561 PubMed summaries** have been read side by side with their
+  abstract: 2,555 in the content-check rounds 2-18 (2,298 in rounds 2-17,
+  257 in round 18) and the 6 PubMed items added in round 14, which were
+  written straight from their abstracts.
+- The 28 non-PubMed items (Swiss official pages and laws, NHS, FSRH, CDC,
+  HFEA, FIGO) have no abstract; they were hand-written from the source
+  document itself when they were added (see the round sections above).
+- Over rounds 2-18, **2,011 of 2,555 checked summaries (about 4 in 5) were
+  fine as written**; 544 needed at least one fix, **805 fixes** in all.
+- Nothing is left unchecked. Future items should be checked against their
+  abstract when they are added (fetch both `PubmedArticle` and
+  `PubmedBookArticle` records).
+
+Tests: `ask-ai-audit.test.ts` (round 18 block).
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed

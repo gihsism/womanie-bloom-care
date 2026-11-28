@@ -7344,7 +7344,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/37851421/",
-   "summary": "This review pooled 65 trials of talking therapies for adults with generalized anxiety disorder, with about 70% of participants being women. Cognitive behavior therapy (CBT), newer 'third-wave' versions of CBT, and relaxation therapy all reduced anxiety symptoms more than usual care in the short term. Only CBT was still clearly better when people were checked 3 to 12 months after treatment ended. People were no more likely to drop out of these therapies than out of usual care.",
+   "summary": "This review pooled 65 trials of talking therapies for adults with generalized anxiety disorder, with about 70% of participants being women. Cognitive behavior therapy (CBT), newer 'third-wave' versions of CBT, and relaxation therapy all reduced anxiety symptoms more than usual care in the short term. Only CBT was still clearly better when people were checked 3 to 12 months after treatment ended. There was no clear difference in dropout between these therapies and usual care.",
    "keyPoints": [
     "CBT and third-wave CBTs reduced anxiety symptoms compared with usual care, with moderate certainty of evidence.",
     "Relaxation therapy also helped in the short term, but the evidence was low certainty and the benefit disappeared when high-risk-of-bias studies were left out.",
@@ -9040,7 +9040,7 @@
     "It is uncertain whether Tai Chi improves pain, disease activity or physical function in rheumatoid arthritis; all of these results were very low-quality evidence.",
     "People doing Tai Chi were less likely to withdraw from the studies than those in comparison groups (low-quality evidence).",
     "Side effects were not clearly reported, but a few minor ones such as joint and muscle soreness and cramps were mentioned in two studies.",
-    "The review found no data on whether Tai Chi affects joint damage seen on X-ray, and the studies did not look at pregnancy."
+    "The review found no data on whether Tai Chi affects joint damage seen on X-ray, and the abstract does not mention pregnancy."
    ],
    "certainty": "very low",
    "lifeStages": [
@@ -9086,9 +9086,9 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/28597983/",
-   "summary": "This review pooled eight trials (almost 4,000 adults, most of them women) of celecoxib, an anti-inflammatory painkiller, for rheumatoid arthritis. Compared with placebo, celecoxib probably improved symptoms and pain. Compared with older anti-inflammatory drugs, it gave only a small symptom benefit but caused fewer stomach and gut ulcers. The evidence was moderate to low quality, and results on serious side effects and heart risks were uncertain. The review did not study pregnancy.",
+   "summary": "This review pooled eight trials (almost 4,000 adults, most of them women) of celecoxib, an anti-inflammatory painkiller, for rheumatoid arthritis. Compared with placebo, celecoxib probably improved symptoms and pain. Compared with older anti-inflammatory drugs, it gave only a small symptom benefit but caused fewer stomach and gut ulcers. The evidence was moderate to low quality, and results on serious side effects and heart risks were uncertain. The abstract does not mention pregnancy.",
    "keyPoints": [
-    "Celecoxib improved symptoms and pain more than placebo in rheumatoid arthritis (moderate to low quality evidence).",
+    "Celecoxib may improve symptoms and pain more than placebo in rheumatoid arthritis (moderate to low quality evidence).",
     "Compared with older NSAIDs, celecoxib gave a small symptom improvement that may not matter much in practice.",
     "Celecoxib caused fewer gastroduodenal ulcers than older NSAIDs (moderate quality evidence).",
     "Results for serious side effects and cardiovascular events were uncertain, and regulators warn of a possible heart risk."
@@ -9979,7 +9979,7 @@
    "keyPoints": [
     "19 studies were included; most measured sleep duration, and only 2 looked at sleep problems.",
     "Study quality was rated strong for 5 studies, moderate for 5 and weak for 9.",
-    "Evidence that longer infant sleep leads to a healthier body composition in childhood was inconsistent."
+    "Evidence that longer infant sleep is linked to a healthier body composition in childhood was inconsistent."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -15326,7 +15326,7 @@
     "Across single-group studies, about 76% of women were still breastfeeding at 6 months and about 41% at 12 months.",
     "Workplace programmes may help employed mothers and the partners of employed fathers, but stronger research is needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "postpartum"
    ],
@@ -17492,7 +17492,7 @@
    "keyPoints": [
     "Enhanced recovery care after caesarean was linked to a shorter hospital stay, by about 14 hours on average.",
     "Opioid use was lower with enhanced recovery care.",
-    "Readmission, overall complications, wound infection and vomiting were not different from usual care.",
+    "Readmission, overall complications, wound infection and vomiting showed no clear difference compared with usual care.",
     "Evidence is limited because few trials were included and the studies used different protocols."
    ],
    "certainty": "not stated",
@@ -19794,7 +19794,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/37787793/",
    "summary": "This review combined data from three trials of CPAP (a breathing machine worn at night) in 4186 adults who had both heart disease and obstructive sleep apnea. Overall, people offered CPAP had about the same risk of another heart attack, stroke or similar event as those given usual care. But people who used CPAP well, for at least 4 hours a night, had a lower risk of these repeat events. Most participants (82%) were men, so results may apply less clearly to women.",
    "keyPoints": [
-    "Overall, offering CPAP did not change the risk of repeat heart or stroke events compared with usual care.",
+    "Overall, there was no clear difference in the risk of repeat heart or stroke events between offering CPAP and usual care.",
     "People who used CPAP for at least 4 hours a day had about a 31% lower risk of repeat events.",
     "Average CPAP use in the trials was only about 3 hours a day, so many people did not use it enough.",
     "The authors suggest sticking with treatment is a key factor in preventing further heart problems in people with sleep apnea."
@@ -20660,7 +20660,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/39097395/",
-   "summary": "Researchers pooled results from 1174 studies worldwide to work out which types of human papillomavirus (HPV) actually cause invasive cervical cancer. They found 17 HPV types that are likely causes, with HPV16 and HPV18 together responsible for about three-quarters of cases. A group of seven types, covered by the 9-valent vaccine-style grouping (HPV16, 18, 31, 33, 45, 52 and 58), accounted for roughly 92% to 96% of cases depending on the region. The authors say this can help shape vaccination and screening plans to reduce cervical cancer.",
+   "summary": "Researchers pooled results from 1174 studies worldwide to work out which types of human papillomavirus (HPV) actually cause invasive cervical cancer. They found 17 HPV types that are likely causes, with HPV16 and HPV18 together responsible for about three-quarters of cases. A group of seven types (HPV16, 18, 31, 33, 45, 52 and 58) accounted for roughly 92% to 96% of cases depending on the region. The authors say this can help shape vaccination and screening plans to reduce cervical cancer.",
    "keyPoints": [
     "17 HPV types were judged to be causes of invasive cervical cancer.",
     "HPV16 caused the largest share of cases worldwide (61.7%), followed by HPV18 (15.3%).",
@@ -21955,7 +21955,7 @@
    "summary": "This review looked at whether a special colonoscopy imaging mode called linked color imaging (LCI), which boosts color contrast, finds more bowel polyps than standard white-light imaging. It combined 16 trials with about 12,800 adults having colonoscopy for screening, symptoms or follow-up checks. LCI found slightly more adenomas (a type of polyp that can turn into cancer) and more polyps overall, with no adverse events needing medical treatment reported. No trial measured whether this led to fewer bowel cancers appearing after colonoscopy.",
    "keyPoints": [
     "LCI slightly increased the adenoma detection rate compared with standard white-light colonoscopy (high-certainty evidence).",
-    "LCI slightly increased the overall polyp detection rate and likely found more sessile serrated lesions and more adenomas per person (moderate-certainty evidence).",
+    "LCI slightly increased the overall polyp detection rate (high-certainty evidence) and likely found more sessile serrated lesions and more adenomas per person (moderate-certainty evidence).",
     "No adverse events needing medical treatment were reported with LCI (moderate-certainty evidence).",
     "No study measured cancers appearing after colonoscopy, so the effect on cancer prevention is not yet known."
    ],
@@ -25323,7 +25323,7 @@
     "Quality of life and sexual functioning seem to improve more consistently with LNG-IUD use.",
     "No studies were found on effects of the LNG-IUD on the brain, and more high-quality research is needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "contraception"
    ],
@@ -28098,9 +28098,9 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/36693931/",
    "summary": "This study looked at 929 embryo transfer cycles (fresh and frozen) in 692 women having ICSI treatment at one fertility centre in Sri Lanka. Researchers checked whether common harmless-looking chromosome variations (called chromosomal polymorphic variants) changed the chances of pregnancy, miscarriage or live birth. They found no evidence of a difference between women with and without these variations, whatever the type or number. The authors say larger, better-powered studies in more diverse groups are still needed.",
    "keyPoints": [
-    "No difference was found in pregnancy, miscarriage or live birth rates between carriers and non-carriers of chromosomal polymorphic variants.",
+    "There was no clear difference in pregnancy, miscarriage or live birth rates between carriers and non-carriers of chromosomal polymorphic variants.",
     "The results differ from some earlier studies that linked these variants to more miscarriages.",
-    "The authors suggest testing for these variants before assisted conception may turn out to be a futile diagnostic tool.",
+    "The authors call for further studies to check whether testing for these variants before assisted conception may be a futile diagnostic tool.",
     "More prospective, adequately powered studies in multiethnic populations are needed."
    ],
    "certainty": "not stated",
@@ -28307,7 +28307,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/38034000/",
-   "summary": "This review pooled 18 studies covering about 16,000 embryo transfer cycles to see whether the womb lining getting thinner (\"compaction\") in the days before an IVF embryo transfer affects the chance of pregnancy. Overall, there was no meaningful difference in pregnancy, live birth or miscarriage rates between women whose lining compacted and those whose lining did not. Some subgroup results looked better with compaction, but these depended on how the lining was measured.",
+   "summary": "This review pooled 18 studies covering about 16,000 embryo transfer cycles to see whether the womb lining getting thinner (\"compaction\") in the days before an IVF embryo transfer affects the chance of pregnancy. Overall, there was no clear difference in pregnancy, live birth or miscarriage rates between women whose lining compacted and those whose lining did not. Some subgroup results looked better with compaction, but these depended on how the lining was measured.",
    "keyPoints": [
     "Across 18 cohort studies, lining compaction made no significant difference to clinical pregnancy, ongoing pregnancy, live birth or miscarriage rates.",
     "Compaction was not linked to any harm for pregnancy outcomes.",
@@ -34564,7 +34564,7 @@
    "keyPoints": [
     "The overall rate of structural birth defects in resource-limited settings was higher than in better-resourced countries.",
     "Maternal illness, unidentified drug use, birth weight, chewing chat and chemical exposure were linked to birth defects.",
-    "Not taking folic acid during pregnancy was linked to birth defects, although the abstract words this result confusingly.",
+    "The authors list never using folic acid among the factors linked to birth defects.",
     "The authors advise preconception care and adequate folic acid before and during early pregnancy."
    ],
    "certainty": "not stated",
@@ -39242,7 +39242,7 @@
     "Only two studies were double-blind supplement trials; four relied on people recalling what they ate.",
     "Study quality was rated good for one study, fair for two and poor for three, so better trials are needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menopause",
     "post-menopause",
@@ -40753,7 +40753,7 @@
     "Four studies had small samples and three had short interventions, and the studies were too different to pool in a meta-analysis.",
     "The authors say better-designed trials are needed to reduce the high risk of bias."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menopause",
     "post-menopause"
@@ -41004,7 +41004,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/40596934/",
    "summary": "This review pooled seven studies (760 people) comparing surgery with non-surgical (conservative) treatment for haemorrhoids. Surgery gave more complete symptom relief, less pain in the first few days, and fewer recurrences, but pain was similar after about ten days. Conservative treatment was safer and less invasive but slower to work and more likely to come back. Similar patterns were seen in pregnant women with thrombosed (clotted) external haemorrhoids, where surgery shortened recovery by about a week.",
    "keyPoints": [
-    "Surgery was about three times as likely as conservative treatment to fully resolve symptoms.",
+    "The odds of full symptom resolution were about three times higher with surgery than with conservative treatment.",
     "Surgery gave clearly less pain within four days, but pain scores were similar after ten days.",
     "In pregnant women with thrombosed external haemorrhoids, surgery shortened recovery by roughly seven days and reduced recurrence.",
     "Surgery had some specific complications (incontinence 3%, persistent pain 5%, watery discharge 6%), while conservative treatment is safer but slower and recurs more often."
@@ -41502,7 +41502,7 @@
    "keyPoints": [
     "The guideline covers assessing and managing heavy menstrual bleeding (menorrhagia).",
     "It aims to help find the cause of heavy periods that are affecting a woman's quality of life.",
-    "Treatment should take into account the woman's priorities and preferences.",
+    "It says treatment should take into account the woman's priorities and preferences.",
     "It is written for healthcare professionals and services, and also for women with heavy periods, their families and carers."
    ],
    "certainty": "not stated",
@@ -43854,7 +43854,7 @@
    "keyPoints": [
     "Exercise improved physical and psychological quality of life in women with menopausal symptoms.",
     "No evidence of an effect on general, social or menopause-specific quality of life.",
-    "Yoga improved physical quality of life but not general, psychological, sexual or vasomotor symptom scores.",
+    "Yoga improved physical quality of life with no clear effect on general, psychological, sexual or vasomotor symptom scores.",
     "Pelvic floor muscle training did not significantly improve general quality of life."
    ],
    "certainty": "not stated",
@@ -44331,7 +44331,7 @@
    "keyPoints": [
     "Tibolone, raloxifene, estriol and ipriflavone may help preserve bone density, based on low or moderate quality evidence.",
     "Four studies reported a large benefit of tibolone on hot flushes and other vasomotor symptoms; the authors also say medroxyprogesterone (MPA) may reduce them.",
-    "Larger uterine volume was a side effect linked to some add-backs (MPA, tibolone and conjugated estrogens), and tibolone may have caused more uterine bleeding.",
+    "Larger uterine volume was a side effect linked to some add-backs (MPA, tibolone and conjugated estrogens), and tibolone may have been linked to more uterine bleeding.",
     "All studies lasted six months or less, which is too short to show effects on bone fractures; for several comparisons the results were unclear or not reported."
    ],
    "certainty": "low",
@@ -48060,7 +48060,7 @@
     "Transdermal (skin patch) hormone replacement therapy improved bone density in the lower spine and the femoral neck compared with placebo or no treatment.",
     "Oral hormone replacement therapy and the combined oral contraceptive pill showed no significant bone benefit at any site.",
     "Teriparatide improved lower spine bone density more than transdermal hormone therapy or the contraceptive pill, but not at the femoral neck or total hip.",
-    "These options are considered when lifestyle changes have not brought periods back."
+    "The authors note that medicines are needed for bone health when lifestyle changes have not brought periods back."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -48320,7 +48320,7 @@
     "Female runners and runners with a past running injury were most at risk of getting injured.",
     "There was moderate certainty that RED-S risk factors increased injury risk, particularly bone stress injuries.",
     "Weak thigh muscles were linked to more knee pain at the front of the knee.",
-    "Evidence was limited that bigger changes in training, poorer sleep and focusing on one sport raise injury risk."
+    "Evidence was limited that bigger changes in training, poorer sleep and focusing on one sport may be linked to higher injury risk."
    ],
    "certainty": "moderate",
    "lifeStages": [
@@ -48527,7 +48527,7 @@
     "Combining two trials showed no clear difference in crying or fussing time after one week of lactase.",
     "Only one trial had a low risk of bias, so evidence that lactase helps colic remains inconclusive."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "postpartum"
    ],
@@ -49104,7 +49104,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/24853164/",
-   "summary": "This review pooled results from three studies that looked at whether infant colic and migraine go together. Migraine was linked to higher odds of infant colic, meaning children and adults with migraine were more likely to have had colic as babies. The authors note that only a small number of studies were included, so the finding is limited. It shows a link, not a proven cause.",
+   "summary": "This review pooled results from three studies that looked at whether infant colic and migraine go together. Infant colic was linked to higher odds of migraine. The authors note that only a small number of studies were included, so the finding is limited. It shows a link, not a proven cause.",
    "keyPoints": [
     "Infant colic was associated with increased odds of migraine across the studies pooled.",
     "The odds ratio was about 6.5 in one analysis and 5.6 in a more cautious analysis.",
@@ -49152,7 +49152,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/40511642/",
-   "summary": "This Cochrane review combined 24 trials (about 7,000 mother-infant pairs) that tested whether giving babies probiotics, or probiotics plus prebiotics, prevents allergic conditions. Probiotics made little to no difference to asthma, hay fever or cow's milk allergy by age two, and may slightly reduce eczema, but this small effect disappeared in the most reliable trials. No serious side effects were reported. Overall the authors say the evidence is not strong enough to draw firm conclusions.",
+   "summary": "This Cochrane review combined 24 trials (about 7,000 mother-infant pairs) that tested whether giving babies probiotics, or probiotics plus prebiotics, prevents allergic conditions. Probiotics may make little to no difference to asthma, hay fever or cow's milk allergy by age two, and may slightly reduce eczema, but this small effect disappeared in the most reliable trials. No serious side effects were reported. Overall the authors say the evidence is not strong enough to draw firm conclusions.",
    "keyPoints": [
     "Probiotics may make little to no difference to asthma, allergic rhinitis (hay fever) or IgE-mediated cow's milk allergy by age two (low-certainty evidence).",
     "Probiotics may slightly reduce eczema by age two, but in the trials at lowest risk of bias there was little or no difference.",
@@ -49962,11 +49962,11 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/31322731/",
-   "summary": "This review pooled 12 trials with 1,879 preterm or low birth weight babies to compare formula with donor breast milk when a mother's own milk is not enough. Babies fed formula gained weight and grew faster in hospital. They also had a higher risk of necrotising enterocolitis, a serious bowel condition. No effect was found on death, long-term growth or later development. The trials had some weaknesses, and most were funded by formula makers.",
+   "summary": "This review pooled 12 trials with 1,879 preterm or low birth weight babies to compare formula with donor breast milk when a mother's own milk is not enough. Babies fed formula gained weight and grew faster in hospital. They also had a higher risk of necrotising enterocolitis, a serious bowel condition. No clear effect was found on death, long-term growth or later development. The trials had some weaknesses, and most were funded by formula makers.",
    "keyPoints": [
     "Formula-fed babies had faster weight gain, length growth and head growth while in hospital.",
     "Formula feeding raised the risk of necrotising enterocolitis (about 3 more cases per 100 babies; roughly 1 extra case for every 33 babies fed formula).",
-    "No effect was found on all-cause mortality, long-term growth or neurodevelopment.",
+    "No clear effect was found on all-cause mortality, long-term growth or neurodevelopment.",
     "The trials had methodological weaknesses, and most were funded by companies that made the study formula."
    ],
    "certainty": "moderate",
@@ -50516,7 +50516,7 @@
     "Cognitive development did not differ significantly from breastfed babies.",
     "The authors say the evidence is limited and not conclusive."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "postpartum"
    ],
@@ -51111,11 +51111,11 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/26755330/",
-   "summary": "This review pooled 12 randomised trials involving 2,877 preterm babies to see whether glutamine supplements, an amino acid given by mouth or through a drip, improve outcomes. It found no effect on deaths, serious infections or a bowel condition called necrotising enterocolitis. Follow-up of children aged 18 to 24 months and beyond also showed no differences. The trials were generally of good quality.",
+   "summary": "This review pooled 12 randomised trials involving 2,877 preterm babies to see whether glutamine supplements, an amino acid given by mouth or through a drip, improve outcomes. It found no clear effect on deaths, serious infections or a bowel condition called necrotising enterocolitis. Follow-up of children aged 18 to 24 months and beyond also found no clear differences. The trials were generally of good quality.",
    "keyPoints": [
-    "No effect of glutamine supplementation on death in preterm infants was found.",
-    "No effect was found on serious infection or necrotising enterocolitis.",
-    "Three trials that followed children to 18 to 24 months and beyond found no effects on neurodevelopment.",
+    "No clear effect of glutamine supplementation on death in preterm infants was found.",
+    "No clear effect was found on serious infection or necrotising enterocolitis.",
+    "Three trials that followed children to 18 to 24 months and beyond found no clear effects on neurodevelopment.",
     "The review concluded there is no evidence that glutamine gives important benefits to preterm babies."
    ],
    "certainty": "not stated",
@@ -52271,7 +52271,7 @@
     "Testosterone and luteinizing hormone levels also improved, and 14% of normal-sperm-count men achieved a pregnancy outcome.",
     "The authors call the data promising but too limited, and say larger, high-quality randomized trials are needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "ivf",
@@ -53167,7 +53167,7 @@
     "Little to no link was seen between bisphenol A, triclocarban or triclosan and time to pregnancy.",
     "The authors advise both women and men trying to conceive to minimise exposure to these chemicals as a common-sense measure."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "general"
@@ -58559,7 +58559,7 @@
    "summary": "This review mapped out research on acupuncture for infertility where the goal is natural conception. It found most studies looked at women with polycystic ovary syndrome, ovulation problems, or a condition where the egg is not released from the follicle. A pooled analysis of small trials suggested acupuncture did better than an hCG trigger injection alone, but the authors say clearer, better-designed studies are still needed because most studies had unclear research aims.",
    "keyPoints": [
     "The review covered 310 articles; most were studies of female infertility, mainly from polycystic ovary syndrome, ovulation disorders and luteinized unruptured follicle syndrome.",
-    "In pooled trials, acupuncture worked better than hCG alone (11 trials, 662 participants).",
+    "In pooled trials, acupuncture appeared to work better than hCG alone (11 trials, 662 participants).",
     "Adding acupuncture to hCG plus letrozole showed no clear difference compared with hCG plus letrozole alone (one small trial of 84 participants).",
     "Reported side effects included mild ovarian irritation and early signs of miscarriage; the authors call for well-designed confirmatory studies."
    ],
@@ -58611,10 +58611,10 @@
    "keyPoints": [
     "A low-tech, low-intervention approach for people who ovulate had equal or higher success rates than routine infertility care protocols.",
     "This approach did not increase risk compared with routine protocols.",
-    "Donor insemination for LGBTQ+ families can be provided appropriately in community-based settings, primary care and fertility clinics, with support and training.",
+    "The authors conclude donor insemination for LGBTQ+ families can be provided appropriately in community-based settings, primary care and fertility clinics, with support and training.",
     "High quality, prospective studies specific to this group are limited, so more research is needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "ivf"
@@ -58709,11 +58709,11 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/37290111/",
-   "summary": "This review pooled 13 studies to compare two ways of timing intrauterine insemination (IUI): an hCG trigger shot given after ultrasound monitoring, or waiting for the body's own natural LH surge, which can be tracked at home. Pregnancy rates were not meaningfully different between the two approaches. This was true for natural cycles and for cycles using clomid or letrozole tablets. The studies differed from one another quite a bit, which makes the result less certain.",
+   "summary": "This review pooled 13 studies to compare two ways of timing intrauterine insemination (IUI): an hCG trigger shot given after ultrasound monitoring, or waiting for the body's own natural LH surge, which can be tracked at home. There was no clear difference in pregnancy rates between the two approaches. This was true for natural cycles and for cycles using clomid or letrozole tablets. The studies differed from one another quite a bit, which makes the result less certain.",
    "keyPoints": [
     "No significant difference in chance of pregnancy between hCG trigger timing and LH surge timing for IUI.",
     "The same result held in natural cycle IUI and in cycles using oral medicines (clomid or letrozole).",
-    "The authors concluded that at-home LH monitoring gave similar pregnancy outcomes to hCG-timed IUI.",
+    "The authors concluded that at-home LH monitoring showed no difference in pregnancy outcomes compared with hCG-timed IUI.",
     "The included studies varied noticeably, and most were not randomised trials."
    ],
    "certainty": "not stated",
@@ -58918,7 +58918,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/30648738/",
-   "summary": "This review pooled 15 trials (2,387 women) of fertility injections called gonadotrophins, used to trigger ovulation in women with PCOS who did not ovulate or conceive on clomiphene. The different types of gonadotrophin (lab-made versus urine-derived) seemed to give similar results, though much of the evidence was low or very low quality. In one large trial, gonadotrophins led to more live births than continuing clomiphene, with more miscarriages but no extra multiple pregnancies.",
+   "summary": "This review pooled 15 trials (2,387 women) of fertility injections called gonadotrophins, used to trigger ovulation in women with PCOS who did not ovulate or conceive on clomiphene. The different types of gonadotrophin (lab-made versus urine-derived) showed no clear difference in results, though much of the evidence was low or very low quality. In one large trial, gonadotrophins led to more live births than continuing clomiphene, with more miscarriages but no extra multiple pregnancies.",
    "keyPoints": [
     "Lab-made (recombinant) FSH and urine-derived gonadotrophins may make little or no difference to live birth, multiple pregnancy, clinical pregnancy or miscarriage (low-quality evidence).",
     "For the other urine-derived types (HMG or HP-HMG) compared with uFSH, the evidence was too weak (very low quality) to say whether one is better.",
@@ -60163,11 +60163,11 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/37592098/",
-   "summary": "This review pooled results from seven earlier studies plus data from one fertility clinic to look at what is linked to mosaic embryos, which contain a mix of normal and abnormal cells. Embryos tested on day 6 or 7 and embryos from women under 34 had slightly higher rates of mosaicism. Embryo quality, sperm quality and the father's age were not linked to mosaicism. The abstract does not rate how certain the evidence is.",
+   "summary": "This review pooled results from seven earlier studies plus data from one fertility clinic to look at what is linked to mosaic embryos, which contain a mix of normal and abnormal cells. Embryos tested on day 6 or 7 and embryos from women under 34 had slightly higher rates of mosaicism. Embryo quality, sperm quality and the father's age showed no clear link with mosaicism. The abstract does not rate how certain the evidence is.",
    "keyPoints": [
     "Embryos biopsied on day 6 or 7 had a slightly higher rate of mosaicism than those biopsied earlier.",
     "Mosaicism was higher in women under 34 than in women 34 or older, unlike aneuploidy (embryos with the wrong number of chromosomes), which rises with age.",
-    "Embryo quality, sperm quality and paternal age were not linked to mosaic embryo rates.",
+    "Embryo quality, sperm quality and paternal age showed no clear link with mosaic embryo rates.",
     "The authors say knowing these factors may help improve results of fertility treatment."
    ],
    "certainty": "not stated",
@@ -62111,7 +62111,7 @@
    "keyPoints": [
     "Compared with no extra treatment, acupuncture was linked to higher biochemical, clinical and ongoing pregnancy rates and live birth rates.",
     "Compared with sham acupuncture, there was no significant difference in pregnancy, live birth or miscarriage.",
-    "Miscarriage rates did not differ between acupuncture and no extra treatment.",
+    "There was no clear difference in miscarriage rates between acupuncture and no extra treatment.",
     "The authors call for further studies comparing acupuncture with sham acupuncture."
    ],
    "certainty": "not stated",
@@ -62409,7 +62409,7 @@
     "No single method or technique was shown to be better than the others for pain relief during and after egg retrieval.",
     "Combining sedation and pain medicine with a paracervical block or acupuncture gave better pain relief than one approach alone.",
     "There was not enough evidence to say whether any pain-relief method affects pregnancy rates.",
-    "All the methods reviewed were linked with high satisfaction, and women's preferences and local resources are worth considering."
+    "All the methods reviewed were linked with high satisfaction, and the authors suggest considering women's preferences and local resources."
    ],
    "certainty": "low",
    "lifeStages": [
@@ -62462,7 +62462,7 @@
     "In the general population, fine particulate matter was linked to reduced chances of conceiving each cycle.",
     "Studies were observational, retrospective and varied widely, so definitive conclusions can't yet be drawn."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "pregnancy",
@@ -67394,7 +67394,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/26577241/",
    "summary": "This review pooled results from eight randomized trials comparing two ways of giving progesterone-type support after fertility treatment (ART/IVF): a pill called dydrogesterone and vaginal progesterone. Pregnancy rates and miscarriage rates were not meaningfully different between the two. Two of three studies found fewer women were dissatisfied with the pill than with vaginal progesterone, while the third found no difference.",
    "keyPoints": [
-    "Oral dydrogesterone and vaginal progesterone gave similar ongoing pregnancy rates (7 trials, 3134 women).",
+    "Oral dydrogesterone and vaginal progesterone showed no clear difference in ongoing pregnancy rates (7 trials, 3134 women).",
     "Clinical pregnancy and miscarriage rates also showed no relevant difference between the two.",
     "Two of three studies reporting dissatisfaction found it lower with oral dydrogesterone (for example 4.6% vs 18.0% against vaginal gel).",
     "The authors conclude oral dydrogesterone seems as effective as vaginal progesterone and appears better tolerated."
@@ -67540,7 +67540,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/26148507/",
-   "summary": "This large review pooled 94 trials (26,198 women) of medicines used to support the second half of the cycle (the luteal phase) after fertility treatment such as IVF. Giving progesterone or hCG was linked with higher rates of live birth or ongoing pregnancy than placebo or no treatment, and adding a GnRH agonist to progesterone seemed to help further. Adding oestrogen did not seem to improve results, and the way progesterone was given (injection, vaginal, oral) made little clear difference. Most of the evidence was low or very low quality because of poor reporting and small studies.",
+   "summary": "This large review pooled 94 trials (26,198 women) of medicines used to support the second half of the cycle (the luteal phase) after fertility treatment such as IVF. Progesterone was linked with higher rates of live birth or ongoing pregnancy than placebo or no treatment, while hCG showed no clear difference, and adding a GnRH agonist to progesterone seemed to help further. Adding oestrogen did not seem to improve results, and the way progesterone was given (injection, vaginal, oral) made little clear difference. Most of the evidence was low or very low quality because of poor reporting and small studies.",
    "keyPoints": [
     "Progesterone was linked with higher live birth or ongoing pregnancy rates than placebo or no treatment, but the evidence was very low quality.",
     "hCG did not clearly improve live birth rates and raised the risk of ovarian hyperstimulation syndrome (OHSS) in one study.",
@@ -70234,12 +70234,12 @@
    ],
    "evidenceLevel": "study",
    "url": "https://pubmed.ncbi.nlm.nih.gov/30000045/",
-   "summary": "This entry from LactMed, the US National Library of Medicine's database on medicines and breastfeeding, covers ibuprofen. Very little ibuprofen passes into breast milk, it leaves the body quickly, and babies are safely given much higher doses than they could get through milk, so it is a preferred painkiller and anti-inflammatory for breastfeeding mothers. Taking ibuprofen and paracetamol (acetaminophen) on a fixed schedule for 24 hours after a vaginal birth appears to increase breastfeeding rates.",
+   "summary": "This entry from LactMed, the US National Library of Medicine's database on medicines and breastfeeding, covers ibuprofen. Very little ibuprofen passes into breast milk, it leaves the body quickly, and babies are safely given much higher doses than they could get through milk, so LactMed calls it a preferred painkiller and anti-inflammatory for breastfeeding mothers. Taking ibuprofen and paracetamol (acetaminophen) on a fixed schedule for 24 hours after a vaginal birth appears to increase breastfeeding rates.",
    "keyPoints": [
     "Ibuprofen levels in breast milk are extremely low and it has a short half-life.",
-    "Ibuprofen is a preferred choice for pain or inflammation while breastfeeding.",
+    "LactMed calls ibuprofen a preferred choice for pain or inflammation while breastfeeding.",
     "Fixed-schedule ibuprofen plus paracetamol for 24 hours after vaginal birth appears to increase the breastfeeding rate.",
-    "Breastfeeding initiation did not differ between ibuprofen alone and paracetamol alone."
+    "LactMed reports no difference in breastfeeding initiation between ibuprofen alone and paracetamol alone."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -70281,7 +70281,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/30000253/",
    "summary": "This entry from LactMed, the US National Library of Medicine's database on medicines and breastfeeding, covers paracetamol (acetaminophen). It is described as a good choice for pain relief and fever in breastfeeding mothers. The amounts that reach breast milk are much smaller than the doses usually given to babies, and side effects in breastfed babies appear to be rare.",
    "keyPoints": [
-    "Paracetamol (acetaminophen) is a good choice for pain and fever while breastfeeding.",
+    "LactMed calls paracetamol (acetaminophen) a good choice for pain and fever while breastfeeding.",
     "Amounts in milk are much less than doses usually given to infants.",
     "Adverse effects in breastfed infants appear to be rare.",
     "Fixed-schedule paracetamol plus ibuprofen for 24 hours after vaginal birth appears to increase the breastfeeding rate."
@@ -74008,7 +74008,7 @@
     "Only three studies showed real acupuncture beating sham acupuncture or no treatment, and one of those was for night-time hot flashes only.",
     "No study had a low risk of bias, so the evidence cannot support or rule out a benefit."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menopause",
     "post-menopause",
@@ -94483,7 +94483,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/38451843/",
-   "summary": "This Cochrane review pooled 60 trials (8,728 adults) of exercise-based cardiac rehabilitation for people with heart failure. Compared with no exercise, it probably lowers the chance of being admitted to hospital and probably improves quality of life, but there was no clear difference in deaths. Home-based and digitally supported programmes seemed to work about as well as centre-based ones. Women were under-represented in the trials, so the authors call for more research in women.",
+   "summary": "This Cochrane review pooled 60 trials (8,728 adults) of exercise-based cardiac rehabilitation for people with heart failure. Compared with no exercise, it probably lowers the chance of being admitted to hospital and probably improves quality of life, but there was no clear difference in deaths. Effects appeared consistent between home-based and centre-based programmes, and the authors say the evidence supports home-based and digitally supported options. Women were under-represented in the trials, so the authors call for more research in women.",
    "keyPoints": [
     "Exercise-based rehabilitation likely reduced hospital admissions from any cause (about 16% versus 24%, moderate-certainty evidence).",
     "It likely improved quality of life on the Minnesota Living with Heart Failure questionnaire by an amount large enough to matter (moderate-certainty evidence).",
@@ -94680,7 +94680,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/35996124/",
-   "summary": "This review looked at 45 earlier reviews of exercise for long-lasting low back pain in adults aged 18 to 70. It compared nine types of exercise, such as yoga, Pilates, resistance training and walking. Several types gave small, mostly short-term improvements in pain and disability compared with no or minimal treatment, with no major difference between types. Many of the studies behind these reviews were of limited quality, so the certainty of the results is low to moderate.",
+   "summary": "This review looked at 45 earlier reviews of exercise for long-lasting low back pain in adults aged 18 to 70. It compared nine types of exercise, such as yoga, Pilates, resistance training and walking. Several types gave small, mostly short-term improvements in pain and disability compared with no or minimal treatment, with no major difference between types. Many of the studies behind these reviews were of limited quality, so the certainty of the results is very low to moderate.",
    "keyPoints": [
     "Motor control exercises, Pilates, resistance training, traditional Chinese exercises and yoga gave small, mostly short-term benefits for pain and disability.",
     "There was no major difference in effect between the exercise types.",
@@ -97914,7 +97914,7 @@
     "Postpartum depression was linked to lower breastfeeding self-efficacy on the first day after birth.",
     "The same link was seen on the third day after birth.",
     "The authors found no sign of publication bias in the studies reviewed.",
-    "Healthcare providers are encouraged to offer support that fits mothers' needs and to develop screening and treatment protocols."
+    "The authors encourage healthcare providers to offer support that fits mothers' needs and to develop screening and treatment protocols."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -98859,7 +98859,7 @@
    "keyPoints": [
     "Perinatal depression affected 16.3% of women in Mainland China overall.",
     "Depression was found in 19.7% of women during pregnancy and 14.8% after birth.",
-    "Lower socioeconomic status, poor physical health, pregnancy anxiety and low social support raised risk.",
+    "Lower socioeconomic status, poor physical health, pregnancy anxiety and low social support were linked to higher risk.",
     "Better living conditions and higher education were linked to lower risk, and rates have risen over the last decade."
    ],
    "certainty": "not stated",
@@ -104704,7 +104704,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34515991/",
-   "summary": "This Cochrane review looked at early warning systems that midwives and doctors use to spot when a pregnant or recently delivered woman is getting sicker, using checks like blood pressure, heart rate and temperature. Only two trials were found, both in low-resource settings. The systems may reduce bleeding and shorten hospital stays, but made little to no difference to deaths of mothers or babies. The evidence ranged from very low to moderate certainty, and it may not apply to wealthier settings.",
+   "summary": "This Cochrane review looked at early warning systems that midwives and doctors use to spot when a pregnant or recently delivered woman is getting sicker, using checks like blood pressure, heart rate and temperature. Only two trials were found, both in low-resource settings. The systems may reduce bleeding and shorten hospital stays, but probably make little to no difference to deaths of mothers and may make little to no difference to deaths of babies. The evidence ranged from very low to moderate certainty, and it may not apply to wealthier settings.",
    "keyPoints": [
     "Early warning systems probably make little to no difference to maternal death and may make little to no difference to newborn death.",
     "They may reduce haemorrhage (heavy bleeding) and shorten a woman's hospital stay (low-certainty evidence).",
@@ -110116,10 +110116,10 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/26598775/",
-   "summary": "This is a UK national guideline on menopause. It notes that many women have menopausal symptoms that can affect quality of life, and that symptoms often last 7 years or more. Because of this, telling women the symptoms will simply get better with time is described as inappropriate, and help should be offered where possible. The guideline covers diagnosis and treatment, including hormonal and non-hormonal options, for women who go through menopause in middle age and for those with premature ovarian insufficiency (POI).",
+   "summary": "This is a UK national guideline on menopause. It notes that many women have menopausal symptoms that can affect quality of life, and that symptoms may often last 7 years or more. Because of this, telling women the symptoms will simply get better with time is described as inappropriate, and help should be offered where possible. The guideline covers diagnosis and treatment, including hormonal and non-hormonal options, for women who go through menopause in middle age and for those with premature ovarian insufficiency (POI).",
    "keyPoints": [
     "Symptoms may continue for 7 years or more, so advice that they will just improve with time is inappropriate.",
-    "Women should be told about the available options, with their risks and benefits, and take part in decisions about their care.",
+    "The guideline says women should be told about the available options, with their risks and benefits, and take part in decisions about their care.",
     "The guideline covers diagnosis and management of menopause symptoms, including hormonal and non-hormonal treatments.",
     "It also covers women with premature ovarian insufficiency and women for whom hormones are not appropriate, including those with or at high risk of breast cancer."
    ],
@@ -110270,7 +110270,7 @@
    "summary": "This review looked at babies in the womb who were growing slowly with no other visible problems, and whose standard genetic tests (chromosomal microarray or karyotype) had come back normal. When researchers added a deeper genetic test called exome sequencing, they found a single-gene (monogenic) condition linked to the poor growth in about 12% of these pregnancies. Most of the pregnancies were tested before 32 weeks. The review pooled eight studies covering 146 babies, so the numbers are fairly small.",
    "keyPoints": [
     "Eight studies with 146 fetuses with isolated fetal growth restriction and normal microarray or karyotype results were pooled.",
-    "Exome sequencing found a likely pathogenic or pathogenic variant causing the growth problem in 17 cases, about 12% (95% CI 7% to 18%).",
+    "Exome sequencing found a likely pathogenic or pathogenic variant thought to be causing the growth problem in 17 cases, about 12% (95% CI 7% to 18%).",
     "This means a single-gene condition was found in roughly 1 in 8 of these apparently isolated cases.",
     "Most fetuses were tested before 32 weeks of pregnancy."
    ],
@@ -110778,7 +110778,7 @@
     "The guideline covers who may be candidates for thrombophilia testing.",
     "It gives updated consensus advice on blood-clot prevention (prophylaxis) during pregnancy and after birth, including considerations around epidural-type (neuraxial) anesthesia."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "pregnancy",
     "postpartum",
@@ -111173,7 +111173,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/39500369/",
-   "summary": "This review pooled results from 198 studies across 66 countries to see how hot weather affects pregnancy and newborns. Higher heat exposure was linked to higher odds of preterm birth, with a bigger increase during heat waves. Heat was also linked to higher risks of stillbirth, congenital anomalies, gestational diabetes and other pregnancy complications. The authors note that studies measured heat and were designed in very different ways, which limits how firm the findings are.",
+   "summary": "This review pooled results from 198 studies across 66 countries to see how hot weather affects pregnancy and newborns. Higher heat exposure was linked to higher odds of preterm birth, with a bigger increase during heat waves. Heat was also linked to higher risks of congenital anomalies, gestational diabetes and other pregnancy complications, with a possible but uncertain rise in stillbirth. The authors note that studies measured heat and were designed in very different ways, which limits how firm the findings are.",
    "keyPoints": [
     "Each 1 °C rise in heat exposure was linked to about 4% higher odds of preterm birth, and heat waves to about 26% higher odds.",
     "High heat exposure was linked to higher risks of congenital anomalies and gestational diabetes; stillbirth showed a possible increase, but the range of results was wide.",
@@ -113140,7 +113140,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/41268817/",
-   "summary": "This Cochrane review looked at whether surgery to remove the wall of tissue inside the uterus (a septate uterus) improves pregnancy outcomes compared with waiting and watching. In the one randomised trial (79 women), surgery made little or no difference to live birth, ongoing pregnancy or clinical pregnancy. Miscarriage may have been slightly higher after surgery, but the result could also be due to chance. Results from the other, non-randomised studies were too uncertain to draw conclusions.",
+   "summary": "This Cochrane review looked at whether surgery to remove the wall of tissue inside the uterus (a septate uterus) improves pregnancy outcomes compared with waiting and watching. In the one randomised trial (79 women), surgery may have made little or no difference to live birth, ongoing pregnancy or clinical pregnancy. Miscarriage may have been slightly higher after surgery, but the result could also be due to chance. Results from the other, non-randomised studies were too uncertain to draw conclusions.",
    "keyPoints": [
     "One randomised trial found little or no difference in live birth between septum resection and expectant management (low-certainty evidence).",
     "In that trial, miscarriage may have been slightly higher after surgery, but the range of results included no effect.",
@@ -113395,7 +113395,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/33725837/",
-   "summary": "This review pooled 24 studies of Chinese couples to see whether a male partner's sperm quality is linked to recurrent miscarriage (two or more pregnancy losses). Partners of women with recurrent miscarriage had lower sperm numbers, lower sperm viability and movement, fewer normally shaped sperm, and more sperm DNA damage than partners of women with no history of miscarriage. Semen volume and pH did not differ. The studies varied a lot and lacked detailed data, so larger studies are still needed.",
+   "summary": "This review pooled 24 studies of Chinese couples to see whether a male partner's sperm quality is linked to recurrent miscarriage (two or more pregnancy losses). Partners of women with recurrent miscarriage had lower sperm numbers, lower sperm viability and movement, fewer normally shaped sperm, and more sperm DNA damage than partners of women with no history of miscarriage. There was no clear difference in semen volume or pH. The studies varied a lot and lacked detailed data, so larger studies are still needed.",
    "keyPoints": [
     "Male partners of women with recurrent miscarriage had lower sperm density, viability, progressive motility and normal shape.",
     "They also had higher rates of misshapen sperm and higher sperm DNA fragmentation.",
@@ -115480,7 +115480,7 @@
     "Bupropion, bupropion with a nicotinic receptor agonist, and bupropion with nicotine replacement were linked to more insomnia than nicotine replacement alone.",
     "Bupropion plus a nicotinic receptor agonist ranked highest for insomnia risk; placebo ranked lowest.",
     "A nicotinic receptor agonist plus nicotine replacement ranked first for abnormal dreams, the agonist alone for nightmares, and nortriptyline for sleepiness.",
-    "Providers are advised to consider sleep-related side effects when prescribing smoking cessation drugs."
+    "The authors advise providers to consider sleep-related side effects when prescribing smoking cessation drugs."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -115829,7 +115829,7 @@
     "Other plants were not tested as rigorously in human studies.",
     "Evidence that single-plant products improve sleep is limited and inconclusive."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "general"
    ],
@@ -118581,11 +118581,11 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/28291302/",
-   "summary": "This Cochrane review looked at 16 trials with about 2,500 adults living with HIV to see whether group-based support programmes improve mental well-being. Groups using cognitive behavioural therapy (CBT) may lower depression slightly, and the benefit may last up to 15 months. There was little or no effect on anxiety, stress or coping, and mindfulness groups showed no clear benefit. The evidence is low or very low quality, so it is not clear how much difference these groups make in daily life.",
+   "summary": "This Cochrane review looked at 16 trials with about 2,500 adults living with HIV to see whether group-based support programmes improve mental well-being. Groups using cognitive behavioural therapy (CBT) may lower depression slightly, and the benefit may last up to 15 months. There may be little or no effect on anxiety or stress, and the effect on coping was unclear, and mindfulness groups showed no clear benefit. The evidence is low or very low quality, so it is not clear how much difference these groups make in daily life.",
    "keyPoints": [
     "CBT-based group programmes may have a small effect on depression, lasting up to 15 months (low certainty evidence).",
     "The average depression score was only about 1.4 points lower on a 63-point scale, and the review says the clinical importance is unclear.",
-    "There may be little or no effect on anxiety, stress or coping.",
+    "There may be little or no effect on anxiety or stress; the effect on coping was unclear.",
     "Mindfulness-based groups did not show clear effects on depression, anxiety or stress (very low certainty evidence)."
    ],
    "certainty": "low",
@@ -118686,7 +118686,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/42720098/",
-   "summary": "This Cochrane review pooled eight trials with 2,528 children and teenagers to see whether iodine supplements, compared with placebo, help prevent problems caused by low iodine. Iodine gave a slight boost in thinking skills and likely lowered the risk of an underactive thyroid and of death in infants. It probably made little or no difference to weight. Evidence on goitre (a swollen thyroid) was very uncertain, and none of the trials reported side effects.",
+   "summary": "This Cochrane review pooled eight trials with 2,528 children and teenagers to see whether iodine supplements, compared with placebo, help prevent problems caused by low iodine. Iodine gave a slight boost in thinking skills and likely lowered the risk of an underactive thyroid and of death in infants. It may make little or no difference to weight. Evidence on goitre (a swollen thyroid) was very uncertain, and none of the trials reported side effects.",
    "keyPoints": [
     "Iodine supplements slightly improved cognitive (thinking) function compared with placebo, based on high-certainty evidence from one study.",
     "Iodine likely greatly reduced hypothyroidism (underactive thyroid) and lowered infant deaths, both with moderate-certainty evidence from single studies.",
@@ -118840,7 +118840,7 @@
     "Many studies showed less eye bulging (proptosis), though the only randomized trial found a non-significant improvement at 6 months.",
     "No severe side effects were reported with intravenous or subcutaneous use."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "general"
    ],
@@ -121372,7 +121372,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/32722824/",
-   "summary": "This review pooled 14 studies of 685 monoamniotic twin pregnancies (identical twins sharing one placenta and one amniotic sac) with no fetal anomalies. It looked at how often newborns had health problems depending on how early they were born. Problems, mostly breathing difficulties, were common after early births and became less frequent as pregnancy continued, with a clear drop for babies born at 33 to 34 weeks. Babies did not do differently whether the mother was monitored in hospital or as an outpatient.",
+   "summary": "This review pooled 14 studies of 685 monoamniotic twin pregnancies (identical twins sharing one placenta and one amniotic sac) with no fetal anomalies. It looked at how often newborns had health problems depending on how early they were born. Problems, mostly breathing difficulties, were common after early births and became less frequent as pregnancy continued, with a clear drop for babies born at 33 to 34 weeks. There was no clear difference in newborn problems between monitoring in hospital and as an outpatient.",
    "keyPoints": [
     "Monoamniotic twin pregnancies carry a high risk of newborn health problems, mainly breathing (respiratory) problems.",
     "Overall newborn problems occurred in 75.4% of births at 24-30 weeks, 65.5% at 31-32 weeks, 37.6% at 33-34 weeks and 18.5% at 35-36 weeks.",
@@ -125673,7 +125673,7 @@
     "Probiotics plus antibiotics worked better than antibiotics alone or with placebo across 14 trials (risk ratio 1.23).",
     "Probiotics beat placebo in three trials, but the number of trials was small.",
     "Three trials found no clear difference between probiotics alone and antibiotics.",
-    "Results varied with how the probiotic was given and the dose; oral L. rhamnosus did better than vaginal use in this analysis."
+    "The authors note that different ways of giving probiotics can lead to different results, and that stronger evidence is needed."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -127523,7 +127523,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/25946084/",
-   "summary": "This Cochrane review looked at whether vitamin D supplements help adults with long-lasting (chronic) pain. It pooled 10 trials with 811 people, comparing vitamin D with placebo or other treatments. Overall, there was no consistent sign that vitamin D eased pain better than placebo, though the evidence was low quality. Side effects were uncommon and similar between vitamin D and placebo.",
+   "summary": "This Cochrane review looked at whether vitamin D supplements help adults with long-lasting (chronic) pain. It pooled 10 trials with 811 people, comparing vitamin D with placebo or other treatments. Overall, there was no consistent sign that vitamin D eased pain better than placebo, though the evidence was low quality. Side effects were uncommon, with no consistent difference between vitamin D and placebo.",
    "keyPoints": [
     "No consistent pattern showed vitamin D relieving chronic pain better than placebo (low quality evidence).",
     "Side effects and people dropping out were uncommon, with no consistent difference between vitamin D and placebo (good quality evidence).",
@@ -128361,10 +128361,10 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/41692034/",
-   "summary": "This Cochrane review looked at 22 trials with 1995 adults with overweight or obesity to see whether intermittent fasting helps weight loss. Compared with regular dietary advice, intermittent fasting made little to no difference to weight loss or quality of life. Compared with doing nothing, it probably led to a small amount of extra weight loss. The evidence on side effects was very uncertain, and trials only followed people for up to 12 months.",
+   "summary": "This Cochrane review looked at 22 trials with 1995 adults with overweight or obesity to see whether intermittent fasting helps weight loss. Compared with regular dietary advice, intermittent fasting may make little to no difference to weight loss or quality of life. Compared with doing nothing, it probably made little to no difference to weight loss. The evidence on side effects was very uncertain, and trials only followed people for up to 12 months.",
    "keyPoints": [
     "Compared with regular dietary advice, intermittent fasting may make little to no difference to weight loss (low-certainty evidence).",
-    "Compared with no intervention or a waiting list, intermittent fasting likely leads to a small extra weight loss (about 3.4% of starting weight, moderate-certainty evidence).",
+    "Compared with no intervention or a waiting list, intermittent fasting likely makes little to no difference to weight loss (moderate-certainty evidence).",
     "Effects on quality of life and side effects were unclear, with very low-certainty evidence.",
     "No trials reported participant satisfaction or diabetes status, and none followed people beyond 12 months."
    ],
@@ -128980,7 +128980,7 @@
    "keyPoints": [
     "In obese people, a strict low-calorie diet may lead to bigger improvements in psoriasis severity than usual care (low-quality evidence).",
     "Diet probably improves skin-related quality of life and lowers BMI compared with usual care (moderate-quality evidence).",
-    "Diet plus exercise probably lowers BMI more than information alone, but may make little or no difference to psoriasis severity.",
+    "Diet plus exercise probably lowers BMI more than information alone, and probably improves psoriasis severity, although the result could also mean little or no difference.",
     "Most people stuck with the lifestyle programmes, and no trials looked at smoking cessation, alcohol abstinence or time to relapse."
    ],
    "certainty": "low",
@@ -129082,7 +129082,7 @@
    "keyPoints": [
     "People with two copies of the obesity-linked FTO variant (AA) lost about 0.44 kg more on diet or lifestyle programmes than those with none (TT).",
     "People with one copy (TA) did not lose a clearly different amount of weight.",
-    "The gene did not appear to stop people from benefiting from diet and lifestyle changes.",
+    "Subgroup results were limited by the small number of studies.",
     "The authors say the clinical use of these findings needs further investigation."
    ],
    "certainty": "not stated",
@@ -129133,7 +129133,7 @@
     "Weight loss can improve health for people with obesity-related risk factors and health conditions.",
     "Approved weight-management medicines can help alongside lifestyle change when diet and exercise alone have not worked.",
     "Many medicines for diabetes, depression and other chronic diseases affect weight, either up or down.",
-    "Where possible, choosing medicines with a favourable weight effect can help prevent and manage obesity."
+    "The guideline says that, where possible, choosing medicines with a favourable weight effect can help prevent and manage obesity."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -133423,7 +133423,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/32956536/",
-   "summary": "This Cochrane review looked at magnesium to prevent muscle cramps in 11 trials with 735 people. For ordinary cramps without a known cause, mostly night-time leg cramps in older adults, magnesium made little or no difference to how often cramps happened compared with placebo (moderate-certainty evidence), and the share of people whose cramps fell by a quarter or more was the same (high-certainty evidence). It also made no clear difference to how bad or how long the cramps were. For leg cramps in pregnancy the five trials were at high risk of bias and gave conflicting results. The authors conclude magnesium is unlikely to help older adults with cramps, and that more research is needed in pregnancy.",
+   "summary": "This Cochrane review looked at magnesium to prevent muscle cramps in 11 trials with 735 people. For ordinary cramps without a known cause, mostly night-time leg cramps in older adults, magnesium probably made little or no difference to how often cramps happened compared with placebo (moderate-certainty evidence), and the share of people whose cramps fell by a quarter or more was the same (high-certainty evidence). It also made no clear difference to how bad or how long the cramps were. For leg cramps in pregnancy the five trials were at high risk of bias and gave conflicting results. The authors conclude magnesium is unlikely to help older adults with cramps, and that more research is needed in pregnancy.",
    "keyPoints": [
     "Night-time leg cramps in older adults: magnesium probably makes little or no difference to how often cramps happen (moderate certainty).",
     "The share of people with a 25% or greater drop in cramps was the same with magnesium and placebo (high certainty).",
