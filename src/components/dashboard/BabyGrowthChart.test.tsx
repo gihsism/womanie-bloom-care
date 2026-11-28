@@ -43,6 +43,12 @@ describe('BabyGrowthChart', () => {
     expect(screen.getByText('Babies often move between lines in the first weeks. Your midwife or paediatrician looks at the trend.')).toBeTruthy();
   });
 
+  it('while the measurements load: "…", not the "Add a weight" prompt', () => {
+    setup({ events: [], loaded: false });
+    expect(screen.getByTestId('growth-loading')).toHaveTextContent('Loading');
+    expect(screen.queryByText(/Add a weight to see where/)).toBeNull();
+  });
+
   it('asks for the sex before showing percentiles', async () => {
     const p = setup({ sex: null });
     expect(screen.queryByTestId('growth-chart')).toBeNull();

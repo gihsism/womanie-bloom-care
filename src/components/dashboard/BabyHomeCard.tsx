@@ -6,6 +6,7 @@ import { useLifeEvents, type LifeEvent } from '@/hooks/useLifeEvents';
 import { countToday, fmtAgo, lastFeed, nappiesToday } from '@/lib/bodyMap';
 import { METHOD_LABEL, fmtClock, quickFeedEvent, quickFeedFrom, quickFeedLabel, readActiveTimer, feedDetail } from '@/lib/babyQuickFeed';
 import { useUndoNotice } from './useUndoNotice';
+import { LOADING, ValueOrLoading } from './LoadingValue';
 
 // Home's baby card (after birth, once a baby is added), under the baby
 // hero: last feed, feeds and nappies today, a running feed/sleep timer,
@@ -17,6 +18,8 @@ import { useUndoNotice } from './useUndoNotice';
 
 interface FeedsHook {
   events: LifeEvent[];
+  /** false until her feeds have loaded: lines show "…", not "None yet" / 0. */
+  loaded?: boolean;
   add: (e: { occurred_at: string; ended_at?: string | null; data?: Record<string, unknown> }) => Promise<LifeEvent | null>;
   remove: (id: string) => Promise<boolean>;
 }
@@ -31,19 +34,20 @@ function Line({ to, label, value, testId }: { to: string; label: string; value: 
     <li>
       <Link to={to} data-testid={testId} className="flex items-center gap-3 py-2.5 text-[15px] hover:text-primary transition-colors">
         <span className="text-muted-foreground w-[6.5rem] flex-shrink-0">{label}</span>
-        <span className="flex-1 min-w-0 break-words tabular-nums">{value}</span>
+        <span className="flex-1 min-w-0 break-words tabular-nums"><ValueOrLoading value={value} /></span>
         <ChevronRight className="h-4 w-4 flex-shrink-0 text-muted-foreground" aria-hidden="true" />
       </Link>
     </li>
   );
 }
 
-export default function BabyHomeCard({ babyId, birthDate, sex, feeds, nappies }: {
+export default function BabyHomeCard({ babyId, birthDate, sex, feeds, nappies, nappiesLoaded = true }: {
   babyId: string;
   birthDate: string | null;
   sex: string | null;
   feeds: FeedsHook;
   nappies: LifeEvent[];
+  nappiesLoaded?: boolean;
 }) {
   const vaccines = useLifeEvents('baby_vaccine', { babyId, limit: 200 });
   const growth = useLifeEvents('baby_growth', { babyId, limit: 30 });
@@ -78,6 +82,7 @@ export default function BabyHomeCard({ babyId, birthDate, sex, feeds, nappies }:
   };
 
   const at = new Date();
+  const feedsLoaded = feeds.loaded !== false;
   const lf = lastFeed(feeds.events, at);
   const ago = lf ? fmtAgo(lf.minutesAgo) : null;
   const feedsToday = countToday(feeds.events, at);
@@ -97,9 +102,9 @@ export default function BabyHomeCard({ babyId, birthDate, sex, feeds, nappies }:
       )}
       <ul className="divide-y divide-border">
         <Line to={TAB('feed')} testId="baby-home-last-feed" label="Last feed"
-          value={lf && ago ? [`${ago.value}${ago.unit ? ` ${ago.unit}` : ''} ago`, feedDetail(lf.method, lf.ml, lf.durationMin)].filter(Boolean).join(' · ') : 'None yet'} />
-        <Line to={TAB('feed')} testId="baby-home-feeds" label="Feeds today" value={String(feedsToday)} />
-        <Line to={TAB('nappy')} testId="baby-home-nappies" label="Nappies today" value={`${np.wet} wet · ${np.dirty} dirty`} />
+          value={lf && ago ? [`${ago.value}${ago.unit ? ` ${ago.unit}` : ''} ago`, feedDetail(lf.method, lf.ml, lf.durationMin)].filter(Boolean).join(' · ') : feedsLoaded ? 'None yet' : LOADING} />
+        <Line to={TAB('feed')} testId="baby-home-feeds" label="Feeds today" value={feedsLoaded ? String(feedsToday) : LOADING} />
+        <Line to={TAB('nappy')} testId="baby-home-nappies" label="Nappies today" value={nappiesLoaded ? `${np.wet} wet · ${np.dirty} dirty` : LOADING} />
         {vax && <Line to={TAB('vax')} testId="baby-home-vaccine" label="Next vaccine" value={`${vax.what} · ${vax.when}`} />}
         {weight && <Line to={TAB('growth')} testId="baby-home-weight" label="Weight"
           value={[weight.weight, weight.percentile, weight.on].filter(Boolean).join(' · ')} />}

@@ -19,10 +19,11 @@ const ev = (id: string, kind: LifeEvent['kind'], minsAgo: number, data: Record<s
 };
 const daysAgoYmd = (n: number) => { const d = new Date(); d.setDate(d.getDate() - n); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 
-function setup(feedEvents: LifeEvent[], nappies: LifeEvent[] = []) {
+function setup(feedEvents: LifeEvent[], nappies: LifeEvent[] = [], loaded = true) {
   let events = [...feedEvents];
   const feeds = {
     get events() { return events; },
+    loaded,
     add: vi.fn(async (e: { occurred_at: string; ended_at?: string | null; data?: Record<string, unknown> }) => {
       const saved: LifeEvent = { id: 'new', kind: 'feed', occurred_at: e.occurred_at, ended_at: e.ended_at ?? null, baby_id: 'b1', data: e.data ?? {} };
       events = [saved, ...events];
@@ -32,7 +33,7 @@ function setup(feedEvents: LifeEvent[], nappies: LifeEvent[] = []) {
   };
   const ui = () => (
     <MemoryRouter>
-      <BabyHomeCard babyId="b1" birthDate={daysAgoYmd(20)} sex="female" feeds={feeds} nappies={nappies} />
+      <BabyHomeCard babyId="b1" birthDate={daysAgoYmd(20)} sex="female" feeds={feeds} nappies={nappies} nappiesLoaded={loaded} />
     </MemoryRouter>
   );
   const r = render(ui());
@@ -67,6 +68,17 @@ describe('Home baby card', () => {
     setup([]);
     expect(screen.getByTestId('baby-home-last-feed')).toHaveTextContent('None yet');
     expect(screen.getByTestId('baby-home-feeds')).toHaveTextContent('0');
+    expect(screen.queryByTestId('home-feed-quick-log')).toBeNull();
+  });
+
+  it('while her feeds and nappies load: "…" (Loading), never "None yet" or 0', () => {
+    setup([], [], false);
+    for (const id of ['baby-home-last-feed', 'baby-home-feeds', 'baby-home-nappies']) {
+      const line = screen.getByTestId(id);
+      expect(line).toHaveTextContent('…');
+      expect(line).toHaveTextContent('Loading');
+      expect(line).not.toHaveTextContent(/None yet|\b0\b/);
+    }
     expect(screen.queryByTestId('home-feed-quick-log')).toBeNull();
   });
 

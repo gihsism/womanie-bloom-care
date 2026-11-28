@@ -9,6 +9,7 @@ import { lastFeed, sleepTodayMin, fmtAgo, dayOfLife } from '@/lib/bodyMap';
 import { SLEEP_ACTIVE_KEY } from '@/lib/babyQuickFeed';
 import { DetailsLink } from '@/components/dashboard/HomeBlocks';
 import BabyHomeCard from '@/components/dashboard/BabyHomeCard';
+import { LoadingValue } from '@/components/dashboard/LoadingValue';
 
 // Version 8 "body map" hero for after birth: a sculpted swaddled baby.
 // Home keeps it to one fact (last feed), one sentence (sleep today, next
@@ -74,7 +75,8 @@ export default function BabyBodyMap() {
   // Feeds and nappies today are on the card below; the sentence keeps sleep,
   // the next side and the day of life.
   const sleepText = asleepMin != null ? 'Asleep now.' : sleptMin ? `Slept ${fmtAgo(sleptMin).value}${fmtAgo(sleptMin).unit ? ' min' : ''} today.` : null;
-  const sentence = [
+  // Until her feeds and sleeps arrive the sentence waits too (no half facts).
+  const sentence = !feeds.loaded || !sleeps.loaded ? '' : [
     sleepText,
     lf?.nextSide ? `Next: ${lf.nextSide}.` : null,
     day && day > 0 && day < 50 ? `Day ${day} of life.` : null,
@@ -85,7 +87,8 @@ export default function BabyBodyMap() {
     <section className="mb-6" aria-label="Your baby at a glance">
       <p className="label-mono">{name} · {format(now, WEEKDAY_DAY_MONTH_FMT)}</p>
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
-        {ago ? <>Last feed <span className="text-muted-foreground">{ago.value}{ago.unit ? ` ${ago.unit}` : ''} ago</span></> : <>No feeds yet</>}
+        {ago ? <>Last feed <span className="text-muted-foreground">{ago.value}{ago.unit ? ` ${ago.unit}` : ''} ago</span></>
+          : feeds.loaded ? <>No feeds yet</> : <>Last feed <span className="text-muted-foreground"><LoadingValue testId="baby-hero-loading" /></span></>}
       </h2>
       {sentence && <p className="mt-1 text-[15px]">{sentence}</p>}
 
@@ -125,7 +128,7 @@ export default function BabyBodyMap() {
 
       <DetailsLink to="/dashboard/baby" label="Baby tracker" />
     </section>
-    <BabyHomeCard babyId={baby.id} birthDate={baby.birth_date} sex={baby.sex ?? null} feeds={feeds} nappies={nappies.events} />
+    <BabyHomeCard babyId={baby.id} birthDate={baby.birth_date} sex={baby.sex ?? null} feeds={feeds} nappies={nappies.events} nappiesLoaded={nappies.loaded} />
     </>
   );
 }

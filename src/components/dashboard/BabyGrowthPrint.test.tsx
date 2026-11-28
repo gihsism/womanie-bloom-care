@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { render } from '@testing-library/react';
-import BabyGrowthPrint from './BabyGrowthPrint';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, fireEvent } from '@testing-library/react';
+import BabyGrowthPrint, { printChartBox, PRINT_W } from './BabyGrowthPrint';
 import { dailyRows } from '@/lib/babyStats';
 
 const events = [
@@ -50,5 +50,32 @@ describe('dailyRows sleep', () => {
     ]);
     expect(rows.map(r => r.sleepMin)).toEqual([0, 0, 0, 0, 60, 120, 90]);
     expect(dailyRows([], [], now).every(r => r.sleepMin === 0)).toBe(true);
+  });
+
+  describe('axis labels legible at phone width and on paper', () => {
+    afterEach(() => { vi.restoreAllMocks(); });
+
+    it('the viewBox follows the drawn width, so labels are 11 CSS px at any width', () => {
+      expect(printChartBox(358)).toEqual({ w: 358, h: 190, font: 11 });
+      expect(printChartBox(PRINT_W)).toEqual({ w: 640, h: 210, font: 11 });
+      expect(printChartBox(0)).toEqual({ w: 640, h: 210, font: 11 });
+      expect(printChartBox(120).w).toBe(300);
+    });
+
+    it('at 390 px the chart is drawn 1:1 (viewBox = its width); on print it goes back to 640 x 210, same curves', () => {
+      vi.spyOn(SVGElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 358, height: 0 } as DOMRect);
+      const { getByTestId } = render(<BabyGrowthPrint birthDate="2026-01-01" sex="female" events={events} />);
+      const weight = getByTestId('print-growth-weight');
+      expect(weight.getAttribute('viewBox')).toBe('0 0 358 190');
+      const labels = [...weight.querySelectorAll('text')];
+      expect(labels.length).toBeGreaterThan(8);
+      for (const t of labels) expect(Number(t.getAttribute('font-size'))).toBeGreaterThanOrEqual(10);
+      expect(weight.querySelectorAll('path')).toHaveLength(6);
+      fireEvent(window, new Event('beforeprint'));
+      expect(weight.getAttribute('viewBox')).toBe('0 0 640 210');
+      expect(weight.querySelectorAll('path')).toHaveLength(6);
+      fireEvent(window, new Event('afterprint'));
+      expect(weight.getAttribute('viewBox')).toBe('0 0 358 190');
+    });
   });
 });

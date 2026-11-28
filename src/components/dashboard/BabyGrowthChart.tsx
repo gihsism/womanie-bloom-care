@@ -6,6 +6,7 @@ import { DATE_FMT } from '@/lib/dateFormat';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { LoadingValue } from './LoadingValue';
 import {
   ageLabel, chartXScale as xScale, chartYAxis as yAxis, curveRows, CURVES, latestLine, MEASURES, measurementRows, measurePoints, normaliseSex, parseCm,
   parseWeight, percentileShort, UNIT, valueLabel, type GrowthEventData, type GrowthMeasure, type GrowthSex, type MeasureCell, type MeasurePoint,
@@ -43,6 +44,8 @@ interface Props {
   birthDate: string | null;
   sex: string | null;
   events: GrowthEventLike[];
+  /** false while the measurements load: no "Add a weight" prompt yet. */
+  loaded?: boolean;
   onSaveMeasurement: (m: MeasurementToSave) => Promise<boolean>;
   onSetSex: (sex: GrowthSex) => Promise<boolean>;
   onSetBirthDate: (date: string) => Promise<boolean>;
@@ -352,7 +355,7 @@ function MeasureTabs({ measure, onChange }: { measure: GrowthMeasure; onChange: 
   );
 }
 
-export default function BabyGrowthChart({ babyName, birthDate, sex, events, onSaveMeasurement, onSetSex, onSetBirthDate, onRemove }: Props) {
+export default function BabyGrowthChart({ babyName, birthDate, sex, events, loaded = true, onSaveMeasurement, onSetSex, onSetBirthDate, onRemove }: Props) {
   const [measure, setMeasure] = useState<GrowthMeasure>('weight');
   const growthSex = normaliseSex(sex);
   const points = useMemo(() => (birthDate ? measurePoints(measure, birthDate, events, localDate) : []), [measure, birthDate, events]);
@@ -378,7 +381,9 @@ export default function BabyGrowthChart({ babyName, birthDate, sex, events, onSa
           <div className="space-y-1">
             {line
               ? <p className="text-sm font-medium" data-testid="growth-latest">{line}</p>
-              : <p className="text-sm text-muted-foreground">Add a {NOUN[measure]} to see where {babyName} is on the chart.</p>}
+              : loaded
+                ? <p className="text-sm text-muted-foreground">Add a {NOUN[measure]} to see where {babyName} is on the chart.</p>
+                : <p className="text-sm text-muted-foreground"><LoadingValue testId="growth-loading" /></p>}
             <p className="text-xs text-muted-foreground">Babies often move between lines in the first weeks. Your midwife or paediatrician looks at the trend.</p>
           </div>
         </>

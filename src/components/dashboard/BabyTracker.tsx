@@ -13,6 +13,7 @@ import { useLifeEvents, importLocalOnce, type LifeEvent } from '@/hooks/useLifeE
 import { Baby, Milk, Moon, Droplets, Ruler, Syringe, Trash2, Play, Square, BarChart3, Plus, Timer, Repeat, Check } from 'lucide-react';
 import { METHOD_LABEL, FEED_ACTIVE_KEY, SLEEP_ACTIVE_KEY, quickFeedFrom, quickFeedLabel, quickFeedEvent, fmtClock, type FeedMethod, type FeedData } from '@/lib/babyQuickFeed';
 import { useUndoNotice } from './useUndoNotice';
+import { LOADING, LoadingValue, ValueOrLoading } from './LoadingValue';
 import { BAG_BABY_VACCINES, BAG_SCHEDULE_SOURCE, BAG_SCHEDULE_URL, babyVaccinePlan, rsvTiming, vaccineMarksFrom, type PlannedDose, type PlannedVisit } from '@/lib/babyVaccineSchedule';
 // Stats tab draws charts (recharts, ~110 KB gzip): load it when opened.
 const BabyStatsTab = lazy(() => import('./BabyStatsTab'));
@@ -226,9 +227,9 @@ function FeedTab({ babyId, openAdd = false }: { babyId: string; openAdd?: boolea
     <div className="space-y-4">
       {feeds.error && <p className="text-xs text-destructive">{feeds.error}</p>}
       <div className="grid grid-cols-3 gap-2 text-center">
-        <Stat label="Last feed" value={sinceLast === null ? '—' : `${fmtMin(sinceLast)} ago`} />
-        <Stat label="Feeds today" value={String(today.length)} />
-        <Stat label="Bottle today" value={mlToday ? `${mlToday} ml` : '—'} />
+        <Stat label="Last feed" value={!feeds.loaded ? LOADING : sinceLast === null ? '—' : `${fmtMin(sinceLast)} ago`} />
+        <Stat label="Feeds today" value={feeds.loaded ? String(today.length) : LOADING} />
+        <Stat label="Bottle today" value={!feeds.loaded ? LOADING : mlToday ? `${mlToday} ml` : '—'} />
       </div>
 
       {active ? (
@@ -359,8 +360,8 @@ function SleepTab({ babyId }: { babyId: string }) {
     <div className="space-y-4">
       {sleeps.error && <p className="text-xs text-destructive">{sleeps.error}</p>}
       <div className="grid grid-cols-2 gap-2 text-center">
-        <Stat label="Sleep today" value={fmtMin(todayMin)} />
-        <Stat label="Naps today" value={String(sleeps.events.filter(e => e.ended_at && isToday(parseISO(e.ended_at))).length)} />
+        <Stat label="Sleep today" value={sleeps.loaded ? fmtMin(todayMin) : LOADING} />
+        <Stat label="Naps today" value={sleeps.loaded ? String(sleeps.events.filter(e => e.ended_at && isToday(parseISO(e.ended_at))).length) : LOADING} />
       </div>
       {start !== null ? (
         <RunningTimer id="sleep-timer-start" title="Sleeping" start={start} onStart={setStart}
@@ -417,8 +418,8 @@ function NappyTab({ babyId }: { babyId: string }) {
     <div className="space-y-3">
       {nappies.error && <p className="text-xs text-destructive">{nappies.error}</p>}
       <div className="grid grid-cols-2 gap-2 text-center">
-        <Stat label="Wet today" value={String(wet)} />
-        <Stat label="Dirty today" value={String(dirty)} />
+        <Stat label="Wet today" value={nappies.loaded ? String(wet) : LOADING} />
+        <Stat label="Dirty today" value={nappies.loaded ? String(dirty) : LOADING} />
       </div>
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground">Tap to add a nappy changed now:</p>
@@ -452,7 +453,7 @@ function GrowthTab({ baby, onBabyChange }: { baby: BabyRow; onBabyChange: (patch
     <div className="space-y-3">
       {growth.error && <p className="text-xs text-destructive">{growth.error}</p>}
       <Suspense fallback={<p className="text-xs text-muted-foreground">Loading the chart…</p>}>
-        <BabyGrowthChart babyName={baby.name} birthDate={baby.birth_date} sex={baby.sex} events={growth.events}
+        <BabyGrowthChart babyName={baby.name} birthDate={baby.birth_date} sex={baby.sex} events={growth.events} loaded={growth.loaded}
           onSaveMeasurement={async m => !!(await saveMeasurement(m))}
           onSetSex={sex => onBabyChange({ sex })} onSetBirthDate={birth_date => onBabyChange({ birth_date })}
           onRemove={growth.remove} />
@@ -617,14 +618,17 @@ function VaccineTab({ baby, onBabyChange }: { baby: BabyRow; onBabyChange: (patc
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-2 text-center">
-          <Stat label="Marked done" value={`${doneCount} of ${doses.length}`} />
-          <Stat label="Due now or soon" value={String(dueNow.reduce((n, v) => n + v.doses.filter(d => d.status === 'due' || d.status === 'soon').length, 0))} />
+          <Stat label="Marked done" value={vax.loaded ? `${doneCount} of ${doses.length}` : LOADING} />
+          <Stat label="Due now or soon" value={vax.loaded ? String(dueNow.reduce((n, v) => n + v.doses.filter(d => d.status === 'due' || d.status === 'soon').length, 0)) : LOADING} />
         </div>
       )}
       {notice}
+      {/* Until her marks load, every past dose would look due: wait. */}
+      {!vax.loaded ? <p className="text-sm text-muted-foreground border-t pt-3"><LoadingValue testId="vax-loading" /></p> : (<>
       {baby.birth_date && section('Due now or soon', dueNow, 'vax-due', 'Nothing due in the next 30 days.')}
       {section(baby.birth_date ? 'Later' : 'By age', later, 'vax-later', 'Nothing later in the schedule.')}
       {done.length > 0 && section('Done', done, 'vax-done')}
+      </>)}
 
       <section className="border-t pt-3 space-y-2" data-testid="vax-other">
         <p className="label-mono">Other vaccinations</p>
@@ -658,7 +662,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-muted/50 rounded-lg p-2">
       <div className="text-[10px] text-muted-foreground">{label}</div>
-      <div className="font-semibold text-sm">{value}</div>
+      <div className="font-semibold text-sm"><ValueOrLoading value={value} /></div>
     </div>
   );
 }

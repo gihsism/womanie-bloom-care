@@ -1,3 +1,5 @@
+import { useLayoutEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { format, parseISO } from 'date-fns';
 import { DATE_FMT } from '@/lib/dateFormat';
 import {
@@ -18,11 +20,57 @@ export interface GrowthPrintEvent { id: string; occurred_at: string; data?: Grow
 const TITLE: Record<GrowthMeasure, string> = { weight: 'Weight for age', length: 'Length for age', head: 'Head circumference for age' };
 const localDate = (iso: string) => format(parseISO(iso), 'yyyy-MM-dd');
 
-const W = 640;
-const H = 210;
-const M = { top: 8, right: 34, bottom: 22, left: 44 };
+// Axis labels stay legible at any width: the viewBox follows the drawn
+// width, so a label is AXIS_PX CSS pixels on a 390 px phone and on paper
+// alike (a fixed 640-wide viewBox shrank 9-unit labels to ~5 px on a
+// phone). On paper the chart is drawn at PRINT_W (about 1:1 with an A4
+// text column), set before the print snapshot. Same data, same curves.
+export const PRINT_W = 640;
+const MIN_W = 300;
+const AXIS_PX = 11;
+const M = { top: 8, right: 36, bottom: 24, left: 48 };
+
+/** viewBox size for a chart drawn `width` CSS pixels wide: 640 x 210 on paper, never flatter than 190 tall. */
+export function printChartBox(width: number) {
+  const w = Math.round(Math.max(MIN_W, width || PRINT_W));
+  return { w, h: Math.round(Math.max(190, (w * 210) / PRINT_W)), font: AXIS_PX };
+}
+
+/** The drawn width of the chart, re-measured on resize; PRINT_W while printing. */
+function useChartWidth() {
+  const ref = useRef<SVGSVGElement | null>(null);
+  const [width, setWidth] = useState(PRINT_W);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || typeof window === 'undefined') return;
+    const print = window.matchMedia?.('print');
+    const measure = () => {
+      if (print?.matches) { setWidth(PRINT_W); return; }
+      const w = el.getBoundingClientRect().width;
+      if (w > 0) setWidth(Math.round(w));
+    };
+    measure();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
+    ro?.observe(el);
+    // flushSync: the browser takes the print snapshot right after this event.
+    const before = () => flushSync(() => setWidth(PRINT_W));
+    const onPrintChange = () => (print?.matches ? before() : measure());
+    window.addEventListener('beforeprint', before);
+    window.addEventListener('afterprint', measure);
+    print?.addEventListener?.('change', onPrintChange);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener('beforeprint', before);
+      window.removeEventListener('afterprint', measure);
+      print?.removeEventListener?.('change', onPrintChange);
+    };
+  }, []);
+  return [ref, width] as const;
+}
 
 function PrintChart({ sex, points, measure }: { sex: 'female' | 'male'; points: MeasurePoint[]; measure: GrowthMeasure }) {
+  const [ref, width] = useChartWidth();
+  const { w: W, h: H, font } = printChartBox(width);
   const last = points[points.length - 1];
   const x = chartXScale(last?.day ?? 0);
   const curves = curveRows(sex, x.end, x.end <= 98 ? 2 : 7, measure);
@@ -35,18 +83,18 @@ function PrintChart({ sex, points, measure }: { sex: 'female' | 'male'; points: 
   const py = (v: number) => M.top + (1 - (v - y.min) / (y.max - y.min)) * (H - M.top - M.bottom);
   const lastRow = curves[curves.length - 1];
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" data-testid={`print-growth-${measure}`}
+    <svg ref={ref} viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" data-testid={`print-growth-${measure}`}
       aria-label={`${TITLE[measure]} chart with the 3rd, 15th, 50th, 85th and 97th percentile curves`}>
       {y.ticks.map(t => (
         <g key={`y${t}`}>
           <line x1={M.left} x2={W - M.right} y1={py(t)} y2={py(t)} stroke="#e5e7eb" strokeWidth={0.75} />
-          <text x={M.left - 4} y={py(t) + 3} fontSize={9} textAnchor="end" fill="#6b7280">{`${t} ${UNIT[measure]}`}</text>
+          <text x={M.left - 4} y={py(t) + font * 0.35} fontSize={font} textAnchor="end" fill="#6b7280">{`${t} ${UNIT[measure]}`}</text>
         </g>
       ))}
       {x.ticks.map(t => (
         <g key={`x${t}`}>
           <line x1={px(t)} x2={px(t)} y1={M.top} y2={H - M.bottom} stroke="#e5e7eb" strokeWidth={0.75} />
-          <text x={px(t)} y={H - M.bottom + 13} fontSize={9} textAnchor="middle" fill="#6b7280">{x.label(t)}</text>
+          <text x={px(t)} y={H - M.bottom + font + 4} fontSize={font} textAnchor="middle" fill="#6b7280">{x.label(t)}</text>
         </g>
       ))}
       {CURVES.map(c => {
@@ -56,7 +104,7 @@ function PrintChart({ sex, points, measure }: { sex: 'female' | 'male'; points: 
           <g key={key}>
             <path d={d} fill="none" stroke={c.p === 50 ? '#6b7280' : '#9ca3af'} strokeWidth={c.p === 50 ? 1.4 : 0.9}
               strokeDasharray={c.p === 3 || c.p === 97 ? '4 3' : undefined} />
-            <text x={px(lastRow.day) + 4} y={py(lastRow[key]) + 3} fontSize={9} fill="#6b7280">{c.p === 3 ? '3rd' : `${c.p}th`}</text>
+            <text x={px(lastRow.day) + 4} y={py(lastRow[key]) + font * 0.35} fontSize={font} fill="#6b7280">{c.p === 3 ? '3rd' : `${c.p}th`}</text>
           </g>
         );
       })}
