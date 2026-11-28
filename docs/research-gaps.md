@@ -659,6 +659,131 @@ or only some outcomes, one self-contradicting abstract), e.g.
 `pmid-41448220`, `pmid-30738885`, `pmid-26172878`, `pmid-32972380`,
 `pmid-30103263`, `pmid-41498229`, `pmid-32124980`, `pmid-41184155`.
 
+## Round 9 (2026-11-28)
+
+### Round-8 weaker matches fixed
+
+| Question | Problem | Fix |
+|---|---|---|
+| Swiss mammography questions | SGGG cervical letter 97 was 2nd / 3rd (matched "cancer", "screening" and the Swiss lift) | New rule `SUBJECT_MISMATCH` in `library.ts` (x0.6): breast / mammogram asked and no cervix / smear / Pap / HPV word, title about cervical screening only; and the reverse (smear asked, breast-only title). The cervical letter is no longer among the six; KLV Art. 12e stays first |
+| HPV-vaccine questions | Cervical letter 4th ("When should girls get the HPV vaccine?") and 2nd ("Is the HPV vaccine free in Switzerland?") | Same rule: a vaccine asked (no screening / smear / test word), a title about screening without "vaccine" x0.6. BAG HPV item still first, the letter is out |
+| "Why are my periods so heavy?" | FIGO normal-cycle item 3rd (it carried the topic `heavy-bleeding`, worth a topic hit) | Topic removed (it defines cycle length; flow is only "judged by the woman"). Now heavy-bleeding reviews and the NICE guideline fill the six. Topics are not embedded, so no re-embed |
+
+The cervical letter still leads both smear questions. Tests:
+`ask-ai-audit.test.ts` (round 9 block, keyword and bundled-model).
+
+### Swiss breast screening by canton, Swiss IVF figures
+
+- **Breast screening programmes** (new hand-written item, publisher
+  "Swiss Cancer Screening", `gp-swiss-teilnahme-e165b7`): the umbrella
+  association's canton list and participation page could be fetched this
+  time. 18 cantons run a programme in November 2026 (AG since July 2026
+  per the Krebsliga Aargau / Clario release of 1 June 2026; AR, AI, BS,
+  BL, BE, FR, GE, GR, JU, LU, NE, SG, SO, TG, TI, VS, VD); no programme
+  listed for ZH, SH, ZG, GL, SZ, UR, OW, NW (inferred from the list: the
+  "other cantons" page does not name them). Ages 50 to 69 or 74 by
+  canton, every 2 years, no deductible, 10% co-payment about CHF 20,
+  double reading, about five in six findings need no treatment. Now first
+  for "Is there a breast screening programme in my canton?" and "I live in
+  Zurich, can I get a free mammogram?"; 2nd after KLV for "When should I
+  start mammograms in Switzerland?".
+- **Swiss IVF figures** (new item, publisher "BFS",
+  `gp-bfs-reproduktive-perinatale-gesundheit-6ec7c0`): BFS tables
+  T 14.03.07.01.01 to .03 (XLSX, data as of 16 April 2026): 2024, 6,533
+  women, 12,573 started cycles, 2,475 live births; 47% of treated women
+  pregnant, 37% gave birth; birth per transfer 30% (fresh 26%, frozen
+  32%), per cycle 19%; miscarriage about 1 in 5; twins 2%; mean age 36.8
+  and the age mix. **No Swiss success rates by age exist in the BFS
+  tables** (BAG pages show them only as charts; no FIVNAT report found as
+  free text), and the item says so and points to the UK register. It now
+  leads the IVF-success questions (Swiss lift) with HFEA (rates by age)
+  2nd; the round-8 test moved HFEA from "first" to "among the sources".
+  Not tagged `age-fertility`, and "ages" kept out of the title, to avoid
+  matching age questions harder than it can answer them.
+
+### Summary content check, next 100 items
+
+Next 100 items on the round-6 exposure ranking (none skipped; all had
+PubMed abstracts). 87 fair. 16 fixes in 13 items, text only (10
+re-embedded offline with the incremental script; label-only changes need
+no re-embed):
+
+- Certainty -> "not stated" where the abstract grades nothing:
+  `pmid-36084006`, `pmid-26695595` (risk of bias only), `pmid-38772634`
+  ("high" came from study-quality tools, not GRADE).
+- Hedges restored to match the GRADE level: `pmid-34391952` (endometriosis
+  surgery, "may", 2 places), `pmid-36209937` (preterm birth, "probably"),
+  `pmid-35553047` (ibuprofen vs paracetamol, "probably", 2 places),
+  `pmid-31990055` (sling complications, "may"), `pmid-41721260`
+  (induction and shoulder dystocia, "probably", 2 places),
+  `pmid-32964431` (hospital stay: very low certainty, "uncertain").
+- Wrong scope or comparison: `pmid-31476798` (most outcomes were unclear,
+  not "made little difference"), `pmid-37415461` (the LDL result was not
+  against levonorgestrel pills; only arterial clots were),
+  `pmid-28987293` ("most likely to help", not "may help most").
+- Blanket safety claim in the app's voice: `pmid-30762623` (creatine
+  "safe" is now the authors' judgement for these trials).
+
+Left as is: 22 judgement calls (labels where the abstract grades a range
+or only the main outcome; evidence levels instead of GRADE), e.g.
+`pmid-32683695`, `pmid-35922074`, `pmid-26415762`, `pmid-34994399`,
+`pmid-32303295`, `pmid-29117320`, `pmid-43055207`.
+
+### Superseded-guideline sweep
+
+All 439 guideline-type PubMed items were listed by issuing body. Newer
+versions were looked up in PubMed (free E-utilities, no API spend) for the
+series that publish numbered or dated updates (ACOG, SOGC, ASRM, ESHRE,
+USPSTF, NAMS, NICE, AAP, AWMF, NCCN, CDC / ACIP). The older record is
+added to `SUPERSEDED` in `library.ts`, so it steps back (x0.6) while the
+newer one is in the library; it stays citable.
+
+Newer version already in the library (16 old records now step back):
+SOGC folic acid 2015 -> Guideline 427 (2022; its French twin also steps
+back, one guideline per slot), SOGC dysmenorrhoea 2017 -> 2025, SOGC
+hirsutism 2017 -> 2023, SOGC OASIS 2015 -> 2024, AWMF candidosis 2015 ->
+2021, ASRM PGT-A 2018 -> 2024, ASRM uterine septum 2016 -> 2024, ESHRE POI
+2016 -> 2025, ACOG morcellation CO 770 -> CO 822, ACOG PB 202 (2 records)
+-> PB 222, AAP influenza 2019-20 and 2023-24 -> 2025-26, USPSTF iron in
+pregnancy 2015 -> 2024, USPSTF tobacco 2015 -> 2021.
+
+Newer version added (summary written from the PubMed abstract, own words;
+7 items embedded offline): USPSTF folic acid 2023 reaffirmation
+(`pmid-37526713`, 0.4 to 0.8 mg daily, grade A), USPSTF hypertensive
+disorders of pregnancy 2023 (`pmid-37721605`, replaces pre-eclampsia
+screening 2017), USPSTF falls 2024 (`pmid-38833246`), ASRM ovarian
+reserve 2020 (`pmid-33280722`), NCCN cervical cancer v2.2026
+(`pmid-41671440`), ACOG CO 807 tobacco and nicotine (`pmid-32332417`,
+replaces CO 721), NICE NG23 menopause, November 2024 update
+(`pmid-31940155`, abstract gives scope only; replaces the 2015 record).
+
+Checked, no newer full version (or only a partial update, so nothing
+demoted): ACOG PB 190 GDM (a 2024 Clinical Practice Update changes
+screening only), SOGC Guideline 398 progesterone (Technical Update 467,
+2026, covers one group), ACS cervical 2020 (2026 update covers self-
+collection and screening exit only), ACIP Tdap 2018 (2020 update is a
+narrow change), USPSTF cervical 2018 (still the final statement in
+PubMed), USPSTF perinatal depression 2019, healthy weight 2021, vitamin D
+and fractures 2018 (no newer statement in PubMed), ACOG PB 194 PCOS, PB
+196, PB 201, PB 203, PB 183, CO 651, CO 762, CO 722, NAMS 2022 / 2023,
+SOGC BV / vulvovaginitis / toxoplasmosis / AUB 292, AAP neonatal pain
+2016, ACR breast imaging in pregnancy 2018.
+
+Before / after check: chat sources for 216 questions (the 138 round-6
+everyday questions plus the eval, QA and audit sets), bundled model. 12
+changed: in every case where an old record left, the newer version was
+sent instead or was already among the six (the slot went to another
+on-topic item). One catch fixed on the way: "itchy with thick white
+discharge" lost its only source (the 2015 AWMF record, found by meaning
+only, fell under the score floor once demoted); the 2021 record now
+carries the keywords "itchy", "itching", "white / thick discharge" and is
+sent. Side effect accepted: after its re-embed, the sling-surgery review
+(`pmid-31990055`) took the 6th slot from a pelvic-floor exercise review
+for "I leak a bit of pee when I sneeze since giving birth" (the
+pelvic-floor sources above it are unchanged). Search evals unchanged.
+Tests: `ask-ai-audit.test.ts` (round 9 sweep block: every pair steps back,
+every target is in the library and not itself superseded).
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed
