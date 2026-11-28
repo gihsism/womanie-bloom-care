@@ -21,8 +21,9 @@ test.describe('IVF: a brand-new account enters the clinic dates', () => {
     const api = await mockAccount(page, 'ivf', { tables: { profiles: [{ ...profile, ivf_start_date: null, ivf_phase: null }] } });
     await page.goto('/dashboard');
 
-    await expect(page.getByRole('link', { name: "Add your clinic's dates" })).toBeVisible();
-    await today(page).getByRole('button', { name: "Add the dates from your clinic's plan" }).click();
+    // Round 10: the hero asks; no second Today row saying the same.
+    await expect(today(page).getByRole('button', { name: /clinic/ })).toHaveCount(0);
+    await page.getByRole('link', { name: "Add your clinic's dates" }).click();
 
     const journey = page.getByTestId('ivf-journey');
     await expect(journey).toBeVisible();
@@ -38,7 +39,6 @@ test.describe('IVF: a brand-new account enters the clinic dates', () => {
 
     await page.goto('/dashboard');
     await expect(today(page).getByRole('button', { name: 'Monitoring scan today' })).toBeVisible();
-    await expect(today(page).getByRole('button', { name: "Add the dates from your clinic's plan" })).toHaveCount(0);
 
     await page.goto('/dashboard/appointments/apt-1/prep');
     const section = page.getByTestId('visit-prep-sheet').locator('[data-section="ivf-dates"]');
@@ -55,10 +55,12 @@ test.describe('Contraception: a brand-new account picks a method and enters its 
     const api = await mockAccount(page, 'contraception');
     await page.goto('/dashboard');
 
-    await expect(page.getByRole('link', { name: 'Choose your method' })).toBeVisible();
-    // No pill reminder for someone who has not said she takes one.
-    await expect(today(page).getByRole('button', { name: /pill/i })).toHaveCount(0);
-    await today(page).getByRole('button', { name: 'Choose your contraception method' }).click();
+    // No pill reminder for someone who has not said she takes one, and no
+    // "Log today's pill" button either (round 10); the hero asks for the
+    // method, with no second Today row saying the same.
+    await expect(today(page).getByRole('button', { name: /pill|method/i })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: "Log today's pill" })).toHaveCount(0);
+    await page.getByRole('link', { name: 'Choose your method' }).click();
 
     const picker = page.getByTestId('method-picker');
     await expect(picker).toContainText('Which method do you use?');

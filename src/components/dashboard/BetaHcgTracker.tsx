@@ -206,7 +206,7 @@ const BetaHcgTracker = ({ ivfPhase }: BetaHcgTrackerProps) => {
       </div>
       <p className="text-xs text-muted-foreground -mt-1">
         Log each blood draw your clinic does after transfer. We'll calculate the doubling time
-        and flag values outside the typical range — it's not medical advice, just a sanity check.
+        and flag results outside the typical range — it's not medical advice, just a sanity check.
       </p>
 
       {/* Add new draw */}

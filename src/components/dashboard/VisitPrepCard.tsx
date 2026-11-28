@@ -1,3 +1,4 @@
+import { nextVisitAhead } from '@/lib/visitAhead';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -157,7 +158,9 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
         .select('signal_date, symptoms, notes')
         .eq('user_id', user.id)
         .gte('signal_date', format(new Date(Date.now() - 60 * 86_400_000), 'yyyy-MM-dd')),
-      fetch('/api/me/appointments?upcoming=true')
+      // All visits, not ?upcoming=true: that one drops a visit the moment it
+      // starts, while Visits still shows it as "Your next visit".
+      fetch('/api/me/appointments')
         .then(r => (r.ok ? r.json() : { appointments: [] }))
         .catch(() => ({ appointments: [] })),
     ]);
@@ -166,7 +169,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
     setFlagged(currentFlagged((flaggedRes.data ?? []) as FlaggedRow[], { borderline: true }));
     setSignals((signalsRes.data ?? []) as SignalRow[]);
     const apts = Array.isArray(aptResp?.appointments) ? aptResp.appointments : [];
-    const next = apts.find((a: { scheduled_at: string }) => Date.parse(a.scheduled_at) > Date.now());
+    const next = nextVisitAhead(apts as Array<{ id: string; scheduled_at: string; doctor_name: string | null; status?: string | null; duration?: number | null }>);
     setUpcomingApt(next ?? null);
     const { data: unsched, error: unschedErr } = await db.from('visit_questions')
       .select('questions')
@@ -220,9 +223,15 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
       const valuePart = row.value !== null && row.value !== undefined
         ? ` (${row.value}${row.unit ? ' ' + row.unit : ''})`
         : '';
+      // Plain words: the test's short name (not "Potassium — heart & muscle
+      // function") and "marked urgent" / "outside the range" for the lab's codes.
+      const st = String(row.status ?? '').trim().toLowerCase();
+      const how = st === 'critical' ? 'was marked urgent'
+        : st === 'abnormal' || st === 'out of range' ? 'came back outside the range'
+        : `came back ${st}`;
       out.push({
         id: `lab:${name}`,
-        text: `My ${name}${valuePart} came back ${row.status} — what does that mean for me and do we need to act on it?`,
+        text: `My ${name.split(' — ')[0]}${valuePart} ${how}: what does that mean for me and do we need to act on it?`,
       });
     }
 
@@ -350,7 +359,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
 
       {upcomingApt && (
         <p className="text-[11px] text-muted-foreground mb-3">
-          Next visit: {format(parseISO(upcomingApt.scheduled_at), 'EEE MMM d, h:mm a')}
+          Next visit: {format(parseISO(upcomingApt.scheduled_at), 'EEE d MMM, HH:mm')}
           {upcomingApt.doctor_name && ` with ${upcomingApt.doctor_name}`}
           {' '}({visitDaysAway(parseISO(upcomingApt.scheduled_at))})
         </p>

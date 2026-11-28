@@ -97,11 +97,11 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       emoji: '🦋',
       connectedTests,
       explanation: tsh.value > 4.5
-        ? 'Your thyroid is underactive (high TSH). This slows your metabolism and can make periods heavier, longer, or irregular. It can also cause fatigue, weight gain, and difficulty conceiving.'
-        : 'Your thyroid is overactive (low TSH). This speeds up metabolism and can make periods lighter, shorter, or absent. It can also cause anxiety, weight loss, and irregular ovulation.',
+        ? 'A high TSH can mean an underactive thyroid. That slows your metabolism and can make periods heavier, longer, or irregular. It can also cause fatigue, weight gain, and difficulty conceiving.'
+        : 'A low TSH can mean an overactive thyroid. That speeds up metabolism and can make periods lighter, shorter, or absent. It can also cause anxiety, weight loss, and irregular ovulation.',
       recommendation: tsh.value > 4.5
-        ? 'Thyroid medication (levothyroxine) can restore normal cycles. If you\'re trying to conceive, treating hypothyroidism is especially important.'
-        : 'Hyperthyroidism treatment can normalize your cycle. If your periods are very light or absent, this may be the reason.',
+        ? 'Ask your doctor whether a re-test or treatment is needed; if the thyroid is underactive, treatment usually brings cycles back to normal. If you\'re trying to conceive, mention it early.'
+        : 'Ask your doctor whether more thyroid tests are needed; if the thyroid is overactive, treatment can bring your cycle back to normal.',
       severity: 'attention',
     });
   }
@@ -255,7 +255,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
         emoji: '🚨',
         connectedTests: ['Platelets', ...(alt ? ['ALT'] : []), ...(ast ? ['AST'] : [])],
         explanation: 'The combination of low platelets and elevated liver enzymes during pregnancy can indicate HELLP syndrome, a serious pregnancy complication. This needs immediate medical evaluation.',
-        recommendation: 'Contact your doctor today. Do NOT wait for your next scheduled appointment. Watch for symptoms: severe headache, vision changes, upper right abdominal pain, nausea.',
+        recommendation: 'Contact your doctor today. Do NOT wait for your next scheduled visit. Watch for symptoms: severe headache, vision changes, upper right abdominal pain, nausea.',
         severity: 'urgent',
       });
     }
@@ -387,7 +387,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
         title: fsh.value > 15 ? 'Elevated FSH — may indicate reduced ovarian reserve' : 'FSH is borderline — worth monitoring',
         emoji: '📈',
         connectedTests: ['FSH', ...(estradiol ? ['Estradiol'] : [])],
-        explanation: `Your FSH is ${fsh.value} IU/L.${fsh.value > 15 ? ' Values above 15 suggest poor ovarian reserve prognosis.' : ' Values of 10-15 are in the concerning range.'}${estradiol && estradiol.value > 80 ? ` Note: your estradiol is ${estradiol.value} pg/mL which may be masking an even higher FSH — these must be interpreted together.` : ''}`,
+        explanation: `Your FSH is ${fsh.value} IU/L.${fsh.value > 15 ? ' Results above 15 can go with a lower egg reserve; on their own they don\'t tell you your chances.' : ' Results of 10-15 are worth keeping an eye on.'}${estradiol && estradiol.value > 80 ? ` Note: your estradiol is ${estradiol.value} pg/mL which may be masking an even higher FSH — these must be interpreted together.` : ''}`,
         recommendation: 'If you\'re planning pregnancy, discuss these results with a fertility specialist. AMH and antral follicle count provide a more complete picture of ovarian reserve.',
         severity: fsh.value > 15 ? 'attention' : 'neutral',
       });
@@ -569,7 +569,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       explanation: `Your bile acids are ${bileAcids.value} μmol/L. Together with itching, 10 or more is what US guidance (SMFM 2021) uses to diagnose intrahepatic cholestasis of pregnancy (ICP); UK guidance (RCOG 2022) uses 19. Only your doctor can diagnose it.${bileAcids.value >= 40 ? ' Values >=40 carry increased risk of adverse outcomes.' : ''}${bileAcids.value >= 100 ? ' Values >=100 are severe — birth is usually planned at 35-36 weeks.' : ''} ICP causes intense itching and can affect the baby.`,
       recommendation: bileAcids.value >= 40
         ? 'Contact your doctor TODAY. You may need ursodeoxycholic acid (UDCA) treatment and increased fetal monitoring. Delivery timing will be discussed.'
-        : 'Discuss with your doctor at your next appointment. UDCA medication can help. Bile acids should be monitored weekly from 32 weeks.',
+        : 'Discuss with your doctor at your next visit. UDCA medication can help. Bile acids should be monitored weekly from 32 weeks.',
       severity: bileAcids.value >= 40 ? 'urgent' : 'attention',
     });
   }

@@ -1,6 +1,7 @@
 // Types shared across medical components
 
 import { labNumber, parseLabRange } from './labValue';
+import { labFlag } from './labFlags';
 
 export interface MedicalDataItem {
   id: string;
@@ -39,6 +40,7 @@ export const friendlyStatus: Record<string, { label: string; emoji: string; colo
   expected: { label: 'Normal for you', emoji: '💙', color: 'text-foreground/75', bgColor: 'bg-muted/40 border-border', dot: 'bg-foreground/50', description: 'This is outside the general range, but perfectly normal for your situation.' },
   abnormal: { label: 'Worth discussing', emoji: '⚠️', color: 'text-destructive', bgColor: 'bg-destructive/5 border-destructive/20', dot: 'bg-destructive/60', description: 'This result is outside the normal range. Talk to your doctor about it.' },
   critical: { label: 'Needs attention', emoji: '🔴', color: 'text-destructive', bgColor: 'bg-destructive/10 border-destructive/30', dot: 'bg-destructive', description: 'This needs urgent medical attention.' },
+  borderline: { label: 'Borderline', emoji: '•', color: 'text-foreground/75', bgColor: 'bg-muted/40 border-border', dot: 'bg-foreground/50', description: 'Close to the edge of the range. Worth keeping an eye on.' },
   informational: { label: 'For reference', emoji: 'ℹ️', color: 'text-muted-foreground', bgColor: 'bg-muted/50 border-border', dot: 'bg-muted-foreground/40', description: 'Tracked for your records.' },
   active: { label: 'Current', emoji: '📌', color: 'text-primary', bgColor: 'bg-primary/5 border-primary/20', dot: 'bg-primary', description: '' },
   resolved: { label: 'Resolved', emoji: '✓', color: 'text-muted-foreground', bgColor: 'bg-muted/50 border-border', dot: 'bg-muted-foreground/40', description: '' },
@@ -46,8 +48,17 @@ export const friendlyStatus: Record<string, { label: string; emoji: string; colo
 
 export const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
 
+// Older rows and doctor-entered rows say high / low / elevated … (the
+// shared lab-flags rule counts them as outside the range): they get the
+// same label as "abnormal", never "For reference".
 export function getStatusInfo(status: string | null) {
-  return friendlyStatus[status || ''] || friendlyStatus.informational;
+  const key = String(status ?? '').trim().toLowerCase();
+  if (friendlyStatus[key]) return friendlyStatus[key];
+  const flag = labFlag(key);
+  if (flag === 'urgent') return friendlyStatus.critical;
+  if (flag === 'outside') return friendlyStatus.abnormal;
+  if (flag === 'borderline') return friendlyStatus.borderline;
+  return friendlyStatus.informational;
 }
 
 // Tones for health values shown outside Health Records (Home cards):
@@ -135,7 +146,7 @@ export function getFriendlyName(title: string): string {
 export const testExplanations: Record<string, { high: string; low: string; normal: string }> = {
   'hemoglobin': { low: 'Low hemoglobin means your blood carries less oxygen, which can cause fatigue, dizziness, and shortness of breath.', high: 'Elevated hemoglobin can be caused by dehydration, smoking, or living at high altitude.', normal: 'Your hemoglobin is healthy — your blood is carrying oxygen well.' },
   'ferritin': { low: 'Low ferritin means your iron stores are depleted. Very common in women due to menstrual blood loss. You may feel tired, have brain fog, or experience hair loss.', high: 'Elevated ferritin can indicate inflammation, liver issues, or iron overload.', normal: 'Your iron stores look good.' },
-  'tsh': { low: 'Low TSH suggests your thyroid is overactive (hyperthyroidism). This can cause weight loss, anxiety, and shorter periods.', high: 'Elevated TSH suggests your thyroid is underactive (hypothyroidism). This can cause fatigue, weight gain, and heavier periods.', normal: 'Your thyroid function is healthy.' },
+  'tsh': { low: 'A low TSH can mean the thyroid is working too fast (overactive). That can cause weight loss, anxiety and shorter periods. Your doctor usually checks other thyroid results before saying more.', high: 'A raised TSH can mean the thyroid is working slowly (underactive). That can cause tiredness, weight gain and heavier periods. Your doctor usually re-tests before saying more.', normal: 'Your thyroid function is healthy.' },
   'vitamin d': { low: 'Low vitamin D is very common and can affect bone health, mood, immunity, and fertility. A supplement can bring it back to healthy levels.', high: 'Very high vitamin D is rare and usually from excessive supplementation.', normal: 'Your vitamin D level is healthy.' },
   'glucose': { low: 'Low blood sugar can cause shakiness and dizziness. If fasting, mildly low is usually fine.', high: 'Elevated blood sugar may indicate prediabetes or diabetes. Lifestyle changes can help.', normal: 'Your blood sugar is in a healthy range.' },
   'estradiol': { low: 'Low estradiol can affect cycle regularity and bone density. In menopause this is expected.', high: 'Elevated estradiol often occurs around ovulation. During IVF stimulation, elevated levels are expected.', normal: 'Your estradiol level is in a healthy range.' },

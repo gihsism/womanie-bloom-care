@@ -27,18 +27,18 @@ describe('useConfirm', () => {
     render(<Harness onResult={onResult} />);
     fireEvent.click(screen.getByText('Cancel visit'));
     expect(await screen.findByRole('alertdialog')).toBeInTheDocument();
-    expect(screen.getByText('Cancel this appointment?')).toBeInTheDocument();
+    expect(screen.getByText('Cancel this visit?')).toBeInTheDocument();
     expect(screen.getByText(/Dr\. Muster · 3 Dec 2026, 09:00/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel appointment' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel visit' }));
     await waitFor(() => expect(onResult).toHaveBeenCalledWith(true));
     await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
   });
 
-  it('resolves false when she keeps the appointment', async () => {
+  it('resolves false when she keeps the visit', async () => {
     const onResult = vi.fn();
     render(<Harness onResult={onResult} />);
     fireEvent.click(screen.getByText('Cancel visit'));
-    fireEvent.click(await screen.findByRole('button', { name: 'Keep appointment' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Keep visit' }));
     await waitFor(() => expect(onResult).toHaveBeenCalledWith(false));
     expect(onResult).not.toHaveBeenCalledWith(true);
   });

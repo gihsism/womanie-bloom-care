@@ -15,10 +15,12 @@ import { PREG_VACCINES_KEY, gestationalWeek, vaccinesDueNow, type VaccineState }
 import { useAccountDataVersion } from '@/lib/account-data';
 import { babyVaccineReminders, type BabyForVaccines } from '@/lib/babyVaccines';
 import { postnatalCheckDue, pickBirthDate, POSTNATAL_MILESTONE_ID } from '@/lib/postnatalCheck';
-import { currentFlagged } from '@/lib/labFlags';
+import { currentFlagged, labFlag } from '@/lib/labFlags';
 import { contraceptionRows, isMethodId, METHOD_DATES_KEY, parseMethodDates } from '@/lib/contraceptionSchedule';
-import { hasAnyDate, ivfTodayDates, localDateTime, parseIvfPlan, IVF_PLAN_LOCAL_KEY, type IvfPlan } from '@/lib/ivfJourney';
+import { hasAnyDate, ivfTodayDates, localDateTime, parseIvfPlan, recentWarningSign, IVF_PLAN_LOCAL_KEY, WARNING_SIGN_HOURS, type IvfPlan, type SymptomEntry } from '@/lib/ivfJourney';
+import { assessCheckin, parseCheckins, RECOVERY_CHECKINS_KEY } from '@/lib/postpartumRecovery';
 import { deviceTz } from '@/components/dashboard/ivf/ivfFormat';
+import { isVisitAhead } from '@/lib/visitAhead';
 
 type FlagRow = { id: string; title: string; status: string | null; data_type: string | null; date_recorded: string | null };
 
@@ -34,7 +36,10 @@ type FlagRow = { id: string; title: string; status: string | null; data_type: st
 // methods: ring / patch change days, injection, IUD check and IUD /
 // implant replacement from the dates she entered; no method yet -> the
 // choose-a-method row. IVF: her clinic dates today / tomorrow; no date
-// and no phase yet -> the add-your-dates row.
+// and no phase yet (no row: the hero asks). Urgent rows (first on the
+// list): results the lab marked critical (latest reading per test); IVF,
+// a warning sign logged in the two-week-wait log in the last 48 h;
+// postpartum, red flags in a recovery check-in saved today or yesterday.
 // Read-only; the same endpoints and tables the old Home cards used
 // (AppointmentTodayBanner, UpcomingAppointments, DoctorNotesCard,
 // useAttentionCount, GettingStarted).
@@ -112,12 +117,15 @@ export function useTodaySignals(
   const [tasks, setTasks] = useState<Pick<TodaySignals, 'medicinesDue' | 'medicinesRunningOut' | 'pill' | 'babyVaccines' | 'lastMoodLog' | 'contraceptionDue' | 'methodMissing'>>({});
   // IVF: her treatment dates (ivf_plans, device copy first); null = not loaded.
   const [ivfPlan, setIvfPlan] = useState<IvfPlan | null>(null);
+  // IVF: two-week-wait log entries of the last 48 h (warning signs).
+  const [ivfLog, setIvfLog] = useState<SymptomEntry[]>([]);
   const { mode, pregnancyDueDate, ivfPhase } = stage;
   const uid = user?.id;
   // Device copies of account data (synced in lib/account-data.ts).
   const vaxKey = uid ? PREG_VACCINES_KEY(uid) : null;
   const epdsKey = uid ? `womanie_epds_history_${uid}` : null;
-  const accountVersion = useAccountDataVersion([vaxKey, epdsKey, uid ? `contraception:${uid}:method` : null, uid ? METHOD_DATES_KEY(uid) : null, uid ? `postpartum:${uid}:milestones` : null]);
+  const recoveryKey = uid ? RECOVERY_CHECKINS_KEY(uid) : null;
+  const accountVersion = useAccountDataVersion([vaxKey, epdsKey, uid ? `contraception:${uid}:method` : null, uid ? METHOD_DATES_KEY(uid) : null, uid ? `postpartum:${uid}:milestones` : null, recoveryKey]);
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -131,8 +139,10 @@ export function useTodaySignals(
       ]);
       const now = Date.now();
       const appts = ((apptResp?.appointments ?? []) as Appt[]).filter(a => (a.status ?? '').toLowerCase() !== 'cancelled');
+      // Same "still ahead" rule as Visits (lib/visitAhead.ts): a visit in
+      // progress still counts; a completed one does not.
       const today = appts
-        .filter(a => isToday(new Date(a.scheduled_at)) && Date.parse(a.scheduled_at) + (a.duration ?? 30) * 60_000 > now)
+        .filter(a => isToday(new Date(a.scheduled_at)) && isVisitAhead(a, now))
         .sort((a, b) => Date.parse(a.scheduled_at) - Date.parse(b.scheduled_at))[0];
       const next = appts
         .filter(a => !isToday(new Date(a.scheduled_at)) && Date.parse(a.scheduled_at) > now)
@@ -141,13 +151,15 @@ export function useTodaySignals(
       const notes = (Array.isArray(notesResp?.notes) ? notesResp.notes : []) as Array<{ created_at: string | null }>;
       const hasDoc = Array.isArray(docsRes.data) && docsRes.data.length > 0;
       const hasLog = Array.isArray(signalsRes.data) && signalsRes.data.length > 0;
+      const current = Array.isArray(critRes.data) ? currentFlagged(critRes.data as FlagRow[]) : [];
       setS({
         appointmentToday: today ? new Date(today.scheduled_at) : null,
         nextVisit: next ? new Date(next.scheduled_at) : null,
         newDoctorNotes: notes.filter(n => n.created_at && Date.parse(n.created_at) >= now - NOTE_WINDOW_MS).length,
         // Same list as Records' "Talk to your doctor about": the latest
         // reading of each test, outside the range (shared rule, labFlags).
-        flaggedResults: Array.isArray(critRes.data) ? currentFlagged(critRes.data as FlagRow[]).length : 0,
+        flaggedResults: current.length,
+        urgentResults: current.filter(r => labFlag(r.status) === 'urgent').map(r => r.title.trim()).filter(Boolean),
         // The name part is added at render time from the CURRENT profile
         // name: an earlier load (before the profile arrived) finishing last
         // must not show "Add your name" to someone who has one.
@@ -297,6 +309,23 @@ export function useTodaySignals(
       if (!local) setIvfPlan(parseIvfPlan(null));
     }
   }, [uid, mode]);
+  const loadIvfLog = useCallback(async () => {
+    if (!uid || mode !== 'ivf') return;
+    try {
+      const since = new Date(Date.now() - WARNING_SIGN_HOURS * 3_600_000).toISOString();
+      const { data } = await db.from('life_events').select('data, occurred_at').eq('user_id', uid)
+        .eq('kind', 'tww_symptom').gte('occurred_at', since);
+      setIvfLog(((Array.isArray(data) ? data : []) as Array<{ data: unknown; occurred_at: string }>).map(r => {
+        let d = r.data;
+        if (typeof d === 'string') { try { d = JSON.parse(d); } catch { d = null; } }
+        return { occurred_at: r.occurred_at, data: (d && typeof d === 'object' ? d : {}) as SymptomEntry['data'] };
+      }));
+    } catch {
+      // Keep the last known state.
+    }
+  }, [uid, mode]);
+  useEffect(() => { void loadIvfLog(); }, [loadIvfLog]);
+  useEffect(() => onHealthDataChange(() => { void loadIvfLog(); }), [loadIvfLog]);
   useEffect(() => { void loadIvf(); }, [loadIvf]);
   useEffect(() => onHealthDataChange(() => { void loadIvf(); }), [loadIvf]);
 
@@ -334,6 +363,27 @@ export function useTodaySignals(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, uid, visitTimes, birthDate, accountVersion, s]);
 
+  // Postpartum: red flags in a recovery check-in saved today or yesterday
+  // (account-synced device key, same list the recovery card shows).
+  const recoveryRedFlags = useMemo(() => {
+    if (mode !== 'postpartum' || !recoveryKey) return [];
+    const now = new Date();
+    const day = (d: Date) => format(d, 'yyyy-MM-dd');
+    const recent = new Set([day(now), day(subDays(now, 1))]);
+    return parseCheckins(readJSON<unknown>(recoveryKey))
+      .filter(e => recent.has(e.date))
+      .flatMap(e => assessCheckin(e).urgent)
+      .filter((f, i, all) => all.indexOf(f) === i);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, recoveryKey, accountVersion, s]);
+
+  const ivfWarningSign = useMemo(
+    () => mode === 'ivf' && recentWarningSign(ivfLog, new Date()),
+    // `tasks` changes on the 5-minute refresh: let a 48-hour-old sign drop off.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [mode, ivfLog, tasks],
+  );
+
   const ivf = useMemo(() => {
     if (mode !== 'ivf' || !ivfPlan) return { ivfDates: [], ivfSetupNeeded: false };
     const now = new Date();
@@ -357,6 +407,8 @@ export function useTodaySignals(
     vaccinesDue,
     lastMoodCheck,
     postnatalCheckDue: postnatal,
+    recoveryRedFlags,
+    ivfWarningSign,
     setup: s.setup ? { ...s.setup, done: s.setup.done + Number(hasName), nameMissing: !hasName } : s.setup,
     // Settings -> Reminders, the in-app switches (the phone has its own per-device ones):
     // "Visit rows in the app" hides the day-of and upcoming visit rows,

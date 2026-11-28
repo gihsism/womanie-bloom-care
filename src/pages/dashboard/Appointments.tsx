@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState, useMemo } from 'react';
+import { isVisitAhead } from '@/lib/visitAhead';
 import { useOnceTrue } from '@/hooks/useOnceTrue';
 import { Link, useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -13,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { format, formatDistanceToNowStrict, isToday, isTomorrow, isPast } from 'date-fns';
+import { format, formatDistanceToNowStrict, isToday, isTomorrow } from 'date-fns';
 import {
   CalendarClock,
   Video,
@@ -86,10 +87,8 @@ function relativeDay(d: Date): string {
   return format(d, 'MMM d, yyyy');
 }
 
-function isUpcoming(apt: AppointmentRow): boolean {
-  if ((apt.status ?? '').toLowerCase() === 'cancelled') return false;
-  return !isPast(new Date(apt.scheduled_at));
-}
+// A visit in progress is still "Your next visit" (shared rule, lib/visitAhead.ts).
+const isUpcoming = (apt: AppointmentRow): boolean => isVisitAhead(apt);
 
 type PastFilter = 'all' | 'completed' | 'no_show' | 'cancelled' | 'unresolved';
 
@@ -136,7 +135,7 @@ const Appointments = () => {
       setLoadFailed(true);
       toast({
         variant: 'destructive',
-        title: 'Could not load appointments',
+        title: 'Could not load your visits',
         description: errorMessage(e, 'Please try again.'),
       });
     } finally {
@@ -151,7 +150,7 @@ const Appointments = () => {
   }, [user?.id]);
 
   const upcoming = useMemo(
-    () => rows.filter(isUpcoming).sort((a, b) =>
+    () => rows.filter(r => isUpcoming(r)).sort((a, b) =>
       new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
     ),
     [rows]
@@ -201,8 +200,8 @@ const Appointments = () => {
         .eq('id', apt.id);
       if (error) throw error;
       toast({
-        title: 'Appointment cancelled',
-        description: `Your appointment with ${doctorLabel} on ${when} has been cancelled.`,
+        title: 'Visit cancelled',
+        description: `Your visit with ${doctorLabel} on ${when} has been cancelled.`,
         action: (
           <Button
             size="sm"
@@ -214,7 +213,7 @@ const Appointments = () => {
                   .update({ status: 'scheduled' })
                   .eq('id', apt.id);
                 if (undoErr) throw undoErr;
-                toast({ title: 'Cancellation undone', description: 'Your appointment is back on the schedule.' });
+                toast({ title: 'Cancellation undone', description: 'Your visit is back on the schedule.' });
                 emitHealthDataChange();
                 await load();
               } catch (e) {
@@ -303,7 +302,7 @@ const Appointments = () => {
           {specialty && <p className="text-[11px] text-muted-foreground mb-1">{specialty}</p>}
           <p className="text-xs text-muted-foreground">
             {kind === 'upcoming'
-              ? `${relativeDay(when)} · ${formatPracticeTime(when)}${swissSuffix(outside)} · in ${formatDistanceToNowStrict(when)}`
+              ? `${relativeDay(when)} · ${formatPracticeTime(when)}${swissSuffix(outside)} · ${when.getTime() <= Date.now() ? 'now' : `in ${formatDistanceToNowStrict(when)}`}`
               : `${format(when, 'PPP')} · ${formatPracticeTime(when)}${swissSuffix(outside)}`}
             {apt.duration ? ` · ${apt.duration} min` : ''}
           </p>

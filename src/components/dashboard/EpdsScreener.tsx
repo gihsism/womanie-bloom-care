@@ -110,31 +110,31 @@ function interpretation(total: number, item10Flag: boolean): {
   if (item10Flag) {
     return {
       band: 'likely',
-      label: 'Item 10 flagged · urgent',
-      message: 'Any answer above "Never" on item 10 (thoughts of self-harm) is taken seriously regardless of total. Please reach out to a clinician today — your OB, midwife, or a crisis line.',
+      label: 'Question 10 · please reach out today',
+      message: 'You said thoughts of harming yourself have come up. That is always taken seriously, whatever the total. Please talk to your doctor or midwife today, or call Die Dargebotene Hand on 143, day and night. In an emergency, call 144.',
       color: `${healthTone.alert.badge} font-medium`,
     };
   }
   if (total < 10) {
     return {
       band: 'low',
-      label: `${total}/30 — low likelihood`,
-      message: 'Score below the EPDS screening threshold (≥10). Doesn\'t rule out distress; check in again in 2 weeks if you have concerns.',
+      label: `${total}/30 — below the screening line`,
+      message: 'Below 10, the score where the EPDS suggests a follow-up talk. It doesn\'t rule out a hard time; check in again in 2 weeks, or sooner if you are worried.',
       color: healthTone.ok.badge,
     };
   }
   if (total < 13) {
     return {
       band: 'possible',
-      label: `${total}/30 — possible depression`,
-      message: 'EPDS ≥10 is the standard cutoff for "possible postnatal depression." A conversation with your OB or GP is the right next step.',
+      label: `${total}/30 — worth a conversation`,
+      message: '10 or more is the score where the EPDS suggests talking it through. Your doctor or midwife is the right next step. This check is not a diagnosis.',
       color: healthTone.watch.badge,
     };
   }
   return {
     band: 'likely',
-    label: `${total}/30 — likely depression`,
-    message: 'EPDS ≥13 strongly suggests postnatal depression. Please contact your OB, GP, or a mental health clinician this week.',
+    label: `${total}/30 — please talk to someone this week`,
+    message: '13 or more means it is important to get support soon. Please contact your doctor, midwife or a mental health professional this week. This check is not a diagnosis.',
     color: healthTone.alert.badge,
   };
 }
@@ -296,7 +296,7 @@ export default function EpdsScreener({ mode }: EpdsScreenerProps) {
 
       <p className="text-[10px] text-muted-foreground mt-3 leading-relaxed">
         Reference: Cox JL, Holden JM, Sagovsky R (1987). EPDS is a screening tool, not a diagnosis.
-        If you're in crisis, contact a clinician or emergency services.
+        If you're in crisis, call your doctor, 143 (Die Dargebotene Hand) or 144.
       </p>
     </Card>
   );

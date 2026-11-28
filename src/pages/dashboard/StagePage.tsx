@@ -222,7 +222,11 @@ export default function StagePage() {
 
         {!p.periodData && (cycleMode || mode === 'pre-menstrual' || mode === 'contraception') && (
           <Section id="guides">
-            <p className="text-sm text-muted-foreground">Log your last period to see guides for each part of your cycle.</p>
+            <p className="text-sm text-muted-foreground">
+              {mode === 'pre-menstrual'
+                ? 'Once your first period comes, log it and guides for each part of your cycle show up here.'
+                : 'Log your last period to see guides for each part of your cycle.'}
+            </p>
           </Section>
         )}
 

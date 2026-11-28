@@ -221,7 +221,7 @@ export default function HealthStatistics() {
             onClick={downloadCsv}
             disabled={downloadingCsv}
             className="gap-2"
-            title="Download all your extracted lab values as a CSV"
+            title="Download all your lab results as a CSV"
           >
             <Download className="h-4 w-4" />
             {downloadingCsv ? 'Preparing…' : 'Download CSV'}
@@ -265,7 +265,7 @@ export default function HealthStatistics() {
                 <p className="text-xs text-muted-foreground">Lab results</p>
               </div>
               <p className="text-2xl font-bold">{stats.labResults}</p>
-              <p className="text-[11px] text-muted-foreground">tracked values</p>
+              <p className="text-[11px] text-muted-foreground">tracked results</p>
             </Card>
             <Card className="p-4">
               <div className="flex items-center gap-2 mb-1">

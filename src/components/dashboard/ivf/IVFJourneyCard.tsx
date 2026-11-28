@@ -161,7 +161,7 @@ export default function IVFJourneyCard({ plan, tz, now, fallbackPhase, serverOk,
                     <Plus className="h-3.5 w-3.5" /> Add a scan date
                   </Button>
                 )}
-                <p className="text-xs text-muted-foreground">The ultrasound and blood-test appointments your clinic books during stimulation. Add each one as it is booked.</p>
+                <p className="text-xs text-muted-foreground">The ultrasound and blood-test visits your clinic books during stimulation. Add each one as it is booked.</p>
               </fieldset>
             )}
           </div>))}

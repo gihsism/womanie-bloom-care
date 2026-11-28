@@ -22,10 +22,8 @@ describe('todayItems: IVF clinic dates', () => {
     ]);
   });
 
-  it('asks a brand-new account for the clinic dates; other stages ignore IVF signals', () => {
-    expect(todayItems('ivf', { now: NOW, ivfSetupNeeded: true })).toEqual([
-      { id: 'ivf-setup', label: "Add the dates from your clinic's plan", target: `${STAGE_PAGE}#ivf-tracker` },
-    ]);
+  it("a brand-new account gets no Today row for the clinic dates (the hero asks for them); other stages ignore IVF signals", () => {
+    expect(todayItems('ivf', { now: NOW, ivfSetupNeeded: true })).toEqual([]);
     expect(todayItems('pregnancy', { now: NOW, ivfSetupNeeded: true, ivfDates: [{ key: 'scan', label: 'Monitoring scan', daysUntil: 0 }] })).toEqual([]);
   });
 });
@@ -44,10 +42,8 @@ describe('todayItems: contraception methods', () => {
     expect(rows[0].target).toBe(`${STAGE_PAGE}#contraception`);
   });
 
-  it('asks for the method on a brand-new account; other stages ignore it', () => {
-    expect(todayItems('contraception', { now: NOW, methodMissing: true })).toEqual([
-      { id: 'method-setup', label: 'Choose your contraception method', target: `${STAGE_PAGE}#contraception` },
-    ]);
+  it('a brand-new account gets no Today row for the method (the hero asks for it); other stages ignore method rows', () => {
+    expect(todayItems('contraception', { now: NOW, methodMissing: true })).toEqual([]);
     expect(todayItems('menstrual-cycle', { now: NOW, methodMissing: true, contraceptionDue: [{ id: 'x', label: 'x', urgent: true }] })).toEqual([]);
   });
 });

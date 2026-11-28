@@ -135,7 +135,7 @@ export default function FertilityOutlookCard({ mode }: FertilityOutlookCardProps
         let detail: string;
         if (sd < 3) { color = 'green'; detail = `Very regular (±${sd.toFixed(1)}d); ovulation is likely predictable.`; }
         else if (sd < 7) { color = 'amber'; detail = `Some variability (±${sd.toFixed(1)}d); fertile window may shift cycle to cycle.`; }
-        else { color = 'red'; detail = `High variability (±${sd.toFixed(1)}d); discuss with a clinician if trying to conceive.`; }
+        else { color = 'red'; detail = `High variability (±${sd.toFixed(1)}d); worth discussing with your doctor if trying to conceive.`; }
         out.push({ label: 'Cycle regularity', value: `±${sd.toFixed(0)}d`, color, detail });
       } else {
         out.push({ label: 'Cycle regularity', value: 'unclear', color: 'muted', detail: 'Logged cycles look unusual — review the cycle history.' });
@@ -226,7 +226,7 @@ export default function FertilityOutlookCard({ mode }: FertilityOutlookCardProps
           aria-label="Ask AI about my fertility outlook"
         >
           <MessageCircle className="h-3 w-3" />
-          Ask Claude about this
+          Ask AI about this
         </button>
       </div>
 

@@ -3,7 +3,9 @@ import { POSTNATAL_LABEL } from './postnatalCheck';
 
 // Home's three answers to "what do I do now?", as pure functions so they
 // can be unit-tested without a browser or database:
-//   todayItems()        — the ranked "Today" list (max 3 one-line rows)
+//   rankedTodayItems()  — every "Today" row, ranked (Home shows the first
+//                         MAX_TODAY and a "N more" link for the rest)
+//   todayItems()        — the first MAX_TODAY of those
 //   primaryActionFor()  — the single filled button for the stage
 //   moreFor()           — the "More for <stage>" links (max 4)
 //
@@ -30,6 +32,15 @@ export interface TodayItem {
 
 export interface TodaySignals {
   now?: Date;
+  /**
+   * Latest reading per test marked critical by the lab (labFlags 'urgent'),
+   * by test name. Always first on the list.
+   */
+  urgentResults?: string[];
+  /** IVF: a warning sign (OHSS / heavy bleeding) logged in the two-week-wait log in the last 2 days. */
+  ivfWarningSign?: boolean;
+  /** Postpartum: red flags ticked in a recovery check-in saved today or yesterday (lib/postpartumRecovery.ts). */
+  recoveryRedFlags?: string[];
   /** Start time of a (not yet finished) visit today. */
   appointmentToday?: Date | null;
   /** Doctor notes written in the last 14 days. */
@@ -62,15 +73,18 @@ export interface TodaySignals {
    * replacement rows from the dates she entered (lib/contraceptionSchedule.ts).
    * urgent rows rank with the stage tasks, the rest as heads-ups.
    */
-  contraceptionDue?: Array<{ id: string; label: string; urgent: boolean }>;
-  /** Contraception: no method chosen yet (a brand-new account) -> "Choose your method". */
+  contraceptionDue?: Array<{ id: string; label: string; urgent: boolean; overdue?: boolean }>;
+  /**
+   * Contraception: no method chosen yet (a brand-new account). No Today
+   * row: the hero already says "Choose your method".
+   */
   methodMissing?: boolean;
   /**
    * IVF: the clinic dates she set for today (daysUntil 0) and tomorrow (1)
    * (lib/ivfJourney.ts ivfTodayDates); time = the trigger shot's HH:MM.
    */
   ivfDates?: Array<{ key: string; label: string; daysUntil: number; time?: string | null }>;
-  /** IVF: no clinic date and no phase yet (a brand-new account) -> "Add your clinic's dates". */
+  /** IVF: no clinic date and no phase yet. No Today row: the hero already says "Add your clinic's dates". */
   ivfSetupNeeded?: boolean;
   /** Pregnancy vaccines in their window and not marked received / "not now". */
   vaccinesDue?: string[];
@@ -129,9 +143,56 @@ const onDay = (now: Date, d: Date) => {
 
 const CYCLE_STAGES: readonly string[] = ['menstrual-cycle', 'conception'];
 
+/**
+ * Rank groups, in order. Within a group rows keep the order they are
+ * added below.
+ *   URGENT   — act now: a result the lab marked critical, a warning sign
+ *              she logged (IVF, after the birth), an overdue injection
+ *   ACT      — today: a visit today, the doctor's new note, results to talk
+ *              about, the stage tasks due now
+ *   HEADS_UP — time-bound, later: PMS soon, tomorrow's clinic date, a
+ *              medicine running out, a visit this week
+ *   NUDGE    — whenever: mood checks, unfinished setup
+ */
+export const TIER = { URGENT: 0, ACT: 1, HEADS_UP: 2, NUDGE: 3 } as const;
+type Tier = (typeof TIER)[keyof typeof TIER];
+
+/** "Heavy bleeding logged" when that is one of them; any other red flag is "A warning sign". */
+function redFlagLabel(flags: string[]): string {
+  return flags.includes('heavy-bleeding')
+    ? 'Heavy bleeding logged: call your doctor or 144 now'
+    : 'You logged a warning sign: call your doctor or 144 now';
+}
+
 export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
+  return rankedTodayItems(mode, s).slice(0, MAX_TODAY);
+}
+
+export function rankedTodayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
   const now = s.now ?? new Date();
-  const items: TodayItem[] = [];
+  const ranked: Array<TodayItem & { tier: Tier }> = [];
+  // The group of the rows added next (see TIER).
+  let tier: Tier = TIER.ACT;
+  const items = { push: (i: TodayItem) => { ranked.push({ ...i, tier }); } };
+
+  // 0. Urgent: always first, whatever else is due.
+  tier = TIER.URGENT;
+  const urgentResults = s.urgentResults ?? [];
+  if (urgentResults.length === 1) {
+    items.push({ id: 'urgent-result', label: fit(`${urgentResults[0]} marked urgent by the lab: call your doctor`), target: RECORDS });
+  } else if (urgentResults.length > 1) {
+    items.push({ id: 'urgent-result', label: `${urgentResults.length} results marked urgent: call your doctor`, target: RECORDS });
+  }
+  if (mode === 'ivf' && s.ivfWarningSign) {
+    items.push({ id: 'ivf-warning', label: 'You logged a warning sign: call your clinic now', target: `${STAGE_PAGE}#ivf-tww` });
+  }
+  const redFlags = mode === 'postpartum' ? s.recoveryRedFlags ?? [] : [];
+  if (redFlags.length > 0) {
+    items.push({ id: 'recovery-red-flag', label: redFlagLabel(redFlags), target: `${STAGE_PAGE}#recovery` });
+  }
+  const methodRows = mode === 'contraception' ? s.contraceptionDue ?? [] : [];
+  for (const r of methodRows.filter(r => r.overdue)) items.push({ id: r.id, label: fit(r.label), target: `${STAGE_PAGE}#contraception` });
+  tier = TIER.ACT;
 
   // 1. A visit today
   if (s.appointmentToday) {
@@ -142,8 +203,9 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
     const n = s.newDoctorNotes!;
     items.push({ id: 'doctor-note', label: n === 1 ? 'New note from your doctor' : `${n} new notes from your doctor`, target: VISITS });
   }
-  // 3. Results to talk about
-  if ((s.flaggedResults ?? 0) > 0) {
+  // 3. Results to talk about (the same count as Records). Skipped when
+  // every one of them already has its own urgent row above.
+  if ((s.flaggedResults ?? 0) > urgentResults.length) {
     const n = s.flaggedResults!;
     items.push({ id: 'flagged-results', label: n === 1 ? '1 result to talk to your doctor about' : `${n} results to talk to your doctor about`, target: RECORDS });
   }
@@ -159,20 +221,15 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
       items.push({ id: 'pill-missed', label: "Yesterday's pill not ticked. Missed it?", target: `${STAGE_PAGE}#contraception` });
     }
   }
-  const method = mode === 'contraception' ? s.contraceptionDue ?? [] : [];
+  const method = methodRows.filter(r => !r.overdue);
   for (const r of method.filter(r => r.urgent)) items.push({ id: r.id, label: fit(r.label), target: `${STAGE_PAGE}#contraception` });
   const ivfTarget = (key: string) => `${STAGE_PAGE}#${key === 'trigger' ? 'ivf-trigger' : 'ivf-tracker'}`;
   const ivfLabel = (d: { label: string; daysUntil: number; time?: string | null }) =>
     fit(`${d.label} ${d.daysUntil === 0 ? 'today' : 'tomorrow'}${d.time ? ` at ${d.time}` : ''}`);
   const ivfDates = mode === 'ivf' ? s.ivfDates ?? [] : [];
   for (const d of ivfDates.filter(d => d.daysUntil === 0)) items.push({ id: `ivf-${d.key}`, label: ivfLabel(d), target: ivfTarget(d.key) });
-  // First data for a brand-new account: the method / the clinic's dates.
-  if (mode === 'contraception' && s.methodMissing) {
-    items.push({ id: 'method-setup', label: 'Choose your contraception method', target: `${STAGE_PAGE}#contraception` });
-  }
-  if (mode === 'ivf' && s.ivfSetupNeeded) {
-    items.push({ id: 'ivf-setup', label: "Add the dates from your clinic's plan", target: `${STAGE_PAGE}#ivf-tracker` });
-  }
+  // A brand-new account's first data (the method / the clinic's dates) has
+  // no row here: the hero above says it already, with its own link.
   const meds = s.medicinesDue ?? [];
   if (meds.length === 1) {
     items.push({ id: 'medicine-due', label: fit(`${meds[0].name} due (${meds[0].time})`), target: 'sheet:medicines' });
@@ -186,14 +243,6 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
       label: fit(vax.length === 1 ? `${vax[0]} vaccination due` : `${vax.length} vaccinations due: ${vax.join(', ')}`),
       target: `${STAGE_PAGE}#vaccinations`,
     });
-  }
-  if (MOOD_STAGES.includes(mode) && s.lastMoodCheck !== undefined) {
-    const last = s.lastMoodCheck;
-    if (last === null) {
-      items.push({ id: 'mood-check', label: 'Take the 2-minute mood check', target: `${STAGE_PAGE}#mood-check` });
-    } else if (daysBetween(last, now) >= MOOD_CHECK_EVERY_DAYS) {
-      items.push({ id: 'mood-check', label: 'Mood check due (every 2 weeks)', target: `${STAGE_PAGE}#mood-check` });
-    }
   }
   if (mode === 'postpartum' && s.postnatalCheckDue) {
     items.push({ id: 'postnatal-check', label: POSTNATAL_LABEL, target: `${STAGE_PAGE}#recovery` });
@@ -218,6 +267,7 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
   // 5. Time-limited heads-ups: PMS in the next few days, a medicine running
   // out (course / pack ends within 3 days), a visit within 7 days
   // Same window as the PMS card on the stage page: the 5 days before the period.
+  tier = TIER.HEADS_UP;
   if (mode === 'menstrual-cycle' && pd != null && pd >= 3 && pd <= 7) {
     const label = pd > PMS_WINDOW_DAYS
       ? `PMS likely from ${dayName(now, new Date(now.getFullYear(), now.getMonth(), now.getDate() + pd - PMS_WINDOW_DAYS))}`
@@ -238,7 +288,17 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
       items.push({ id: 'visit-soon', label: `Visit ${onDay(now, s.nextVisit)} at ${hhmm(s.nextVisit)}`, target: VISITS });
     }
   }
-  // 5b. Gentle weekly mood prompt for the stages without the EPDS check: a
+  // 5b. Nudges. The 2-weekly EPDS mood check (pregnancy, after the birth).
+  tier = TIER.NUDGE;
+  if (MOOD_STAGES.includes(mode) && s.lastMoodCheck !== undefined) {
+    const last = s.lastMoodCheck;
+    if (last === null) {
+      items.push({ id: 'mood-check', label: 'Take the 2-minute mood check', target: `${STAGE_PAGE}#mood-check` });
+    } else if (daysBetween(last, now) >= MOOD_CHECK_EVERY_DAYS) {
+      items.push({ id: 'mood-check', label: 'Mood check due (every 2 weeks)', target: `${STAGE_PAGE}#mood-check` });
+    }
+  }
+  // Gentle weekly mood prompt for the stages without the EPDS check: a
   // week since she last ticked a mood; someone who never ticks one sees
   // it on Mondays only, so it stays weekly rather than daily.
   if (!MOOD_STAGES.includes(mode) && s.lastMoodLog !== undefined) {
@@ -255,7 +315,11 @@ export function todayItems(mode: LifeStage, s: TodaySignals): TodayItem[] {
     );
   }
 
-  return items.slice(0, MAX_TODAY);
+  // Stable sort: by group, then the order added.
+  return ranked
+    .map((r, i) => ({ r, i }))
+    .sort((a, b) => a.r.tier - b.r.tier || a.i - b.i)
+    .map(({ r }) => ({ id: r.id, label: r.label, target: r.target }));
 }
 
 export const NOTHING_TODAY = 'Nothing needs you today';

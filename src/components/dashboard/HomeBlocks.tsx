@@ -1,7 +1,8 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { NOTHING_TODAY, type MoreRow, type PrimaryAction, type Target, type TodayItem } from '@/lib/todayItems';
+import { MAX_TODAY, NOTHING_TODAY, type MoreRow, type PrimaryAction, type Target, type TodayItem } from '@/lib/todayItems';
 
 // The three simple blocks under Home's hero: the ranked "Today" list, the
 // one filled button, and "More for <stage>". Rows are one line with a
@@ -33,7 +34,15 @@ function Row({ label, onClick }: { label: string; onClick: () => void }) {
   );
 }
 
+/**
+ * `items` is the whole ranked list (lib/todayItems.ts rankedTodayItems):
+ * the first MAX_TODAY show, the rest sit behind a quiet "N more" link, so
+ * an urgent row always shows and nothing due is silently dropped.
+ */
 export function TodayList({ items, go }: { items: TodayItem[]; go: (t: Target) => void }) {
+  const [open, setOpen] = useState(false);
+  const shown = open ? items : items.slice(0, MAX_TODAY);
+  const hidden = items.length - shown.length;
   return (
     <section className="mb-5" aria-labelledby="today-heading">
       <h2 id="today-heading" className="text-base font-semibold mb-1">Today</h2>
@@ -41,8 +50,13 @@ export function TodayList({ items, go }: { items: TodayItem[]; go: (t: Target) =
         <p className="py-3 text-[15px] text-muted-foreground border-y border-border">{NOTHING_TODAY}</p>
       ) : (
         <ul className="divide-y divide-border border-y border-border">
-          {items.map((i) => <Row key={i.id} label={i.label} onClick={() => go(i.target)} />)}
+          {shown.map((i) => <Row key={i.id} label={i.label} onClick={() => go(i.target)} />)}
         </ul>
+      )}
+      {hidden > 0 && (
+        <Button type="button" variant="link" size="sm" className="tap-target px-0 text-[15px]" onClick={() => setOpen(true)}>
+          {hidden} more
+        </Button>
       )}
     </section>
   );

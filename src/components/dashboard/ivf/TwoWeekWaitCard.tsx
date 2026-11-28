@@ -5,12 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { useLifeEvents } from '@/hooks/useLifeEvents';
-import { TWW_SYMPTOMS, groupSymptomLog, twoWeekWait, type IvfPlan } from '@/lib/ivfJourney';
+import { TWW_SYMPTOMS, TWW_WARNING_SIGNS, groupSymptomLog, twoWeekWait, type IvfPlan } from '@/lib/ivfJourney';
 import { fmtDay } from './ivfFormat';
 
 // Two-week wait (after the embryo transfer, until test day): a day
 // counter, a gentle note on early home tests, and a symptom log that only
 // records (life_events kind 'tww_symptom'), never scores or interprets.
+// The one exception: the warning signs (TWW_WARNING_SIGNS: OHSS, heavy
+// bleeding) show a call-your-clinic note when ticked, and Home's Today
+// list puts "call your clinic" first for 2 days after one is saved.
 
 interface SymptomData { symptoms: string[]; note?: string }
 
@@ -28,6 +31,21 @@ export default function TwoWeekWaitCard({ plan, tz, now }: Props) {
   }, [events, tz, plan.transfer]);
 
   const toggle = (s: string) => setPicked(p => (p.includes(s) ? p.filter(x => x !== s) : [...p, s]));
+  const warningPicked = picked.some(p => (TWW_WARNING_SIGNS as readonly string[]).includes(p));
+  const chip = (s: string) => (
+    <button
+      key={s}
+      type="button"
+      aria-pressed={picked.includes(s)}
+      onClick={() => toggle(s)}
+      className={cn(
+        'rounded-full border px-3 py-1 text-xs transition-colors',
+        picked.includes(s) ? 'border-primary bg-primary/10 text-foreground' : 'border-border hover:bg-muted',
+      )}
+    >
+      {s}
+    </button>
+  );
   const save = async () => {
     if (!picked.length && !note.trim()) return;
     setSaving(true);
@@ -78,21 +96,17 @@ export default function TwoWeekWaitCard({ plan, tz, now }: Props) {
         <p className="text-sm font-medium">How are you today?</p>
         <p className="text-xs text-muted-foreground">A private note for yourself. Progesterone support can cause many of the same feelings, so this log doesn't read anything into them.</p>
         <div className="flex flex-wrap gap-2" role="group" aria-label="What you notice today">
-          {TWW_SYMPTOMS.map(s => (
-            <button
-              key={s}
-              type="button"
-              aria-pressed={picked.includes(s)}
-              onClick={() => toggle(s)}
-              className={cn(
-                'rounded-full border px-3 py-1 text-xs transition-colors',
-                picked.includes(s) ? 'border-primary bg-primary/10 text-foreground' : 'border-border hover:bg-muted',
-              )}
-            >
-              {s}
-            </button>
-          ))}
+          {TWW_SYMPTOMS.map(chip)}
         </div>
+        <p className="text-xs font-medium pt-1">Signs to call your clinic about</p>
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Signs to call your clinic about">
+          {TWW_WARNING_SIGNS.map(chip)}
+        </div>
+        {warningPicked && (
+          <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-2.5 text-xs" data-testid="ivf-tww-warning">
+            Call your clinic now. Out of hours, use your clinic's emergency number, or 144 in an emergency.
+          </p>
+        )}
         <Textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Anything else (optional)" maxLength={500} rows={2} aria-label="Note" />
         <Button size="sm" onClick={() => void save()} disabled={saving || (!picked.length && !note.trim())} data-testid="ivf-tww-save">Save</Button>
         {error && <p className="text-xs text-destructive">{error}</p>}

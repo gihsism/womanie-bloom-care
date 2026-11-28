@@ -49,9 +49,6 @@ import {
   Apple,
   Pencil,
   RotateCcw,
-  ClipboardList,
-  CheckCircle2,
-  CircleDashed,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -260,59 +257,6 @@ function getNearestPerspectives(week: number): WeekPerspectives | null {
   if (best === null && anchorWeeks.length > 0) best = anchorWeeks[0];
   return best !== null ? WEEK_PERSPECTIVES[best] : null;
 }
-
-// ─── Recommended prenatal milestones ───
-//
-// Sourced from ACOG / NICE typical prenatal care timelines. These are
-// recommendations, not prescriptions — every pregnancy is different and
-// the user's OB-GYN may schedule differently. Window is the
-// {start, end} week range during which the milestone is typically done;
-// label is short, description explains why.
-interface PregnancyMilestone {
-  start: number;
-  end: number;
-  label: string;
-  description: string;
-  category: 'visit' | 'scan' | 'lab' | 'class' | 'decision';
-}
-
-const PREGNANCY_MILESTONES: PregnancyMilestone[] = [
-  { start: 4, end: 8, label: 'First prenatal visit', description: 'Confirm pregnancy, due-date calc, initial bloodwork (CBC, blood type + Rh, rubella, HIV, hep B, syphilis).', category: 'visit' },
-  { start: 8, end: 12, label: 'Dating ultrasound', description: 'Confirms gestational age and heartbeat. Most accurate due-date estimate.', category: 'scan' },
-  { start: 10, end: 13, label: 'First-trimester screening', description: 'Nuchal translucency scan + bloodwork (PAPP-A, β-hCG) to assess Down/Edwards/Patau risk. In Switzerland basic insurance covers this first-trimester test and two routine scans: one at 12–14 weeks and one at 20–23 weeks (BAG).', category: 'scan' },
-  { start: 10, end: 14, label: 'NIPT (optional)', description: 'Cell-free DNA blood test. More sensitive than the first-trimester combined screen; covered by some insurance for high-risk pregnancies. In Switzerland basic insurance pays for it from week 12 when the first-trimester test shows a risk of 1 in 1,000 or higher (BAG).', category: 'lab' },
-  { start: 15, end: 20, label: 'Quad screen (if no NIPT)', description: 'AFP, hCG, estriol, inhibin-A. Backup screen if first-trimester or NIPT not done. Mainly a US practice; in Switzerland the first-trimester test and NIPT are the usual screens.', category: 'lab' },
-  { start: 18, end: 22, label: 'Anatomy scan', description: 'Detailed mid-pregnancy ultrasound — checks organs, placenta, growth. Sex often visible if you want to know.', category: 'scan' },
-  { start: 24, end: 28, label: 'Glucose challenge test', description: 'Screens for gestational diabetes. Either a 1-hour sugary-drink test (no fasting needed, a longer test follows if high) or — in Switzerland and much of Europe — one 2-hour fasting test (75 g OGTT).', category: 'lab' },
-  { start: 27, end: 29, label: 'Rhogam (if Rh-negative)', description: 'Anti-D immunoglobulin if your blood type is Rh-negative. Prevents complications in this and future pregnancies. In Switzerland a blood test at 18–24 weeks first checks the baby\'s Rh type from your blood; the 28-week anti-D is given only if the baby is Rh-positive (SGGG expert letter 68).', category: 'lab' },
-  { start: 28, end: 36, label: 'Visits every 2 weeks', description: 'Standard cadence shifts from monthly to biweekly through week 36. In Switzerland basic insurance covers seven check-ups in a normal pregnancy; your doctor or midwife sets the timing (BAG).', category: 'visit' },
-  { start: 24, end: 40, label: 'Know your baby\'s movements', description: 'Get to know your baby\'s usual pattern. There is no set number that is normal. If movements slow down, change or stop, call your midwife or maternity unit straight away, day or night.', category: 'decision' },
-  { start: 30, end: 36, label: 'Childbirth class', description: 'Hospital tour, birth-prep classes, breastfeeding class. Book early — popular classes fill up.', category: 'class' },
-  { start: 36, end: 37, label: 'Group B Strep swab', description: 'Vaginal/rectal swab at 36–37 weeks (ACOG 2020) to test for GBS colonization. If positive, you\'ll get IV antibiotics in labor. Swiss guidance (SGGG expert letter 86, 2024) places the swab at 35–37 weeks.', category: 'lab' },
-  { start: 36, end: 40, label: 'Weekly visits', description: 'Cervical checks, position monitoring, induction discussion if appropriate.', category: 'visit' },
-  { start: 36, end: 38, label: 'Hospital bag packed', description: 'Have it ready by week 36. Pack for mom, baby, partner. Include ID, insurance card, birth plan if you have one.', category: 'class' },
-  { start: 37, end: 40, label: 'Full term reached', description: '37 weeks is "early term", 39+ is "full term". Most healthy babies arrive between 39 and 41 weeks.', category: 'decision' },
-  { start: 41, end: 42, label: 'Induction discussion', description: 'Past your due date by 7+ days — your provider will discuss monitoring frequency and induction timing.', category: 'decision' },
-];
-
-// Returns the milestones that bracket the current week: a small set
-// of "due now" plus "coming up next" plus "you may have missed if
-// not done". UI uses these three buckets so the user sees what's
-// active without scrolling 16 rows.
-function getRelevantMilestones(week: number) {
-  const active = PREGNANCY_MILESTONES.filter(m => week >= m.start && week <= m.end);
-  const upcoming = PREGNANCY_MILESTONES.filter(m => m.start > week && m.start <= week + 6);
-  const recent = PREGNANCY_MILESTONES.filter(m => m.end < week && m.end >= week - 4);
-  return { active, upcoming, recent };
-}
-
-const MILESTONE_CATEGORY_TONE: Record<PregnancyMilestone['category'], { dot: string; label: string }> = {
-  visit: { dot: 'bg-primary', label: 'Visit' },
-  scan: { dot: 'bg-secondary', label: 'Scan' },
-  lab: { dot: 'bg-primary/50', label: 'Lab' },
-  class: { dot: 'bg-foreground/60', label: 'Class' },
-  decision: { dot: 'bg-violet-500', label: 'Decision' },
-};
 
 // ─── Pregnancy symptoms by trimester ───
 const PREGNANCY_SYMPTOMS: Record<string, { label: string; icon: string }[]> = {
@@ -873,85 +817,6 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
           almost certainly Braxton-Hicks and don't need timing. */}
       {weeksPregnant >= 36 && <div id="contraction-timer" className="scroll-mt-4 md:scroll-mt-28"><ContractionTimer /></div>}
 
-      {/* Recommended prenatal milestones — what's due now, what's
-          coming up, what may have been missed. Sourced from ACOG/NICE
-          typical prenatal care timelines; user's actual schedule may
-          vary by clinic. */}
-      {(() => {
-        const { active, upcoming, recent } = getRelevantMilestones(weeksPregnant);
-        if (active.length === 0 && upcoming.length === 0 && recent.length === 0) return null;
-        const renderMilestone = (
-          m: PregnancyMilestone,
-          variant: 'active' | 'upcoming' | 'recent'
-        ) => {
-          const tone = MILESTONE_CATEGORY_TONE[m.category];
-          const Icon = variant === 'recent' ? CheckCircle2 : CircleDashed;
-          return (
-            <div
-              key={`${m.start}-${m.label}`}
-              className={`flex items-start gap-3 p-3 rounded-lg border ${
-                variant === 'active' ? 'border-primary/30 bg-primary/5' : 'border-border bg-card'
-              } ${variant === 'recent' ? 'opacity-85' : ''}`}
-            >
-              <Icon
-                className={`h-4 w-4 mt-0.5 flex-shrink-0 ${
-                  variant === 'recent' ? 'text-muted-foreground' : 'text-primary'
-                }`}
-              />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-medium">{m.label}</span>
-                  <span className={`inline-flex items-center gap-1 text-[10px] text-muted-foreground`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${tone.dot}`} />
-                    {tone.label} · weeks {m.start}{m.start !== m.end ? `–${m.end}` : ''}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                  {m.description}
-                </p>
-              </div>
-            </div>
-          );
-        };
-        return (
-          <Card className="p-4 space-y-3">
-            <h4 className="font-semibold flex items-center gap-2">
-              <ClipboardList className="h-4 w-4 text-primary" />
-              Prenatal milestones
-            </h4>
-            <p className="text-[11px] text-muted-foreground -mt-1">
-              Typical ACOG/NICE schedule, with Swiss notes (BAG, SGGG) where practice differs — your clinic may differ. Use this as a checklist for
-              what to ask about at your next visit.
-            </p>
-            {active.length > 0 && (
-              <div className="space-y-2">
-                <h5 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Due now
-                </h5>
-                {active.map(m => renderMilestone(m, 'active'))}
-              </div>
-            )}
-            {upcoming.length > 0 && (
-              <div className="space-y-2">
-                <h5 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Coming up
-                </h5>
-                {upcoming.slice(0, 4).map(m => renderMilestone(m, 'upcoming'))}
-              </div>
-            )}
-            {recent.length > 0 && (
-              <div className="space-y-2">
-                <h5 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Recently expected
-                </h5>
-                {recent.slice(0, 3).map(m => renderMilestone(m, 'recent'))}
-              </div>
-            )}
-          </Card>
-        );
-      })()}
-
-
       {/* Reading material, folded away so the trackers stay near the top. */}
       <GuidesSection title={`Week ${weeksPregnant}: what it means, symptoms & milestones`}>
         {/* Multi-perspective framing of the current week — what it means
@@ -1082,7 +947,7 @@ function getMilestones(currentWeek: number) {
     { week: 20, title: 'Anatomy Scan', description: 'Detailed ultrasound to check baby\'s development' },
     { week: 24, title: 'Viability Milestone', description: 'Baby could survive outside the womb with medical help' },
     { week: 26, title: 'Glucose Test', description: 'Screening for gestational diabetes' },
-    { week: 28, title: 'Third Trimester Begins', description: 'Final stretch! More frequent appointments' },
+    { week: 28, title: 'Third Trimester Begins', description: 'Final stretch! More frequent check-ups' },
     { week: 32, title: 'Hospital Bag', description: 'Good time to pack your hospital bag' },
     { week: 36, title: 'Weekly Check-ups', description: 'Baby may drop into position' },
     { week: 37, title: 'Full Term', description: 'Baby is considered early term' },

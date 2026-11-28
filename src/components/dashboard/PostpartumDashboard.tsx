@@ -209,7 +209,7 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
           <div>
             <h3 className="font-semibold">When was your baby born?</h3>
             <p className="text-xs text-muted-foreground">
-              The postpartum dashboard is time-bound. We need a birth date to surface recovery milestones at the right weeks.
+              Add the birth date and your recovery steps, check-ins and the postnatal check show up at the right weeks.
             </p>
           </div>
         </div>

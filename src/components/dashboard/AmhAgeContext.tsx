@@ -236,7 +236,7 @@ export default function AmhAgeContext({ mode }: AmhAgeContextProps) {
           aria-label="Ask AI about my AMH"
         >
           <MessageCircle className="h-3 w-3" />
-          Ask Claude about this
+          Ask AI about this
         </button>
       </div>
     </Card>

@@ -166,6 +166,11 @@ export interface ContraceptionRow {
   label: string;
   /** true = due today / overdue (ranked with the stage tasks); false = a heads-up. */
   urgent: boolean;
+  /**
+   * The injection date has passed: protection may have lapsed, so Home
+   * puts the row first, above everything else due today.
+   */
+  overdue?: boolean;
 }
 
 /** IUD / implant: replacement within this many days shows a heads-up. */
@@ -212,7 +217,7 @@ export function contraceptionRows(method: ContraceptionMethodId | null, d: Metho
 
   if (method === 'injection' && d.next) {
     const n = daysBetween(today, d.next);
-    if (n < 0 && n >= -STALE_AFTER_DAYS) rows.push({ id: 'method-injection', label: `Injection was due ${shortDay(d.next)}: check with your clinic`, urgent: true });
+    if (n < 0 && n >= -STALE_AFTER_DAYS) rows.push({ id: 'method-injection', label: `Injection was due ${shortDay(d.next)}: check with your clinic`, urgent: true, overdue: true });
     else if (n === 0) rows.push({ id: 'method-injection', label: 'Contraceptive injection due today', urgent: true });
     else if (n > 0 && n <= INJECTION_HEADS_UP_DAYS) rows.push({ id: 'method-injection', label: `Contraceptive injection due ${whenText(today, d.next)}`, urgent: false });
     return rows;

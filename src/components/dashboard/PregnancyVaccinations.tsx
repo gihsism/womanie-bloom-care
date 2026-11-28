@@ -103,7 +103,7 @@ export default function PregnancyVaccinations({ dueDate }: PregnancyVaccinations
     if (gestWeek > v.windowEndWeek) {
       return {
         key: 'past_due',
-        label: 'Window passed — ask your OB',
+        label: 'Window passed — ask your doctor or midwife',
         color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200',
       };
     }
@@ -190,7 +190,7 @@ export default function PregnancyVaccinations({ dueDate }: PregnancyVaccinations
           Reference: ACOG 2026 maternal immunization schedule and CDC guidance for pregnancy; Swiss timing from the{' '}
           <a href="https://www.bag.admin.ch/de/schweizerischer-impfplan" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">BAG Swiss vaccination schedule</a>{' '}
           (BAG-Bulletins 35 and 36/2025). Status is saved
-          to your account — share with your OB at the next visit. Schedules update annually.
+          to your account — share with your doctor or midwife at the next visit. Schedules update annually.
         </span>
       </p>
     </Card>

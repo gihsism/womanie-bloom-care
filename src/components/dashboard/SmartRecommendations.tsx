@@ -88,7 +88,7 @@ export default function SmartRecommendations({ medicalData, lifeStage }: SmartRe
       recs.push({
         emoji: '🔄',
         title: `Retest: ${staleNames}`,
-        description: `These abnormal results are over 6 months old. A follow-up test can show if values have improved.`,
+        description: `These abnormal results are over 6 months old. A follow-up test can show if they have changed.`,
         priority: 'high',
       });
     }

@@ -5,7 +5,7 @@ import { onHealthDataChange } from '@/lib/data-events';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { differenceInDays, differenceInMonths, format, parseISO } from 'date-fns';
+import { differenceInDays, differenceInMonths, format, formatDistanceToNowStrict, parseISO } from 'date-fns';
 import { Flower2, Info, MessageCircle } from 'lucide-react';
 
 // STRAW+10 staging estimator for menopausal-mode users.
@@ -52,7 +52,7 @@ const STAGE_DESCRIPTION: Record<Stage, { label: string; body: string }> = {
   },
   unknown: {
     label: 'Stage unclear',
-    body: 'Log at least one period (even an estimated date) so we can stage it. Lab values like FSH help refine the estimate.',
+    body: 'Log at least one period (even an estimated date) so we can stage it. Lab results like FSH help refine the estimate.',
   },
 };
 
@@ -210,7 +210,9 @@ export default function PerimenopauseStageCard({ mode }: PerimenopauseStageCardP
           {result.monthsSinceLastPeriod !== null && (
             <span className="block mt-0.5">
               Last logged period: {format(parseISO(periodRecords[periodRecords.length - 1].period_start_date), 'MMM d, yyyy')}
-              {' '}({result.monthsSinceLastPeriod} months ago)
+              {' '}({result.monthsSinceLastPeriod < 1
+                ? `${formatDistanceToNowStrict(parseISO(periodRecords[periodRecords.length - 1].period_start_date), { unit: 'day' })} ago`
+                : `${result.monthsSinceLastPeriod} month${result.monthsSinceLastPeriod === 1 ? '' : 's'} ago`})
             </span>
           )}
         </span>
@@ -218,7 +220,7 @@ export default function PerimenopauseStageCard({ mode }: PerimenopauseStageCardP
 
       <p className="text-[10px] text-muted-foreground mt-2 leading-relaxed">
         Reference: STRAW+10 (2012 Workshop on the Stages of Reproductive Aging). Approximation
-        from tracked data — not a clinical diagnosis. Discuss with your clinician.
+        from tracked data — not a clinical diagnosis. Discuss with your doctor.
       </p>
 
       {result.stage !== 'unknown' && (
@@ -233,7 +235,7 @@ export default function PerimenopauseStageCard({ mode }: PerimenopauseStageCardP
             aria-label="Ask AI about my menopause stage"
           >
             <MessageCircle className="h-3 w-3" />
-            Ask Claude about this
+            Ask AI about this
           </button>
         </div>
       )}
