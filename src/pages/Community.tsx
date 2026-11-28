@@ -1,4 +1,4 @@
-import { usePageTitle } from '@/hooks/usePageTitle';
+import { usePublicPageMeta } from '@/hooks/usePublicPageMeta';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
@@ -93,7 +93,7 @@ const socialLinks = [
 ];
 
 const Community = () => {
-  usePageTitle('Community');
+  usePublicPageMeta('/community');
   return (
     <div className="min-h-screen bg-background">
       <Navigation />

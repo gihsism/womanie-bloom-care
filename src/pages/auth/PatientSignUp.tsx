@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { isNativeApp } from '@/lib/platform';
 import { useNavigate } from 'react-router-dom';
-import { usePageTitle } from '@/hooks/usePageTitle';
+import { usePublicPageMeta } from '@/hooks/usePublicPageMeta';
 import { useAuth } from '@/contexts/AuthContext';
 import { ArrowLeft, Loader2, Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ import { scorePassword } from '@/lib/password-strength';
 import { PRIVACY_POLICY_VERSION } from '@/lib/policyVersion';
 
 const PatientSignUp = () => {
-  usePageTitle('Sign Up');
+  usePublicPageMeta('/auth/signup');
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();

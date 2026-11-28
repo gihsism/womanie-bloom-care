@@ -12,7 +12,7 @@ import {
   Trash2,
   Mail,
 } from 'lucide-react';
-import { usePageTitle } from '@/hooks/usePageTitle';
+import { usePublicPageMeta } from '@/hooks/usePublicPageMeta';
 import UserMenu from '@/components/UserMenu';
 
 // Concrete privacy overview, so the user knows exactly where their
@@ -72,7 +72,7 @@ const SECTIONS: Array<{ icon: typeof Shield; title: string; body: string | strin
 
 export default function Privacy() {
   const navigate = useNavigate();
-  usePageTitle('Privacy & Security');
+  usePublicPageMeta('/privacy');
 
   return (
     <div className="min-h-screen bg-background">

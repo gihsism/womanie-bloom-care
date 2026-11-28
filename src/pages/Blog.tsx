@@ -1,12 +1,12 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { usePageTitle } from '@/hooks/usePageTitle';
+import { usePublicPageMeta } from '@/hooks/usePublicPageMeta';
 import { Calendar, User, ArrowRight } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 
 const Blog = () => {
-  usePageTitle('Blog');
+  usePublicPageMeta('/blog');
 
   const articles = [
     {

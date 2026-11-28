@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { usePageTitle } from '@/hooks/usePageTitle';
+import { usePublicPageMeta } from '@/hooks/usePublicPageMeta';
 import { Check } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const Pricing = () => {
   const navigate = useNavigate();
-  usePageTitle('Pricing');
+  usePublicPageMeta('/pricing');
   const { user } = useAuth();
 
   const plans = [

@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { usePageTitle } from '@/hooks/usePageTitle';
+import { usePublicPageMeta } from '@/hooks/usePublicPageMeta';
 import { ArrowRight, FileText, KeyRound, PenLine, Stethoscope } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -30,7 +30,7 @@ const STEPS = [
 
 const ForDoctors = () => {
   const navigate = useNavigate();
-  usePageTitle('For Doctors');
+  usePublicPageMeta('/for-doctors');
 
   return (
     <div className="min-h-screen bg-background">

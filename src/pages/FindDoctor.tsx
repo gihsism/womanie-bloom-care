@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState, useCallback } from 'react';
 import { useOnceTrue } from '@/hooks/useOnceTrue';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { usePageTitle } from '@/hooks/usePageTitle';
+import { usePublicPageMeta } from '@/hooks/usePublicPageMeta';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -78,7 +78,7 @@ export const DoctorsJoiningEmptyState = ({ onPrint }: { onPrint: () => void }) =
 
 const FindDoctor = () => {
   const navigate = useNavigate();
-  usePageTitle('Find a Doctor');
+  usePublicPageMeta('/find-doctor');
   const { toast } = useToast();
   const { user, loading } = useAuth();
   const [doctors, setDoctors] = useState<Doctor[]>([]);

@@ -5,10 +5,10 @@ import Footer from '@/components/Footer';
 import alenaPhoto from '@/assets/alena-photo.png';
 import marinaPhoto from '@/assets/marina-photo.jpg';
 import johnPhoto from '@/assets/john-photo.png';
-import { usePageTitle } from '@/hooks/usePageTitle';
+import { usePublicPageMeta } from '@/hooks/usePublicPageMeta';
 
 const About = () => {
-  usePageTitle('About');
+  usePublicPageMeta('/about');
 
   const values = [
     {

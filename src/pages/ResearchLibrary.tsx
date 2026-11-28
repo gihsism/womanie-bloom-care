@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, Loader2, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { usePageTitle } from '@/hooks/usePageTitle';
+import { usePublicPageMeta } from '@/hooks/usePublicPageMeta';
 import { RESEARCH_DISCLAIMER } from '@/lib/research-sources';
 import {
   EVIDENCE_LABEL,
@@ -21,7 +21,7 @@ import {
 const PAGE = 20;
 
 export default function ResearchLibrary() {
-  usePageTitle('Research library');
+  usePublicPageMeta('/library');
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [params, setParams] = useSearchParams();

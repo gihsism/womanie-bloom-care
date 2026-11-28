@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { usePageTitle } from '@/hooks/usePageTitle';
+import { usePublicPageMeta } from '@/hooks/usePublicPageMeta';
 import { ArrowLeft, Eye, EyeOff, Mail, Lock, User, Stethoscope, FileText, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +24,7 @@ const specialties = [
 
 const DoctorSignUp = () => {
   const navigate = useNavigate();
-  usePageTitle('Doctor Sign Up');
+  usePublicPageMeta('/auth/doctor-signup');
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

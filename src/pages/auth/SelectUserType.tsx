@@ -1,11 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { usePageTitle } from '@/hooks/usePageTitle';
+import { usePublicPageMeta } from '@/hooks/usePublicPageMeta';
 import { User, Stethoscope, ArrowLeft } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 const SelectUserType = () => {
   const navigate = useNavigate();
-  usePageTitle('Get Started');
+  usePublicPageMeta('/auth/select-type');
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

@@ -1,3 +1,4 @@
+import { usePublicPageMeta } from '@/hooks/usePublicPageMeta';
 import Navigation from '@/components/Navigation';
 import Hero from '@/components/Hero';
 import WhatIsWomanie from '@/components/WhatIsWomanie';
@@ -9,6 +10,7 @@ import FinalCTA from '@/components/FinalCTA';
 import Footer from '@/components/Footer';
 
 const Index = () => {
+  usePublicPageMeta('/');
   return (
     <div className="min-h-screen">
       <Navigation />

@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { usePageTitle } from '@/hooks/usePageTitle';
+import { usePublicPageMeta } from '@/hooks/usePublicPageMeta';
 import { FileText, Brain, TrendingUp, MessageCircle, Shield, Heart, ArrowRight } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -10,7 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const ForPatients = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  usePageTitle('For Patients');
+  usePublicPageMeta('/for-patients');
 
   const features = [
     { icon: FileText, title: 'Upload any medical document', description: 'Lab results, prescriptions, scan reports, discharge letters. PDF, a photo, or a Word file.' },

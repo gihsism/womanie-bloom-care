@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { isNativeApp } from '@/lib/platform';
 import { useNavigate } from 'react-router-dom';
-import { usePageTitle } from '@/hooks/usePageTitle';
+import { usePublicPageMeta } from '@/hooks/usePublicPageMeta';
 import { useAuth } from '@/contexts/AuthContext';
 import { ArrowLeft, Loader2, Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 
 const PatientLogIn = () => {
-  usePageTitle('Log In');
+  usePublicPageMeta('/auth/login');
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
