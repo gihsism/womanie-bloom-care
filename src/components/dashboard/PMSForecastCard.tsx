@@ -1,3 +1,4 @@
+import { DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -188,14 +189,14 @@ export default function PMSForecastCard({ mode }: Props) {
         <Badge variant="outline" className="text-[10px] ml-auto">
           {inPmsNow
             ? `period in ~${forecast.daysToNext}d`
-            : `starts ${format(forecast.pmsStart, 'MMM d')} (~${forecast.daysToNext - PMS_WINDOW_LEN}d)`}
+            : `starts ${format(forecast.pmsStart, DAY_MONTH_FMT)} (~${forecast.daysToNext - PMS_WINDOW_LEN}d)`}
         </Badge>
       </div>
 
       <p className="text-xs text-muted-foreground mb-3">
         {inPmsNow
-          ? `Period predicted ${format(forecast.nextStart, 'MMM d')}. Common late-luteal symptoms include cramps, bloating, mood shifts, and sleep disruption.`
-          : `Period predicted ${format(forecast.nextStart, 'MMM d')}. The 5 days before tend to be when symptoms peak — a few days of prep can help.`}
+          ? `Period predicted ${format(forecast.nextStart, DAY_MONTH_FMT)}. Common late-luteal symptoms include cramps, bloating, mood shifts, and sleep disruption.`
+          : `Period predicted ${format(forecast.nextStart, DAY_MONTH_FMT)}. The 5 days before tend to be when symptoms peak — a few days of prep can help.`}
       </p>
 
       {symptomProfile && symptomProfile.ranked.length > 0 && (

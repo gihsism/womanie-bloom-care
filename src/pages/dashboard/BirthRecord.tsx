@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -335,7 +336,7 @@ export default function BirthRecord() {
             <ul className="divide-y text-sm">
               {[...labourMeds.events].sort((a, b) => a.occurred_at.localeCompare(b.occurred_at)).map(m => (
                 <li key={m.id} className="py-1.5 flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground tabular-nums w-24 flex-shrink-0">{format(parseISO(m.occurred_at), 'MMM d, HH:mm')}</span>
+                  <span className="text-xs text-muted-foreground tabular-nums w-24 flex-shrink-0">{format(parseISO(m.occurred_at), 'd MMM, HH:mm')}</span>
                   <span className="flex-1">{m.data?.name}{m.data?.dose ? <span className="text-muted-foreground"> · {m.data.dose}</span> : null}</span>
                   <button type="button" aria-label="Remove" className="text-muted-foreground/60 hover:text-destructive" onClick={() => labourMeds.remove(m.id)}>
                     <Trash2 className="h-3.5 w-3.5" />
@@ -380,7 +381,7 @@ export default function BirthRecord() {
                   <button type="button" className="text-left w-full" onClick={() => navigate('/dashboard/medical-history')}>
                     <div className="text-sm font-medium">{d.ai_suggested_name || d.file_name}</div>
                     <div className="text-[11px] text-muted-foreground">
-                      {d.document_type} · {format(parseISO(d.uploaded_at), 'MMM d, yyyy')}{d.ai_summary ? '' : ' · being analysed'}
+                      {d.document_type} · {format(parseISO(d.uploaded_at), DATE_FMT)}{d.ai_summary ? '' : ' · being analysed'}
                     </div>
                   </button>
                 </li>

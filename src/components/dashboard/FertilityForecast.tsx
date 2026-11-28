@@ -1,3 +1,4 @@
+import { DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useEffect, useMemo, useState } from 'react';
 import { useCycleModel } from '@/hooks/useCycleModel';
 import { Card } from '@/components/ui/card';
@@ -192,7 +193,7 @@ const FertilityForecast = ({ lastPeriodStart, cycleLengthFallback = 28 }: Fertil
                     Cycle {c.index}
                   </span>
                   <span className="text-sm font-semibold">
-                    Period {format(c.startDate, 'MMM d')} – {format(c.endDate, 'MMM d')}
+                    Period {format(c.startDate, DAY_MONTH_FMT)} – {format(c.endDate, DAY_MONTH_FMT)}
                   </span>
                 </div>
                 <span className="text-[11px] text-muted-foreground">
@@ -237,13 +238,13 @@ const FertilityForecast = ({ lastPeriodStart, cycleLengthFallback = 28 }: Fertil
               <div className="grid grid-cols-3 text-[11px] text-muted-foreground">
                 <div>
                   <div className="font-medium text-foreground">Fertile</div>
-                  {format(c.fertileStart, 'MMM d')} – {format(c.fertileEnd, 'MMM d')}
+                  {format(c.fertileStart, DAY_MONTH_FMT)} – {format(c.fertileEnd, DAY_MONTH_FMT)}
                 </div>
                 <div className="text-center">
                   <div className="font-medium text-foreground inline-flex items-center gap-1">
                     <Sparkles className="h-3 w-3 text-secondary" /> Ovulation
                   </div>
-                  <div>{format(c.ovulation, 'MMM d')}</div>
+                  <div>{format(c.ovulation, DAY_MONTH_FMT)}</div>
                 </div>
                 <div className="text-right">
                   <div className="font-medium text-foreground">Cycle</div>

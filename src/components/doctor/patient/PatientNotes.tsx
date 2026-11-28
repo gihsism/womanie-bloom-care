@@ -1,3 +1,4 @@
+import { formatDate } from '@/lib/dateFormat';
 import { useConfirm } from '@/components/ConfirmDialog';
 import { deleteNoteConfirm } from '@/lib/confirmCopy';
 import { useState } from 'react';
@@ -215,7 +216,7 @@ const PatientNotes = ({ doctorId, patientId, notes, formOpen, draft, onDraftChan
                 <div className="min-w-0 flex-1">
                   <h3 className="font-medium">{note.title}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {new Date(note.created_at).toLocaleDateString()} · {typeLabel(note.note_type)}
+                    {formatDate(note.created_at)} · {typeLabel(note.note_type)}
                   </p>
                 </div>
                 <Badge variant={note.is_visible_to_patient ? 'default' : 'outline'} className="shrink-0">

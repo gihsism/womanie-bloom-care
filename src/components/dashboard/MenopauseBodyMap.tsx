@@ -1,3 +1,4 @@
+import { WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useEffect, useState } from 'react';
 import { format, subDays } from 'date-fns';
 import { db } from '@/integrations/db/client';
@@ -61,7 +62,7 @@ export default function MenopauseBodyMap({ mode }: { name?: string | null; mode:
 
   return (
     <section className="mb-6" aria-label="Your body at a glance">
-      <p className="label-mono">{format(now, 'EEE d MMM')}</p>
+      <p className="label-mono">{format(now, WEEKDAY_DAY_MONTH_FMT)}</p>
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
         {hf.daysLogged7
           ? <>Hot flushes <span className="text-muted-foreground">this week: {hf.total7}</span></>

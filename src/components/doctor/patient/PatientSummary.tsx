@@ -1,3 +1,4 @@
+import { formatDate, formatDateTime, formatWeekdayDayMonth } from '@/lib/dateFormat';
 import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { Card } from '@/components/ui/card';
@@ -85,8 +86,8 @@ const PatientSummary = ({ medicalData, documents, notes, appointments, signals, 
       : `${flagged.length} result${flagged.length === 1 ? '' : 's'} out of range`;
 
   const visitParts = [
-    last ? `Last: ${new Date(last.scheduled_at).toLocaleDateString()}` : 'No past visits',
-    next ? `Next: ${new Date(next.scheduled_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}` : null,
+    last ? `Last: ${formatDate(last.scheduled_at)}` : 'No past visits',
+    next ? `Next: ${formatDateTime(next.scheduled_at)}` : null,
   ].filter(Boolean).join(' · ');
 
   return (
@@ -167,7 +168,7 @@ const PatientSummary = ({ medicalData, documents, notes, appointments, signals, 
                 return (
                   <div key={s.id} className="p-3 text-sm">
                     <p className="font-medium">
-                      {new Date(s.signal_date).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}
+                      {formatWeekdayDayMonth(s.signal_date)}
                     </p>
                     {parts.length > 0 && <p className="text-xs text-muted-foreground">{parts.join(' · ')}</p>}
                     {s.notes && <p className="text-xs mt-1">{s.notes}</p>}

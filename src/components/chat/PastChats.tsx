@@ -1,3 +1,4 @@
+import { DATE_TIME_FMT } from '@/lib/dateFormat';
 import { format } from 'date-fns';
 import { ChevronRight, Loader2, Trash2 } from 'lucide-react';
 import { chatDeleteTarget, type PastChat } from '@/lib/chatSessions';
@@ -48,7 +49,7 @@ export function PastChats<C extends PastChat>({
                 <span className="flex-1 min-w-0">
                   <span className="block text-sm font-medium truncate">{c.title}</span>
                   <span className="block text-xs text-muted-foreground">
-                    {c.startedAt ? format(c.startedAt, 'd MMM yyyy, HH:mm') : 'Earlier'} · {c.messages.length} messages
+                    {c.startedAt ? format(c.startedAt, DATE_TIME_FMT) : 'Earlier'} · {c.messages.length} messages
                   </span>
                 </span>
                 <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />

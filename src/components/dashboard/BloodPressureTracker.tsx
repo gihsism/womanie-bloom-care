@@ -1,3 +1,4 @@
+import { DATE_FMT, DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -277,7 +278,7 @@ export default function BloodPressureTracker({ mode }: BloodPressureTrackerProps
             <span className="ml-auto text-[10px] font-medium">{latestClass.label}</span>
           </div>
           <p className="text-[10px] mt-1 opacity-75">
-            {format(parseISO(latest.date), 'MMM d, yyyy')}{latest.time ? ` · ${latest.time}` : ''}
+            {format(parseISO(latest.date), DATE_FMT)}{latest.time ? ` · ${latest.time}` : ''}
             {latest.pulse ? ` · pulse ${latest.pulse} bpm` : ''}
           </p>
         </div>
@@ -306,7 +307,7 @@ export default function BloodPressureTracker({ mode }: BloodPressureTrackerProps
                 return (
                   <li key={`${e.date}-${e.time}-${i}`} className="flex items-center gap-2 text-[11px]">
                     <span className="text-muted-foreground w-24">
-                      {format(parseISO(e.date), 'MMM d')}{e.time ? ` ${e.time}` : ''}
+                      {format(parseISO(e.date), DAY_MONTH_FMT)}{e.time ? ` ${e.time}` : ''}
                     </span>
                     <span className="font-mono">{e.systolic}/{e.diastolic}</span>
                     <span className={`text-[10px] px-1.5 py-0.5 rounded border ${c.color}`}>{c.band}</span>

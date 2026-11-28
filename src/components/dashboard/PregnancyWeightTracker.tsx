@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -394,7 +395,7 @@ export default function PregnancyWeightTracker({ dueDate }: PregnancyWeightTrack
               <ul className="space-y-1">
                 {[...entries].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8).map(e => (
                   <li key={e.date} className="flex items-center gap-2 text-xs">
-                    <span className="text-muted-foreground w-20">{format(parseISO(e.date), 'MMM d, yyyy')}</span>
+                    <span className="text-muted-foreground w-20">{format(parseISO(e.date), DATE_FMT)}</span>
                     <span className="font-mono">{fmtWeight(e.kg)}</span>
                     <span className="text-muted-foreground">{setup.prePregKg ? fmtGain(e.kg - setup.prePregKg) + ' total' : ''}</span>
                     <button

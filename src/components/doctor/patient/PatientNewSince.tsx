@@ -1,3 +1,4 @@
+import { formatDate, formatDayMonth } from '@/lib/dateFormat';
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { AlertTriangle, BookOpen, FileText, FlaskConical, MessageSquare } from 'lucide-react';
@@ -36,7 +37,7 @@ const PatientNewSince = ({ appointments, documents, medicalData, notes, signals,
       <p className="text-xs text-muted-foreground">
         {lastVisitAt === null
           ? 'No completed visit with you yet, so everything in the chart is new to you.'
-          : `Since ${new Date(lastVisitAt).toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' })}`}
+          : `Since ${formatDate(lastVisitAt)}`}
       </p>
 
       {lastVisitAt !== null && (
@@ -60,7 +61,7 @@ const PatientNewSince = ({ appointments, documents, medicalData, notes, signals,
                     <span className="min-w-0 flex-1">
                       <span className="block text-sm truncate">{item.title}</span>
                       <span className="block text-xs text-muted-foreground">
-                        {item.detail} · {new Date(item.at).toLocaleDateString([], { day: 'numeric', month: 'short' })}
+                        {item.detail} · {formatDayMonth(item.at)}
                       </span>
                     </span>
                   </button>

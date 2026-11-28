@@ -1,3 +1,4 @@
+import { formatDate } from '@/lib/dateFormat';
 import { lazy, Suspense, useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -92,7 +93,7 @@ const PatientDetails = () => {
     if (!intent && !searchParams.has('tab')) return;
     if (intent) {
       const d = new Date(searchParams.get('date') || '');
-      const pretty = (isNaN(d.getTime()) ? new Date() : d).toLocaleDateString();
+      const pretty = formatDate(isNaN(d.getTime()) ? new Date() : d);
       writeNote(intent === 'visit' ? `Visit on ${pretty}` : undefined);
     } else if (tab) {
       setActiveTab(tab);

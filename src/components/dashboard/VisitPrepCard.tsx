@@ -1,3 +1,4 @@
+import { WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useConfirm } from '@/components/ConfirmDialog';
 import { unshareVisitListConfirm } from '@/lib/confirmCopy';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -354,7 +355,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
 
       {upcomingApt && (
         <p className="text-[11px] text-muted-foreground mb-3">
-          Next visit: {format(parseISO(upcomingApt.scheduled_at), 'EEE MMM d, h:mm a')}
+          Next visit: {format(parseISO(upcomingApt.scheduled_at), 'EEE d MMM, h:mm a')}
           {upcomingApt.doctor_name && ` with ${upcomingApt.doctor_name}`}
           {' '}({visitDaysAway(parseISO(upcomingApt.scheduled_at))})
         </p>
@@ -416,7 +417,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
           </form>
           {isSaved ? (
             <p className="text-[11px] text-muted-foreground">
-              Saved to your visit on {format(parseISO(upcomingApt.scheduled_at), 'EEE MMM d')}. Your doctor can see this list.{' '}
+              Saved to your visit on {format(parseISO(upcomingApt.scheduled_at), WEEKDAY_DAY_MONTH_FMT)}. Your doctor can see this list.{' '}
               <button type="button" className="underline hover:text-foreground" onClick={unshare}>Remove from visit</button>
             </p>
           ) : (

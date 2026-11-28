@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { lazy, Suspense, useEffect, useState, useMemo } from 'react';
 import { useOnceTrue } from '@/hooks/useOnceTrue';
 import { Link, useNavigate } from 'react-router-dom';
@@ -83,7 +84,7 @@ function relativeDay(d: Date): string {
   if (isTomorrow(d)) return 'Tomorrow';
   const days = Math.round((d.getTime() - Date.now()) / 86_400_000);
   if (days > 0 && days < 7) return format(d, 'EEEE');
-  return format(d, 'MMM d, yyyy');
+  return format(d, DATE_FMT);
 }
 
 function isUpcoming(apt: AppointmentRow): boolean {
@@ -304,7 +305,7 @@ const Appointments = () => {
           <p className="text-xs text-muted-foreground">
             {kind === 'upcoming'
               ? `${relativeDay(when)} · ${formatPracticeTime(when)}${swissSuffix(outside)} · in ${formatDistanceToNowStrict(when)}`
-              : `${format(when, 'PPP')} · ${formatPracticeTime(when)}${swissSuffix(outside)}`}
+              : `${format(when, DATE_FMT)} · ${formatPracticeTime(when)}${swissSuffix(outside)}`}
             {apt.duration ? ` · ${apt.duration} min` : ''}
           </p>
           <p className="text-[11px] text-muted-foreground mt-0.5 inline-flex items-center gap-1">

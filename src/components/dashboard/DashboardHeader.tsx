@@ -1,3 +1,4 @@
+import { formatDayMonth } from '@/lib/dateFormat';
 import { Link } from 'react-router-dom';
 import {
   Activity,
@@ -159,7 +160,7 @@ export const getModeStats = (mode: LifeStage, cycleDay: number = 14, pregnancyDu
       return [
         { title: 'Week', value: `${weeks}+${days}`, subtitle: trimesterLabel, icon: Baby, color: 'text-primary' },
         { title: 'Baby Size', value: babySize, subtitle: `Week ${weeks} of 40`, icon: Heart, color: 'text-secondary' },
-        { title: 'Due Date', value: daysLeft > 0 ? `${daysLeft} days` : 'Due!', subtitle: pregnancyDueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), icon: CalendarIcon, color: 'text-accent' },
+        { title: 'Due Date', value: daysLeft > 0 ? `${daysLeft} days` : 'Due!', subtitle: formatDayMonth(pregnancyDueDate), icon: CalendarIcon, color: 'text-accent' },
         { title: 'Progress', value: `${Math.min(100, Math.round((totalDays / 280) * 100))}%`, subtitle: `${280 - totalDays} days remaining`, icon: TrendingUp, color: 'text-primary' },
       ];
     }

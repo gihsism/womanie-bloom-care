@@ -1,3 +1,4 @@
+import { WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { format, differenceInCalendarDays } from 'date-fns';
 import { fmtGrams } from '@/lib/bodyMap';
 import { getWeekData } from './pregnancyWeekData';
@@ -26,7 +27,7 @@ export default function PregnancyBodyMap({ dueDate }: { dueDate: Date; name?: st
 
   return (
     <section className="mb-6" aria-label="Your pregnancy at a glance">
-      <p className="label-mono">{format(now, 'EEE d MMM')}</p>
+      <p className="label-mono">{format(now, WEEKDAY_DAY_MONTH_FMT)}</p>
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
         Week {week} <span className="text-muted-foreground">of 40</span>
       </h2>

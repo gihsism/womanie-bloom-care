@@ -1,3 +1,4 @@
+import { formatDate } from '@/lib/dateFormat';
 import { lifeStageLabel } from './lifeStageLabels';
 // Pure helpers for the doctor's dashboard. Kept free of React so the
 // ranking, sorting and consent rules can be unit-tested.
@@ -193,7 +194,7 @@ export function doctorTodayItems(input: {
         patientId: a.patient_id,
         appointmentId: a.id,
         title: `Close the visit with ${patientName(patients, a.patient_id)}`,
-        detail: `${new Date(a.scheduled_at).toLocaleDateString()} · did it happen?`,
+        detail: `${formatDate(a.scheduled_at)} · did it happen?`,
       });
     });
 
@@ -212,7 +213,7 @@ export function doctorTodayItems(input: {
         patientId: a.patient_id,
         appointmentId: a.id,
         title: `${patientName(patients, a.patient_id)} cancelled`,
-        detail: `${d.toLocaleDateString()} at ${timeLabel(d)} · slot is free again`,
+        detail: `${formatDate(d)} at ${timeLabel(d)} · slot is free again`,
       });
     });
 

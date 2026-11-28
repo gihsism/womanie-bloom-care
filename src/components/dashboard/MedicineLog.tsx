@@ -419,7 +419,7 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
                   {d.pending && <CloudOff className="h-3 w-3" aria-label="Not synced yet" />}
                 </span>
                 <span className="tabular-nums">
-                  {isToday(parseISO(d.occurred_at)) ? format(parseISO(d.occurred_at), 'HH:mm') : format(parseISO(d.occurred_at), 'MMM d, HH:mm')}
+                  {isToday(parseISO(d.occurred_at)) ? format(parseISO(d.occurred_at), 'HH:mm') : format(parseISO(d.occurred_at), 'd MMM, HH:mm')}
                 </span>
               </li>
             ))}

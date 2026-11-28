@@ -1,3 +1,4 @@
+import { formatDate } from '@/lib/dateFormat';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { NO_REMOTE_IMAGES } from '@/lib/safeMarkdown';
@@ -96,7 +97,7 @@ const PatientDocuments = ({ documents, patientId, patientName, onSent }: Props) 
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium truncate">{doc.ai_suggested_name || doc.file_name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {(doc.document_type || 'Document').replace(/_/g, ' ')} · {doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString() : 'date unknown'}
+                    {(doc.document_type || 'Document').replace(/_/g, ' ')} · {doc.uploaded_at ? formatDate(doc.uploaded_at) : 'date unknown'}
                     {doc.sent_by_me && <Badge variant="secondary" className="ml-2 text-[10px] py-0">Sent by you</Badge>}
                   </p>
                   {doc.sent_by_me && doc.sent_note && (

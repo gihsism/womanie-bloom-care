@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar as CalendarIcon } from 'lucide-react';
@@ -76,7 +77,7 @@ const TryingToConceiveForm = () => {
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {lastPeriodStart ? format(lastPeriodStart, 'PPP') : <span>Pick a date</span>}
+                  {lastPeriodStart ? format(lastPeriodStart, DATE_FMT) : <span>Pick a date</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">

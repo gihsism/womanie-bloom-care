@@ -1,3 +1,4 @@
+import { DAY_MONTH_FMT, formatDayRange } from '@/lib/dateFormat';
 import { Sparkles, TrendingUp, TrendingDown, AlertCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { addDays, differenceInCalendarDays, format, parseISO, startOfDay } from 'date-fns';
@@ -219,8 +220,8 @@ const TodayStatusCard = ({
         <div className="text-center text-sm text-muted-foreground">
           <span className="font-medium text-foreground">Next period: </span>
           {prediction.isRegular
-            ? format(prediction.predictedPeriodStart, 'MMM d')
-            : `${format(addDays(prediction.predictedPeriodStart, -prediction.confidenceWindow), 'MMM d')}-${format(addDays(prediction.predictedPeriodStart, prediction.confidenceWindow), 'd')}`
+            ? format(prediction.predictedPeriodStart, DAY_MONTH_FMT)
+            : formatDayRange(addDays(prediction.predictedPeriodStart, -prediction.confidenceWindow), addDays(prediction.predictedPeriodStart, prediction.confidenceWindow))
           }
         </div>
       </div>}

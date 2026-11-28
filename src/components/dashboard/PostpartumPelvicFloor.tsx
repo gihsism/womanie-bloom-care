@@ -1,3 +1,4 @@
+import { WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -131,7 +132,7 @@ const PostpartumPelvicFloor = () => {
               <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
                 <div
                   className={`h-8 w-full rounded ${hit ? 'bg-primary' : some ? 'bg-primary/40' : 'bg-muted'}`}
-                  title={`${format(d.date, 'EEE MMM d')}: ${d.count} sets`}
+                  title={`${format(d.date, WEEKDAY_DAY_MONTH_FMT)}: ${d.count} sets`}
                 >
                   {d.count > 0 && (
                     <span className="text-[9px] text-primary-foreground font-medium flex items-center justify-center h-full">

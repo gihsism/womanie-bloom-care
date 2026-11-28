@@ -1,3 +1,4 @@
+import { WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { format } from 'date-fns';
 import { DEFAULT_IVF_TZ, isValidTimeZone } from '@/lib/ivfJourney';
 
@@ -12,7 +13,7 @@ export function deviceTz(): string {
 /** 'YYYY-MM-DD' -> "Thu 20 Nov" (read as a local calendar day). */
 export function fmtDay(date: string): string {
   const [y, m, d] = date.split('-').map(Number);
-  return format(new Date(y, m - 1, d), 'EEE d MMM');
+  return format(new Date(y, m - 1, d), WEEKDAY_DAY_MONTH_FMT);
 }
 
 /** A trigger instant as "Thu 20 Nov, 21:30" in a timezone. */

@@ -1,3 +1,4 @@
+import { formatWeekdayDayMonth } from '@/lib/dateFormat';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -23,7 +24,7 @@ export interface BabySummaryData {
 }
 
 const H2 = 'text-[11px] font-bold uppercase tracking-wide text-gray-500 mb-1';
-const shortDay = (d: Date) => d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+const shortDay = (d: Date) => formatWeekdayDayMonth(d);
 
 /** "6 weeks old (born 12 October 2026)" - weeks up to 4 months, then months. */
 export function babyAge(birthDate: string | null, now: Date): string | null {

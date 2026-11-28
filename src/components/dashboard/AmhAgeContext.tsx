@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { Card } from '@/components/ui/card';
 import { useUserHealthContext } from '@/hooks/useUserHealthContext';
 import { hormoneKeyForTitle, parseLabValue, amhAgeComparison } from '@/lib/hormone-reference';
@@ -119,7 +120,7 @@ export default function AmhAgeContext({ mode }: AmhAgeContextProps) {
   const lab = ctx.labs.amh;
   const cmp = ctx.age != null ? amhAgeComparison(lab.value, lab.unit, ctx.age, ctx.labs.fsh?.value ?? null) : null;
   const dateLine = lab.dateRecorded
-    ? `tested ${format(parseISO(lab.dateRecorded), 'MMM d, yyyy')}`
+    ? `tested ${format(parseISO(lab.dateRecorded), DATE_FMT)}`
     : null;
 
   // Round display for the bracket band to one decimal — typical AMH

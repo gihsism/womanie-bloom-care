@@ -1,3 +1,4 @@
+import { DATE_FMT, WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -402,7 +403,7 @@ function dayHeading(iso: string) {
   const d = parseISO(iso);
   if (isToday(d)) return 'Today';
   if (isYesterday(d)) return 'Yesterday';
-  return format(d, 'EEE d MMM');
+  return format(d, WEEKDAY_DAY_MONTH_FMT);
 }
 
 function EntryList<D>({ events, onRemove, render, dateOnly }: {
@@ -414,7 +415,7 @@ function EntryList<D>({ events, onRemove, render, dateOnly }: {
       <ul className="divide-y border-t">
         {events.map(e => (
           <li key={e.id} className="flex items-center gap-3 py-2.5 text-sm">
-            <span className="text-muted-foreground tabular-nums w-28 flex-shrink-0">{format(parseISO(e.occurred_at), 'd MMM yyyy')}</span>
+            <span className="text-muted-foreground tabular-nums w-28 flex-shrink-0">{format(parseISO(e.occurred_at), DATE_FMT)}</span>
             <span className="flex-1">{render(e)}</span>
             <Remove onClick={() => { void onRemove(e.id); }} />
           </li>

@@ -1,3 +1,4 @@
+import { DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Droplet, AlertCircle } from 'lucide-react';
@@ -165,7 +166,7 @@ export default function PostpartumLochiaCard({ birthDate }: Props) {
             <div
               key={c.day}
               className={`h-5 w-5 rounded ${lochiaClass} ${today ? 'ring-2 ring-primary' : ''}`}
-              title={`Day ${c.day} (${format(c.date, 'MMM d')}): ${c.lochia ? LABEL[c.lochia] : 'no log'}`}
+              title={`Day ${c.day} (${format(c.date, DAY_MONTH_FMT)}): ${c.lochia ? LABEL[c.lochia] : 'no log'}`}
             />
           );
         })}

@@ -1,3 +1,4 @@
+import { formatDayMonth } from '@/lib/dateFormat';
 import { useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -64,7 +65,7 @@ function generateSuggestions(labs: LabResult[], lifeStage?: string | null): Cycl
       description: `Your progesterone level (${progesterone.value} ${labs.find(l => l.title.toLowerCase().includes('progesterone'))?.unit || 'ng/mL'}) confirms that ovulation occurred${testDate ? ` around the time of your test` : ''}.`,
       actionLabel: 'Mark ovulation in calendar',
       detail: testDate
-        ? `Ovulation likely happened 5-7 days before your blood test${testDate ? ` on ${new Date(testDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}` : ''}. Would you like to update your calendar?`
+        ? `Ovulation likely happened 5-7 days before your blood test${testDate ? ` on ${formatDayMonth(testDate)}` : ''}. Would you like to update your calendar?`
         : 'Your elevated progesterone confirms a recent ovulation. Mark it in your cycle tracker for better future predictions.',
       confidence: progesterone.value > 10 ? 'high' : 'medium',
       priority: 1,

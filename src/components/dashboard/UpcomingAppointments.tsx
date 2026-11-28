@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { useOnceTrue } from '@/hooks/useOnceTrue';
 import { useNavigate } from 'react-router-dom';
@@ -79,7 +80,7 @@ export default function UpcomingAppointments() {
 
   const cancel = async (apt: AppointmentRow) => {
     const doctorLabel = [apt.doctor_title, apt.doctor_name].filter(Boolean).join(' ') || 'this doctor';
-    const when = format(new Date(apt.scheduled_at), 'PPP, p');
+    const when = format(new Date(apt.scheduled_at), `${DATE_FMT}, p`);
     if (!(await confirm(cancelAppointmentConfirm(doctorLabel, when)))) return;
     setBusyId(apt.id);
     try {

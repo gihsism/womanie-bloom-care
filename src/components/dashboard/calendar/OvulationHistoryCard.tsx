@@ -1,3 +1,4 @@
+import { DATE_FMT, DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useMemo } from 'react';
 import { format } from 'date-fns';
 import { Card } from '@/components/ui/card';
@@ -33,7 +34,7 @@ const OvulationHistoryCard = ({ periodStarts, signals, progesterone, model }: Ov
           <li key={c.start.toISOString()} className="py-3">
             <div className="flex items-baseline justify-between gap-3">
               <span className="font-display text-base" style={{ fontWeight: 450 }}>
-                {format(c.start, 'd MMM yyyy')}
+                {format(c.start, DATE_FMT)}
               </span>
               <span className="text-sm text-muted-foreground whitespace-nowrap">
                 <span className="font-display text-foreground" style={{ fontWeight: 450 }}>{c.length}</span> days
@@ -44,7 +45,7 @@ const OvulationHistoryCard = ({ periodStarts, signals, progesterone, model }: Ov
                 <span className="label-mono leading-5">Ovulation</span>
                 <span className="min-w-0">
                   Day <span className="font-display" style={{ fontWeight: 450 }}>{c.ovulationDay}</span>
-                  <span className="text-muted-foreground"> · {format(c.ovulation.date, 'd MMM')}</span>
+                  <span className="text-muted-foreground"> · {format(c.ovulation.date, DAY_MONTH_FMT)}</span>
                   <span className="block text-xs text-muted-foreground">{describeOvulation(c.ovulation)}</span>
                 </span>
                 <span className="label-mono leading-5">Luteal</span>

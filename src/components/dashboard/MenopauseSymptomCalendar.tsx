@@ -1,3 +1,4 @@
+import { DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { db } from '@/integrations/db/client';
@@ -175,7 +176,7 @@ export default function MenopauseSymptomCalendar({ mode }: MenopauseSymptomCalen
           <div
             key={c.date}
             className={`relative h-7 w-7 rounded-md flex items-center justify-center text-[10px] font-semibold ${bgForHotFlashes(c.hotFlashes)} ${textForHotFlashes(c.hotFlashes)}`}
-            title={`${format(parseISO(c.date), 'MMM d')}${c.hotFlashes > 0 ? ` — ${c.hotFlashes} hot flash${c.hotFlashes === 1 ? '' : 'es'}` : ''}${c.symptomCount > 0 ? ` · ${c.symptomCount} symptom${c.symptomCount === 1 ? '' : 's'}` : ''}${c.moodCount > 0 ? ` · mood logged` : ''}${c.hasNotes ? ` · note` : ''}`}
+            title={`${format(parseISO(c.date), DAY_MONTH_FMT)}${c.hotFlashes > 0 ? ` — ${c.hotFlashes} hot flash${c.hotFlashes === 1 ? '' : 'es'}` : ''}${c.symptomCount > 0 ? ` · ${c.symptomCount} symptom${c.symptomCount === 1 ? '' : 's'}` : ''}${c.moodCount > 0 ? ` · mood logged` : ''}${c.hasNotes ? ` · note` : ''}`}
           >
             {c.hotFlashes > 0 ? c.hotFlashes : ''}
             {c.hotFlashes === 0 && c.loggedAnything && (

@@ -303,7 +303,7 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
       <div className="flex items-center justify-between mb-4">
         <div>
           {!hideTitle && <h3 className="text-base font-semibold">Today's Quick Log</h3>}
-          <p className="text-xs text-muted-foreground">{format(new Date(), 'EEEE, MMMM d')}</p>
+          <p className="text-xs text-muted-foreground">{format(new Date(), 'EEEE d MMMM')}</p>
         </div>
         {saved && (
           <Badge variant="outline" className="text-primary border-primary/30 gap-1">

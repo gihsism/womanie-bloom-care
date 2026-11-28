@@ -364,7 +364,7 @@ const CycleCalendar = ({
       } else {
         next.clear();
         next.add(dateKey);
-        toast({ title: 'Ovulation marked', description: format(date, 'MMMM d') });
+        toast({ title: 'Ovulation marked', description: format(date, 'd MMMM') });
       }
       return next;
     });

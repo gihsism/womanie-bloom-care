@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -574,7 +575,7 @@ const PregnancyTracker = ({ dueDate, onSetDueDate, onResetPregnancy, onSwitchToP
             <Calendar className="h-5 w-5 text-primary" />
             <div>
               <div className="text-sm font-medium">Due date</div>
-              <div className="text-lg font-bold">{format(dueDate, 'MMMM d, yyyy')}</div>
+              <div className="text-lg font-bold">{format(dueDate, DATE_FMT)}</div>
               <div className="text-xs text-muted-foreground">
                 {daysUntilDue > 0 ? `${daysUntilDue} days to go · ${trimesterLabel.toLowerCase()} trimester` : daysUntilDue === 0 ? 'Due today' : `${Math.abs(daysUntilDue)} days past the due date`}
               </div>

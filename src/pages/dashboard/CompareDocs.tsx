@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -240,14 +241,14 @@ export default function CompareDocs() {
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1">Document A</p>
               <p className="text-sm font-semibold truncate">{docA.ai_suggested_name || docA.file_name}</p>
               {docA.uploaded_at && (
-                <p className="text-[11px] text-muted-foreground">{format(new Date(docA.uploaded_at), 'MMM d, yyyy')}</p>
+                <p className="text-[11px] text-muted-foreground">{format(new Date(docA.uploaded_at), DATE_FMT)}</p>
               )}
             </div>
             <div>
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1">Document B</p>
               <p className="text-sm font-semibold truncate">{docB.ai_suggested_name || docB.file_name}</p>
               {docB.uploaded_at && (
-                <p className="text-[11px] text-muted-foreground">{format(new Date(docB.uploaded_at), 'MMM d, yyyy')}</p>
+                <p className="text-[11px] text-muted-foreground">{format(new Date(docB.uploaded_at), DATE_FMT)}</p>
               )}
             </div>
           </div>

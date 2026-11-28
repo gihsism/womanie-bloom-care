@@ -84,7 +84,7 @@ export default function ChartAccessLog() {
                     </p>
                   </div>
                   <span className="text-[11px] text-muted-foreground whitespace-nowrap">
-                    {format(new Date(row.viewed_at), 'MMM d, p')}
+                    {format(new Date(row.viewed_at), 'd MMM, p')}
                   </span>
                 </li>
               ))}

@@ -1,3 +1,4 @@
+import { formatDate } from '@/lib/dateFormat';
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -126,7 +127,7 @@ const LabResultsView = ({
             <span className="text-muted-foreground">ref {r.reference_range}</span>
           )}
           {r.date_recorded && (
-            <span className="text-muted-foreground">{new Date(r.date_recorded).toLocaleDateString()}</span>
+            <span className="text-muted-foreground">{formatDate(r.date_recorded)}</span>
           )}
           {docNameById.has(r.document_id) && (
             <span className="text-muted-foreground truncate">· {docNameById.get(r.document_id)}</span>

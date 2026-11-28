@@ -1,3 +1,4 @@
+import { DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { format, isSameDay, startOfDay, parseISO, addDays } from 'date-fns';
 import { Droplet, Sparkles, Heart, Smile, AlertCircle, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -63,7 +64,7 @@ const DayActionSheet = ({
       <SheetContent side="bottom" className="h-auto max-h-[80vh] rounded-t-3xl">
         <SheetHeader className="pb-4">
           <SheetTitle className="text-center">
-            {format(date, 'EEEE, MMMM d')}
+            {format(date, 'EEEE d MMMM')}
             {isToday && <span className="text-primary ml-2">(Today)</span>}
           </SheetTitle>
         </SheetHeader>
@@ -94,7 +95,7 @@ const DayActionSheet = ({
                   <div className="text-left">
                     <div className="font-medium">My period started</div>
                     <div className="text-sm text-muted-foreground">
-                      {isToday ? 'Mark today as period start' : `Mark ${format(date, 'MMM d')} as start`}
+                      {isToday ? 'Mark today as period start' : `Mark ${format(date, DAY_MONTH_FMT)} as start`}
                     </div>
                   </div>
                 </div>
@@ -155,7 +156,7 @@ const DayActionSheet = ({
                         ? 'Ended today'
                         : isYesterday
                         ? 'Ended yesterday'
-                        : `Ended ${format(date, 'MMM d')}`}
+                        : `Ended ${format(date, DAY_MONTH_FMT)}`}
                     </Button>
                   </div>
                 )}

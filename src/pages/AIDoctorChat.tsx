@@ -1,3 +1,4 @@
+import { formatWeekdayDayMonth } from '@/lib/dateFormat';
 import { useConfirm } from '@/components/ConfirmDialog';
 import { deleteChatConfirm, deleteAllChatsConfirm } from '@/lib/confirmCopy';
 import { useState, useRef, useEffect } from 'react';
@@ -818,7 +819,7 @@ export default function AIDoctorChat() {
       const unschedRow = next ? rows.find(r => r.appointment_id === UNSCHEDULED_VISIT_ID) ?? null : null;
       const { list, added, carried } = addToVisitList(visitRow ? visitRow.questions : null, unschedRow?.questions ?? null, text);
       const where = next
-        ? `your visit on ${new Date(next.scheduled_at).toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' })}`
+        ? `your visit on ${formatWeekdayDayMonth(next.scheduled_at)}`
         : 'your next visit';
       if (added) {
         const { error: upErr } = await db.from('visit_questions').upsert(

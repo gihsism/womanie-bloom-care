@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar as CalendarIcon } from 'lucide-react';
@@ -80,7 +81,7 @@ const PregnancyForm = () => {
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {lastPeriodDate ? format(lastPeriodDate, 'PPP') : <span>Pick a date</span>}
+                      {lastPeriodDate ? format(lastPeriodDate, DATE_FMT) : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -107,7 +108,7 @@ const PregnancyForm = () => {
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dueDate ? format(dueDate, 'PPP') : <span>Pick a date</span>}
+                      {dueDate ? format(dueDate, DATE_FMT) : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">

@@ -1,3 +1,4 @@
+import { DATE_FMT, DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -252,7 +253,7 @@ const BBTChart = ({ lastPeriodStart }: BBTChartProps) => {
           <div className="text-[10px] text-muted-foreground">Detected ovulation</div>
           <div className="font-semibold">
             {ovulationCandidate
-              ? format(parseISO(ovulationCandidate.date), 'MMM d')
+              ? format(parseISO(ovulationCandidate.date), DAY_MONTH_FMT)
               : '—'}
           </div>
         </div>
@@ -264,7 +265,7 @@ const BBTChart = ({ lastPeriodStart }: BBTChartProps) => {
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
             <XAxis
               dataKey="day"
-              tickFormatter={(d) => format(subDays(new Date(), SCAN_DAYS - d), 'MMM d')}
+              tickFormatter={(d) => format(subDays(new Date(), SCAN_DAYS - d), DAY_MONTH_FMT)}
               tick={{ fontSize: 10 }}
               tickCount={5}
             />
@@ -276,7 +277,7 @@ const BBTChart = ({ lastPeriodStart }: BBTChartProps) => {
             />
             <Tooltip
               labelFormatter={(d) =>
-                format(subDays(new Date(), SCAN_DAYS - Number(d)), 'MMM d, yyyy')
+                format(subDays(new Date(), SCAN_DAYS - Number(d)), DATE_FMT)
               }
               formatter={(v: number) => [tooltipFormatter(v), 'BBT']}
               contentStyle={{
@@ -340,7 +341,7 @@ const BBTChart = ({ lastPeriodStart }: BBTChartProps) => {
                 ? `${coverlines.postMedian.toFixed(2)}°F`
                 : `${(((coverlines.postMedian - 32) * 5) / 9).toFixed(2)}°C`}
             </span>{' '}
-            around {format(parseISO(ovulationCandidate.date), 'MMM d')}. Ovulation typically
+            around {format(parseISO(ovulationCandidate.date), DAY_MONTH_FMT)}. Ovulation typically
             the day before the rise.
           </span>
         </div>

@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Card } from '@/components/ui/card';
@@ -29,7 +30,7 @@ export default function TtcDoctorCard() {
           <p className="text-sm font-semibold">Trying since</p>
           <p className="text-[11px] text-muted-foreground">
             {advice
-              ? `${format(parseYmd(ttcStart as string), 'd MMMM yyyy')} · ${advice.monthsTrying} ${advice.monthsTrying === 1 ? 'month' : 'months'}`
+              ? `${format(parseYmd(ttcStart as string), DATE_FMT)} · ${advice.monthsTrying} ${advice.monthsTrying === 1 ? 'month' : 'months'}`
               : 'Add the day you started trying (roughly is fine)'}
           </p>
         </div>
