@@ -23,6 +23,13 @@ describe('vercel.json security headers', () => {
     expect(header('Referrer-Policy')).toBe('strict-origin-when-cross-origin');
     expect(header('Content-Security-Policy')).toContain("frame-ancestors 'none'");
     expect(header('Content-Security-Policy')).toContain("object-src 'none'");
+    // Pages opened from Womanie (or that open it) can't reach its window.
+    expect(header('Cross-Origin-Opener-Policy')).toBe('same-origin');
+  });
+
+  it('API responses (health documents included) may only be loaded by Womanie itself', () => {
+    const api = vercel.headers.find(h => h.source === '/api/(.*)');
+    expect(api?.headers.find(h => h.key === 'Cross-Origin-Resource-Policy')?.value).toBe('same-origin');
   });
 
   it("allows index.html's inline scripts by hash (and nothing inline otherwise)", () => {
