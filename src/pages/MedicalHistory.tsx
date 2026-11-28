@@ -854,7 +854,6 @@ export default function MedicalHistory() {
     });
 
     // Health score
-    const overallHealthScore = labResults.length > 0 ? Math.round((normalLabs / labResults.length) * 100) : null;
 
     // Checkup timing
     const sortedDates = documents.filter(d => d.uploaded_at).map(d => new Date(d.uploaded_at!)).sort((a, b) => a.getTime() - b.getTime());
@@ -873,7 +872,6 @@ export default function MedicalHistory() {
       activeConditions, activeMedications,
       labsByPanel: sortedPanels,
       labTrendData, repeatedTests, predictions,
-      overallHealthScore,
       avgDaysBetweenDocs, nextCheckupEstimate, daysSinceLastDoc,
     };
   }, [medicalData, documents]);

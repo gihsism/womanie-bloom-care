@@ -3,17 +3,11 @@ import { withinWindow } from '@/lib/labWindow';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { onHealthDataChange } from '@/lib/data-events';
-import { currentFlagged, labFlag, latestPerTest } from '@/lib/labFlags';
-import {
-  HeartPulse,
-  ArrowRight,
-  AlertTriangle,
-  CheckCircle2,
-} from 'lucide-react';
+import { summarizeResults, summaryHeadline, summaryChanges } from '@/lib/resultsSummary';
+import { HeartPulse, ArrowRight } from 'lucide-react';
 
 interface ExtractedItem {
   title: string;
@@ -55,17 +49,19 @@ export default function HealthSummaryWidget({ since = null, showViewAll = true }
   // upload card further down already ask for the first document.
   if (docCount === 0) return null;
 
-  // One line per test: its latest reading (shared rule, labFlags), so a
-  // high result re-tested normal counts as healthy, not "to discuss".
-  const labs = latestPerTest(data.filter(d => d.data_type === 'lab_result'));
-  const normalCount = labs.filter(d => d.status === 'normal' || d.status === 'expected').length;
-  const abnormalCount = labs.filter(d => labFlag(d.status) === 'outside').length;
-  const criticalCount = labs.filter(d => labFlag(d.status) === 'urgent').length;
-  const healthScore = labs.length > 0 ? Math.round((normalCount / labs.length) * 100) : null;
+  // Facts only, no score (resultsSummary): how many latest results the lab
+  // marked outside its range, and how many crossed it since the test
+  // before. The list itself is "Talk to your doctor about" on this page,
+  // so the card links there instead of repeating it.
+  const labRows = data.filter(d => d.data_type === 'lab_result');
+  const summary = summarizeResults(labRows);
+  const changes = summaryChanges(summary);
   const conditions = data.filter(d => d.data_type === 'condition' && d.status === 'active');
-
-  // Top 3 flagged items
-  const flagged = currentFlagged(labs).slice(0, 3);
+  const goTo = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    else navigate(`/dashboard/medical-history#${id}`);
+  };
 
   return (
     <Card className="p-4 mb-6">
@@ -82,53 +78,17 @@ export default function HealthSummaryWidget({ since = null, showViewAll = true }
       </div>
 
       <div className="space-y-3">
-        {/* Score + stats row */}
-        <div className="flex items-center gap-4">
-          {healthScore !== null && (
-            <div className="flex-shrink-0 text-center">
-              <p className={`font-display text-2xl font-medium ${
-                healthScore >= 80 ? 'text-muted-foreground' : healthScore >= 50 ? 'text-destructive' : 'text-destructive'
-              }`}>{healthScore}%</p>
-              <p className="text-[9px] text-muted-foreground">wellness</p>
-            </div>
-          )}
-          <div className="flex-1 space-y-1.5">
-            {healthScore !== null && <Progress value={healthScore} aria-label="Wellness score" className="h-1.5 bg-muted" indicatorClassName={healthScore >= 80 ? "bg-foreground/35" : healthScore >= 50 ? "bg-destructive/70" : "bg-destructive"} />}
-            <div className="flex gap-3 text-[10px]">
-              <span className="flex items-center gap-1 text-muted-foreground">
-                <CheckCircle2 className="h-3 w-3" /> {normalCount} healthy
-              </span>
-              {abnormalCount > 0 && (
-                <span className="flex items-center gap-1 text-destructive">
-                  <AlertTriangle className="h-3 w-3" /> {abnormalCount} to discuss
-                </span>
-              )}
-              {criticalCount > 0 && (
-                <span className="flex items-center gap-1 text-destructive">
-                  <AlertTriangle className="h-3 w-3" /> {criticalCount} urgent
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Flagged items preview */}
-        {flagged.length > 0 && (
-          <div className="space-y-1.5">
-            {flagged.map((item, i) => (
-              <div key={i} className={`flex items-center gap-2 text-xs px-2.5 py-1.5 rounded-lg ${
-                item.status === 'critical'
-                  ? 'bg-destructive/10 text-destructive'
-                  : 'bg-destructive/5 text-destructive'
-              }`}>
-                <span aria-hidden="true" className={`inline-block h-2 w-2 rounded-full flex-shrink-0 ${item.status === 'critical' ? 'bg-destructive' : 'bg-destructive/60'}`} />
-                <span className="font-medium">{item.title}</span>
-                {item.value && (
-                  <span className="font-mono ml-auto">{item.value}{item.unit ? ` ${item.unit}` : ''}</span>
-                )}
-              </div>
-            ))}
-          </div>
+        {/* Plain summary, linking to the list */}
+        {summary.total > 0 && (
+          <button
+            type="button"
+            onClick={() => goTo(summary.outside > 0 ? 'attention' : 'results')}
+            className="w-full text-left text-sm hover:underline underline-offset-2"
+            data-testid="results-summary"
+          >
+            <span className={summary.outside > 0 ? 'text-destructive' : 'text-muted-foreground'}>{summaryHeadline(summary)}</span>
+            {changes && <span className="text-muted-foreground"> · {changes}</span>}
+          </button>
         )}
 
         {/* Conditions */}
@@ -144,7 +104,7 @@ export default function HealthSummaryWidget({ since = null, showViewAll = true }
 
         {/* Documents count */}
         <p className="text-[10px] text-muted-foreground">
-          Based on {docCount} document{docCount !== 1 ? 's' : ''} • {labs.length} test result{labs.length !== 1 ? 's' : ''}
+          Based on {docCount} document{docCount !== 1 ? 's' : ''} • {summary.total} test result{summary.total !== 1 ? 's' : ''}
         </p>
       </div>
     </Card>
