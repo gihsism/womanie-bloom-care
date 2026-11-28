@@ -991,6 +991,112 @@ fainting or sad before her period, first gynaecology visit, sore
 breasts before a period, swollen feet late in pregnancy, travel or
 bleeding after embryo transfer.
 
+## Round 12 (2026-11-28)
+
+### Swiss gaps: official sources added (all free)
+
+Seven hand-written items in our own words (`scripts/research/swiss-sources.mjs`),
+read in full on 2026-11-28. Federal laws were read in the consolidated
+version in force that day (fedlex filestore HTML, found through the
+fedlex SPARQL endpoint, since the fedlex page itself needs JavaScript).
+
+| Question | Source | What the item says |
+|---|---|---|
+| Krankenkasse and fertility tests / IVF | BAG fact sheet on the FMedG (30 Jan 2025) | covered: tests for both partners, hormone stimulation (as a rule 12 cycles or one year), IUI; not covered: IVF, embryo testing (PGT) and the tests and hormones for them |
+| Egg freezing, storage, egg donation | FMedG (SR 810.11, version of 1 Aug 2025) Art. 3, 4, 15, 16 | own eggs: written consent, 5 years plus up to 5 on request; longer when freezing before a treatment or job that can cause infertility; embryos 5 plus 5; egg donation, embryo donation and surrogacy banned; revision with egg donation planned, consultation in Q2 2027 (BAG page on the revision) |
+| Contraception costs (pill, IUD) | Federal Council answer to motion 19.3660 (2019, Curia Vista) | basic insurance does not pay: not treatment of illness, prevention or maternity care; motion closed in 2021 without being adopted. New publisher "Swiss Parliament" (summary-only, official text not protected by copyright) |
+| Krankenkasse and HRT | KVG (SR 832.10, version of 1 Jul 2026) Art. 25, 52, 64 | medicines prescribed by a doctor and on the Spezialitätenliste are paid; the law names no product, so a given HRT product depends on the list; deductible plus 10%; no cost-sharing for maternity care or from week 13 to 8 weeks after birth |
+| When maternity leave starts | EOG (SR 834.1, version of 1 Jun 2026) Art. 16b to 16h, 16i ff. | starts on the day of birth, 98 days (14 weeks), 80% of earnings up to 220 francs a day, conditions (9 months AHV, 5 months work), hospital extension up to 56 days, other parent 14 days within 6 months |
+| Work in pregnancy and after birth | ArG (SR 822.11) Art. 35 to 35b | no work in the 8 weeks after birth, then to week 16 only with consent; no night work from 8 weeks before birth; time to breastfeed; 80% of wage when hard work is forbidden and no equal work is offered |
+
+`toItem` now takes a per-item `publicationType` and `attribution`, so the
+law items no longer show the fedlex default "ordinance (KLV)". The round-11
+BLV cheese keywords had been added to `library.json` only; they are now in
+the script, so a re-run keeps them.
+
+### Topics that had nothing: sources added
+
+| Topic | Items |
+|---|---|
+| Toxic shock syndrome / tampons | NHS "Toxic shock syndrome" (hand-written, OGL; reviewed June 2023), `pmid-32461307` (device-associated menstrual TSS review, 2020), `pmid-31324419` (menstrual cup systematic review, Lancet Public Health 2019) |
+| Breech presentation | `pmid-25828903` (Cochrane, external cephalic version at term) |
+| Home birth | `pmid-36884026` (Cochrane 2023, one tiny trial, very low certainty), `pmid-31709403` (meta-analysis of about 500,000 planned home births), `pmid-28333817` (ACOG CO 697 summary) |
+| Night cramps | `pmid-32956536` (Cochrane, magnesium for muscle cramps; probably no help for night cramps in older adults), `pmid-33275278` (Cochrane, leg cramps in pregnancy), `pmid-34247796` (meta-analysis, magnesium in pregnancy) |
+| Pill and libido | `pmid-31521571` (ESSM position statements 2019), `pmid-38515302` (combined pill and sexuality review 2024) |
+| Fertility apps | `pmid-41849976` (systematic review 2026, apps as contraception), `pmid-38106802` (scoping review 2023, apps to avoid or plan pregnancy) |
+
+Summaries written from the PubMed abstracts in our own words; certainty
+"not stated" where the abstract grades nothing; narrative and scoping
+reviews labelled "study". 20 new items, embedded offline with the
+incremental script.
+
+### Ranking
+
+New `SUBJECT_MISMATCH` rules (x0.6) keep the law items off health
+questions: the KVG, Federal Council and BAG fact-sheet items step back
+without an insurance or cost word; the KVG item also without a medicine
+word (otherwise it led "Does the Krankenkasse pay the yearly gynaecology
+check-up?"); the FMedG item without a legal, storage or donation word
+("How does age affect egg freezing success?"); the EOG and ArG items
+without a leave or work word. Generic insurance keywords were left off the
+new items for the same reason.
+
+First source now (bundled model): fertility tests and IVF -> BAG fact
+sheet; copper IUD -> Federal Council answer; HRT -> KVG; egg freezing and
+egg donation -> FMedG; maternity leave -> EOG; TSS and teen tampon -> NHS;
+breech -> Cochrane ECV; home birth -> Cochrane; magnesium for night cramps
+-> Cochrane magnesium; pill and libido -> ESSM; **"Are fertility apps
+reliable?" -> the 2023 app scoping review** (the antioxidant reviews no
+longer lead; two filler reviews stay behind it).
+
+Before / after: on the 138 round-6 questions 7 changed, all on topic (FIGO
+now first for "Is a 35 day cycle normal?", the cup review and NHS TSS for
+cups and teen tampons, the app reviews join period-tracking apps, ESSM as
+a filler for libido and future-fertility questions). On the 167 round-11
+questions 19 changed: the 15 targets above, plus fillers. Search evals
+unchanged (0.94 / 1.00). Tests: `ask-ai-audit.test.ts` (round 12 blocks:
+data, keyword retrieval, bundled model, and the questions the rules must
+leave alone).
+
+### Summary content check, next 120 exposed items
+
+The next 120 PubMed items of the round-11 exposure ranking (one skipped,
+no abstract: `pmid-31940155`). 82 fair. 50 fixes in 38 items, text only
+(33 re-embedded offline; label-only changes need no re-embed):
+
+- Certainty -> "not stated" where the abstract grades nothing:
+  `pmid-38350640`, `pmid-34036861`, `pmid-39936607`, `pmid-39611763`,
+  `pmid-27008889`, `pmid-31841131`.
+- Facts corrected: `pmid-27039249` (repeat scan "at least 7 or 14 days"
+  later, not "7 to 14"), `pmid-42200680` (the 3-year interval is for the
+  stool DNA / RNA tests; stool blood tests are yearly), `pmid-36318133`
+  (the depression-history check applied to the depression results only),
+  `pmid-35182080` (testing is narrowed because of resistance, not because
+  infections are silent), `pmid-41885132` (narrative synthesis, not pooled).
+- Hedges restored to the GRADE level: `pmid-42227307`, `pmid-38830233`
+  (2), `pmid-40489856` (3), `pmid-38167523` (2), `pmid-39479986`,
+  `pmid-32609376` (2), `pmid-30337344` (4), `pmid-27696372`.
+- Causal wording on observational data: `pmid-33309062`, `pmid-39611763`
+  (2), `pmid-34758846`.
+- Advice in the app's voice now credited: `pmid-38061151`,
+  `pmid-30105360`, `pmid-38597099`, `pmid-41271375`, `pmid-27457513`,
+  `pmid-38432215`, `pmid-42547374` (2), `pmid-36600467`, `pmid-33970989`,
+  `pmid-36972750`, `pmid-40854469`, `pmid-40445098`, `pmid-29190037`,
+  `pmid-33613678`, `pmid-40728304`, `pmid-39029545`, `pmid-42200680`,
+  `pmid-39821528`.
+
+Left as is: 19 judgement calls (labels picked from a graded range,
+harmless simplifications), e.g. `pmid-39075435`, `pmid-27030386`,
+`pmid-36053030`, `pmid-42640814`, `pmid-27696372` (label). **114 exposed
+PubMed items stay unchecked** for round 13 (the 12 hand-written ones in the
+list were checked in rounds 3-5).
+
+Still without a fitting free item: ovulation pain, lubricants and sperm,
+high prolactin, the pill and cervical cancer, hair dye in pregnancy, and
+the weak first sources listed in round 11 (teen breast growth, fainting
+before a period, first gynaecology visit, swollen feet, travel or bleeding
+after embryo transfer).
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed

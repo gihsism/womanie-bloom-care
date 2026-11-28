@@ -384,6 +384,42 @@ const SUBJECT_MISMATCH: { ask: RegExp; unless: RegExp; title: RegExp; keep: RegE
     title: /\b(cancer|carcinoma|tumou?rs?)\b/i,
     keep: /\b(breastfe\w*|lactat\w*)\b/i,
   },
+  // Round 12: the Swiss law items answer legal, insurance and work
+  // questions. Asked about health or chances with none of their words
+  // ("How does age affect egg freezing success?" got the FMedG storage
+  // item first, "Can I exercise during IVF stimulation?" the BAG fact
+  // sheet, "Does the Pille danach need a prescription?" the answer on
+  // contraception costs), they step back.
+  // What insurance pays (KVG, the Federal Council answer, the BAG fact sheet).
+  {
+    ask: /\w/,
+    unless: /\b(insur\w*|krankenkasse|kasse|pay|pays|paid|cover(ed|s)?|costs?|price\w*|free|deductible|franchise|selbstbehalt)\b/i,
+    title: /\bKVG\b|\bmotion \d|\bfact sheet on reproductive medicine\b/,
+    keep: /(?!)/,
+  },
+  // The KVG item is about medicines and cost-sharing: an insurance question
+  // about something else ("Does the Krankenkasse pay the yearly gynaecology
+  // check-up?") keeps the item that names that service first.
+  {
+    ask: /\w/,
+    unless: /\b(hrt|hormon\w*|medicin\w*|medications?|drugs?|prescri\w*|pills?|tablets?|deductible|franchise|selbstbehalt|cost-?sharing)\b/i,
+    title: /\bKVG\b/,
+    keep: /(?!)/,
+  },
+  // What the law allows (FMedG).
+  {
+    ask: /\w/,
+    unless: /\b(legal|illegal|laws?|allowed|banned?|permitted|rules?|stor(e|ed|age)|how long|donat\w*|donors?|surrogac\w*)\b/i,
+    title: /\bFMedG\b/,
+    keep: /(?!)/,
+  },
+  // Leave and work (EOG, ArG).
+  {
+    ask: /\w/,
+    unless: /\b(leave|working|employ\w*|jobs?|(at|to) work|night shifts?|allowance|paternity|partner|mutterschutz\w*|mutterschaft\w*|rights?)\b/i,
+    title: /\b(EOG|ArG)\b/,
+    keep: /(?!)/,
+  },
 ];
 
 function subjectMismatchFactor(query: string, title: string): number {

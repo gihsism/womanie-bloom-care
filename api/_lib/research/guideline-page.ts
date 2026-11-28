@@ -855,6 +855,27 @@ PUBLISHERS.push(
   },
 );
 
+/**
+ * Round 12 (2026-11-28): Federal Council answers to parliamentary motions
+ * (Curia Vista), for official positions no ordinance states, e.g. that
+ * basic insurance does not pay for contraception. Hand-written summaries
+ * with a link; official texts are not protected by copyright (URG Art. 5).
+ */
+PUBLISHERS.push({
+  publisher: 'Swiss Parliament',
+  hosts: ['www.parlament.ch'],
+  ingest: 'summary-only',
+  licence: {
+    name: 'Official parliamentary documents (not protected by copyright, URG Art. 5)',
+    url: null,
+    termsUrl: 'https://www.parlament.ch/de/services/rechtliche-hinweise',
+    notes: SWISS_SUMMARY_ONLY,
+  },
+  evidenceLevel: 'guideline',
+  publicationType: 'Federal Council answer to a parliamentary motion',
+  attribution: 'Source: Swiss Federal Council answer in the parliamentary database Curia Vista, parlament.ch.',
+});
+
 export const HAND_WRITTEN_SUMMARISER = 'hand-written';
 
 export function publisherFor(url: string): PublisherPolicy | null {

@@ -432,3 +432,125 @@ describe.skipIf(!hasModel)('Research round 11: sources the chat sends (bundled m
     expect((await sources('Does the Krankenkasse pay for a midwife (Hebamme) after birth?', 'postpartum'))[0]).toBe(BAG_MATERNITY);
   }, 60_000);
 });
+
+// Round 12 (docs/research-gaps.md): the Swiss gaps of round 11 get official
+// sources (BAG fact sheet on fertility-treatment cover, FMedG, the Federal
+// Council answer on contraception costs, KVG, EOG, ArG), topics that had
+// nothing get PubMed / NHS items (toxic shock syndrome, breech, home birth,
+// night cramps, the pill and libido, fertility apps), and four
+// SUBJECT_MISMATCH rules keep the law items off health questions.
+const BAG_FERTILITY_COVER = 'gp-bag-faktenblatt-20fortpflanzungsmedizingeset-71d92f';
+const FMEDG = 'gp-fedlex-de-acd179';
+const FC_CONTRACEPTION = 'gp-swiss-geschaeft-4394ba';
+const KVG_MEDICINES = 'gp-fedlex-de-650685';
+const EOG_MATERNITY = 'gp-fedlex-de-011006';
+const ARG_WORK = 'gp-fedlex-de-e2cb60';
+const NHS_TSS = 'gp-nhs-toxic-shock-syndrome-bbfbe9';
+const TSS_REVIEW = 'pmid-32461307';
+const CUP_REVIEW = 'pmid-31324419';
+const ECV = 'pmid-25828903';
+const HOME_BIRTH = ['pmid-36884026', 'pmid-31709403', 'pmid-28333817'];
+const CRAMPS = ['pmid-32956536', 'pmid-34247796', 'pmid-33275278'];
+const LIBIDO = ['pmid-31521571', 'pmid-38515302'];
+const APPS = ['pmid-38106802', 'pmid-41849976'];
+
+describe('Research round 12: library data', () => {
+  const lib = getLibrary();
+  const byId = new Map(lib.items.map((i) => [i.id, i]));
+  const text = (id: string) => [byId.get(id)!.summary, ...byId.get(id)!.keyPoints].join(' ');
+
+  it('the Swiss items state the rules they were added for', () => {
+    expect(text(BAG_FERTILITY_COVER)).toMatch(/12 cycles or one year/);
+    expect(text(BAG_FERTILITY_COVER)).toMatch(/Not covered: IVF/);
+    expect(text(FMEDG)).toMatch(/up to 5 years, extended on request by up to 5 more \(10 years in total\)/);
+    expect(text(FMEDG)).toMatch(/Egg donation, embryo donation and surrogacy are banned/);
+    expect(text(FC_CONTRACEPTION)).toMatch(/does not pay for contraceptive pills or IUDs/);
+    expect(text(KVG_MEDICINES)).toMatch(/whether a given product is paid depends on whether it is on the list/);
+    expect(text(EOG_MATERNITY)).toMatch(/starts on the day of the birth/);
+    expect(text(EOG_MATERNITY)).toMatch(/98 days in a row \(14 weeks\), at 80% of average earnings, up to 220 francs/);
+    expect(text(ARG_WORK)).toMatch(/No work in the 8 weeks after the birth/);
+  });
+
+  it('the law items carry their own law name and the parliament source its publisher', () => {
+    expect(byId.get(FMEDG)!.publicationTypes).toEqual(['Swiss federal law (FMedG)']);
+    expect(byId.get(FC_CONTRACEPTION)!.source).toBe('Swiss Parliament');
+    for (const id of [BAG_FERTILITY_COVER, FMEDG, FC_CONTRACEPTION, KVG_MEDICINES, EOG_MATERNITY, ARG_WORK]) expect(byId.get(id)!.tags).toContain('switzerland');
+    expect(byId.get(NHS_TSS)!.tags).not.toContain('switzerland');
+  });
+
+  it('the new PubMed items are in, hedged to their grading', () => {
+    expect(byId.get(ECV)!.certainty).toBe('very low');
+    expect(text(ECV)).toMatch(/very low-certainty evidence/);
+    expect(text('pmid-32956536')).toMatch(/probably makes little or no difference/);
+    for (const id of [TSS_REVIEW, CUP_REVIEW, ...HOME_BIRTH, ...CRAMPS, ...LIBIDO, ...APPS]) expect(byId.has(id)).toBe(true);
+  });
+});
+
+describe('Research round 12: keyword retrieval and ranking rules', () => {
+  const first = (q: string, stage: string | null) => selectChatSources(q, stage)[0]?.id;
+  const ids = (q: string, stage: string | null) => selectChatSources(q, stage).map((i) => i.id);
+
+  it.each([
+    ['Does the Krankenkasse pay fertility tests in Switzerland?', 'conception', BAG_FERTILITY_COVER],
+    ['Does the Krankenkasse pay for IVF in Switzerland?', 'ivf', BAG_FERTILITY_COVER],
+    ['Is the copper IUD paid by the Krankenkasse?', 'contraception', FC_CONTRACEPTION],
+    ['Does the Krankenkasse pay for HRT?', 'menopause', KVG_MEDICINES],
+    ['Is egg freezing legal in Switzerland and how long can eggs be stored?', 'ivf', FMEDG],
+    ['Is egg donation allowed in Switzerland?', 'ivf', FMEDG],
+    ['When does maternity leave start in Switzerland?', 'pregnancy', EOG_MATERNITY],
+    ['Can I work night shifts while pregnant?', 'pregnancy', ARG_WORK],
+    ['Is it safe for teenagers to sleep with a tampon?', 'pre-menstrual', NHS_TSS],
+    ['Breech baby at 34 weeks, what are my options?', 'pregnancy', ECV],
+    ['Are fertility apps reliable for avoiding or getting pregnant?', 'conception', 'pmid-38106802'],
+  ] as const)('%s -> first source %s', (q, stage, id) => {
+    expect(first(q, stage)).toBe(id);
+  });
+
+  it('topics that had nothing get an on-topic first source', () => {
+    expect([NHS_TSS, TSS_REVIEW]).toContain(first('Toxic shock syndrome from tampons, how rare is it?', 'menstrual-cycle'));
+    expect(HOME_BIRTH).toContain(first('Is a home birth safe?', 'pregnancy'));
+    expect(CRAMPS).toContain(first('Should I take magnesium for cramps at night?', null));
+    expect(LIBIDO).toContain(first('Does the pill cause low libido?', 'contraception'));
+  });
+
+  it('the law items step back from health questions without a legal, insurance or work word', () => {
+    expect(first('How does age affect egg freezing success?', 'ivf')).not.toBe(FMEDG);
+    expect(ids('Can I exercise during IVF stimulation?', 'ivf')).not.toContain(BAG_FERTILITY_COVER);
+    expect(first('Does the Pille danach (morning after pill) need a prescription in Switzerland?', 'contraception')).not.toBe(FC_CONTRACEPTION);
+    expect(ids('How long can I stay on HRT?', 'menopause')).not.toContain(KVG_MEDICINES);
+    expect(ids('How many ultrasounds are covered in pregnancy in Switzerland?', 'pregnancy')).not.toContain(EOG_MATERNITY);
+  });
+});
+
+describe.skipIf(!hasModel)('Research round 12: sources the chat sends (bundled model)', () => {
+  const sources = async (q: string, stage: string | null) =>
+    (await selectChatSourcesHybrid(q, stage, { timeoutMs: 20_000 })).map((i) => i.id);
+
+  it.each([
+    ['Does the Krankenkasse pay fertility tests in Switzerland?', 'conception', BAG_FERTILITY_COVER],
+    ['Does the Krankenkasse pay for IVF in Switzerland?', 'ivf', BAG_FERTILITY_COVER],
+    ['Is the copper IUD paid by the Krankenkasse?', 'contraception', FC_CONTRACEPTION],
+    ['Does the Krankenkasse pay for HRT?', 'menopause', KVG_MEDICINES],
+    ['Is egg freezing legal in Switzerland and how long can eggs be stored?', 'ivf', FMEDG],
+    ['Is egg donation allowed in Switzerland?', 'ivf', FMEDG],
+    ['When does maternity leave start in Switzerland?', 'pregnancy', EOG_MATERNITY],
+    ['Toxic shock syndrome from tampons, how rare is it?', 'menstrual-cycle', NHS_TSS],
+    ['Is it safe for teenagers to sleep with a tampon?', 'pre-menstrual', NHS_TSS],
+    ['Breech baby at 34 weeks, what are my options?', 'pregnancy', ECV],
+    ['Is a home birth safe?', 'pregnancy', 'pmid-36884026'],
+    ['Should I take magnesium for cramps at night?', null, 'pmid-32956536'],
+    ['Does the pill cause low libido?', 'contraception', 'pmid-31521571'],
+    ['Are fertility apps reliable for avoiding or getting pregnant?', 'conception', 'pmid-38106802'],
+  ] as const)('%s -> first source %s', async (q, stage, id) => {
+    expect((await sources(q, stage))[0]).toBe(id);
+  }, 30_000);
+
+  it('the law items stay off the health questions and the check-up question keeps its source', async () => {
+    expect((await sources('How does age affect egg freezing success?', 'ivf'))[0]).not.toBe(FMEDG);
+    expect(await sources('Can I exercise during IVF stimulation?', 'ivf')).not.toContain(BAG_FERTILITY_COVER);
+    expect(await sources('Do ovulation tests work?', 'conception')).not.toContain(BAG_FERTILITY_COVER);
+    expect((await sources('Does the Pille danach (morning after pill) need a prescription in Switzerland?', 'contraception'))[0]).not.toBe(FC_CONTRACEPTION);
+    expect((await sources('Does the Krankenkasse pay the yearly gynaecology check-up?', null))[0]).toBe(FEDLEX_SCREENING);
+    expect(await sources('Are fertility apps reliable for avoiding or getting pregnant?', 'conception')).not.toContain('pmid-33890288');
+  }, 90_000);
+});

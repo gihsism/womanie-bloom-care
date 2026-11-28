@@ -130,7 +130,9 @@ export const SWISS_SOURCES = [
     lifeStages: ['conception', 'pregnancy', 'postpartum'],
     topics: ['pregnancy-nutrition', 'folic-acid', 'iodine-supplements-pregnancy', 'vitamin-d-pregnancy'],
     tags: ['switzerland', 'nutrition', 'folic acid', 'iodine', 'vitamin d', 'breastfeeding'],
-    keywords: ['switzerland', 'swiss', 'folic acid', 'folsäure', 'iodine', 'iodised salt', 'vitamin d', 'iron', 'supplement', 'diet', 'nutrition', 'breastfeeding', 'pregnancy', 'trying to conceive', 'before pregnancy', 'folic acid before pregnancy', 'caffeine', 'coffee', 'alcohol', 'tuna', 'mercury', 'fish', 'weight gain', 'calories', 'exercise'],
+    keywords: ['switzerland', 'swiss', 'folic acid', 'folsäure', 'iodine', 'iodised salt', 'vitamin d', 'iron', 'supplement', 'diet', 'nutrition', 'breastfeeding', 'pregnancy', 'trying to conceive', 'before pregnancy', 'folic acid before pregnancy', 'caffeine', 'coffee', 'alcohol', 'tuna', 'mercury', 'fish', 'weight gain', 'calories', 'exercise',
+      // Round 11 keywords (added to library.json then; carried here in round 12 so a re-run keeps them).
+      'cheese', 'soft cheese', 'raw milk cheese', 'rohmilchkäse', 'listeria'],
   },
   {
     url: 'https://www.blv.admin.ch/de/naehrstoffzufuhr',
@@ -322,6 +324,133 @@ export const SWISS_SOURCES = [
     tags: ['switzerland', 'ivf statistics', 'national register', 'birth rate', 'bfs'],
     keywords: ['switzerland', 'swiss', 'schweiz', 'ivf in switzerland', 'ivf success', 'success rate', 'chance of success', 'birth rate', 'live birth', 'per embryo', 'statistics', 'how many women', 'bfs', 'federal statistical office', 'icsi', 'twins'],
   },
+  // Round 12 (2026-11-28): Swiss gaps from the round-11 audit. Federal laws
+  // were read in the consolidated version in force on the fetch date (the
+  // fedlex filestore HTML, found through the fedlex SPARQL endpoint); the
+  // BAG fact sheet and the Federal Council answer were read in full.
+  {
+    url: 'https://www.bag.admin.ch/dam/de/sd-web/Md2u17tGY9oX/Faktenblatt%20Fortpflanzungsmedizingesetz_aktualisiert.pdf',
+    title: 'Fertility tests, hormone stimulation, insemination and IVF: what Swiss basic insurance pays (BAG fact sheet on reproductive medicine, January 2025)',
+    year: 2025,
+    fetchedAt: '2026-11-28T12:00:00.000Z',
+    summary:
+      'A fact sheet from the Swiss Federal Office of Public Health (BAG) explains what Swiss basic health insurance (the compulsory Krankenkasse cover) pays for when a couple cannot get pregnant. It pays for the tests to find the cause of infertility, for both the woman and the man. It pays for hormone treatment to stimulate the ovaries, as a rule for 12 cycles or for one year, and for insemination of sperm into the womb (IUI). It does not pay for IVF, for genetic testing of embryos (PGT), or for the tests and treatments needed for them, such as lab tests and hormones. The BAG adds that if egg donation is allowed in future, basic insurance would not automatically pay for it.',
+    keyPoints: [
+      'Covered: tests to find the cause of infertility, for the woman and the man.',
+      'Covered: hormone stimulation of the ovaries, as a rule 12 cycles or one year of treatment.',
+      'Covered: insemination into the womb (IUI).',
+      'Not covered: IVF and genetic testing of embryos (PGT), nor the lab tests and hormones needed for them.',
+      'For a treatment to be paid, the law requires a condition that needs treatment, and the treatment must be effective, appropriate and cost-effective.',
+      'About 6,000 to 7,000 couples a year in Switzerland use fertility treatment; the BAG gives an average of 46 in 100 women pregnant and 35 in 100 giving birth after IVF.',
+    ],
+    lifeStages: ['conception', 'ivf'],
+    topics: ['infertility-evaluation', 'iui', 'ivf-outcomes'],
+    tags: ['switzerland', 'health insurance', 'fertility tests', 'ivf costs', 'iui', 'ovarian stimulation'],
+    keywords: ['switzerland', 'swiss', 'krankenkasse', 'fertility tests', 'fertility test', 'infertility tests', 'ivf cost', 'pay for ivf', 'iui', 'insemination', 'hormone stimulation', 'ovarian stimulation', 'pgt'],
+  },
+  {
+    url: 'https://www.fedlex.admin.ch/eli/cc/2000/554/de',
+    title: 'Egg freezing, storage limits and the egg-donation ban in Switzerland (Reproductive Medicine Act FMedG, version of 1 August 2025)',
+    year: 2025,
+    fetchedAt: '2026-11-28T12:00:00.000Z',
+    publicationType: 'Swiss federal law (FMedG)',
+    attribution: 'Source: Swiss Federal Act on Medically Assisted Reproduction (FMedG, SR 810.11), fedlex.admin.ch.',
+    summary:
+      'The Swiss Reproductive Medicine Act (FMedG) allows anyone to have their own eggs or sperm frozen, but only with written consent and for at most five years; on request the storage is extended by at most five more years, so ten years in total. A longer period can be agreed when the eggs or sperm are frozen because a medical treatment or a job could make the person infertile (for example before chemotherapy). Frozen embryos and fertilised eggs follow the same five-plus-five-year limit, with the consent of both partners. Consent can be withdrawn in writing at any time; at the end of the storage time the cells are destroyed. Egg donation, embryo donation and surrogacy are not allowed in Switzerland; donated sperm may be used only by married couples. Eggs or sperm may not be used after the death of the person they come from. A revision of the law that would allow egg donation is being drafted; the BAG plans to open the consultation in the second quarter of 2027, so the ban still applies.',
+    keyPoints: [
+      'Own eggs or sperm can be frozen with written consent: up to 5 years, extended on request by up to 5 more (10 years in total).',
+      'Longer storage can be agreed when freezing because a medical treatment or a job could cause infertility.',
+      'Frozen embryos and fertilised eggs: also 5 years plus up to 5 more, with both partners\' written consent.',
+      'Consent can be withdrawn in writing at any time; at the end of storage the cells are destroyed.',
+      'Egg donation, embryo donation and surrogacy are banned (FMedG Art. 4); donated sperm only for married couples.',
+      'A law change to allow egg donation is being prepared (consultation planned for the second quarter of 2027); until it passes, the ban stays.',
+    ],
+    lifeStages: ['ivf', 'conception'],
+    topics: ['egg-freezing'],
+    tags: ['switzerland', 'egg freezing', 'egg donation', 'storage limit', 'fmedg', 'surrogacy'],
+    keywords: ['switzerland', 'swiss', 'egg freezing', 'freeze eggs', 'freezing eggs', 'social egg freezing', 'how long can eggs be stored', 'stored', 'storage', 'storage limit', 'ten years', '10 years', 'egg donation', 'donor eggs', 'egg donor', 'eizellenspende', 'legal', 'allowed', 'banned', 'surrogacy', 'embryo donation', 'frozen embryos', 'fmedg'],
+  },
+  {
+    url: 'https://www.parlament.ch/de/ratsbetrieb/suche-curia-vista/geschaeft?AffairId=20193660',
+    title: 'Contraception is not paid by Swiss basic insurance: the pill, the IUD and other methods (Federal Council answer to motion 19.3660, 2019)',
+    year: 2019,
+    fetchedAt: '2026-11-28T12:00:00.000Z',
+    summary:
+      'A 2019 parliamentary motion asked for prescribed contraceptives to be added to what Swiss basic health insurance pays for. In its answer the Federal Council explained why basic insurance does not pay for them: it covers the diagnosis and treatment of illness, some preventive care and maternity care, and in its view contraceptive pills and IUDs (coils) are none of these. It said avoiding an unwanted pregnancy is the insured person\'s own responsibility, that help for people with little money is a matter for the cantons and communes, and it asked parliament to reject the motion; the motion was closed in 2021 without being adopted. The answer also notes that about 80% of sexually active people aged 15 to 49 in Switzerland use contraception, most often condoms or hormonal methods, and that condoms also protect against sexually transmitted infections.',
+    keyPoints: [
+      'Swiss basic insurance does not pay for contraceptive pills or IUDs (coils): the Federal Council does not count them as treatment of illness, prevention or maternity care.',
+      'The Federal Council sees avoiding an unwanted pregnancy as the person\'s own responsibility; support for people on low incomes is left to cantons and communes.',
+      'The 2019 motion to add contraceptives to basic insurance was closed in 2021 without being adopted.',
+      'About 80% of sexually active people aged 15 to 49 in Switzerland use contraception, most often condoms or hormonal methods.',
+    ],
+    lifeStages: ['contraception'],
+    topics: ['contraception-effectiveness', 'combined-pill', 'iud-implant'],
+    tags: ['switzerland', 'health insurance', 'contraception costs', 'pill', 'iud'],
+    keywords: ['switzerland', 'swiss', 'krankenkasse', 'contraception cost', 'pill cost', 'iud', 'copper iud', 'coil', 'hormonal iud', 'spirale', 'verhütung', 'contraceptives'],
+  },
+  {
+    url: 'https://www.fedlex.admin.ch/eli/cc/1995/1328_1328_1328/de',
+    title: 'Medicines such as menopause hormone therapy: when Swiss basic insurance pays and what you pay yourself (Health Insurance Act KVG, version of 1 July 2026)',
+    year: 2026,
+    fetchedAt: '2026-11-28T12:00:00.000Z',
+    publicationType: 'Swiss federal law (KVG)',
+    attribution: 'Source: Swiss Federal Health Insurance Act (KVG, SR 832.10), fedlex.admin.ch.',
+    summary:
+      'The Swiss Health Insurance Act (KVG) sets the rules for medicines, including hormone therapy (HRT) for menopause symptoms. Basic insurance pays for medicines that a doctor prescribes to diagnose or treat an illness and that are on the Spezialitätenliste, the list of medicines and prices kept by the Federal Office of Public Health (BAG). The law does not name single medicines, so whether a particular hormone product is paid depends on whether it is on that list; the doctor or pharmacist can tell. On what is covered, adults first pay their yearly deductible (Franchise) and then 10% of further costs up to a yearly maximum, and the Federal Council can set a higher share for some services. There is no cost-sharing for maternity care, and none for medical care from week 13 of pregnancy until eight weeks after the birth.',
+    keyPoints: [
+      'Basic insurance pays for medicines prescribed by a doctor that are on the BAG\'s list of covered medicines (Spezialitätenliste).',
+      'Hormone therapy for menopause follows the same rule: whether a given product is paid depends on whether it is on the list.',
+      'Cost-sharing on covered care: the yearly deductible (Franchise), then 10% of further costs up to a yearly maximum; a higher share can apply to some services.',
+      'No cost-sharing for maternity care, and none for medical care from week 13 of pregnancy until eight weeks after the birth.',
+    ],
+    lifeStages: ['menopause', 'post-menopause', 'general'],
+    topics: ['hrt-benefits-risks'],
+    tags: ['switzerland', 'health insurance', 'hrt', 'medicines', 'deductible', 'spezialitätenliste'],
+    keywords: ['switzerland', 'swiss', 'hrt', 'hormone therapy', 'hormone replacement', 'menopause hormones', 'pay for hrt', 'hrt covered', 'medicines covered', 'prescribed medicines', 'deductible', 'franchise', 'selbstbehalt', 'spezialitätenliste'],
+  },
+  {
+    url: 'https://www.fedlex.admin.ch/eli/cc/1952/1021_1046_1050/de',
+    title: 'Maternity leave pay in Switzerland: starts on the day of birth, 14 weeks at 80% of earnings (Income Compensation Act EOG, version of 1 June 2026)',
+    year: 2026,
+    fetchedAt: '2026-11-28T12:00:00.000Z',
+    publicationType: 'Swiss federal law (EOG)',
+    attribution: 'Source: Swiss Federal Act on Income Compensation (EOG, SR 834.1), fedlex.admin.ch.',
+    summary:
+      'Under the Swiss Income Compensation Act (EOG), paid maternity leave starts on the day the baby is born, not before, and lasts 98 days in a row (14 weeks). The daily allowance is 80% of the average earnings before the birth, up to 220 francs a day. A mother qualifies if she was insured in the Swiss old-age insurance (AHV) for the nine months before the birth (fewer if the baby is born early), worked for at least five of those months, and at the birth is employed, self-employed or paid for working in her spouse\'s business. If the newborn stays in hospital for at least two weeks straight after birth, the pay is extended by the hospital stay, by up to 56 days, if the mother had planned to go back to work. The allowance ends early if she goes back to work. Cantons may pay more or for longer. The other parent gets up to 14 daily allowances (two weeks), to be taken within six months of the birth.',
+    keyPoints: [
+      'Maternity pay starts on the day of the birth; there is no paid federal maternity leave before the birth.',
+      'It is paid for 98 days in a row (14 weeks), at 80% of average earnings, up to 220 francs a day.',
+      'To qualify: AHV-insured for the 9 months before the birth, at least 5 months of paid work in that time, and employed or self-employed at the birth.',
+      'Newborn in hospital 2 weeks or more right after birth: pay extended by the stay, up to 56 days, if the mother planned to return to work.',
+      'Going back to work ends the allowance early; cantons may offer more.',
+      'The other parent: up to 14 daily allowances (two weeks) within six months of the birth.',
+    ],
+    lifeStages: ['pregnancy', 'postpartum'],
+    topics: ['postpartum-recovery'],
+    tags: ['switzerland', 'maternity leave', 'maternity pay', 'eo', 'mutterschaftsurlaub', 'paternity leave'],
+    keywords: ['switzerland', 'swiss', 'maternity leave', 'maternity pay', 'mutterschaftsurlaub', 'mutterschaftsentschädigung', 'parental leave', 'leave start', 'when does maternity leave start', '14 weeks', '98 days', '80%', 'eo', 'eog', 'paternity leave', 'other parent', 'partner leave', 'vaterschaftsurlaub'],
+  },
+  {
+    url: 'https://www.fedlex.admin.ch/eli/cc/1966/57_57_57/de',
+    title: 'Working while pregnant and after the birth in Switzerland: no work in the first 8 weeks after birth, night work and time off (Labour Act ArG Art. 35 to 35b)',
+    year: 2023,
+    fetchedAt: '2026-11-28T12:00:00.000Z',
+    publicationType: 'Swiss federal law (ArG)',
+    attribution: 'Source: Swiss Federal Labour Act (ArG, SR 822.11), fedlex.admin.ch.',
+    summary:
+      'The Swiss Labour Act (ArG) protects pregnant women and new mothers at work. Pregnant and breastfeeding women may only be employed with their agreement, and a pregnant woman may stay away from work or leave work simply by telling her employer. After the birth, a mother may not work for eight weeks, and from then until week 16 only if she agrees. From eight weeks before the due date, pregnant women may not work between 8 pm and 6 am; the employer should offer equal day work, otherwise 80% of the wage is paid. Breastfeeding mothers must be given the time needed to breastfeed, and the employer must arrange work so that it does not harm the health of mother or baby; hard or dangerous work can be forbidden by ordinance, with 80% of the wage paid when no equal replacement work is offered. Paid maternity leave itself is set by a separate law (EOG).',
+    keyPoints: [
+      'Pregnant and breastfeeding women work only with their agreement; a pregnant woman can stay away from work by telling her employer.',
+      'No work in the 8 weeks after the birth; from week 8 to week 16 only if the mother agrees.',
+      'No work between 8 pm and 6 am from 8 weeks before the birth; equal day work or 80% of the wage.',
+      'Breastfeeding mothers get the time needed to breastfeed.',
+      'Hard or dangerous work can be forbidden; if no equal replacement work is offered, 80% of the wage is paid.',
+    ],
+    lifeStages: ['pregnancy', 'postpartum'],
+    topics: ['postpartum-recovery', 'breastfeeding'],
+    tags: ['switzerland', 'work', 'maternity protection', 'labour law', 'night work', 'breastfeeding at work'],
+    keywords: ['switzerland', 'swiss', 'work', 'working', 'employer', 'job', 'labour law', 'arbeitsgesetz', 'maternity protection', 'mutterschutz', 'back to work', 'return to work', 'night work', 'night shift', 'breastfeeding at work', 'stay away from work', '8 weeks after birth', '16 weeks'],
+  },
 ];
 
 // Round 8 (2026-11-28): non-Swiss official sources for questions the
@@ -406,6 +535,27 @@ export const OTHER_SOURCES = [
     tags: ['normal cycle', 'cycle length', 'figo', 'abnormal uterine bleeding', 'regularity'],
     keywords: ['normal cycle', 'normal cycle length', 'cycle length', 'how long is a normal cycle', 'what is a normal period', 'how many days', 'irregular periods', 'regular cycle', 'period length', 'bleeding days', 'figo', '24 to 38 days', 'short cycle', 'long cycle'],
   },
+  // Round 12 (2026-11-28): toxic shock syndrome had no source at all.
+  {
+    url: 'https://www.nhs.uk/conditions/toxic-shock-syndrome/',
+    title: 'Toxic shock syndrome: warning signs, when to get urgent help and how to lower the risk with tampons and menstrual cups (NHS, reviewed June 2023)',
+    year: 2023,
+    fetchedAt: '2026-11-28T12:00:00.000Z',
+    summary:
+      'The NHS describes toxic shock syndrome (TSS) as a rare but life-threatening infection whose symptoms come on quickly and need urgent treatment. Signs include a high temperature or shivering, flu-like aches, a rash like sandpaper, vomiting, diarrhoea, feeling dizzy, peeling or swollen skin, and red palms, soles, tongue or eyes. Confusion, trouble breathing, pale, grey or blotchy skin or lips, a rash that does not fade under a glass or large areas of peeling skin are an emergency. Anyone who thinks they have TSS while using a tampon or menstrual cup should take it out and tell the medical team. TSS is linked to tampons and menstrual cups, a contraceptive diaphragm or cap, giving birth, and infected cuts, boils or burns; it is more likely in someone who has had it before. To lower the risk the NHS advises washing hands before putting in a tampon or cup, following the product instructions, and not leaving it in longer than needed or recommended. Treatment is in hospital, with antibiotics and other support.',
+    keyPoints: [
+      'TSS is rare but life-threatening and needs urgent treatment.',
+      'Signs: high temperature, flu-like aches, sandpaper-like rash, vomiting or diarrhoea, dizziness, peeling skin, red palms, soles, tongue or eyes.',
+      'Emergency signs: confusion, difficulty breathing, pale, grey or blotchy skin or lips, a rash that does not fade under a glass.',
+      'Using a tampon or cup when symptoms start: take it out and tell the medical team.',
+      'Lower the risk: wash hands first, follow the product instructions, do not leave a tampon or cup in longer than needed or recommended.',
+      'After TSS, a doctor may advise against tampons, caps or diaphragms.',
+    ],
+    lifeStages: ['menstrual-cycle', 'general'],
+    topics: ['vaginal-infections'],
+    tags: ['toxic shock syndrome', 'tss', 'tampons', 'menstrual cup', 'emergency signs'],
+    keywords: ['toxic shock syndrome', 'toxic shock', 'tss', 'tampon', 'tampons', 'menstrual cup', 'sleep with a tampon', 'tampon overnight', 'how long can a tampon stay in', 'leave a tampon in', 'tampon safety', 'rash and fever', 'staphylococcus'],
+  },
 ];
 
 function toItem(src) {
@@ -421,7 +571,7 @@ function toItem(src) {
     journal: policy.publisher,
     organisation: policy.publisher,
     year: src.year,
-    publicationTypes: [policy.publicationType],
+    publicationTypes: [src.publicationType ?? policy.publicationType],
     evidenceLevel: policy.evidenceLevel,
     url: src.url,
     summary: src.summary,
@@ -441,7 +591,7 @@ function toItem(src) {
       lastReviewed: null,
       nextReview: null,
       licence: { ...policy.licence, pageCopyright: null },
-      attribution: policy.attribution ?? null,
+      attribution: src.attribution ?? policy.attribution ?? null,
       refreshDays: null,
       robots: { allowed: true, rule: null, checkedAt: src.fetchedAt ?? FETCHED },
       // Hash of our own summary text (no page text is stored).
