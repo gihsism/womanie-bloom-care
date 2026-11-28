@@ -1,4 +1,4 @@
-import { DAY_MONTH_FMT } from '@/lib/dateFormat';
+import { DAY_MONTH_FMT, WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { format, isSameDay, startOfDay, parseISO, addDays } from 'date-fns';
 import { Droplet, Sparkles, Heart, Smile, AlertCircle, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -64,7 +64,7 @@ const DayActionSheet = ({
       <SheetContent side="bottom" className="h-auto max-h-[80vh] rounded-t-3xl">
         <SheetHeader className="pb-4">
           <SheetTitle className="text-center">
-            {format(date, 'EEEE d MMMM')}
+            {format(date, WEEKDAY_DAY_MONTH_FMT)}
             {isToday && <span className="text-primary ml-2">(Today)</span>}
           </SheetTitle>
         </SheetHeader>

@@ -11,6 +11,7 @@ import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { emitHealthDataChange } from '@/lib/data-events';
 import { format } from 'date-fns';
+import { WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { Loader2, Check } from 'lucide-react';
 import type { LifeStage } from './DashboardHeader';
 
@@ -303,7 +304,7 @@ const DailyLogging = ({ selectedMode, hideTitle = false }: DailyLoggingProps) =>
       <div className="flex items-center justify-between mb-4">
         <div>
           {!hideTitle && <h3 className="text-base font-semibold">Today's Quick Log</h3>}
-          <p className="text-xs text-muted-foreground">{format(new Date(), 'EEEE d MMMM')}</p>
+          <p className="text-xs text-muted-foreground">{format(new Date(), WEEKDAY_DAY_MONTH_FMT)}</p>
         </div>
         {saved && (
           <Badge variant="outline" className="text-primary border-primary/30 gap-1">

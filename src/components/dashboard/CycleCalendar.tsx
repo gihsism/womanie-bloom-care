@@ -6,6 +6,7 @@ import { emitHealthDataChange, onHealthDataChange } from '@/lib/data-events';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Settings2, Sparkles } from 'lucide-react';
+import { formatDayMonth } from '@/lib/dateFormat';
 import { format, addMonths, subMonths, addDays, differenceInDays, startOfDay, parseISO } from 'date-fns';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -364,7 +365,7 @@ const CycleCalendar = ({
       } else {
         next.clear();
         next.add(dateKey);
-        toast({ title: 'Ovulation marked', description: format(date, 'd MMMM') });
+        toast({ title: 'Ovulation marked', description: formatDayMonth(date) });
       }
       return next;
     });
