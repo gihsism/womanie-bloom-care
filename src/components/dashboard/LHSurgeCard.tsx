@@ -219,7 +219,7 @@ const LHSurgeCard = () => {
         <div className="flex items-start gap-2 p-2.5 rounded-lg bg-muted/30">
           <XCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-muted-foreground" />
           <p className="text-xs text-muted-foreground">
-            No surge detected in your recent tests. The LH surge typically lasts 12-24 hours —
+            No surge detected in your recent tests. The LH surge can be short, so
             testing twice a day (morning + afternoon) catches it more reliably.
           </p>
         </div>

@@ -70,7 +70,9 @@ const GUIDANCE: Record<Phase, PhaseGuidance> = {
     focus: [
       'Steady-state cardio (zone 2) feels easier than the same work at sprint pace',
       'Strength is still useful — work submaximal, focus on form',
-      'Last 5-7 days (PMS window): reduce intensity, prioritise sleep + magnesium',
+      // Round 10: "+ magnesium" removed (ACOG: mixed evidence for PMS); the
+      // 5 days before a period is the PMS window in ACOG's definition.
+      'The 5 days or so before your period (when PMS is common): ease off if you need to, prioritise sleep',
       'Hot environment + intensity is harder — body temperature is already elevated by ~0.3 °C',
       'Stretching + mobility work pays off here; tissues are slightly stiffer',
     ],

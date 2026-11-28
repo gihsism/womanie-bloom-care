@@ -228,6 +228,7 @@ function FeedTab({ babyId, openAdd = false }: { babyId: string; openAdd?: boolea
           {f.data?.milk ? ` (${f.data.milk === 'formula' ? 'formula' : 'breast milk'})` : ''}
         </>
       )} />
+      {/* 8-12 feeds a day: AAP breastfeeding policy statement (2022) and NHS. */}
       <p className="text-xs text-muted-foreground">Newborns typically feed 8–12 times in 24 hours. Ask your midwife or health visitor if you’re unsure.</p>
     </div>
   );

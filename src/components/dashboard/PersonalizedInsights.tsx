@@ -126,7 +126,9 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
         emoji: '🤰',
         connectedTests: ['Folate', ...(vitB12 ? ['Vitamin B12'] : [])],
         explanation: 'Folate is critical in the first weeks of pregnancy (often before you know you\'re pregnant). Low folate increases the risk of neural tube defects in the baby.',
-        recommendation: 'Start a prenatal vitamin with at least 400mcg of folic acid immediately. Eat folate-rich foods: leafy greens, beans, citrus, and fortified cereals.',
+        // 400 µg folic acid daily: USPSTF 2023 (library pmid-37526713, 0.4 to
+        // 0.8 mg) and the Swiss BLV pregnancy brochure.
+        recommendation: 'Start a prenatal vitamin with at least 400mcg of folic acid now, and ask your doctor whether you need more. Eat folate-rich foods: leafy greens, beans, citrus, and fortified cereals.',
         severity: 'urgent',
       });
     }
@@ -237,7 +239,9 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       explanation: tsh.value > 2.5
         ? `Your TSH (${tsh.value}) is above 2.5. Labs should use pregnancy ranges; without them, the American Thyroid Association (2026) uses 0.1-4.0 in the first trimester, and women on thyroid medicine are usually kept below 2.5. Untreated underactive thyroid in pregnancy is linked to miscarriage and preeclampsia.`
         : `Your TSH (${tsh.value}) is very low, suggesting overactive thyroid. This needs close monitoring during pregnancy as it can affect baby's growth.`,
-      recommendation: 'Your doctor should monitor TSH every 4-6 weeks during pregnancy. Medication dosage may need adjustment as pregnancy progresses.',
+      // Research round 10: "every 4-6 weeks" removed; the ATA 2026 item in
+      // the library gives no interval, so the doctor sets it.
+      recommendation: 'Your doctor or midwife will usually recheck TSH during pregnancy and tell you how often. If you take thyroid medicine, the dose may need to change as pregnancy goes on.',
       severity: tsh.value > 4 || tsh.value < 0.1 ? 'urgent' : 'attention',
     });
   }
@@ -276,11 +280,13 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
   // Iron + B12 + Folate — triple deficiency = fatigue combo
   if (ferritin && ferritin.value < 30 && vitB12 && vitB12.value < 300 && folate && folate.value < 10) {
     insights.push({
-      title: 'Triple nutrient gap — likely causing significant fatigue',
+      // Research round 10: "energy should improve within 4-8 weeks" and the
+      // three-supplement plan were unsourced; the doctor decides treatment.
+      title: 'Iron, B12 and folate all low: can add to tiredness',
       emoji: '😴',
       connectedTests: ['Ferritin', 'Vitamin B12', 'Folate'],
-      explanation: 'Iron, B12, and folate all contribute to making healthy red blood cells. When all three are low, fatigue can be severe. You may also experience brain fog, hair loss, and poor concentration.',
-      recommendation: 'Address all three: iron supplement (with vitamin C for absorption), B12 supplement or injections, and folate/folic acid. Your energy should improve within 4-8 weeks of supplementation.',
+      explanation: 'Iron, B12, and folate all contribute to making healthy red blood cells. When all three are low, you may feel tired, find it harder to concentrate, or notice hair loss.',
+      recommendation: 'Ask your doctor which of the three need treating and how (food, tablets or, for B12, sometimes injections). They usually recheck your blood afterwards to see if it worked.',
       severity: 'attention',
     });
   }
@@ -372,7 +378,9 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       title: 'Low AMH — your ovarian reserve may be declining',
       emoji: '🥚',
       connectedTests: connected,
-      explanation: `Your AMH is ${amh.value} ng/mL, which is below the low threshold of 1.1 ng/mL.${fsh && fsh.value > 10 ? ` Combined with your elevated FSH (${fsh.value}), this suggests diminished ovarian reserve.` : ''} AMH reflects the number of remaining eggs and declines before FSH rises, making it an early indicator.`,
+      // Research round 10: "the low threshold of 1.1 ng/mL" removed (no
+      // source in the library; labs and ages differ, so her lab's range wins).
+      explanation: `Your AMH is ${amh.value} ng/mL, which is on the low side for many labs. AMH falls with age and labs use different methods, so compare it with your lab's range and talk it through with your doctor.${fsh && fsh.value > 10 ? ` Combined with your elevated FSH (${fsh.value}), this suggests diminished ovarian reserve.` : ''} AMH reflects the number of remaining eggs and declines before FSH rises, making it an early indicator.`,
       recommendation: lifeStage === 'conception' || lifeStage === 'ivf'
         ? 'Discuss your fertility timeline with a reproductive endocrinologist. Low AMH doesn\'t mean you can\'t conceive, but earlier intervention may be beneficial. IVF protocols can be adjusted for lower reserve.'
         : 'If you\'re considering having children in the future, this is worth discussing with your doctor sooner rather than later. Egg freezing may be an option to preserve fertility.',
@@ -449,7 +457,9 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       connectedTests: connected,
       explanation: `Your anti-TPO is ${antiTPO.value} IU/mL (positive >35). This indicates your immune system is attacking your thyroid gland (Hashimoto's). Hashimoto's is 4-10x more common in women.${tsh && tsh.value > 4 ? ` Your elevated TSH (${tsh.value}) suggests the thyroid is already underperforming.` : ' Your thyroid function may still be normal now, but monitoring is important.'}`,
       recommendation: tsh && tsh.value > 4
-        ? 'Thyroid medication (levothyroxine) is likely needed. Monitor TSH every 6-8 weeks until stable. If trying to conceive, keep TSH below 2.5.'
+        // Research round 10: no medicine advice, recheck interval or TSH
+        // target in the app's voice (none of them is sourced here).
+        ? 'Ask your doctor whether you need thyroid medicine. If you start it, your doctor rechecks TSH to find the right dose. If you are trying to conceive or are pregnant, tell your doctor, as the targets are different then.'
         : 'Monitor TSH every 6-12 months. Many people with positive antibodies eventually develop hypothyroidism. If you notice fatigue, weight gain, or irregular periods, recheck sooner.',
       severity: tsh && tsh.value > 4 ? 'attention' : 'neutral',
     });
@@ -569,7 +579,9 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       explanation: `Your bile acids are ${bileAcids.value} μmol/L. Together with itching, 10 or more is what US guidance (SMFM 2021) uses to diagnose intrahepatic cholestasis of pregnancy (ICP); UK guidance (RCOG 2022) uses 19. Only your doctor can diagnose it.${bileAcids.value >= 40 ? ' Values >=40 carry increased risk of adverse outcomes.' : ''}${bileAcids.value >= 100 ? ' Values >=100 are severe — birth is usually planned at 35-36 weeks.' : ''} ICP causes intense itching and can affect the baby.`,
       recommendation: bileAcids.value >= 40
         ? 'Contact your doctor TODAY. You may need ursodeoxycholic acid (UDCA) treatment and increased fetal monitoring. Delivery timing will be discussed.'
-        : 'Discuss with your doctor at your next visit. UDCA medication can help. Bile acids should be monitored weekly from 32 weeks.',
+        // Research round 10: "monitored weekly from 32 weeks" removed (not in
+        // SMFM 2021 or RCOG 2022 as a fixed rule; the doctor sets the checks).
+        : 'Discuss with your doctor at your next visit. UDCA medication can help with the itching. Your doctor or midwife will tell you how often to repeat the blood test.',
       severity: bileAcids.value >= 40 ? 'urgent' : 'attention',
     });
   }

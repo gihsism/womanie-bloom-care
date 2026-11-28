@@ -278,3 +278,56 @@ describe('AI lab-reading prompt: only sourced figures, lab range wins', () => {
     expect(rules).toMatch(/Never say how much of a medicine or supplement to take/);
   });
 });
+
+// Research round 10: static text sweep of numbers with units in src/
+// (docs/research-gaps.md). Removed claims are checked on the code with
+// comments stripped, since the comments name what was removed and why.
+const code = (p: string) =>
+  read(p)
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/^\s*\/\/.*$/gm, '');
+
+describe('round 10: unsourced numbers in lab insights and cycle cards', () => {
+  const pi = code(`${D}PersonalizedInsights.tsx`);
+
+  it('no fixed recheck intervals, TSH target or recovery promise in the app voice', () => {
+    expect(pi).not.toMatch(/every 4-6 weeks/);
+    expect(pi).not.toMatch(/every 6-8 weeks/);
+    expect(pi).not.toMatch(/keep TSH below 2\.5/);
+    expect(pi).not.toMatch(/levothyroxine\) is likely needed/);
+    expect(pi).not.toMatch(/within 4-8 weeks/);
+    expect(pi).not.toMatch(/likely causing significant fatigue/);
+    expect(pi).not.toMatch(/weekly from 32 weeks/);
+    expect(pi).toMatch(/tell you how often to repeat the blood test/);
+  });
+
+  it('AMH is read against the lab range, not a fixed "low threshold"', () => {
+    expect(pi).not.toMatch(/low threshold of 1\.1/);
+    expect(pi).toMatch(/compare it with your lab's range/);
+  });
+
+  it('folic acid 400 µg keeps its source', () => {
+    expect(read(`${D}PersonalizedInsights.tsx`)).toMatch(/USPSTF 2023 \(library pmid-37526713/);
+  });
+
+  it('pregnancy lab card carries no unused cut-offs (no 30 ng/mL vitamin D, no 95 mg/dL)', () => {
+    const s = code(`${D}PregnancyLabInsights.tsx`);
+    expect(s).not.toMatch(/idealLabel|criticalBelow/);
+    expect(s).not.toMatch(/30 ng\/mL|95 mg\/dL/);
+  });
+
+  it('cycle cards: no magnesium tip, no fixed surge length, no "5-7 days before your blood test"', () => {
+    expect(code(`${D}CyclePhaseExercise.tsx`)).not.toMatch(/magnesium/i);
+    expect(code(`${D}LHSurgeCard.tsx`)).not.toMatch(/12-24 hours/);
+    const cu = code(`${D}CycleUpdateSuggestions.tsx`);
+    expect(cu).not.toMatch(/5-7 days before your blood test/);
+    expect(cu).not.toMatch(/24-48 hours/);
+    expect(cu).toMatch(/One result cannot pin the exact day/);
+  });
+
+  it('due-date notes: WHO birth size, no "5% on the due date"', () => {
+    const t = code(`${D}PregnancyTracker.tsx`);
+    expect(t).not.toMatch(/3\.4 kg|2\.5-4\.3 kg|about 5% of babies/);
+    expect(t).toMatch(/3\.2 to 3\.3 kg \(WHO growth standards\)/);
+  });
+});

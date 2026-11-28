@@ -65,7 +65,9 @@ function generateSuggestions(labs: LabResult[], lifeStage?: string | null): Cycl
       description: `Your progesterone level (${progesterone.value} ${labs.find(l => l.title.toLowerCase().includes('progesterone'))?.unit || 'ng/mL'}) confirms that ovulation occurred${testDate ? ` around the time of your test` : ''}.`,
       actionLabel: 'Mark ovulation in calendar',
       detail: testDate
-        ? `Ovulation likely happened 5-7 days before your blood test${testDate ? ` on ${formatDayMonth(testDate)}` : ''}. Would you like to update your calendar?`
+        // Round 10: "5-7 days before your blood test" removed; one
+        // progesterone result shows ovulation happened, not the day.
+        ? `If your blood test${testDate ? ` on ${formatDayMonth(testDate)}` : ''} was timed about a week before your next period, as this test usually is, ovulation was probably about a week before it. One result cannot pin the exact day. Would you like to update your calendar?`
         : 'Your elevated progesterone confirms a recent ovulation. Mark it in your cycle tracker for better future predictions.',
       confidence: progesterone.value > 10 ? 'high' : 'medium',
       priority: 1,
@@ -79,9 +81,11 @@ function generateSuggestions(labs: LabResult[], lifeStage?: string | null): Cycl
       type: 'ovulation_confirmed',
       title: 'LH surge detected — ovulation approaching',
       emoji: '⚡',
-      description: `Your LH level (${lh.value}) is elevated, indicating an LH surge. Ovulation typically occurs within 24-48 hours of an LH surge.`,
+      description: `Your LH level (${lh.value}) is elevated, indicating an LH surge. Ovulation usually follows within about a day and a half.`,
       actionLabel: 'Mark fertile window',
-      detail: 'This is your most fertile time. If you\'re trying to conceive, the next 24-48 hours are optimal. Would you like to mark this as your fertile window?',
+      // Round 10: same timing as the ovulation-test card (12 to 36 hours);
+      // "24-48 hours are optimal" removed.
+      detail: 'This is your most fertile time. If you\'re trying to conceive, today and the next day or two are your best chance. Would you like to mark this as your fertile window?',
       confidence: lh.value > 40 ? 'high' : 'medium',
       priority: 0,
     });
