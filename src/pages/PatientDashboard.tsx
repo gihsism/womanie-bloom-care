@@ -15,7 +15,7 @@ import { TodayList, PrimaryButton, MoreForStage, useGo, type SheetKind } from '@
 import PeriodLateCard from '@/components/dashboard/PeriodLateCard';
 import { useStageProfile } from '@/hooks/useStageProfile';
 import { useTodaySignals } from '@/hooks/useTodaySignals';
-import { todayItems, primaryActionFor, secondaryActionFor, moreFor } from '@/lib/todayItems';
+import { rankedTodayItems, primaryActionFor, secondaryActionFor, moreFor } from '@/lib/todayItems';
 import { stageLabel } from '@/lib/stageLabels';
 import { usePageTitle } from '@/hooks/usePageTitle';
 
@@ -28,7 +28,8 @@ const LogSheet = lazy(loadLogSheet);
 // Home: the same short template for every life stage —
 //   1. greeting, with the stage as a quiet "· change" link (to Me)
 //   2. one hero: one fact, one sentence, one "Details" link
-//   3. Today: at most 3 ranked one-line rows (lib/todayItems.ts); under it,
+//   3. Today: ranked one-line rows, urgent first (lib/todayItems.ts); the
+//      first 3 show, the rest behind "N more"; under it,
 //      only when the period is 5+ days late, the "period late?" note
 //   4. one filled button (opens the Log sheet or the stage's main tool;
 //      in the latter case a quiet "Log today" link sits under it, so every
@@ -40,13 +41,14 @@ const LogSheet = lazy(loadLogSheet);
 
 // Contraception: a daily-pill method gets "Log today's pill"; other
 // methods (patch, ring, IUD …) get "Log today". Same per-device setting the
-// contraception card stores.
+// contraception card stores. No method chosen yet: "Log today" too, so the
+// button doesn't talk about a pill while the hero asks her to choose a method.
 function hasDailyPill(userId: string): boolean {
   try {
     const raw = localStorage.getItem(`contraception:${userId}:method`);
-    return !raw || JSON.parse(raw) === 'pill';
+    return !!raw && JSON.parse(raw) === 'pill';
   } catch {
-    return true;
+    return false;
   }
 }
 
@@ -105,7 +107,7 @@ const PatientDashboard = () => {
 
         {hero}
 
-        <TodayList items={todayItems(mode, signals)} go={go} />
+        <TodayList items={rankedTodayItems(mode, signals)} go={go} />
 
         <PeriodLateCard
           userId={user.id}

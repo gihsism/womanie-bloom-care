@@ -85,8 +85,8 @@ export default function UpcomingAppointments() {
     try {
       await setApptStatus(apt, 'cancelled');
       toast({
-        title: 'Appointment cancelled',
-        description: `Your appointment with ${doctorLabel} on ${when} has been cancelled.`,
+        title: 'Visit cancelled',
+        description: `Your visit with ${doctorLabel} on ${when} has been cancelled.`,
         action: (
           <Button
             size="sm"
@@ -94,7 +94,7 @@ export default function UpcomingAppointments() {
             onClick={async () => {
               try {
                 await setApptStatus(apt, 'scheduled');
-                toast({ title: 'Cancellation undone', description: 'Your appointment is back on the schedule.' });
+                toast({ title: 'Cancellation undone', description: 'Your visit is back on the schedule.' });
                 emitHealthDataChange();
                 await load();
               } catch (e) {
@@ -132,7 +132,7 @@ export default function UpcomingAppointments() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold">
-            {rows.length === 1 ? 'Upcoming appointment' : `${rows.length} upcoming appointments`}
+            {rows.length === 1 ? 'Upcoming visit' : `${rows.length} upcoming visits`}
           </p>
           <p className="text-[11px] text-muted-foreground">
             Your scheduled consultations. Cancel any time before the visit.
@@ -199,8 +199,8 @@ export default function UpcomingAppointments() {
                   className="h-8 px-2 text-muted-foreground hover:text-primary"
                   onClick={() => setRescheduling(apt)}
                   disabled={busyId === apt.id}
-                  aria-label="Reschedule appointment"
-                  title="Reschedule appointment"
+                  aria-label="Reschedule visit"
+                  title="Reschedule visit"
                 >
                   <CalendarCog className="h-4 w-4" />
                 </Button>
@@ -210,8 +210,8 @@ export default function UpcomingAppointments() {
                   className="h-8 px-2 text-muted-foreground hover:text-destructive"
                   onClick={() => cancel(apt)}
                   disabled={busyId === apt.id}
-                  aria-label="Cancel appointment"
-                  title="Cancel appointment"
+                  aria-label="Cancel visit"
+                  title="Cancel visit"
                 >
                   <X className="h-4 w-4" />
                 </Button>

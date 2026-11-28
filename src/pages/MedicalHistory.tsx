@@ -33,7 +33,6 @@ import HealthTimeline from '@/components/dashboard/HealthTimeline';
 import ResultsRangeChart from '@/components/dashboard/ResultsRangeChart';
 import DocumentCycleAlert from '@/components/dashboard/DocumentCycleAlert';
 import WeeklySummary from '@/components/dashboard/WeeklySummary';
-import RecentFindings from '@/components/dashboard/RecentFindings';
 import OverdueTests from '@/components/dashboard/OverdueTests';
 import RecheckHints from '@/components/dashboard/RecheckHints';
 import HealthTrends from '@/components/dashboard/HealthTrends';
@@ -68,7 +67,8 @@ import {
 } from 'lucide-react';
 import { fetchDoctorSentDocuments } from '@/lib/documentFiles';
 import { LoadFailed } from '@/components/LoadFailed';
-import { currentFlagged } from '@/lib/labFlags';
+import { currentFlagged, labFlag } from '@/lib/labFlags';
+import { deviationPct } from '@/lib/labValue';
 import { format, differenceInDays, addDays } from 'date-fns';
 import {
   type MedicalDataItem,
@@ -102,8 +102,8 @@ const testExplanations: Record<string, { high: string; low: string; normal: stri
     normal: 'Your iron stores look good.',
   },
   'tsh': {
-    low: 'Low TSH suggests your thyroid is overactive (hyperthyroidism). This can cause weight loss, anxiety, rapid heartbeat, and shorter/lighter periods.',
-    high: 'Elevated TSH suggests your thyroid is underactive (hypothyroidism). This can cause fatigue, weight gain, feeling cold, and heavier/irregular periods. It\'s very treatable with medication.',
+    low: 'A low TSH can mean the thyroid is working too fast (overactive). That can cause weight loss, anxiety, a fast heartbeat and shorter or lighter periods. Your doctor usually checks other thyroid results (T4, T3) before saying more.',
+    high: 'A raised TSH can mean the thyroid is working slowly (underactive). That can cause tiredness, weight gain, feeling cold and heavier or irregular periods. Your doctor usually re-tests and checks T4 before saying more; if treatment is needed, it works well.',
     normal: 'Your thyroid function is healthy.',
   },
   'vitamin d': {
@@ -197,7 +197,7 @@ const testExplanations: Record<string, { high: string; low: string; normal: stri
     normal: 'Your HCG level is in the expected range.',
   },
   'amh': {
-    low: 'Low AMH indicates a lower ovarian reserve (fewer eggs remaining). If you\'re planning to conceive, timing matters — consider discussing your options with a fertility specialist.',
+    low: 'A low AMH can mean a lower egg reserve. On its own it doesn\'t tell you whether you can get pregnant; if you\'re planning to conceive, a fertility specialist can explain what it means for you.',
     high: 'Elevated AMH can indicate a high egg reserve (good for fertility) or may be associated with PCOS.',
     normal: 'Your ovarian reserve looks healthy.',
   },
@@ -262,22 +262,32 @@ function generateFallbackNote(item: MedicalDataItem): string | null {
     }
   }
 
-  if (item.status === 'normal' || item.status === 'expected') {
+  const status = String(item.status ?? '').trim().toLowerCase();
+  if (status === 'normal' || status === 'expected') {
     if (explanation) return explanation.normal;
     return null;
   }
 
-  if (item.status === 'abnormal' || item.status === 'critical') {
+  // Same tiers as everywhere else (lab-flags): high / low / elevated …
+  // are outside the range too, and a critical one is not for "your next visit".
+  const flag = labFlag(status);
+  if (flag === 'urgent' || flag === 'outside') {
+    const next = flag === 'urgent'
+      ? ' The lab marked this as urgent: contact your doctor soon rather than waiting for your next visit.'
+      : ' Bring this up at your next doctor visit for personalised advice.';
     if (explanation && direction !== 'unknown') {
       const rangeText = item.reference_range ? ` (healthy range: ${item.reference_range}${item.unit ? ' ' + item.unit : ''})` : '';
-      return `Your ${item.title} (${item.value}${item.unit ? ' ' + item.unit : ''}) is ${direction === 'low' ? 'below' : 'above'} the healthy range${rangeText}. ${explanation[direction]}`;
+      return `Your ${item.title} (${item.value}${item.unit ? ' ' + item.unit : ''}) is ${direction === 'low' ? 'below' : 'above'} the healthy range${rangeText}. ${explanation[direction]}${flag === 'urgent' ? next : ''}`;
     }
 
     // Generic but still specific about the value
     const dirLabel = direction === 'low' ? 'lower than' : direction === 'high' ? 'higher than' : 'outside';
-    return `Your ${item.title} (${item.value || ''}${item.unit ? ' ' + item.unit : ''}) is ${dirLabel} the healthy range${item.reference_range ? ` (${item.reference_range}${item.unit ? ' ' + item.unit : ''})` : ''}. Bring this up at your next doctor visit for personalized advice.`;
+    return `Your ${item.title} (${item.value || ''}${item.unit ? ' ' + item.unit : ''}) is ${dirLabel} the healthy range${item.reference_range ? ` (${item.reference_range}${item.unit ? ' ' + item.unit : ''})` : ''}.${next}`;
   }
 
+  // Borderline, or no status but the number sits outside the printed
+  // range: never call it healthy.
+  if (flag === 'borderline' || direction !== 'unknown') return null;
   // informational or unknown status
   if (explanation) return explanation.normal;
   return null;
@@ -323,11 +333,13 @@ function ValueGauge({ value, unit, refRange, status }: { value: string | null; u
     } else if (numVal < low) {
       const under = (low - numVal) / range;
       markerPct = Math.max(0, 20 - under * 20 / Math.max(0.5, under));
-      deviationLabel = `${Math.round(under * 100)}% below`;
+      // The label is relative to the limit crossed (12 vs 15 = "20% below"),
+      // not to the width of the range, which made 12 vs 15-150 read "2% below".
+      deviationLabel = `${deviationPct(low - numVal, low, range)}% below`;
     } else {
       const over = (numVal - high) / range;
       markerPct = Math.min(100, 80 + over * 20 / Math.max(0.5, over));
-      deviationLabel = `${Math.round(over * 100)}% above`;
+      deviationLabel = `${deviationPct(numVal - high, high, range)}% above`;
     }
   }
 
@@ -1780,12 +1792,12 @@ export default function MedicalHistory() {
 
                 {/* ============ LAB SUMMARY CARDS (moved here from Home) ============ */}
                 {/* Each card hides itself when it has nothing to show. Order: the */}
-                {/* week's story, what needs attention, what's due, how results    */}
+                {/* week's story, what's due, how results moved (no second list of */}
+                {/* flagged results: "Talk to your doctor about" above is that).  */}
                 {/* moved, then the overall picture. Their own margins are reset   */}
                 {/* so the page's space-y-6 rhythm applies.                        */}
                 <div className="space-y-6 [&>*]:!mb-0 empty:hidden">
                   <WeeklySummary />
-                  <RecentFindings showViewAll={false} />
                   <OverdueTests />
                   <RecheckHints stage={mode} dueDate={pregnancyDueDate} />
                   <HealthTrends showViewAll={false} />

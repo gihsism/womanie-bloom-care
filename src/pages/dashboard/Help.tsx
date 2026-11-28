@@ -27,7 +27,7 @@ const FAQS: Array<{ question: string; icon: typeof HelpCircle; answer: string | 
     question: 'Is Womanie a replacement for my doctor?',
     icon: Stethoscope,
     answer:
-      "No. Womanie is an assistant that translates medical documents into plain language, highlights patterns across your results over time, and helps you come to appointments with better questions. Nothing it says replaces real clinical advice — if a result worries you, please talk to a clinician.",
+      "No. Womanie is an assistant that translates medical documents into plain language, highlights patterns across your results over time, and helps you come to visits with better questions. Nothing it says replaces real clinical advice — if a result worries you, please talk to a clinician.",
   },
   {
     question: 'How does document upload work?',
@@ -75,7 +75,7 @@ const FAQS: Array<{ question: string; icon: typeof HelpCircle; answer: string | 
     answer: [
       'It can be wrong. It\'s trained to read medical documents carefully and to prefer the 2024–2026 clinical guidelines we\'ve included, but it\'s not infallible.',
       'If an extracted value looks wrong, tap the doc card and "Re-analyze" — re-runs are free and non-destructive. The prior analysis stays queryable as history.',
-      "If something seems urgent, don't wait for the AI. Contact a clinician.",
+      "If something seems urgent, don't wait for the AI. Contact your doctor, or call 144 in an emergency.",
     ],
   },
   {

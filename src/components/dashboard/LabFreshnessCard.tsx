@@ -148,7 +148,7 @@ export default function LabFreshnessCard({ mode }: LabFreshnessCardProps) {
       </ul>
 
       <p className="text-[10px] text-muted-foreground mt-2 leading-relaxed">
-        Suggestions only — your clinician's interval is the one to follow. Hide a lab from this card by archiving older readings, or upload a fresher one to dismiss.
+        Suggestions only — your doctor's interval is the one to follow. Hide a lab from this card by archiving older readings, or upload a fresher one to dismiss.
       </p>
     </Card>
   );

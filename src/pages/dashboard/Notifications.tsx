@@ -263,8 +263,8 @@ export default function Notifications() {
               <CalendarX className="h-4 w-4 text-destructive" />
               <p className="text-sm font-semibold">
                 {cancellations.length === 1
-                  ? 'A doctor cancelled your appointment'
-                  : `${cancellations.length} appointments were cancelled by your doctor`}
+                  ? 'A doctor cancelled your visit'
+                  : `${cancellations.length} visits were cancelled by your doctor`}
               </p>
             </div>
             <ul className="space-y-2">

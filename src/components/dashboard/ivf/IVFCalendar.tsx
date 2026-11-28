@@ -28,7 +28,7 @@ interface IVFCalendarProps {
 const EVENT_TYPE_CONFIG: Record<string, { icon: typeof Syringe; color: string; label: string }> = {
   injection: { icon: Syringe, color: 'bg-primary text-primary-foreground', label: 'Injection' },
   medication: { icon: Pill, color: 'bg-secondary text-secondary-foreground', label: 'Medication' },
-  appointment: { icon: Stethoscope, color: 'bg-accent text-accent-foreground', label: 'Appointment' },
+  appointment: { icon: Stethoscope, color: 'bg-accent text-accent-foreground', label: 'Visit' },
   procedure: { icon: FlaskConical, color: 'bg-destructive text-destructive-foreground', label: 'Procedure' },
   transfer: { icon: Baby, color: 'bg-primary text-primary-foreground', label: 'Transfer' },
   test: { icon: Clock, color: 'bg-muted-foreground text-background', label: 'Test' },

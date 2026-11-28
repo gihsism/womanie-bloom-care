@@ -75,7 +75,7 @@ export default function CyclePredictionInsights({ mode }: CyclePredictionInsight
         ))}
       </ul>
       <p className="text-[10px] text-muted-foreground mt-2">
-        These are population-level signals, not a diagnosis. Discuss with your clinician.
+        These are population-level signals, not a diagnosis. Discuss with your doctor.
       </p>
 
       <div className="flex justify-end mt-2">
@@ -90,7 +90,7 @@ export default function CyclePredictionInsights({ mode }: CyclePredictionInsight
           aria-label="Ask AI about these cycle factors"
         >
           <MessageCircle className="h-3 w-3" />
-          Ask Claude about this
+          Ask AI about this
         </button>
       </div>
     </Card>

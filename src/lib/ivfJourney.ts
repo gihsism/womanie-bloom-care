@@ -431,6 +431,30 @@ export const TWW_SYMPTOMS = [
   'Cramping', 'Spotting', 'Bloating', 'Tender breasts', 'Tiredness', 'Nausea', 'Headache', 'Mood swings', 'Feeling okay',
 ] as const;
 
+/**
+ * Signs to call the clinic about straight away (OHSS: HFEA, RCOG; heavy
+ * bleeding). Logged in the same list as TWW_SYMPTOMS, shown apart, and
+ * the only entries the app reacts to (a call-your-clinic note, and Home's
+ * Today row for 2 days).
+ */
+export const TWW_WARNING_SIGNS = [
+  'Strong tummy pain', 'Belly swelling quickly', 'Short of breath', 'Much less urine', 'Heavy bleeding',
+] as const;
+
+/** Hours a logged warning sign keeps Home's "call your clinic" row. */
+export const WARNING_SIGN_HOURS = 48;
+
+/** A warning sign in an entry logged within the last WARNING_SIGN_HOURS. */
+export function recentWarningSign(entries: SymptomEntry[], now: Date): boolean {
+  const since = now.getTime() - WARNING_SIGN_HOURS * 3_600_000;
+  const signs: readonly string[] = TWW_WARNING_SIGNS;
+  return entries.some(e => {
+    const t = Date.parse(e.occurred_at);
+    if (Number.isNaN(t) || t < since || t > now.getTime() + 60_000) return false;
+    return Array.isArray(e.data?.symptoms) && e.data.symptoms.some(x => typeof x === 'string' && signs.includes(x));
+  });
+}
+
 export interface SymptomEntry { id?: string; occurred_at: string; data: { symptoms?: unknown; note?: unknown } }
 export interface SymptomDay { date: string; symptoms: string[]; notes: string[] }
 

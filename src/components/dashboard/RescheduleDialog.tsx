@@ -155,7 +155,7 @@ const RescheduleDialog = ({ appointment, open, onOpenChange, onRescheduled }: Re
         throw new Error(payload.error || `HTTP ${resp.status}`);
       }
       toast({
-        title: 'Appointment rescheduled',
+        title: 'Visit rescheduled',
         description: `Moved to ${formatVisitWhen(slot)}.`,
       });
       onOpenChange(false);
@@ -180,7 +180,7 @@ const RescheduleDialog = ({ appointment, open, onOpenChange, onRescheduled }: Re
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Reschedule appointment</DialogTitle>
+          <DialogTitle>Reschedule visit</DialogTitle>
           <DialogDescription>
             {appointment && (
               <>Currently {formatVisitWhen(new Date(appointment.scheduled_at))} with {doctorLabel}. Pick a new time below.</>

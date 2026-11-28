@@ -71,7 +71,7 @@ describe('Home template', () => {
     expect(container.textContent).not.toMatch(/\bMenu\b|Upload|Devices|Community|Daily Reminders|Quick Access/);
   });
 
-  it('caps Today at three rows and opens the Log sheet from the primary button', async () => {
+  it('shows three Today rows (the rest behind "N more") and opens the Log sheet from the primary button', async () => {
     state.signals = {
       appointmentToday: new Date(new Date().setHours(23, 0, 0, 0)),
       newDoctorNotes: 1,
@@ -80,7 +80,8 @@ describe('Home template', () => {
     };
     renderHome('menstrual-cycle');
     const today = screen.getByRole('heading', { name: 'Today' }).closest('section')!;
-    expect(within(today).getAllByRole('button')).toHaveLength(3);
+    expect(within(today).getAllByRole('listitem')).toHaveLength(3);
+    expect(within(today).getByRole('button', { name: '1 more' })).toBeInTheDocument();
     expect(screen.queryByRole('dialog')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Log today' }));
     expect(await screen.findByRole('dialog')).toHaveTextContent('Log sheet: log');

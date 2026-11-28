@@ -142,7 +142,8 @@ describe('todayItems', () => {
     it('rank after doctor items, before heads-ups and setup; max 3', () => {
       const s = { newDoctorNotes: 1, medicinesDue: [{ name: 'Iron', time: '08:00' }], vaccinesDue: ['Tdap'], lastMoodCheck: null, nextVisit: at(2), setup: { done: 1, total: 3 } };
       expect(ids('pregnancy', s)).toEqual(['doctor-note', 'medicine-due', 'vaccination-due']);
-      expect(ids('pregnancy', { ...s, newDoctorNotes: 0, medicinesDue: [] })).toEqual(['vaccination-due', 'mood-check', 'visit-soon']);
+      // The EPDS mood check is a nudge: after a visit this week.
+      expect(ids('pregnancy', { ...s, newDoctorNotes: 0, medicinesDue: [] })).toEqual(['vaccination-due', 'visit-soon', 'mood-check']);
       expect(ids('contraception', { pill: pill(), medicinesDue: [{ name: 'Iron', time: '08:00' }], setup: { done: 1, total: 3 } }))
         .toEqual(['pill-missed', 'medicine-due', 'setup']);
     });

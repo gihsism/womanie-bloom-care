@@ -419,7 +419,7 @@ export default function PregnancyWeightTracker({ dueDate }: PregnancyWeightTrack
 
       <p className="text-[10px] text-muted-foreground mt-2 leading-relaxed">
         Reference: Institute of Medicine, Weight Gain During Pregnancy (2009); the Swiss BLV brochure (2025)
-        uses the same ranges. Individual targets can differ — your OB's recommendation is the one to follow.
+        uses the same ranges. Individual targets can differ — your doctor's or midwife's advice is the one to follow.
       </p>
     </Card>
   );

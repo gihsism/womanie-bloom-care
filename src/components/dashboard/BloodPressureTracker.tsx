@@ -55,7 +55,7 @@ function classify(sys: number, dia: number, isPregnancy: boolean):
   if (isPregnancy ? (sys >= 160 || dia >= 110) : (sys >= 180 || dia >= 120)) {
     return {
       band: 'severe',
-      label: isPregnancy ? 'Severe — call your OB now' : 'Hypertensive crisis range',
+      label: isPregnancy ? 'Severe — call your doctor or maternity unit now' : 'Hypertensive crisis range',
       color: `${healthTone.alert.badge} font-medium`,
       urgent: true,
     };
@@ -174,9 +174,9 @@ export default function BloodPressureTracker({ mode }: BloodPressureTrackerProps
     if (c.urgent) {
       toast({
         variant: 'destructive',
-        title: 'Severe range — call your clinician',
+        title: 'Severe range — call your doctor',
         description: isPregnancy
-          ? `${s}/${d} mmHg is in the severe range. ACOG recommends contacting your OB now.`
+          ? `${s}/${d} mmHg is in the severe range. ACOG advises contacting your doctor or maternity unit now.`
           : `${s}/${d} mmHg is in the hypertensive-crisis range. Re-measure after 5 minutes of rest; if it stays this high, call your doctor now, or emergency services with chest pain, breathlessness or vision changes.`,
       });
     } else {
@@ -208,7 +208,7 @@ export default function BloodPressureTracker({ mode }: BloodPressureTrackerProps
           <p className="text-sm font-semibold">Blood pressure</p>
           <p className="text-[11px] text-muted-foreground">
             {isPregnancy
-              ? 'Preeclampsia screening — log home readings between OB visits'
+              ? 'Pre-eclampsia watch — log home readings between check-ups'
               : 'Cardiovascular monitoring trend'}
           </p>
         </div>
@@ -330,7 +330,7 @@ export default function BloodPressureTracker({ mode }: BloodPressureTrackerProps
 
       <p className="text-[10px] text-muted-foreground mt-3 leading-relaxed">
         {isPregnancy
-          ? <>Reference: ACOG 2020 hypertension in pregnancy guidance. Home readings supplement, don't replace, clinic measurements. Severe range (≥160/≥110) is an immediate call-your-OB situation.</>
+          ? <>Reference: ACOG 2020 hypertension in pregnancy guidance. Home readings supplement, don't replace, clinic measurements. Severe range (≥160/≥110): call your doctor or maternity unit straight away.</>
           : <>Reference: AHA/ACC 2025 blood pressure guideline (same categories as 2017). Blood pressure tends to rise after menopause; home readings supplement, don't replace, clinic measurements. ≥180/≥120 is a hypertensive crisis — call your doctor right away.</>}
       </p>
     </Card>

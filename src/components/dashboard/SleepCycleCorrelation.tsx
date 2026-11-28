@@ -257,7 +257,7 @@ export default function SleepCycleCorrelation({ mode }: Props) {
               ? 'Common in the PMS window — progesterone drops, plus body temperature and bloating affect sleep depth.'
               : result.worstPhase === 'menstrual'
                 ? 'Cramps and discomfort often disrupt sleep around your period.'
-                : 'Worth noting in your cycle log — patterns like this can be a useful conversation with your clinician.'}
+                : 'Worth noting in your cycle log — patterns like this can be a useful conversation with your doctor.'}
           </span>
         </p>
       )}

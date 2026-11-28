@@ -160,7 +160,7 @@ const PostpartumPelvicFloor = () => {
               .slice(0, 12)
               .map(s => (
                 <li key={s.at} className="flex items-center justify-between text-[11px] text-muted-foreground">
-                  <span>{format(parseISO(s.at), 'h:mm a')}</span>
+                  <span>{format(parseISO(s.at), 'HH:mm')}</span>
                   <button
                     type="button"
                     onClick={() => removeSet(s.at)}

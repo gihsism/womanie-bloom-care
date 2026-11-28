@@ -43,7 +43,7 @@ const PHASE_TIPS: Record<NonNullable<Phase>, { headline: string; bullets: string
       'Keep caffeine moderate: up to 200 mg a day, about 1-2 cups of coffee (EFSA, BLV)',
       'Best to stop alcohol from this point: it is advised against when trying to get pregnant, and some studies link it to lower IVF success',
       'Vitamin D: the everyday amount is 600 IU a day (BLV); if a test shows a low level, your doctor will advise you',
-      'Strength + cardio 4-5×/week unless your clinician says otherwise',
+      'Strength + cardio 4-5×/week unless your clinic says otherwise',
     ],
   },
   stimulation: {

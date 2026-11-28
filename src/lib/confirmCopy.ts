@@ -6,10 +6,10 @@ import type { ConfirmOptions } from '@/components/ConfirmDialog';
 
 export function cancelAppointmentConfirm(doctorLabel: string, when: string): ConfirmOptions {
   return {
-    title: 'Cancel this appointment?',
+    title: 'Cancel this visit?',
     description: `${doctorLabel} · ${when}. Your doctor will see that you cancelled. If you change your mind, tap Undo on the message that appears next.`,
-    confirmLabel: 'Cancel appointment',
-    cancelLabel: 'Keep appointment',
+    confirmLabel: 'Cancel visit',
+    cancelLabel: 'Keep visit',
     destructive: true,
   };
 }

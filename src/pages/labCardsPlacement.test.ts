@@ -5,7 +5,7 @@ import { describe, it, expect } from 'vitest';
 // Home is a short page: greeting, hero, Today, one button, "More for
 // <stage>". The general lab cards live on Records; the stage lab cards,
 // chart cards and visit cards moved off Home too (Records / Visits).
-const CARDS = ['WeeklySummary', 'RecentFindings', 'OverdueTests', 'HealthTrends', 'HealthSummaryWidget'];
+const CARDS = ['WeeklySummary', 'OverdueTests', 'HealthTrends', 'HealthSummaryWidget'];
 const MOVED_OFF_HOME = [
   // lab cards -> Records
   'ModeLabInsights', 'CycleLabInsights', 'PregnancyLabInsights', 'LabFreshnessCard', 'AmhAgeContext',
@@ -33,6 +33,11 @@ describe('general lab card placement', () => {
 
   it.each(CARDS)('%s is rendered exactly once on Health Records', (card) => {
     expect(records.match(new RegExp(`<${card}\\b`, 'g')) ?? []).toHaveLength(1);
+  });
+
+  it('Records lists flagged results once ("Talk to your doctor about"), not again in a second card', () => {
+    expect(records).not.toMatch(/<RecentFindings\b/);
+    expect(records).toContain('Talk to your doctor about');
   });
 
   it('Home keeps a route to Records (a "More for" row)', () => {

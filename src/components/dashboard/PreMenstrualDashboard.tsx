@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -78,6 +79,7 @@ function writeLS(userId: string, key: string, value: unknown) {
 }
 
 export default function PreMenstrualDashboard() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const userId = user?.id;
   const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
@@ -342,14 +344,17 @@ export default function PreMenstrualDashboard() {
           Learn More
         </h3>
         <div className="space-y-2">
+          {/* Each row opens Ask AI with the question filled in (they used to lead nowhere). */}
           {[
-            { title: 'What is a period?', subtitle: 'The basics explained simply' },
-            { title: 'Puberty timeline', subtitle: 'What happens and when' },
-            { title: 'How to talk to parents', subtitle: 'Starting the conversation' },
-            { title: 'Period products guide', subtitle: 'Pads, tampons & more' },
+            { title: 'What is a period?', subtitle: 'The basics explained simply', q: 'What is a period, explained simply for someone who has not had one yet?' },
+            { title: 'Puberty timeline', subtitle: 'What happens and when', q: 'What happens during puberty, and roughly when?' },
+            { title: 'How to talk to parents', subtitle: 'Starting the conversation', q: 'How can I start talking to my parents about periods?' },
+            { title: 'Period products guide', subtitle: 'Pads, tampons & more', q: 'What period products are there (pads, tampons, cups, period pants) and how do I choose?' },
           ].map((resource) => (
             <button
               key={resource.title}
+              type="button"
+              onClick={() => navigate(`/dashboard/ai-doctor?q=${encodeURIComponent(resource.q)}`)}
               className="w-full flex items-center justify-between p-3 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors text-left"
             >
               <div>

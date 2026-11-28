@@ -44,7 +44,7 @@ export const PREGNANCY_VACCINES: Vaccine[] = [
     windowStartWeek: 32,
     windowEndWeek: 36,
     rationale:
-      'Single-dose maternal RSV vaccine during the recommended window passes antibodies to baby. Alternative is monoclonal antibody (nirsevimab) for the infant after birth — discuss with OB which path fits. In Switzerland the BAG (2025) advises it at weeks 32 to 36 if your due date falls between early October and end of March; you choose between this and the antibody for your baby after birth.',
+      'Single-dose maternal RSV vaccine during the recommended window passes antibodies to baby. Alternative is monoclonal antibody (nirsevimab) for the infant after birth — discuss with your doctor or midwife which path fits. In Switzerland the BAG (2025) advises it at weeks 32 to 36 if your due date falls between early October and end of March; you choose between this and the antibody for your baby after birth.',
     cadence: 'once-per-season',
   },
   {

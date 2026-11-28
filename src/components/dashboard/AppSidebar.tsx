@@ -25,7 +25,7 @@ import { useAttentionCount } from "@/hooks/useAttentionCount";
 
 const menuItems = [
   { title: "My Profile", url: "/dashboard/profile", icon: User },
-  { title: "Appointments", url: "/dashboard/appointments", icon: CalendarClock },
+  { title: "Visits", url: "/dashboard/appointments", icon: CalendarClock },
   { title: "Notifications", url: "/dashboard/notifications", icon: Bell },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
   { title: "Emergency Contacts", url: "/dashboard/emergency", icon: Phone },
@@ -81,7 +81,7 @@ export function AppSidebar() {
                         {item.url === '/dashboard/appointments' && attention.upcomingAppointments > 0 && (
                           <span
                             className="absolute -top-1 -right-1 inline-flex items-center justify-center min-w-[14px] h-[14px] px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-bold leading-none"
-                            aria-label={`${attention.upcomingAppointments} upcoming appointments`}
+                            aria-label={`${attention.upcomingAppointments} upcoming visits`}
                           >
                             {attention.upcomingAppointments > 9 ? '9+' : attention.upcomingAppointments}
                           </span>
