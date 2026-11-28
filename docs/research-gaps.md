@@ -808,6 +808,36 @@ reviews too. Asked about surgery ("What surgery is there for bladder
 leaks?"), the sling reviews still lead. Search evals unchanged. Tests:
 `ask-ai-audit.test.ts` (round 10 block).
 
+### Summary content check, next 100 items
+
+Next 100 items on the round-6 exposure ranking (none skipped; all had
+PubMed abstracts). Only 32 items with any exposure are left unchecked
+after this round, so round 11 needs a new ranking (new questions). 85
+fair. 19 fixes in 15 items, text only (8 re-embedded offline with the
+incremental script; label-only changes need no re-embed):
+
+- Certainty -> "not stated" where the abstract grades nothing (risk of
+  bias or study-quality scales only): `pmid-27461606`, `pmid-34967466`,
+  `pmid-30624659`, `pmid-32635675`, `pmid-38715235`, `pmid-30928686`,
+  `pmid-40312882`.
+- Hedges restored to match the GRADE level: `pmid-29630882` (exercise for
+  period pain: pain "probably", duration "may", 2 places),
+  `pmid-41288141` (cyproterone vs other hirsutism treatments, "may"),
+  `pmid-27701665` (nausea in pregnancy, low quality, "may", 3 places),
+  `pmid-29045765` (metformin in pregnancy, "may", 2 places),
+  `pmid-42746920` (length gain, low certainty: "may", was "probably").
+- Causal wording on observational data: `pmid-34895348` (spiramycin
+  "linked to" lower toxoplasma transmission).
+- Wrong scope: `pmid-33461239` (two trials studied women as a group, not
+  "only two included women"), `pmid-38016166` (the combined estrogen /
+  bazedoxifene product is sold in the US at a lower dose; only the dose
+  studied is not).
+
+Left as is: 12 judgement calls (labels picked from a graded range; two
+hedges that repeat the Cochrane authors' own wording), e.g.
+`pmid-39546333`, `pmid-29068467`, `pmid-36635165`, `pmid-35099778`,
+`pmid-33034900`, `pmid-32096862`, `pmid-28444736`, `pmid-35416478`.
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed
