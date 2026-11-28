@@ -6,13 +6,12 @@ import { withSentry } from './_lib/sentry.js';
 import { withMaintenance } from './_lib/maintenance.js';
 import { applyChatLimits } from './_lib/chat-limits.js';
 import { parseConversationId, persistChatTurn } from './_lib/chatConversation.js';
-import { buildLifeContext } from './_lib/life-context.js';
-import { buildProfileContext } from './_lib/profile-context.js';
-import { fetchPersonalRows, selectPersonalContext } from './_lib/personal-retrieval.js';
+import { fetchPersonalRows } from './_lib/personal-retrieval.js';
+import { assembleChatSystemPrompt, buildChatContext } from './_lib/chat-context.js';
 import { SOURCES_FOOTER_MARK, formatSourcesFooter, stripUnknownCitations } from './_lib/research/library.js';
-import { buildChatSystemPrompt, selectChatEvidenceForTurn } from './_lib/research/chat-prompt.js';
+import { selectChatEvidenceForTurn } from './_lib/research/chat-prompt.js';
 import { checkCitations, evidenceTexts } from './_lib/research/citation-check.js';
-import { FOLLOWUPS_PROMPT, parseFollowUps, visibleWhileStreaming } from './_lib/chat-followups.js';
+import { parseFollowUps, visibleWhileStreaming } from './_lib/chat-followups.js';
 import { recordsUsedInAnswer } from './_lib/record-citations.js';
 
 export const config = {
@@ -56,53 +55,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const messages = limited.messages;
   const model = ALLOWED_MODELS.includes(requestedModel) ? requestedModel : DEFAULT_MODEL;
 
-  // Client-supplied context: things the server can't see (age lives in
-  // localStorage), or things we precomputed there and don't want to
-  // re-derive here (AMH age-bracket assessment). Validated shape only;
-  // anything else is dropped. Free-form `summary` lets the client send
-  // a pre-built block without us reaching into its internals.
-  const personalContextBlock: string = (() => {
-    if (!personalContext || typeof personalContext !== 'object') return '';
-    const lines: string[] = [];
-    const age = typeof personalContext.age === 'number' && personalContext.age > 0 && personalContext.age < 130
-      ? Math.floor(personalContext.age)
-      : null;
-    if (age !== null) lines.push(`Age: ${age}`);
-    const amhSummary = typeof personalContext.amhSummary === 'string'
-      ? personalContext.amhSummary.slice(0, 400)
-      : null;
-    if (amhSummary) lines.push(`AMH context: ${amhSummary}`);
-    const flags = typeof personalContext.flags === 'string'
-      ? personalContext.flags.slice(0, 400)
-      : null;
-    if (flags) lines.push(`Lab signals: ${flags}`);
-    const postpartumWeeks = typeof personalContext.postpartumWeeks === 'number'
-      && personalContext.postpartumWeeks >= 0
-      && personalContext.postpartumWeeks <= 104
-      ? Math.floor(personalContext.postpartumWeeks)
-      : null;
-    if (postpartumWeeks !== null) {
-      lines.push(`Postpartum week ${postpartumWeeks} (${postpartumWeeks * 7} days since birth)`);
-    }
-    const cyclePhase = typeof personalContext.cyclePhase === 'string'
-      ? personalContext.cyclePhase.slice(0, 200)
-      : null;
-    if (cyclePhase) lines.push(`Cycle: ${cyclePhase}`);
-    if (lines.length === 0) return '';
-    return `\n## Personal context\n${lines.join('\n')}\n`;
-  })();
-
   const sql = neon(process.env.DATABASE_URL!);
-
-  // Capture the latest user turn now but don't persist until we
-  // actually have an assistant reply — a stream that fails before a
-  // single content_block_delta shouldn't leave an orphan user message
-  // sitting in chat_messages with no response next to it.
-  const lastMsg = messages[messages.length - 1];
-  const userTurnContent =
-    lastMsg?.role === 'user' && typeof lastMsg.content === 'string'
-      ? lastMsg.content
-      : null;
 
   // Her documents and extracted values, read in full (paged, capped) and
   // filtered per question below; see api/_lib/personal-retrieval.ts.
@@ -146,59 +99,27 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   ]);
 
   const profile = profileRow[0];
-
-  let medicalContext = '';
-  if (profile) {
-    // Stage anchors ("what week am I?") only for the stage she is in now.
-    medicalContext += buildProfileContext(profile, new Date(), clientToday);
-  }
-
   type Row = Record<string, unknown>;
 
-  // Question-aware personal records: the full history of every test the
-  // question names, matching documents, recent out-of-range values and a
-  // small baseline, within a token budget (replaces "latest 20 documents
-  // + latest 100 values" regardless of the question).
-  const previousUserTurn = [...messages.slice(0, -1)].reverse()
-    .find((m: { role?: unknown; content?: unknown }) => m?.role === 'user' && typeof m.content === 'string')?.content as string | undefined;
-  const personalSelection = selectPersonalContext({
-    question: userTurnContent,
-    previousQuestion: previousUserTurn,
-    labs: personalRows.labs,
-    docs: personalRows.docs,
-  });
-  medicalContext += personalSelection.block;
-
-  if (upcomingApts.length > 0) {
-    medicalContext += '\n## Upcoming Appointments\n';
-    (upcomingApts as Row[]).forEach((a) => {
-      const doctorLabel = [a.doctor_title, a.doctor_name].filter(Boolean).join(' ') || 'a doctor';
-      const specialties = Array.isArray(a.doctor_specialties) ? a.doctor_specialties as string[] : [];
-      const spec = specialties.length > 0 ? `, ${specialties[0]}` : '';
-      medicalContext += `- ${new Date(String(a.scheduled_at)).toISOString()} with ${doctorLabel}${spec} — ${a.consultation_type || 'consultation'}${a.duration ? `, ${a.duration} min` : ''}\n`;
-    });
-  }
-
-  if (visibleNotes.length > 0) {
-    medicalContext += '\n## Doctor Notes (visible to patient)\n';
-    (visibleNotes as Row[]).forEach((n) => {
-      const doctorLabel = [n.doctor_title, n.doctor_name].filter(Boolean).join(' ') || 'A doctor';
-      const created = new Date(String(n.created_at)).toLocaleDateString();
-      medicalContext += `- ${created} — ${doctorLabel} (${n.note_type || 'note'}): ${n.title}\n  ${String(n.content || '').replace(/\n/g, '\n  ')}\n`;
-    });
-  }
-
-  medicalContext += buildLifeContext({
+  // Profile line, question-aware records, visits, doctor notes, app logs
+  // and the page's personal context (see api/_lib/chat-context.ts; the
+  // prompt harness ask-ai-prompt.test.ts builds the same block offline).
+  // userTurnContent is captured now but persisted only with a reply: a
+  // stream that fails before any text must not leave an orphan question.
+  const { medicalContext, personalSelection, userTurnContent, previousUserTurn } = buildChatContext({
+    profile,
+    personalRows,
+    upcomingApts: upcomingApts as Row[],
+    visibleNotes: visibleNotes as Row[],
+    lifeMeds: lifeMeds as Row[],
+    lifeEvents: lifeEvents as Row[],
+    lifeBirth: ((lifeBirth as Row[])[0] ?? null),
+    lifeBabies: lifeBabies as Row[],
+    personalContext,
+    messages,
     now: new Date(),
-    medications: lifeMeds as Row[],
-    events: lifeEvents as Row[],
-    birth: ((lifeBirth as Row[])[0] ?? null),
-    babies: lifeBabies as Row[],
+    clientToday,
   });
-
-  if (personalContextBlock) {
-    medicalContext += personalContextBlock;
-  }
 
   // Research library: the 0-6 best-matching guideline/review summaries
   // for this question and life stage, given to the model as numbered
@@ -212,7 +133,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const { chatSources, researchItems, passages, block: evidenceBlock } = await selectChatEvidenceForTurn(userTurnContent, previousUserTurn, profile?.life_stage);
   // Follow-up chips come from a short tail block in the same reply (see
   // api/_lib/chat-followups.ts); it is stripped before the citation check.
-  const systemPrompt = buildChatSystemPrompt(medicalContext, evidenceBlock) + FOLLOWUPS_PROMPT;
+  const systemPrompt = assembleChatSystemPrompt(medicalContext, evidenceBlock);
 
   const anthropicMessages = messages.map((m: { role: string; content: string }) => ({
     role: m.role === 'system' ? 'user' : m.role,

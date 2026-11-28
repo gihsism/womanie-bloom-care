@@ -32,7 +32,10 @@ export function todayNumber(now: Date, clientToday?: unknown): number {
 export function buildProfileContext(profile: Row, now: Date, clientToday?: unknown): string {
   const today = todayNumber(now, clientToday);
   const stage = typeof profile.life_stage === 'string' ? profile.life_stage : '';
-  let out = `Patient: ${profile.full_name || 'Unknown'}, Life stage: ${stage || 'Not specified'}`;
+  // First name only: enough to address her, and her surname adds nothing
+  // to an answer (less personal data sent to the model provider).
+  const firstName = typeof profile.full_name === 'string' ? profile.full_name.trim().split(/\s+/)[0] : '';
+  let out = `Patient: ${firstName || 'Unknown'}, Life stage: ${stage || 'Not specified'}`;
 
   if (stage === 'pregnancy' && profile.pregnancy_due_date) {
     const due = new Date(profile.pregnancy_due_date as string);
