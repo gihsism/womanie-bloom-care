@@ -198,6 +198,8 @@ export async function installMockApi(page: Page, opts: MockOptions): Promise<Moc
       case '/api/connections/pending': return json(route, { pending: [] });
       case '/api/connections/approved': return json(route, { approved: [] });
       case '/api/push/config': return json(route, { enabled: false });
+      // Photo of the baby scale: a fixed reading (tests override it with opts.json).
+      case '/api/baby/scale-photo': return json(route, { weight_kg: 4.62, confidence: 0.9 });
       case '/api/summary/generate':
         return json(route, {
           summary: '**This week:** ferritin is a little low; vitamin D is in range.',
