@@ -140,6 +140,9 @@ export default defineConfig(() => ({
     },
   },
   build: {
+    // dist/.vite/manifest.json: the chunk graph scripts/check-bundle-size.mjs
+    // reads to measure first-load JS per route (not served, not precached).
+    manifest: true,
     rollupOptions: {
       external: ['@niceplugins/capacitor-healthkit'],
       output: {

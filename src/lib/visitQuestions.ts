@@ -10,6 +10,8 @@ export interface VisitQuestion {
 
 export const MAX_QUESTIONS = 20;
 export const MAX_QUESTION_CHARS = 300;
+/** Where questions go when no visit is booked yet. The print summary reads every row; doctors only see rows joined to their own appointment. */
+export const UNSCHEDULED_VISIT_ID = 'unscheduled';
 
 /** Parse the stored questions (JSONB may arrive parsed or as a string); drops junk. */
 export function parseQuestions(raw: unknown): VisitQuestion[] {

@@ -9,7 +9,7 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import { getFriendlyName } from '@/lib/medical-utils';
 import { normalizeLifeStage } from '@/lib/lifeStage';
 import { readTtcStartLocal } from '@/hooks/useTtcStart';
-import { UNSCHEDULED_VISIT_ID } from '@/lib/hrtQuestions';
+import { UNSCHEDULED_VISIT_ID } from '@/lib/visitQuestions';
 import { formatLabDay } from '@/lib/health-trends';
 import { recheckHints, type RecheckRow } from '@/lib/labRecheck';
 import { prepQuestions, resultsToDiscuss, type PrepResultRow } from '@/lib/visitPrep';

@@ -4,13 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import ModeHeroStat from '@/components/dashboard/ModeHeroStat';
-import PregnancyBodyMap from '@/components/dashboard/PregnancyBodyMap';
-import BabyBodyMap from '@/components/dashboard/BabyBodyMap';
-import CycleDialHero from '@/components/dashboard/CycleDialHero';
-import PillRingHero from '@/components/dashboard/PillRingHero';
-import MenopauseBodyMap from '@/components/dashboard/MenopauseBodyMap';
-import IVFTimelineHero from '@/components/dashboard/IVFTimelineHero';
 import { TodayList, PrimaryButton, MoreForStage, useGo, type SheetKind } from '@/components/dashboard/HomeBlocks';
 import PeriodLateCard from '@/components/dashboard/PeriodLateCard';
 import { useStageProfile } from '@/hooks/useStageProfile';
@@ -24,6 +17,30 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 // below), so the first tap on "Log today" still opens it straight away.
 const loadLogSheet = () => import('@/components/dashboard/LogSheet');
 const LogSheet = lazy(loadLogSheet);
+
+// One hero per life stage, and she only ever sees hers: each loads on its
+// own instead of all seven (body maps, week data, IVF timeline...) coming
+// with Home. Until hers has loaded, Home keeps showing its loading skeleton
+// (the Suspense below), exactly as while the profile loads, so nothing on
+// the page appears in two steps.
+const ModeHeroStat = lazy(() => import('@/components/dashboard/ModeHeroStat'));
+const PregnancyBodyMap = lazy(() => import('@/components/dashboard/PregnancyBodyMap'));
+const BabyBodyMap = lazy(() => import('@/components/dashboard/BabyBodyMap'));
+const CycleDialHero = lazy(() => import('@/components/dashboard/CycleDialHero'));
+const PillRingHero = lazy(() => import('@/components/dashboard/PillRingHero'));
+const MenopauseBodyMap = lazy(() => import('@/components/dashboard/MenopauseBodyMap'));
+const IVFTimelineHero = lazy(() => import('@/components/dashboard/IVFTimelineHero'));
+
+function HomeSkeleton() {
+  return (
+    <div className="min-h-screen bg-background px-4 py-6 space-y-4">
+      <Skeleton className="h-8 w-48" />
+      <Skeleton className="h-4 w-32" />
+      <Skeleton className="h-64 w-full rounded-xl" />
+      <Skeleton className="h-24 w-full rounded-xl" />
+    </div>
+  );
+}
 
 // Home: the same short template for every life stage —
 //   1. greeting, with the stage as a quiet "· change" link (to Me)
@@ -72,16 +89,7 @@ const PatientDashboard = () => {
     if (!loading && !user) navigate('/auth/login');
   }, [user, loading, navigate]);
 
-  if (loading || !mode) {
-    return (
-      <div className="min-h-screen bg-background px-4 py-6 space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-4 w-32" />
-        <Skeleton className="h-64 w-full rounded-xl" />
-        <Skeleton className="h-24 w-full rounded-xl" />
-      </div>
-    );
-  }
+  if (loading || !mode) return <HomeSkeleton />;
   if (!user) return null;
 
   const name = profile?.full_name;
@@ -99,6 +107,7 @@ const PatientDashboard = () => {
     : <ModeHeroStat selectedMode={mode} periodData={periodData} pregnancyDueDate={pregnancyDueDate} ivfStartDate={ivfStartDate} ivfPhase={ivfPhase} />;
 
   return (
+    <Suspense fallback={<HomeSkeleton />}>
     <main className="min-h-screen bg-background">
       <div className="w-full max-w-2xl mx-auto px-4 pt-6 pb-8">
         <header className="mb-5">
@@ -132,6 +141,7 @@ const PatientDashboard = () => {
         </Suspense>
       )}
     </main>
+    </Suspense>
   );
 };
 

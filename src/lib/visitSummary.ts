@@ -9,7 +9,7 @@
 import { lifeStageLabel } from './lifeStageLabels';
 import { formatDate } from './dateFormat';
 import { parseQuestions } from './visitQuestions';
-import { monthsBetween } from './ttc';
+import { monthsBetween } from './monthsBetween';
 
 export const SUMMARY_SECTIONS = {
   stage: 'Life stage and today',

@@ -41,14 +41,17 @@ vi.mock('@/components/dashboard/LogSheet', () => ({
 
 import PatientDashboard from './PatientDashboard';
 
-function renderHome(mode: LifeStage, weeks: number | null = null) {
+// The stage's hero loads on its own (lazy); Home shows its skeleton until then.
+async function renderHome(mode: LifeStage, weeks: number | null = null) {
   state.mode = mode;
   state.weeks = weeks;
-  return render(
+  const r = render(
     <MemoryRouter>
       <PatientDashboard />
     </MemoryRouter>,
   );
+  await screen.findAllByTestId('hero');
+  return r;
 }
 
 beforeEach(() => {
@@ -58,8 +61,8 @@ beforeEach(() => {
 const STAGES: LifeStage[] = ['pre-menstrual', 'menstrual-cycle', 'contraception', 'conception', 'ivf', 'pregnancy', 'postpartum', 'menopause', 'post-menopause'];
 
 describe('Home template', () => {
-  it.each(STAGES)('%s: five blocks, one primary button, at most 10 tappables', (mode) => {
-    const { container } = renderHome(mode, 20);
+  it.each(STAGES)('%s: five blocks, one primary button, at most 10 tappables', async (mode) => {
+    const { container } = await renderHome(mode, 20);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/, Lena$/);
     expect(screen.getByRole('link', { name: /change life stage/i })).toHaveAttribute('href', '/dashboard/settings#life-stage');
     expect(screen.getAllByTestId('hero')).toHaveLength(1);
@@ -78,7 +81,7 @@ describe('Home template', () => {
       flaggedResults: 2,
       setup: { done: 1, total: 3 },
     };
-    renderHome('menstrual-cycle');
+    await renderHome('menstrual-cycle');
     const today = screen.getByRole('heading', { name: 'Today' }).closest('section')!;
     expect(within(today).getAllByRole('listitem')).toHaveLength(3);
     expect(within(today).getByRole('button', { name: '1 more' })).toBeInTheDocument();
@@ -88,7 +91,7 @@ describe('Home template', () => {
   });
 
   it('pregnancy week 30: "Count kicks" is the filled button, and a quiet "Log today" still opens the log', async () => {
-    renderHome('pregnancy', 30);
+    await renderHome('pregnancy', 30);
     const kicks = screen.getByRole('button', { name: 'Count kicks' });
     const log = screen.getByRole('button', { name: 'Log today' });
     expect(kicks.className).not.toMatch(/underline-offset/);
@@ -98,13 +101,13 @@ describe('Home template', () => {
   });
 
   it.each([[28], [37]])('pregnancy week %i keeps a way into the log', async (w) => {
-    renderHome('pregnancy', w);
+    await renderHome('pregnancy', w);
     fireEvent.click(screen.getByRole('button', { name: 'Log today' }));
     expect(await screen.findByRole('dialog')).toHaveTextContent('Log sheet: log');
   });
 
-  it('stages whose filled button is the log get no extra link', () => {
-    renderHome('pregnancy', 20);
+  it('stages whose filled button is the log get no extra link', async () => {
+    await renderHome('pregnancy', 20);
     expect(screen.getAllByRole('button', { name: 'Log today' })).toHaveLength(1);
   });
 });

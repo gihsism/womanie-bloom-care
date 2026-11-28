@@ -166,12 +166,10 @@ export interface TtcDoctorAdvice {
   monthsLeft: number;
 }
 
-/** Whole calendar months from start to now (day-of-month aware). */
-export function monthsBetween(start: Date, now: Date): number {
-  let m = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
-  if (now.getDate() < start.getDate()) m -= 1;
-  return Math.max(0, m);
-}
+// Lives in monthsBetween.ts so Records / visit summaries can use it without
+// downloading the trying-to-conceive and ovulation logic.
+import { monthsBetween } from './monthsBetween';
+export { monthsBetween };
 
 export function thresholdMonthsFor(age: number | null | undefined): number {
   if (age != null && age >= 40) return 0;

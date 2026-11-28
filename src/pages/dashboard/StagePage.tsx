@@ -8,22 +8,8 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import { useScrollToHash } from '@/hooks/useScrollToHash';
 import { useStageProfile } from '@/hooks/useStageProfile';
 import { stageLabel } from '@/lib/stageLabels';
-import PregnancyVaccinations from '@/components/dashboard/PregnancyVaccinations';
-import PregnancyCheckupsCard from '@/components/dashboard/PregnancyCheckupsCard';
-import PregnancyNutrition from '@/components/dashboard/PregnancyNutrition';
-import PregnancyExercise from '@/components/dashboard/PregnancyExercise';
-import MenopauseNutrition from '@/components/dashboard/MenopauseNutrition';
-import IVFNutrition from '@/components/dashboard/IVFNutrition';
 import MedicineLog from '@/components/dashboard/MedicineLog';
 import GuidesSection from '@/components/dashboard/GuidesSection';
-import CyclePhaseNutrition from '@/components/dashboard/CyclePhaseNutrition';
-import CyclePhaseExercise from '@/components/dashboard/CyclePhaseExercise';
-import PMSForecastCard from '@/components/dashboard/PMSForecastCard';
-import FertilityOutlookCard from '@/components/dashboard/FertilityOutlookCard';
-import OvulationTestsCard from '@/components/dashboard/OvulationTestsCard';
-import TtcDoctorCard from '@/components/dashboard/TtcDoctorCard';
-import FertilityForecast from '@/components/dashboard/FertilityForecast';
-import CycleExplainedCard from '@/components/dashboard/CycleExplainedCard';
 import EvidenceNote from '@/components/research/EvidenceNote';
 import { evidenceSpec } from '@/lib/evidenceTopics';
 
@@ -43,6 +29,23 @@ const MenopauseSymptomCalendar = lazy(() => import('@/components/dashboard/Menop
 const MenopauseSymptomTrends = lazy(() => import('@/components/dashboard/MenopauseSymptomTrends'));
 const PerimenopauseStageCard = lazy(() => import('@/components/dashboard/PerimenopauseStageCard'));
 const ContraceptionDashboard = lazy(() => import('@/components/dashboard/ContraceptionDashboard'));
+// The stage-only cards and guides too (check-ups, vaccinations, nutrition,
+// ovulation tests...): same single Suspense boundary below, so they still
+// appear together with the stage's tracker.
+const PregnancyVaccinations = lazy(() => import('@/components/dashboard/PregnancyVaccinations'));
+const PregnancyCheckupsCard = lazy(() => import('@/components/dashboard/PregnancyCheckupsCard'));
+const PregnancyNutrition = lazy(() => import('@/components/dashboard/PregnancyNutrition'));
+const PregnancyExercise = lazy(() => import('@/components/dashboard/PregnancyExercise'));
+const MenopauseNutrition = lazy(() => import('@/components/dashboard/MenopauseNutrition'));
+const IVFNutrition = lazy(() => import('@/components/dashboard/IVFNutrition'));
+const CyclePhaseNutrition = lazy(() => import('@/components/dashboard/CyclePhaseNutrition'));
+const CyclePhaseExercise = lazy(() => import('@/components/dashboard/CyclePhaseExercise'));
+const PMSForecastCard = lazy(() => import('@/components/dashboard/PMSForecastCard'));
+const FertilityOutlookCard = lazy(() => import('@/components/dashboard/FertilityOutlookCard'));
+const OvulationTestsCard = lazy(() => import('@/components/dashboard/OvulationTestsCard'));
+const TtcDoctorCard = lazy(() => import('@/components/dashboard/TtcDoctorCard'));
+const FertilityForecast = lazy(() => import('@/components/dashboard/FertilityForecast'));
+const CycleExplainedCard = lazy(() => import('@/components/dashboard/CycleExplainedCard'));
 
 // /dashboard/stage — everything for the current life stage that used to be
 // stacked on Home: the stage's big tracker (unchanged), its guides and the

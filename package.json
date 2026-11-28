@@ -14,7 +14,9 @@
     "typecheck": "tsc -b",
     "e2e": "playwright test",
     "e2e:report": "playwright show-report e2e/.report",
-    "e2e:local": "npm run build && playwright test -c e2e-local/playwright.config.ts"
+    "e2e:local": "npm run build && playwright test -c e2e-local/playwright.config.ts",
+    "size": "node scripts/check-bundle-size.mjs",
+    "size:build": "npm run build && node scripts/check-bundle-size.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.2.0",

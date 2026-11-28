@@ -12,7 +12,7 @@
 // not show up), not a recommendation; the note never says a test is "due".
 
 import { formatLabDay } from './health-trends';
-import { monthsBetween } from './ttc';
+import { monthsBetween } from './monthsBetween';
 
 export interface RecheckRow {
   title: string;

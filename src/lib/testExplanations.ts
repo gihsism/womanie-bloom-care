@@ -178,9 +178,14 @@ const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 // is HDL, "Hemoglobin A1c" is HbA1c. Otherwise longest name first, as a
 // whole word ("Gastrin" is not AST).
 const BROAD = new Set(['cholesterol', 'total cholesterol', 'hemoglobin', 'haemoglobin', 'iron']);
-const NAMES = [...Object.keys(testExplanations), ...Object.keys(ALIASES)]
-  .sort((a, b) => Number(BROAD.has(a)) - Number(BROAD.has(b)) || b.length - a.length)
-  .map(name => ({ name, re: new RegExp(`(^|[^a-z0-9])${escape(name)}($|[^a-z0-9])`) }));
+// Built on first use, not at import: a module with no import-time work can
+// be dropped from bundles that only re-export it (lib/medical-utils.ts), so
+// screens that never explain a result don't download this map.
+let names: { name: string; re: RegExp }[] | null = null;
+const getNames = () =>
+  (names ??= [...Object.keys(testExplanations), ...Object.keys(ALIASES)]
+    .sort((a, b) => Number(BROAD.has(a)) - Number(BROAD.has(b)) || b.length - a.length)
+    .map(name => ({ name, re: new RegExp(`(^|[^a-z0-9])${escape(name)}($|[^a-z0-9])`) })));
 // Related tests whose high / low mean something else (high TIBC goes with
 // LOW iron; MCH is not hemoglobin; urine values and ratios read differently).
 const NOT_THE_SAME_TEST = /binding capacity|tibc|transferrin|saturation|corpuscular|\bmch|ratio|\/|urin|non-hdl/;
@@ -189,7 +194,7 @@ const NOT_THE_SAME_TEST = /binding capacity|tibc|transferrin|saturation|corpuscu
 export function findExplanation(title: string | null | undefined): TestExplanation | undefined {
   const t = String(title ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
   if (!t || NOT_THE_SAME_TEST.test(t)) return undefined;
-  const hit = NAMES.find(n => n.re.test(t));
+  const hit = getNames().find(n => n.re.test(t));
   if (!hit) return undefined;
   return testExplanations[ALIASES[hit.name] ?? hit.name];
 }

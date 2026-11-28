@@ -14,8 +14,9 @@ import { MAX_QUESTIONS, type VisitQuestion } from './visitQuestions';
 
 export const MIN_HRT_QUESTIONS = 3;
 export const MAX_HRT_QUESTIONS = 5;
-/** Where questions go when no visit is booked yet. The print summary reads every row; doctors only see rows joined to their own appointment. */
-export const UNSCHEDULED_VISIT_ID = 'unscheduled';
+// Re-exported: the constant lives in visitQuestions.ts so screens that only
+// need it don't download the HRT question builder and menopause insights.
+export { UNSCHEDULED_VISIT_ID } from './visitQuestions';
 
 export interface HrtQuestionInput {
   insight: MenopauseInsight;

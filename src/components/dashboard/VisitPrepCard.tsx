@@ -19,8 +19,7 @@ import type { LifeStage } from './DashboardHeader';
 import { getFriendlyName } from '@/lib/medical-utils';
 import { currentFlagged, flagRank } from '@/lib/labFlags';
 import { pushAccountData, useAccountDataVersion } from '@/lib/account-data';
-import { UNSCHEDULED_VISIT_ID } from '@/lib/hrtQuestions';
-import { addQuestion, fromSuggestions, parseQuestions, removeQuestion, toggleAsked, visitDaysAway, type VisitQuestion } from '@/lib/visitQuestions';
+import { UNSCHEDULED_VISIT_ID, addQuestion, fromSuggestions, parseQuestions, removeQuestion, toggleAsked, visitDaysAway, type VisitQuestion } from '@/lib/visitQuestions';
 
 // Generates a personalised "questions to bring to your doctor"
 // checklist from the user's recent data + mode. Patients

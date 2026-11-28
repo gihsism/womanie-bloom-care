@@ -51,7 +51,7 @@ import { parseChatMeta, type ChatMeta } from '@/lib/chatMeta';
 import { flushPendingFeedback, newAnswerKey, readFeedback, saveFeedback, type FeedbackReason } from '@/lib/chatFeedback';
 import { AnswerFeedback, FollowUpChips, RecordChips } from '@/components/chat/AnswerExtras';
 import { addToVisitList, chatToMarkdown, questionFromAnswer } from '@/lib/chatExport';
-import { UNSCHEDULED_VISIT_ID } from '@/lib/hrtQuestions';
+import { UNSCHEDULED_VISIT_ID } from '@/lib/visitQuestions';
 import { emitHealthDataChange } from '@/lib/data-events';
 import { currentFlagged, latestPerTest } from '@/lib/labFlags';
 import { chatErrorText, type ChatErrorKind, type ChatErrorState } from '@/lib/chatErrors';
