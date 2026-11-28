@@ -1,6 +1,6 @@
 import { formatTime } from '@/lib/timeFormat';
 import { DATE_FMT, WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLifeEvents, importLocalOnce, type LifeEvent } from '@/hooks/useLifeEvents';
-import { Baby, Milk, Moon, Droplets, Ruler, Syringe, Trash2, Play, Square, BarChart3, Plus, Timer, Repeat, Undo2, Check } from 'lucide-react';
+import { Baby, Milk, Moon, Droplets, Ruler, Syringe, Trash2, Play, Square, BarChart3, Plus, Timer, Repeat, Check } from 'lucide-react';
+import { METHOD_LABEL, FEED_ACTIVE_KEY, SLEEP_ACTIVE_KEY, quickFeedFrom, quickFeedLabel, quickFeedEvent, fmtClock, type FeedMethod, type FeedData } from '@/lib/babyQuickFeed';
+import { useUndoNotice } from './useUndoNotice';
 import { BAG_BABY_VACCINES, BAG_SCHEDULE_SOURCE, BAG_SCHEDULE_URL, babyVaccinePlan, rsvTiming, vaccineMarksFrom, type PlannedDose, type PlannedVisit } from '@/lib/babyVaccineSchedule';
 // Stats tab draws charts (recharts, ~110 KB gzip): load it when opened.
 const BabyStatsTab = lazy(() => import('./BabyStatsTab'));
@@ -24,17 +26,11 @@ import { differenceInMinutes, format, isToday, isYesterday, parseISO } from 'dat
 // into the account (onto the first baby) once.
 
 interface BabyRow { id: string; name: string; birth_date: string | null; sex: string | null }
-type FeedMethod = 'breast_l' | 'breast_r' | 'bottle';
-interface FeedData { method: FeedMethod; ml?: number | null; milk?: 'breast_milk' | 'formula' | null }
 interface NappyData { type: 'wet' | 'dirty' | 'both' }
 interface GrowthData { weight_g?: number | null; length_cm?: number | null; head_cm?: number | null; source?: 'typed' | 'photo' }
 interface VaccineData { name: string; dose?: string }
 
 const OLD_FEEDS_KEY = (userId: string) => `postpartum:${userId}:feeds`;
-const SLEEP_ACTIVE_KEY = (babyId: string) => `womanie_baby_sleep_active_${babyId}`;
-const FEED_ACTIVE_KEY = (babyId: string) => `womanie_baby_feed_active_${babyId}`;
-
-const METHOD_LABEL: Record<FeedMethod, string> = { breast_l: 'Left breast', breast_r: 'Right breast', bottle: 'Bottle' };
 
 const fmtMin = (m: number | null) => {
   if (m === null || !Number.isFinite(m)) return '—';
@@ -68,13 +64,6 @@ function Remove({ onClick }: { onClick: () => void }) {
 const nowLocal = () => format(new Date(), "yyyy-MM-dd'T'HH:mm");
 const toLocalInput = (ms: number) => format(new Date(ms), "yyyy-MM-dd'T'HH:mm");
 
-/** Running timer as a clock: "4:07" or "1:02:05". */
-const fmtClock = (ms: number) => {
-  const s = Math.max(0, Math.floor(ms / 1000));
-  const h = Math.floor(s / 3600); const m = Math.floor((s % 3600) / 60); const sec = s % 60;
-  const two = (n: number) => String(n).padStart(2, '0');
-  return h ? `${h}:${two(m)}:${two(sec)}` : `${m}:${two(sec)}`;
-};
 
 /** A start time she typed for a running timer: in the past, at most 12 hours ago. */
 function parseStart(v: string): number | null {
@@ -89,35 +78,6 @@ function retimed(e: LifeEvent<unknown>, iso: string): { occurred_at: string; end
   return e.ended_at ? { occurred_at: iso, ended_at: new Date(Date.parse(e.ended_at) + delta).toISOString() } : { occurred_at: iso };
 }
 
-/**
- * "Feed saved ✓ [Undo]" under the buttons. With an undo it stays 8 s;
- * Undo runs once, then says "Removed." Plain confirmations go after 2.5 s.
- */
-function useUndoNotice() {
-  const [state, setState] = useState<{ text: string; undo?: () => Promise<unknown> } | null>(null);
-  const timer = useRef<number | undefined>(undefined);
-  const show = useCallback((text: string, undo?: () => Promise<unknown>) => {
-    window.clearTimeout(timer.current);
-    setState({ text, undo });
-    timer.current = window.setTimeout(() => setState(null), undo ? 8000 : 2500);
-  }, []);
-  useEffect(() => () => window.clearTimeout(timer.current), []);
-  const node = state ? (
-    <div role="status" className="flex items-center justify-center gap-3 text-sm" data-testid="baby-notice">
-      <span className="text-primary">{state.text}</span>
-      {state.undo && (
-        <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => {
-          const u = state.undo as () => Promise<unknown>;
-          setState(null);
-          void u().then(() => show('Removed.'));
-        }}>
-          <Undo2 className="h-3.5 w-3.5" /> Undo
-        </Button>
-      )}
-    </div>
-  ) : null;
-  return [node, show] as const;
-}
 
 /** "Started 14:05 · Change" under a running timer; lets her set the real start. */
 function TimerStart({ start, onChange, id }: { start: number; onChange: (t: number) => void; id: string }) {
@@ -166,23 +126,6 @@ function RunningTimer({ title, start, onStart, onSave, saveLabel, onDiscard, id 
   );
 }
 
-interface QuickFeed { method: FeedMethod; minutes: number; ml: number | null; milk: 'breast_milk' | 'formula' | null }
-
-/** What one tap logs, from her last feed: the same bottle, or the other breast for as long as last time. */
-function quickFeedFrom(last: LifeEvent<FeedData> | undefined): QuickFeed | null {
-  const m = last?.data?.method;
-  if (!last || !m || !(m in METHOD_LABEL)) return null;
-  if (m === 'bottle') {
-    const ml = Number(last.data.ml);
-    return { method: 'bottle', minutes: 0, ml: Number.isFinite(ml) && ml > 0 ? ml : null, milk: last.data.milk ?? null };
-  }
-  const dur = last.ended_at ? differenceInMinutes(parseISO(last.ended_at), parseISO(last.occurred_at)) : 0;
-  return { method: m === 'breast_l' ? 'breast_r' : 'breast_l', minutes: dur > 0 && dur < 120 ? dur : 15, ml: null, milk: null };
-}
-
-const quickFeedLabel = (q: QuickFeed) => q.method === 'bottle'
-  ? ['Bottle', q.ml ? `${q.ml} ml` : null, q.milk ? (q.milk === 'formula' ? 'formula' : 'breast milk') : null].filter(Boolean).join(' · ')
-  : `${METHOD_LABEL[q.method]} · ${q.minutes} min`;
 
 function FeedTab({ babyId, openAdd = false }: { babyId: string; openAdd?: boolean }) {
   const feeds = useLifeEvents<FeedData>('feed', {
@@ -258,10 +201,7 @@ function FeedTab({ babyId, openAdd = false }: { babyId: string; openAdd?: boolea
     if (!quick || busy) return;
     setBusy(true);
     try {
-      const now = Date.now();
-      const saved = quick.method === 'bottle'
-        ? await feeds.add({ occurred_at: new Date(now).toISOString(), data: { method: 'bottle', ml: quick.ml, milk: quick.milk } })
-        : await feeds.add({ occurred_at: new Date(now - quick.minutes * 60000).toISOString(), ended_at: new Date(now).toISOString(), data: { method: quick.method } });
+      const saved = await feeds.add(quickFeedEvent(quick));
       undoable(saved, `${quickFeedLabel(quick)} logged ✓`);
     } finally { setBusy(false); }
   };

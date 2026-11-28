@@ -5,20 +5,24 @@ import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLifeEvents } from '@/hooks/useLifeEvents';
 import { onHealthDataChange } from '@/lib/data-events';
-import { lastFeed, countToday, nappiesToday, sleepTodayMin, fmtAgo, dayOfLife } from '@/lib/bodyMap';
+import { lastFeed, sleepTodayMin, fmtAgo, dayOfLife } from '@/lib/bodyMap';
+import { SLEEP_ACTIVE_KEY } from '@/lib/babyQuickFeed';
 import { DetailsLink } from '@/components/dashboard/HomeBlocks';
+import BabyHomeCard from '@/components/dashboard/BabyHomeCard';
 
 // Version 8 "body map" hero for after birth: a sculpted swaddled baby.
-// Home keeps it to one fact (last feed), one sentence (feeds, nappies and
-// sleep today) and one link, "Baby tracker"; logging and growth live on
-// /dashboard/baby. Same coordinate box as PregnancyBodyMap.
+// Home keeps it to one fact (last feed), one sentence (sleep today, next
+// side, day of life) and one link, "Baby tracker"; logging and growth live
+// on /dashboard/baby. Same coordinate box as PregnancyBodyMap.
+// Under the hero (its own block, not part of it) comes the baby card
+// (BabyHomeCard: feeds and nappies today, timer, next vaccine, weight,
+// one-tap "Log feed"); it shares this hero's baby and feeds, so a feed
+// logged there updates the headline at once.
 
 const W = 320;
 const H = 536;
 
-interface Baby { id: string; name: string | null; birth_date: string | null }
-
-const SLEEP_ACTIVE_KEY = (babyId: string) => `womanie_baby_sleep_active_${babyId}`;
+interface Baby { id: string; name: string | null; birth_date: string | null; sex?: string | null }
 
 export default function BabyBodyMap() {
   const { user } = useAuth();
@@ -27,7 +31,7 @@ export default function BabyBodyMap() {
 
   const load = useCallback(async () => {
     if (!user) return;
-    const { data } = await db.from('babies').select('id, name, birth_date').eq('user_id', user.id).order('created_at', { ascending: true });
+    const { data } = await db.from('babies').select('id, name, birth_date, sex').eq('user_id', user.id).order('created_at', { ascending: true });
     const b = ((data as Baby[] | null) ?? [])[0] ?? null;
     setBaby(b);
     setLoaded(true);
@@ -62,30 +66,28 @@ export default function BabyBodyMap() {
   const name = baby.name?.trim() || 'Baby';
   const day = dayOfLife(baby.birth_date, now);
   const lf = lastFeed(feeds.events, now);
-  const feedsToday = countToday(feeds.events, now);
-  const np = nappiesToday(nappies.events, now);
   const sleptMin = Math.round(sleepTodayMin(sleeps.events, now));
   let asleepSince: number | null = null;
   try { const v = localStorage.getItem(SLEEP_ACTIVE_KEY(baby.id)); asleepSince = v ? Number(v) : null; } catch { /* private mode */ }
   const asleepMin = asleepSince ? Math.max(0, Math.round((now.getTime() - asleepSince) / 60000)) : null;
   const ago = lf ? fmtAgo(lf.minutesAgo) : null;
-  const nappyCount = np.wet + np.dirty;
-  const sleepText = asleepMin != null ? 'asleep now' : sleptMin ? `slept ${fmtAgo(sleptMin).value}${fmtAgo(sleptMin).unit ? ' min' : ''} today` : null;
-  const facts = [
-    `${feedsToday} feed${feedsToday === 1 ? '' : 's'} today`,
-    `${nappyCount} napp${nappyCount === 1 ? 'y' : 'ies'}`,
+  // Feeds and nappies today are on the card below; the sentence keeps sleep,
+  // the next side and the day of life.
+  const sleepText = asleepMin != null ? 'Asleep now.' : sleptMin ? `Slept ${fmtAgo(sleptMin).value}${fmtAgo(sleptMin).unit ? ' min' : ''} today.` : null;
+  const sentence = [
     sleepText,
-  ].filter(Boolean).join(', ');
+    lf?.nextSide ? `Next: ${lf.nextSide}.` : null,
+    day && day > 0 && day < 50 ? `Day ${day} of life.` : null,
+  ].filter(Boolean).join(' ');
 
   return (
+    <>
     <section className="mb-6" aria-label="Your baby at a glance">
       <p className="label-mono">{name} · {format(now, WEEKDAY_DAY_MONTH_FMT)}</p>
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
         {ago ? <>Last feed <span className="text-muted-foreground">{ago.value}{ago.unit ? ` ${ago.unit}` : ''} ago</span></> : <>No feeds yet</>}
       </h2>
-      <p className="mt-1 text-[15px]">
-        {facts}.{lf?.nextSide ? ` Next: ${lf.nextSide}.` : ''}{day && day > 0 && day < 50 ? ` Day ${day} of life.` : ''}
-      </p>
+      {sentence && <p className="mt-1 text-[15px]">{sentence}</p>}
 
       <div className="relative mx-auto mt-3 w-full max-w-[110px]" style={{ aspectRatio: `${W} / ${H}` }}>
         <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" aria-hidden="true">
@@ -123,5 +125,7 @@ export default function BabyBodyMap() {
 
       <DetailsLink to="/dashboard/baby" label="Baby tracker" />
     </section>
+    <BabyHomeCard babyId={baby.id} birthDate={baby.birth_date} sex={baby.sex ?? null} feeds={feeds} nappies={nappies.events} />
+    </>
   );
 }
