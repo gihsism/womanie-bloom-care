@@ -1527,6 +1527,64 @@ wording that is the abstract's own ("does not", "did not differ",
 
 Tests: `ask-ai-audit.test.ts` (round 18 block).
 
+## Round 19 (2026-11-28)
+
+### The two gaps of the Ask AI prompt harness, filled
+
+`api/_lib/ask-ai-prompt.test.ts` (40 questions, 9 stages) marked two
+questions with no source at all. Both now get their own items first; the
+known-gap markers are gone and a test keeps it that way.
+
+| Question | Added | First source now |
+|---|---|---|
+| "Is swelling in my feet normal now?" (pregnancy) | NHS "Swollen ankles, feet and fingers in pregnancy" (`gp-nhs-swollen-ankles-feet-and-fingers-861db2`, reviewed April 2024): gradual swelling is normal, what helps, a **sudden** increase or swelling of the face or hands can be pre-eclampsia, contact the midwife / GP / labour ward straight away. NHS "Pre-eclampsia" (`gp-nhs-pre-eclampsia-2db977`, reviewed March 2026): from 20 weeks, blood pressure and urine checks, symptoms, risk factors, aspirin only when advised, urgent help. | the NHS swelling page; "What are the signs of pre-eclampsia?" gets the pre-eclampsia page first |
+| "How do I read my beta hCG result?" (IVF) | Wen 2026 systematic review (`pmid-41837133`): the first beta after a single embryo transfer predicts a clinical pregnancy well, a live birth less well, cut-offs differ by study. Chung 2006 (`pmid-16311298`): in IVF pregnancies that ended in a birth, hCG rose on average ~50% a day and ~124% in two days (written as an average, not a pass mark). Seeber 2012 review (`pmid-23031160`): serial hCG helps the doctor decide whether to wait or act, and never replaces clinical judgement. | the review, then the two others |
+
+Hand-written in our own words: the NHS items from the pages themselves
+(OGL v3.0, in `scripts/research/swiss-sources.mjs`), the PubMed items from
+their abstracts only. No diagnosis wording; certainty "not stated". Only
+these 5 items were embedded (offline, incremental). Retrieval: "my beta"
+now also searches "hcg" (not "beta blockers" etc.), and a number next to
+beta / hCG in a fertility question is no longer read as her age.
+
+### Off-topic first sources in the 40 questions
+
+All 40 questions were scanned for the first source the model sees.
+Nine led with an off-topic study; a `SUBJECT_MISMATCH` rule each (x0.6,
+only when the question does not name that subject) moves them back:
+
+| Question | Led with | Now first |
+|---|---|---|
+| Does folic acid need to start before pregnancy? | folic acid with antimalarials | BLV Swiss nutrition advice |
+| Do ovulation tests work? | synchronised IUI | timed intercourse (ovulation-kit review 3rd) |
+| What should I do if I miss a pill? | the pill for period pain | FSRH guideline (CDC 3rd) |
+| What does my AMH level mean for my fertility? | AMH after bariatric surgery | AMH and live birth in IVF by age |
+| What helps with period cramps? | pain with an IUD | dysmenorrhoea prevalence review, then TENS, the pill, exercise |
+| Can I take ibuprofen while breastfeeding? | NSAIDs for perineal pain | LactMed ibuprofen |
+| How can I tell if it might be postpartum depression? | breastfeeding support to prevent it | peripartum depression guideline |
+| Is my bleeding after birth normal? | tranexamic acid to prevent haemorrhage | ACOG PB 183 postpartum haemorrhage |
+| What should I do and avoid after embryo transfer? | blastocyst vs cleavage stage | techniques for preparation before transfer |
+
+Each rule is checked both ways: the same item stays first when the
+question names its subject ("Does the pill help period pain?", "Does
+endometriosis surgery lower AMH?", "Will IUI work better with an
+ovulation test?", "Is a day 5 transfer better?", "Does tranexamic acid
+prevent bleeding after birth?"). "Can I get pregnant while
+breastfeeding?" is untouched (the lactation rule needs a take / eat /
+drink / medicine word).
+
+Still weak, left as is: "What does my FSH level mean?" leads with FSH and
+metabolic syndrome after menopause (on FSH, but not on reading a value);
+the library has no source on what an FSH value means. A demotion only
+moved it to a review that is not on FSH either, so no rule was added.
+Candidate for a next build: a guideline or review on FSH in diagnosing
+the menopause transition / POI. "My beta was 45, is that good?" still finds
+no source (the number counts against the keyword coverage); the chat then
+answers without citations.
+
+Tests: `ask-ai-prompt.test.ts` (no known gaps; first source on-topic for
+11 questions), `ask-ai-audit.test.ts` (round 19 blocks).
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed

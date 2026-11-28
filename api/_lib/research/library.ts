@@ -232,6 +232,9 @@ const SYNONYMS: Record<string, string[]> = {
 const PHRASE_SYNONYMS: [RegExp, string[]][] = [
   [/\b(periods? (has |have )?(stopped|stop|disappeared|gone)|(no|missed|missing|lost my|absent) periods?|not had (a|my) period|periods? (has |have )?not come)\b/, ['amenorrhea', 'amenorrhoea']],
   [/\b(how (can|do|would|will) i (tell|know)|signs? of|symptoms? of|first signs?)\b/, ['symptom', 'screening', 'diagnosis']],
+  // Round 19: "my beta" after an embryo transfer is the blood hCG test
+  // ("My beta was 45, is that good?" found no source at all).
+  [/\bbetas?\b(?![- ]?(blockers?|carotene|thalass\w*|glucans?|agonists?|cells?|sitosterol|alanine))/, ['hcg']],
 ];
 
 /**
@@ -241,6 +244,7 @@ const PHRASE_SYNONYMS: [RegExp, string[]][] = [
  */
 const AGE_NUMBER = /\b(3[5-9]|4[0-9])\b(?!\s*(\+|weeks?|wks?|days?|mg|mcg|hours?|hrs?|minutes?|mins?|months?|%|kg|lbs?|cm|mm|years? ago))/;
 const AGE_STAGES = new Set<LifeStage>(['conception', 'ivf']);
+const HORMONE_VALUE = /\b(betas?|b?hcg|beta-hcg)\b/;
 
 // Medicines and supplements (stemmed query tokens). When a question names
 // one, items about that substance (in their title, or failing that their
@@ -477,6 +481,87 @@ const SUBJECT_MISMATCH: { ask: RegExp; unless: RegExp; title: RegExp; keep: RegE
     title: /\b(breast pain|check your breasts)\b/i,
     keep: /(?!)/,
   },
+  // Round 19 (Ask AI prompt harness, 40 questions): off-topic first sources.
+  // "Does folic acid need to start before pregnancy?" led with folic acid
+  // in people taking antimalarials; without a malaria word it steps back.
+  {
+    ask: /\w/,
+    unless: /\b(malaria\w*|antimalari\w*)\b/i,
+    title: /\b(malaria\w*|antimalari\w*)\b/i,
+    keep: /(?!)/,
+  },
+  // "Do ovulation tests work?" / fertile days: IUI timing and LH-surge
+  // control in IVF stimulation led; asked without a treatment word, they
+  // step back behind ovulation kits and timed intercourse.
+  {
+    ask: /\b(ovulation (tests?|kits?|strips?|predictor\w*)|opks?|lh (tests?|strips?)|fertile (days?|window)|when (do|did|will) i ovulate)\b/i,
+    unless: /\b(iui|insemination|ivf|icsi|stimulation|fertility treatment|clinic)\b/i,
+    title: /\b(intrauterine insemination|iui|controlled ovarian (hyper)?stimulation|ovarian stimulation)\b/i,
+    keep: /(?!)/,
+  },
+  // "What should I do if I miss a pill?" led with the pill for period
+  // pain and for PMS; without a word about that condition they step back.
+  {
+    ask: /\b(pills?|contracepti\w*)\b/i,
+    unless: /\b(cramps?|period pain|painful periods?|dysmenorrh\w*|pms|premenstrual|pmdd|mood)\b/i,
+    title: /\bfor (primary )?(dysmenorrh\w*|premenstrual syndrome)\b/i,
+    keep: /(?!)/,
+  },
+  // "What does my AMH level mean for my fertility?" led with AMH after
+  // bariatric or endometriosis surgery; without a surgery word they step back.
+  {
+    ask: /\b(amh|anti-?m[uü]llerian|ovarian reserve|egg reserve)\b/i,
+    unless: /\b(surgery|surgical|operation|operated|bariatric|gastric|laparoscop\w*|endometrio\w*|cysts?)\b/i,
+    title: /\b(surgery|surgical|bariatric|laparoscop\w*)\b/i,
+    keep: /(?!)/,
+  },
+  // "What helps with period cramps?" led with pain from an IUD; without
+  // an IUD word it steps back.
+  {
+    ask: /\w/,
+    unless: /\b(iuds?|iud-|coils?|intrauterine|mirena|kyleena)\b/i,
+    title: /\b(intrauterine[- ]device use|iud use|iud users)\b/i,
+    keep: /(?!)/,
+  },
+  // "Can I take ibuprofen while breastfeeding?" led with painkiller
+  // efficacy after birth (perineal pain, caesarean); taking or eating
+  // something "while breastfeeding" asks about the milk, so titles without
+  // a lactation word step back behind LactMed and lactation guidance.
+  // ("Can I get pregnant while breastfeeding?" is not affected.)
+  {
+    ask: /^(?=.*\b(while|when|whilst) (i'?m |i am )?(breastfe\w*|breast-?feeding|nursing|lactating|pumping)\b)(?=.*\b(take|taking|safe|drink\w*|eat\w*|medicines?|medications?|drugs?|tablets?|painkillers?)\b)/is,
+    unless: /(?!)/,
+    title: /\w/,
+    keep: /\b(lactat\w*|breastfe\w*|breast-?feeding|breast milk|human milk|milk|nursing)\b/i,
+  },
+  // "How can I tell if it might be postpartum depression?" led with
+  // breastfeeding support to prevent it; a question about the signs keeps
+  // screening and diagnosis first, prevention trials step back.
+  {
+    ask: /^(?=.*\bdepress\w*)(?=.*\b(signs?|symptoms?|tell|know|recogni[sz]\w*|screen\w*|diagnos\w*)\b)/is,
+    unless: /\b(prevent\w*|avoid|exercise|breastfe\w*|treat\w*)\b/i,
+    title: /\b(interventions for preventing|aerobic exercise|physical activity)\b/i,
+    keep: /(?!)/,
+  },
+  // "Is my bleeding after birth normal?" led with tranexamic acid to
+  // prevent haemorrhage; asked without a medicine or prevention word,
+  // labour-ward prevention trials step back.
+  {
+    ask: /^(?=.*\b(bleed\w*|lochia)\b)(?=.*\b(after (the )?(birth|delivery|giving birth)|postpartum|since (the )?birth|after (my )?(baby|c-?section|caesarean))\b)/is,
+    unless: /\b(tranexamic|txa|medicines?|drugs?|injections?|prevent\w*)\b/i,
+    title: /\b(tranexamic|active versus expectant management|third stage of labou?r)\b/i,
+    keep: /(?!)/,
+  },
+  // "What should I do and avoid after embryo transfer?" led with
+  // blastocyst vs cleavage-stage transfer and endometrial scratching (lab
+  // and clinic choices, not what she does); asked about her own conduct
+  // without naming those, they step back behind preparation and rest.
+  {
+    ask: /^(?=.*\btransfers?\b)(?=.*\b(avoid|bed ?rest|rest|activit\w*|exercise|sex|intercourse|do and|should i do|can i do)\b)/is,
+    unless: /\b(blastocysts?|day ?[35]|cleavage|scratch\w*|endometrial injury|how many embryos|number of embryos)\b/i,
+    title: /\b(blastocyst-stage versus|cleavage-stage versus|endometrial injury)\b/i,
+    keep: /(?!)/,
+  },
 ];
 
 function subjectMismatchFactor(query: string, title: string): number {
@@ -520,7 +605,8 @@ export function phraseExpansions(query: string, stage: LifeStage | null): string
   const q = query.toLowerCase();
   const out: string[] = [];
   for (const [re, words] of PHRASE_SYNONYMS) if (re.test(q)) out.push(...words);
-  if (stage && AGE_STAGES.has(stage) && AGE_NUMBER.test(q)) out.push('age');
+  // A number next to a test ("My beta was 45", "hCG 120") is a value, not an age.
+  if (stage && AGE_STAGES.has(stage) && AGE_NUMBER.test(q) && !HORMONE_VALUE.test(q)) out.push('age');
   return out;
 }
 

@@ -617,6 +617,49 @@ export const OTHER_SOURCES = [
     tags: ['ovarian cancer', 'ovarian cancer symptoms', 'bloating', 'ca125'],
     keywords: ['ovarian cancer', 'ovarian cancer symptoms', 'bloating', 'persistent bloating', 'bloated all the time', 'swollen tummy', 'feeling full quickly', 'pelvic pain', 'ca125', 'ca-125', 'cancer of the ovary'],
   },
+  // Round 19 (2026-11-28): swelling in pregnancy had no source (Ask AI
+  // prompt harness gap): what is normal, what helps and when sudden
+  // swelling can be a warning sign of pre-eclampsia. NHS pages, read in
+  // full on 2026-11-28.
+  {
+    url: 'https://www.nhs.uk/pregnancy/related-conditions/common-symptoms/swollen-ankles-feet-and-fingers/',
+    title: 'Swollen ankles, feet and fingers in pregnancy: what is normal, what helps, and when sudden swelling is a warning sign (NHS, reviewed April 2024)',
+    year: 2024,
+    fetchedAt: '2026-11-28T12:00:00.000Z',
+    summary:
+      'The NHS says some swelling of the legs, ankles, feet and fingers is normal in pregnancy. The body holds more water than usual, the extra fluid gathers in the lowest parts of the body, especially in hot weather or after standing a lot, and the growing womb can slow the blood flow back from the legs. Swelling that comes on gradually, is worse at the end of the day and later in pregnancy, is usually not harmful to the mother or the baby, though it can be uncomfortable. Things that may help: not standing for long, comfortable shoes and socks without tight straps, resting with the feet up, regular walks and simple foot exercises (moving each foot up and down and in circles). A sudden increase in swelling can be a sign of pre-eclampsia. The NHS advises contacting a midwife, GP or the labour ward straight away for sudden swelling of the face, hands or feet, or for a very bad headache, blurred vision or flashing lights, severe pain just below the ribs, heartburn that antacids do not ease, vomiting, or feeling very unwell.',
+    keyPoints: [
+      'Some gradual swelling of the legs, ankles, feet and fingers is normal in pregnancy, often worse in the evening and later in pregnancy.',
+      'Causes: the body holds more water, fluid gathers low down (heat, standing), and the womb presses on the blood flow from the legs.',
+      'May help: avoid long standing, comfortable shoes and socks, rest with the feet up, regular walks and foot exercises.',
+      'A sudden increase in swelling, or sudden swelling of the face, hands or feet, can be a sign of pre-eclampsia.',
+      'Contact a midwife, GP or the labour ward straight away for sudden swelling or with a very bad headache, vision problems, pain below the ribs, vomiting or feeling very unwell.',
+    ],
+    lifeStages: ['pregnancy'],
+    topics: ['pre-eclampsia', 'hypertension-pregnancy'],
+    tags: ['swelling in pregnancy', 'oedema', 'swollen ankles', 'swollen feet', 'pre-eclampsia warning signs'],
+    keywords: ['swelling', 'swollen', 'swollen feet', 'swollen ankles', 'swollen legs', 'swollen hands', 'swollen fingers', 'swelling in pregnancy', 'feet swelling', 'puffy feet', 'puffy ankles', 'oedema', 'edema', 'water retention', 'fluid retention', 'sudden swelling', 'face swelling'],
+  },
+  {
+    url: 'https://www.nhs.uk/conditions/pre-eclampsia/',
+    title: 'Pre-eclampsia: symptoms, who is at higher risk, checks at antenatal appointments and when to get urgent help (NHS, reviewed March 2026)',
+    year: 2026,
+    fetchedAt: '2026-11-28T12:00:00.000Z',
+    summary:
+      'The NHS describes pre-eclampsia as a condition of pregnancy that causes high blood pressure and can lead to serious problems for mother and baby if it is not monitored and treated. It is most likely from 20 weeks of pregnancy, but can happen at any point, and sometimes in the days or weeks after the birth. The first signs are high blood pressure and protein in the urine, which a woman is unlikely to notice herself; this is why the midwife checks blood pressure and urine at every antenatal appointment. Other symptoms are a severe headache that simple painkillers do not ease, blurred vision or flashing lights, pain below the ribs, sudden swelling of the face, hands or feet, heartburn that does not get better with medicine, vomiting and feeling very unwell. The risk is higher with diabetes, high blood pressure, kidney disease, lupus or antiphospholipid syndrome, or pre-eclampsia in a previous pregnancy, and somewhat higher in a first pregnancy, at 40 or over, with twins, a BMI of 35 or more, or a close relative who had it. Women at higher risk may be prescribed low-dose aspirin from week 12, but should not start it unless advised. Treatment is led by specialists, often in hospital, and an early birth may be the safest option. Anyone pregnant or recently delivered with these symptoms should get urgent medical help, by calling the maternity unit or, if that is not possible, the out-of-hours service.',
+    keyPoints: [
+      'Pre-eclampsia causes high blood pressure in pregnancy; most likely from 20 weeks, sometimes in the weeks after birth.',
+      'First signs (high blood pressure, protein in the urine) are not noticeable yourself; they are checked at antenatal appointments.',
+      'Symptoms: severe headache, blurred vision or flashing lights, pain below the ribs, sudden swelling of the face, hands or feet, vomiting, feeling very unwell.',
+      'Higher risk: diabetes, high blood pressure, kidney or autoimmune disease, or pre-eclampsia before; also first pregnancy, age 40+, twins, BMI 35+.',
+      'Low-dose aspirin from week 12 may be prescribed for women at higher risk; do not start it unless advised.',
+      'Symptoms in pregnancy or after a recent birth need urgent medical help, starting with the maternity unit.',
+    ],
+    lifeStages: ['pregnancy', 'postpartum'],
+    topics: ['pre-eclampsia', 'hypertension-pregnancy'],
+    tags: ['pre-eclampsia', 'high blood pressure in pregnancy', 'warning signs', 'protein in urine'],
+    keywords: ['pre-eclampsia', 'preeclampsia', 'pre eclampsia', 'high blood pressure', 'blood pressure in pregnancy', 'protein in urine', 'sudden swelling', 'swelling', 'swollen face', 'headache in pregnancy', 'flashing lights', 'blurred vision', 'pain under ribs', 'eclampsia', 'hellp'],
+  },
 ];
 
 function toItem(src) {

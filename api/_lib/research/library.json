@@ -134815,6 +134815,371 @@
     "summariser": "hand-written",
     "chunks": 0
    }
+  },
+  {
+   "id": "pmid-41837133",
+   "pmid": "41837133",
+   "doi": "10.3389/fendo.2026.1636981",
+   "title": "Diagnostic accuracy of initial serum β-hCG in predicting pregnancy outcomes post-SET in IVF/ICSI cycles: a systematic review and meta-analysis.",
+   "source": "Frontiers in Endocrinology",
+   "journal": "Frontiers in Endocrinology",
+   "organisation": null,
+   "year": 2026,
+   "publicationTypes": [
+    "Journal Article",
+    "Systematic Review",
+    "Meta-Analysis"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/41837133/",
+   "summary": "This review pooled 12 studies of women who had a single embryo transferred in IVF or ICSI, to see how well the first blood hCG test after the transfer (the first 'beta') predicts how the pregnancy goes. Earlier studies had each set their own cut-off level, which made their results hard to apply elsewhere. The first hCG level was good at telling apart pregnancies that went on to be seen on the scan (a clinical pregnancy) from those that did not: it was right about 9 times in 10 either way. It was less good at predicting a live birth: it picked up most pregnancies that ended in a birth, but about 3 in 10 pregnancies that did not still had a level above the cut-off. The authors conclude that the first hCG level has some predictive value for the outcome, not a definite answer.",
+   "keyPoints": [
+    "12 studies of single embryo transfer in IVF or ICSI, looking at the first blood hCG test after transfer.",
+    "The first hCG level predicted a pregnancy seen on the scan well (about 9 in 10 correct either way).",
+    "It predicted a live birth less well: about 3 in 10 pregnancies that did not end in a birth still had a level above the cut-off.",
+    "Studies used different cut-off levels; the authors say the first level has some predictive value, not a definite answer."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "ivf",
+    "pregnancy"
+   ],
+   "topics": [
+    "embryo-transfer",
+    "ivf-outcomes"
+   ],
+   "tags": [
+    "beta hcg",
+    "pregnancy test after ivf",
+    "single embryo transfer",
+    "early pregnancy"
+   ],
+   "keywords": [
+    "beta hcg",
+    "beta-hcg",
+    "b-hcg",
+    "bhcg",
+    "hcg",
+    "beta",
+    "hcg level",
+    "hcg result",
+    "beta result",
+    "first beta",
+    "second beta",
+    "pregnancy blood test",
+    "blood pregnancy test",
+    "pregnancy test after ivf",
+    "pregnancy test after embryo transfer",
+    "positive beta",
+    "low beta",
+    "hcg doubling",
+    "doubling time",
+    "hcg rise",
+    "read my beta",
+    "beta hcg cut-off",
+    "what level",
+    "predict live birth"
+   ]
+  },
+  {
+   "id": "pmid-16311298",
+   "pmid": "16311298",
+   "doi": "10.1093/humrep/dei389",
+   "title": "Defining the rise of serum HCG in viable pregnancies achieved through use of IVF.",
+   "source": "Human Reproduction",
+   "journal": "Human Reproduction",
+   "organisation": null,
+   "year": 2006,
+   "publicationTypes": [
+    "Journal Article",
+    "Multicenter Study"
+   ],
+   "evidenceLevel": "study",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/16311298/",
+   "summary": "This study at two US fertility centres looked at 391 IVF pregnancies that all ended in a live birth and measured how fast the blood hCG level rose in early pregnancy (1,052 hCG values). On average the level rose by about half in one day and by about 124% in two days, so a little more than doubling over two days. The rise slowed down from about 24 days after egg collection, earlier than has been described for pregnancies conceived without IVF. Twins and triplets had higher hCG levels but not a faster rise, and women with a BMI over 30 had lower levels. Overall the average rise was similar to earlier figures for naturally conceived pregnancies.",
+   "keyPoints": [
+    "391 IVF pregnancies that ended in a live birth, two US centres.",
+    "On average hCG rose by about 50% in one day and about 124% in two days (a little more than doubling).",
+    "The rise slowed from about 24 days after egg collection.",
+    "Twins and triplets had higher levels but not a faster rise; a BMI over 30 went with lower levels.",
+    "These are averages from pregnancies that went well, not a pass mark for one woman's result."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "ivf",
+    "pregnancy"
+   ],
+   "topics": [
+    "ivf-outcomes",
+    "embryo-transfer"
+   ],
+   "tags": [
+    "beta hcg",
+    "hcg doubling time",
+    "hcg rise",
+    "ivf pregnancy"
+   ],
+   "keywords": [
+    "beta hcg",
+    "beta-hcg",
+    "b-hcg",
+    "bhcg",
+    "hcg",
+    "beta",
+    "hcg level",
+    "hcg result",
+    "beta result",
+    "first beta",
+    "second beta",
+    "pregnancy blood test",
+    "blood pregnancy test",
+    "pregnancy test after ivf",
+    "pregnancy test after embryo transfer",
+    "positive beta",
+    "low beta",
+    "hcg doubling",
+    "doubling time",
+    "hcg rise",
+    "doubling",
+    "does my hcg double",
+    "hcg every 48 hours",
+    "rising hcg",
+    "slow rising hcg",
+    "twins hcg"
+   ]
+  },
+  {
+   "id": "pmid-23031160",
+   "pmid": "23031160",
+   "doi": "10.1016/j.fertnstert.2012.09.014",
+   "title": "What serial hCG can tell you, and cannot tell you, about an early pregnancy.",
+   "source": "Fertility and Sterility",
+   "journal": "Fertility and Sterility",
+   "organisation": null,
+   "year": 2012,
+   "publicationTypes": [
+    "Journal Article",
+    "Review"
+   ],
+   "evidenceLevel": "study",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/23031160/",
+   "summary": "This short expert review explains that repeating the blood hCG test a few days apart is an important tool for telling a normally developing early pregnancy from one that is not, at a stage when the hCG level is still too low for an ultrasound scan to show the pregnancy. The doctor compares how the level rises or falls with known expected curves, to decide whether to wait and repeat the test or to act. The author stresses that the method has limits: the pattern of hCG on its own should never override the doctor's judgement based on symptoms and signs.",
+   "keyPoints": [
+    "Repeated blood hCG tests a few days apart help tell a normally developing early pregnancy from one that is not.",
+    "They matter most while the level is too low for an ultrasound scan to show the pregnancy.",
+    "The doctor compares the rise or fall with expected curves to decide whether to wait or act.",
+    "The hCG pattern has limits and does not replace the doctor's judgement based on symptoms and signs."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "ivf",
+    "pregnancy",
+    "conception"
+   ],
+   "topics": [
+    "ectopic-pregnancy",
+    "miscarriage"
+   ],
+   "tags": [
+    "serial hcg",
+    "beta hcg",
+    "early pregnancy",
+    "pregnancy of unknown location"
+   ],
+   "keywords": [
+    "beta hcg",
+    "beta-hcg",
+    "b-hcg",
+    "bhcg",
+    "hcg",
+    "beta",
+    "hcg level",
+    "hcg result",
+    "beta result",
+    "first beta",
+    "second beta",
+    "pregnancy blood test",
+    "blood pregnancy test",
+    "pregnancy test after ivf",
+    "pregnancy test after embryo transfer",
+    "positive beta",
+    "low beta",
+    "hcg doubling",
+    "doubling time",
+    "hcg rise",
+    "repeat hcg",
+    "serial hcg",
+    "hcg not doubling",
+    "falling hcg",
+    "early pregnancy scan"
+   ]
+  },
+  {
+   "id": "gp-nhs-swollen-ankles-feet-and-fingers-861db2",
+   "pmid": "",
+   "doi": null,
+   "title": "Swollen ankles, feet and fingers in pregnancy: what is normal, what helps, and when sudden swelling is a warning sign (NHS, reviewed April 2024)",
+   "source": "NHS",
+   "journal": "NHS",
+   "organisation": "NHS",
+   "year": 2024,
+   "publicationTypes": [
+    "Patient information page"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://www.nhs.uk/pregnancy/related-conditions/common-symptoms/swollen-ankles-feet-and-fingers/",
+   "summary": "The NHS says some swelling of the legs, ankles, feet and fingers is normal in pregnancy. The body holds more water than usual, the extra fluid gathers in the lowest parts of the body, especially in hot weather or after standing a lot, and the growing womb can slow the blood flow back from the legs. Swelling that comes on gradually, is worse at the end of the day and later in pregnancy, is usually not harmful to the mother or the baby, though it can be uncomfortable. Things that may help: not standing for long, comfortable shoes and socks without tight straps, resting with the feet up, regular walks and simple foot exercises (moving each foot up and down and in circles). A sudden increase in swelling can be a sign of pre-eclampsia. The NHS advises contacting a midwife, GP or the labour ward straight away for sudden swelling of the face, hands or feet, or for a very bad headache, blurred vision or flashing lights, severe pain just below the ribs, heartburn that antacids do not ease, vomiting, or feeling very unwell.",
+   "keyPoints": [
+    "Some gradual swelling of the legs, ankles, feet and fingers is normal in pregnancy, often worse in the evening and later in pregnancy.",
+    "Causes: the body holds more water, fluid gathers low down (heat, standing), and the womb presses on the blood flow from the legs.",
+    "May help: avoid long standing, comfortable shoes and socks, rest with the feet up, regular walks and foot exercises.",
+    "A sudden increase in swelling, or sudden swelling of the face, hands or feet, can be a sign of pre-eclampsia.",
+    "Contact a midwife, GP or the labour ward straight away for sudden swelling or with a very bad headache, vision problems, pain below the ribs, vomiting or feeling very unwell."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy"
+   ],
+   "topics": [
+    "pre-eclampsia",
+    "hypertension-pregnancy"
+   ],
+   "tags": [
+    "swelling in pregnancy",
+    "oedema",
+    "swollen ankles",
+    "swollen feet",
+    "pre-eclampsia warning signs"
+   ],
+   "keywords": [
+    "swelling",
+    "swollen",
+    "swollen feet",
+    "swollen ankles",
+    "swollen legs",
+    "swollen hands",
+    "swollen fingers",
+    "swelling in pregnancy",
+    "feet swelling",
+    "puffy feet",
+    "puffy ankles",
+    "oedema",
+    "edema",
+    "water retention",
+    "fluid retention",
+    "sudden swelling",
+    "face swelling"
+   ],
+   "sourceType": "guideline-page",
+   "page": {
+    "publisher": "NHS",
+    "url": "https://www.nhs.uk/pregnancy/related-conditions/common-symptoms/swollen-ankles-feet-and-fingers/",
+    "fetchedAt": "2026-11-28T12:00:00.000Z",
+    "published": null,
+    "lastUpdated": null,
+    "lastReviewed": null,
+    "nextReview": null,
+    "licence": {
+     "name": "Open Government Licence v3.0",
+     "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+     "termsUrl": "https://www.nhs.uk/our-policies/terms-and-conditions/",
+     "notes": "NHS website content is released under the OGL v3.0, commercial use included (terms 3.3-3.4). Must show \"Information from the NHS website is licensed under the Open Government Licence v3.0\" with a link. Unchanged copies must show the date copied or be refreshed at least every 7 days (terms 3.6). Excluded from the OGL: logos, images with people, third-party content, medical devices (terms 3.5).",
+     "pageCopyright": null
+    },
+    "attribution": "Information from the NHS website is licensed under the Open Government Licence v3.0.",
+    "refreshDays": null,
+    "robots": {
+     "allowed": true,
+     "rule": null,
+     "checkedAt": "2026-11-28T12:00:00.000Z"
+    },
+    "contentHash": "bbc7123c",
+    "summariser": "hand-written",
+    "chunks": 0
+   }
+  },
+  {
+   "id": "gp-nhs-pre-eclampsia-2db977",
+   "pmid": "",
+   "doi": null,
+   "title": "Pre-eclampsia: symptoms, who is at higher risk, checks at antenatal appointments and when to get urgent help (NHS, reviewed March 2026)",
+   "source": "NHS",
+   "journal": "NHS",
+   "organisation": "NHS",
+   "year": 2026,
+   "publicationTypes": [
+    "Patient information page"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://www.nhs.uk/conditions/pre-eclampsia/",
+   "summary": "The NHS describes pre-eclampsia as a condition of pregnancy that causes high blood pressure and can lead to serious problems for mother and baby if it is not monitored and treated. It is most likely from 20 weeks of pregnancy, but can happen at any point, and sometimes in the days or weeks after the birth. The first signs are high blood pressure and protein in the urine, which a woman is unlikely to notice herself; this is why the midwife checks blood pressure and urine at every antenatal appointment. Other symptoms are a severe headache that simple painkillers do not ease, blurred vision or flashing lights, pain below the ribs, sudden swelling of the face, hands or feet, heartburn that does not get better with medicine, vomiting and feeling very unwell. The risk is higher with diabetes, high blood pressure, kidney disease, lupus or antiphospholipid syndrome, or pre-eclampsia in a previous pregnancy, and somewhat higher in a first pregnancy, at 40 or over, with twins, a BMI of 35 or more, or a close relative who had it. Women at higher risk may be prescribed low-dose aspirin from week 12, but should not start it unless advised. Treatment is led by specialists, often in hospital, and an early birth may be the safest option. Anyone pregnant or recently delivered with these symptoms should get urgent medical help, by calling the maternity unit or, if that is not possible, the out-of-hours service.",
+   "keyPoints": [
+    "Pre-eclampsia causes high blood pressure in pregnancy; most likely from 20 weeks, sometimes in the weeks after birth.",
+    "First signs (high blood pressure, protein in the urine) are not noticeable yourself; they are checked at antenatal appointments.",
+    "Symptoms: severe headache, blurred vision or flashing lights, pain below the ribs, sudden swelling of the face, hands or feet, vomiting, feeling very unwell.",
+    "Higher risk: diabetes, high blood pressure, kidney or autoimmune disease, or pre-eclampsia before; also first pregnancy, age 40+, twins, BMI 35+.",
+    "Low-dose aspirin from week 12 may be prescribed for women at higher risk; do not start it unless advised.",
+    "Symptoms in pregnancy or after a recent birth need urgent medical help, starting with the maternity unit."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "pregnancy",
+    "postpartum"
+   ],
+   "topics": [
+    "pre-eclampsia",
+    "hypertension-pregnancy"
+   ],
+   "tags": [
+    "pre-eclampsia",
+    "high blood pressure in pregnancy",
+    "warning signs",
+    "protein in urine"
+   ],
+   "keywords": [
+    "pre-eclampsia",
+    "preeclampsia",
+    "pre eclampsia",
+    "high blood pressure",
+    "blood pressure in pregnancy",
+    "protein in urine",
+    "sudden swelling",
+    "swelling",
+    "swollen face",
+    "headache in pregnancy",
+    "flashing lights",
+    "blurred vision",
+    "pain under ribs",
+    "eclampsia",
+    "hellp"
+   ],
+   "sourceType": "guideline-page",
+   "page": {
+    "publisher": "NHS",
+    "url": "https://www.nhs.uk/conditions/pre-eclampsia/",
+    "fetchedAt": "2026-11-28T12:00:00.000Z",
+    "published": null,
+    "lastUpdated": null,
+    "lastReviewed": null,
+    "nextReview": null,
+    "licence": {
+     "name": "Open Government Licence v3.0",
+     "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+     "termsUrl": "https://www.nhs.uk/our-policies/terms-and-conditions/",
+     "notes": "NHS website content is released under the OGL v3.0, commercial use included (terms 3.3-3.4). Must show \"Information from the NHS website is licensed under the Open Government Licence v3.0\" with a link. Unchanged copies must show the date copied or be refreshed at least every 7 days (terms 3.6). Excluded from the OGL: logos, images with people, third-party content, medical devices (terms 3.5).",
+     "pageCopyright": null
+    },
+    "attribution": "Information from the NHS website is licensed under the Open Government Licence v3.0.",
+    "refreshDays": null,
+    "robots": {
+     "allowed": true,
+     "rule": null,
+     "checkedAt": "2026-11-28T12:00:00.000Z"
+    },
+    "contentHash": "340cf997",
+    "summariser": "hand-written",
+    "chunks": 0
+   }
   }
  ]
 }

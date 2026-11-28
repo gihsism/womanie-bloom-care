@@ -106,6 +106,8 @@ interface Case {
   prev?: string;
   /** At least one of these research items must be among the sources (null: known library gap). */
   sources: string[] | null;
+  /** When set, the FIRST source must be one of these (round 19: questions that led with an off-topic study). */
+  first?: string[];
   /** Analytes whose full history must be in the records block. */
   history?: string[];
 }
@@ -115,36 +117,36 @@ const CASES: Case[] = [
   { stage: 'pre-menstrual', q: 'When should girls get the HPV vaccine?', sources: ['gp-bag-humane-papillomaviren-hpv-d8e9aa'] },
   { stage: 'pre-menstrual', q: 'Is it normal to have discharge before my first period?', sources: ['pmid-30064002', 'pmid-26595586'] },
   { stage: 'pre-menstrual', q: 'How do I use a tampon for the first time?', sources: ['gp-nhs-toxic-shock-syndrome-bbfbe9'] },
-  { stage: 'menstrual-cycle', q: 'What helps with period cramps?', sources: ['pmid-31538328', 'pmid-37523477', 'pmid-39037764'] },
+  { stage: 'menstrual-cycle', q: 'What helps with period cramps?', sources: ['pmid-31538328', 'pmid-37523477', 'pmid-39037764'], first: ['pmid-41031966', 'pmid-39037764', 'pmid-37523477', 'pmid-31538328', 'pmid-40216328'] },
   { stage: 'menstrual-cycle', q: 'Are heavy periods a sign of anaemia?', sources: ['pmid-42425828', 'pmid-27087396'], history: ['Ferritin', 'Hemoglobin'] },
   { stage: 'menstrual-cycle', q: 'How has my ferritin changed over the years?', sources: ['pmid-34028001', 'pmid-42747316'], history: ['Ferritin'] },
   { stage: 'menstrual-cycle', q: 'And since 2022?', prev: 'How has my ferritin changed over the years?', sources: ['pmid-34028001'], history: ['Ferritin'] },
   { stage: 'menstrual-cycle', q: 'Why do I feel bloated before my period?', sources: ['pmid-36612891', 'pmid-40766994'] },
   { stage: 'menstrual-cycle', q: 'Is my TSH normal?', sources: ['pmid-31088853'], history: ['TSH'] },
   { stage: 'contraception', q: 'Does the pill increase blood clot risk?', sources: ['pmid-27793376', 'pmid-29388678'] },
-  { stage: 'contraception', q: 'What should I do if I miss a pill?', sources: ['gp-cdc-combined-hormonal-contraceptives-html-41d76f', 'gp-fsrh-fsrh-guideline-combined-hormonal-contrac-4c670a'] },
+  { stage: 'contraception', q: 'What should I do if I miss a pill?', sources: ['gp-cdc-combined-hormonal-contraceptives-html-41d76f', 'gp-fsrh-fsrh-guideline-combined-hormonal-contrac-4c670a'], first: ['gp-cdc-combined-hormonal-contraceptives-html-41d76f', 'gp-fsrh-fsrh-guideline-combined-hormonal-contrac-4c670a'] },
   { stage: 'contraception', q: 'Can I use contraception after 40?', sources: ['pmid-40838950'] },
   { stage: 'contraception', q: 'How long does the morning-after pill work?', sources: ['pmid-30661244', 'pmid-39701010'] },
-  { stage: 'conception', q: 'Does folic acid need to start before pregnancy?', sources: ['gp-blv-ernaehrung-schwangere-und-stillende-d179e9', 'pmid-37526713'] },
+  { stage: 'conception', q: 'Does folic acid need to start before pregnancy?', sources: ['gp-blv-ernaehrung-schwangere-und-stillende-d179e9', 'pmid-37526713'], first: ['gp-blv-ernaehrung-schwangere-und-stillende-d179e9', 'pmid-37526713', 'pmid-26662928', 'pmid-29802877', 'pmid-35691683'] },
   { stage: 'conception', q: 'When are my fertile days?', sources: ['pmid-31139458', 'pmid-38106802'] },
-  { stage: 'conception', q: 'What does my AMH level mean for my fertility?', sources: ['pmid-35199161', 'pmid-35907969'], history: ['AMH'] },
-  { stage: 'conception', q: 'Do ovulation tests work?', sources: ['pmid-31139458'] },
+  { stage: 'conception', q: 'What does my AMH level mean for my fertility?', sources: ['pmid-35199161', 'pmid-35907969'], first: ['pmid-35199161', 'pmid-35907969', 'pmid-36651193'], history: ['AMH'] },
+  { stage: 'conception', q: 'Do ovulation tests work?', sources: ['pmid-31139458'], first: ['pmid-31139458', 'pmid-37709293', 'pmid-38358798', 'pmid-38106802'] },
   { stage: 'ivf', q: 'What are the warning signs of OHSS?', sources: ['pmid-41996998', 'pmid-26597569'] },
   { stage: 'ivf', q: 'Which side effects are normal during stimulation?', sources: ['pmid-41996998'] },
-  { stage: 'ivf', q: 'What should I do and avoid after embryo transfer?', sources: ['pmid-42556821', 'pmid-32827168'] },
-  // Known gap: no library item explains reading a beta hCG after transfer.
-  { stage: 'ivf', q: 'How do I read my beta hCG result?', sources: null },
+  { stage: 'ivf', q: 'What should I do and avoid after embryo transfer?', sources: ['pmid-42556821', 'pmid-32827168'], first: ['pmid-42556821', 'pmid-35325124'] },
+  // Round 19: filled (was a known gap).
+  { stage: 'ivf', q: 'How do I read my beta hCG result?', sources: ['pmid-41837133', 'pmid-16311298', 'pmid-23031160'], first: ['pmid-41837133', 'pmid-16311298', 'pmid-23031160'] },
   { stage: 'pregnancy', q: 'Is coffee safe in pregnancy?', sources: ['pmid-26058966', 'pmid-36825339'] },
   { stage: 'pregnancy', q: 'How many cups a day exactly?', prev: 'Is coffee safe in pregnancy?', sources: ['pmid-26058966', 'pmid-26026343'] },
   { stage: 'pregnancy', q: 'Should I get the whooping cough vaccine in pregnancy?', sources: ['gp-bag-schweizerischer-impfplan-bd22fa'] },
   { stage: 'pregnancy', q: 'What is gestational diabetes and how is it tested?', sources: ['gp-sggg-screening-und-management-der-gestationsd-cec2b3'] },
   { stage: 'pregnancy', q: 'Can I eat raw-milk cheese while pregnant?', sources: ['gp-blv-ernaehrung-schwangere-und-stillende-d179e9'] },
-  // Known gap: no library item on swelling in pregnancy (normal vs pre-eclampsia).
-  { stage: 'pregnancy', q: 'Is swelling in my feet normal now?', sources: null },
-  { stage: 'postpartum', q: 'Is my bleeding after birth normal?', sources: ['pmid-28937571', 'pmid-40188841'] },
-  { stage: 'postpartum', q: 'How can I tell if it might be postpartum depression?', sources: ['pmid-40566968', 'pmid-40224605'] },
+  // Round 19: filled (was a known gap): NHS swelling page, sudden swelling as a pre-eclampsia sign.
+  { stage: 'pregnancy', q: 'Is swelling in my feet normal now?', sources: ['gp-nhs-swollen-ankles-feet-and-fingers-861db2'], first: ['gp-nhs-swollen-ankles-feet-and-fingers-861db2', 'gp-nhs-pre-eclampsia-2db977'] },
+  { stage: 'postpartum', q: 'Is my bleeding after birth normal?', sources: ['pmid-28937571', 'pmid-40188841'], first: ['pmid-28937571', 'pmid-40188841'] },
+  { stage: 'postpartum', q: 'How can I tell if it might be postpartum depression?', sources: ['pmid-40566968', 'pmid-40224605'], first: ['pmid-40566968', 'pmid-40224605'] },
   { stage: 'postpartum', q: 'How often should my baby feed overnight?', sources: ['pmid-35548942', 'pmid-36763610'] },
-  { stage: 'postpartum', q: 'Can I take ibuprofen while breastfeeding?', sources: ['pmid-30000045'] },
+  { stage: 'postpartum', q: 'Can I take ibuprofen while breastfeeding?', sources: ['pmid-30000045'], first: ['pmid-30000045'] },
   { stage: 'menopause', q: 'Natural remedies for hot flashes', sources: ['pmid-37252752'] },
   { stage: 'menopause', q: 'Is HRT safe for me?', sources: ['pmid-35797481', 'pmid-36081216'] },
   { stage: 'menopause', q: 'Does menopause cause joint pain?', sources: ['pmid-33299396', 'pmid-41344380'] },
@@ -212,6 +214,25 @@ describe('Ask AI prompt harness: 40 questions, 9 stages', () => {
       .filter((r) => r.c.sources && !r.c.sources.some((id) => r.sourceIds.includes(id)))
       .map((r) => `${r.c.stage} | ${r.c.q} -> ${r.sourceIds.join(', ')}`);
     expect(misses).toEqual([]);
+  });
+
+  it('no known library gaps left in the 40 questions', () => {
+    expect(CASES.filter((c) => c.sources === null).map((c) => c.q)).toEqual([]);
+  });
+
+  // Round 19: the first source is the one the model leans on most. These
+  // questions used to lead with an off-topic study (antimalarials for
+  // folic acid, IUI timing for ovulation tests, the pill for period pain
+  // for a missed pill, AMH after bariatric surgery, IUD pain for cramps,
+  // painkiller efficacy after birth for a breastfeeding question,
+  // prevention trials for the signs of depression or for normal bleeding
+  // after birth, blastocyst vs cleavage stage for what to do after
+  // transfer).
+  it.skipIf(!hasModel)('the first source is on-topic where it used to be off-topic', () => {
+    const wrong = results
+      .filter((r) => r.c.first && !r.c.first.includes(r.sourceIds[0]))
+      .map((r) => `${r.c.stage} | ${r.c.q} -> ${r.sourceIds[0]}`);
+    expect(wrong).toEqual([]);
   });
 
   it('every question with an expected source gets 1-6 numbered sources', () => {

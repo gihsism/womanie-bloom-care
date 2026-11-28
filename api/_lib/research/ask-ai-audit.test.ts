@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { existsSync } from 'node:fs';
-import { demotedIds, getLibrary, selectChatSources, SUPERSEDED, SWISS_SOURCE_FACTOR } from './library';
+import { demotedIds, getLibrary, phraseExpansions, selectChatSources, SUPERSEDED, SWISS_SOURCE_FACTOR } from './library';
 import { selectChatSourcesHybrid } from './hybrid';
 import { DEFAULT_EMBEDDING_MODEL, EMBEDDING_MODELS, modelFile } from './embed';
 
@@ -902,4 +902,100 @@ describe('Research round 18: last unchecked items content check', () => {
   it('certainty labels the abstracts never gave are "not stated"', () => {
     for (const id of ['pmid-33050979', 'pmid-34425187', 'pmid-40971619', 'pmid-33041224', 'pmid-38426798', 'pmid-39064816', 'pmid-30466985', 'pmid-30307509', 'pmid-39365239', 'pmid-30594197', 'pmid-26281028', 'pmid-29939939', 'pmid-29356580', 'pmid-38215463']) expect(byId.get(id)!.certainty).toBe('not stated');
   });
+});
+
+// Round 19 (docs/research-gaps.md): the two known gaps of the Ask AI prompt
+// harness get sources (NHS swelling in pregnancy and pre-eclampsia pages;
+// three PubMed records on reading a beta hCG after IVF), and SUBJECT_MISMATCH
+// rules move off-topic first sources back (antimalarials for folic acid, IUI
+// for ovulation tests, the pill for period pain for a missed pill, AMH
+// after surgery, IUD pain for cramps, painkiller efficacy for a "while
+// breastfeeding" question, prevention trials for the signs of depression and
+// for bleeding after birth, embryo-stage reviews for what to do after transfer).
+const NHS_SWELLING = 'gp-nhs-swollen-ankles-feet-and-fingers-861db2';
+const NHS_PE = 'gp-nhs-pre-eclampsia-2db977';
+const HCG = ['pmid-41837133', 'pmid-16311298', 'pmid-23031160'];
+
+describe('Research round 19: library data', () => {
+  const lib = getLibrary();
+  const byId = new Map(lib.items.map((i) => [i.id, i]));
+  const text = (id: string) => [byId.get(id)!.summary, ...byId.get(id)!.keyPoints].join(' ');
+
+  it('the NHS swelling item says what is normal and when swelling is a warning sign', () => {
+    expect(text(NHS_SWELLING)).toMatch(/some swelling of the legs, ankles, feet and fingers is normal in pregnancy/);
+    expect(text(NHS_SWELLING)).toMatch(/A sudden increase in swelling can be a sign of pre-eclampsia/);
+    expect(text(NHS_SWELLING)).toMatch(/midwife, GP or the labour ward straight away/);
+    expect(text(NHS_PE)).toMatch(/most likely from 20 weeks/);
+    expect(text(NHS_PE)).toMatch(/should not start it unless advised/);
+    for (const id of [NHS_SWELLING, NHS_PE]) {
+      expect(byId.get(id)!.source).toBe('NHS');
+      expect(byId.get(id)!.tags).not.toContain('switzerland');
+    }
+  });
+
+  it('the beta hCG items give the doubling figure and leave the reading to the clinic', () => {
+    for (const id of HCG) expect(byId.get(id)!.certainty).toBe('not stated');
+    expect(text('pmid-16311298')).toMatch(/about 124% in two days/);
+    expect(text('pmid-16311298')).toMatch(/not a pass mark/);
+    expect(text('pmid-41837133')).toMatch(/some predictive value/);
+    expect(text('pmid-23031160')).toMatch(/does not replace the doctor's judgement/);
+  });
+});
+
+describe('Research round 19: keyword retrieval and ranking rules', () => {
+  const first = (q: string, stage: string | null) => selectChatSources(q, stage)[0]?.id;
+  const ids = (q: string, stage: string | null) => selectChatSources(q, stage).map((i) => i.id);
+
+  it('swelling and beta hCG questions get their new sources first', () => {
+    expect(first('Is swelling in my feet normal now?', 'pregnancy')).toBe(NHS_SWELLING);
+    expect(first('Why are my ankles swollen?', 'pregnancy')).toBe(NHS_SWELLING);
+    expect(first('What are the signs of pre-eclampsia?', 'pregnancy')).toBe(NHS_PE);
+    expect(HCG).toContain(first('How do I read my beta hCG result?', 'ivf'));
+    expect(HCG).toContain(first('Is my hCG doubling fast enough?', 'ivf'));
+    expect(HCG).toContain(first('What does my beta result mean?', 'ivf'));
+  });
+
+  it('a number next to beta or hCG is a value, not an age; beta blockers are not hCG', () => {
+    expect(phraseExpansions('My beta was 45, is that good?', 'ivf')).toEqual(['hcg']);
+    expect(phraseExpansions('IVF success at 40', 'ivf')).toEqual(['age']);
+    expect(phraseExpansions('Do beta blockers cause tiredness?', null)).toEqual([]);
+  });
+
+  it('off-topic first sources step back', () => {
+    expect(first('Does folic acid need to start before pregnancy?', 'conception')).not.toBe('pmid-41705996');
+    expect(first('Do ovulation tests work?', 'conception')).not.toBe('pmid-40985294');
+    expect(first('What should I do if I miss a pill?', 'contraception')).not.toBe('pmid-37523477');
+    expect(first('What does my AMH level mean for my fertility?', 'conception')).not.toBe('pmid-42401855');
+    expect(first('What helps with period cramps?', 'menstrual-cycle')).not.toBe('pmid-36017945');
+    expect(first('Can I take ibuprofen while breastfeeding?', 'postpartum')).toBe('pmid-30000045');
+    expect(first('How can I tell if it might be postpartum depression?', 'postpartum')).not.toBe('pmid-39963955');
+    expect(first('Is my bleeding after birth normal?', 'postpartum')).not.toBe('pmid-39812173');
+    expect(first('What should I do and avoid after embryo transfer?', 'ivf')).not.toBe('pmid-41574757');
+  });
+
+  it('the same items keep their place when the question names their subject', () => {
+    expect(first('Does the pill help period pain?', 'menstrual-cycle')).toBe('pmid-37523477');
+    expect(ids('Does endometriosis surgery lower AMH?', 'ivf').slice(0, 3)).toContain('pmid-34265271');
+    expect(ids('Will IUI work better with an ovulation test?', 'conception').slice(0, 2)).toContain('pmid-40985294');
+    expect(ids('Is a day 5 transfer better?', 'ivf').slice(0, 3)).toContain('pmid-41574757');
+    expect(ids('Does tranexamic acid prevent bleeding after birth?', 'postpartum').slice(0, 2)).toContain('pmid-39812173');
+  });
+});
+
+describe.skipIf(!hasModel)('Research round 19: sources the chat sends (bundled model)', () => {
+  const sources = async (q: string, stage: string | null) =>
+    (await selectChatSourcesHybrid(q, stage, { timeoutMs: 20_000 })).map((i) => i.id);
+
+  it.each([
+    ['Is swelling in my feet normal now?', 'pregnancy', [NHS_SWELLING]],
+    ['My face and hands suddenly swelled up, should I worry?', 'pregnancy', [NHS_SWELLING, NHS_PE]],
+    ['What are the signs of pre-eclampsia?', 'pregnancy', [NHS_PE]],
+    ['How do I read my beta hCG result?', 'ivf', HCG],
+    ['Is my hCG doubling fast enough?', 'ivf', HCG],
+    ['Does folic acid need to start before pregnancy?', 'conception', [BLV_PREGNANCY]],
+    ['Do ovulation tests work?', 'conception', ['pmid-37709293', 'pmid-31139458', 'pmid-38358798']],
+    ['Can I take ibuprofen while breastfeeding?', 'postpartum', ['pmid-30000045']],
+  ] as const)('%s -> first source in %j', async (q, stage, want) => {
+    expect(want as readonly string[]).toContain((await sources(q, stage))[0]);
+  }, 60_000);
 });
