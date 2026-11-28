@@ -135180,6 +135180,271 @@
     "summariser": "hand-written",
     "chunks": 0
    }
+  },
+  {
+   "id": "pmid-19942836",
+   "pmid": "19942836",
+   "doi": null,
+   "title": "Hormone changes associated with the menopausal transition.",
+   "source": "Minerva Ginecologica",
+   "journal": "Minerva Ginecologica",
+   "organisation": null,
+   "year": 2009,
+   "publicationTypes": [
+    "Journal Article",
+    "Review"
+   ],
+   "evidenceLevel": "study",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/19942836/",
+   "summary": "This review looks at how four hormones change in the years before the last period (the menopause transition): FSH, AMH, inhibin B and estradiol. On average FSH goes up over these years, while AMH, inhibin B and estradiol go down. AMH seems to change first, then FSH and inhibin B, and estradiol falls only late in the transition. The authors found no tested FSH or other hormone level that tells a woman how long her transition will last or when her last period will be. Until such levels exist, they say the menopause transition and the last period should be recognised from her periods and symptoms, not from a blood test result.",
+   "keyPoints": [
+    "FSH tends to rise in the years before the last period; AMH, inhibin B and estradiol tend to fall.",
+    "AMH seems to change first, then FSH and inhibin B; estradiol falls late.",
+    "No FSH level (or other hormone level) has been shown to predict when the last period will come.",
+    "The authors say the transition is recognised from periods and symptoms, not from one blood test."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menopause",
+    "post-menopause"
+   ],
+   "topics": [
+    "perimenopause"
+   ],
+   "tags": [
+    "fsh",
+    "menopause transition",
+    "perimenopause",
+    "hormone tests",
+    "estradiol",
+    "amh"
+   ],
+   "keywords": [
+    "fsh",
+    "fsh level",
+    "fsh result",
+    "fsh test",
+    "fsh blood test",
+    "high fsh",
+    "raised fsh",
+    "elevated fsh",
+    "low fsh",
+    "follicle stimulating hormone",
+    "follicle-stimulating hormone",
+    "what does my fsh mean",
+    "fsh value",
+    "am i in menopause",
+    "menopause blood test",
+    "menopause test",
+    "hormone test",
+    "perimenopause",
+    "perimenopause test",
+    "last period",
+    "hormone levels in menopause",
+    "estradiol",
+    "oestradiol"
+   ]
+  },
+  {
+   "id": "pmid-18624962",
+   "pmid": "18624962",
+   "doi": "10.1111/j.1743-6109.2008.00921.x",
+   "title": "The menopausal transition--endocrinology.",
+   "source": "The Journal of Sexual Medicine",
+   "journal": "The Journal of Sexual Medicine",
+   "organisation": null,
+   "year": 2008,
+   "publicationTypes": [
+    "Journal Article",
+    "Review"
+   ],
+   "evidenceLevel": "study",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/18624962/",
+   "summary": "This review sums up what a large Australian study (438 women aged 45 to 55 at the start, with a yearly blood test, period diary and questionnaire) and related work found about hormones around the menopause. FSH levels varied widely between women whatever stage they were at, so the author concludes that a single FSH result says little about whether a woman is in the menopause transition. FSH started to rise, and estradiol to fall, about two years before the last period; at the last period FSH was about half the level it later reached after the menopause. Even women whose periods had become irregular, or who had gone more than three months without one, could still have normal cycles with ovulation, sometimes close to the last period. The fall in sexual function over these years went along with falling estradiol, not with testosterone, which did not drop much.",
+   "keyPoints": [
+    "FSH varies widely between women at every stage, so one FSH result says little about menopause status.",
+    "FSH starts to rise and estradiol to fall about two years before the last period.",
+    "At the last period, FSH is about half the level reached later after the menopause.",
+    "Normal ovulating cycles can still happen after irregular periods or more than three months without a period."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menopause",
+    "post-menopause"
+   ],
+   "topics": [
+    "perimenopause"
+   ],
+   "tags": [
+    "fsh",
+    "single fsh test",
+    "menopause transition",
+    "perimenopause",
+    "estradiol"
+   ],
+   "keywords": [
+    "fsh",
+    "fsh level",
+    "fsh result",
+    "fsh test",
+    "fsh blood test",
+    "high fsh",
+    "raised fsh",
+    "elevated fsh",
+    "low fsh",
+    "follicle stimulating hormone",
+    "follicle-stimulating hormone",
+    "what does my fsh mean",
+    "fsh value",
+    "am i in menopause",
+    "menopause blood test",
+    "menopause test",
+    "hormone test",
+    "one fsh test",
+    "single fsh",
+    "fsh varies",
+    "fsh fluctuates",
+    "perimenopause",
+    "irregular periods",
+    "can i still ovulate",
+    "estradiol",
+    "oestradiol"
+   ]
+  },
+  {
+   "id": "pmid-17630397",
+   "pmid": "17630397",
+   "doi": "10.1093/humupd/dmm020",
+   "title": "A review of hormonal changes during the menopausal transition: focus on findings from the Melbourne Women's Midlife Health Project.",
+   "source": "Human Reproduction Update",
+   "journal": "Human Reproduction Update",
+   "organisation": null,
+   "year": 2007,
+   "publicationTypes": [
+    "Journal Article",
+    "Review"
+   ],
+   "evidenceLevel": "study",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/17630397/",
+   "summary": "This review explains why hormone levels change as the menopause approaches. The main cause is that the number of egg follicles in the ovaries falls sharply. As the follicles fall, the ovaries make less inhibin B and AMH early in the cycle. Inhibin B normally holds FSH down, so with less of it FSH rises; this higher FSH seems to help keep estradiol levels up until late in the reproductive years. The menopause transition, which usually starts in the mid-40s, is a time when the hormones are very unsteady. After the menopause FSH is clearly high, estradiol is low, and inhibin B and AMH can no longer be measured.",
+   "keyPoints": [
+    "Hormone changes before the menopause come mainly from the falling number of egg follicles.",
+    "Less inhibin B from the ovaries lets FSH rise; the higher FSH helps keep estradiol up until late.",
+    "The transition usually starts in the mid-40s and hormone levels are very unsteady during it.",
+    "After the menopause FSH is clearly high, estradiol low, and inhibin B and AMH no longer measurable."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menopause",
+    "post-menopause"
+   ],
+   "topics": [
+    "perimenopause"
+   ],
+   "tags": [
+    "fsh",
+    "why fsh rises",
+    "menopause transition",
+    "inhibin b",
+    "amh",
+    "estradiol"
+   ],
+   "keywords": [
+    "fsh",
+    "fsh level",
+    "fsh result",
+    "fsh test",
+    "fsh blood test",
+    "high fsh",
+    "raised fsh",
+    "elevated fsh",
+    "low fsh",
+    "follicle stimulating hormone",
+    "follicle-stimulating hormone",
+    "what does my fsh mean",
+    "fsh value",
+    "am i in menopause",
+    "menopause blood test",
+    "menopause test",
+    "hormone test",
+    "why is my fsh high",
+    "fsh after menopause",
+    "postmenopausal fsh",
+    "inhibin",
+    "estradiol",
+    "oestradiol",
+    "egg reserve"
+   ]
+  },
+  {
+   "id": "pmid-16891297",
+   "pmid": "16891297",
+   "doi": "10.1093/humupd/dml034",
+   "title": "A systematic review of tests predicting ovarian reserve and IVF outcome.",
+   "source": "Human Reproduction Update",
+   "journal": "Human Reproduction Update",
+   "organisation": null,
+   "year": 2006,
+   "publicationTypes": [
+    "Journal Article",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/16891297/",
+   "summary": "This systematic review looked at the tests used to judge a woman's egg supply (ovarian reserve) before IVF: blood levels early in the cycle of FSH, estradiol, inhibin B and AMH, the count of small follicles on the scan, the size and blood flow of the ovaries, and several stimulation tests. For each test it asked how well it predicts how many eggs IVF will give and whether a pregnancy follows. All the tests, including a day-3 FSH, predicted only modestly or poorly. They did somewhat better at spotting women likely to respond poorly to the IVF drugs, but were very weak at predicting pregnancy: with a cut-off set high enough not to wrongly turn couples away, only about 3 in 100 couples were flagged as having poor chances. The authors conclude that these tests should not be used to predict whether IVF will work, and that starting a first IVF cycle without them seems the better approach.",
+   "keyPoints": [
+    "Reviewed day-3 FSH, estradiol, inhibin B, AMH, follicle count on the scan and other egg-supply tests before IVF.",
+    "All the tests, FSH included, predicted the IVF outcome only modestly or poorly.",
+    "They were better at spotting a likely poor response to the drugs than at predicting pregnancy.",
+    "The authors advise against using them to predict whether IVF will work."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "ivf"
+   ],
+   "topics": [
+    "amh-ovarian-reserve",
+    "infertility-evaluation"
+   ],
+   "tags": [
+    "fsh",
+    "day 3 fsh",
+    "ovarian reserve tests",
+    "egg reserve",
+    "ivf prediction"
+   ],
+   "keywords": [
+    "fsh",
+    "fsh level",
+    "fsh result",
+    "fsh test",
+    "fsh blood test",
+    "high fsh",
+    "raised fsh",
+    "elevated fsh",
+    "low fsh",
+    "follicle stimulating hormone",
+    "follicle-stimulating hormone",
+    "what does my fsh mean",
+    "fsh value",
+    "am i in menopause",
+    "menopause blood test",
+    "menopause test",
+    "hormone test",
+    "day 3 fsh",
+    "basal fsh",
+    "day 2 fsh",
+    "fsh fertility",
+    "fsh and ivf",
+    "ovarian reserve",
+    "ovarian reserve test",
+    "egg reserve",
+    "egg count",
+    "antral follicle count",
+    "afc",
+    "poor responder"
+   ]
   }
  ]
 }

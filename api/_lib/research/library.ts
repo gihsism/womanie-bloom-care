@@ -244,7 +244,21 @@ const PHRASE_SYNONYMS: [RegExp, string[]][] = [
  */
 const AGE_NUMBER = /\b(3[5-9]|4[0-9])\b(?!\s*(\+|weeks?|wks?|days?|mg|mcg|hours?|hrs?|minutes?|mins?|months?|%|kg|lbs?|cm|mm|years? ago))/;
 const AGE_STAGES = new Set<LifeStage>(['conception', 'ivf']);
-const HORMONE_VALUE = /\b(betas?|b?hcg|beta-hcg)\b/;
+// Round 20: a number right after a lab test ("My beta was 45", "hCG 120",
+// "my AMH is 40 pmol/L", "FSH level of 38") is her value, not her age.
+// Only that number is set aside, so "I'm 38 and my beta was 45" still
+// reads 38 as her age.
+const LAB_VALUE =
+  /\b(betas?|b?hcg|beta-hcg|amh|fsh|lh|tsh|t4|t3|ferritin|iron|progesterone|p4|o?estradiol|e2|prolactin|testosterone|vitamin d|vit d|b12|folate|ha?emoglobin|hb|hba1c|glucose|sugar|cholesterol|ldl|hdl|triglycerides?|crp)\b(\s+(levels?|results?|values?|tests?|count|reading))?\s*(is|was|were|of|at|came back( at)?|is now|now|=|:|-)?\s*~?\d+([.,]\d+)?(\s*(ng|mg|iu|miu|mu|pmol|nmol|mmol|umol|mcg|ug|µg|g|u)\s*(\/\s*(ml|dl|l)\b)?)?/gi;
+// Round 20: lab values in a question ("my ferritin is 12", "TSH 4.8",
+// "FSH 30 IU/L") are not subject words: they still score when an item
+// carries them, but no longer count against the share of question words
+// an item covers (the number alone pushed "My beta was 45, is that good?"
+// below the cut-off). Units are never subject words either.
+const LAB_UNITS = new Set(['ng', 'ml', 'mg', 'dl', 'iu', 'miu', 'mu', 'pmol', 'nmol', 'mmol', 'umol', 'mcg', 'ug', 'mmhg']);
+export function isValueToken(t: string): boolean {
+  return /^\d+$/.test(t) || LAB_UNITS.has(t);
+}
 
 // Medicines and supplements (stemmed query tokens). When a question names
 // one, items about that substance (in their title, or failing that their
@@ -562,6 +576,34 @@ const SUBJECT_MISMATCH: { ask: RegExp; unless: RegExp; title: RegExp; keep: RegE
     title: /\b(blastocyst-stage versus|cleavage-stage versus|endometrial injury)\b/i,
     keep: /(?!)/,
   },
+  // Round 20 (lab questions with a number): her own test result is not the
+  // medicine of the same name. "My day 3 FSH is 11" led with long-acting
+  // FSH injections; asked without a treatment word, FSH-as-a-drug titles
+  // step back behind the reviews on reading an FSH level.
+  {
+    ask: /\b(my (day ?\d+ )?fsh|fsh (levels?|results?|tests?|values?|is|was|of)|fsh \d|day ?\d+ fsh|(high|raised|elevated|low) fsh)\b/i,
+    unless: /\b(injections?|inject\w*|stimulation|dose|doses|dosing|gonal|menopur|puregon|pergoveris|drugs?|medication|protocol)\b/i,
+    title: /\b(long-acting fsh|daily fsh|corifollitropin|recombinant fsh|urinary fsh|fsh consumption|gonadotrophins? for|gonadotropins? for|gonadotropin dose|dose selection)\b/i,
+    keep: /(?!)/,
+  },
+  // "Progesterone 25 on day 21, did I ovulate?" led with progestogen
+  // treatments (hormonal coil, receptor modulators); a question about her
+  // progesterone result keeps the luteal-phase testing first.
+  {
+    ask: /\b(my progesterone|progesterone (levels?|results?|tests?|is|was|of)|progesterone \d|day ?21|did i ovulate|have i ovulated)\b/i,
+    unless: /\b(coil|ius|iud|mirena|pessar\w*|supplement\w*|treatment|cream|pills?|tablets?|endometrio\w*|fibroids?)\b/i,
+    title: /\b(progest\w*[- ]releasing|receptor modulators?|progestagens for|progestogens for|progesterone or progestogen)\b/i,
+    keep: /(?!)/,
+  },
+  // "My AMH is 0.8, can I still get pregnant?" led with platelet-rich
+  // plasma injected into the ovaries; without naming that treatment it
+  // steps back behind the AMH and fertility reviews.
+  {
+    ask: /\b(amh|anti-?m[uü]llerian|ovarian reserve|egg reserve)\b/i,
+    unless: /\b(prp|platelet|rejuvenat\w*|injections? (in|into) the ovar\w*)\b/i,
+    title: /\b(platelet-rich plasma|prp)\b/i,
+    keep: /(?!)/,
+  },
 ];
 
 function subjectMismatchFactor(query: string, title: string): number {
@@ -600,13 +642,31 @@ function expandQuery(tokens: string[], extra: string[] = []): { token: string; w
   return [...out].map(([token, weight]) => ({ token, weight }));
 }
 
+/**
+ * Round 20: the text the semantic model embeds for a question. A lab value
+ * ("My beta was 45", "FSH 30 IU/L", "TSH 4.8") pulls the query vector away
+ * from every item on that test, so the value is dropped (the test name
+ * stays) and the library words the phrasing implies ("beta" -> hCG) are
+ * added. Questions without a lab value are embedded exactly as asked.
+ */
+function stripLabValues(query: string): string {
+  return query.replace(LAB_VALUE, (_m, test: string, word: string | undefined) => ` ${test}${word ?? ''} `);
+}
+
+export function semanticQueryText(query: string, lifeStage?: string | null): string {
+  const stripped = stripLabValues(query);
+  if (stripped === query) return query;
+  const words = phraseExpansions(query, normalizeLifeStage(lifeStage)).filter((w) => w !== 'age' && !stripped.toLowerCase().includes(w));
+  return [stripped.replace(/\s+([,.?!])/g, '$1').replace(/\s+/g, ' ').trim(), ...new Set(words)].join(' ');
+}
+
 /** Library words implied by the question's phrasing (PHRASE_SYNONYMS, ages). */
 export function phraseExpansions(query: string, stage: LifeStage | null): string[] {
   const q = query.toLowerCase();
   const out: string[] = [];
   for (const [re, words] of PHRASE_SYNONYMS) if (re.test(q)) out.push(...words);
   // A number next to a test ("My beta was 45", "hCG 120") is a value, not an age.
-  if (stage && AGE_STAGES.has(stage) && AGE_NUMBER.test(q) && !HORMONE_VALUE.test(q)) out.push('age');
+  if (stage && AGE_STAGES.has(stage) && AGE_NUMBER.test(q.replace(LAB_VALUE, ' '))) out.push('age');
   return out;
 }
 
@@ -959,6 +1019,10 @@ export function searchItems(
 ): ScoredItem[] {
   const stage = normalizeLifeStage(opts.lifeStage);
   const qTokens = tokenize(query);
+  // A lab value and its unit ("ferritin is 12", "FSH 30 IU/L") do not count
+  // against coverage; other numbers ("contraception after 40") still do.
+  const wordTokens = tokenize(stripLabValues(query));
+  const coverageTokens = wordTokens.length ? wordTokens : qTokens;
   const expanded = expandQuery(qTokens, phraseExpansions(query, stage));
   const qLower = ` ${query.toLowerCase().replace(/[^a-z0-9 -]+/g, ' ').replace(/\s+/g, ' ')} `;
   const nowYear = new Date().getFullYear();
@@ -983,11 +1047,11 @@ export function searchItems(
   const asksPregnancy = qTokens.some((t) => PREGNANCY_WORDS.has(t));
   const vocab = topicVocabulary(items, indexed);
   const demoted = demotedIds(items);
-  const anchors = qTokens.filter((t) => vocab.has(t) && !SUBJECT_CONTEXT_WORDS.has(t) && !PREGNANCY_WORDS.has(t) && !/^\d+$/.test(t));
+  const anchors = qTokens.filter((t) => vocab.has(t) && !SUBJECT_CONTEXT_WORDS.has(t) && !PREGNANCY_WORDS.has(t) && !isValueToken(t));
   const fertilityTreatmentContext = (stage !== null && IVF_STAGES.has(stage)) || IVF_QUERY.test(query);
-  const subjectTokens = opts.requireSubject ? qTokens.filter((t) => !SUBJECT_CONTEXT_WORDS.has(t) && !/^\d+$/.test(t)) : [];
+  const subjectTokens = opts.requireSubject ? qTokens.filter((t) => !SUBJECT_CONTEXT_WORDS.has(t) && !isValueToken(t)) : [];
   // Subject words for the Swiss lift (not "pregnant", "swiss" or other context words).
-  const ownTokens = qTokens.filter((t) => !SUBJECT_CONTEXT_WORDS.has(t) && !PREGNANCY_WORDS.has(t) && !/^\d+$/.test(t));
+  const ownTokens = qTokens.filter((t) => !SUBJECT_CONTEXT_WORDS.has(t) && !PREGNANCY_WORDS.has(t) && !isValueToken(t));
   const candidates: { it: IndexedItem; base: number; strength: number; cos: number; subject: boolean; anchored: boolean; own: boolean }[] = [];
 
   for (const it of indexed) {
@@ -1011,8 +1075,8 @@ export function searchItems(
     const subject = subjectTokens.some((t) => matched.has(t) || (SYNONYMS[t] ?? []).some((x) => matched.has(stem(x))));
     const own = ownTokens.some((t) => matched.has(t) || (SYNONYMS[t] ?? []).some((x) => matched.has(stem(x))));
     const anchored = anchors.length === 0 || anchors.some((t) => matched.has(t) || (SYNONYMS[t] ?? []).some((x) => matched.has(stem(x))));
-    const coverage = qTokens.length
-      ? qTokens.filter((t) => matched.has(t) || (SYNONYMS[t] ?? []).some((s) => matched.has(stem(s)))).length / qTokens.length
+    const coverage = coverageTokens.length
+      ? coverageTokens.filter((t) => matched.has(t) || (SYNONYMS[t] ?? []).some((s) => matched.has(stem(s)))).length / coverageTokens.length
       : 1;
     const base = qTokens.length ? raw * (0.4 + 0.6 * coverage) : 1;
     if (sem) {

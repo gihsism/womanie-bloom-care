@@ -1585,6 +1585,68 @@ answers without citations.
 Tests: `ask-ai-prompt.test.ts` (no known gaps; first source on-topic for
 11 questions), `ask-ai-audit.test.ts` (round 19 blocks).
 
+## Round 20 (2026-11-28)
+
+### Reading an FSH result (the round 19 gap), filled
+
+Free sources only. MedlinePlus is not on our publisher list, the NHS
+pages on menopause and early menopause say nothing about FSH values, and
+NICE (NG23, CKS) stays licence-required, so the items are PubMed
+abstracts, written in our own words, certainty "not stated", no
+diagnosis wording, no cut-off given as a pass mark:
+
+| Item | What it says |
+|---|---|
+| Su & Freeman 2009 review (`pmid-19942836`) | FSH rises, AMH / inhibin B / estradiol fall before the last period; no hormone level predicts when it comes; the transition is recognised from periods and symptoms, not a blood test |
+| Burger 2008 review (`pmid-18624962`) | FSH varies widely, so a single FSH result says little; FSH rises ~2 years before the last period; ovulating cycles can still happen after months without a period |
+| Burger 2007 review (`pmid-17630397`) | why FSH rises (fewer follicles, less inhibin B); after the menopause FSH is clearly high |
+| Broekmans 2006 systematic review (`pmid-16891297`) | day-3 FSH and the other egg-supply tests predict IVF results only modestly or poorly |
+
+"What does my FSH level mean?" (menopause) now leads with them (was FSH
+and metabolic syndrome); "Why is my FSH so high after menopause?" and
+"FSH 30 IU/L what does that mean?" too; "Does a high FSH mean IVF won't
+work?" leads with the Broekmans review. Only these 4 items were embedded
+(offline, incremental).
+
+### Lab questions with a bare number
+
+"My beta was 45, is that good?" found no source. Two causes: the number
+counted against the share of question words an item covers, and the
+semantic model embedded "45" too, which pulled the query away from every
+hCG item (even "My beta, is that good?" scored under the cut-off on the
+semantic side). Fixes in `library.ts` / `hybrid.ts`:
+
+- A value right after a test name (`LAB_VALUE`: beta / hCG, AMH, FSH, LH,
+  TSH, ferritin, progesterone, estradiol, vitamin D, haemoglobin, LDL,
+  glucose ..., with an optional unit like ng/mL or IU/L) no longer counts
+  against coverage. Other numbers still do: "Can I use contraception
+  after 40?" kept its sources only because of that.
+- The embedded text drops the value and adds the words the phrasing
+  implies (`semanticQueryText`: "My beta was 45" -> "My beta, ... hcg").
+  Questions without a lab value are embedded exactly as asked.
+- Age: only the number after a test is set aside, so "My AMH is 40
+  pmol/L" is not an age, while "I'm 38 and my beta was 45" still is
+  (round 19 dropped the age for any question naming beta / hCG).
+- Units (ng, mL, IU, pmol ...) are never subject words.
+- Three `SUBJECT_MISMATCH` rules for questions about her own result:
+  FSH-as-a-drug titles (long-acting / daily FSH, gonadotrophins for ...)
+  step back behind the FSH reading items ("My day 3 FSH is 11"),
+  progestogen treatments behind luteal-phase testing ("Progesterone 25 on
+  day 21, did I ovulate?"), and PRP into the ovaries behind the AMH
+  reviews ("My AMH is 0.8, can I still get pregnant?"). Each keeps its
+  item when the question names the treatment.
+
+15 number questions now find their on-topic source with the first source
+on the test asked about: beta 45, beta 250, hCG 120, hCG 80 -> 150,
+ferritin 12, ferritin 9 ng/mL, TSH 4.8, TSH 3.2 in pregnancy, AMH 0.8,
+AMH 1.2 at 38, FSH 45, FSH 30 IU/L, day 3 FSH 11, progesterone 25,
+LDL 4.4. Still weak: without the bundled model (keyword-only fallback)
+"FSH 30 IU/L" and "TSH 4.8" lead with less fitting items; the chat runs
+with the model.
+
+Tests: `ask-ai-prompt.test.ts` (FSH case, new block of 15 number
+questions), `ask-ai-audit.test.ts` (round 20 blocks).
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed

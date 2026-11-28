@@ -150,7 +150,8 @@ const CASES: Case[] = [
   { stage: 'menopause', q: 'Natural remedies for hot flashes', sources: ['pmid-37252752'] },
   { stage: 'menopause', q: 'Is HRT safe for me?', sources: ['pmid-35797481', 'pmid-36081216'] },
   { stage: 'menopause', q: 'Does menopause cause joint pain?', sources: ['pmid-33299396', 'pmid-41344380'] },
-  { stage: 'menopause', q: 'What does my FSH level mean?', sources: ['pmid-36651193'], history: ['FSH'] },
+  // Round 20: three reviews on reading an FSH level now lead (was FSH and metabolic syndrome).
+  { stage: 'menopause', q: 'What does my FSH level mean?', sources: ['pmid-19942836', 'pmid-18624962', 'pmid-17630397'], first: ['pmid-19942836', 'pmid-18624962', 'pmid-17630397'], history: ['FSH'] },
   { stage: 'post-menopause', q: 'How to prevent osteoporosis after menopause?', sources: ['pmid-36592456'] },
   { stage: 'post-menopause', q: 'Is bleeding after menopause serious?', sources: ['pmid-38901794', 'pmid-39127112'] },
   { stage: 'post-menopause', q: 'Do I still need smear tests after menopause?', sources: ['gp-sggg-97-empfehlungen-fuer-die-gebaermutterhal-200014'] },
@@ -293,6 +294,62 @@ describe('Ask AI prompt harness: 40 questions, 9 stages', () => {
   it('a long doctor note is shortened', () => {
     const m = results[0].medicalContext;
     expect(m).toContain('(note shortened)');
+  });
+});
+
+// Round 20: lab questions with a bare number. The number (and its unit)
+// used to count against the share of question words an item covers and
+// pulled the semantic query away from the test, so "My beta was 45, is
+// that good?" found no source at all. Each must find the on-topic item(s),
+// with the first source among them.
+const HCG_ITEMS = ['pmid-41837133', 'pmid-16311298', 'pmid-23031160'];
+const FSH_ITEMS = ['pmid-19942836', 'pmid-18624962', 'pmid-17630397'];
+const NUMBER_CASES: Case[] = [
+  { stage: 'ivf', q: 'My beta was 45, is that good?', sources: HCG_ITEMS, first: HCG_ITEMS },
+  { stage: 'ivf', q: 'Beta 250 on day 12, what does it mean?', sources: HCG_ITEMS, first: HCG_ITEMS },
+  { stage: 'ivf', q: 'My hCG is 120 at 14 days past transfer', sources: HCG_ITEMS, first: HCG_ITEMS },
+  { stage: 'pregnancy', q: 'My hCG went from 80 to 150 in two days, is that normal?', sources: HCG_ITEMS, first: HCG_ITEMS },
+  { stage: 'menstrual-cycle', q: 'My ferritin is 12, is that low?', sources: ['pmid-34028001', 'pmid-42747316'], first: ['pmid-34028001', 'pmid-42747316'], history: ['Ferritin'] },
+  { stage: 'menstrual-cycle', q: 'Ferritin 9 ng/mL, should I take iron?', sources: ['pmid-39834271', 'pmid-34028001'], first: ['pmid-39834271', 'pmid-34028001', 'pmid-42747316'], history: ['Ferritin'] },
+  { stage: 'menstrual-cycle', q: 'TSH 4.8 is that bad?', sources: ['pmid-31088853', 'pmid-39707289'], first: ['pmid-31088853', 'pmid-39707289'], history: ['TSH'] },
+  { stage: 'pregnancy', q: 'My TSH is 3.2 in pregnancy, is that too high?', sources: ['pmid-26387772', 'pmid-35255260', 'pmid-40609565'] },
+  { stage: 'conception', q: 'My AMH is 0.8, can I still get pregnant?', sources: ['pmid-35199161', 'pmid-16891297'], first: ['pmid-35199161', 'pmid-35907969', 'pmid-36651193'], history: ['AMH'] },
+  { stage: 'conception', q: 'AMH 1.2 ng/ml at 38, what does it mean?', sources: ['pmid-35199161', 'pmid-35907969', 'pmid-36651193'], first: ['pmid-36651193', 'pmid-35199161', 'pmid-35907969', 'pmid-35778760'], history: ['AMH'] },
+  { stage: 'menopause', q: 'My FSH is 45, am I in menopause?', sources: FSH_ITEMS, first: [...FSH_ITEMS, 'pmid-39652037'], history: ['FSH'] },
+  { stage: 'menopause', q: 'FSH 30 IU/L what does that mean?', sources: FSH_ITEMS, first: FSH_ITEMS, history: ['FSH'] },
+  { stage: 'conception', q: 'My day 3 FSH is 11, is that bad for my fertility?', sources: ['pmid-16891297'], first: ['pmid-16891297'], history: ['FSH'] },
+  { stage: 'menstrual-cycle', q: 'Progesterone 25 on day 21, did I ovulate?', sources: ['pmid-33827766'], first: ['pmid-33827766'] },
+  { stage: 'post-menopause', q: 'My LDL is 4.4, should I worry?', sources: ['pmid-33781847', 'pmid-27673306'], history: ['LDL'] },
+];
+
+describe('Ask AI prompt harness: 15 lab questions with a number (round 20)', () => {
+  const results: Assembled[] = [];
+  beforeAll(async () => {
+    for (const c of NUMBER_CASES) results.push(await assemble(c));
+  }, 120_000);
+
+  it('covers 15 questions', () => {
+    expect(NUMBER_CASES).toHaveLength(15);
+  });
+
+  it.skipIf(!hasModel)('every number question finds its on-topic source(s), 1-6 in all', () => {
+    const misses = results
+      .filter((r) => !r.c.sources!.some((id) => r.sourceIds.includes(id)) || r.sourceIds.length > 6)
+      .map((r) => `${r.c.stage} | ${r.c.q} -> ${r.sourceIds.join(', ')}`);
+    expect(misses).toEqual([]);
+  });
+
+  it.skipIf(!hasModel)('the first source is on the test she asks about', () => {
+    const wrong = results
+      .filter((r) => r.c.first && !r.c.first.includes(r.sourceIds[0]))
+      .map((r) => `${r.c.stage} | ${r.c.q} -> ${r.sourceIds[0]}`);
+    expect(wrong).toEqual([]);
+  });
+
+  it('the records still carry the full history of the test she names', () => {
+    for (const { c, medicalContext: m } of results) {
+      for (const a of c.history ?? []) expect(m, `${c.q}: ${a}`).toMatch(new RegExp(`### ${a}[^\\n]*full history`));
+    }
   });
 });
 

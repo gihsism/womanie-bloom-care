@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { existsSync } from 'node:fs';
-import { demotedIds, getLibrary, phraseExpansions, selectChatSources, SUPERSEDED, SWISS_SOURCE_FACTOR } from './library';
+import { demotedIds, getLibrary, phraseExpansions, selectChatSources, semanticQueryText, SUPERSEDED, SWISS_SOURCE_FACTOR } from './library';
 import { selectChatSourcesHybrid } from './hybrid';
 import { DEFAULT_EMBEDDING_MODEL, EMBEDDING_MODELS, modelFile } from './embed';
 
@@ -995,6 +995,89 @@ describe.skipIf(!hasModel)('Research round 19: sources the chat sends (bundled m
     ['Does folic acid need to start before pregnancy?', 'conception', [BLV_PREGNANCY]],
     ['Do ovulation tests work?', 'conception', ['pmid-37709293', 'pmid-31139458', 'pmid-38358798']],
     ['Can I take ibuprofen while breastfeeding?', 'postpartum', ['pmid-30000045']],
+  ] as const)('%s -> first source in %j', async (q, stage, want) => {
+    expect(want as readonly string[]).toContain((await sources(q, stage))[0]);
+  }, 60_000);
+});
+
+// Round 20 (docs/research-gaps.md): reading an FSH result gets its own
+// sources (three PubMed reviews on FSH around the menopause, one
+// systematic review on FSH and other egg-supply tests before IVF), and a
+// lab value in the question ("My beta was 45", "TSH 4.8", "FSH 30 IU/L")
+// no longer pushes the right sources below the cut-off.
+const FSH = ['pmid-19942836', 'pmid-18624962', 'pmid-17630397'];
+
+describe('Research round 20: library data', () => {
+  const lib = getLibrary();
+  const byId = new Map(lib.items.map((i) => [i.id, i]));
+  const text = (id: string) => [byId.get(id)!.summary, ...byId.get(id)!.keyPoints].join(' ');
+
+  it('the FSH items say one result says little and leave the reading to periods and symptoms', () => {
+    for (const id of [...FSH, 'pmid-16891297']) {
+      expect(byId.get(id), id).toBeDefined();
+      expect(byId.get(id)!.certainty).toBe('not stated');
+      expect(byId.get(id)!.keywords).toContain('fsh');
+      // No diagnosis wording addressed to her.
+      expect(text(id)).not.toMatch(/\byou (have|are in)\b|\bdiagnos(e|is) (you|her)\b/i);
+    }
+    expect(text('pmid-18624962')).toMatch(/a single FSH result says little/);
+    expect(text('pmid-19942836')).toMatch(/from her periods and symptoms, not from a blood test result/);
+    expect(text('pmid-17630397')).toMatch(/After the menopause FSH is clearly high/);
+    expect(text('pmid-16891297')).toMatch(/including a day-3 FSH, predicted only modestly or poorly/);
+  });
+});
+
+describe('Research round 20: lab values in the question', () => {
+  const first = (q: string, stage: string | null) => selectChatSources(q, stage)[0]?.id;
+  const ids = (q: string, stage: string | null) => selectChatSources(q, stage).map((i) => i.id);
+
+  it('a number after a test is her value, not her age; other numbers still are', () => {
+    expect(phraseExpansions('My AMH is 40 pmol/L, is that ok?', 'conception')).not.toContain('age');
+    expect(phraseExpansions('FSH level of 38, what now?', 'ivf')).not.toContain('age');
+    expect(phraseExpansions("I'm 38 and my beta was 45", 'ivf')).toEqual(['hcg', 'age']);
+    expect(phraseExpansions('AMH 1.2 ng/ml at 38, what does it mean?', 'conception')).toContain('age');
+    expect(phraseExpansions('IVF success at 40', 'ivf')).toEqual(['age']);
+    expect(phraseExpansions('My beta was 45, is that good?', 'ivf')).toEqual(['hcg']);
+  });
+
+  it('the embedded text drops the value and keeps the test', () => {
+    expect(semanticQueryText('My beta was 45, is that good?', 'ivf')).toBe('My beta, is that good? hcg');
+    expect(semanticQueryText('FSH 30 IU/L what does that mean?', 'menopause')).toBe('FSH what does that mean?');
+    expect(semanticQueryText('TSH 4.8 is that bad?', 'menstrual-cycle')).toBe('TSH is that bad?');
+    expect(semanticQueryText('Ferritin 9 ng/mL, should I take iron?', null)).toBe('Ferritin, should I take iron?');
+    // Questions without a lab value are embedded exactly as asked.
+    for (const q of ['Can I use contraception after 40?', 'What does my FSH level mean?', 'Is coffee safe in pregnancy?'])
+      expect(semanticQueryText(q, null)).toBe(q);
+  });
+
+  it('keyword retrieval: the number no longer drops the match', () => {
+    expect(HCG).toContain(first('My beta was 45, is that good?', 'ivf'));
+    expect(HCG).toContain(first('Beta 250 on day 12, what does it mean?', 'ivf'));
+    expect(FSH).toContain(first('What does my FSH level mean?', 'menopause'));
+  });
+
+  it('her own result is not the medicine of the same name', () => {
+    expect(first('My day 3 FSH is 11, is that bad for my fertility?', 'conception')).toBe('pmid-16891297');
+    expect(first('Progesterone 25 on day 21, did I ovulate?', 'menstrual-cycle')).not.toBe('pmid-25924648');
+    expect(first('My AMH is 0.8, can I still get pregnant?', 'conception')).not.toBe('pmid-38760869');
+    // Named treatments keep their items.
+    expect(ids('Is long-acting FSH better than daily FSH injections?', 'ivf').slice(0, 2)).toContain('pmid-26171903');
+    expect(ids('Does PRP improve AMH?', 'conception').slice(0, 2)).toContain('pmid-38760869');
+  });
+});
+
+describe.skipIf(!hasModel)('Research round 20: sources the chat sends (bundled model)', () => {
+  const sources = async (q: string, stage: string | null) =>
+    (await selectChatSourcesHybrid(q, stage, { timeoutMs: 20_000 })).map((i) => i.id);
+
+  it.each([
+    ['My beta was 45, is that good?', 'ivf', HCG],
+    ['What does my FSH level mean?', 'menopause', FSH],
+    ['FSH 30 IU/L what does that mean?', 'menopause', FSH],
+    ['Why is my FSH so high after menopause?', 'post-menopause', FSH],
+    ["Does a high FSH mean IVF won't work?", 'ivf', ['pmid-16891297']],
+    ['TSH 4.8 is that bad?', 'menstrual-cycle', ['pmid-31088853', 'pmid-39707289']],
+    ['Progesterone 25 on day 21, did I ovulate?', 'menstrual-cycle', ['pmid-33827766']],
   ] as const)('%s -> first source in %j', async (q, stage, want) => {
     expect(want as readonly string[]).toContain((await sources(q, stage))[0]);
   }, 60_000);

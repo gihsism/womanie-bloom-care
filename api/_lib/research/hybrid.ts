@@ -17,6 +17,7 @@ import {
   getLibrary,
   searchItems,
   selectChatSources,
+  semanticQueryText,
   type ResearchItem,
   type ScoredItem,
   type SearchOptions,
@@ -131,7 +132,8 @@ export async function selectChatSourcesHybrid(
   deps?: SemanticDeps,
 ): Promise<ResearchItem[]> {
   if (!question || !question.trim()) return [];
-  const semantic = await semanticQuery(question, deps);
+  // Round 20: a lab value in the question is left out of the embedded text.
+  const semantic = await semanticQuery(semanticQueryText(question, lifeStage), deps);
   return selectChatSources(question, lifeStage, undefined, undefined, semantic);
 }
 
