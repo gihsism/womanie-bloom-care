@@ -188,7 +188,7 @@ export const AUDIT_QUESTIONS: AuditQuestion[] = [
   { q: 'Does letrozole work better than clomid for PCOS?', stage: 'conception', ids: ['pmid-36735392', 'pmid-36165742', 'pmid-29797697'] },
   { q: "When should we see a fertility doctor if we're not getting pregnant?", stage: 'conception', ids: [], gap: true },
   // IVF
-  { q: 'What are the IVF success rates at 40?', stage: 'ivf', ids: ['pmid-40803331', 'pmid-36878347', 'pmid-35907969'] },
+  { q: 'What are the IVF success rates at 40?', stage: 'ivf', ids: ['pmid-40803331', 'pmid-36878347', 'pmid-35907969', 'gp-hfea-fertility-treatment-2024-trends-and-figu-7b731e', 'pmid-21558332'] }, // HFEA register + age-stratified UK data added in round 8
   { q: 'What is OHSS and how do I avoid it during IVF?', stage: 'ivf', ids: ['pmid-41996998', 'pmid-28111738', 'pmid-26597569', 'pmid-27577848'] },
   { q: 'Is a frozen embryo transfer better than fresh?', stage: 'ivf', ids: ['pmid-33539543', 'pmid-41950579'] },
   { q: 'Does progesterone support after embryo transfer matter?', stage: 'ivf', ids: ['pmid-36574915', 'pmid-41475299', 'pmid-36303972', 'pmid-34384594'] },

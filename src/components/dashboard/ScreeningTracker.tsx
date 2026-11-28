@@ -36,7 +36,7 @@ const SCREENINGS: ScreeningType[] = [
     id: 'mammogram',
     label: 'Mammogram',
     cadenceMonths: 24,
-    description: 'Every 2 years from 40 to 74 (USPSTF 2024). In Switzerland, many cantons run programmes that invite women from 50 every 2 years. Can find breast cancer before it can be felt.',
+    description: 'Every 2 years from 40 to 74 (USPSTF 2024). In Switzerland, many cantons run programmes that invite women from 50 every 2 years; basic insurance pays for these programme mammograms with no deductible, the co-payment still applies (KLV Art. 12e). Can find breast cancer before it can be felt.',
     scopes: ['post-menopause', 'menopause', 'general'],
   },
   {
@@ -57,7 +57,7 @@ const SCREENINGS: ScreeningType[] = [
     id: 'pap',
     label: 'Pap smear + HPV',
     cadenceMonths: 36,
-    description: 'Every 3 years (Pap alone) or every 5 years (Pap + HPV co-test) through 65 if previous results were normal.',
+    description: 'In Switzerland every 3 years from 21 to 70 if results are normal: a cell test (Pap) from 21 to 29, a Pap or an HPV test from 30; both together is not recommended (SGGG 2026). Basic insurance pays for the smear (yearly for the first two, then every 3 years) but not for an HPV test used for screening (KLV Art. 12e). Ask your gynaecologist what fits you.',
     scopes: ['post-menopause', 'menopause', 'general'],
   },
   {

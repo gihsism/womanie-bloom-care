@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // Official Swiss sources as research-library items, so the AI chat can cite
-// them (round 4, 2026-11-27).
+// them (round 4, 2026-11-27). Round 8 (2026-11-28) adds a few non-Swiss
+// official sources the same way (OTHER_SOURCES: FSRH, CDC, HFEA, FIGO),
+// for questions no PubMed abstract answers.
 //
 //   node scripts/research/swiss-sources.mjs          # upsert into library.json
 //   node scripts/research/swiss-sources.mjs --check  # validate only
@@ -164,24 +166,25 @@ export const SWISS_SOURCES = [
     tags: ['switzerland', 'gestational diabetes', 'ogtt', 'glucose test', 'screening'],
     keywords: ['switzerland', 'swiss', 'gestational diabetes', 'glucose test', 'sugar test', 'ogtt', 'glucose drink', 'blood sugar', 'hba1c', 'week 24', '24 to 28 weeks', 'fasting'],
   },
-  // Round 5 (2026-11-28): the two SGGG letters whose free links were not
-  // confirmed in round 4. Anti-D: the German journal version (Gynäkologie
-  // 1/2020; sggg.ch hosts only the French and Italian PDFs). A revised
-  // letter 68 was announced in November 2025 (written consent for the
-  // fetal blood group test); not yet published when checked.
+  // Round 5 (2026-11-28) held letter 68 (Gynäkologie 1/2020). Round 8
+  // (2026-11-28): letter 94 of 7 January 2026 replaces it (sggg.ch,
+  // "Expertenbriefe", read 2026-11-28): the baby's RhD test from week 16,
+  // written consent (genetic test law GUMG), anti-D for early bleeding
+  // only from 12+0 weeks and after a miscarriage managed at home or with
+  // tablets only from 9+0 weeks. Same weeks 28 to 30 and 72 h / 14 days.
   {
-    url: 'https://www.rosenfluh.ch/media/gynaekologie/2020/01/Empfehlungen-zur-Anti-D-Immunglobulin-Gabe-in-der-Schwangerschaft-Anti-D-Prophylaxe.pdf',
-    title: 'Anti-D injections in pregnancy for RhD-negative women (SGGG expert letter 68, Gynäkologie 1/2020)',
-    year: 2020,
+    url: 'https://www.sggg.ch/fileadmin/user_upload/Dokumente/3_Fachinformationen/1_Expertenbriefe/DE/94_Empfehlungen_zur_Anti-D_Immunglobulin_Gabe_in_der_Schwangerschaft___Anti-D-Prophylaxe__ersetzt_No_68.pdf',
+    title: 'Anti-D injections in pregnancy for RhD-negative women (SGGG expert letter 94, January 2026, replaces letter 68)',
+    year: 2026,
     fetchedAt: '2026-11-28T12:00:00.000Z',
     summary:
-      'The Swiss Society of Gynaecology and Obstetrics (SGGG) explains when a pregnant woman whose blood group is RhD negative needs an anti-D injection, which stops her body from making antibodies against an RhD-positive baby. At the first check-ups (weeks 8 to 12) every woman has her blood group, RhD status and an antibody screen checked. For RhD-negative women, a blood test between weeks 18 and 24 can read the baby\'s RhD status from the baby\'s DNA in the mother\'s blood. If the baby is RhD positive, the woman gets an anti-D injection between weeks 28 and 30, and again after the birth. If the baby is RhD negative, no routine anti-D is needed in pregnancy, after bleeding or procedures, or after the birth; the letter says this spares about 40% of injections in Switzerland. Anti-D after the birth is given ideally within 72 hours, and can still be given up to 14 days later.',
+      'The Swiss Society of Gynaecology and Obstetrics (SGGG) explains when a pregnant woman whose blood group is RhD negative needs an anti-D injection, which stops her body from making antibodies against an RhD-positive baby. At the first check-ups (weeks 8 to 12) every woman has her blood group, RhD status and an antibody screen checked. For RhD-negative women, a blood test between weeks 16 and 24 can read the baby\'s RhD status from the baby\'s DNA in the mother\'s blood; it is a genetic test, so she is counselled first and gives written consent on the lab form, and insurance pays for it once. If the baby is RhD positive, the woman gets an anti-D injection between weeks 28 and 30, and again after the birth. If the baby is RhD negative, no routine anti-D is needed in pregnancy, after bleeding or procedures, or after the birth; the letter says this spares about 40% of injections in pregnancy in Switzerland. Anti-D after the birth is given ideally within 72 hours, and can still be given up to 14 days later. This letter (January 2026) replaces letter 68 of 2020.',
     keyPoints: [
       'First check-ups (weeks 8 to 12): blood group, RhD status and a screen for blood group antibodies.',
-      'RhD-negative women: a blood test between weeks 18 and 24 shows the baby\'s RhD status; women should be told about this option.',
+      'RhD-negative women: a blood test between weeks 16 and 24 shows the baby\'s RhD status; the society advises against doing it before week 16. It needs counselling and written consent, and basic insurance pays for it once.',
       'Baby RhD positive: anti-D injection between weeks 28 and 30, and again after the birth, ideally within 72 hours (up to 14 days later if missed).',
-      'Baby RhD negative: no routine anti-D in pregnancy or after the birth, and none needed after bleeding or procedures.',
-      'Without a known baby RhD status, anti-D is also given after a miscarriage, a termination, an ectopic pregnancy, amniocentesis or CVS, bleeding in pregnancy, turning a breech baby or a blow to the belly.',
+      'Baby RhD negative: no routine anti-D in pregnancy or after the birth, and none needed after bleeding or procedures; the newborn\'s blood group then does not need testing.',
+      'Without a known baby RhD status: anti-D after a surgical miscarriage treatment or termination, an ectopic or molar pregnancy, CVS or amniocentesis at any stage; after a miscarriage managed by waiting or with tablets, or a termination with tablets, from 9 weeks; for bleeding with an ongoing pregnancy only from 12 weeks; and after turning a breech baby or a blow to the belly.',
     ],
     lifeStages: ['pregnancy', 'postpartum'],
     topics: ['prenatal-screening'],
@@ -227,6 +230,133 @@ export const SWISS_SOURCES = [
     topics: ['cervical-screening'],
     tags: ['switzerland', 'hpv vaccine', 'vaccination', 'cervical cancer', 'adolescents'],
     keywords: ['switzerland', 'swiss', 'hpv', 'hpv vaccine', 'hpv vaccination', 'papillomavirus', 'gardasil', 'vaccine', 'impfung', 'cervical cancer', 'genital warts', 'teenager', 'daughter', 'catch-up', 'kanton'],
+  },
+  // Round 8 (2026-11-28): Swiss cervical and breast screening (open gap of
+  // the round-7 Ask AI audit).
+  {
+    url: 'https://www.sggg.ch/fileadmin/user_upload/Dokumente/3_Fachinformationen/1_Expertenbriefe/DE/97_Empfehlungen_fuer_die_Gebaermutterhalskrebsvorsorge.pdf',
+    title: 'Cervical cancer screening in Switzerland: who, how often and with which test (SGGG expert letter 97, June 2026, replaces letter 50)',
+    year: 2026,
+    fetchedAt: '2026-11-28T12:00:00.000Z',
+    summary:
+      'The Swiss Society of Gynaecology and Obstetrics (SGGG) recommends cervical screening every 3 years from age 21 to 70. From 21 to 29 the test is a cell test (Pap smear, cytology); from 30 to 70 it can be a cell test or an HPV test, each every 3 years. Doing both tests at the same time (co-testing) is not recommended for routine screening. Basic insurance still does not pay for the HPV test as the first screening test; an application was made in 2025, so women who choose it usually pay for it themselves. Switzerland has no invitation programme: women book the check themselves. Screening is not done before 21, whatever the age at first sex. It can stop at 70 after normal results (three normal cell tests in 10 years or two negative HPV tests in 6 years) and no earlier high-grade changes. HPV-vaccinated women follow the same schedule, and a pregnancy does not change it.',
+    keyPoints: [
+      'Every 3 years from 21 to 70.',
+      'Age 21 to 29: cell test (Pap smear) every 3 years; no HPV test or co-testing at this age.',
+      'Age 30 to 70: cell test or HPV test, either one every 3 years; doing both together is not recommended.',
+      'Basic insurance does not yet pay for the HPV test as the first screening test, so women usually pay for it themselves.',
+      'Switzerland has no invitation programme for cervical screening: women book the check with their gynaecologist or family doctor.',
+      'No screening before 21; screening can stop at 70 after normal results and no earlier high-grade changes.',
+      'Vaccinated women follow the same schedule; if the last test was less than 3 years ago, no extra test is needed in pregnancy.',
+    ],
+    lifeStages: ['menstrual-cycle', 'contraception', 'menopause', 'post-menopause', 'general'],
+    topics: ['cervical-screening'],
+    tags: ['switzerland', 'cervical screening', 'pap smear', 'hpv test', 'cervical cancer'],
+    keywords: ['switzerland', 'swiss', 'smear', 'smear test', 'pap', 'pap smear', 'pap test', 'cervical screening', 'cervical smear', 'hpv test', 'cytology', 'how often smear', 'every 3 years', 'gynaecologist check', 'cervical cancer screening', 'vorsorge', 'krebsabstrich'],
+  },
+  {
+    url: 'https://www.fedlex.admin.ch/eli/cc/1995/4964_4964_4964/de',
+    title: 'Cancer screening Swiss basic insurance pays for: cervical smear and breast screening mammography (KLV Art. 12e, version of 1 August 2026)',
+    year: 2026,
+    fetchedAt: '2026-11-28T12:00:00.000Z',
+    summary:
+      'The Swiss health insurance benefits ordinance (KLV, Article 12e) sets which screening tests basic insurance pays for. A gynaecological check-up with a cervical smear is covered once a year for the first two checks and then every three years if the results are normal; after an abnormal result the doctor decides the interval. An HPV test used for cervical screening is not covered. A screening mammogram is covered every two years from the 50th birthday, but only within a cantonal breast cancer screening programme that meets the federal quality rules; for these programme mammograms no deductible (franchise) is charged, while the co-payment still applies. Women with a moderately or strongly raised family risk of breast cancer can have mammography or breast MRI covered under separate rules (KLV Art. 12d).',
+    keyPoints: [
+      'Cervical smear: covered once a year for the first two checks, then every 3 years if the results are normal.',
+      'After an abnormal smear, the doctor decides how often to check.',
+      'An HPV test for cervical screening is not paid by basic insurance.',
+      'Screening mammogram: covered every 2 years from age 50, only within a cantonal screening programme.',
+      'No deductible (franchise) on programme mammograms; the co-payment still applies. Not every canton runs a programme.',
+      'A raised family risk of breast cancer: mammography or breast MRI covered under separate rules (KLV Art. 12d).',
+    ],
+    lifeStages: ['menopause', 'post-menopause', 'general', 'menstrual-cycle'],
+    topics: ['breast-health', 'cervical-screening'],
+    tags: ['switzerland', 'mammography', 'breast screening', 'cervical screening', 'health insurance'],
+    keywords: ['switzerland', 'swiss', 'mammogram', 'mammography', 'breast screening', 'breast cancer screening', 'screening programme', 'kanton', 'canton', 'smear', 'pap smear', 'hpv test', 'hpv', 'covered', 'insurance', 'krankenkasse', 'deductible', 'franchise', 'from 50', 'every two years', 'klv'],
+  },
+];
+
+// Round 8 (2026-11-28): non-Swiss official sources for questions the
+// round-7 Ask AI audit could not answer from a PubMed abstract (missed
+// pill, migraine with aura and the pill, typical-use effectiveness,
+// normal cycle length, IVF success by age). Same rules: hand-written
+// summaries in our own words with a link; no tag "switzerland", so they
+// get no Swiss lift.
+export const OTHER_SOURCES = [
+  {
+    url: 'https://www.cosrh.org/Common/Uploaded%20files/documents/fsrh-guideline-combined-hormonal-contraception-october-2023.pdf',
+    title: 'Combined hormonal contraception (pill, patch, ring): effectiveness, missed pills and migraine (FSRH clinical guideline, January 2019, amended October 2023)',
+    year: 2023,
+    summary:
+      'The UK Faculty (now College) of Sexual and Reproductive Healthcare guideline on the combined pill, patch and ring. Used perfectly, about 0.3% of users get pregnant in the first year; with typical use, which includes late or missed pills, about 9% do, because the method depends on being used correctly every day. Implants and coils (IUDs) stay below 1% either way, because they do not depend on the user, so women choosing the pill should hear about them too. A combined pill counts as missed when it is more than 24 hours late; missing pills next to the 7-day break matters most, because it makes the break longer; the detailed steps are in the separate FSRH guidance on incorrect use. Vomiting within 3 hours of a pill, or severe diarrhoea for more than 24 hours, counts like a missed pill. Women who have migraine with aura should not use combined methods (UKMEC category 4: an unacceptable health risk), because together they raise the risk of ischaemic stroke; with migraine without aura the combined method can usually be started (UKMEC 2), but new migraine after starting it is a reason to stop (UKMEC 3). The absolute stroke risk in young women stays low.',
+    keyPoints: [
+      'First-year pregnancy rate: about 0.3% with perfect use and about 9% with typical use (pill, patch and ring alike).',
+      'Typical use, other methods: progestogen-only pill 9%, injection 6%, male condom 18%, copper coil 0.8%, hormonal coil 0.2%, implant 0.05%.',
+      'A combined pill is missed when it is more than 24 hours late; pills missed next to the 7-day break matter most.',
+      'Vomiting within 3 hours of a pill, or severe diarrhoea for more than 24 hours, counts as a missed pill.',
+      'Migraine with aura: combined pill, patch or ring should not be used (UKMEC 4) because of the higher risk of ischaemic stroke.',
+      'Migraine without aura: a combined method can usually be started (UKMEC 2); new migraine after starting it is a reason to stop (UKMEC 3).',
+      'Women who often miss pills can consider a method that does not depend on daily use, such as an implant or coil.',
+    ],
+    lifeStages: ['contraception'],
+    topics: ['combined-pill', 'contraception-effectiveness', 'migraine-hormones'],
+    tags: ['combined pill', 'missed pill', 'typical use', 'migraine with aura', 'ukmec', 'contraception guideline'],
+    keywords: ['pill', 'combined pill', 'missed pill', 'forgot pill', 'forgotten pill', 'late pill', 'typical use', 'perfect use', 'how effective', 'effectiveness', 'failure rate', 'migraine', 'aura', 'migraine with aura', 'stroke', 'ukmec', 'vomiting', 'diarrhoea', 'patch', 'ring'],
+  },
+  {
+    url: 'https://www.cdc.gov/contraception/hcp/usspr/combined-hormonal-contraceptives.html',
+    title: 'What to do after late or missed combined pills, a late patch or a late ring (CDC US Selected Practice Recommendations, 2024)',
+    year: 2024,
+    summary:
+      'The US CDC practice recommendations (2024) say what to do when combined pills are taken late or missed. A pill counts as late when less than 24 hours have passed since it was due, and missed after 24 hours or more. If one pill is late or missed (less than 48 hours): take it as soon as possible and carry on as usual, even if that means two pills in one day; no extra protection is needed. If two or more pills in a row are missed (48 hours or more): take the most recent missed pill now, carry on as usual, and use condoms or avoid sex until seven hormone pills in a row have been taken. If the missed pills were in the last week of hormone pills, finish them and start the next pack straight away without the break. If pills were missed in the first week and there was sex without a condom in the previous 5 days, emergency contraception should be considered. Patch and ring follow the same 48-hour rule. The UK FSRH uses the same 24-hour and 48-hour limits; her own pack leaflet can be stricter and then applies, and a pharmacist can help.',
+    keyPoints: [
+      'Late = less than 24 hours after the pill was due; missed = 24 hours or more.',
+      'One pill late or missed (under 48 hours): take it now, even two in one day, and carry on; no extra protection needed.',
+      'Two or more missed in a row (48 hours or more): take the latest missed pill now, carry on, and use condoms or avoid sex until 7 hormone pills in a row have been taken.',
+      'Missed in the last week of hormone pills: finish them and start the next pack without the break.',
+      'Missed in the first week with sex without a condom in the previous 5 days: emergency contraception should be considered (ask a pharmacist).',
+      'Patch or ring 48 hours or more late: put a new one on or in now and use condoms for 7 days; the pack leaflet can be stricter.',
+    ],
+    lifeStages: ['contraception'],
+    topics: ['combined-pill', 'emergency-contraception'],
+    tags: ['missed pill', 'combined pill', 'emergency contraception', 'patch', 'ring'],
+    keywords: ['missed pill', 'forgot pill', 'forgot my pill', 'forget a pill', 'forget my pill', 'forgotten pill', 'late pill', 'two pills', 'pill late', 'what to do', 'emergency contraception', 'morning after pill', 'condoms', '7 days', 'patch', 'ring', 'pill-free break', 'combined pill'],
+  },
+  {
+    url: 'https://www.hfea.gov.uk/about-us/publications/research-and-data/fertility-treatment-2024-trends-and-figures',
+    title: 'Fertility treatment 2024: trends and figures, including IVF birth rates by age (HFEA, UK national register, June 2026)',
+    year: 2026,
+    summary:
+      'The UK Human Fertilisation and Embryology Authority (HFEA) reports every IVF cycle done in the UK. In 2024 the average birth rate per embryo transferred, using the woman\'s own eggs and counting fresh and frozen transfers together, was 30%, up from 20% in 2014. Age makes the biggest difference: it was 38% for women aged 18 to 34 and 8% for women aged 43 to 44. Most transfers (84%) used a single embryo, and the multiple birth rate was about 3%. The average age at starting IVF was about 35. The 2024 birth figures are preliminary and not yet fully validated. These are UK averages per embryo transferred, not a personal chance; the clinic can explain what they mean for her.',
+    keyPoints: [
+      'Birth rate per embryo transferred (own eggs, fresh and frozen together): 30% on average in 2024, up from 20% in 2014.',
+      'By age: 38% for women aged 18 to 34; 8% for women aged 43 to 44.',
+      '84% of transfers used a single embryo; the multiple birth rate was about 3%.',
+      'The average age at starting IVF was about 35.',
+      'The 2024 birth figures are preliminary; averages per embryo transferred are not a personal chance.',
+    ],
+    lifeStages: ['ivf', 'conception'],
+    topics: ['ivf-outcomes', 'age-fertility', 'ivf-cumulative-success'],
+    tags: ['ivf success rates', 'age', 'national register', 'birth rate', 'single embryo transfer'],
+    keywords: ['ivf success', 'ivf success rate', 'success rate', 'chance of success', 'by age', 'age', 'over 40', 'birth rate', 'live birth', 'per embryo', 'hfea', 'statistics', 'how likely', 'chances'],
+  },
+  {
+    url: 'https://obgyn.onlinelibrary.wiley.com/doi/10.1002/ijgo.14946',
+    title: 'What counts as a normal period: cycle length, bleeding days and regularity (FIGO System 1, International Journal of Gynecology & Obstetrics 2023)',
+    year: 2023,
+    summary:
+      'The International Federation of Gynecology and Obstetrics (FIGO) defines normal menstrual bleeding in the reproductive years with four measures. A normal cycle, counted from the first day of one period to the first day of the next, lasts 24 to 38 days; shorter cycles count as frequent and longer ones as infrequent, and no bleeding at all is amenorrhoea. Normal bleeding lasts up to 8 days, spotting included. Cycles count as regular when the shortest and longest cycle differ by up to 7 to 9 days, depending on age (up to 9 days at 18 to 25 and 42 to 45, up to 7 days at 26 to 41); for girls under 18 and women over 45 there are no agreed limits. Flow is judged by the woman herself as light, normal or heavy. Bleeding between regular periods is not normal and is worth discussing with a doctor.',
+    keyPoints: [
+      'Normal cycle length: 24 to 38 days, from the first day of one period to the first day of the next.',
+      'Normal bleeding: up to 8 days, spotting included.',
+      'Regular: the shortest and longest cycle differ by up to 9 days at ages 18 to 25 and 42 to 45, and up to 7 days at ages 26 to 41.',
+      'No agreed limits for regularity under 18 or over 45.',
+      'Heavy flow is judged by the woman herself; bleeding between regular periods is not normal.',
+    ],
+    lifeStages: ['menstrual-cycle', 'general'],
+    topics: ['irregular-cycles', 'cycle-tracking', 'heavy-bleeding'],
+    tags: ['normal cycle', 'cycle length', 'figo', 'abnormal uterine bleeding', 'regularity'],
+    keywords: ['normal cycle', 'normal cycle length', 'cycle length', 'how long is a normal cycle', 'what is a normal period', 'how many days', 'irregular periods', 'regular cycle', 'period length', 'bleeding days', 'figo', '24 to 38 days', 'short cycle', 'long cycle'],
   },
 ];
 
@@ -276,7 +406,7 @@ function toItem(src) {
 
 const lib = JSON.parse(readFileSync(libFile, 'utf8'));
 const topicIds = new Set(lib.topics.map((t) => t.id));
-const items = SWISS_SOURCES.map(toItem);
+const items = [...SWISS_SOURCES, ...OTHER_SOURCES].map(toItem);
 let bad = 0;
 for (const it of items) {
   const errs = validateLibraryItem(it, topicIds);
@@ -287,10 +417,12 @@ for (const it of items) {
 }
 if (bad) process.exit(1);
 if (process.argv.includes('--check')) {
-  console.log(`${items.length} Swiss items valid`);
+  console.log(`${items.length} hand-written items valid`);
   process.exit(0);
 }
+// Round 8: letter 68 (anti-D) was replaced by letter 94 (new URL, new id).
+const REMOVED = new Set(['gp-sggg-empfehlungen-zur-anti-d-immunglobulin-ga-d77009']);
 const ids = new Set(items.map((i) => i.id));
-lib.items = [...lib.items.filter((i) => !ids.has(i.id)), ...items];
+lib.items = [...lib.items.filter((i) => !ids.has(i.id) && !REMOVED.has(i.id)), ...items];
 writeFileSync(libFile, JSON.stringify(lib, null, 1) + '\n');
-console.log(`Upserted ${items.length} Swiss items: ${[...ids].join(', ')}`);
+console.log(`Upserted ${items.length} hand-written items: ${[...ids].join(', ')}`);
