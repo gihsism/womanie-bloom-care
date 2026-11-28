@@ -149,6 +149,24 @@ as they are; only the explanatory text carries the Swiss timing. Also
 replaced "Start daily kick counts" (week 28 text) with "Get to know your
 baby's usual pattern of movements", matching the movements milestone.
 
+## Baby Vaccines tab vs the BAG schedule (2026-11-28)
+
+Checked against the Schweizerischer Impfplan 2026 (BAG/EKIF, 23 Feb 2026,
+corrected 16 Apr 2026; Tabelle 1 and chapter 1.1, incl. 1.1.a RSV). The
+schedule lives in `src/lib/babyVaccineSchedule.ts`, ages pinned in
+`src/lib/babyVaccines.test.ts`.
+
+| Before | BAG 2026 | Now |
+|---|---|---|
+| Free-text log with chips: Hepatitis B, Vitamin K, BCG, 6-in-1, Pneumococcal, Rotavirus, MenB, MMR; no ages, no doses | BCG is not in the routine plan; a hepatitis B dose at birth only for babies of HBsAg-positive mothers; vitamin K is not a vaccine | chips removed; schedule below; free text kept as "Other vaccinations" |
+| (none) | 6-in-1 (DTPa-IPV-Hib-HBV) and PCV at 2, 4, 12 months ("2+1"), basic | 3 doses each |
+| (none) | Rotavirus, oral, 2 and 4 months, complementary; dose 1 by 15 weeks 6 days, dose 2 by 23 weeks 6 days | 2 doses, closed after the age limits |
+| (none) | MenB 3, 5, 12-18 months (2 and 4 also possible), complementary | 3 doses |
+| (none) | MenACWY 12-18 months, 1 or 2 doses by vaccine, complementary | 1 entry with the note |
+| "MMR", no varicella | MMRV (measles, mumps, rubella, chickenpox) at 9 and 12 months, basic | 2 doses |
+| (none) | RSV long-acting antibody: born Oct-Mar first week of life (not needed after the maternal vaccine >= 14 days before birth, except e.g. prematurity); born Apr-Sep in October; until the day before the 1st birthday | 1 dose, date by birth month |
+| Home reminder at 2, 4, 12 months | basic visits also at 9 months (MMRV 1) | Home row and phone reminder at 2, 4, 9, 12 months |
+
 ## Round 3 (2026-11-27)
 
 ### Vitamin D cards

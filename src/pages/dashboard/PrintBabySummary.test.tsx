@@ -43,6 +43,28 @@ describe('BabySummarySheet', () => {
     expect(container.querySelector('[data-section="days"]')).toBeNull();
   });
 
+  it('prints the vaccinations against the BAG schedule: done with date, due, later, other', () => {
+    // Born 2026-09-20: 2-month visit on 2026-11-20, NOW = 2026-11-25.
+    const vaccines = [
+      { id: 'v1', occurred_at: new Date(2026, 10, 21, 12).toISOString(), data: { name: '6-in-1 vaccine, dose 1 of 3', dose: 'hexa-1' } },
+      { id: 'v2', occurred_at: new Date(2026, 9, 1, 12).toISOString(), data: { name: 'Flu' } },
+    ];
+    const { container } = render(<BabySummarySheet data={{ ...data, birthDate: '2026-09-20', vaccines }} now={NOW} />);
+    const sec = container.querySelector('[data-section="vaccines"]')!;
+    expect(sec.querySelectorAll('tbody tr')).toHaveLength(15);
+    expect(sec.querySelector('[data-dose="hexa-1"]')!.textContent).toContain('Done 21 Nov 2026');
+    expect(sec.querySelector('[data-dose="pcv-1"]')!.textContent).toContain('Not marked yet (from 20 Nov 2026)');
+    expect(sec.querySelector('[data-dose="menb-1"]')!.textContent).toContain('Due soon (from 20 Dec 2026)');
+    expect(sec.querySelector('[data-dose="mmrv-1"]')!.textContent).toContain('From 20 Jun 2027');
+    expect(sec.textContent).toContain('Other vaccinations: Flu (1 Oct 2026).');
+    expect(sec.textContent).toContain('Source: BAG Swiss vaccination schedule 2026');
+  });
+
+  it('no vaccinations loaded: no section', () => {
+    const { container } = render(<BabySummarySheet data={data} now={NOW} />);
+    expect(container.querySelector('[data-section="vaccines"]')).toBeNull();
+  });
+
   it('babyAge handles days, weeks, months and a missing date', () => {
     expect(babyAge('2026-11-20', NOW)).toBe('5 days old (born 20 Nov 2026)');
     expect(babyAge('2026-05-01', NOW)).toMatch(/^6 months old/);

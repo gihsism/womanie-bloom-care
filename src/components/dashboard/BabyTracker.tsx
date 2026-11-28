@@ -10,7 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLifeEvents, importLocalOnce, type LifeEvent } from '@/hooks/useLifeEvents';
-import { Baby, Milk, Moon, Droplets, Ruler, Syringe, Trash2, Play, Square, BarChart3, Plus, Timer, Repeat, Undo2 } from 'lucide-react';
+import { Baby, Milk, Moon, Droplets, Ruler, Syringe, Trash2, Play, Square, BarChart3, Plus, Timer, Repeat, Undo2, Check } from 'lucide-react';
+import { BAG_BABY_VACCINES, BAG_SCHEDULE_SOURCE, BAG_SCHEDULE_URL, babyVaccinePlan, rsvTiming, vaccineMarksFrom, type PlannedDose, type PlannedVisit } from '@/lib/babyVaccineSchedule';
 // Stats tab draws charts (recharts, ~110 KB gzip): load it when opened.
 const BabyStatsTab = lazy(() => import('./BabyStatsTab'));
 // WHO growth charts + "Add a measurement" (recharts, WHO tables): loaded with the Growth tab.
@@ -27,14 +28,13 @@ type FeedMethod = 'breast_l' | 'breast_r' | 'bottle';
 interface FeedData { method: FeedMethod; ml?: number | null; milk?: 'breast_milk' | 'formula' | null }
 interface NappyData { type: 'wet' | 'dirty' | 'both' }
 interface GrowthData { weight_g?: number | null; length_cm?: number | null; head_cm?: number | null; source?: 'typed' | 'photo' }
-interface VaccineData { name: string }
+interface VaccineData { name: string; dose?: string }
 
 const OLD_FEEDS_KEY = (userId: string) => `postpartum:${userId}:feeds`;
 const SLEEP_ACTIVE_KEY = (babyId: string) => `womanie_baby_sleep_active_${babyId}`;
 const FEED_ACTIVE_KEY = (babyId: string) => `womanie_baby_feed_active_${babyId}`;
 
 const METHOD_LABEL: Record<FeedMethod, string> = { breast_l: 'Left breast', breast_r: 'Right breast', bottle: 'Bottle' };
-const COMMON_VACCINES = ['Hepatitis B', 'Vitamin K', 'BCG', '6-in-1 (DTaP/IPV/Hib/HepB)', 'Pneumococcal', 'Rotavirus', 'MenB', 'MMR'];
 
 const fmtMin = (m: number | null) => {
   if (m === null || !Number.isFinite(m)) return '—';
@@ -521,31 +521,195 @@ function GrowthTab({ baby, onBabyChange }: { baby: BabyRow; onBabyChange: (patch
   );
 }
 
-function VaccineTab({ babyId }: { babyId: string }) {
-  const vax = useLifeEvents<VaccineData>('baby_vaccine', { babyId, limit: 100 });
-  const [name, setName] = useState('');
-  const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+const todayYmd = () => format(new Date(), 'yyyy-MM-dd');
+const fmtDay = (ymd: string) => format(parseISO(ymd), DATE_FMT);
+
+/** Inline "Date given" + Save for one dose or a whole visit. */
+function MarkDoneRow({ id, label, minDate, onSave, onCancel }: {
+  id: string; label: string; minDate: string | null; onSave: (on: string) => Promise<void>; onCancel: () => void;
+}) {
+  const [on, setOn] = useState(todayYmd);
+  const [error, setError] = useState(false);
+  const [busy, setBusy] = useState(false);
   const save = async () => {
+    if (!on || on > todayYmd() || (minDate && on < minDate)) { setError(true); return; }
+    setBusy(true);
+    await onSave(on);
+    setBusy(false);
+  };
+  return (
+    <div className="space-y-1.5 py-1.5" data-testid="vax-mark-row">
+      <Label htmlFor={id} className="text-xs">{label}</Label>
+      <div className="flex flex-wrap gap-2">
+        <Input id={id} type="date" value={on} max={todayYmd()} min={minDate ?? undefined} onChange={e => { setOn(e.target.value); setError(false); }} className="h-10 text-base flex-1 min-w-[10rem]" />
+        <Button size="sm" className="h-10" disabled={busy} onClick={() => { void save(); }}>Save</Button>
+        <Button size="sm" variant="ghost" className="h-10" onClick={onCancel}>Cancel</Button>
+      </div>
+      {error && <p className="text-xs text-destructive">Choose a date between the birth and today.</p>}
+    </div>
+  );
+}
+
+const CLOSED_TEXT = (d: PlannedDose) => (d.vaccine === 'rsv'
+  ? 'Only given before the first birthday.'
+  : d.id === 'rota-1' ? 'Only started up to 15 weeks 6 days of age.' : d.id === 'rota-2' ? 'Not given from 24 weeks of age.' : 'No longer given at this age.');
+
+function VaccineVisit({ v, birthDate, marking, setMarking, onMark, onUnmark }: {
+  v: PlannedVisit; birthDate: string | null; marking: string | null; setMarking: (k: string | null) => void;
+  onMark: (doses: PlannedDose[], on: string) => Promise<void>; onUnmark: (d: PlannedDose) => void;
+}) {
+  const open = v.doses.filter(d => d.status !== 'done' && d.status !== 'closed');
+  const visitKey = `visit:${v.key}`;
+  return (
+    <li className="py-2.5" data-testid={`vax-visit-${v.key}`}>
+      <div className="flex items-baseline justify-between gap-2">
+        <p className="text-sm font-medium">{v.age}</p>
+        {v.due && open.length > 0 && <p className="text-[11px] text-muted-foreground tabular-nums">from {format(v.due, DATE_FMT)}</p>}
+      </div>
+      {v.key === 'rsv' && open.length > 0 && <p className="text-[11px] text-muted-foreground">{rsvTiming(birthDate)}</p>}
+      <ul>
+        {v.doses.map(d => {
+          const info = BAG_BABY_VACCINES[d.vaccine];
+          return (
+            <li key={d.id} className="py-1.5" data-testid={`vax-dose-${d.id}`}>
+              <div className="flex items-center gap-2 text-sm">
+                {d.status === 'done' ? <Check className="h-4 w-4 text-primary flex-shrink-0" aria-hidden /> : <span className="w-4 flex-shrink-0" />}
+                <span className="flex-1 min-w-0">
+                  <span className={d.status === 'closed' ? 'text-muted-foreground' : undefined}>{d.name}</span>
+                  {info.category === 'complementary' && <span className="ml-1.5 text-[10px] rounded bg-muted px-1.5 py-0.5 text-muted-foreground align-middle">extra</span>}
+                  <span className="block text-[11px] text-muted-foreground">
+                    {d.status === 'done' && d.doneOn ? `Done ${fmtDay(d.doneOn)}`
+                      : d.status === 'closed' ? CLOSED_TEXT(d)
+                      : [d.dose === 1 ? `Protects against ${info.against}.` : '', d.note ?? ''].filter(Boolean).join(' ')}
+                  </span>
+                </span>
+                {d.status === 'done' ? (
+                  <button type="button" onClick={() => onUnmark(d)} aria-label={`Remove done mark, ${d.name}`} className="-m-2.5 p-2.5 text-muted-foreground/60 hover:text-destructive">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                ) : d.status !== 'closed' && marking !== d.id ? (
+                  <Button size="sm" variant="outline" className="h-8 flex-shrink-0" aria-label={`Mark done, ${d.name}`} onClick={() => setMarking(d.id)}>Mark done</Button>
+                ) : null}
+              </div>
+              {marking === d.id && (
+                <MarkDoneRow id={`vd-${d.id}`} label={`Date given: ${d.name}`} minDate={birthDate}
+                  onSave={on => onMark([d], on)} onCancel={() => setMarking(null)} />
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      {open.length > 1 && (v.status === 'due' || v.status === 'soon') && (marking === visitKey ? (
+        <MarkDoneRow id={`vd-${v.key}`} label={`Date given: all ${open.length} at ${v.age}`} minDate={birthDate}
+          onSave={on => onMark(open, on)} onCancel={() => setMarking(null)} />
+      ) : (
+        <Button size="sm" variant="ghost" className="h-8 px-2 text-xs" onClick={() => setMarking(visitKey)}>Mark all {open.length} done</Button>
+      ))}
+    </li>
+  );
+}
+
+function VaccineTab({ baby, onBabyChange }: { baby: BabyRow; onBabyChange: (patch: Partial<BabyRow>) => Promise<boolean> }) {
+  const vax = useLifeEvents<VaccineData>('baby_vaccine', { babyId: baby.id, limit: 200 });
+  const marks = useMemo(() => vaccineMarksFrom(vax.events), [vax.events]);
+  const plan = useMemo(() => babyVaccinePlan(baby.birth_date, marks), [baby.birth_date, marks]);
+  const markIds = new Set(marks.map(m => m.id));
+  const other = vax.events.filter(e => !markIds.has(e.id));
+  const [marking, setMarking] = useState<string | null>(null);
+  const [notice, show] = useUndoNotice();
+  const [birth, setBirth] = useState('');
+  const [birthError, setBirthError] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [name, setName] = useState('');
+  const [date, setDate] = useState(todayYmd);
+
+  const onMark = async (doses: PlannedDose[], on: string) => {
+    const saved: string[] = [];
+    for (const d of doses) {
+      const s = await vax.add({ occurred_at: new Date(`${on}T12:00:00`).toISOString(), data: { name: d.name, dose: d.id } });
+      if (s) saved.push(s.id);
+    }
+    setMarking(null);
+    if (saved.length) show(saved.length === 1 ? 'Marked done ✓' : `${saved.length} marked done ✓`, async () => { for (const id of saved) await vax.remove(id); });
+  };
+  const onUnmark = (d: PlannedDose) => { if (d.markId) void vax.remove(d.markId); };
+  const saveOther = async () => {
     if (!name.trim()) return;
     const ok = await vax.add({ occurred_at: new Date(`${date}T12:00:00`).toISOString(), data: { name: name.trim() } });
-    if (ok) setName('');
+    if (ok) { setName(''); setAdding(false); }
   };
+  const saveBirth = async () => {
+    if (!birth || birth > todayYmd()) { setBirthError('Enter the birth date.'); return; }
+    if (!(await onBabyChange({ birth_date: birth }))) setBirthError('Could not save. Try again.');
+  };
+
+  const dueNow = plan.filter(v => v.status === 'due' || v.status === 'soon');
+  const later = plan.filter(v => v.status === 'later');
+  const done = plan.filter(v => v.status === 'done' || v.status === 'closed');
+  const doses = plan.flatMap(v => v.doses);
+  const doneCount = doses.filter(d => d.status === 'done').length;
+  const section = (title: string, visits: PlannedVisit[], testId: string, empty?: string) => (
+    <section className="border-t pt-3" data-testid={testId}>
+      <p className="label-mono">{title}</p>
+      {visits.length === 0 ? <p className="text-sm text-muted-foreground py-2">{empty}</p> : (
+        <ul className="divide-y">
+          {visits.map(v => <VaccineVisit key={v.key} v={v} birthDate={baby.birth_date} marking={marking} setMarking={setMarking} onMark={onMark} onUnmark={onUnmark} />)}
+        </ul>
+      )}
+    </section>
+  );
+
   return (
     <div className="space-y-3">
       {vax.error && <p className="text-xs text-destructive">{vax.error}</p>}
-      <div className="flex flex-wrap gap-1">
-        {COMMON_VACCINES.map(v => (
-          <button key={v} type="button" onClick={() => setName(v)}
-            className={`text-xs px-2.5 py-1.5 rounded-full ${name === v ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/70'}`}>{v}</button>
-        ))}
+      <div className="space-y-1">
+        <h4 className="font-semibold text-sm">Swiss vaccination schedule</h4>
+        <p className="text-[11px] text-muted-foreground">Birth to 18 months, as recommended by the BAG. Tap Mark done after each visit.</p>
       </div>
-      <div className="flex items-end gap-2">
-        <div className="flex-1"><Label htmlFor="v-name" className="text-xs">Vaccine</Label><Input id="v-name" value={name} onChange={e => setName(e.target.value)} /></div>
-        <div className="w-36"><Label htmlFor="v-date" className="text-xs">Date</Label><Input id="v-date" type="date" value={date} onChange={e => setDate(e.target.value)} /></div>
-        <Button size="sm" onClick={save} disabled={!name.trim()}>Add</Button>
+      {!baby.birth_date ? (
+        <div className="rounded-lg bg-muted/50 p-3 space-y-2" data-testid="vax-birth-picker">
+          <p className="text-sm">Add {baby.name}’s birth date to see when each vaccination is due.</p>
+          <div className="flex items-end gap-2">
+            <div className="flex-1"><Label htmlFor="vax-birth" className="text-xs">Birth date</Label><Input id="vax-birth" type="date" max={todayYmd()} value={birth} onChange={e => { setBirth(e.target.value); setBirthError(null); }} /></div>
+            <Button size="sm" onClick={() => { void saveBirth(); }}>Save</Button>
+          </div>
+          {birthError && <p className="text-xs text-destructive">{birthError}</p>}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2 text-center">
+          <Stat label="Marked done" value={`${doneCount} of ${doses.length}`} />
+          <Stat label="Due now or soon" value={String(dueNow.reduce((n, v) => n + v.doses.filter(d => d.status === 'due' || d.status === 'soon').length, 0))} />
+        </div>
+      )}
+      {notice}
+      {baby.birth_date && section('Due now or soon', dueNow, 'vax-due', 'Nothing due in the next 30 days.')}
+      {section(baby.birth_date ? 'Later' : 'By age', later, 'vax-later', 'Nothing later in the schedule.')}
+      {done.length > 0 && section('Done', done, 'vax-done')}
+
+      <section className="border-t pt-3 space-y-2" data-testid="vax-other">
+        <p className="label-mono">Other vaccinations</p>
+        <EntryList events={other} onRemove={vax.remove} dateOnly render={e => <>{e.data?.name}</>} />
+        {adding ? (
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <div><Label htmlFor="v-name" className="text-xs">Vaccine</Label><Input id="v-name" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. flu" /></div>
+              <div><Label htmlFor="v-date" className="text-xs">Date</Label><Input id="v-date" type="date" max={todayYmd()} value={date} onChange={e => setDate(e.target.value)} /></div>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={() => { void saveOther(); }} disabled={!name.trim()}>Add</Button>
+              <Button size="sm" variant="ghost" onClick={() => setAdding(false)}>Cancel</Button>
+            </div>
+          </div>
+        ) : (
+          <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setAdding(true)}><Plus className="h-4 w-4" /> Add another vaccination</Button>
+        )}
+      </section>
+
+      <div className="space-y-1 text-[11px] text-muted-foreground" data-testid="vax-source">
+        <p>“extra” = a complementary vaccination: recommended mainly for your baby’s own protection. The others are recommended for all babies.</p>
+        <p>Dates are a guide. Ask your paediatrician what your baby needs and when, for example after a premature birth or to catch up a missed dose.</p>
+        <p><a href={BAG_SCHEDULE_URL} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{BAG_SCHEDULE_SOURCE}</a> (Schweizerischer Impfplan).</p>
       </div>
-      <EntryList events={vax.events} onRemove={vax.remove} dateOnly render={e => <>{e.data?.name}</>} />
-      <p className="text-[10px] text-muted-foreground">Vaccine schedules differ by country — follow your baby’s official health booklet.</p>
     </div>
   );
 }
@@ -740,7 +904,7 @@ export default function BabyTracker({ initialTab = 'feed', openAdd = false }: { 
           <TabsContent value="sleep" className="pt-3"><SleepTab babyId={baby.id} /></TabsContent>
           <TabsContent value="nappy" className="pt-3"><NappyTab babyId={baby.id} /></TabsContent>
           <TabsContent value="growth" className="pt-3"><GrowthTab baby={baby} onBabyChange={updateBaby} /></TabsContent>
-          <TabsContent value="vax" className="pt-3"><VaccineTab babyId={baby.id} /></TabsContent>
+          <TabsContent value="vax" className="pt-3"><VaccineTab baby={baby} onBabyChange={updateBaby} /></TabsContent>
           <TabsContent value="stats" className="pt-3"><Suspense fallback={null}><BabyStatsTab babyId={baby.id} onGoTo={setTab} /></Suspense></TabsContent>
         </Tabs>
       )}

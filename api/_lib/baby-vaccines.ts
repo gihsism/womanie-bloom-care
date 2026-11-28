@@ -1,8 +1,15 @@
-// Home "Today" row for a baby's vaccinations (postpartum).
+// Baby vaccinations: the Home "Today" row / phone reminder (postpartum).
+// The full Swiss schedule (Vaccines tab, printed summary) is in
+// src/lib/babyVaccineSchedule.ts.
 //
-// Schedules differ by country, so the app never says which vaccine is due.
-// It only points at the ages most national schedules share (2 months,
-// 4 months, 1 year) and asks her to check the baby's health booklet.
+// Source: BAG / EKIF, Schweizerischer Impfplan 2026 (published 23 Feb 2026,
+// corrected 16 Apr 2026), Tabelle 1 "Synopsis" and chapter 1.1 "Alter
+// 0-3 Jahre" incl. 1.1.a (RSV) and h-l (rotavirus, MenB, MenACWY, MMR,
+// varicella): https://www.bag.admin.ch/de/schweizerischer-impfplan
+//
+// The Home row never names a vaccine (discreet wording, also on the lock
+// screen). It points at the ages of the BAG basic-vaccination visits
+// (2, 4, 9 and 12 months) and asks her to check the baby's booklet.
 // Dates are local calendar days.
 
 export interface BabyForVaccines {
@@ -13,8 +20,11 @@ export interface BabyForVaccines {
   lastVaccineAt?: Date | null;
 }
 
-/** Ages (in months) at which most schedules have a vaccination visit. */
-export const BABY_VACCINE_AGES_MONTHS = [2, 4, 12] as const;
+/**
+ * Ages (in months) of the BAG basic-vaccination visits: 6-in-1 + PCV at
+ * 2, 4 and 12 months ("2+1"), MMRV at 9 and 12 months (Impfplan 2026, Tab. 1).
+ */
+export const BABY_VACCINE_AGES_MONTHS = [2, 4, 9, 12] as const;
 /** The row shows from a few days before the age until three weeks after. */
 const DAYS_BEFORE = 3;
 const DAYS_AFTER = 21;

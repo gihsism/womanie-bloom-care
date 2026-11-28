@@ -9,6 +9,8 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import { hoursMin, weeklyLines, weeklySummary, type StatEvent } from '@/lib/babyStats';
 import { footerLine, localDate, parseDay, daysBetween } from '@/lib/visitSummary';
 import type { GrowthPrintEvent } from '@/components/dashboard/BabyGrowthPrint';
+import { BAG_SCHEDULE_SOURCE, babyVaccinePlan, vaccineMarksFrom, type PlannedDose } from '@/lib/babyVaccineSchedule';
+import { format } from 'date-fns';
 // WHO growth charts + measurement table: SVG and the WHO tables, loaded
 // only when there are measurements to print.
 const BabyGrowthPrint = lazy(() => import('@/components/dashboard/BabyGrowthPrint'));
@@ -18,7 +20,9 @@ const BabyGrowthPrint = lazy(() => import('@/components/dashboard/BabyGrowthPrin
 // averages on top. Neutral numbers only. Opened from the baby Stats tab;
 // same print decisions as the visit summary (white page, black text,
 // toolbar hidden on paper). Nothing leaves the device. Below the week:
-// the WHO growth charts and every measurement with its percentile.
+// the WHO growth charts and every measurement with its percentile, then
+// the vaccinations against the BAG Swiss schedule 2026 (done with the date
+// she entered, due now or soon, later) and any other vaccination logged.
 
 export interface BabySummaryData {
   name: string;
@@ -30,6 +34,57 @@ export interface BabySummaryData {
   sex?: string | null;
   /** Every baby_growth record (not only the last 7 days). */
   growth?: GrowthPrintEvent[];
+  /** Every baby_vaccine record (schedule marks carry data.dose). */
+  vaccines?: VaccinePrintEvent[];
+}
+
+export interface VaccinePrintEvent { id: string; occurred_at: string; data: Record<string, unknown> }
+
+const printDay = (ymd: string) => format(new Date(`${ymd}T12:00:00`), 'd MMM yyyy');
+function doseStatusText(d: PlannedDose): string {
+  if (d.status === 'done') return d.doneOn ? `Done ${printDay(d.doneOn)}` : 'Done';
+  if (d.status === 'closed') return d.vaccine === 'rsv' ? 'Only before the 1st birthday' : 'Age limit passed';
+  const when = d.due ? format(d.due, 'd MMM yyyy') : '';
+  if (d.status === 'due') return `Not marked yet (from ${when})`;
+  if (d.status === 'soon') return `Due soon (from ${when})`;
+  return when ? `From ${when}` : '';
+}
+
+/** Vaccinations against the BAG schedule, one row per dose. */
+export function VaccinePrintSection({ birthDate, events, now }: { birthDate: string | null; events: VaccinePrintEvent[]; now: Date }) {
+  const marks = vaccineMarksFrom(events);
+  const markIds = new Set(marks.map(m => m.id));
+  const doses = babyVaccinePlan(birthDate, marks, now).flatMap(v => v.doses);
+  const other = events.filter(e => !markIds.has(e.id))
+    .sort((a, b) => a.occurred_at.localeCompare(b.occurred_at))
+    .map(e => ({ id: e.id, name: String(e.data?.name ?? 'Vaccination'), on: format(new Date(e.occurred_at), 'd MMM yyyy') }));
+  return (
+    <section className="mb-4" data-section="vaccines">
+      <h2 className={H2}>Vaccinations (Swiss schedule)</h2>
+      <table className="w-full text-sm border-collapse">
+        <thead>
+          <tr className="border-b border-gray-300 text-xs text-gray-500">
+            <th className="text-left py-1 font-medium">Age</th>
+            <th className="text-left py-1 pl-2 font-medium">Vaccination</th>
+            <th className="text-left py-1 pl-2 font-medium">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {doses.map(d => (
+            <tr key={d.id} className="border-b border-gray-100 break-inside-avoid" data-dose={d.id}>
+              <td className="py-1 pr-2 whitespace-nowrap align-top">{d.age}</td>
+              <td className="py-1 pl-2 align-top">{d.name}</td>
+              <td className="py-1 pl-2 align-top">{doseStatusText(d)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {other.length > 0 && (
+        <p className="text-sm mt-1">Other vaccinations: {other.map(o => `${o.name} (${o.on})`).join(', ')}.</p>
+      )}
+      <p className="text-xs text-gray-500 mt-1">“Done” = marked by the parent in the app, with the date entered. {BAG_SCHEDULE_SOURCE} (Schweizerischer Impfplan, bag.admin.ch).</p>
+    </section>
+  );
 }
 
 const H2 = 'text-[11px] font-bold uppercase tracking-wide text-gray-500 mb-1';
@@ -109,6 +164,8 @@ export function BabySummarySheet({ data, now = new Date() }: { data: BabySummary
         </Suspense>
       )}
 
+      {data.vaccines && <VaccinePrintSection birthDate={data.birthDate} events={data.vaccines} now={now} />}
+
       <footer className="mt-6 pt-2 border-t border-gray-200 text-[10px] text-gray-500">{footerLine(now)}</footer>
     </article>
   );
@@ -137,7 +194,10 @@ export default function PrintBabySummary() {
     const growthQ = db.from('life_events').select('*')
       .eq('user_id', user.id).eq('kind', 'baby_growth').eq('baby_id', baby.id)
       .order('occurred_at', { ascending: false }).limit(200);
-    const [f, n, s, g] = await Promise.all([events('feed'), events('nappy'), events('baby_sleep'), growthQ]);
+    const vaxQ = db.from('life_events').select('*')
+      .eq('user_id', user.id).eq('kind', 'baby_vaccine').eq('baby_id', baby.id)
+      .order('occurred_at', { ascending: true }).limit(200);
+    const [f, n, s, g, v] = await Promise.all([events('feed'), events('nappy'), events('baby_sleep'), growthQ, vaxQ]);
     if (f.error || n.error || s.error) { setFailed(true); return; }
     const rows = (r: { data: unknown }) => ((Array.isArray(r.data) ? r.data : []) as Array<Record<string, unknown>>).map(x => {
       let d = x.data as unknown;
@@ -151,9 +211,12 @@ export default function PrintBabySummary() {
     // Growth is extra: if it fails to load, the week still prints.
     const growthIds = ((Array.isArray(g.data) ? g.data : []) as Array<Record<string, unknown>>).map((x, i) => String(x.id ?? i));
     const growth = g.error ? [] : rows(g).map((r, i) => ({ id: growthIds[i], occurred_at: r.occurred_at, data: r.data }));
+    // Vaccinations are extra too: without them the section is left out.
+    const vaxIds = ((Array.isArray(v.data) ? v.data : []) as Array<Record<string, unknown>>).map((x, i) => String(x.id ?? i));
+    const vaccines = v.error ? undefined : rows(v).map((r, i) => ({ id: vaxIds[i], occurred_at: r.occurred_at, data: r.data }));
     setData({
       name: baby.name || 'Baby', birthDate: baby.birth_date ? String(baby.birth_date).slice(0, 10) : null, sex: baby.sex ?? null,
-      feeds: rows(f), nappies: rows(n), sleeps: rows(s), growth,
+      feeds: rows(f), nappies: rows(n), sleeps: rows(s), growth, vaccines,
     });
   }, [user, babyParam]);
 
