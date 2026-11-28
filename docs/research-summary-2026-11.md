@@ -41,7 +41,7 @@ which had one of those risk words. Round 16 took the rest of those and
 the first 100 that only give a plain number, pregnancy, breastfeeding,
 medicine and lab topics first.
 
-- About 5 in 6 summaries were fine as written.
+- Most summaries were fine as written. The later rounds deliberately picked riskier ones (doses, "safe", medicines in pregnancy), and there about 2 in 5 needed a fix.
 - **656 corrections** were made in total (153 of them in round 14, in 70
   of the 150 risky summaries checked; 64 in round 15, in 41 of 150; 142 in
   round 16, in 87 of 226).
