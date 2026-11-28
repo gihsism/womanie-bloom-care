@@ -56,7 +56,7 @@ const PatientDashboard = () => {
   usePageTitle('Home');
   const p = useStageProfile();
   const { selectedMode: mode, profile, periodData, pregnancyDueDate, ivfStartDate, ivfPhase, weeksPregnant } = p;
-  const signals = useTodaySignals(periodData, profile?.full_name, { mode, pregnancyDueDate });
+  const signals = useTodaySignals(periodData, profile?.full_name, { mode, pregnancyDueDate, ivfPhase });
   const [sheet, setSheet] = useState<SheetKind | null>(null);
   const go = useGo(setSheet);
   const logSheetMounted = useOnceTrue(sheet !== null);

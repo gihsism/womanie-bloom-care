@@ -16,6 +16,9 @@ import { useAccountDataVersion } from '@/lib/account-data';
 import { babyVaccineReminders, type BabyForVaccines } from '@/lib/babyVaccines';
 import { postnatalCheckDue, pickBirthDate, POSTNATAL_MILESTONE_ID } from '@/lib/postnatalCheck';
 import { currentFlagged } from '@/lib/labFlags';
+import { contraceptionRows, isMethodId, METHOD_DATES_KEY, parseMethodDates } from '@/lib/contraceptionSchedule';
+import { hasAnyDate, ivfTodayDates, localDateTime, parseIvfPlan, IVF_PLAN_LOCAL_KEY, type IvfPlan } from '@/lib/ivfJourney';
+import { deviceTz } from '@/components/dashboard/ivf/ivfFormat';
 
 type FlagRow = { id: string; title: string; status: string | null; data_type: string | null; date_recorded: string | null };
 
@@ -27,7 +30,11 @@ type FlagRow = { id: string; title: string; status: string | null; data_type: st
 // an unticked contraceptive pill, pregnancy vaccinations in their window
 // and the 2-weekly EPDS mood check; postpartum, a baby at a common
 // vaccination age (babies + baby_vaccine events); other stages, the last
-// mood ticked in the daily log (weekly mood prompt).
+// mood ticked in the daily log (weekly mood prompt). Contraception, other
+// methods: ring / patch change days, injection, IUD check and IUD /
+// implant replacement from the dates she entered; no method yet -> the
+// choose-a-method row. IVF: her clinic dates today / tomorrow; no date
+// and no phase yet -> the add-your-dates row.
 // Read-only; the same endpoints and tables the old Home cards used
 // (AppointmentTodayBanner, UpcomingAppointments, DoctorNotesCard,
 // useAttentionCount, GettingStarted).
@@ -94,7 +101,7 @@ interface Med extends SupplyMed { id: string; name: string; reminder_times: stri
 export function useTodaySignals(
   period: PeriodData | null,
   profileName: string | null | undefined,
-  stage: { mode?: LifeStage | null; pregnancyDueDate?: Date | null } = {},
+  stage: { mode?: LifeStage | null; pregnancyDueDate?: Date | null; ivfPhase?: string | null } = {},
 ): TodaySignals {
   const { user } = useAuth();
   const prefs = useNotificationPrefs();
@@ -102,13 +109,15 @@ export function useTodaySignals(
   // Start times of her visits that are not cancelled (for the postnatal-check row).
   const [visitTimes, setVisitTimes] = useState<Date[] | null>(null);
   const [birthDate, setBirthDate] = useState<Date | null>(null);
-  const [tasks, setTasks] = useState<Pick<TodaySignals, 'medicinesDue' | 'medicinesRunningOut' | 'pill' | 'babyVaccines' | 'lastMoodLog'>>({});
-  const { mode, pregnancyDueDate } = stage;
+  const [tasks, setTasks] = useState<Pick<TodaySignals, 'medicinesDue' | 'medicinesRunningOut' | 'pill' | 'babyVaccines' | 'lastMoodLog' | 'contraceptionDue' | 'methodMissing'>>({});
+  // IVF: her treatment dates (ivf_plans, device copy first); null = not loaded.
+  const [ivfPlan, setIvfPlan] = useState<IvfPlan | null>(null);
+  const { mode, pregnancyDueDate, ivfPhase } = stage;
   const uid = user?.id;
   // Device copies of account data (synced in lib/account-data.ts).
   const vaxKey = uid ? PREG_VACCINES_KEY(uid) : null;
   const epdsKey = uid ? `womanie_epds_history_${uid}` : null;
-  const accountVersion = useAccountDataVersion([vaxKey, epdsKey, uid ? `contraception:${uid}:method` : null, uid ? `postpartum:${uid}:milestones` : null]);
+  const accountVersion = useAccountDataVersion([vaxKey, epdsKey, uid ? `contraception:${uid}:method` : null, uid ? METHOD_DATES_KEY(uid) : null, uid ? `postpartum:${uid}:milestones` : null]);
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -197,7 +206,15 @@ export function useTodaySignals(
       const now = new Date();
       let pill: TodaySignals['pill'] = null;
       const method = readJSON<string>(`contraception:${uid}:method`);
-      if (mode === 'contraception' && (method == null || method === 'pill')) {
+      // Other methods: rows from the dates she entered on the method card.
+      // No method yet (nothing chosen on this account): ask for it instead
+      // of reminding a possibly IUD / implant user about a pill.
+      const methodId = isMethodId(method) ? method : null;
+      const contraceptionDue = mode === 'contraception'
+        ? contraceptionRows(methodId, parseMethodDates(readJSON<unknown>(METHOD_DATES_KEY(uid)))[methodId ?? 'pill'], now)
+        : [];
+      const methodMissing = mode === 'contraception' && method == null;
+      if (mode === 'contraception' && method === 'pill') {
         const { data } = await db.from('daily_health_signals').select('signal_date, notes')
           .eq('user_id', uid).gte('signal_date', format(subDays(now, 7), 'yyyy-MM-dd'));
         const rows = (Array.isArray(data) ? data : []) as Array<{ signal_date: string; notes: string | null }>;
@@ -214,7 +231,7 @@ export function useTodaySignals(
           packDay: pillPackDay(readJSON<string>(`contraception:${uid}:packStartDate`), now),
         };
       }
-      setTasks(t => ({ ...t, pill }));
+      setTasks(t => ({ ...t, pill, contraceptionDue, methodMissing }));
     } catch {
       // Keep the last known state.
     }
@@ -262,6 +279,27 @@ export function useTodaySignals(
     }
   }, [uid, mode]);
 
+  // IVF: the clinic dates (same source as the stage page's timeline).
+  const loadIvf = useCallback(async () => {
+    if (!uid || mode !== 'ivf') return;
+    let local: IvfPlan | null = null;
+    try {
+      const raw = localStorage.getItem(IVF_PLAN_LOCAL_KEY(uid));
+      if (raw) local = parseIvfPlan(raw);
+    } catch { /* storage blocked */ }
+    if (local) setIvfPlan(local);
+    try {
+      const { data, error } = await db.from('ivf_plans').select('plan').eq('user_id', uid).maybeSingle();
+      const row = data as { plan: unknown } | null;
+      if (!error && row) setIvfPlan(parseIvfPlan(row.plan));
+      else if (!local) setIvfPlan(parseIvfPlan(null));
+    } catch {
+      if (!local) setIvfPlan(parseIvfPlan(null));
+    }
+  }, [uid, mode]);
+  useEffect(() => { void loadIvf(); }, [loadIvf]);
+  useEffect(() => onHealthDataChange(() => { void loadIvf(); }), [loadIvf]);
+
   useEffect(() => { void loadMeds(); }, [loadMeds]);
   useEffect(() => { void loadStageExtras(); }, [loadStageExtras]);
   useEffect(() => onHealthDataChange(() => { void loadStageExtras(); }), [loadStageExtras]);
@@ -296,10 +334,26 @@ export function useTodaySignals(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, uid, visitTimes, birthDate, accountVersion, s]);
 
+  const ivf = useMemo(() => {
+    if (mode !== 'ivf' || !ivfPlan) return { ivfDates: [], ivfSetupNeeded: false };
+    const now = new Date();
+    const tz = deviceTz();
+    return {
+      ivfDates: ivfTodayDates(ivfPlan, now, tz).map(d => ({
+        key: d.key, label: d.label, daysUntil: d.daysUntil,
+        time: d.at ? localDateTime(new Date(d.at), tz).time : null,
+      })),
+      ivfSetupNeeded: !hasAnyDate(ivfPlan) && !ivfPhase,
+    };
+    // `s` / `tasks` change on the 5-minute refresh: re-evaluate today / tomorrow.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, ivfPlan, ivfPhase, s, tasks]);
+
   const hasName = !!profileName?.trim();
   return {
     ...s,
     ...tasks,
+    ...ivf,
     vaccinesDue,
     lastMoodCheck,
     postnatalCheckDue: postnatal,

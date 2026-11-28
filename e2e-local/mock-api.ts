@@ -49,6 +49,19 @@ interface DbBody {
   limitCount: number | null;
 }
 
+// JSONB columns: the client sends JSON.stringify(value) and Postgres keeps
+// the parsed value, which the Neon driver hands back parsed (account-data
+// relies on it). Without this the mock returned the string, and the
+// account sync double-encoded every synced device key on the next load.
+const JSONB_COLUMNS: Record<string, string[]> = { user_app_data: ['value'] };
+function asStored(table: string, r: Row | null | undefined): Row {
+  const out: Row = { ...(r ?? {}) };
+  for (const c of JSONB_COLUMNS[table] ?? []) {
+    if (typeof out[c] === 'string') { try { out[c] = JSON.parse(out[c] as string); } catch { /* keep as text */ } }
+  }
+  return out;
+}
+
 function runDb(tables: Tables, b: DbBody, userId: string): Row[] {
   const t = (tables[b.table] ??= []);
   const filtered = () => t.filter((r) => (b.filters ?? []).every((f) => match(r, f)));
@@ -56,13 +69,13 @@ function runDb(tables: Tables, b: DbBody, userId: string): Row[] {
   switch (b.operation) {
     case 'insert': {
       const src = Array.isArray(b.insertData) ? b.insertData : [b.insertData ?? {}];
-      const rows = src.map((r) => ({ id: newId(), created_at: now, user_id: userId, ...r }));
+      const rows = src.map((r) => ({ id: newId(), created_at: now, user_id: userId, ...asStored(b.table, r) }));
       t.push(...rows);
       return rows.map((r) => ({ ...r }));
     }
     case 'update': {
       const rows = filtered();
-      rows.forEach((r) => Object.assign(r, b.updateData));
+      rows.forEach((r) => Object.assign(r, asStored(b.table, b.updateData as Row)));
       return rows.map((r) => ({ ...r }));
     }
     case 'upsert': {
@@ -71,7 +84,7 @@ function runDb(tables: Tables, b: DbBody, userId: string): Row[] {
       for (const raw of Array.isArray(b.upsertData) ? b.upsertData : [b.upsertData ?? {}]) {
         // The server stamps the signed-in user's id, so onConflict
         // 'user_id,key' matches rows the client sent without user_id.
-        const r: Row = { user_id: userId, ...raw };
+        const r: Row = { user_id: userId, ...asStored(b.table, raw) };
         const existing = t.find((x) => keys.every((k) => r[k] !== undefined && String(x[k]) === String(r[k])));
         if (existing) { Object.assign(existing, r); out.push({ ...existing }); }
         else { const n = { id: newId(), created_at: now, user_id: userId, ...r }; t.push(n); out.push({ ...n }); }

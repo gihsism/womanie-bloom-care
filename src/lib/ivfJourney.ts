@@ -34,6 +34,12 @@ export interface IvfPlan {
   downregStart: string | null;
   /** Stim day 1. */
   stimStart: string | null;
+  /**
+   * Monitoring scans / blood tests during stimulation, as the clinic books
+   * them (sorted, no repeats, at most MAX_IVF_SCANS). Older saved plans
+   * have no such field: read as [].
+   */
+  scans: string[];
   /** The trigger shot as a UTC instant (ISO). */
   triggerAt: string | null;
   /** The timezone she entered the trigger time in. */
@@ -45,8 +51,10 @@ export interface IvfPlan {
 }
 
 export const EMPTY_IVF_PLAN: IvfPlan = {
-  v: 1, downregStart: null, stimStart: null, triggerAt: null, triggerTz: null, retrieval: null, transfer: null, testDate: null,
+  v: 1, downregStart: null, stimStart: null, scans: [], triggerAt: null, triggerTz: null, retrieval: null, transfer: null, testDate: null,
 };
+
+export const MAX_IVF_SCANS = 10;
 
 export const IVF_PLAN_LOCAL_KEY = (userId: string) => `womanie_ivf_plan_${userId}`;
 
@@ -80,6 +88,9 @@ export function parseIvfPlan(raw: unknown): IvfPlan {
     v: 1,
     downregStart: date('downregStart'),
     stimStart: date('stimStart'),
+    scans: Array.isArray(o.scans)
+      ? [...new Set(o.scans.filter(isDateStr))].sort().slice(0, MAX_IVF_SCANS)
+      : [],
     triggerAt: at,
     triggerTz: at && isValidTimeZone(o.triggerTz) ? (o.triggerTz as string) : at ? DEFAULT_IVF_TZ : null,
     retrieval: date('retrieval'),
@@ -89,7 +100,7 @@ export function parseIvfPlan(raw: unknown): IvfPlan {
 }
 
 export function hasAnyDate(p: IvfPlan): boolean {
-  return !!(p.downregStart || p.stimStart || p.triggerAt || p.retrieval || p.transfer || p.testDate);
+  return !!(p.downregStart || p.stimStart || p.scans.length || p.triggerAt || p.retrieval || p.transfer || p.testDate);
 }
 
 // ─── Calendar math (DST-proof) ───
@@ -150,7 +161,7 @@ export function zonedTimeToUtc(date: string, time: string, timeZone: string): Da
 // ─── Timeline and phase ───
 
 export interface IvfStep {
-  key: 'downreg' | 'stims' | 'trigger' | 'retrieval' | 'transfer' | 'tww' | 'test';
+  key: 'downreg' | 'stims' | 'scan' | 'trigger' | 'retrieval' | 'transfer' | 'tww' | 'test';
   label: string;
   phase: IvfPhaseKey;
   /** Local date of the step (the trigger: its local date in her zone). */
@@ -161,6 +172,7 @@ export interface IvfStep {
 const STEP_LABELS: Record<IvfStep['key'], string> = {
   downreg: 'Down-regulation',
   stims: 'Stimulation',
+  scan: 'Monitoring scan',
   trigger: 'Trigger shot',
   retrieval: 'Egg retrieval',
   transfer: 'Embryo transfer',
@@ -226,6 +238,7 @@ export function ivfTimeline(p: IvfPlan, now: Date, tz: string = DEFAULT_IVF_TZ, 
   const dates: Record<IvfStep['key'], string | null> = {
     downreg: p.downregStart,
     stims: p.stimStart,
+    scan: null,
     trigger: triggerLocalDate(p, tz),
     retrieval: p.retrieval,
     transfer: p.transfer,
@@ -255,8 +268,8 @@ export interface NextKeyDate {
   at: string | null;
 }
 
-/** The next date she set that is still ahead (today's counts until it is over). */
-export function nextKeyDate(p: IvfPlan, now: Date, tz: string = DEFAULT_IVF_TZ): NextKeyDate | null {
+/** Every date she set that is still ahead, soonest first (today's counts until it is over). */
+function keyDatesAhead(p: IvfPlan, now: Date, tz: string): NextKeyDate[] {
   const today = localDate(now, tz);
   const cands: NextKeyDate[] = [];
   const add = (key: IvfStep['key'], date: string | null, at: string | null = null) => {
@@ -267,12 +280,41 @@ export function nextKeyDate(p: IvfPlan, now: Date, tz: string = DEFAULT_IVF_TZ):
     cands.push({ key, label: STEP_LABELS[key], date, daysUntil, at });
   };
   add('stims', p.stimStart && daysBetween(today, p.stimStart) > 0 ? p.stimStart : null);
+  for (const d of p.scans ?? []) add('scan', d);
   add('trigger', triggerLocalDate(p, tz), p.triggerAt);
   add('retrieval', p.retrieval);
   add('transfer', p.transfer);
   add('test', p.testDate);
   cands.sort((a, b) => a.daysUntil - b.daysUntil || (a.at ? -1 : 1));
-  return cands[0] ?? null;
+  return cands;
+}
+
+/** The next date she set that is still ahead (today's counts until it is over). */
+export function nextKeyDate(p: IvfPlan, now: Date, tz: string = DEFAULT_IVF_TZ): NextKeyDate | null {
+  return keyDatesAhead(p, now, tz)[0] ?? null;
+}
+
+/**
+ * Home's Today rows: the clinic dates she set for today and tomorrow
+ * (soonest first; the trigger with its time; a trigger already given
+ * drops out). Only her own dates, no advice.
+ */
+export function ivfTodayDates(p: IvfPlan, now: Date, tz: string = DEFAULT_IVF_TZ): NextKeyDate[] {
+  return keyDatesAhead(p, now, tz).filter(k => k.daysUntil <= 1);
+}
+
+/** Her treatment dates in order, for the visit prep sheet (only the ones she set). */
+export function ivfDateList(p: IvfPlan, tz: string = DEFAULT_IVF_TZ): Array<{ label: string; date: string; at: string | null }> {
+  const rows: Array<{ label: string; date: string; at: string | null }> = [];
+  const add = (label: string, date: string | null, at: string | null = null) => { if (date) rows.push({ label, date, at }); };
+  add('Down-regulation starts', p.downregStart);
+  add('Stimulation day 1', p.stimStart);
+  (p.scans ?? []).forEach((d, i, all) => add(all.length > 1 ? `Monitoring scan ${i + 1}` : 'Monitoring scan', d));
+  add('Trigger shot', triggerLocalDate(p, tz), p.triggerAt);
+  add('Egg retrieval', p.retrieval);
+  add('Embryo transfer', p.transfer);
+  add('Test day', p.testDate);
+  return rows;
 }
 
 /** Dates entered out of order (shown as a gentle "check this" note, never blocking). */
