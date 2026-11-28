@@ -1,3 +1,5 @@
+import { useConfirm } from '@/components/ConfirmDialog';
+import { deleteDocumentConfirm } from '@/lib/confirmCopy';
 import { lazy, Suspense, useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import ReportChanges from '@/components/records/ReportChanges';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -588,6 +590,7 @@ export default function MedicalHistory() {
   const [docFilter, setDocFilter] = useState<DocFilter>('all');
   const [docSearch, setDocSearch] = useState('');
   const { toast } = useToast();
+  const [confirm, confirmDialog] = useConfirm();
   const [searchParams] = useSearchParams();
   // Three segments: Results (default) | Documents | My charts.
   // ?tab=documents|charts opens one directly; ?doc=<id> opens Documents.
@@ -1141,6 +1144,7 @@ export default function MedicalHistory() {
 
   return (
     <main className="min-h-screen bg-background">
+    {confirmDialog}
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="px-3 py-3 sm:px-4 sm:py-4 flex items-center gap-2 sm:gap-3">
@@ -1490,9 +1494,9 @@ export default function MedicalHistory() {
                             variant="outline"
                             size="sm"
                             className="h-7 text-xs gap-1.5 text-destructive hover:text-destructive"
-                            onClick={(e) => {
+                            onClick={async (e) => {
                               e.stopPropagation();
-                              if (window.confirm(`Delete "${doc.ai_suggested_name || doc.file_name}"?`)) {
+                              if (await confirm(deleteDocumentConfirm(doc.ai_suggested_name || doc.file_name))) {
                                 deleteDocument(doc.id);
                               }
                             }}

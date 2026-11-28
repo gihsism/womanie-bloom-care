@@ -1,3 +1,5 @@
+import { useConfirm } from '@/components/ConfirmDialog';
+import { deleteAccountConfirm } from '@/lib/confirmCopy';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -61,6 +63,7 @@ const Settings = () => {
   const attention = useAttentionCount();
   const { user } = useAuth();
   const { toast } = useToast();
+  const [confirm, confirmDialog] = useConfirm();
   const [selectedStage, setSelectedStage] = useState<LifeStage>('menstrual-cycle');
   // Her name (profiles.full_name): the Home greeting and Ask AI use it,
   // and Home's "Add your name" row leads here.
@@ -221,14 +224,10 @@ const Settings = () => {
   };
 
   const handleDeleteAccount = async () => {
-    // Double gate: an initial warning, then a type-to-confirm step so
-    // a stray click on the destructive button doesn't eat months of
-    // health data.
-    if (!window.confirm("This will permanently erase everything Womanie has on you — documents, analyses, cycle logs, chats. This cannot be undone.\n\nContinue?")) {
-      return;
-    }
-    const typed = window.prompt('To confirm, type exactly: DELETE MY ACCOUNT');
-    if (typed !== 'DELETE MY ACCOUNT') {
+    // Double gate in one in-app dialog: the warning, then a
+    // type-to-confirm field, so a stray click on the destructive button
+    // doesn't eat months of health data.
+    if (!(await confirm(deleteAccountConfirm()))) {
       toast({ title: 'Account delete cancelled' });
       return;
     }
@@ -416,6 +415,7 @@ const Settings = () => {
 
   return (
     <main className="min-h-screen bg-background">
+    {confirmDialog}
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="w-full px-4 py-4">

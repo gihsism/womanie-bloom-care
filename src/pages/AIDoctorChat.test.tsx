@@ -126,18 +126,22 @@ describe('Ask AI', () => {
       }
       return json({ deleted: 2 });
     });
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValueOnce(false).mockReturnValueOnce(true);
+    const confirmSpy = vi.spyOn(window, 'confirm');
     renderChat();
     await waitFor(() => expect(fetchSpy).toHaveBeenCalled());
     fireEvent.click(screen.getByRole('button', { name: /past chats/i }));
     await screen.findByTestId('past-chats');
     const del = screen.getByRole('button', { name: 'Delete chat: Is my TSH normal?' });
-    fireEvent.click(del); // cancelled
+    fireEvent.click(del);
+    fireEvent.click(await screen.findByRole('button', { name: 'Keep chat' })); // cancelled
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
     const deletes = () => fetchSpy.mock.calls.filter(([, init]: [unknown, RequestInit | undefined]) => init?.method === 'DELETE');
     expect(deletes()).toHaveLength(0);
-    fireEvent.click(del); // confirmed
+    fireEvent.click(del);
+    expect(await screen.findByText('Delete the chat "Is my TSH normal?"?')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Delete chat' })); // confirmed
     await waitFor(() => expect(screen.queryByText('Is my TSH normal?')).toBeNull());
-    expect(confirmSpy).toHaveBeenCalledTimes(2);
+    expect(confirmSpy).not.toHaveBeenCalled(); // in-app dialog, never the browser's
     const [url, init] = deletes()[0] as [string, RequestInit];
     expect(url).toBe('/api/chat/conversation');
     expect(JSON.parse(String(init.body))).toEqual({ messageIds: [withIds[0].id, withIds[1].id] });

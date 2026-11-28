@@ -181,8 +181,8 @@ test('contraction timer: 5-1-1 banner logic and offline save', async ({ page, co
   expect(created).toHaveLength(18);
 
   // Clear history removes them again.
-  page.once('dialog', (d) => d.accept());
   await timer.getByRole('button', { name: 'Clear history' }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Clear history' }).click();
   await expect(timer.getByText('No contractions timed yet')).toBeVisible({ timeout: 30_000 });
 });
 

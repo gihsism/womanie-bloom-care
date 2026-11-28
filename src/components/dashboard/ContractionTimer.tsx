@@ -1,3 +1,5 @@
+import { useConfirm } from '@/components/ConfirmDialog';
+import { discardContractionConfirm, clearContractionsConfirm } from '@/lib/confirmCopy';
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -49,6 +51,7 @@ function readActive(key: string): ActiveContraction | null {
 const ContractionTimer = () => {
   const { user } = useAuth();
   const userId = user?.id;
+  const [confirm, confirmDialog] = useConfirm();
   const { events, pending, addOrQueue, remove, removePending, error } = useOfflineLifeEvents('contraction', {
     limit: MAX_HISTORY,
     beforeLoad: (id) => importLocalOnce<{ startedAt: number; endedAt: number | null }, Record<string, never>>(id, KEY(id), 'contraction', c =>
@@ -100,9 +103,9 @@ const ContractionTimer = () => {
     await addOrQueue({ occurred_at: new Date(startedAt).toISOString(), ended_at: new Date(endedAt).toISOString() });
   };
 
-  const discardActive = () => {
+  const discardActive = async () => {
     if (!active) return;
-    if (!window.confirm('Discard this contraction?')) return;
+    if (!(await confirm(discardContractionConfirm()))) return;
     setActiveSaved(null);
   };
 
@@ -113,7 +116,7 @@ const ContractionTimer = () => {
 
   const reset = async () => {
     if (all.length === 0 && !active) return;
-    if (!window.confirm('Clear all contraction history?')) return;
+    if (!(await confirm(clearContractionsConfirm()))) return;
     setActiveSaved(null);
     for (const c of all) {
       if (c.pending) removePending(c.id);
@@ -127,6 +130,7 @@ const ContractionTimer = () => {
 
   return (
     <Card className="p-4 space-y-3">
+    {confirmDialog}
       <div className="flex items-center justify-between">
         <h4 className="font-semibold flex items-center gap-2">
           <Timer className="h-4 w-4 text-primary" />

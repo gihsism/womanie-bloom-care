@@ -1,3 +1,5 @@
+import { useConfirm } from '@/components/ConfirmDialog';
+import { stopMedicineConfirm } from '@/lib/confirmCopy';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -64,6 +66,7 @@ const DEFAULT_EXAMPLES = ['Iron', 'Vitamin D', 'Magnesium', 'Painkiller'];
 export default function MedicineLog({ stage }: { stage?: string | null }) {
   const { user } = useAuth();
   const userId = user?.id ?? '';
+  const [confirm, confirmDialog] = useConfirm();
   const [meds, setMeds] = useState<Medication[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -227,7 +230,7 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
   };
 
   const stop = async (m: Medication) => {
-    if (!window.confirm(`Stop tracking ${m.name}? Past doses stay in your history.`)) return;
+    if (!(await confirm(stopMedicineConfirm(m.name)))) return;
     const base = { active: false, updated_at: new Date().toISOString() };
     // stopped_on arrives with migration 018; until then retry without it.
     let { error: err } = await db.from('medications')
@@ -258,6 +261,7 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
 
   return (
     <Card className="p-4 space-y-3">
+    {confirmDialog}
       <div className="flex items-center justify-between">
         <h3 className="font-semibold flex items-center gap-2">
           <Pill className="h-4 w-4 text-primary" />

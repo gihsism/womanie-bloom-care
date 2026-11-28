@@ -1,3 +1,5 @@
+import { useConfirm } from '@/components/ConfirmDialog';
+import { discardKickSessionConfirm } from '@/lib/confirmCopy';
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -58,6 +60,7 @@ const KickCounter = () => {
   const { user } = useAuth();
   const userId = user?.id;
   const { toast } = useToast();
+  const [confirm, confirmDialog] = useConfirm();
   const [current, setCurrent] = useState<KickSession | null>(null);
   const [lastDone, setLastDone] = useState<KickSession | null>(null);
   const { events, pending, addOrQueue, error } = useOfflineLifeEvents<KickData>('kick_session', {
@@ -158,9 +161,9 @@ const KickCounter = () => {
     }
   };
 
-  const reset = () => {
+  const reset = async () => {
     if (!current) return;
-    if (current.count > 0 && !window.confirm('Discard this kick-count session?')) return;
+    if (current.count > 0 && !(await confirm(discardKickSessionConfirm()))) return;
     persistCurrent(null);
   };
 
@@ -171,6 +174,7 @@ const KickCounter = () => {
 
   return (
     <Card className="p-4 space-y-4">
+    {confirmDialog}
       {error && <p className="text-xs text-destructive">{error}</p>}
       <div className="flex items-center justify-between">
         <h4 className="font-semibold flex items-center gap-2">

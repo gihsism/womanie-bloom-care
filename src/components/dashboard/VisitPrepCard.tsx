@@ -1,3 +1,5 @@
+import { useConfirm } from '@/components/ConfirmDialog';
+import { unshareVisitListConfirm } from '@/lib/confirmCopy';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -107,6 +109,7 @@ const MODE_DEFAULTS: Record<string, string[]> = {
 export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [confirm, confirmDialog] = useConfirm();
   const navigate = useNavigate();
   const ctx = useUserHealthContext();
 
@@ -302,7 +305,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
 
   const unshare = async () => {
     if (!user || !upcomingApt) return;
-    if (!window.confirm('Remove this list from your visit? Your doctor will no longer see it.')) return;
+    if (!(await confirm(unshareVisitListConfirm()))) return;
     const { error } = await db.from('visit_questions').delete()
       .eq('user_id', user.id).eq('appointment_id', String(upcomingApt.id));
     if (error) { toast({ variant: 'destructive', title: 'Could not remove', description: 'Try again.' }); return; }
@@ -340,6 +343,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
 
   return (
     <Card className="p-4">
+    {confirmDialog}
       <div className="flex items-center gap-2 mb-2">
         <ClipboardCheck className="h-4 w-4 text-primary" />
         <h3 className="text-sm font-semibold">Questions for your next visit</h3>
