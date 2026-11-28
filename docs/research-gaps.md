@@ -951,6 +951,46 @@ ScreeningTracker intervals (pinned in round 8), "half of all people"
 have periods. Tests: `src/lib/healthClaims.test.ts` (round 11 block,
 code comments stripped).
 
+### First source for the 167 questions: off-topic or non-Swiss
+
+Each question's chat sources (bundled model) were read. Fixed:
+
+| Question | Problem | Fix |
+|---|---|---|
+| "Can I eat Rohmilchkäse (raw milk cheese) in pregnancy?" | BLV 3rd behind an iodine-in-dairy review | keywords on the BLV item (cheese, soft cheese, raw milk cheese, rohmilchkäse, listeria; not embedded). BLV now first, also for "soft cheese" |
+| "Chlamydia test, how often should young women get one?" | SGGG cervical letter 1st, SGGG GBS letter 2nd (both matched "test"/"swab" and the Swiss lift) | two `SUBJECT_MISMATCH` rules: another test asked (no smear / HPV / cancer / check-up / screening word) -> cervical-screening title x0.6; an STI asked -> cervical, GBS or pre-eclampsia-test title x0.6. "chlamydia test" keywords on CDC STI 2021. CDC first; the cervical letter also left "What blood tests check for PCOS?" and the Swiss fertility-tests question |
+| "Does the Krankenkasse pay the yearly gynaecology check-up?" | BAG maternity benefits 1st | rule: insurance / pay / cover asked with no pregnancy, birth, midwife, baby or scan word -> "maternity" title x0.6. Fedlex screening cover now first, SGGG letter 2nd |
+| "Is the pill safe while breastfeeding?" | triple-negative breast cancer risk-factor review 1st | rule: breastfeeding asked without a cancer word -> cancer title not naming breastfeeding x0.6. Cochrane lactation contraception first |
+| "Can I have a vaginal birth after a caesarean?" | 3 general Cochrane caesarean / labour-support reviews ahead of FIGO 2025 and ACOG PB 205 | rule: birth after a caesarean asked -> titles not about birth after a previous caesarean x0.6. FIGO first, ACOG 2nd |
+| "Itching on hands and feet in pregnancy" | toxoplasmosis hygiene review 1st: the library had **no cholestasis-of-pregnancy item** | new item SMFM Consult #53 (2021, `pmid-33197417`, summary from the PubMed abstract, own words; the source the app's bile-acid insight already names) |
+| "How long after stopping the pill can I get pregnant?" | anticoagulant-recurrence review 1st, nothing on fertility after contraception | new item: return of fertility after contraception, systematic review (2018, `pmid-30062044`; 83% pregnant within 12 months, no difference by method). Kept off "trying to conceive" (it took the TTC question on the first try) |
+| "When will my period come back after birth?" | postplacental-IUD guideline 1st | keywords on the Cochrane LAM review |
+| "Can I get pregnant in perimenopause?" | CANMAT depression guideline 1st | keywords on the contraception-over-40 consensus |
+| "Does my baby need vitamin D drops?" | vitamin D for asthma review 1st | keywords (baby, vitamin D drops) on the Cochrane review on breastfed babies: now first |
+| "Are fertility apps reliable for avoiding or getting pregnant?" | antioxidant reviews 1st to 3rd, nothing on apps | app keywords on the fertility-awareness effectiveness review (`pmid-30095777`) and the wearables review: the former is now 4th; antioxidant reviews still lead (partial fix) |
+
+Before / after on the 138 round-6 questions: 3 changed, all on topic
+(BLV now first for soft cheese; a filler swap for period-tracking apps;
+the cholestasis item replaces a haemorrhoid guideline as a filler for
+"Can I dye my hair while pregnant?", which has no on-topic source either
+way). Search evals unchanged. Tests: `ask-ai-audit.test.ts` (round 11
+blocks: keyword and bundled model, including the questions the rules
+must leave alone: smear interval, midwife cover, pregnancy cover,
+breastfeeding and breast cancer).
+
+Not fixed, no fitting free item in the library yet (candidates for a
+later round): toxic shock syndrome / tampons, ovulation pain, lubricants
+and sperm, breech and turning the baby, planned home birth, magnesium
+for night cramps, high prolactin, the pill and cervical cancer or
+libido, hair dye. **Swiss gaps** (no Swiss item answers them, the
+non-Swiss or off-topic first source stays): what basic insurance pays
+for fertility tests, IVF, contraception and HRT (KLV); egg freezing
+storage and the egg-donation ban (FMedG); maternity leave start (EO).
+Weak first sources left for the same reason: teen breast growth, a teen
+fainting or sad before her period, first gynaecology visit, sore
+breasts before a period, swollen feet late in pregnancy, travel or
+bleeding after embryo transfer.
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed

@@ -11294,7 +11294,9 @@
     "scar rupture",
     "labour after caesarean",
     "birth after caesarean",
-    "trial of labour"
+    "trial of labour",
+    "vaginal birth after a caesarean",
+    "vaginal birth after a c-section"
    ]
   },
   {
@@ -17054,7 +17056,9 @@
     "iud",
     "coil",
     "infant growth",
-    "postpartum"
+    "postpartum",
+    "pill while breastfeeding",
+    "pill breastfeeding"
    ]
   },
   {
@@ -17828,7 +17832,9 @@
     "repeat cesarean",
     "previous c-section",
     "natural birth after cesarean",
-    "birth options"
+    "birth options",
+    "vaginal birth after a caesarean",
+    "vaginal birth after a c-section"
    ]
   },
   {
@@ -23496,7 +23502,9 @@
     "baby weight",
     "contraception",
     "blood clot",
-    "combined contraceptive"
+    "combined contraceptive",
+    "pill while breastfeeding",
+    "pill breastfeeding"
    ]
   },
   {
@@ -25760,7 +25768,11 @@
     "trying to conceive",
     "heart rate",
     "app privacy",
-    "fertility tracking"
+    "fertility tracking",
+    "fertility app",
+    "fertility apps",
+    "cycle app",
+    "period app"
    ]
   },
   {
@@ -26020,7 +26032,11 @@
     "cervical mucus",
     "avoid pregnancy",
     "birth control",
-    "period tracking app"
+    "period tracking app",
+    "fertility app",
+    "fertility apps",
+    "cycle app",
+    "avoiding pregnancy"
    ]
   },
   {
@@ -56615,7 +56631,10 @@
     "can i get pregnant while breastfeeding",
     "natural family planning",
     "postpartum birth control",
-    "nursing mother pregnancy risk"
+    "nursing mother pregnancy risk",
+    "period after birth",
+    "periods after birth",
+    "when will my period come back"
    ]
   },
   {
@@ -99366,7 +99385,9 @@
     "hormonal coil",
     "iud",
     "after birth",
-    "postpartum"
+    "postpartum",
+    "pill while breastfeeding",
+    "pill breastfeeding"
    ]
   },
   {
@@ -112395,7 +112416,9 @@
     "bone density",
     "heavy periods",
     "contraception after 40",
-    "contraception over 40"
+    "contraception over 40",
+    "pregnant in perimenopause",
+    "pregnancy in perimenopause"
    ]
   },
   {
@@ -118370,7 +118393,11 @@
     "syphilis in pregnancy",
     "hpv vaccine",
     "herpes testing",
-    "hepatitis c testing"
+    "hepatitis c testing",
+    "chlamydia test",
+    "chlamydia screening",
+    "sti test",
+    "std test"
    ]
   },
   {
@@ -128045,7 +128072,12 @@
     "breast milk",
     "vitamin d deficiency",
     "lactation",
-    "baby vitamins"
+    "baby vitamins",
+    "vitamin d for babies",
+    "baby vitamin d",
+    "baby",
+    "babies",
+    "does my baby need vitamin d"
    ]
   },
   {
@@ -131359,7 +131391,12 @@
     "fish",
     "weight gain",
     "calories",
-    "exercise"
+    "exercise",
+    "cheese",
+    "soft cheese",
+    "raw milk cheese",
+    "rohmilchkäse",
+    "listeria"
    ],
    "sourceType": "guideline-page",
    "page": {
@@ -132851,6 +132888,109 @@
     "breast cancer",
     "treatment options",
     "nice guideline"
+   ]
+  },
+  {
+   "id": "pmid-33197417",
+   "pmid": "33197417",
+   "doi": "10.1016/j.ajog.2020.11.002",
+   "title": "Society for Maternal-Fetal Medicine Consult Series #53: Intrahepatic cholestasis of pregnancy: Replaces Consult #13, April 2011.",
+   "source": "Society for Maternal-Fetal Medicine",
+   "journal": "American Journal of Obstetrics and Gynecology",
+   "organisation": "Society for Maternal-Fetal Medicine",
+   "year": 2021,
+   "publicationTypes": [
+    "Practice Guideline",
+    "Review"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/33197417/",
+   "summary": "This US guidance from the Society for Maternal-Fetal Medicine covers intrahepatic cholestasis of pregnancy (ICP), a liver condition of pregnancy that causes itching and raised bile acids in the blood. It carries little risk for the mother but raises the risk of an early birth, meconium in the waters and stillbirth for the baby. The society recommends a blood test for bile acids and liver enzymes when ICP is suspected, ursodeoxycholic acid as the first medicine for the itching, and checks on the baby from diagnosis. It recommends offering birth at 36 weeks when bile acids are 100 micromol/L or higher, and birth between 36 and 39 weeks when they are lower, but no birth before 37 weeks on symptoms alone without a raised bile acid result.",
+   "keyPoints": [
+    "ICP causes itching and raised bile acids; the main risks are for the baby (early birth, meconium, stillbirth).",
+    "Suspected ICP: blood test for bile acids and liver enzymes (strong recommendation, moderate-quality evidence).",
+    "Ursodeoxycholic acid is the first-line medicine for the itching (strong recommendation, high-quality evidence).",
+    "Bile acids of 100 micromol/L or more: birth offered at 36 weeks; lower levels: birth between 36 and 39 weeks.",
+    "No birth before 37 weeks for itching alone without a raised bile acid result."
+   ],
+   "certainty": "moderate",
+   "lifeStages": [
+    "pregnancy"
+   ],
+   "topics": [
+    "preterm-birth"
+   ],
+   "tags": [
+    "cholestasis of pregnancy",
+    "itching in pregnancy",
+    "bile acids",
+    "liver",
+    "stillbirth"
+   ],
+   "keywords": [
+    "intrahepatic cholestasis of pregnancy",
+    "icp",
+    "obstetric cholestasis",
+    "cholestasis",
+    "itching",
+    "itchy",
+    "itching in pregnancy",
+    "itchy hands and feet",
+    "itching on hands and feet",
+    "itchy palms",
+    "bile acids",
+    "liver enzymes",
+    "ursodeoxycholic acid",
+    "ursodiol",
+    "induction for cholestasis"
+   ]
+  },
+  {
+   "id": "pmid-30062044",
+   "pmid": "30062044",
+   "doi": "10.1186/s40834-018-0064-y",
+   "title": "Return of fertility after discontinuation of contraception: a systematic review and meta-analysis.",
+   "source": "Contraception and Reproductive Medicine",
+   "journal": "Contraception and Reproductive Medicine",
+   "organisation": null,
+   "year": 2018,
+   "publicationTypes": [
+    "Journal Article",
+    "Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/30062044/",
+   "summary": "This review pooled 22 studies of 14,884 women who stopped using contraception in order to see how quickly they became pregnant. About 83 in 100 became pregnant within the first year after stopping. The rate was much the same after hormonal methods and after an IUD, and neither the type of progestogen nor how long the pill had been taken made a clear difference. The authors conclude that using contraception, whatever the method or for how long, does not harm or clearly delay the ability to get pregnant afterwards. The evidence was not graded.",
+   "keyPoints": [
+    "22 studies, 14,884 women who stopped contraception.",
+    "About 83% became pregnant within 12 months of stopping.",
+    "No clear difference between hormonal methods and IUDs, or by how long the pill was used.",
+    "The authors conclude contraception does not harm or clearly delay later fertility."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "contraception",
+    "conception"
+   ],
+   "topics": [
+    "contraception-effectiveness",
+    "preconception-care"
+   ],
+   "tags": [
+    "fertility after contraception",
+    "stopping the pill",
+    "contraception"
+   ],
+   "keywords": [
+    "return of fertility",
+    "fertility after the pill",
+    "stopping the pill",
+    "coming off the pill",
+    "after stopping the pill",
+    "pregnant after stopping the pill",
+    "stopping contraception",
+    "iud removal",
+    "implant removal"
    ]
   }
  ]

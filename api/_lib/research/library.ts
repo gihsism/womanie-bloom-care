@@ -336,6 +336,54 @@ const SUBJECT_MISMATCH: { ask: RegExp; unless: RegExp; title: RegExp; keep: RegE
     title: /\b(surg\w*|operat\w*|sling\w*|mesh|tapes?|colposuspension|bulking|procedures?|repairs?)\b/i,
     keep: /\b(pelvic floor|muscle training|exercis\w*|physiother\w*|conservative)\b/i,
   },
+  // Round 11: the Swiss cervical-screening letter matched "test" and the
+  // Swiss lift, so it led "Chlamydia test, how often ...?" and came 2nd or
+  // 3rd for PCOS blood tests and Swiss fertility tests. Another test asked
+  // (no smear / HPV / cancer / check-up word): a cervical-screening title
+  // steps back.
+  {
+    ask: /\b(tests?|testing|blood work|bloods)\b/i,
+    unless: /\b(cervi\w*|smear|pap|hpv|cancer|check-?ups?|screen\w*)\b/i,
+    title: /\bcervical (cancer )?screening\b/i,
+    keep: /(?!)/,
+  },
+  // Round 11: an STI asked, a cervical-screening or group B strep title
+  // (both matched "test" / "swab", the latter is about newborn sepsis).
+  {
+    ask: /\b(chlamydia|gonorrh\w*|syphilis|herpes|trichomon\w*|stis?|stds?|sexually transmitted)\b/i,
+    unless: /\b(cervi\w*|smear|pap|hpv|pregnan\w*|labou?r|birth|newborns?)\b/i,
+    title: /\b(cervical|streptococc\w*|gbs|pre-?eclampsia)\b/i,
+    keep: /\b(chlamydia|gonorrh\w*|sexually transmitted|stis?)\b/i,
+  },
+  // Round 11: birth after a caesarean asked. Cochrane reviews on caesarean
+  // rates, labour support and midwife care led "Can I have a vaginal birth
+  // after a caesarean?" ahead of the FIGO and ACOG VBAC guidance; any title
+  // that is not about birth after a previous caesarean steps back.
+  {
+    ask: /\b(vbac|tolac|(birth|labou?r|deliver\w*) after (a |my |one |two |previous |an? earlier )?(c-?sections?|caesareans?|cesareans?))\b/i,
+    unless: /(?!)/,
+    title: /\w/,
+    keep: /\b(vbac|tolac|trial of labou?r|after (a )?(previous |prior )?(caesarean|cesarean|c-section)|(previous|prior|repeat) (caesarean|cesarean|c-section))\b/i,
+  },
+  // Round 11: an insurance question with no word about pregnancy or birth,
+  // the BAG maternity-benefits title ("Does the Krankenkasse pay the yearly
+  // gynaecology check-up?" got it first).
+  {
+    ask: /\b(insurance|insured|krankenkasse|kasse|cover(ed|s)?|pay|pays|paid|costs?)\b/i,
+    unless: /\b(pregnan\w*|birth|matern\w*|midwi\w*|hebamme|baby|babies|antenatal|prenatal|postnatal|postpartum|breastfe\w*|ultrasounds?|scans?|nipt|trimester|ersttrimester\w*)\b/i,
+    title: /\bmaternity\b/i,
+    keep: /(?!)/,
+  },
+  // Round 11: breastfeeding asked without any word about cancer, a cancer
+  // title that does not name breastfeeding ("Is the pill safe while
+  // breastfeeding?" got a breast-cancer risk-factor review first, since
+  // breastfeeding and the pill are risk factors in it).
+  {
+    ask: /\b(breastfe\w*|breast-?fe\w*|lactat\w*|nursing|stillen)\b/i,
+    unless: /\b(cancer|tumou?rs?|lumps?|oncolog\w*)\b/i,
+    title: /\b(cancer|carcinoma|tumou?rs?)\b/i,
+    keep: /\b(breastfe\w*|lactat\w*)\b/i,
+  },
 ];
 
 function subjectMismatchFactor(query: string, title: string): number {
