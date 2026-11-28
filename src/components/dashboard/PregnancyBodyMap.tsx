@@ -1,4 +1,4 @@
-import { WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
+import { WEEKDAY_DAY_MONTH_FMT, formatDate } from '@/lib/dateFormat';
 import { format, differenceInCalendarDays } from 'date-fns';
 import { fmtGrams } from '@/lib/bodyMap';
 import { getWeekData } from './pregnancyWeekData';
@@ -33,7 +33,7 @@ export default function PregnancyBodyMap({ dueDate }: { dueDate: Date; name?: st
       </h2>
       <p className="mt-1 text-[15px]">
         Baby is about the size of {/^[aeiou]/i.test(wk.size) ? 'an' : 'a'} {wk.size.toLowerCase()}{size ? ` (${size.value} ${size.unit})` : ''}.{' '}
-        {daysLeft > 0 ? `${daysLeft} days to go, due ${format(dueDate, 'd MMMM')}.` : 'Due date reached: any day now.'}
+        {daysLeft > 0 ? `${daysLeft} days to go, due ${formatDate(dueDate)}.` : 'Due date reached: any day now.'}
       </p>
 
       <div className="relative mx-auto mt-3 w-full max-w-[120px]" style={{ aspectRatio: `${W} / ${H}` }}>

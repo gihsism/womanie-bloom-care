@@ -54,6 +54,13 @@ describe('no month-first or phone-locale dates left in the app', () => {
     expect(files.filter(f => MONTH_FIRST.test(readFileSync(f, 'utf8')))).toEqual([]);
   });
 
+  it('no date-fns pattern spells the month out after the day ("28 March")', () => {
+    // Home's pregnancy hero said "due 28 March" while the prep sheet said
+    // "28 Mar 2027" (live check 2026-11-28).
+    const LONG_MONTH = /format\([^;]*?,\s*['"`](E{3,4} )?d M{4}/;
+    expect(files.filter(f => LONG_MONTH.test(readFileSync(f, 'utf8')))).toEqual([]);
+  });
+
   it('no on-screen date follows the phone language', () => {
     // AIDoctorChat builds the AI's context (not shown to her), so it may.
     const shown = files.filter(f => !f.endsWith('AIDoctorChat.tsx'));
