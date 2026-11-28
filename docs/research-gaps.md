@@ -1097,6 +1097,87 @@ the weak first sources listed in round 11 (teen breast growth, fainting
 before a period, first gynaecology visit, swollen feet, travel or bleeding
 after embryo transfer).
 
+## Round 13 (2026-11-28)
+
+### Summary content check, the last 114 exposed items
+
+The remaining 114 PubMed items of the round-11 exposure ranking (none
+skipped; all had abstracts). The round-11 exposure list is now used up:
+every PubMed item with any exposure on the 167 round-11 questions has been
+checked (the 12 Swiss hand-written items on it were checked in rounds 3-5).
+79 fair. 57 fixes in 35 items, text only (30 re-embedded offline with the
+incremental script; label-only changes need no re-embed):
+
+- Certainty -> "not stated" where the abstract grades nothing:
+  `pmid-27444983`, `pmid-39229895`, `pmid-37299551`, `pmid-26018758`
+  (the review's own evidence levels, not GRADE), `pmid-39514962` (study
+  quality only).
+- Facts corrected: `pmid-34369613` and `pmid-33686672` (specificity
+  described as "a normal / flagged result was rarely wrong"),
+  `pmid-32990945` ("did not report side effects" read as "found none"),
+  `pmid-32677706` (two trials were specifically in women, not "only two
+  included women"), `pmid-35587030` (the live-birth benefit held with low
+  starting doses; only stricter cancellation made it unclear),
+  `pmid-38110714` (the women were 21 young egg donors, not IVF patients).
+- Hedges restored to the GRADE level: `pmid-28407220` (4),
+  `pmid-37071891` (3), `pmid-39433088` (3), `pmid-30827035` (2),
+  `pmid-27150280` (2), `pmid-37788790` (2), `pmid-34767026` (2),
+  `pmid-35587030` (2), `pmid-34003218`, `pmid-34231203`, `pmid-35553678`.
+- Causal wording on observational data: `pmid-40238039`,
+  `pmid-37071891`, `pmid-40188841`, `pmid-34774058`, `pmid-34750904`.
+- Advice in the app's voice now credited: `pmid-30681543` (2),
+  `pmid-27050049` (3), `pmid-29398421`, `pmid-42810186` (2),
+  `pmid-27840033` (2), `pmid-41308919` (2), `pmid-39652037`,
+  `pmid-35587030`, `pmid-32804883` (2), `pmid-42080744`, `pmid-30693579`.
+
+Left as is: 18 judgement calls (labels picked from a graded range, the
+authors' own conclusions), e.g. `pmid-25929235`, `pmid-26343254`,
+`pmid-30553051`, `pmid-34061352`, `pmid-37888839`. `pmid-38110714` keeps
+the evidence level "systematic review" because PubMed tags it
+Meta-Analysis (it is a small crossover trial); a library rebuild would
+bring the tag back.
+
+### Off-topic fillers in the round-11 question set
+
+"Are fertility apps reliable for avoiding or getting pregnant?" had two
+antioxidant reviews and preconception lifestyle advice in places 2-3,
+because the 2026 app review (`pmid-41849976`) was not tagged for the
+conception stage. Now: 2023 app scoping review, 2026 app review, fertility
+awareness review (`pmid-30095777`).
+
+Other fillers that answered a different question, fixed:
+
+| Question | Off-topic before | Fix | Sources now (first 2-3) |
+|---|---|---|---|
+| How do I know when I ovulate? | ovarian reserve testing, PCOS position statement | keywords on the timed-intercourse and ovulation-kit items | timed intercourse, ovulation kits |
+| Best time to have sex to get pregnant | Zika preconception guidance, IUI timing at place 2-3 | same | timed intercourse, ovulation kits |
+| Sore breasts before period / one breast growing faster | breastfeeding and maternal health review | rule: breasts asked without a feeding word, a breastfeeding title steps back | (still a gap, see below) |
+| Thyroid problems after giving birth | delayed milk supply, gestational diabetes, genitourinary symptoms | rule: thyroid asked (not with miscarriage or fertility), a title with no thyroid word steps back | iodine, ATA 2026, Graves' disease |
+| Joint pain in menopause, is it hormonal? | acupuncture for cancer-related conditions, breast-cancer treatment side effects | rule: no cancer word asked, "cancer-related" / "cancer treatment" titles step back | osteoarthritis in menopause, HRT and musculoskeletal pain, musculoskeletal pain in the menopause transition |
+| Does my baby need vitamin D drops? | vitamin D for asthma (all ages) | item re-tagged: general stage, no infant-feeding topics, no "vitamin d drops" keyword | breastfed infants, preterm infants, under-fives |
+| Can I get pregnant while breastfeeding? | marijuana in pregnancy at place 3 | keywords on the postpartum fertility-awareness review | lactational amenorrhoea, fertility awareness after birth |
+| Thinning hair after menopause | risk-reducing ovary removal and HRT | hair-loss guideline tagged for menopause | female pattern hair loss (Cochrane), hair-loss guideline |
+
+New `SUBJECT_MISMATCH` rules (x0.6) in `library.ts`: app or tracker asked
+(titles about apps, tracking, cycles, ovulation or fertility awareness
+stay), breasts without a feeding word, thyroid, and cancer-related titles
+without a cancer word. Before / after: on the 167 round-11 questions 12
+changed, all the targets above plus fillers; on the 138 round-6 questions
+8 changed, all on topic (a review of bleeding in teens having cancer
+treatment left six period and pill questions; "Can I get pregnant during
+my period?" gains the fertility-awareness review; "Can thyroid problems
+change my cycle?" now lists only thyroid items). Search evals unchanged
+(0.94 / 1.00). Tests: `ask-ai-audit.test.ts` (round 13 blocks: data,
+keyword retrieval, bundled model, and the questions the rules must leave
+alone: thyroid antibodies and miscarriage, breast lump, vaginal estrogen
+long term, period-tracking apps).
+
+Still without a fitting free item (no change): cyclical breast pain, teen
+breast growth, postpartum thyroiditis, warning signs of ovarian cancer,
+high prolactin, ovulation pain, lubricants and sperm, the pill and
+cervical cancer, hair dye in pregnancy, swollen feet, travel or bleeding
+after embryo transfer.
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed

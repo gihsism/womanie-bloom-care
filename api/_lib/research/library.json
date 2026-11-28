@@ -4167,7 +4167,7 @@
    "summary": "This international guideline from ESHRE and partner societies sets out 145 recommendations on diagnosing and managing premature ovarian insufficiency (POI), when the ovaries stop working normally well before the usual age of menopause. New data suggest POI affects about 3.5% of women, more than once thought. The guideline covers diagnosis, causes, effects on bone, heart, brain and sexual health, fertility, and treatment including hormone therapy. The authors note that for most management options, the supporting evidence in POI is limited.",
    "keyPoints": [
     "POI is more common than previously thought, at an estimated 3.5% of women.",
-    "A single raised FSH result above 25 IU is now enough to diagnose POI; repeat FSH and/or AMH testing may be used when the diagnosis is unclear.",
+    "The guideline now says a single raised FSH result above 25 IU is enough to diagnose POI; repeat FSH and/or AMH testing may be used when the diagnosis is unclear.",
     "The guideline now covers the role of AMH in diagnosis, fertility preservation, muscle health, and hormone therapy after treatment-caused (iatrogenic) POI.",
     "Recommendations on genetic testing, estrogen doses, the combined oral contraceptive and testosterone therapy were updated, but evidence for most options is limited."
    ],
@@ -6310,9 +6310,9 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34767026/",
-   "summary": "This large review combined 154 randomised trials (about 33,000 people) that compared iron given through a drip (intravenous iron) with iron tablets or no iron. Intravenous iron raised haemoglobin more and made blood transfusions less likely, but it was also linked to a higher risk of infection. The authors rate the evidence for the infection risk as moderate certainty and call for better studies to weigh up the benefits and risks. The trials covered many patient groups, not only pregnancy.",
+   "summary": "This large review combined 154 randomised trials (about 33,000 people) that compared iron given through a drip (intravenous iron) with iron tablets or no iron. Intravenous iron raised haemoglobin more and made blood transfusions less likely, but it was probably also linked to a higher risk of infection. The authors rate the evidence for the infection risk as moderate certainty and call for better studies to weigh up the benefits and risks. The trials covered many patient groups, not only pregnancy.",
    "keyPoints": [
-    "Intravenous iron was linked to a higher risk of infection than oral iron or no iron (risk ratio 1.17, moderate certainty evidence).",
+    "Intravenous iron was probably linked to a higher risk of infection than oral iron or no iron (risk ratio 1.17, moderate certainty evidence).",
     "It raised haemoglobin by about 0.57 g/dL and reduced the need for red blood cell transfusion.",
     "There was no evidence of an effect on death or length of hospital stay.",
     "The authors say well-designed studies with standard definitions of infection are needed to balance the risk against the benefits."
@@ -6825,9 +6825,9 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/27150280/",
-   "summary": "This large Cochrane review pooled 40 trials, covering over 276,000 women, to see whether taking vitamins before or in early pregnancy prevents miscarriage. Vitamin C, vitamin A, folic acid and multivitamins did not reduce miscarriage or total pregnancy loss. Women who took multivitamins plus iron and folic acid had a slightly lower risk of stillbirth than women who took iron and folic acid alone. There was not enough evidence to judge different vitamin combinations.",
+   "summary": "This large Cochrane review pooled 40 trials, covering over 276,000 women, to see whether taking vitamins before or in early pregnancy prevents miscarriage. Vitamin C, vitamin A, folic acid and multivitamins probably did not reduce miscarriage or total pregnancy loss. Women who took multivitamins plus iron and folic acid had a slightly lower risk of stillbirth than women who took iron and folic acid alone. There was not enough evidence to judge different vitamin combinations.",
    "keyPoints": [
-    "Taking vitamin supplements before or in early pregnancy did not prevent miscarriage.",
+    "Taking vitamin supplements before or in early pregnancy probably did not prevent miscarriage.",
     "Vitamin C (with vitamin E), vitamin A and folic acid showed no clear difference in miscarriage or total pregnancy loss.",
     "Multivitamins plus iron and folic acid were linked to a lower risk of stillbirth than iron and folic acid alone (high-quality evidence).",
     "There is not enough evidence to compare different combinations of vitamins for miscarriage."
@@ -11119,7 +11119,7 @@
     "Evidence was very limited for water gymnastics, muscle relaxation, osteopathic manual therapy, craniosacral therapy, electrotherapy and yoga.",
     "For pain after birth, evidence was very limited for clinic-based treatments and self-management programmes."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "pregnancy",
     "postpartum"
@@ -11223,7 +11223,7 @@
     "Emotional support, good communication, and how willing healthcare staff and facilities are to support VBAC also matter.",
     "The authors conclude that hospitals should improve care, build capacity to support VBAC, and respect women's preferences by involving them in decisions."
    ],
-   "certainty": "moderate",
+   "certainty": "not stated",
    "lifeStages": [
     "pregnancy"
    ],
@@ -13012,11 +13012,11 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/27840033/",
-   "summary": "This position statement from Exercise and Sports Science Australia reviews research on how exercise can help prevent and manage osteoporosis. It found that bone responds well to impact activities and to high-intensity resistance training that gets progressively harder. Building muscle strength, balance and mobility also lowers the chance of falls, and so of fractures. Exercise should be tailored to each person's bone health, other health conditions and fracture risk.",
+   "summary": "This position statement from Exercise and Sports Science Australia reviews research on how exercise can help prevent and manage osteoporosis. It found that bone responds well to impact activities and to high-intensity resistance training that gets progressively harder. Building muscle strength, balance and mobility also lowers the chance of falls, and so of fractures. The statement says exercise should be tailored to each person's bone health, other health conditions and fracture risk.",
    "keyPoints": [
     "Bone responds positively to impact activities and high-intensity progressive resistance training.",
     "Improving muscle strength, balance and mobility reduces the risk of falls and therefore fractures.",
-    "Exercise programs should come with enough calcium and vitamin D.",
+    "The statement says exercise programs should come with enough calcium and vitamin D.",
     "Loaded spine flexion is not recommended, and impact activities may need changing for people with osteoarthritis or frailty."
    ],
    "certainty": "not stated",
@@ -17800,12 +17800,12 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/30681543/",
-   "summary": "This American College of Obstetricians and Gynecologists guideline looks at trying to give birth vaginally after a previous cesarean (called TOLAC, with a successful result called VBAC). It says VBAC can meet a woman's wish for vaginal birth and is linked to fewer complications for the mother and in later pregnancies. A trial of labor that does not succeed carries more risk than a successful VBAC or a planned repeat cesarean. Because of this, it is important to look at each woman's chance of success and personal risks when deciding if TOLAC is a good fit.",
+   "summary": "This American College of Obstetricians and Gynecologists guideline looks at trying to give birth vaginally after a previous cesarean (called TOLAC, with a successful result called VBAC). It says VBAC can meet a woman's wish for vaginal birth and is linked to fewer complications for the mother and in later pregnancies. A trial of labor that does not succeed carries more risk than a successful VBAC or a planned repeat cesarean. Because of this, the guideline says it is important to look at each woman's chance of success and personal risks when deciding if TOLAC is a good fit.",
    "keyPoints": [
     "TOLAC is a planned attempt at vaginal birth after a previous cesarean, and a successful attempt is called VBAC.",
     "VBAC is linked to lower maternal complications and fewer problems in future pregnancies.",
     "A failed trial of labor is linked to more maternal and newborn complications than VBAC or an elective repeat cesarean.",
-    "Counseling should weigh the likelihood of VBAC and each woman's individual risks."
+    "The guideline says counseling should weigh the likelihood of VBAC and each woman's individual risks."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -22156,7 +22156,7 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34003218/",
-   "summary": "The US Preventive Services Task Force reviewed the evidence on screening for bowel (colorectal) cancer in adults at average risk, meaning people with no prior bowel cancer, polyps, inflammatory bowel disease or known inherited risk. It found that screening clearly helps adults aged 50 to 75, and also helps those aged 45 to 49. For adults aged 76 to 85 the benefit is small, so the choice depends on the person's health, past screening and preferences.",
+   "summary": "The US Preventive Services Task Force reviewed the evidence on screening for bowel (colorectal) cancer in adults at average risk, meaning people with no prior bowel cancer, polyps, inflammatory bowel disease or known inherited risk. It found that screening clearly helps adults aged 50 to 75, and probably also helps those aged 45 to 49. For adults aged 76 to 85 the benefit is small, so the choice depends on the person's health, past screening and preferences.",
    "keyPoints": [
     "Screening is recommended for all adults aged 50 to 75, with high certainty of substantial benefit.",
     "Screening is also recommended for adults aged 45 to 49, with moderate certainty of moderate benefit.",
@@ -22567,11 +22567,11 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/37071891/",
-   "summary": "This review pooled results from five studies to see whether taking estrogen affects the chance of dying from COVID-19 in women. Women past menopause who used menopausal hormone therapy were less likely to die from COVID-19 than women who did not use it. Premenopausal women taking the combined pill showed no clear difference in COVID-19 deaths compared with women not taking it. Most of the evidence came from cohort studies, so certainty was limited for most outcomes.",
+   "summary": "This review pooled results from five studies to see whether taking estrogen affects the chance of dying from COVID-19 in women. Women past menopause who used menopausal hormone therapy were probably less likely to die from COVID-19 than women who did not use it. Premenopausal women taking the combined pill showed no clear difference in COVID-19 deaths compared with women not taking it. Most of the evidence came from cohort studies, so certainty was limited for most outcomes.",
    "keyPoints": [
-    "Menopausal hormone therapy was linked to a lower chance of dying from COVID-19 in postmenopausal women (moderate certainty evidence).",
-    "The combined oral contraceptive pill made no significant difference to COVID-19 death rates in premenopausal women (2 studies, 5,099 women).",
-    "Menopausal hormone therapy users had a slightly higher rate of hospital and ICU admission, but no clear difference in needing breathing support.",
+    "Menopausal hormone therapy was probably linked to a lower chance of dying from COVID-19 in postmenopausal women (moderate certainty evidence).",
+    "Taking the combined oral contraceptive pill was not linked to a significant difference in COVID-19 death rates in premenopausal women (2 studies, 5,099 women).",
+    "Menopausal hormone therapy users may have had a slightly higher rate of hospital and ICU admission, but no clear difference in needing breathing support.",
     "Certainty was low for outcomes other than death, because the included studies were mostly cohort studies and hormone doses and durations varied."
    ],
    "certainty": "moderate",
@@ -23628,7 +23628,7 @@
     "Three studies found lower hormone exposure with St. John's wort; the one study that did not used a product low in hypericin.",
     "The evidence is limited, but it raises concern about reduced contraceptive effectiveness."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "contraception",
     "general"
@@ -25877,7 +25877,9 @@
     "cycle tracking app",
     "get pregnant faster",
     "lh test",
-    "live birth"
+    "live birth",
+    "when i ovulate",
+    "know when i ovulate"
    ]
   },
   {
@@ -25930,7 +25932,9 @@
     "billings method",
     "marquette method",
     "standard days method",
-    "avoid pregnancy"
+    "avoid pregnancy",
+    "pregnant while breastfeeding",
+    "get pregnant while breastfeeding"
    ]
   },
   {
@@ -28405,7 +28409,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/35553678/",
-   "summary": "This review pooled results from many studies comparing two ways of preparing the womb for a frozen embryo transfer: using hormone replacement medicines (programmed cycle) or following the body's own natural cycle. Pregnancies from programmed cycles had higher rates of high blood pressure disorders, pre-eclampsia, heavy bleeding after birth and caesarean birth. Most of the evidence was low or very low quality, so the authors say firm recommendations for clinical practice cannot yet be made.",
+   "summary": "This review pooled results from many studies comparing two ways of preparing the womb for a frozen embryo transfer: using hormone replacement medicines (programmed cycle) or following the body's own natural cycle. Pregnancies from programmed cycles may have higher rates of high blood pressure disorders, pre-eclampsia, heavy bleeding after birth and caesarean birth. Most of the evidence was low or very low quality, so the authors say firm recommendations for clinical practice cannot yet be made.",
    "keyPoints": [
     "Programmed (hormone replacement) frozen transfer cycles were linked to higher risks of hypertensive disorders of pregnancy, pre-eclampsia, postpartum haemorrhage and caesarean section than natural cycles.",
     "After adjusting for other factors, only high blood pressure disorders, pre-eclampsia, postpartum haemorrhage and caesarean section stayed significantly linked to hormone preparation.",
@@ -38075,7 +38079,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34750904/",
-   "summary": "This review pooled results from 27 studies including more than 133,000 women to estimate how common postpartum depression is and what raises the risk. About 14 in 100 women were affected, with rates ranging from about 5% to 26% depending on the country. Having gestational diabetes, depression in pregnancy, or a past history of depression was linked to a higher chance of postpartum depression. The authors note that high-quality reviews on this topic are limited, and results varied a lot between studies.",
+   "summary": "This review pooled results from 27 studies including more than 133,000 women to estimate how common postpartum depression is and which factors are linked to it. About 14 in 100 women were affected, with rates ranging from about 5% to 26% depending on the country. Having gestational diabetes, depression in pregnancy, or a past history of depression was linked to a higher chance of postpartum depression. The authors note that high-quality reviews on this topic are limited, and results varied a lot between studies.",
    "keyPoints": [
     "Pooled prevalence of postpartum depression was 14.0% across all studies, and it varied by country from 5.0% to 26.32%.",
     "Gestational diabetes, depression during pregnancy, and a history of depression were linked to higher risk.",
@@ -39758,9 +39762,9 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/37788790/",
-   "summary": "This review pooled 20 randomized trials of strength (resistance) training in overweight or obese women after menopause and in older women. Both lower-volume and higher-volume training improved body fat, blood fats, blood sugar and a marker of inflammation compared with no training. Higher-volume training showed larger improvements in blood glucose and C-reactive protein (an inflammation marker). The quality of the evidence was low to very low, so the results should be read with caution.",
+   "summary": "This review pooled 20 randomized trials of strength (resistance) training in overweight or obese women after menopause and in older women. Both lower-volume and higher-volume training may improve body fat, blood fats, blood sugar and a marker of inflammation compared with no training. Higher-volume training showed larger improvements in blood glucose and C-reactive protein (an inflammation marker). The quality of the evidence was low to very low, so the results should be read with caution.",
    "keyPoints": [
-    "Strength training improved body fat, metabolic risk markers and inflammation compared with no training in overweight/obese postmenopausal and older women.",
+    "Strength training may improve body fat, metabolic risk markers and inflammation compared with no training in overweight/obese postmenopausal and older women.",
     "Higher-volume training (about 77 sets per week) gave larger improvements in glucose and C-reactive protein than lower-volume training (about 44 sets per week).",
     "The trials had some concerns about risk of bias, and the certainty of the evidence was low to very low."
    ],
@@ -49516,13 +49520,10 @@
    ],
    "certainty": "high",
    "lifeStages": [
-    "postpartum",
     "general"
    ],
    "topics": [
-    "infant-feeding",
-    "vitamin-d",
-    "infant-vitamins-growth"
+    "vitamin-d"
    ],
    "tags": [
     "vitamin d",
@@ -49536,7 +49537,6 @@
     "asthma attacks",
     "wheezing",
     "supplements",
-    "vitamin d drops",
     "children",
     "cholecalciferol",
     "exacerbations",
@@ -50164,12 +50164,12 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/27050049/",
-   "summary": "This position paper from a European children's nutrition committee looks at vitamin K deficiency bleeding, a serious bleeding risk in newborns and young babies because they naturally have low vitamin K levels. It says the condition can largely be prevented by giving vitamin K. All healthy newborns should receive it, either as one injection at birth or as oral doses over the first weeks to months. The injection is the preferred route because it is the most reliable.",
+   "summary": "This position paper from a European children's nutrition committee looks at vitamin K deficiency bleeding, a serious bleeding risk in newborns and young babies because they naturally have low vitamin K levels. It says the condition can largely be prevented by giving vitamin K. The committee recommends that all healthy newborns receive it, either as one injection at birth or as oral doses over the first weeks to months. The injection is the preferred route because it is the most reliable.",
    "keyPoints": [
-    "All newborn infants should receive vitamin K prophylaxis, and the date, dose and method should be recorded.",
+    "The committee says all newborn infants should receive vitamin K prophylaxis, and the date, dose and method should be recorded.",
     "Options for healthy newborns are 1 mg vitamin K1 by injection at birth, or oral vitamin K1 given in repeated doses (3 x 2 mg, or 2 mg at birth then 1 mg weekly for 3 months).",
     "Injection is the preferred route for efficiency and reliability; oral dosing depends on families sticking to the schedule.",
-    "Oral vitamin K is not appropriate for preterm babies, babies who are too unwell or have poor gut absorption, or those whose mothers took medicines that interfere with vitamin K."
+    "The committee says oral vitamin K is not appropriate for preterm babies, babies who are too unwell or have poor gut absorption, or those whose mothers took medicines that interfere with vitamin K."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -53243,7 +53243,12 @@
     "time to pregnancy",
     "when to have sex",
     "ovulation tracking",
-    "home test"
+    "home test",
+    "when i ovulate",
+    "when do i ovulate",
+    "know when i ovulate",
+    "best time to have sex",
+    "time to have sex"
    ]
   },
   {
@@ -54858,7 +54863,7 @@
     "Flour fortified with iron alone may have little or no effect on anaemia (low-certainty evidence).",
     "It probably makes little or no difference to iron deficiency (moderate-certainty evidence).",
     "Effects on haemoglobin are uncertain when iron is added alone (very low-certainty evidence).",
-    "Only two of the nine trials included women, and none reported other side effects."
+    "Only two of the nine trials were specifically in women, and none reported other side effects."
    ],
    "certainty": "low",
    "lifeStages": [
@@ -60725,7 +60730,7 @@
     "13 studies were included, but they differed a lot in design, patients, biopsy day and how results were measured.",
     "No single or combined time-lapse measure was consistently able to predict whether an embryo had the right number of chromosomes.",
     "The evidence is too mixed to draw firm conclusions about time-lapse for chromosome screening.",
-    "Time-lapse measures should not yet be used in place of preimplantation genetic screening (PGS)."
+    "The authors say time-lapse measures should not yet be used in place of preimplantation genetic screening (PGS)."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -64566,7 +64571,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34231203/",
-   "summary": "This Cochrane review looked at seven trials (1357 women) testing non-drug approaches such as education, cognitive behavioural therapy, group discussion, peer education and art therapy for high or severe fear of childbirth, including tocophobia. These approaches may lower fear scores slightly, but the drop may be too small to make a real difference. They probably reduce caesarean births and the number of women preferring a caesarean, and made little or no difference to depression scores. The evidence is limited, so the effect on fear itself is uncertain.",
+   "summary": "This Cochrane review looked at seven trials (1357 women) testing non-drug approaches such as education, cognitive behavioural therapy, group discussion, peer education and art therapy for high or severe fear of childbirth, including tocophobia. These approaches may lower fear scores slightly, but the drop may be too small to make a real difference. They probably reduce caesarean births and the number of women preferring a caesarean, and may make little or no difference to depression scores. The evidence is limited, so the effect on fear itself is uncertain.",
    "keyPoints": [
     "Non-drug interventions may reduce fear of childbirth scores, but the reduction may not be clinically meaningful (low-certainty evidence).",
     "They probably reduce the number of women having a caesarean section (moderate-certainty evidence).",
@@ -65461,7 +65466,7 @@
    "keyPoints": [
     "Obesity is linked to longer time to pregnancy, lower IVF success and a higher risk of miscarriage.",
     "Obesity affects hormones, ovarian function, womb lining receptivity and sperm quality, in both women and men.",
-    "In pregnancy, obesity raises the risk of gestational diabetes, preeclampsia, caesarean delivery, large babies and NICU admission.",
+    "In pregnancy, obesity is linked to a higher risk of gestational diabetes, preeclampsia, caesarean delivery, large babies and NICU admission.",
     "The review supports weight management before pregnancy and individualised IVF and antenatal care."
    ],
    "certainty": "not stated",
@@ -65888,7 +65893,7 @@
     "The authors describe the evidence as preliminary because the studies varied a lot.",
     "It is currently unclear which diet patterns are linked to better fertility and ART outcomes."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "ivf"
@@ -66510,7 +66515,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/38110714/",
-   "summary": "This small study compared two ways of giving progesterone support after egg collection in IVF: a tablet taken by mouth (dydrogesterone) and a vaginal progesterone. Researchers looked at hormone levels in the blood and at tissue samples from the womb lining a week later. The womb lining looked very similar with both treatments, with only subtle differences in some immune cells. The authors say this supports earlier trials showing the tablet works about as well as vaginal progesterone, but the study was small.",
+   "summary": "This small study, in 21 young egg donors, compared two ways of giving progesterone support after egg collection, as used in IVF: a tablet taken by mouth (dydrogesterone) and a vaginal progesterone. Researchers looked at hormone levels in the blood and at tissue samples from the womb lining a week later. The womb lining looked very similar with both treatments, with only subtle differences in some immune cells. The authors say this supports earlier trials showing the tablet works about as well as vaginal progesterone, but the study was small.",
    "keyPoints": [
     "All 42 womb lining samples showed a normal secretory (post-ovulation) pattern, and gene activity did not differ significantly between the two treatments.",
     "After a dose of the oral tablet, drug levels peaked within about 1.5 hours and cleared quickly, so how often it is taken may matter as well as the dose.",
@@ -71550,9 +71555,9 @@
    "summary": "This clinical guide from a European menopause society and an epilepsy centre looks at how to care for women who have both epilepsy and menopause. Women with epilepsy may reach menopause earlier and are more likely to develop heart disease, weak bones and memory or thinking problems. There is very little research on the best treatments for this group, because women with epilepsy are often left out of studies. The guide, based on a literature review and expert agreement, says care should be personalised.",
    "keyPoints": [
     "Women with epilepsy may be at higher risk of early menopause, heart disease, osteoporosis and cognitive problems than women without epilepsy.",
-    "Menopausal hormone therapy can be considered if the likely benefits outweigh the risks, and transdermal (skin) estrogen may be preferred to limit swings in hormone levels.",
+    "The guide says menopausal hormone therapy can be considered if the likely benefits outweigh the risks, and transdermal (skin) estrogen may be preferred to limit swings in hormone levels.",
     "Seizure medicines and hormone therapy can interact, so seizure medicine doses may need to change.",
-    "Healthcare providers should be trained in epilepsy care at menopause, with multidisciplinary teams."
+    "The guide says healthcare providers should be trained in epilepsy care at menopause, with multidisciplinary teams."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -72285,10 +72290,10 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/30827035/",
-   "summary": "This review pooled 12 trials of about 1,369 women having chemotherapy for cancers such as breast cancer, ovarian cancer or Hodgkin's lymphoma. It looked at whether taking a GnRH agonist (a hormone-suppressing medicine) alongside chemotherapy helps protect the ovaries from early menopause. Women who also took the medicine were less likely to develop premature ovarian failure, and more likely to get their periods back or keep them. The trials were at high or unclear risk of bias, and evidence on protecting fertility was not strong enough to draw conclusions.",
+   "summary": "This review pooled 12 trials of about 1,369 women having chemotherapy for cancers such as breast cancer, ovarian cancer or Hodgkin's lymphoma. It looked at whether taking a GnRH agonist (a hormone-suppressing medicine) alongside chemotherapy helps protect the ovaries from early menopause. Women who also took the medicine were probably less likely to develop premature ovarian failure, and may have been more likely to get their periods back or keep them in the first 12 months. The trials were at high or unclear risk of bias, and evidence on protecting fertility was not strong enough to draw conclusions.",
    "keyPoints": [
     "Premature ovarian failure occurred in about 11% of women using a GnRH agonist with chemotherapy, versus about 25% with chemotherapy alone (moderate-certainty evidence).",
-    "Periods returned or continued more often with the agonist within 12 months, but there was no clear difference after 12 months (low-certainty evidence).",
+    "Periods may have returned or continued more often with the agonist within 12 months, but there was no clear difference after 12 months (low-certainty evidence).",
     "Pregnancy rates did not clearly differ between groups, and evidence on protecting fertility was insufficient.",
     "Common side effects of GnRH analogues included hot flushes, vaginal dryness and mood swings, with no overall difference in side effects between groups."
    ],
@@ -72660,10 +72665,10 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/39433088/",
-   "summary": "This review pooled 40 randomized trials (3,285 postmenopausal women) to see whether soy isoflavones act like the hormone estrogen in the body. Women took a median of 75 mg a day for about 24 weeks. Soy isoflavones made no significant difference to womb lining thickness, vaginal cell maturation, or blood levels of FSH and estradiol compared with non-isoflavone comparison groups. The authors rated the certainty of the evidence as high to moderate.",
+   "summary": "This review pooled 40 randomized trials (3,285 postmenopausal women) to see whether soy isoflavones act like the hormone estrogen in the body. Women took a median of 75 mg a day for about 24 weeks. Soy isoflavones probably made no significant difference to womb lining thickness, vaginal cell maturation, or blood levels of FSH and estradiol compared with non-isoflavone comparison groups. The authors rated the certainty of the evidence as high to moderate.",
    "keyPoints": [
-    "Soy isoflavones had no significant effect on womb lining (endometrial) thickness in postmenopausal women.",
-    "They also had no significant effect on vaginal maturation index, FSH or estradiol levels.",
+    "Soy isoflavones probably had no significant effect on womb lining (endometrial) thickness in postmenopausal women.",
+    "They also probably had no significant effect on vaginal maturation index, FSH or estradiol levels.",
     "The authors conclude soy isoflavones do not appear to have estrogen-like effects on these four measures and likely act as selective estrogen receptor modulators.",
     "Evidence certainty was high to moderate across all outcomes."
    ],
@@ -84049,7 +84054,7 @@
    "keyPoints": [
     "Remifentanil PCA can give effective pain relief in labour, particularly when an epidural or spinal is not possible or is declined.",
     "When used within defined limits, there is now an established record of effectiveness and safety, though some risks remain.",
-    "Labour wards need clear protocols for giving and monitoring it, and staff trained to spot and manage complications.",
+    "The guidance says labour wards need clear protocols for giving and monitoring it, and staff trained to spot and manage complications.",
     "There is little data on its use in higher-risk mothers and babies, which is a research priority."
    ],
    "certainty": "moderate",
@@ -84443,11 +84448,11 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/28407220/",
-   "summary": "This Cochrane review looked at remifentanil, a short-acting opioid that women can give themselves through a drip during labour (patient-controlled analgesia). It pooled 20 trials with 3569 women, comparing it with other opioid injections and with epidurals. Remifentanil worked better than other opioid injections but not as well as an epidural. Most of the evidence is low or very low quality, and information on safety for mothers and babies is limited.",
+   "summary": "This Cochrane review looked at remifentanil, a short-acting opioid that women can give themselves through a drip during labour (patient-controlled analgesia). It pooled 20 trials with 3569 women, comparing it with other opioid injections and with epidurals. Remifentanil may work better than other opioid injections but not as well as an epidural. Most of the evidence is low or very low quality, and information on safety for mothers and babies is limited.",
    "keyPoints": [
-    "Women using remifentanil had stronger pain relief at one hour than with other opioids given by injection or drip, but more pain and less satisfaction than with an epidural.",
-    "Women using remifentanil were much more likely to need extra pain relief than women with an epidural, but less likely than women given other opioid injections.",
-    "The chance of caesarean birth was no different between remifentanil and epidural or other injected opioids; a possible increase versus another patient-controlled opioid was very uncertain.",
+    "Women using remifentanil may have had stronger pain relief at one hour than with other opioids given by injection or drip, but more pain and less satisfaction than with an epidural.",
+    "Women using remifentanil were probably much more likely to need extra pain relief than women with an epidural, but less likely than women given other opioid injections.",
+    "The chance of caesarean birth may not differ between remifentanil and epidural or other injected opioids; a possible increase versus another patient-controlled opioid was very uncertain.",
     "Safety data for mothers (breathing problems) and babies (Apgar scores) were limited, so no firm conclusions could be drawn."
    ],
    "certainty": "low",
@@ -90538,7 +90543,7 @@
     "Both studies that looked at menopausal symptoms found strong links between symptoms and disordered eating.",
     "Findings were mixed and the studies were of limited quality, so firm conclusions cannot be drawn yet."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menopause",
     "post-menopause"
@@ -92132,9 +92137,9 @@
    "summary": "This Canadian guideline covers long-term care for women who had a severe perineal tear involving the anal sphincter during birth (called an OASI). It says dedicated follow-up clinics and pelvic health physiotherapy play a key role in recovery and long-term outcomes. It also offers new tools to help women and their care providers decide together how to give birth next time. The abstract does not give a certainty rating for its recommendations.",
    "keyPoints": [
     "Dedicated follow-up clinics and pelvic health physiotherapy play a critical role in recovery and long-term outcomes after a severe tear.",
-    "Women should be told about the possible benefits of referral to specialized centers, including a possibly better long-term outlook.",
+    "The guideline says women should be told about the possible benefits of referral to specialized centers, including a possibly better long-term outlook.",
     "The guideline gives new algorithms to support shared decision-making about the mode of delivery after an earlier OASI.",
-    "Access to these services should not depend on where a woman lives or what she can afford, and telehealth and local provider training are suggested to help."
+    "The guideline says access to these services should not depend on where a woman lives or what she can afford, and telehealth and local provider training are suggested to help."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -97348,7 +97353,7 @@
    "keyPoints": [
     "Pooled across five studies, the scan correctly found about 85-87% of polyps and correctly cleared about 85-91% of women without polyps, depending on the comparison used.",
     "Accuracy improved (about 91% of polyps found) when a study with poor-quality scans was left out.",
-    "If the scan shows no sign of a polyp and a sample of the womb lining is benign, watchful waiting without further procedures could be considered.",
+    "The authors say that if the scan shows no sign of a polyp and a sample of the womb lining is benign, watchful waiting without further procedures could be considered.",
     "If the scan is of good quality, it can help decide which women need a follow-up camera examination of the womb (hysteroscopy)."
    ],
    "certainty": "not stated",
@@ -99903,7 +99908,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34774058/",
-   "summary": "This review pooled results from 12 studies in Ethiopia to see how many women use an intrauterine device (IUD, or coil) after giving birth, and what makes use more likely. About 22 in 100 women (21.63%) used one, which the authors describe as low. Use was more common among women with more education, those who went to antenatal care, those who had counselling or good knowledge of the IUD, and those whose husbands were supportive.",
+   "summary": "This review pooled results from 12 studies in Ethiopia to see how many women use an intrauterine device (IUD, or coil) after giving birth, and what is linked to using one. About 22 in 100 women (21.63%) used one, which the authors describe as low. Use was more common among women with more education, those who went to antenatal care, those who had counselling or good knowledge of the IUD, and those whose husbands were supportive.",
    "keyPoints": [
     "The pooled rate of postpartum IUD use among women in Ethiopia was 21.63%, described as significantly low.",
     "Higher education, antenatal care visits, counselling, good knowledge and awareness of the IUD were linked to greater use.",
@@ -101455,7 +101460,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/40188841/",
-   "summary": "This large review pooled results from 327 studies covering over 847 million women to find out why heavy bleeding after birth (postpartum haemorrhage) happens and who is more likely to have it. The most common cause was the womb not tightening properly after birth (uterine atony), found in about 7 in 10 cases. Several factors raised the chance of heavy bleeding, with some linked more strongly than others. The authors say most of the studies were of high methodological quality.",
+   "summary": "This large review pooled results from 327 studies covering over 847 million women to find out why heavy bleeding after birth (postpartum haemorrhage) happens and who is more likely to have it. The most common cause was the womb not tightening properly after birth (uterine atony), found in about 7 in 10 cases. Several factors were linked to a higher chance of heavy bleeding, with some linked more strongly than others. The authors say most of the studies were of high methodological quality.",
    "keyPoints": [
     "Uterine atony (the womb not contracting well after birth) was the most common cause, at about 70.6% of cases, followed by genital tract trauma (16.9%) and retained placenta (16.4%).",
     "Strongly linked risk factors included anaemia, previous heavy bleeding after birth, caesarean birth, multiple pregnancy, placenta praevia, assisted reproductive technology use, a baby over 4500 g, and shoulder dystocia.",
@@ -110365,7 +110370,7 @@
    "summary": "This review pooled 63 studies covering over 328,000 pregnancies to see how well an ultrasound at 11-14 weeks can spot major heart problems in the baby. It found the scan picks up a little over half of major heart anomalies in lower-risk pregnancies and about two thirds in higher-risk pregnancies. When the scan did flag a problem, it was right about 94-95% of the time. Scans that looked at the heart's outflow tracts or used colour-flow Doppler found more problems, and some types of heart anomaly are easier to spot early than others.",
    "keyPoints": [
     "In lower-risk pregnancies, the early scan detected about 56% of major heart anomalies; in higher-risk pregnancies, about 68%.",
-    "A positive result was correct roughly 95% of the time, and a normal result was very rarely wrong about what it showed (specificity above 99.7%).",
+    "A positive result was correct roughly 95% of the time, and the scan very rarely flagged a problem in babies with a normal heart (specificity above 99.7%).",
     "Detection was significantly better when the scan included an outflow-tract view or colour-flow Doppler.",
     "The authors conclude that first-trimester heart scans can identify over half of affected babies, and that screening programmes should use structured protocols."
    ],
@@ -110463,7 +110468,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/33686672/",
-   "summary": "This Cochrane review looked at how well ultrasound can spot a big difference in weight between twins before birth, compared with their actual weights after birth. Across 39 studies, ultrasound often missed true weight differences, but when it did flag a difference it was usually correct. The evidence was very low certainty, so ultrasound alone may not be a reliable basis for big decisions about twin pregnancies.",
+   "summary": "This Cochrane review looked at how well ultrasound can spot a big difference in weight between twins before birth, compared with their actual weights after birth. Across 39 studies, ultrasound often missed true weight differences, but it was usually right when there was no real difference. The evidence was very low certainty, so ultrasound alone may not be a reliable basis for big decisions about twin pregnancies.",
    "keyPoints": [
     "Ultrasound caught only about half of true weight differences between twins (sensitivity about 51% at a 20% cut-off and 46% at a 25% cut-off).",
     "Ultrasound was good at ruling out a difference when there wasn't one (specificity about 91% to 93%).",
@@ -110616,8 +110621,8 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/32804883/",
    "summary": "This ACOG guideline explains the tests available to check for chromosomal conditions in a pregnancy. It says no single test is best for everyone, so each person should be given clear information about the benefits and limits of each option. Testing is a personal choice, and every patient can accept or decline it after counseling.",
    "keyPoints": [
-    "Every patient should be counseled about testing for fetal chromosomal abnormalities in each pregnancy.",
-    "All patients should be offered both screening tests and diagnostic tests.",
+    "The guideline says every patient should be counseled about testing for fetal chromosomal abnormalities in each pregnancy.",
+    "The guideline says all patients should be offered both screening tests and diagnostic tests.",
     "No one screening test is better than the others in every situation, so the choice depends on the person's clinical context, values and goals.",
     "Patients have the right to accept or decline testing after counseling."
    ],
@@ -114364,7 +114369,7 @@
     "Only one study (75 women) looked at pine bark extract for female sexual dysfunction; it reported higher satisfaction and lower pain scores.",
     "The evidence for women's sexual function and pain was rated very low certainty.",
     "Across all 27 trials, small sizes and poor reporting meant no definitive conclusions on whether the supplement works or is safe.",
-    "Most studies did not report serious side effects or hospital admissions."
+    "For most comparisons, the studies did not report on serious side effects or hospital admissions at all."
    ],
    "certainty": "very low",
    "lifeStages": [
@@ -115075,7 +115080,9 @@
    "certainty": "not stated",
    "lifeStages": [
     "menstrual-cycle",
-    "general"
+    "general",
+    "menopause",
+    "post-menopause"
    ],
    "topics": [
     "skin-hair-hormones"
@@ -115097,7 +115104,8 @@
     "finasteride",
     "wig",
     "hair regrowth",
-    "scalp"
+    "scalp",
+    "thinning hair"
    ]
   },
   {
@@ -122220,11 +122228,11 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/35587030/",
-   "summary": "This review pooled individual data from 7 trials (about 2,400 couples with unexplained infertility) having intrauterine insemination (IUI) with medicines to stimulate the ovaries. Injectable hormones (gonadotrophins) gave more live births and a shorter time to conception than clomiphene citrate, but also more multiple pregnancies (twins or more). When lower starting doses and stricter cancellation rules were used, the differences in live birth and multiple pregnancy were no longer clear. Letrozole was compared in only one trial, so little can be said about it yet.",
+   "summary": "This review pooled individual data from 7 trials (about 2,400 couples with unexplained infertility) having intrauterine insemination (IUI) with medicines to stimulate the ovaries. Injectable hormones (gonadotrophins) probably give more live births and a shorter time to conception than clomiphene citrate, but may also lead to more multiple pregnancies (twins or more). In trials with lower starting doses the live birth benefit remained, but with stricter cancellation rules it was no longer clear, and in both cases the difference in multiple pregnancy was unclear. Letrozole was compared in only one trial, so little can be said about it yet.",
    "keyPoints": [
-    "Gonadotrophins increased live birth compared with clomiphene (moderate-certainty evidence) and shortened the time to a live birth.",
+    "Gonadotrophins probably increased live birth compared with clomiphene (moderate-certainty evidence) and probably shortened the time to a live birth.",
     "Gonadotrophins may raise the chance of multiple pregnancy compared with clomiphene (low-certainty evidence).",
-    "With low starting doses and stricter cancellation criteria, effectiveness and safety of the different medicines looked acceptable, so cost, availability and patient preference can guide the choice.",
+    "With low starting doses and stricter cancellation criteria, effectiveness and safety of the different medicines looked acceptable, so the authors say cost, availability and patient preference should guide the choice.",
     "Effects did not seem to differ by age, BMI or whether infertility was primary or secondary; more trials of letrozole are needed."
    ],
    "certainty": "moderate",
@@ -133582,7 +133590,8 @@
    "certainty": "not stated",
    "lifeStages": [
     "contraception",
-    "menstrual-cycle"
+    "menstrual-cycle",
+    "conception"
    ],
    "topics": [
     "cycle-tracking",

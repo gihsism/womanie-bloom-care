@@ -420,6 +420,46 @@ const SUBJECT_MISMATCH: { ask: RegExp; unless: RegExp; title: RegExp; keep: RegE
     title: /\b(EOG|ArG)\b/,
     keep: /(?!)/,
   },
+  // Round 13: an app or tracker asked, a title about something else ("Are
+  // fertility apps reliable for avoiding or getting pregnant?" had two
+  // antioxidant reviews and preconception lifestyle advice behind the app
+  // review). Titles about apps, cycle tracking, fertility awareness or
+  // timing sex stay.
+  {
+    ask: /\b(apps?|trackers?)\b/i,
+    unless: /(?!)/,
+    title: /\w/,
+    keep: /\b(apps?|applications?|mobile|smartphones?|digital|track\w*|fertility awareness|natural family planning|timed intercourse|timing|cycles?|ovulat\w*|fertile)\b/i,
+  },
+  // Round 13: breasts asked without a word about feeding, a breastfeeding
+  // title ("Sore breasts before period every month" and "Is it normal for
+  // one breast to grow faster than the other?" got a review of
+  // breastfeeding and the mother's health).
+  {
+    ask: /\bbreasts?\b/i,
+    unless: /\b(breastfe\w*|breast-?fe\w*|feed\w*|nursing|lactat\w*|milk|nipples?|baby|babies|stillen)\b/i,
+    title: /\b(breastfe\w*|breast-?feeding|lactat\w*)\b/i,
+    keep: /(?!)/,
+  },
+  // Round 13: the thyroid asked, a title with no thyroid word ("Thyroid
+  // problems after giving birth" got delayed milk supply and gestational
+  // diabetes reviews). Asked together with miscarriage or fertility, the
+  // pregnancy-loss and fertility guidance keeps its place.
+  {
+    ask: /\b(thyroid\w*|tsh|hashimoto\w*|hypothyroid\w*|hyperthyroid\w*)\b/i,
+    unless: /\b(miscarr\w*|pregnancy loss|infertil\w*|fertility|ivf)\b/i,
+    title: /\w/,
+    keep: /\b(thyro\w*|tsh|iodine|levothyrox\w*|hypothyroid\w*|hyperthyroid\w*|hashimoto\w*|graves)\b/i,
+  },
+  // Round 13: an overview of acupuncture for cancer-related conditions led
+  // "Joint pain in menopause, is it hormonal?", with side effects of
+  // breast-cancer treatment behind it; without a cancer word they step back.
+  {
+    ask: /\w/,
+    unless: /\b(cancer|tumou?rs?|oncolog\w*|chemo\w*|survivors?)\b/i,
+    title: /\b(cancer-related|cancer treatments?|inhibitor-induced)\b/i,
+    keep: /(?!)/,
+  },
 ];
 
 function subjectMismatchFactor(query: string, title: string): number {

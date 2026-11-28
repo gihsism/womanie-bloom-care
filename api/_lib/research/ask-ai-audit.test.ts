@@ -554,3 +554,80 @@ describe.skipIf(!hasModel)('Research round 12: sources the chat sends (bundled m
     expect(await sources('Are fertility apps reliable for avoiding or getting pregnant?', 'conception')).not.toContain('pmid-33890288');
   }, 90_000);
 });
+
+// Round 13 (docs/research-gaps.md): the last 114 exposed PubMed items
+// content-checked, off-topic fillers in the round-11 question set fixed
+// (app, breast, thyroid and cancer-related SUBJECT_MISMATCH rules; app,
+// ovulation and breastfeeding keywords; the asthma vitamin D review no
+// longer tagged as baby vitamin D drops).
+describe('Research round 13: library data', () => {
+  const lib = getLibrary();
+  const byId = new Map(lib.items.map((i) => [i.id, i]));
+  const text = (id: string) => [byId.get(id)!.summary, ...byId.get(id)!.keyPoints].join(' ');
+
+  it('summary fixes from the content check stay in', () => {
+    expect(byId.get('pmid-27444983')!.certainty).toBe('not stated');
+    expect(byId.get('pmid-39514962')!.certainty).toBe('not stated');
+    expect(text('pmid-35587030')).toMatch(/probably/);
+    expect(text('pmid-40238039')).toMatch(/linked to a higher risk/);
+    expect(text('pmid-38110714')).toMatch(/in 21 young egg donors/);
+    expect(text('pmid-41308919')).toMatch(/The guideline says/);
+  });
+
+  it('metadata fixes', () => {
+    expect(byId.get('pmid-41849976')!.lifeStages).toContain('conception');
+    expect(byId.get('pmid-36744416')!.lifeStages).toEqual(['general']);
+    expect(byId.get('pmid-36744416')!.keywords).not.toContain('vitamin d drops');
+    expect(byId.get('pmid-29863806')!.lifeStages).toContain('post-menopause');
+  });
+});
+
+describe('Research round 13: keyword retrieval and ranking rules', () => {
+  const ids = (q: string, stage: string | null) => selectChatSources(q, stage).map((i) => i.id);
+
+  it('the fertility-apps question gets only app items', () => {
+    expect(ids('Are fertility apps reliable for avoiding or getting pregnant?', 'conception').slice(0, 2)).toEqual(['pmid-38106802', 'pmid-41849976']);
+  });
+
+  it('ovulation timing questions reach the timing and ovulation-kit items', () => {
+    expect(ids('How do I know when I ovulate?', 'conception').slice(0, 2)).toEqual(['pmid-37709293', 'pmid-31139458']);
+    expect(ids('Best time to have sex to get pregnant', 'conception').slice(0, 2)).toEqual(['pmid-37709293', 'pmid-31139458']);
+  });
+
+  it('off-topic fillers step back', () => {
+    expect(ids('Sore breasts before period every month', 'menstrual-cycle')).not.toContain('pmid-26172878');
+    expect(ids('Joint pain in menopause, is it hormonal?', 'menopause')).not.toContain('pmid-36099656');
+    expect(ids('Joint pain in menopause, is it hormonal?', 'menopause')).toContain('pmid-33299396');
+    expect(ids('Does my baby need vitamin D drops?', 'postpartum')).not.toContain('pmid-36744416');
+    expect(ids('Thyroid problems after giving birth', 'postpartum')).not.toContain('pmid-35613728');
+  });
+
+  it('the rules leave related questions alone', () => {
+    expect(ids('Can thyroid antibodies cause miscarriage?', 'conception')).toContain('pmid-41176277');
+    expect(ids('Breast lump, what should I do?', null)[0]).toBe('pmid-37236740');
+    expect(ids('Is vaginal estrogen safe long term?', 'post-menopause')).toContain('pmid-39521301');
+    expect(ids('Do period tracking apps work?', 'menstrual-cycle')[0]).toBe('pmid-38358798');
+  });
+});
+
+describe.skipIf(!hasModel)('Research round 13: sources the chat sends (bundled model)', () => {
+  const sources = async (q: string, stage: string | null) =>
+    (await selectChatSourcesHybrid(q, stage, { timeoutMs: 20_000 })).map((i) => i.id);
+
+  it('fertility apps: places 2 and 3 are the app review and fertility awareness, no antioxidant reviews', async () => {
+    const s = await sources('Are fertility apps reliable for avoiding or getting pregnant?', 'conception');
+    expect(s.slice(0, 3)).toEqual(['pmid-38106802', 'pmid-41849976', 'pmid-30095777']);
+    for (const id of ['pmid-35506389', 'pmid-32851663', 'pmid-33914901']) expect(s).not.toContain(id);
+  }, 30_000);
+
+  it('fillers fixed in the round-11 question set', async () => {
+    expect((await sources('How do I know when I ovulate?', 'conception')).slice(0, 2)).toEqual(['pmid-37709293', 'pmid-31139458']);
+    expect((await sources('Best time to have sex to get pregnant', 'conception')).slice(0, 2)).toEqual(['pmid-37709293', 'pmid-31139458']);
+    expect((await sources('Joint pain in menopause, is it hormonal?', 'menopause')).slice(0, 3)).toEqual(['pmid-41574523', 'pmid-41344380', 'pmid-33299396']);
+    expect((await sources('Thyroid problems after giving birth', 'postpartum')).slice(0, 2)).toEqual(['pmid-28260263', 'pmid-42219800']);
+    expect((await sources('Can I get pregnant while breastfeeding?', 'postpartum')).slice(0, 2)).toEqual(['pmid-26457821', 'pmid-35716805']);
+    expect(await sources('Does my baby need vitamin D drops?', 'postpartum')).not.toContain('pmid-36744416');
+    expect((await sources('Thinning hair after menopause', 'post-menopause')).slice(0, 2)).toEqual(['pmid-27225981', 'pmid-29863806']);
+    expect(await sources('Sore breasts before period every month', 'menstrual-cycle')).not.toContain('pmid-26172878');
+  }, 120_000);
+});
