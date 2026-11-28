@@ -21,7 +21,8 @@ function localDay(offset: number): string {
 export function resolveTokens<T>(value: T): T {
   const text = JSON.stringify(value)
     .replace(/\{\{day:(-?\d+)\}\}/g, (_, n) => localDay(Number(n)))
-    .replace(/\{\{at:(-?\d+)\}\}/g, (_, n) => new Date(Date.now() + Number(n) * 86_400_000).toISOString());
+    .replace(/\{\{at:(-?\d+)\}\}/g, (_, n) => new Date(Date.now() + Number(n) * 86_400_000).toISOString())
+    .replace(/\{\{min:(-?\d+)\}\}/g, (_, n) => new Date(Date.now() + Number(n) * 60_000).toISOString());
   return JSON.parse(text) as T;
 }
 
@@ -55,6 +56,21 @@ export async function mockAccount(
     appointments: override.appointments ?? account.appointments,
   });
   return Object.assign(api, { account });
+}
+
+/**
+ * The fake doctor (fixtures/doctor.json) with two patients: Lena approved,
+ * Sara pending. `revoked`: the admin took the doctor role away (the
+ * connection rows stay, as on the server).
+ */
+export async function mockDoctor(
+  page: Page,
+  opts: { revoked?: boolean; tables?: Tables } = {},
+): Promise<MockApi & { tables: Tables }> {
+  const doc = resolveTokens(readJson('doctor.json') as { user: Row; tables: Tables });
+  const tables = { ...doc.tables, ...opts.tables };
+  if (opts.revoked) tables.user_roles = [];
+  return installMockApi(page, { user: doc.user, tables });
 }
 
 // Console noise that is not an app bug.

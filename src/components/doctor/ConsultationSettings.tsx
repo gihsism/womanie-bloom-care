@@ -225,8 +225,14 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
         .eq('doctor_id', doctorId);
 
       if (data && data.length > 0) {
+        // A saved schedule holds only the days she works (save writes the
+        // active days). Start from all days off, or the Mon-Fri defaults
+        // showed days she never picked as ticked, and the next "Save
+        // hours" would have opened them for booking.
         setSchedule(prev => {
-          const loaded = { ...prev };
+          const loaded = Object.fromEntries(
+            Object.entries(prev).map(([d, v]) => [d, { ...v, active: false }]),
+          ) as typeof prev;
           data.forEach((s: { day_of_week: number | null; start_time: string; end_time: string; is_active: boolean | null }) => {
             if (s.day_of_week !== null) {
               loaded[s.day_of_week] = {
@@ -314,7 +320,7 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
         return (
           <div
             key={index}
-            className={`flex items-center gap-4 p-3 border rounded-lg ${
+            className={`flex flex-wrap items-center gap-x-4 gap-y-2 p-3 border rounded-lg ${
               invalid ? 'border-destructive bg-destructive/5' : ''
             }`}
           >
@@ -333,7 +339,7 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
             </button>
             <span className="w-24 font-medium">{dayName}</span>
             {schedule[index].active ? (
-              <div className="flex items-center gap-2 flex-1">
+              <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
                 <input
                   type="time"
                   value={schedule[index].start}

@@ -2,6 +2,7 @@ import { neon } from '@neondatabase/serverless';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuthUser } from '../../_lib/auth.js';
 import { withSentry } from '../../_lib/sentry.js';
+import { outsideRangeSince } from '../../_lib/lab-flags.js';
 
 // The doctor's day: her visits in a short window (the dashboard asks for
 // today + tomorrow in the doctor's local time), each with the few facts
@@ -28,7 +29,8 @@ const MAX_VISITS = 100;
 export const LOW_MOOD_KEYS = new Set(['sad', 'anxious', 'irritable']);
 /** Consecutive low-mood days at which the day view flags her. */
 export const LOW_MOOD_STREAK_FLAG = 3;
-const FLAGGED_STATUSES = ['critical', 'high', 'low', 'abnormal'];
+/** Lab rows read per patient for the out-of-range count (newest first). */
+const MAX_LAB_ROWS = 500;
 
 const DAY_MS = 86_400_000;
 
@@ -147,6 +149,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const since = new Map<string, Row>();
     const questions = new Map<string, number>();
     const streaks = new Map<string, number>();
+    const newAbnormal = new Map<string, number>();
 
     if (approvedIds.length > 0) {
       try {
@@ -164,8 +167,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           `SELECT id, life_stage, pregnancy_due_date, ivf_phase FROM profiles WHERE id = ANY($1)`,
           [approvedIds]
         ),
-        // Last COMPLETED visit with THIS doctor, and what arrived after it:
-        // documents she uploaded, and out-of-range results from them.
+        // Last COMPLETED visit with THIS doctor, and the documents she
+        // uploaded after it.
         sql.query(
           `WITH last_visit AS (
              SELECT patient_id, MAX(scheduled_at) AS last_visit_at
@@ -176,14 +179,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
            )
            SELECT l.patient_id, l.last_visit_at,
                   (SELECT COUNT(*) FROM health_documents d
-                    WHERE d.user_id = l.patient_id AND d.uploaded_at > l.last_visit_at) AS new_docs,
-                  (SELECT COUNT(*) FROM current_extracted_data m
-                     JOIN health_documents d ON d.id::text = m.document_id::text
-                    WHERE m.user_id = l.patient_id AND d.user_id = l.patient_id
-                      AND d.uploaded_at > l.last_visit_at
-                      AND LOWER(COALESCE(m.status, '')) = ANY($3)) AS new_abnormal
+                    WHERE d.user_id = l.patient_id AND d.uploaded_at > l.last_visit_at) AS new_docs
              FROM last_visit l`,
-          [doctor.id, approvedIds, FLAGGED_STATUSES]
+          [doctor.id, approvedIds]
         ),
         sql.query(
           `SELECT user_id, signal_date, mood FROM daily_health_signals
@@ -191,6 +189,49 @@ async function handler(req: VercelRequest, res: VercelResponse) {
           [approvedIds]
         ),
       ]) as [Row[], Row[], Row[]];
+
+      // Out-of-range results new since the last visit, by the shared rule
+      // (lab-flags): only the latest reading of each test counts, so a
+      // high value on an old report that a newer test supersedes is not
+      // "new out of range" here while the chart says in range. Read only
+      // for patients who have a completed visit with this doctor.
+      const sinceIds = sinceRows.map(r => String(r.patient_id));
+      if (sinceIds.length > 0) {
+        try {
+          const labRows = await sql.query(
+            `SELECT m.user_id, m.title, m.data_type, m.date_recorded, m.status, d.uploaded_at
+               FROM current_extracted_data m
+               JOIN health_documents d ON d.id::text = m.document_id::text AND d.user_id = m.user_id
+              WHERE m.user_id = ANY($1)
+              ORDER BY m.date_recorded DESC NULLS LAST
+              LIMIT ${MAX_LAB_ROWS * 4}`,
+            [sinceIds]
+          ) as Row[];
+          const byUser = new Map<string, Row[]>();
+          for (const r of labRows) {
+            const k = String(r.user_id);
+            const list = byUser.get(k) ?? [];
+            if (list.length < MAX_LAB_ROWS) list.push(r);
+            byUser.set(k, list);
+          }
+          for (const s of sinceRows) {
+            const k = String(s.patient_id);
+            const lastAt = Date.parse(iso(s.last_visit_at) ?? '');
+            const rows = (byUser.get(k) ?? []).map(r => ({
+              title: (r.title as string | null) ?? null,
+              data_type: (r.data_type as string | null) ?? null,
+              date_recorded: ymd(r.date_recorded),
+              status: (r.status as string | null) ?? null,
+              uploaded_at: iso(r.uploaded_at),
+            }));
+            newAbnormal.set(k, Number.isFinite(lastAt)
+              ? outsideRangeSince(rows, lastAt, r => Date.parse(r.uploaded_at ?? '')).length
+              : 0);
+          }
+        } catch (labErr) {
+          console.error('doctors/day: results read failed (non-fatal):', labErr);
+        }
+      }
 
       for (const p of profileRows) profiles.set(String(p.id), p);
       for (const s of sinceRows) since.set(String(s.patient_id), s);
@@ -244,7 +285,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
         open_questions: questions.get(base.appointment_id) ?? 0,
         last_visit_at: s ? iso(s.last_visit_at) : null,
         new_docs: s ? int(s.new_docs) : 0,
-        new_abnormal: s ? int(s.new_abnormal) : 0,
+        new_abnormal: newAbnormal.get(base.patient_id) ?? 0,
         low_mood_streak: streaks.get(base.patient_id) ?? 0,
       };
     });

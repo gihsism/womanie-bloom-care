@@ -36,9 +36,12 @@ handler knows is recorded, and every test asserts there were none, so a new
 endpoint shows up as a failure until it gets a fixture.
 
 Fixtures: `e2e-local/fixtures/account.json` (one patient: a medicine, a lab
-document with two results, two periods, an upcoming visit) and
-`fixtures/stages.json` (per-stage profile columns and the stage label).
-Dates are tokens (`{{day:-12}}`, `{{at:5}}`) resolved against today.
+document with two results, two periods, an upcoming visit),
+`fixtures/stages.json` (per-stage profile columns and the stage label) and
+`fixtures/doctor.json` (one doctor, two patients; the mock answers
+`/api/doctors/connections|day|patient|patient-trends` from these tables with
+the server's gates: doctor role plus an approved connection).
+Dates are tokens (`{{day:-12}}`, `{{at:5}}`, `{{min:90}}`) resolved against now.
 
 Two projects: `phone-390` (390x844, touch) and `desktop` (1280x900). Tests
 run in parallel; each starts from a fresh copy of the fixtures.
@@ -48,6 +51,7 @@ run in parallel; each starts from a fresh copy of the fixtures.
 | `journeys.spec.ts` | Home: log today (mood, save) and tick a medicine (0 -> 1 of 1, dose row written); Records -> Documents -> open the lab document -> Print / PDF view; Ask AI -> canned streamed answer; Visits -> next visit -> prep sheet -> Print (window.print called, toolbar hidden in print media); Me -> profile shows the email, life-stage picker shows the stage |
 | `new-features.spec.ts` | Prep sheet: questions, medicines, results, plus the symptom diary only for menopause / post-menopause and the cycles + ovulation tests only for trying to conceive. Once: Ask AI "Ask my doctor about this" (saved to the next visit, or to the unscheduled list with no visit, and shown on the prep sheet); "Print this chat" (print page, no tab bar, toolbar hidden in print); baby Stats weekly summary -> print page; pregnancy Check-ups "Mark done" saved to `user_app_data`, then Undo |
 | `round10.spec.ts` | Once: a critical result is the first Today row ("marked urgent by the lab"), the flagged count stays the Records total; Records lists flagged results once (no second "Results that need attention" card) with "20% below" relative to the limit, and Health Overview states "N of M latest results outside the lab's range" (no wellness %); a visit that started 5 minutes ago is still "Your next visit" on Visits |
+| `doctor.spec.ts` | Doctor side, fake doctor in `fixtures/doctor.json` (`mockDoctor()`): Lena approved, Sara pending. Dashboard: "Your day" row with "New: 1 result out of range, 2 new documents" and the open question (her superseded high TSH is not counted), pending visit says "waiting for her approval", Appointments offers "Open chart" only for Lena, saved opening hours (Mon + Wed) show the other weekdays off, no sideways scroll. Chart: Before-the-visit card (24-hour time, medicines, mood, results, her question), "1 result out of range" on Summary, Trends sentences. Notes: write, then delete through the in-app dialog (Keep note, then Delete note; no browser dialog). Revoked doctor (no role row): sent to doctor login, chart never requested |
 | `edge-cases.spec.ts` | Every main page (Home, stage page, Records, Ask AI, Visits, Me, prep sheet) renders with no error screen and no console errors, for a brand-new empty account and for rows whose optional columns are null |
 
 Bugs it has caught: a period row with no `cycle_length` froze the stage page
@@ -138,8 +142,9 @@ Other tools (design screenshots, UX sweeps) log in as the same account and
 switch its life stage, so the stage-and-log group runs serially with one
 retry, and it does not assume any particular stage on Home.
 
-There is no doctor-side test: no doctor test account exists, and the suite
-does not create accounts.
+There is no doctor-side test here: no doctor test account exists, and the
+suite does not create accounts. The doctor side is covered by the local
+suite (`e2e-local/doctor.spec.ts`).
 
 ## Writing more tests
 

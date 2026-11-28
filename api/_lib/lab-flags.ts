@@ -101,3 +101,22 @@ export function currentFlagged<T extends TestRowLike & { status?: string | null 
     .filter(r => keep(r.status))
     .sort((a, b) => flagRank(a.status) - flagRank(b.status) || when(b.date_recorded) - when(a.date_recorded));
 }
+
+/**
+ * Tests that are outside the range NOW (latest reading, shared rule) and
+ * whose latest reading reached the chart after `since` (ms): what the
+ * doctor's day calls "N results out of range" new since her last visit.
+ * `arrivedAt` is when the reading arrived (its document's upload time).
+ * A high value on an old report that a newer test supersedes is not
+ * counted, so the day list agrees with the chart and the patient's Home.
+ */
+export function outsideRangeSince<T extends TestRowLike & { status?: string | null }>(
+  rows: readonly T[],
+  since: number,
+  arrivedAt: (r: T) => number,
+): T[] {
+  return currentFlagged(rows).filter(r => {
+    const at = arrivedAt(r);
+    return Number.isFinite(at) && at > since;
+  });
+}

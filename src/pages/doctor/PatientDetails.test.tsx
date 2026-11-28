@@ -3,7 +3,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'doc1' } }) }));
-vi.mock('@/hooks/useRequireRole', () => ({ useRequireRole: () => ({ loading: false }) }));
+vi.mock('@/hooks/useRequireRole', () => ({ useRequireRole: () => ({ loading: false, hasRole: true }) }));
 vi.mock('@/hooks/usePageTitle', () => ({ usePageTitle: () => {} }));
 vi.mock('@/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }));
 vi.mock('@/integrations/db/client', () => ({ db: { from: vi.fn() } }));

@@ -3,6 +3,7 @@
 // Kept free of React so the rules are unit-tested.
 
 import { isFlagged, pregnancyWeek } from './doctorPatient';
+import { latestPerTest } from './labFlags';
 import { patientName, stageLabel, type DoctorAppointment, type DoctorPatientConnection } from './doctorDashboard';
 
 /** One visit as /api/doctors/day returns it. Health fields only when approved. */
@@ -154,7 +155,7 @@ const t = (d: string | null | undefined) => (d ? Date.parse(d) : NaN);
 export function newSinceLastVisit(input: {
   appointments: Array<{ scheduled_at: string; status: string | null }>;
   documents: Array<{ id: string; file_name: string; ai_suggested_name: string | null; uploaded_at: string | null }>;
-  medicalData: Array<{ id: string; document_id: string; title: string; value: string | number | null; unit: string | null; status: string | null }>;
+  medicalData: Array<{ id: string; document_id: string; title: string; value: string | number | null; unit: string | null; status: string | null; data_type?: string | null; date_recorded?: string | null }>;
   notes: Array<{ id: string; title: string; created_at: string }>;
   signals: Array<{ id: string; signal_date: string; notes: string | null }>;
   now: number;
@@ -178,16 +179,25 @@ export function newSinceLastVisit(input: {
       items.push({ key: `doc-${d.id}`, kind: 'document', title: d.ai_suggested_name || d.file_name, detail: 'Document', at });
     }
   }
+  // Shared rule (labFlags): only the latest reading of each test is
+  // flagged, as on the Results tab and the patient's own screens. An old
+  // report uploaded late keeps its status word but is marked superseded.
+  const latestIds = new Set(latestPerTest(medicalData).map(r => r.id));
   for (const r of medicalData) {
     const at = uploadedAt.get(r.document_id);
     if (at === undefined || at <= last) continue;
     const value = r.value === null || r.value === '' ? '' : ` ${r.value}${r.unit ? ` ${r.unit}` : ''}`;
-    const flagged = isFlagged(r.status);
+    const outside = isFlagged(r.status);
+    const flagged = outside && latestIds.has(r.id);
     items.push({
       key: `res-${r.id}`,
       kind: 'result',
       title: `${r.title}${value}`,
-      detail: flagged ? `Result · ${(r.status || '').toLowerCase()}` : 'Result',
+      detail: !outside
+        ? 'Result'
+        : flagged
+        ? `Result · ${(r.status || '').toLowerCase()}`
+        : `Result · ${(r.status || '').toLowerCase()} on an older test, re-tested since`,
       at,
       flagged,
     });

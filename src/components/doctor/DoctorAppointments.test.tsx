@@ -46,4 +46,13 @@ describe('Doctor cancel visit dialog', () => {
     expect(update).not.toHaveBeenCalled();
     expect(screen.queryByRole('dialog')).toBeNull();
   });
+
+  it('offers "Open chart" only for a patient who approved; a pending one says when it opens', () => {
+    const pending = [{ ...patients[0], status: 'pending' }];
+    const { rerender } = render(<MemoryRouter><AppointmentsView appointments={[apt]} patients={patients} onChange={vi.fn()} /></MemoryRouter>);
+    expect(screen.getByRole('button', { name: 'Open chart' })).toBeInTheDocument();
+    rerender(<MemoryRouter><AppointmentsView appointments={[apt]} patients={pending} onChange={vi.fn()} /></MemoryRouter>);
+    expect(screen.queryByRole('button', { name: 'Open chart' })).toBeNull();
+    expect(screen.getByText('Chart opens once she approves')).toBeInTheDocument();
+  });
 });
