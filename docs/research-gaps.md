@@ -701,6 +701,89 @@ The cervical letter still leads both smear questions. Tests:
   Not tagged `age-fertility`, and "ages" kept out of the title, to avoid
   matching age questions harder than it can answer them.
 
+### Summary content check, next 100 items
+
+Next 100 items on the round-6 exposure ranking (none skipped; all had
+PubMed abstracts). 87 fair. 16 fixes in 13 items, text only (10
+re-embedded offline with the incremental script; label-only changes need
+no re-embed):
+
+- Certainty -> "not stated" where the abstract grades nothing:
+  `pmid-36084006`, `pmid-26695595` (risk of bias only), `pmid-38772634`
+  ("high" came from study-quality tools, not GRADE).
+- Hedges restored to match the GRADE level: `pmid-34391952` (endometriosis
+  surgery, "may", 2 places), `pmid-36209937` (preterm birth, "probably"),
+  `pmid-35553047` (ibuprofen vs paracetamol, "probably", 2 places),
+  `pmid-31990055` (sling complications, "may"), `pmid-41721260`
+  (induction and shoulder dystocia, "probably", 2 places),
+  `pmid-32964431` (hospital stay: very low certainty, "uncertain").
+- Wrong scope or comparison: `pmid-31476798` (most outcomes were unclear,
+  not "made little difference"), `pmid-37415461` (the LDL result was not
+  against levonorgestrel pills; only arterial clots were),
+  `pmid-28987293` ("most likely to help", not "may help most").
+- Blanket safety claim in the app's voice: `pmid-30762623` (creatine
+  "safe" is now the authors' judgement for these trials).
+
+Left as is: 22 judgement calls (labels where the abstract grades a range
+or only the main outcome; evidence levels instead of GRADE), e.g.
+`pmid-32683695`, `pmid-35922074`, `pmid-26415762`, `pmid-34994399`,
+`pmid-32303295`, `pmid-29117320`, `pmid-43055207`.
+
+### Superseded-guideline sweep
+
+All 439 guideline-type PubMed items were listed by issuing body. Newer
+versions were looked up in PubMed (free E-utilities, no API spend) for the
+series that publish numbered or dated updates (ACOG, SOGC, ASRM, ESHRE,
+USPSTF, NAMS, NICE, AAP, AWMF, NCCN, CDC / ACIP). The older record is
+added to `SUPERSEDED` in `library.ts`, so it steps back (x0.6) while the
+newer one is in the library; it stays citable.
+
+Newer version already in the library (16 old records now step back):
+SOGC folic acid 2015 -> Guideline 427 (2022; its French twin also steps
+back, one guideline per slot), SOGC dysmenorrhoea 2017 -> 2025, SOGC
+hirsutism 2017 -> 2023, SOGC OASIS 2015 -> 2024, AWMF candidosis 2015 ->
+2021, ASRM PGT-A 2018 -> 2024, ASRM uterine septum 2016 -> 2024, ESHRE POI
+2016 -> 2025, ACOG morcellation CO 770 -> CO 822, ACOG PB 202 (2 records)
+-> PB 222, AAP influenza 2019-20 and 2023-24 -> 2025-26, USPSTF iron in
+pregnancy 2015 -> 2024, USPSTF tobacco 2015 -> 2021.
+
+Newer version added (summary written from the PubMed abstract, own words;
+7 items embedded offline): USPSTF folic acid 2023 reaffirmation
+(`pmid-37526713`, 0.4 to 0.8 mg daily, grade A), USPSTF hypertensive
+disorders of pregnancy 2023 (`pmid-37721605`, replaces pre-eclampsia
+screening 2017), USPSTF falls 2024 (`pmid-38833246`), ASRM ovarian
+reserve 2020 (`pmid-33280722`), NCCN cervical cancer v2.2026
+(`pmid-41671440`), ACOG CO 807 tobacco and nicotine (`pmid-32332417`,
+replaces CO 721), NICE NG23 menopause, November 2024 update
+(`pmid-31940155`, abstract gives scope only; replaces the 2015 record).
+
+Checked, no newer full version (or only a partial update, so nothing
+demoted): ACOG PB 190 GDM (a 2024 Clinical Practice Update changes
+screening only), SOGC Guideline 398 progesterone (Technical Update 467,
+2026, covers one group), ACS cervical 2020 (2026 update covers self-
+collection and screening exit only), ACIP Tdap 2018 (2020 update is a
+narrow change), USPSTF cervical 2018 (still the final statement in
+PubMed), USPSTF perinatal depression 2019, healthy weight 2021, vitamin D
+and fractures 2018 (no newer statement in PubMed), ACOG PB 194 PCOS, PB
+196, PB 201, PB 203, PB 183, CO 651, CO 762, CO 722, NAMS 2022 / 2023,
+SOGC BV / vulvovaginitis / toxoplasmosis / AUB 292, AAP neonatal pain
+2016, ACR breast imaging in pregnancy 2018.
+
+Before / after check: chat sources for 216 questions (the 138 round-6
+everyday questions plus the eval, QA and audit sets), bundled model. 12
+changed: in every case where an old record left, the newer version was
+sent instead or was already among the six (the slot went to another
+on-topic item). One catch fixed on the way: "itchy with thick white
+discharge" lost its only source (the 2015 AWMF record, found by meaning
+only, fell under the score floor once demoted); the 2021 record now
+carries the keywords "itchy", "itching", "white / thick discharge" and is
+sent. Side effect accepted: after its re-embed, the sling-surgery review
+(`pmid-31990055`) took the 6th slot from a pelvic-floor exercise review
+for "I leak a bit of pee when I sneeze since giving birth" (the
+pelvic-floor sources above it are unchanged). Search evals unchanged.
+Tests: `ask-ai-audit.test.ts` (round 9 sweep block: every pair steps back,
+every target is in the library and not itself superseded).
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed

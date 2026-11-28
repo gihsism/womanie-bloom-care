@@ -250,3 +250,55 @@ describe.skipIf(!hasModel)('Ask AI audit round 9: sources the chat sends (bundle
     expect((await sources('How often should I have a cervical smear?', null))[0]).toBe(SGGG_CERVICAL);
   }, 30_000);
 });
+
+describe('Research round 9: superseded-guideline sweep', () => {
+  const lib = getLibrary();
+  const byId = new Map(lib.items.map((i) => [i.id, i]));
+  const demoted = demotedIds(lib.items);
+  const PAIRS: [string, string][] = [
+    ['pmid-26334606', 'pmid-35691683'],
+    ['pmid-28625286', 'pmid-40216328'],
+    ['pmid-29080721', 'pmid-38049282'],
+    ['pmid-26637088', 'pmid-39581327'],
+    ['pmid-25711406', 'pmid-33529414'],
+    ['pmid-29566854', 'pmid-38762806'],
+    ['pmid-27235766', 'pmid-38556964'],
+    ['pmid-27008889', 'pmid-39652037'],
+    ['pmid-30801477', 'pmid-33595252'],
+    ['pmid-30575675', 'pmid-32443079'],
+    ['pmid-37641884', 'pmid-40717224'],
+    ['pmid-26344176', 'pmid-39163015'],
+    ['pmid-26389730', 'pmid-33464343'],
+    ['pmid-28097362', 'pmid-37526713'],
+    ['pmid-28444286', 'pmid-37721605'],
+    ['pmid-29710141', 'pmid-38833246'],
+    ['pmid-25585505', 'pmid-33280722'],
+    ['pmid-30659131', 'pmid-41671440'],
+    ['pmid-28937568', 'pmid-32332417'],
+    ['pmid-26598775', 'pmid-31940155'],
+  ];
+
+  it.each(PAIRS)('%s steps back for the newer %s', (old, newer) => {
+    expect(SUPERSEDED[old]).toBe(newer);
+    expect(byId.get(newer)!.year).toBeGreaterThan(byId.get(old)!.year);
+    expect(demoted.has(old)).toBe(true);
+    expect(demoted.has(newer)).toBe(false);
+  });
+
+  it('every SUPERSEDED target is in the library and is not itself superseded', () => {
+    for (const [old, newer] of Object.entries(SUPERSEDED)) {
+      expect(byId.has(old), old).toBe(true);
+      expect(byId.has(newer), newer).toBe(true);
+      expect(SUPERSEDED[newer], newer).toBeUndefined();
+    }
+  });
+
+  it('keyword retrieval prefers the current version', () => {
+    const ids = (q: string, s: string | null) => selectChatSources(q, s).map((i) => i.id);
+    const a = ids('How much folic acid should I take before pregnancy?', 'conception');
+    expect(a).toContain('pmid-37526713');
+    if (a.includes('pmid-28097362')) expect(a.indexOf('pmid-37526713')).toBeLessThan(a.indexOf('pmid-28097362'));
+    const b = ids('Should my blood pressure be checked in pregnancy for pre-eclampsia?', 'pregnancy');
+    if (b.includes('pmid-28444286')) expect(b.indexOf('pmid-37721605')).toBeLessThan(b.indexOf('pmid-28444286'));
+  });
+});

@@ -16560,7 +16560,7 @@
     "Probiotics are being looked at as an option because antibiotic use in breastfeeding raises safety and drug-resistance concerns.",
     "Only six trials were included, and larger high-quality trials are still needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "pregnancy",
     "postpartum"
@@ -17328,9 +17328,9 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/41721260/",
-   "summary": "This review pooled three randomised trials (almost 4,000 pregnancies) where the baby was suspected to be larger than expected. It compared planned induction of labour at 37-39 weeks with waiting for labour to start on its own. Induction led to fewer shoulder dystocia cases (when a baby's shoulder gets stuck) and fewer caesarean births, and more spontaneous vaginal births. Babies in the induction group needed phototherapy for jaundice more often. The certainty of the evidence was moderate for most main outcomes.",
+   "summary": "This review pooled three randomised trials (almost 4,000 pregnancies) where the baby was suspected to be larger than expected. It compared planned induction of labour at 37-39 weeks with waiting for labour to start on its own. Induction probably led to fewer shoulder dystocia cases (when a baby's shoulder gets stuck) and fewer caesarean births, and more spontaneous vaginal births. Babies in the induction group needed phototherapy for jaundice more often. The certainty of the evidence was moderate for most main outcomes.",
    "keyPoints": [
-    "Induction reduced shoulder dystocia (RR 0.65) and caesarean birth (RR 0.87), and increased spontaneous vaginal birth (RR 1.12).",
+    "Induction probably reduced shoulder dystocia (RR 0.65) and caesarean birth (RR 0.87), and increased spontaneous vaginal birth (RR 1.12).",
     "No differences were seen in instrumental delivery, severe perineal trauma or perinatal death.",
     "Babies born after induction weighed about 177 g less on average but were more likely to need phototherapy (RR 1.63).",
     "The authors suggest discussing these benefits with each patient, taking her preferences and circumstances into account."
@@ -22613,7 +22613,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/37415461/",
-   "summary": "This review pooled 33 studies with over 629,000 women to look at side effects of newer combined pills (third- and fourth-generation) in women before menopause. Compared with older levonorgestrel pills, fourth-generation pills were linked to lower LDL ('bad') cholesterol and a lower risk of arterial blood clots. There was no difference in clots in the leg veins (deep vein thrombosis), and for the other outcomes the data were mixed and showed no clear difference.",
+   "summary": "This review pooled 33 studies with over 629,000 women to look at side effects of newer combined pills (third- and fourth-generation) in women before menopause. Fourth-generation pills were linked to lower LDL ('bad') cholesterol and, compared with older levonorgestrel pills, a lower risk of arterial blood clots. There was no difference in clots in the leg veins (deep vein thrombosis), and for the other outcomes the data were mixed and showed no clear difference.",
    "keyPoints": [
     "Fourth-generation pills were linked to lower LDL cholesterol than comparison pills.",
     "Arterial thrombosis was less common with fourth-generation pills than with levonorgestrel pills.",
@@ -30697,8 +30697,8 @@
    "summary": "These French guidelines look at whether extra procedures should be done during gynecological surgery when mild (superficial) endometriosis or scar-like tissue (adhesions) is found. Surgery is not recommended for mild endometriosis that causes no symptoms, but removing it may improve pain and quality of life in women who do have pelvic pain. Routine release of adhesions is generally not advised. All recommendations are based on low-quality evidence, so more research is needed.",
    "keyPoints": [
     "Surgery for symptom-free superficial endometriosis is not recommended to prevent pelvic pain, as there is no evidence it will become painful (low level of evidence).",
-    "In women with pelvic pain, removing superficial endometriosis lesions found during surgery improves pain and quality of life (low level of evidence).",
-    "In infertile women, cutting out (excising) superficial endometriosis is recommended over burning it (monopolar coagulation), as it gave a higher spontaneous pregnancy rate (low level of evidence).",
+    "In women with pelvic pain, removing superficial endometriosis lesions found during surgery may improve pain and quality of life (low level of evidence).",
+    "In infertile women, cutting out (excising) superficial endometriosis is recommended over burning it (monopolar coagulation), as it may give a higher spontaneous pregnancy rate (low level of evidence).",
     "Routine adhesiolysis (releasing adhesions) is not recommended to prevent pelvic pain or to improve pregnancy chances, because benefit is unclear and surgery carries risks (low level of evidence)."
    ],
    "certainty": "low",
@@ -38611,7 +38611,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/31476798/",
-   "summary": "This review looked at whether using ultrasound scans of the baby's size, on top of mum's blood sugar readings, helps decide how closely to treat gestational diabetes. It found three trials with 524 women. For most outcomes, such as caesarean birth and newborn low blood sugar, the scans made little or no difference, but the evidence was low or very low quality. The authors say there is not enough evidence to know whether this approach helps mothers or babies.",
+   "summary": "This review looked at whether using ultrasound scans of the baby's size, on top of mum's blood sugar readings, helps decide how closely to treat gestational diabetes. It found three trials with 524 women. For caesarean birth and newborn low blood sugar, the scans may make little or no difference, but the evidence was low or very low quality. The authors say there is not enough evidence to know whether this approach helps mothers or babies.",
    "keyPoints": [
     "Three trials (524 women) compared ultrasound of baby's size plus blood sugar levels with blood sugar levels alone.",
     "Adding ultrasound may make little or no difference to caesarean birth or newborn low blood sugar (low-certainty evidence).",
@@ -40572,7 +40572,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/30762623/",
    "summary": "This review looked at 17 randomized trials of older adults who did exercise with or without creatine supplements. Any extra benefit for strength, daily function and lean muscle seemed to need low daily doses of creatine plus at least 12 weeks of resistance training. Creatine monohydrate was found to be safe in older adults, and benefits looked more consistent in older women than in men. More long-term studies are still needed, especially for bone and thinking skills.",
    "keyPoints": [
-    "Creatine monohydrate is safe to use in older adults.",
+    "The authors judged creatine monohydrate safe to use in older adults, based on these trials.",
     "Extra muscle benefits over exercise alone may need continuous low-dose daily creatine plus at least 12 weeks of resistance training.",
     "Possible gains in thigh bone (femur) density may need at least 1 year of creatine with moderate resistance training.",
     "Limited data showed no added effect of creatine on mental health, and benefits were more consistent in older women than in men."
@@ -49849,7 +49849,7 @@
    "summary": "This Cochrane review looked at whether adding extra protein to breast milk helps premature babies grow while they are in hospital. It pooled six small trials with 204 babies. Low-quality evidence suggests the extra protein may increase short-term growth in weight, length and head size. The effects on hospital stay, feeding problems and a serious bowel condition (necrotising enterocolitis) are uncertain because the evidence was very weak, and there was no information on longer-term outcomes.",
    "keyPoints": [
     "Low-quality evidence found that adding protein to human milk may increase in-hospital growth in weight, length and head circumference in preterm babies.",
-    "Protein supplementation may lead to longer hospital stays, but this came from one small trial and the evidence was very low quality.",
+    "It is uncertain whether protein supplementation leads to longer hospital stays, as this came from one small trial and the evidence was very low quality.",
     "The effect on feeding intolerance and necrotising enterocolitis is uncertain.",
     "No data were available on brain development or on outcomes after leaving hospital."
    ],
@@ -64040,7 +64040,7 @@
     "Local anaesthetic infiltration, numbing creams or sprays, ointments and pudendal nerve block are not recommended because evidence is lacking or insufficient.",
     "For stitches, a continuous suture is recommended over interrupted stitches for episiotomy or second-degree tears when pain is the outcome, and for first- or second-degree tears, no stitches or glue may be better for pain than suturing."
    ],
-   "certainty": "high",
+   "certainty": "not stated",
    "lifeStages": [
     "pregnancy",
     "postpartum"
@@ -68782,9 +68782,9 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/35553047/",
-   "summary": "This Cochrane review looked at ways to ease pain during medical abortion (mifepristone plus misoprostol) before 14 weeks. It found five studies, which were too different to combine. One study found that a high dose of ibuprofen reduced pain more than paracetamol. Most other findings came from small studies with low or very low certainty.",
+   "summary": "This Cochrane review looked at ways to ease pain during medical abortion (mifepristone plus misoprostol) before 14 weeks. It found five studies, which were too different to combine. One study found that a high dose of ibuprofen probably reduced pain more than paracetamol. Most other findings came from small studies with low or very low certainty.",
    "keyPoints": [
-    "In one trial of 108 women, ibuprofen 1600 mg lowered pain scores by about 2 points out of 10 more than paracetamol 2000 mg (moderate-certainty evidence).",
+    "In one trial of 108 women, ibuprofen 1600 mg probably lowered pain scores by about 2 points out of 10 more than paracetamol 2000 mg (moderate-certainty evidence).",
     "Paracetamol did not appear to cause more side effects or make the abortion less likely to be complete, but it eased pain less than ibuprofen 1600 mg.",
     "Pregabalin 300 mg and ibuprofen 800 mg showed little to no clear pain benefit over placebo, and walking around or resting made little difference to pain (low to very low certainty).",
     "Most results were low or very low certainty because studies were small and two had a high risk of bias; larger, high-quality trials are needed."
@@ -100188,7 +100188,7 @@
     "Fitting an IUD within 10 minutes of delivering the placenta is safe and has no higher risk of complications than fitting it later.",
     "Most studies find the IUD is more likely to be expelled after fitting straight after birth than after later fitting.",
     "Expulsion is more common after vaginal delivery than after cesarean delivery, but rates vary widely and the reasons are unclear.",
-    "It may help most people who are unlikely to come back for a postpartum visit, if a replacement is available when an IUD comes out and the risks and benefits are explained."
+    "It is most likely to help people who are unlikely to come back for a postpartum visit, if a replacement is available when an IUD comes out and the risks and benefits are explained."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -105645,7 +105645,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/36209937/",
-   "summary": "This review pooled nine studies of 2,150 pregnant women who already had chronic high blood pressure. It looked at whether taking low-dose aspirin lowered the chance of superimposed pre-eclampsia (pre-eclampsia developing on top of existing high blood pressure). Aspirin did not clearly reduce pre-eclampsia, but it did reduce preterm birth. The evidence for pre-eclampsia was low to very low quality, so firm conclusions are hard to draw.",
+   "summary": "This review pooled nine studies of 2,150 pregnant women who already had chronic high blood pressure. It looked at whether taking low-dose aspirin lowered the chance of superimposed pre-eclampsia (pre-eclampsia developing on top of existing high blood pressure). Aspirin did not clearly reduce pre-eclampsia, but it probably reduced preterm birth. The evidence for pre-eclampsia was low to very low quality, so firm conclusions are hard to draw.",
    "keyPoints": [
     "Low-dose aspirin did not significantly reduce superimposed pre-eclampsia in randomized trials (low-quality evidence) or in observational studies (very low-quality evidence).",
     "Aspirin made no significant difference to preterm pre-eclampsia, small-for-gestational-age babies or perinatal death, and starting it early did not change this.",
@@ -123130,7 +123130,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/31990055/",
-   "summary": "This Cochrane review looked at 34 trials with 3,244 women to see how well traditional sling operations work for stress urinary incontinence (leaking when coughing, sneezing or exercising). Compared with another open operation called colposuspension, traditional slings probably left more women dry in the medium term (one to five years) and fewer needed repeat surgery. Compared with newer mid-urethral slings, traditional slings were probably no better and may be less effective, with more complications. Most trials did not follow women for long, so the long-term picture is unclear.",
+   "summary": "This Cochrane review looked at 34 trials with 3,244 women to see how well traditional sling operations work for stress urinary incontinence (leaking when coughing, sneezing or exercising). Compared with another open operation called colposuspension, traditional slings probably left more women dry in the medium term (one to five years) and fewer needed repeat surgery. Compared with newer mid-urethral slings, traditional slings were probably no better and may be less effective, and may cause more complications. Most trials did not follow women for long, so the long-term picture is unclear.",
    "keyPoints": [
     "Versus colposuspension, traditional slings probably led to more women being dry at one to five years (69% vs 59%, moderate-quality evidence).",
     "Women were less likely to need repeat continence surgery after a traditional sling than after colposuspension (high-quality evidence).",
@@ -124035,7 +124035,7 @@
     "The studies were small with a high risk of bias, so any apparent effects may be misleading or overestimated.",
     "Reported side effects included diarrhoea, nausea, vomiting, constipation and vaginal symptoms; information on serious harms was limited."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "general"
    ],
@@ -125713,7 +125713,11 @@
     "recurrent thrush",
     "thrush in pregnancy",
     "oral thrush baby",
-    "nappy rash"
+    "nappy rash",
+    "itchy",
+    "itching",
+    "white discharge",
+    "thick discharge"
    ]
   },
   {
@@ -132488,6 +132492,361 @@
     "summariser": "hand-written",
     "chunks": 0
    }
+  },
+  {
+   "id": "pmid-37526713",
+   "pmid": "37526713",
+   "doi": "10.1001/jama.2023.12876",
+   "title": "Folic Acid Supplementation to Prevent Neural Tube Defects: US Preventive Services Task Force Reaffirmation Recommendation Statement",
+   "source": "US Preventive Services Task Force",
+   "journal": "JAMA",
+   "organisation": "US Preventive Services Task Force",
+   "year": 2023,
+   "publicationTypes": [
+    "Practice Guideline"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/37526713/",
+   "summary": "The US Preventive Services Task Force checked the evidence on folic acid again in 2023 and kept its advice. Neural tube defects are serious birth defects of the brain and spine, affecting about 3000 pregnancies a year in the US, and many are caused by low folate. The Task Force is highly certain that folic acid supplements bring a substantial benefit. It recommends that everyone who is planning a pregnancy or could become pregnant takes a daily supplement with 0.4 to 0.8 mg (400 to 800 micrograms) of folic acid.",
+   "keyPoints": [
+    "Updated (reaffirmed) in 2023; replaces the 2017 statement.",
+    "High certainty that folic acid supplements bring a substantial benefit in preventing neural tube defects.",
+    "Recommended for everyone planning a pregnancy or who could become pregnant: a daily supplement with 0.4 to 0.8 mg (400 to 800 micrograms) of folic acid (grade A)."
+   ],
+   "certainty": "high",
+   "lifeStages": [
+    "conception",
+    "pregnancy",
+    "general"
+   ],
+   "topics": [
+    "folic-acid",
+    "pregnancy-nutrition"
+   ],
+   "tags": [
+    "folic acid",
+    "neural tube defects",
+    "supplements",
+    "preconception",
+    "prenatal vitamins"
+   ],
+   "keywords": [
+    "folic acid",
+    "folate",
+    "vitamin b9",
+    "prenatal vitamins",
+    "neural tube defects",
+    "spina bifida",
+    "trying to conceive",
+    "supplements",
+    "pregnancy planning",
+    "birth defects",
+    "400 micrograms"
+   ]
+  },
+  {
+   "id": "pmid-37721605",
+   "pmid": "37721605",
+   "doi": "10.1001/jama.2023.16991",
+   "title": "Screening for Hypertensive Disorders of Pregnancy: US Preventive Services Task Force Final Recommendation Statement",
+   "source": "US Preventive Services Task Force",
+   "journal": "JAMA",
+   "organisation": "US Preventive Services Task Force",
+   "year": 2023,
+   "publicationTypes": [
+    "Practice Guideline"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/37721605/",
+   "summary": "The US Preventive Services Task Force reviewed screening for high blood pressure conditions of pregnancy, such as pre-eclampsia and gestational hypertension. These conditions are a leading cause of serious illness and death in mothers in the US, and they have become about twice as common since the 1990s. The Task Force concludes with moderate certainty that checking blood pressure throughout pregnancy has a substantial benefit, and recommends it for all pregnant women who do not already have high blood pressure.",
+   "keyPoints": [
+    "Replaces the 2017 statement on screening for pre-eclampsia and now covers all high blood pressure conditions of pregnancy.",
+    "Blood pressure should be measured throughout pregnancy (grade B).",
+    "Moderate certainty that this screening has a substantial benefit.",
+    "High blood pressure conditions in US pregnancies roughly doubled between 1993 and 2016 to 2017."
+   ],
+   "certainty": "moderate",
+   "lifeStages": [
+    "pregnancy",
+    "postpartum"
+   ],
+   "topics": [
+    "pre-eclampsia",
+    "hypertension-pregnancy"
+   ],
+   "tags": [
+    "preeclampsia",
+    "blood pressure",
+    "prenatal screening",
+    "pregnancy complications"
+   ],
+   "keywords": [
+    "preeclampsia",
+    "pre-eclampsia",
+    "high blood pressure in pregnancy",
+    "blood pressure check",
+    "prenatal care",
+    "antenatal appointments",
+    "screening",
+    "toxemia",
+    "hypertension",
+    "eclampsia",
+    "gestational hypertension",
+    "hypertensive disorders of pregnancy"
+   ]
+  },
+  {
+   "id": "pmid-38833246",
+   "pmid": "38833246",
+   "doi": "10.1001/jama.2024.8481",
+   "title": "Interventions to Prevent Falls in Community-Dwelling Older Adults: US Preventive Services Task Force Recommendation Statement",
+   "source": "US Preventive Services Task Force",
+   "journal": "JAMA",
+   "organisation": "US Preventive Services Task Force",
+   "year": 2024,
+   "publicationTypes": [
+    "Practice Guideline"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/38833246/",
+   "summary": "The US Preventive Services Task Force reviewed ways to prevent falls in people aged 65 and older who live at home and have a higher risk of falling. Falls are the leading cause of injury in older adults; in 2018 more than a quarter of over-65s in the US reported a fall in the past year. The Task Force concludes with moderate certainty that exercise programmes bring a moderate benefit, and recommends them. Programmes that combine several steps (for example checking medicines, vision and the home) bring only a small benefit overall, so the Task Force says they should be offered case by case, depending on past falls, other health conditions and the person's wishes.",
+   "keyPoints": [
+    "Replaces the 2018 statement.",
+    "Exercise programmes are recommended for people 65 and older at higher risk of falls (grade B, moderate benefit).",
+    "Combined multi-step programmes have a small overall benefit and should be decided case by case (grade C).",
+    "In 2018, 27.5% of over-65s living at home reported at least one fall in the past year."
+   ],
+   "certainty": "moderate",
+   "lifeStages": [
+    "post-menopause",
+    "general"
+   ],
+   "topics": [
+    "vitamin-d"
+   ],
+   "tags": [
+    "vitamin d",
+    "falls prevention",
+    "older adults",
+    "exercise",
+    "supplements"
+   ],
+   "keywords": [
+    "vitamin d",
+    "falls",
+    "falling",
+    "older women",
+    "elderly",
+    "balance",
+    "exercise",
+    "supplements",
+    "bone health",
+    "injury prevention",
+    "ageing"
+   ]
+  },
+  {
+   "id": "pmid-33280722",
+   "pmid": "33280722",
+   "doi": "10.1016/j.fertnstert.2020.09.134",
+   "title": "Testing and interpreting measures of ovarian reserve: a committee opinion",
+   "source": "American Society for Reproductive Medicine",
+   "journal": "Fertility and Sterility",
+   "organisation": "American Society for Reproductive Medicine",
+   "year": 2020,
+   "publicationTypes": [
+    "Practice Guideline"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/33280722/",
+   "summary": "This committee opinion from the American Society for Reproductive Medicine explains what ovarian reserve tests can and cannot tell. Ovarian reserve means the number of eggs left in the ovaries. It is estimated from hormone blood tests (such as AMH) and from features seen on an ovary ultrasound scan. These markers help predict how many eggs may be collected after ovarian stimulation for IVF, but apart from age they are poor predictors of the chance of getting pregnant.",
+   "keyPoints": [
+    "Ovarian reserve means the number of eggs left, not their quality.",
+    "Markers include hormone blood tests such as AMH and features measured on an ultrasound scan.",
+    "They help predict how many eggs may be collected after stimulation.",
+    "Apart from age, they are poor predictors of the chance of pregnancy."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "ivf",
+    "general"
+   ],
+   "topics": [
+    "amh-ovarian-reserve",
+    "iui"
+   ],
+   "tags": [
+    "ovarian reserve",
+    "amh",
+    "egg quantity",
+    "fertility testing"
+   ],
+   "keywords": [
+    "amh",
+    "egg reserve",
+    "ovarian reserve",
+    "egg count",
+    "egg quality",
+    "fertility test",
+    "low ovarian reserve",
+    "anti-mullerian hormone",
+    "trying to conceive",
+    "fertility"
+   ]
+  },
+  {
+   "id": "pmid-41671440",
+   "pmid": "41671440",
+   "doi": "10.6004/jnccn.2025.0057",
+   "title": "Cervical Cancer, Version 2.2026, NCCN Clinical Practice Guidelines In Oncology",
+   "source": "NCCN",
+   "journal": "Journal of the National Comprehensive Cancer Network",
+   "organisation": "NCCN",
+   "year": 2025,
+   "publicationTypes": [
+    "Practice Guideline"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/41671440/",
+   "summary": "This is the current version of the US cancer network (NCCN) guideline on cervical cancer. It covers how cervical cancer is diagnosed and staged, the principles of surgery, the main treatment options for early and advanced cancer, and a detailed overview of drug treatments. The abstract does not list specific recommendations.",
+   "keyPoints": [
+    "Covers diagnosis, staging, surgery and main treatments for early and advanced cervical cancer.",
+    "Gives an overview of drug (systemic) treatments.",
+    "Replaces older versions such as Version 3.2019.",
+    "The abstract does not list specific recommendations."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "contraception",
+    "general"
+   ],
+   "topics": [
+    "cervical-screening",
+    "stis"
+   ],
+   "tags": [
+    "cervical cancer",
+    "hpv",
+    "screening",
+    "vaccination",
+    "prevention"
+   ],
+   "keywords": [
+    "cervical cancer",
+    "hpv",
+    "human papillomavirus",
+    "hpv vaccine",
+    "smear test",
+    "pap test",
+    "cervical screening",
+    "precancer",
+    "cervix"
+   ]
+  },
+  {
+   "id": "pmid-32332417",
+   "pmid": "32332417",
+   "doi": "10.1097/AOG.0000000000003822",
+   "title": "Tobacco and Nicotine Cessation During Pregnancy: ACOG Committee Opinion, Number 807",
+   "source": "American College of Obstetricians and Gynecologists",
+   "journal": "Obstetrics and Gynecology",
+   "organisation": "American College of Obstetricians and Gynecologists",
+   "year": 2020,
+   "publicationTypes": [
+    "Practice Guideline"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/32332417/",
+   "summary": "This guidance from US obstetricians (ACOG) explains the risks of tobacco in pregnancy and how to help women stop. Smoking in pregnancy is linked to cleft lip and palate, a baby who grows poorly, placenta problems, waters breaking early, low birth weight, ectopic pregnancy and more deaths around birth; children have more chest infections, asthma, colic and obesity. About 54% of women who smoke stop just before or during pregnancy. Stopping at any point helps mother and baby, with the greatest benefit before 15 weeks. E-cigarettes, vaping, hookahs and cigars are increasingly used, and ACOG advises stopping all forms. Care should be individual, with counselling, behavioural support and, where needed, medicines, and support should be discussed at prenatal and postnatal visits.",
+   "keyPoints": [
+    "Replaces Committee Opinion 721 (2017).",
+    "Stopping smoking at any point in pregnancy helps; the greatest benefit is before 15 weeks.",
+    "About 54% of women who smoke stop just before or during pregnancy.",
+    "All forms of tobacco and nicotine, including e-cigarettes and vaping, should be stopped.",
+    "Support can include counselling, behavioural help and medicines, offered at prenatal and postnatal visits."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "pregnancy",
+    "postpartum"
+   ],
+   "topics": [
+    "smoking-pregnancy"
+   ],
+   "tags": [
+    "smoking",
+    "smoking cessation",
+    "vaping",
+    "e-cigarettes",
+    "pregnancy outcomes"
+   ],
+   "keywords": [
+    "smoking",
+    "cigarettes",
+    "quit smoking",
+    "stop smoking",
+    "vaping",
+    "e-cigarettes",
+    "nicotine",
+    "pregnancy",
+    "quit line",
+    "counselling"
+   ]
+  },
+  {
+   "id": "pmid-31940155",
+   "pmid": "31940155",
+   "doi": null,
+   "title": "Menopause: identification and management (NICE guideline NG23, updated November 2024)",
+   "source": "National Institute for Health and Care Excellence",
+   "journal": "National Institute for Health and Care Excellence",
+   "organisation": null,
+   "year": 2024,
+   "publicationTypes": [
+    "Practice Guideline"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/31940155/",
+   "summary": "This is the UK national NICE guideline on recognising and managing menopause, including premature ovarian insufficiency (menopause before 40). It was updated in November 2024 and replaces the 2015 version. It aims to make the support and information people get during menopause more consistent. It is written for health professionals and for women, trans men and non-binary people registered female at birth who have menopause symptoms, and their families. The abstract does not list specific recommendations.",
+   "keyPoints": [
+    "UK national guideline, updated November 2024; replaces the 2015 version.",
+    "Covers recognising and managing menopause, including premature ovarian insufficiency.",
+    "Aims to make menopause support and information more consistent.",
+    "The abstract does not list specific recommendations."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "conception",
+    "menopause",
+    "post-menopause"
+   ],
+   "topics": [
+    "premature-ovarian-insufficiency",
+    "hrt-benefits-risks",
+    "hot-flushes"
+   ],
+   "tags": [
+    "menopause",
+    "premature ovarian insufficiency",
+    "hormone replacement therapy",
+    "menopause symptoms",
+    "non-hormonal treatment"
+   ],
+   "keywords": [
+    "menopause",
+    "early menopause",
+    "poi",
+    "premature ovarian insufficiency",
+    "hrt",
+    "hormone replacement therapy",
+    "hot flushes",
+    "menopause symptoms",
+    "breast cancer",
+    "treatment options",
+    "nice guideline"
+   ]
   }
  ]
 }
