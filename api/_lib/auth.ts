@@ -1,6 +1,7 @@
 import type { VercelRequest } from '@vercel/node';
 import * as jose from 'jose';
 import { neon } from '@neondatabase/serverless';
+import { readCookie } from './oauth-state.js';
 
 export function getAuthSecret(): Uint8Array {
   const secret = process.env.AUTH_SECRET;
@@ -12,6 +13,17 @@ export function getAuthSecret(): Uint8Array {
   return new TextEncoder().encode(secret);
 }
 
+// Session tokens are only ever signed with HS256. Pinning it means a token
+// whose header names another algorithm is refused outright.
+export const SESSION_JWT_ALGS = ['HS256'];
+
+// The session cookie by its exact name: an anchored match, so a cookie
+// such as `x_womanie_session=...` (for example one set by another site on
+// a sibling subdomain) is never mistaken for it.
+export function readSessionCookie(cookieHeader: string | undefined): string | null {
+  return readCookie(cookieHeader, 'womanie_session');
+}
+
 export interface AuthUser {
   id: string;
   email?: string;
@@ -20,12 +32,11 @@ export interface AuthUser {
 }
 
 export async function getAuthUser(req: VercelRequest): Promise<AuthUser | null> {
-  const cookies = req.headers.cookie || '';
-  const match = cookies.match(/womanie_session=([^;]+)/);
-  if (!match) return null;
+  const token = readSessionCookie(req.headers.cookie);
+  if (!token) return null;
 
   try {
-    const { payload } = await jose.jwtVerify(match[1], getAuthSecret());
+    const { payload } = await jose.jwtVerify(token, getAuthSecret(), { algorithms: SESSION_JWT_ALGS });
     // A valid signature isn't enough: logout, password change and account
     // deletion revoke by deleting the auth_sessions row, so the token must
     // still map to a live session (same check as /api/auth/me).

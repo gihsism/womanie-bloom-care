@@ -54,4 +54,23 @@ describe("getAuthUser", () => {
       .sign(new TextEncoder().encode("y".repeat(40)));
     expect(await getAuthUser(req(forged))).toBeNull();
   });
+
+  it("only reads the cookie named exactly womanie_session", async () => {
+    query.mockResolvedValue([{ "?column?": 1 }]);
+    const t = await token({ sub: "user_1", sid: "s1" });
+    const lookalike = { headers: { cookie: `x_womanie_session=${t}` } } as unknown as VercelRequest;
+    expect(await getAuthUser(lookalike)).toBeNull();
+    const amongOthers = { headers: { cookie: `theme=dark; womanie_session=${t}; other=1` } } as unknown as VercelRequest;
+    expect((await getAuthUser(amongOthers))?.id).toBe("user_1");
+  });
+
+  it("refuses a token signed with any algorithm other than HS256", async () => {
+    query.mockResolvedValue([{ "?column?": 1 }]);
+    const hs512 = await new jose.SignJWT({ sub: "user_1", sid: "s1" })
+      .setProtectedHeader({ alg: "HS512" })
+      .setExpirationTime("1h")
+      .sign(new TextEncoder().encode(SECRET.repeat(2)));
+    process.env.AUTH_SECRET = SECRET.repeat(2);
+    expect(await getAuthUser(req(hs512))).toBeNull();
+  });
 });
