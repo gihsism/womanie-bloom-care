@@ -755,3 +755,29 @@ describe('Research round 14: risk-ranked content check', () => {
     for (const id of ['pmid-32619725', 'pmid-41596408', 'pmid-35636626', 'pmid-28390010', 'pmid-37788418']) expect(byId.get(id)!.certainty).toBe('not stated');
   });
 });
+
+// Round 15: the next 150 unchecked items with one risk word (mostly
+// "safe", "should" or a medicine in pregnancy next to a number) checked
+// against their abstracts. These pin the most serious fixes.
+describe('Research round 15: one-risk-word content check', () => {
+  const lib = getLibrary();
+  const byId = new Map(lib.items.map((i) => [i.id, i]));
+  const text = (id: string) => [byId.get(id)!.summary, ...byId.get(id)!.keyPoints].join(' ');
+
+  it('overstated results are hedged or corrected', () => {
+    expect(text('pmid-31200970')).not.toMatch(/clearly raised/);
+    expect(text('pmid-30287313')).not.toMatch(/negative effect on male fertility was found/);
+    expect(text('pmid-38140841')).not.toMatch(/worked whether done on its own/);
+    expect(text('pmid-38593643')).not.toMatch(/The programs appeared to be safe/);
+    expect(text('pmid-37581900')).toMatch(/linked to fewer clinical and ongoing pregnancies/);
+  });
+
+  it('"as effective" where the abstract found no clear difference', () => {
+    expect(text('pmid-28205208')).not.toMatch(/about as effective as breastfeeding/);
+    expect(byId.get('pmid-29909264')!.summary).toMatch(/no clear difference/);
+  });
+
+  it('certainty labels the abstracts never gave are "not stated"', () => {
+    for (const id of ['pmid-37881498', 'pmid-37922258', 'pmid-29286987', 'pmid-40639456', 'pmid-37708365', 'pmid-33608901', 'pmid-32200197', 'pmid-34755503', 'pmid-27244847']) expect(byId.get(id)!.certainty).toBe('not stated');
+  });
+});

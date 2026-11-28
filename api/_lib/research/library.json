@@ -4011,7 +4011,7 @@
     "Across 591 women, bariatric surgery was not linked to a significant overall change in AMH levels.",
     "Results differed widely between studies, so the average hides a lot of variation.",
     "AMH fell in some subgroups, such as women with higher starting AMH, and rose in the fertile subgroup.",
-    "Changes in AMH should be seen as shifting hormone levels, not direct evidence of altered egg reserve or fertility, as few studies reported reproductive outcomes."
+    "The authors say changes in AMH should be seen as shifting hormone levels, not direct evidence of altered egg reserve or fertility, as few studies reported reproductive outcomes."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -4856,7 +4856,7 @@
     "The fall in AMH was greater after cyst removal (cystectomy) than after vaporization with bipolar energy or laser.",
     "Using bipolar energy to control bleeding lowered AMH more than stitches or hemostatic agents."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "ivf",
@@ -7705,8 +7705,8 @@
    "summary": "This is a practice guideline from the Polish Psychiatric Association on caring for women after pregnancy loss or unsuccessful IVF treatment. Pregnancy loss and the death of a baby around birth are described as among the most stressful life events, and they raise the risk of depression, anxiety and post-traumatic stress. Repeated IVF failures can cause similar emotional effects. The guideline sets out how health staff should support women, and gives basic advice on talking therapy and medicines.",
    "keyPoints": [
     "Pregnancy loss and perinatal death carry an increased risk of depression, anxiety and post-traumatic stress disorders.",
-    "Care should be individual and based on respect, empathy and expertise.",
-    "Recommended support includes full information from the doctor about the woman's health, possible causes and next steps, access to a psychological consultation at any time, and clear information on legal rights such as health insurance and labour law.",
+    "The guideline says care should be individual and based on respect, empathy and expertise.",
+    "The guideline's recommended support includes full information from the doctor about the woman's health, possible causes and next steps, access to a psychological consultation at any time, and clear information on legal rights such as health insurance and labour law.",
     "Repeated IVF failures can bring emotional effects like those after miscarriage, and prolonged frustration may lead to depressive symptoms and more anxiety."
    ],
    "certainty": "not stated",
@@ -10315,12 +10315,12 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/27244847/",
    "summary": "This review pooled data from 4 observational studies to look at whether swaddling a baby for sleep is linked to sudden infant death syndrome (SIDS). Across all four studies the link was not clear-cut, but removing one study gave a small increased risk. The risk was much higher when swaddled babies were placed on their front or side, and possibly higher in babies older than 6 months. The authors note the evidence is limited and hard to interpret.",
    "keyPoints": [
-    "Advice to avoid front or side sleeping applies especially to swaddled babies.",
+    "The authors say advice to avoid front or side sleeping applies especially to swaddled babies.",
     "Swaddled babies placed on their front had the highest risk, followed by side sleeping, then back sleeping.",
     "Limited evidence suggested the risk rises with age, with about twice the risk in swaddled babies over 6 months old.",
     "The authors suggest considering an age after which swaddling should be discouraged."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "postpartum"
    ],
@@ -15690,7 +15690,7 @@
    "keyPoints": [
     "Skin-to-skin care appeared to reduce pain in newborns during a single painful procedure, based on combined pain scores, heart rate and crying time.",
     "Babies cried for a shorter time with skin-to-skin care after heel pricks and injections.",
-    "Skin-to-skin care alone worked better than glucose alone in two studies, and was about as effective as breastfeeding or expressed breast milk where compared.",
+    "Skin-to-skin care alone worked better than glucose alone in two studies, and showed no clear difference from breastfeeding or expressed breast milk where compared.",
     "No adverse events were reported, and the authors judged it safe for a single painful procedure."
    ],
    "certainty": "not stated",
@@ -15793,7 +15793,7 @@
     "Valproate was the only medicine linked to more cognitive developmental delay compared with no medicine (OR 7.40).",
     "Valproate was also linked to more psychomotor delay, as was a combination of carbamazepine, phenobarbital and valproate.",
     "Oxcarbazepine, valproate, lamotrigine and lamotrigine plus valproate were linked to higher odds of autism, with wide uncertainty ranges.",
-    "Counselling is advised for women considering pregnancy to tailor the safest regimen."
+    "The authors advise counselling for women considering pregnancy to tailor the safest regimen."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -16508,7 +16508,7 @@
     "A database of unplanned pregnancies on SGLT2 inhibitors found more miscarriages and birth defects.",
     "The authors broadly support stopping both medicine types during pregnancy and breastfeeding, and note that human data are scarce."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "pregnancy",
@@ -17281,9 +17281,9 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/40335352/",
    "summary": "This is an updated set of recommendations from the Enhanced Recovery After Surgery Society on what care to offer during a caesarean birth, to help recovery and improve outcomes for mothers and babies. The authors reviewed recent trials and large studies, then agreed on ten areas of care. All ten came with a strong recommendation, though the strength of the evidence behind them ranges from very low to high.",
    "keyPoints": [
-    "Having a support person present is recommended, although the evidence for this is very low quality.",
-    "Antibiotics given to prevent infection, keeping the mother warm, careful use of medicines that help the womb contract, and early skin-to-skin contact with the baby are recommended, backed by moderate to high quality evidence.",
-    "Preventing nausea and low blood pressure after a spinal, keeping fluid levels balanced, and using several types of pain relief together are also recommended, based on low quality evidence.",
+    "Having a support person present is recommended by the guideline, although the evidence for this is very low quality.",
+    "Antibiotics given to prevent infection, keeping the mother warm, careful use of medicines that help the womb contract, and early skin-to-skin contact with the baby are recommended by the guideline, backed by moderate to high quality evidence.",
+    "Preventing nausea and low blood pressure after a spinal, keeping fluid levels balanced, and using several types of pain relief together are also recommended by the guideline, based on low quality evidence.",
     "The guideline says these steps should be considered for people having a caesarean unless there is a reason they are not suitable."
    ],
    "certainty": "moderate",
@@ -24136,7 +24136,7 @@
     "Starting most hormonal contraception right away did not reduce how well a first-trimester medical abortion worked.",
     "One fair-quality study found ongoing pregnancy in 3.6% with immediate DMPA injection versus 0.9% with delayed DMPA.",
     "No bleeding-related safety concerns were found when hormonal contraception was started after medical or surgical abortion.",
-    "Starting a hormonal method as early as the day of the first abortion pill is an option for those who want contraception."
+    "Starting a hormonal method as early as the day of the first abortion pill is an option for those who want contraception, according to the authors."
    ],
    "certainty": "low",
    "lifeStages": [
@@ -31085,10 +31085,10 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/29794673/",
-   "summary": "This ACOG committee opinion looks at aromatase inhibitors, medicines that lower estrogen, and how they are used in gynecologic care. For women with polycystic ovary syndrome (PCOS) and a body mass index above 30, letrozole (an aromatase inhibitor) should be considered the first choice to trigger ovulation, because it led to more live births than clomiphene citrate. The opinion also notes these medicines may help endometriosis pain when combined with progestins, and that women with breast cancer on long-term treatment should have bone density checked.",
+   "summary": "This ACOG committee opinion looks at aromatase inhibitors, medicines that lower estrogen, and how they are used in gynecologic care. For women with polycystic ovary syndrome (PCOS) and a body mass index above 30, the opinion says letrozole (an aromatase inhibitor) should be considered the first choice to trigger ovulation, because it led to more live births than clomiphene citrate. The opinion also notes these medicines may help endometriosis pain when combined with progestins, and that women with breast cancer on long-term treatment should have bone density checked.",
    "keyPoints": [
-    "For women with PCOS and a BMI over 30, letrozole should be considered first-line treatment for ovulation induction because it gives a higher live birth rate than clomiphene citrate.",
-    "Lifestyle changes that lead to weight loss should be strongly encouraged for women with PCOS.",
+    "For women with PCOS and a BMI over 30, ACOG says letrozole should be considered first-line treatment for ovulation induction because it gives a higher live birth rate than clomiphene citrate.",
+    "ACOG says lifestyle changes that lead to weight loss should be strongly encouraged for women with PCOS.",
     "Aromatase inhibitors are a promising option for endometriosis-related pain when used together with progestins.",
     "Compared with tamoxifen in breast cancer care, aromatase inhibitors are linked to fewer blood clots, endometrial cancers and vaginal bleeding, but long-term use needs bone density screening."
    ],
@@ -31627,7 +31627,7 @@
     "Pelvic floor muscle training in pregnancy lowered the risk of urinary incontinence (relative risk 0.72).",
     "It also lowered the risk of third- or fourth-degree perineal tears (relative risk 0.50).",
     "It made no clear difference to the chance of having an episiotomy.",
-    "The training worked whether done on its own or as part of a general exercise program."
+    "The analyses included training done on its own or as part of a general exercise program."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -34616,7 +34616,7 @@
     "There is insufficient evidence for a link between folic acid supplementation and tongue-tie.",
     "The authors say the benefits of folic acid currently far outweigh the risks."
    ],
-   "certainty": "very low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "pregnancy"
@@ -36484,8 +36484,8 @@
    "keyPoints": [
     "Toxoplasmosis in pregnancy can pass to the baby, which is called congenital toxoplasmosis.",
     "Congenital toxoplasmosis is rare but can cause severe brain or eye disease, including blindness, and heart and brain anomalies.",
-    "Prenatal care should include education about preventing toxoplasmosis.",
-    "Routine screening is not currently recommended because the disease is uncommon in Canada and diagnosis and treatment have limitations."
+    "The guideline says prenatal care should include education about preventing toxoplasmosis.",
+    "The guideline does not currently recommend routine screening, because the disease is uncommon in Canada and diagnosis and treatment have limitations."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -37676,7 +37676,7 @@
     "Effect on sexual function is uncertain because most studies had no placebo and did not account for baseline differences.",
     "Safety is uncertain because few women were studied, studies were short, and hormone-level reporting was incomplete."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menopause",
     "post-menopause"
@@ -40285,7 +40285,7 @@
    "summary": "This review pooled 12 randomized trials (482 women) to see whether strength (resistance) training helps menopausal and postmenopausal women. Women who did resistance training had lower levels of C-reactive protein, a blood marker of inflammation, and better cholesterol (lipid) results than women in control groups. Waist size did not seem to change much. The evidence was rated very low quality, so the authors have little confidence in the results and say the true effect may be quite different.",
    "keyPoints": [
     "Resistance training was linked to lower C-reactive protein (an inflammation marker) in postmenopausal women compared with controls.",
-    "Cholesterol (lipid) results also improved in the short to long term.",
+    "Cholesterol (lipid) results also appeared to improve, on very low-certainty evidence, in the short to long term.",
     "Resistance training may have little to no effect on waist circumference.",
     "Safety data were scarce, and the authors call for better-designed trials."
    ],
@@ -43116,7 +43116,7 @@
     "Probiotics may improve how well and how safely estriol and isoflavones work.",
     "The included studies had a high risk of bias, so the findings are promising but need confirming."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menopause",
     "post-menopause"
@@ -47810,8 +47810,8 @@
    "keyPoints": [
     "Sudden, severe high blood pressure can occur during pregnancy and in the weeks after birth.",
     "Standard, evidence-based care plans for preeclampsia and eclampsia have been shown to reduce serious problems for mothers.",
-    "Care teams and hospitals should have systems ready to give medication promptly in a hypertensive emergency.",
-    "After the emergency is treated, mother and baby should be fully assessed, including whether more medication is needed and when to deliver."
+    "The committee says care teams and hospitals should have systems ready to give medication promptly in a hypertensive emergency.",
+    "The committee says that after the emergency is treated, mother and baby should be fully assessed, including whether more medication is needed and when to deliver."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -47906,10 +47906,10 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/30575639/",
-   "summary": "This ACOG committee opinion covers urgent treatment of suddenly very high blood pressure during pregnancy or after birth. Women with acute-onset severe high blood pressure need urgent treatment, ideally within 30-60 minutes of it being confirmed, to lower the risk of stroke. Intravenous labetalol and hydralazine are first-line medicines, and immediate-release oral nifedipine may also be used first-line, especially without intravenous access. Standard hospital protocols for pre-eclampsia have been shown to reduce serious complications for mothers.",
+   "summary": "This ACOG committee opinion covers urgent treatment of suddenly very high blood pressure during pregnancy or after birth. The committee says women with acute-onset severe high blood pressure need urgent treatment, ideally within 30-60 minutes of it being confirmed, to lower the risk of stroke. Intravenous labetalol and hydralazine are first-line medicines, and immediate-release oral nifedipine may also be used first-line, especially without intravenous access. Standard hospital protocols for pre-eclampsia have been shown to reduce serious complications for mothers.",
    "keyPoints": [
-    "Acute-onset severe hypertension in pregnancy or after birth needs urgent treatment.",
-    "Treatment should start as soon as possible, within 30-60 minutes of confirmed severe hypertension, to reduce the risk of maternal stroke.",
+    "ACOG says acute-onset severe hypertension in pregnancy or after birth needs urgent treatment.",
+    "ACOG says treatment should start as soon as possible, within 30-60 minutes of confirmed severe hypertension, to reduce the risk of maternal stroke.",
     "Intravenous labetalol and hydralazine are first-line; immediate-release oral nifedipine may also be first-line.",
     "Standardised protocols for pre-eclampsia and eclampsia reduce adverse maternal outcomes."
    ],
@@ -50313,7 +50313,7 @@
     "Breastfeeding promotion increased early and exclusive breastfeeding at 3 and 6 months in lower-income settings.",
     "Breast milk fortification and nutrient-enriched formula improved growth; formula milk raised the risk of necrotizing enterocolitis overall and neonatal death in low- and lower-middle-income settings.",
     "Iron supplements reduced anemia and vitamin A reduced deaths (in lower-middle-income countries), with little to no harm seen from zinc, calcium/phosphorus or vitamin D supplements.",
-    "When breast milk is not available, fortified feeds or nutrient-enriched formula can support better growth."
+    "The authors say that when breast milk is not available, fortified feeds or nutrient-enriched formula can support better growth."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -52055,7 +52055,7 @@
    "summary": "This review looked at whether skin medications taken as tablets or injections by men can affect their fertility or cause birth defects in a pregnancy. It checked 13 medications that were once flagged as risky in pregnancy. Studies on a man's use were found for 10 of them, and 6 showed a negative effect. The authors say better-quality research is needed, especially on possible birth defects.",
    "keyPoints": [
     "13 systemic skin medications were reviewed; studies on fathers' use existed for 10 of them.",
-    "Evidence of a negative effect on male fertility was found for 6 medications.",
+    "Evidence of a negative effect (on fertility or pregnancy outcomes) was found for 6 medications.",
     "Many medications once rated as risky in pregnancy also seem to affect male fertility.",
     "More and better studies are needed, particularly on whether a father's use could cause birth defects."
    ],
@@ -57276,10 +57276,10 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/34242822/",
    "summary": "This Canadian committee opinion gives guidance to health care providers on how to talk about birth control without pressure or coercion. It says people should be supported to choose the method that suits them, including the right to decline contraception, use a less effective method, or stop a method at any time. The aim is better patient autonomy and a better experience in health care settings, especially for people who may be more vulnerable to feeling pressured.",
    "keyPoints": [
-    "Contraception counselling should respect a person's beliefs, culture, preferences and ability to use the method they choose.",
+    "The committee says contraception counselling should respect a person's beliefs, culture, preferences and ability to use the method they choose.",
     "People have the right to access the contraceptive method they want, to decline contraception or use less effective methods, and to stop a method freely.",
     "People have the right to unbiased, non-coercive counselling and evidence-based information from their provider.",
-    "Following these recommendations should reduce real or perceived coercive care, particularly among vulnerable populations."
+    "The committee expects that following these recommendations would reduce real or perceived coercive care, particularly among vulnerable populations."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -59179,9 +59179,9 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/29909264/",
-   "summary": "This review pooled 12 studies (1,302 women) comparing two fertility tablets, tamoxifen and clomiphene citrate, for women who do not ovulate. Overall, the two drugs did not differ in ovulation or pregnancy rates, and the best-designed trials (RCTs) also found no difference. Some other study types hinted that tamoxifen might work better, but the authors say the true effect still needs to be confirmed.",
+   "summary": "This review pooled 12 studies (1,302 women) comparing two fertility tablets, tamoxifen and clomiphene citrate, for women who do not ovulate. Overall, there was no clear difference between the two drugs in ovulation or pregnancy rates, and the best-designed trials (RCTs) also found no difference. Some other study types hinted that tamoxifen might work better, but the authors say the true effect still needs to be confirmed.",
    "keyPoints": [
-    "Across all studies, tamoxifen and clomiphene citrate gave similar ovulation and pregnancy rates.",
+    "Across all studies, tamoxifen and clomiphene citrate showed no clear difference in ovulation and pregnancy rates.",
     "In case-control studies only, tamoxifen was linked to higher ovulation and pregnancy rates, but this was not seen in randomised trials.",
     "No clear differences were found in womb lining thickness or miscarriage rate.",
     "The authors say the exact effectiveness of tamoxifen versus clomiphene needs further confirmation."
@@ -60112,7 +60112,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/37581900/",
-   "summary": "This review looked at whether a blastocyst (a 5-6 day old embryo) that spontaneously shrinks and re-expands, called collapse, is linked to IVF outcomes. Collapse is seen with time-lapse cameras in the lab. Pooling seven studies, collapsed blastocysts were less likely to be chromosomally normal and led to fewer clinical and ongoing pregnancies. Live birth and miscarriage rates did not clearly differ, and all the studies were retrospective with varying results, so the findings should be read with caution.",
+   "summary": "This review looked at whether a blastocyst (a 5-6 day old embryo) that spontaneously shrinks and re-expands, called collapse, is linked to IVF outcomes. Collapse is seen with time-lapse cameras in the lab. Pooling seven studies, collapsed blastocysts were less likely to be chromosomally normal and were linked to fewer clinical and ongoing pregnancies. Live birth and miscarriage rates did not clearly differ, and all the studies were retrospective with varying results, so the findings should be read with caution.",
    "keyPoints": [
     "About 37% of blastocysts in the seven studies showed spontaneous collapse.",
     "Collapse was linked to lower clinical pregnancy and ongoing pregnancy rates and to fewer chromosomally normal (euploid) embryos.",
@@ -64468,7 +64468,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34075656/",
-   "summary": "This review pooled results from 43 studies of nine non-drug ways to ease pain in labour. Acupressure, aromatherapy and massage lowered labour pain scores compared with usual care or placebo, with aromatherapy ranking highest. Yoga and acupressure were linked to shorter labour stages, and the methods did not change newborn Apgar scores or the use of pain medicines. The authors say these methods look effective and safe for low-risk pregnant women, but better-designed studies are still needed to confirm this.",
+   "summary": "This review pooled results from 43 studies of nine non-drug ways to ease pain in labour. Acupressure, aromatherapy and massage lowered labour pain scores compared with usual care or placebo, with aromatherapy ranking highest. Yoga and acupressure were linked to shorter labour stages, and there was no clear difference in newborn Apgar scores or the use of pain medicines. The authors say these methods look effective and safe for low-risk pregnant women, but better-designed studies are still needed to confirm this.",
    "keyPoints": [
     "Acupressure, aromatherapy and massage significantly reduced labour pain, with aromatherapy ranking as the most effective.",
     "Yoga was linked to a shorter first stage of labour and acupressure to a shorter second stage.",
@@ -64934,7 +64934,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/29589380/",
    "summary": "This Cochrane review looked at 14 trials of hands-on methods such as massage and warm packs for easing pain during labour. Massage appeared to lower pain during the first stage of labour compared with usual care, and warm or thermal packs may also help with pain and labour length. However, the quality of the evidence was low to very low, and few trials looked at safety, so the results are uncertain.",
    "keyPoints": [
-    "Massage reduced self-reported pain in the first stage of labour compared with usual care (low-quality evidence from six trials).",
+    "Massage may have reduced self-reported pain in the first stage of labour compared with usual care (low-quality evidence from six trials).",
     "Massage showed no clear difference in labour length, use of pain medicine, assisted vaginal birth or caesarean section (very low-quality evidence).",
     "Single trials found massage gave women a greater sense of control and less anxiety, and two trials found more satisfaction with birth.",
     "Warm packs and thermal methods may reduce pain and shorten labour, but the evidence was very low quality; no trials of reflexology were found."
@@ -66569,7 +66569,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/38961556/",
    "summary": "This review pooled 66 randomised trials (over 16,000 participants) of extra treatments added to standard intrauterine insemination (IUI). Using vaginal progesterone after insemination in cycles with fertility medication appeared to improve the chance of an ongoing pregnancy or live birth. Endometrial scratch and ovarian stimulation in the first half of the cycle also showed possible benefit, but the evidence for these is weaker. Most other add-ons made no clear difference, and the authors say more research is needed.",
    "keyPoints": [
-    "Vaginal progesterone for luteal phase support in stimulated IUI cycles significantly increased ongoing pregnancy or live birth (RR 1.37), with moderate to low certainty.",
+    "Vaginal progesterone for luteal phase support in stimulated IUI cycles probably increased ongoing pregnancy or live birth (RR 1.37), with moderate to low certainty.",
     "Endometrial scratch may increase pregnancy or live birth (RR 1.44), but the evidence is very uncertain.",
     "Ovarian stimulation in the follicular phase (two studies) may increase success (RR 1.39), with low certainty.",
     "The other add-ons studied showed no significant difference in the main outcomes."
@@ -67080,7 +67080,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/31200970/",
-   "summary": "This review pooled results from 82 studies covering 26,726 women having fresh IVF cycles. It looked at whether giving progesterone-type medicine (progestogen) after egg collection improves pregnancy rates, and how best to give it. Progestogen supplements clearly raised clinical pregnancy rates compared with no treatment, whichever way they were given. Adding estrogen did not help, and carrying on beyond about 3 weeks made no difference.",
+   "summary": "This review pooled results from 82 studies covering 26,726 women having fresh IVF cycles. It looked at whether giving progesterone-type medicine (progestogen) after egg collection improves pregnancy rates, and how best to give it. In this meta-analysis, progestogen supplements raised clinical pregnancy rates compared with no treatment, whichever way they were given. Adding estrogen did not help, and carrying on beyond about 3 weeks made no difference.",
    "keyPoints": [
     "Progestogen supplements (injection into muscle, vaginal, under the skin or oral) all increased clinical pregnancy rates compared with no treatment.",
     "Injections into the muscle gave the highest pregnancy rates, about 1.4 times the odds of vaginal use.",
@@ -69586,7 +69586,7 @@
     "The studies were very different from each other and had few direct comparisons between treatments.",
     "The authors conclude that no safe conclusions can be made about the best treatment for these women."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "pregnancy",
     "postpartum"
@@ -82646,7 +82646,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/40327246/",
-   "summary": "This review pulled together four studies of 813 women having IVF to compare oral GnRH antagonist pills with the usual injected version. These medicines stop the body from releasing eggs too early during ovarian stimulation. The pills and injections gave similar results for cycle cancellation, number of eggs retrieved, fertilization and blastocyst rates. The quality of the evidence was moderate, and the authors say more research is needed to confirm how well the pills work and how safe they are.",
+   "summary": "This review pulled together four studies of 813 women having IVF to compare oral GnRH antagonist pills with the usual injected version. These medicines stop the body from releasing eggs too early during ovarian stimulation. No clear differences were found between pills and injections for cycle cancellation, number of eggs retrieved, fertilization and blastocyst rates. The quality of the evidence was moderate, and the authors say more research is needed to confirm how well the pills work and how safe they are.",
    "keyPoints": [
     "No clear differences were found between oral and injected GnRH antagonists in cycle cancellation, eggs retrieved, fertilization or blastulation rates.",
     "The review included four studies with 813 women in total.",
@@ -94886,10 +94886,10 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/30229557/",
-   "summary": "This Cochrane review looked at 23 trials with 1372 people who had had breast, prostate, colorectal or lung cancer and were not very active. It asked which approaches help people start and keep up regular exercise. Programmes that used goal setting, step-by-step increases in activity and instruction on how to exercise did best at helping people stick to guideline-level exercise, and they all included some supervision. Exercise programmes improved aerobic fitness at 8 to 12 weeks and at 6 months, but the evidence was low quality, and most studies were in white women with breast cancer.",
+   "summary": "This Cochrane review looked at 23 trials with 1372 people who had had breast, prostate, colorectal or lung cancer and were not very active. It asked which approaches help people start and keep up regular exercise. Goal setting, step-by-step increases in activity and instruction on how to exercise were common in programmes where most people stuck to guideline-level exercise, and those programmes all included some supervision. Exercise programmes may have improved aerobic fitness at 8 to 12 weeks and at 6 months, but the evidence was low quality, and most studies were in white women with breast cancer.",
    "keyPoints": [
     "Programmes that set goals, built up activity in graded steps and taught how to exercise were most common among those where 75% or more of people stuck to guideline-level exercise.",
-    "Exercise programmes improved aerobic fitness at 8 to 12 weeks and at 6 months compared with usual care (low-quality evidence).",
+    "Exercise programmes may have improved aerobic fitness at 8 to 12 weeks and at 6 months compared with usual care (low-quality evidence).",
     "Very few serious adverse effects were reported, which the authors say is reassuring that exercise is safe for people with cancer.",
     "Long-term follow-up data are limited, and many studies had a high risk of bias or poor reporting."
    ],
@@ -99864,7 +99864,7 @@
     "Limited evidence suggests teenagers may prefer implants over intrauterine devices, and may face more barriers to post-abortion fitting than adults.",
     "Almost no evidence was found on teenagers' decisions about fitting straight after an abortion."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "postpartum",
     "contraception"
@@ -100012,9 +100012,9 @@
     "Behavior-change-based programs led more women to start effective contraception than written information alone.",
     "Results were stronger when programs offered on-site contraceptive counseling and free birth control.",
     "Financial incentives also seemed to increase contraception use.",
-    "Programs for pregnant and postpartum women with heavy substance use helped women start contraception, but unplanned pregnancy rates stayed high over long follow-up."
+    "Programs for pregnant and postpartum women with heavy substance use showed promising results for helping women start contraception, but unplanned pregnancy rates stayed high over long follow-up."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "pregnancy",
     "postpartum",
@@ -101818,7 +101818,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34581730/",
-   "summary": "This review pulled together 23 randomised trials (nearly 27,000 people) on taking daily low-dose aspirin during pregnancy. For people at increased risk of preeclampsia, aspirin was linked to a lower chance of preeclampsia, preterm birth, poor growth of the baby in the womb, and death of the baby around the time of birth. It did not raise the risk of heavy bleeding after birth (postpartum hemorrhage) or other bleeding problems, and no harms were seen for babies.",
+   "summary": "This review pulled together 23 randomised trials (nearly 27,000 people) on taking daily low-dose aspirin during pregnancy. For people at increased risk of preeclampsia, aspirin was linked to a lower chance of preeclampsia, preterm birth, poor growth of the baby in the womb, and death of the baby around the time of birth. It was not linked to a higher risk of heavy bleeding after birth (postpartum hemorrhage) or other bleeding problems, and no harms were seen for babies.",
    "keyPoints": [
     "Low-dose aspirin was linked to a lower risk of preeclampsia (about 15% lower) in people at increased risk.",
     "It was also linked to lower risks of preterm birth, poor fetal growth and perinatal death.",
@@ -108801,11 +108801,11 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34564844/",
-   "summary": "This large review pulled together 75 earlier reviews on ways to prevent or treat anaemia (low haemoglobin, often from low iron) at every age. Daily iron supplements may raise haemoglobin and lower the risk of anaemia and iron deficiency anaemia in babies, children, and pregnant and non-pregnant women. Iron-fortified foods also helped in several groups. Very few reviews looked at improving diet variety and quality, and the quality of evidence ranged from high to very low.",
+   "summary": "This large review pulled together 75 earlier reviews on ways to prevent or treat anaemia (low haemoglobin, often from low iron) at every age. Daily iron supplements may raise haemoglobin and lower the risk of anaemia and iron deficiency anaemia in babies, children, and pregnant and non-pregnant women. Iron-fortified foods also appeared to help in several groups. Very few reviews looked at improving diet variety and quality, and the quality of evidence ranged from high to very low.",
    "keyPoints": [
     "Daily iron supplements may raise haemoglobin and reduce anaemia and iron deficiency anaemia in infants, children, and pregnant and non-pregnant women.",
-    "In pregnancy, daily iron (with or without folic acid) raised haemoglobin and cut the risk of anaemia, while intermittent iron raised the risk of anaemia near term but caused fewer side effects.",
-    "Adding iron to foods such as flour, rice, salt and soy sauce raised haemoglobin and lowered anaemia risk in several reviews.",
+    "In pregnancy, one review suggested daily iron (with or without folic acid) raised haemoglobin and cut the risk of anaemia, while intermittent iron raised the risk of anaemia near term but caused fewer side effects.",
+    "Adding iron to foods such as flour, rice, salt and soy sauce appeared to raise haemoglobin and lower anaemia risk in several reviews.",
     "Few reviews tested diet-based approaches, and none looked at women aged 50 and over or at fortification or diet changes in non-pregnant women of reproductive age."
    ],
    "certainty": "low",
@@ -113343,7 +113343,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/33035720/",
-   "summary": "This review pooled 12 randomised trials with 2,298 women who had repeated pregnancy losses. It compared low molecular weight heparin (a blood-thinning injection) with no heparin. In women without an inherited clotting disorder, heparin made no clear difference to the chance of a live birth. In women with an inherited clotting disorder the result was also not clear, and the trials differed a lot, though heparin may help in some specific types.",
+   "summary": "This review pooled 12 randomised trials with 2,298 women who had repeated pregnancy losses. It compared low molecular weight heparin (a blood-thinning injection) with no heparin. In women without an inherited clotting disorder, heparin made no clear difference to the chance of a live birth. In women with an inherited clotting disorder the result was also not clear, and the trials differed a lot, though the authors suggest heparin may help in some specific types.",
    "keyPoints": [
     "Heparin injections did not clearly improve live birth rates in women with recurrent pregnancy loss.",
     "In women without an inherited clotting disorder, there was no benefit, and the studies agreed fairly well.",
@@ -115281,7 +115281,7 @@
     "For adults with chronic insomnia, the guideline suggests CBT-I plus insomnia medication over medication alone (conditional recommendation, low certainty).",
     "The guideline suggests against using CBT-I plus medication over CBT-I alone (conditional recommendation, low certainty).",
     "People who care most about sleeping longer early in treatment, or who care less about daytime symptoms, may reasonably choose combination treatment instead of CBT-I alone.",
-    "Conditional recommendations mean the choice should take a person's own values and preferences into account."
+    "The guideline says conditional recommendations mean the choice should take a person's own values and preferences into account."
    ],
    "certainty": "low",
    "lifeStages": [
@@ -119082,9 +119082,9 @@
    "summary": "This is an updated set of European expert guidelines on congenital hypothyroidism, a condition where a baby is born with an underactive thyroid. The experts reviewed the research on newborn screening, diagnosis and treatment. They recommend starting the right dose of levothyroxine (thyroid hormone medicine) straight away once the condition is found, with regular follow-up checks.",
    "keyPoints": [
     "Newborn screening helps find congenital hypothyroidism early, and the guidelines support its benefits.",
-    "Once diagnosed, treatment with correctly dosed levothyroxine should start immediately.",
+    "Once the condition is diagnosed, the expert panel recommends starting correctly dosed levothyroxine immediately.",
     "Frequent follow-up and blood tests keep thyroid hormone levels in the target range, with attention to brain development and senses such as hearing and vision.",
-    "People with the condition should have a well-planned move from children's to adult care."
+    "The guidelines say people with the condition are entitled to a well-planned move from children's to adult care."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -122491,10 +122491,10 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/26001875/",
    "summary": "This Canadian guideline looks at how to manage uterine fibroids (non-cancerous growths in the womb) in women whose infertility has no other clear cause. It says that fibroids growing into the womb cavity (submucosal) should be removed to improve the chances of pregnancy. Fibroids on the outside of the womb (subserosal) do not appear to affect fertility, and removing fibroids within the womb wall (intramural) is generally not recommended when the womb lining is intact. Uterine artery embolization is generally not advised for women who want to become pregnant.",
    "keyPoints": [
-    "Submucosal fibroids (those pressing into the womb cavity) should be removed in women with otherwise unexplained infertility to improve conception and pregnancy rates.",
+    "The guideline says submucosal fibroids (those pressing into the womb cavity) should be removed in women with otherwise unexplained infertility to improve conception and pregnancy rates.",
     "Subserosal fibroids do not appear to affect fertility, and removing them is not recommended.",
     "Surgery to remove intramural fibroids is generally not recommended when the womb lining is intact, though care can be individualised if there are no other options.",
-    "Uterine artery embolization is linked with lower pregnancy rates, more miscarriages and loss of ovarian reserve, so it is generally not offered to women seeking pregnancy."
+    "Uterine artery embolization is linked with lower pregnancy rates, more miscarriages and loss of ovarian reserve, so the guideline says it should generally not be offered to women seeking pregnancy."
    ],
    "certainty": "low",
    "lifeStages": [
@@ -128164,7 +128164,7 @@
     "Trial evidence supports a protective effect of combined vitamin D and calcium supplements against preeclampsia.",
     "Evidence leans towards a higher risk of high blood pressure disorders in pregnancy when vitamin D blood levels are below 50 nmol/L.",
     "Observational studies give mixed results because of differences in study design, definitions and how vitamin D was measured and reported.",
-    "Caution is advised with vitamin D dosing in trials because long-term safety data are lacking."
+    "The authors advise caution with vitamin D dosing in trials because long-term safety data are lacking."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -128461,12 +128461,12 @@
    ],
    "evidenceLevel": "guideline",
    "url": "https://pubmed.ncbi.nlm.nih.gov/40228835/",
-   "summary": "This Canadian guideline gives advice on how to support children living with obesity, using the best available research and the views of families and health care providers. It recommends that care start with a full assessment of the child and family. Lifestyle and psychological support that combines several approaches should be the foundation, and medicines or surgery may be considered as options in some cases. The certainty of the evidence ranged from very low to moderate.",
+   "summary": "This Canadian guideline gives advice on how to support children living with obesity, using the best available research and the views of families and health care providers. It recommends that care start with a full assessment of the child and family. It says lifestyle and psychological support that combines several approaches should be the foundation, and medicines or surgery may be considered as options in some cases. The certainty of the evidence ranged from very low to moderate.",
    "keyPoints": [
-    "Care should begin with a comprehensive assessment of the child and family.",
-    "Multicomponent behavioural and psychological programs should form the foundation of care (strong recommendation, very low to moderate certainty).",
+    "The guideline says care should begin with a comprehensive assessment of the child and family.",
+    "The guideline says multicomponent behavioural and psychological programs should form the foundation of care (strong recommendation, very low to moderate certainty).",
     "Medicines and surgery can be considered as options (conditional recommendation, low to moderate certainty), depending on availability, feasibility and acceptability.",
-    "Decisions should be shared between the child, family and health care providers, based on benefits, harms and family values and preferences."
+    "The guideline says decisions should be shared between the child, family and health care providers, based on benefits, harms and family values and preferences."
    ],
    "certainty": "low",
    "lifeStages": [
@@ -129327,12 +129327,12 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/38593643/",
-   "summary": "This review pooled 11 randomized trials of programs designed to help pregnant women be more active, using methods based on health behavior theories such as goal setting and action planning. The programs modestly increased moderate-to-vigorous physical activity, slightly reduced weekly weight gain, and lowered the chance of gestational diabetes. Effects on total weight gain over the whole pregnancy, high blood pressure in pregnancy and preterm birth were unclear. The programs appeared to be safe.",
+   "summary": "This review pooled 11 randomized trials of programs designed to help pregnant women be more active, using methods based on health behavior theories such as goal setting and action planning. The programs modestly increased moderate-to-vigorous physical activity, slightly reduced weekly weight gain, and lowered the chance of gestational diabetes. Effects on total weight gain over the whole pregnancy, high blood pressure in pregnancy and preterm birth were unclear. The authors say the programs appear to be safe.",
    "keyPoints": [
     "Theory-based activity programs modestly increased moderate-to-vigorous physical activity (moderate certainty evidence).",
     "Average weight gain per week of pregnancy was slightly lower, by about 0.06 kg per week (moderate certainty evidence).",
     "Gestational diabetes was less common, with a risk ratio of 0.64 (high certainty evidence).",
-    "Effects on total weight gain, gestational high blood pressure and preterm delivery were unclear, and the programs appeared safe."
+    "Effects on total weight gain, gestational high blood pressure and preterm delivery were unclear, and the authors say the programs appear safe."
    ],
    "certainty": "moderate",
    "lifeStages": [

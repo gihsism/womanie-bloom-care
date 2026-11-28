@@ -30,17 +30,18 @@ thyroid, screening tests, infections).
 
 ## How much has been checked
 
-Over 14 rounds of review, **1,722 source summaries** were read side by side
+Over 15 rounds of review, **1,872 source summaries** were read side by side
 with the original research abstract. Rounds 1-13 started with the sources
 users are most likely to see (the order came from running several hundred
 everyday questions through the app and counting which sources came up
 most). Round 14 picked the riskiest of the rest: summaries that give doses
 or numbers, call something "safe", say what women "should" do, or talk
-about medicines in pregnancy or breastfeeding.
+about medicines in pregnancy or breastfeeding. Round 15 took the next 150,
+which had one of those risk words.
 
 - About 5 in 6 summaries were fine as written.
-- **450 corrections** were made in total (153 of them in round 14, in 70
-  of the 150 risky summaries checked).
+- **514 corrections** were made in total (153 of them in round 14, in 70
+  of the 150 risky summaries checked; 64 in round 15, in 41 of 150).
 - Almost every source that comes up for the questions we tested has now
   been checked once.
 
@@ -129,10 +130,14 @@ them, and these come up first in the chat:
 - **Ten higher-priority gaps** from the first audit, such as painkillers
   while breastfeeding, how long it usually takes to get pregnant, and IVF
   success rates by age (the list is at the top of `docs/research-gaps.md`).
-- **About 830 summaries have never been checked.** They did not come up
-  for any of the questions we tested, and they are the lower-risk ones:
-  about 290 have one risk word (such as a dose or "should"), about 500
-  only a plain number, about 50 none. The next step is the 290.
+- **About 680 summaries have never been checked.** They did not come up
+  for any of the questions we tested, and they are the lower-risk ones.
+  Round 15 checked 150 more against their abstracts (64 fixes in 41
+  summaries: overstated results toned down, "as effective" changed to "no
+  clear difference", nine certainty labels set to "not stated", and advice
+  credited to the guideline that gave it). Still open: about 135 with one
+  risk word (such as "should" alone), about 500 with only a plain number,
+  about 50 none. The next step is the 135.
 - **A few labels are judgement calls** (for example a review that grades
   its findings from "moderate" to "low" and carries one label). These were
   left as they are and are listed in the detailed file.

@@ -1283,6 +1283,54 @@ prolactin, ovulation pain, lubricants and sperm, the pill and cervical
 cancer, hair dye in pregnancy, swollen feet, travel or bleeding after
 embryo transfer.
 
+## Round 15 (2026-11-28)
+
+### Summary content check: the one-risk-word tier
+
+Same scoring as round 14, re-run on the 833 PubMed items not yet checked.
+286 have one risk word ("safe", "should", "recommend" or a medicine named
+next to pregnancy or breastfeeding, usually with a plain number). The top
+150 by score (all of score 5 and above, then 27 "should" items from score
+4) were checked against their PubMed abstracts; two items with no abstract
+(`pmid-30000045`, `pmid-30000253`) were skipped. 109 fair. **64 fixes in
+41 items**, text only (34 re-embedded offline; the 7 certainty-only
+changes need no re-embed):
+
+- Overstatements: `pmid-31200970` (progestogen in IVF: "clearly" dropped,
+  the meta-analysis gives no intervals or grading), `pmid-30287313`
+  (dermatology medicines in men: the abstract says "a negative effect" for
+  6 medicines, not specifically on fertility), `pmid-38140841` (pelvic
+  floor training "worked whether done on its own or as part of an exercise
+  program": no separate results in the abstract, removed),
+  `pmid-38593643` ("the programs appeared safe" is the authors' claim; no
+  safety data reported), `pmid-37581900` (blastocyst collapse "linked to",
+  not "led to", fewer pregnancies; all studies retrospective),
+  `pmid-30229557` (goal setting did not "do best"; it was common in the
+  programmes people stuck to).
+- "As effective" / "did not differ" where the abstract found no clear
+  difference: `pmid-28205208` (skin-to-skin care vs breastfeeding),
+  `pmid-29909264` (tamoxifen vs clomiphene), `pmid-34075656`,
+  `pmid-40327246` (oral vs injected GnRH antagonists), `pmid-34581730`
+  (aspirin and heavy bleeding).
+- Hedges restored for low or moderate evidence: `pmid-36219807`,
+  `pmid-29589380`, `pmid-38961556`, `pmid-34564844`, `pmid-32200197`.
+- Certainty -> "not stated" (the abstract grades nothing): `pmid-37881498`,
+  `pmid-37922258`, `pmid-29286987`, `pmid-40639456`, `pmid-37708365`,
+  `pmid-33608901`, `pmid-32200197`, `pmid-34755503`, `pmid-27244847`.
+- Advice in the app's voice now credited to the guideline, committee,
+  ACOG, panel or authors: about 40 edits (severe high blood pressure in
+  pregnancy, caesarean recovery, toxoplasmosis, contraception counselling,
+  letrozole for PCOS, fibroids, congenital hypothyroidism, child obesity,
+  swaddling, AMH, vitamin D and others).
+
+Left as is: 11 judgement calls (certainty picked from a graded range),
+e.g. `pmid-36376068`, `pmid-40335352`, `pmid-39266712`, `pmid-26001875`.
+
+About 680 PubMed items remain unchecked: about 135 with one risk word
+(score 4 and below: mostly "should", "recommend" or "safe" alone), about
+500 with only a plain number, and about 50 with none of the risk words.
+Tests: `ask-ai-audit.test.ts` (round 15 block).
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed
