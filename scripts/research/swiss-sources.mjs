@@ -556,6 +556,67 @@ export const OTHER_SOURCES = [
     tags: ['toxic shock syndrome', 'tss', 'tampons', 'menstrual cup', 'emergency signs'],
     keywords: ['toxic shock syndrome', 'toxic shock', 'tss', 'tampon', 'tampons', 'menstrual cup', 'sleep with a tampon', 'tampon overnight', 'how long can a tampon stay in', 'leave a tampon in', 'tampon safety', 'rash and fever', 'staphylococcus'],
   },
+  // Round 14 (2026-11-28): weak topics (sore breasts before a period,
+  // breasts of different sizes, ovarian cancer warning signs) had only
+  // nearby sources. NHS pages, read in full on 2026-11-28.
+  {
+    url: 'https://www.nhs.uk/symptoms/breast-pain/',
+    title: 'Breast pain: the link with periods, other causes, what helps and when to see a doctor (NHS, reviewed October 2026)',
+    year: 2026,
+    fetchedAt: '2026-11-28T12:00:00.000Z',
+    summary:
+      'The NHS says breast pain is most often linked to periods: it usually starts up to two weeks before a period and eases once the period is over. Other causes include a strain or injury in the neck, shoulder or back, some medicines (for example the contraceptive pill, HRT and some antidepressants), a breast infection (mastitis) or abscess, pregnancy, the menopause and a bra that does not fit well. Breast pain on its own is unlikely to be a sign of breast cancer. Things that may help are paracetamol or ibuprofen, or a painkilling gel, a well-fitting bra during the day and a soft bra at night. The NHS says there is little evidence that vitamin E or evening primrose oil help. It advises seeing a GP for a lump, swelling, nipple changes or dimpled skin, for pain that is not getting better, is new or feels different, with a family history of breast cancer, or when worried; and getting urgent help when breast pain comes with a high temperature or shivering, or part of the breast is hot, swollen or changes colour.',
+    keyPoints: [
+      'Breast pain linked to periods usually starts up to two weeks before a period and eases when the period ends.',
+      'Other causes: neck, shoulder or back strain, some medicines (the pill, HRT, some antidepressants), mastitis, pregnancy, the menopause, a badly fitting bra.',
+      'Breast pain on its own is unlikely to be a sign of breast cancer.',
+      'May help: paracetamol, ibuprofen or a painkilling gel, a well-fitting bra by day and a soft bra at night; little evidence for vitamin E or evening primrose oil.',
+      'See a GP for a lump, swelling, nipple or skin changes, pain that does not improve or is new, or a family history of breast cancer.',
+      'Urgent help: breast pain with a high temperature or shivering, or a hot, swollen or discoloured area of the breast.',
+    ],
+    lifeStages: ['menstrual-cycle', 'general'],
+    topics: ['breast-health', 'pms-pmdd'],
+    tags: ['breast pain', 'cyclical breast pain', 'mastalgia', 'sore breasts', 'premenstrual symptoms'],
+    keywords: ['breast pain', 'sore breasts', 'breasts hurt', 'tender breasts', 'breast tenderness', 'sore breasts before period', 'breasts hurt before period', 'cyclical breast pain', 'cyclic breast pain', 'mastalgia', 'breast pain before period', 'evening primrose oil', 'breast pain cancer', 'bra'],
+  },
+  {
+    url: 'https://www.nhs.uk/tests-and-treatments/how-to-check-your-breasts-or-chest/',
+    title: 'How to check your breasts: breasts of different sizes are common, and which changes to get checked (NHS, reviewed July 2024)',
+    year: 2024,
+    fetchedAt: '2026-11-28T12:00:00.000Z',
+    summary:
+      'The NHS says it is common for breasts to be different sizes, and that breasts look and feel different at different times: through the menstrual cycle, in pregnancy and breastfeeding, and after the menopause. It advises getting to know how your breasts usually look and feel, so that you notice changes that are not normal for you. Changes to look out for are a lump or swelling in the breast, chest or armpit; skin changes such as dimpling or redness; a change in the size or shape of one or both breasts; nipple discharge when not pregnant or breastfeeding, which may contain blood; a nipple that turns inwards or gets a rash; and sores on the chest. The NHS advises seeing a GP for a lump or swelling, for any breast or nipple change that is not normal for you, or for breast or armpit pain that does not go away. These changes often have other causes, but finding cancer early makes it easier to treat.',
+    keyPoints: [
+      'It is common for breasts to be different sizes.',
+      'Breasts look and feel different through the menstrual cycle, in pregnancy and breastfeeding, and after the menopause.',
+      'Get to know what is normal for you, so you notice a change.',
+      'Changes to get checked: a lump or swelling, skin dimpling or redness, a new change in the size or shape of a breast, nipple discharge, an inward-turning nipple or rash, sores.',
+      'See a GP for a lump, a change that is not normal for you, or breast or armpit pain that does not go away.',
+    ],
+    lifeStages: ['menstrual-cycle', 'general'],
+    topics: ['breast-health'],
+    tags: ['breast asymmetry', 'breasts different sizes', 'breast awareness', 'breast changes', 'breast self-check'],
+    keywords: ['breast asymmetry', 'uneven breasts', 'breasts different sizes', 'one breast bigger', 'one breast bigger than the other', 'one breast larger', 'one breast smaller', 'one breast growing faster', 'breasts uneven', 'lopsided breasts', 'check my breasts', 'breast self exam', 'breast changes', 'nipple discharge', 'inverted nipple'],
+  },
+  {
+    url: 'https://www.nhs.uk/conditions/ovarian-cancer/symptoms/',
+    title: 'Ovarian cancer symptoms: persistent bloating, tummy pain, feeling full quickly, needing to pee more, and when to see a GP (NHS, reviewed November 2025)',
+    year: 2025,
+    fetchedAt: '2026-11-28T12:00:00.000Z',
+    summary:
+      'The NHS lists the main symptoms of ovarian cancer as a swollen tummy or feeling bloated, pain or tenderness in the tummy or between the hips, losing your appetite or feeling full quickly, and needing to pee more often or more urgently, especially when they happen often (about 12 or more times a month). Other possible symptoms are indigestion, constipation or diarrhoea, back pain, feeling tired all the time, losing weight without trying, and unusual vaginal bleeding (between periods, heavier periods, or bleeding after the menopause). These symptoms are common and usually caused by something else, but the NHS advises seeing a GP if you have them, and going back if they continue, get worse or come more often after a first visit. The GP asks about your family history of ovarian or breast cancer and may arrange a CA125 blood test and, if the level is raised, an ultrasound scan of the tummy and pelvis. An urgent referral, usually within 2 weeks, does not mean that cancer has been found.',
+    keyPoints: [
+      'Main symptoms: a swollen tummy or bloating, tummy or pelvic pain, loss of appetite or feeling full quickly, needing to pee more often or urgently.',
+      'They matter most when they happen often, about 12 or more times a month.',
+      'Other possible symptoms: indigestion, bowel changes, back pain, constant tiredness, unexplained weight loss, unusual vaginal bleeding.',
+      'These symptoms usually have other causes, but see a GP, and go back if they continue or get worse.',
+      'The GP may arrange a CA125 blood test and, if it is raised, an ultrasound scan; an urgent referral does not mean cancer has been found.',
+    ],
+    lifeStages: ['menopause', 'post-menopause', 'general'],
+    topics: ['ovarian-cysts'],
+    tags: ['ovarian cancer', 'ovarian cancer symptoms', 'bloating', 'ca125'],
+    keywords: ['ovarian cancer', 'ovarian cancer symptoms', 'bloating', 'persistent bloating', 'bloated all the time', 'swollen tummy', 'feeling full quickly', 'pelvic pain', 'ca125', 'ca-125', 'cancer of the ovary'],
+  },
 ];
 
 function toItem(src) {

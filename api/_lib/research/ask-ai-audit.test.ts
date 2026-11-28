@@ -624,10 +624,109 @@ describe.skipIf(!hasModel)('Research round 13: sources the chat sends (bundled m
     expect((await sources('How do I know when I ovulate?', 'conception')).slice(0, 2)).toEqual(['pmid-37709293', 'pmid-31139458']);
     expect((await sources('Best time to have sex to get pregnant', 'conception')).slice(0, 2)).toEqual(['pmid-37709293', 'pmid-31139458']);
     expect((await sources('Joint pain in menopause, is it hormonal?', 'menopause')).slice(0, 3)).toEqual(['pmid-41574523', 'pmid-41344380', 'pmid-33299396']);
-    expect((await sources('Thyroid problems after giving birth', 'postpartum')).slice(0, 2)).toEqual(['pmid-28260263', 'pmid-42219800']);
+    // Round 14: the two postpartum thyroiditis reviews now lead; iodine and ATA 2026 follow.
+    expect((await sources('Thyroid problems after giving birth', 'postpartum')).slice(0, 4)).toEqual(['pmid-30844908', 'pmid-22443972', 'pmid-28260263', 'pmid-42219800']);
     expect((await sources('Can I get pregnant while breastfeeding?', 'postpartum')).slice(0, 2)).toEqual(['pmid-26457821', 'pmid-35716805']);
     expect(await sources('Does my baby need vitamin D drops?', 'postpartum')).not.toContain('pmid-36744416');
     expect((await sources('Thinning hair after menopause', 'post-menopause')).slice(0, 2)).toEqual(['pmid-27225981', 'pmid-29863806']);
     expect(await sources('Sore breasts before period every month', 'menstrual-cycle')).not.toContain('pmid-26172878');
   }, 120_000);
+});
+
+// Round 14 (docs/research-gaps.md): the four weak topics of round 13 get
+// sources that answer them (NHS breast pain, NHS breast check, NHS ovarian
+// cancer symptoms, two postpartum thyroiditis reviews, two breast pain
+// reviews, a symptom review and the USPSTF screening statement), and two
+// SUBJECT_MISMATCH rules keep them off questions without a cancer or
+// breast word.
+const NHS_BREAST_PAIN = 'gp-nhs-breast-pain-10c702';
+const NHS_BREAST_CHECK = 'gp-nhs-how-to-check-your-breasts-or-chest-7925ce';
+const NHS_OVARIAN = 'gp-nhs-symptoms-97b430';
+const PPT = ['pmid-30844908', 'pmid-22443972'];
+const BREAST_PAIN_REVIEWS = ['pmid-32138883', 'pmid-26541567'];
+const OVARIAN_SYMPTOMS = 'pmid-26541098';
+const USPSTF_OVARIAN = 'pmid-29450531';
+
+describe('Research round 14: library data', () => {
+  const lib = getLibrary();
+  const byId = new Map(lib.items.map((i) => [i.id, i]));
+  const text = (id: string) => [byId.get(id)!.summary, ...byId.get(id)!.keyPoints].join(' ');
+
+  it('the NHS items state what they were added for', () => {
+    expect(text(NHS_BREAST_PAIN)).toMatch(/up to two weeks before a period/);
+    expect(text(NHS_BREAST_PAIN)).toMatch(/unlikely to be a sign of breast cancer/);
+    expect(text(NHS_BREAST_CHECK)).toMatch(/common for breasts to be different sizes/);
+    expect(text(NHS_OVARIAN)).toMatch(/12 or more times a month/);
+    for (const id of [NHS_BREAST_PAIN, NHS_BREAST_CHECK, NHS_OVARIAN]) {
+      expect(byId.get(id)!.source).toBe('NHS');
+      expect(byId.get(id)!.page?.summariser).toBe('hand-written');
+      expect(byId.get(id)!.tags).not.toContain('switzerland');
+    }
+  });
+
+  it('the new PubMed items are in, with the figures of their abstracts', () => {
+    expect(text(PPT[0])).toMatch(/about 5% of women/);
+    expect(text(PPT[1])).toMatch(/1 to 3 months/);
+    expect(text(PPT[1])).toMatch(/up to 6 months/);
+    expect(text(OVARIAN_SYMPTOMS)).toMatch(/about 63%/);
+    expect(byId.get(USPSTF_OVARIAN)!.certainty).toBe('moderate');
+    expect(text(USPSTF_OVARIAN)).toMatch(/recommends against screening/);
+    for (const id of [...PPT, ...BREAST_PAIN_REVIEWS, OVARIAN_SYMPTOMS]) expect(byId.get(id)!.certainty).toBe('not stated');
+  });
+});
+
+describe('Research round 14: keyword retrieval and ranking rules', () => {
+  const first = (q: string, stage: string | null) => selectChatSources(q, stage)[0]?.id;
+  const ids = (q: string, stage: string | null) => selectChatSources(q, stage).map((i) => i.id);
+
+  it.each([
+    ['Sore breasts before period every month', 'menstrual-cycle', NHS_BREAST_PAIN],
+    ['Is cyclical breast pain normal?', 'menstrual-cycle', NHS_BREAST_PAIN],
+    ['One breast is bigger than the other, is that normal?', null, NHS_BREAST_CHECK],
+    ['One breast growing faster than the other', 'pre-menstrual', NHS_BREAST_CHECK],
+    ['Thyroid problems after giving birth', 'postpartum', PPT[0]],
+    ['What is postpartum thyroiditis?', 'postpartum', PPT[0]],
+    ['Bloating all the time, could it be ovarian cancer?', 'menopause', NHS_OVARIAN],
+    ['Is there a screening test for ovarian cancer?', null, USPSTF_OVARIAN],
+  ] as const)('%s (%s) -> first source %s', (q, stage, id) => {
+    expect(first(q, stage)).toBe(id);
+  });
+
+  it('the new items stay off questions without a cancer or breast word', () => {
+    for (const id of [NHS_OVARIAN, OVARIAN_SYMPTOMS, USPSTF_OVARIAN]) expect(ids('What are the warning signs of OHSS?', 'ivf')).not.toContain(id);
+    for (const id of [NHS_BREAST_PAIN, NHS_BREAST_CHECK]) expect(ids('My daughter is 15 and has not had her period yet, should we see a doctor?', 'pre-menstrual')).not.toContain(id);
+    expect(ids('Breast pain while breastfeeding, is it mastitis?', 'postpartum')).not.toContain(NHS_BREAST_CHECK);
+  });
+
+  it('related questions keep their sources', () => {
+    expect(ids('Breast lump, what should I do?', null)[0]).toBe('pmid-37236740');
+    expect(ids('What are the warning signs of OHSS?', 'ivf')[0]).toBe('pmid-41996998');
+  });
+});
+
+describe.skipIf(!hasModel)('Research round 14: sources the chat sends (bundled model)', () => {
+  const sources = async (q: string, stage: string | null) =>
+    (await selectChatSourcesHybrid(q, stage, { timeoutMs: 20_000 })).map((i) => i.id);
+
+  it.each([
+    ['Sore breasts before period every month', 'menstrual-cycle', NHS_BREAST_PAIN],
+    ['Why do my breasts hurt before my period?', null, NHS_BREAST_PAIN],
+    ['Is cyclical breast pain normal?', 'menstrual-cycle', NHS_BREAST_PAIN],
+    ['One breast is bigger than the other, is that normal?', null, NHS_BREAST_CHECK],
+    ['One breast growing faster than the other', 'pre-menstrual', NHS_BREAST_CHECK],
+    ['My breasts are uneven sizes, should I worry?', 'menstrual-cycle', NHS_BREAST_CHECK],
+    ['What is postpartum thyroiditis?', 'postpartum', PPT[0]],
+    ['Feeling anxious and losing weight a few months after birth, could it be my thyroid?', 'postpartum', PPT[0]],
+    ['Bloating all the time, could it be ovarian cancer?', 'menopause', NHS_OVARIAN],
+    ['Is there a screening test for ovarian cancer?', null, USPSTF_OVARIAN],
+  ] as const)('%s (%s) -> first source %s', async (q, stage, id) => {
+    expect((await sources(q, stage))[0]).toBe(id);
+  }, 30_000);
+
+  it('ovarian cancer warning signs: the symptom review and NHS lead; OHSS and late periods unchanged', async () => {
+    expect((await sources('What are the warning signs of ovarian cancer?', null)).slice(0, 2).sort()).toEqual([OVARIAN_SYMPTOMS, NHS_OVARIAN].sort());
+    expect(await sources('What are the warning signs of OHSS?', 'ivf')).toEqual(['pmid-41996998', 'pmid-26597569', 'pmid-27577848', 'pmid-28111738']);
+    const late = await sources('My daughter is 15 and has not had her period yet, should we see a doctor?', 'pre-menstrual');
+    for (const id of [NHS_BREAST_PAIN, NHS_BREAST_CHECK]) expect(late).not.toContain(id);
+  }, 90_000);
 });

@@ -134270,6 +134270,551 @@
     "summariser": "hand-written",
     "chunks": 0
    }
+  },
+  {
+   "id": "pmid-30844908",
+   "pmid": "30844908",
+   "doi": "10.1097/GRF.0000000000000430",
+   "title": "Postpartum Thyroiditis.",
+   "source": "Clinical Obstetrics and Gynecology",
+   "journal": "Clinical Obstetrics and Gynecology",
+   "organisation": null,
+   "year": 2019,
+   "publicationTypes": [
+    "Journal Article",
+    "Review"
+   ],
+   "evidenceLevel": "study",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/30844908/",
+   "summary": "This review describes postpartum thyroiditis, an autoimmune inflammation of the thyroid gland that starts in the first year after giving birth and affects about 5% of women. It covers the causes, the usual course, risk factors, the outlook and treatment, and says doctors need to recognise the signs and tell it apart from Graves' disease, another cause of an overactive thyroid. Women who have had postpartum thyroiditis are more likely to have it again after a later pregnancy and have a higher risk of a lasting underactive thyroid.",
+   "keyPoints": [
+    "Postpartum thyroiditis is an autoimmune thyroid inflammation in the first year after birth; about 5% of women have it.",
+    "It needs to be told apart from Graves' disease, which also makes the thyroid overactive.",
+    "After one episode, it is more likely to come back after a later pregnancy.",
+    "Women who have had it have a higher risk of a lasting underactive thyroid."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "postpartum"
+   ],
+   "topics": [
+    "postpartum-thyroid-bp",
+    "thyroid-general"
+   ],
+   "tags": [
+    "postpartum thyroiditis",
+    "thyroid",
+    "after birth",
+    "hypothyroidism",
+    "hyperthyroidism"
+   ],
+   "keywords": [
+    "postpartum thyroiditis",
+    "thyroiditis",
+    "thyroid after birth",
+    "thyroid after giving birth",
+    "thyroid problems after pregnancy",
+    "thyroid postpartum",
+    "overactive thyroid after birth",
+    "underactive thyroid after birth",
+    "graves disease",
+    "hypothyroidism",
+    "hyperthyroidism",
+    "anxious after birth",
+    "weight loss after birth",
+    "tired after birth"
+   ]
+  },
+  {
+   "id": "pmid-22443972",
+   "pmid": "22443972",
+   "doi": "10.1016/j.mcna.2012.01.003",
+   "title": "Subacute, silent, and postpartum thyroiditis.",
+   "source": "The Medical Clinics of North America",
+   "journal": "The Medical Clinics of North America",
+   "organisation": null,
+   "year": 2012,
+   "publicationTypes": [
+    "Journal Article",
+    "Review"
+   ],
+   "evidenceLevel": "study",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/22443972/",
+   "summary": "This review explains three temporary kinds of thyroid inflammation, one of which is postpartum thyroiditis. The classic course has three phases: a short overactive phase of 1 to 3 months, while thyroid hormone stored in the gland leaks out, then a longer underactive phase of up to 6 months, and then a return to normal thyroid function. The pattern varies from woman to woman: some have only the overactive phase, some only the underactive phase and some both, and it can be mild or more severe.",
+   "keyPoints": [
+    "Postpartum thyroiditis is one of three temporary forms of thyroid inflammation.",
+    "Classic course: an overactive phase of 1 to 3 months, then an underactive phase of up to 6 months, then normal function.",
+    "Not everyone has all phases: some have only the overactive or only the underactive phase.",
+    "Cases range from mild to more severe."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "postpartum",
+    "general"
+   ],
+   "topics": [
+    "postpartum-thyroid-bp",
+    "thyroid-general"
+   ],
+   "tags": [
+    "postpartum thyroiditis",
+    "thyroiditis",
+    "thyroid",
+    "hyperthyroidism",
+    "hypothyroidism"
+   ],
+   "keywords": [
+    "postpartum thyroiditis",
+    "thyroiditis",
+    "thyroid after birth",
+    "thyroid after giving birth",
+    "thyroid problems after pregnancy",
+    "overactive then underactive thyroid",
+    "temporary thyroid",
+    "silent thyroiditis",
+    "hyperthyroidism",
+    "hypothyroidism"
+   ]
+  },
+  {
+   "id": "pmid-32138883",
+   "pmid": "32138883",
+   "doi": "10.1016/j.mayocp.2019.12.014",
+   "title": "Current Management and Treatment Options for Breast Pain.",
+   "source": "Mayo Clinic Proceedings",
+   "journal": "Mayo Clinic Proceedings",
+   "organisation": null,
+   "year": 2020,
+   "publicationTypes": [
+    "Journal Article",
+    "Review"
+   ],
+   "evidenceLevel": "study",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/32138883/",
+   "summary": "This review says breast pain is common in women of all ages and can affect quality of life. Many women seek help because they fear cancer, but the risk of cancer is low when the breast examination finds no lump or other abnormal sign. The authors advise a careful history and examination to decide whether a scan is needed. When nothing abnormal is found, often no treatment is needed. For pain that gets in the way of daily life, they suggest trying non-drug measures first for mild to moderate pain, and considering a medicine for severe pain only after its side effects have been discussed.",
+   "keyPoints": [
+    "Breast pain is common at all ages and can affect quality of life.",
+    "The risk of cancer is low when the examination finds no lump or other abnormal sign.",
+    "A history and examination decide whether a scan is needed.",
+    "Often no treatment is needed; the authors suggest non-drug measures first, and a medicine only for severe pain after discussing side effects."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menstrual-cycle",
+    "menopause",
+    "general"
+   ],
+   "topics": [
+    "breast-health"
+   ],
+   "tags": [
+    "breast pain",
+    "mastalgia",
+    "cyclical breast pain",
+    "breast cancer risk"
+   ],
+   "keywords": [
+    "breast pain",
+    "sore breasts",
+    "breasts hurt",
+    "tender breasts",
+    "breast tenderness",
+    "mastalgia",
+    "cyclical breast pain",
+    "cyclic breast pain",
+    "breast pain cancer",
+    "breast pain treatment"
+   ]
+  },
+  {
+   "id": "pmid-26541567",
+   "pmid": "26541567",
+   "doi": "10.1016/j.jgyn.2015.09.039",
+   "title": "[Breast pain: Recommendations].",
+   "source": "Journal de Gynecologie, Obstetrique et Biologie de la Reproduction",
+   "journal": "Journal de Gynecologie, Obstetrique et Biologie de la Reproduction",
+   "organisation": null,
+   "year": 2015,
+   "publicationTypes": [
+    "English Abstract",
+    "Journal Article",
+    "Review"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/26541567/",
+   "summary": "These French recommendations on breast pain, based on a review of the literature, say a pain calendar can show whether the pain follows the menstrual cycle, and a pain scale or questionnaire can help describe it. When nothing can be felt on examination, breast pain is not a reason to change breast screening, and an MRI is not recommended when the mammogram and ultrasound are normal. Care starts with reassurance after a normal examination or normal scans and a well-fitted bra; if that is not enough, the authors say an anti-inflammatory (NSAID) gel can be offered.",
+   "keyPoints": [
+    "A pain calendar helps show whether breast pain follows the menstrual cycle.",
+    "With nothing felt on examination, breast pain is not a reason to change breast screening.",
+    "MRI is not recommended when the mammogram and ultrasound are normal.",
+    "First steps: reassurance after a normal check and a well-fitted bra; next, an NSAID gel can be offered."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menstrual-cycle",
+    "general"
+   ],
+   "topics": [
+    "breast-health"
+   ],
+   "tags": [
+    "breast pain",
+    "mastalgia",
+    "cyclical breast pain",
+    "nsaid gel"
+   ],
+   "keywords": [
+    "breast pain",
+    "sore breasts",
+    "breasts hurt",
+    "tender breasts",
+    "mastalgia",
+    "cyclical breast pain",
+    "cyclic breast pain",
+    "breast pain before period",
+    "pain calendar",
+    "bra",
+    "anti-inflammatory gel"
+   ]
+  },
+  {
+   "id": "pmid-26541098",
+   "pmid": "26541098",
+   "doi": "10.1016/j.amepre.2015.09.023",
+   "title": "A Systematic Review of Symptoms for the Diagnosis of Ovarian Cancer.",
+   "source": "American Journal of Preventive Medicine",
+   "journal": "American Journal of Preventive Medicine",
+   "organisation": null,
+   "year": 2016,
+   "publicationTypes": [
+    "Journal Article",
+    "Meta-Analysis",
+    "Systematic Review"
+   ],
+   "evidenceLevel": "systematic review",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/26541098/",
+   "summary": "This review pooled 17 studies, published from 2001 to 2014, on how well symptoms point to ovarian cancer. Most studies were at high risk of bias, often because they compared women already diagnosed with women without cancer. The signs that most raised the likelihood of ovarian cancer were a mass that can be felt in the tummy, a swollen or growing tummy, tummy or pelvic pain, bloating, loss of appetite and a family history of ovarian cancer. No symptom ruled ovarian cancer out when it was absent. A symptom checklist (the Ovarian Cancer Symptom Index) picked up about 63% of cancers and was negative in about 95% of women without cancer.",
+   "keyPoints": [
+    "17 studies; most at high risk of bias.",
+    "The strongest signs: a mass felt in the tummy, a swollen tummy, tummy or pelvic pain, bloating, loss of appetite, a family history of ovarian cancer.",
+    "Not having a symptom did not rule ovarian cancer out.",
+    "The Ovarian Cancer Symptom Index picked up about 63% of cancers and was negative in about 95% of women without cancer."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menopause",
+    "post-menopause",
+    "general"
+   ],
+   "topics": [
+    "ovarian-cysts"
+   ],
+   "tags": [
+    "ovarian cancer",
+    "symptoms",
+    "bloating",
+    "diagnosis"
+   ],
+   "keywords": [
+    "ovarian cancer",
+    "ovarian cancer symptoms",
+    "bloating",
+    "persistent bloating",
+    "swollen tummy",
+    "pelvic pain",
+    "loss of appetite",
+    "symptom index"
+   ]
+  },
+  {
+   "id": "pmid-29450531",
+   "pmid": "29450531",
+   "doi": "10.1001/jama.2017.21926",
+   "title": "Screening for Ovarian Cancer: US Preventive Services Task Force Recommendation Statement.",
+   "source": "US Preventive Services Task Force",
+   "journal": "JAMA",
+   "organisation": "US Preventive Services Task Force",
+   "year": 2018,
+   "publicationTypes": [
+    "Journal Article",
+    "Practice Guideline"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/29450531/",
+   "summary": "The US Preventive Services Task Force recommends against screening for ovarian cancer in women who have no symptoms and are not known to have an inherited condition that raises the risk (a \"D\" recommendation). It found good evidence that screening does not lower the number of deaths from ovarian cancer, and that its harms, mainly surgery in women who turn out not to have cancer, are at least moderate. The Task Force concluded with moderate certainty that the harms outweigh the benefit. The recommendation does not cover women with symptoms or women known to have a high-risk inherited cancer syndrome.",
+   "keyPoints": [
+    "The Task Force recommends against ovarian cancer screening in women without symptoms and without a known high-risk inherited syndrome.",
+    "Screening did not lower deaths from ovarian cancer.",
+    "Harms, mainly unneeded surgery after false alarms, are at least moderate.",
+    "It does not apply to women with symptoms or with a known hereditary cancer syndrome."
+   ],
+   "certainty": "moderate",
+   "lifeStages": [
+    "menopause",
+    "post-menopause",
+    "general"
+   ],
+   "topics": [
+    "ovarian-cysts"
+   ],
+   "tags": [
+    "ovarian cancer",
+    "screening",
+    "uspstf"
+   ],
+   "keywords": [
+    "ovarian cancer",
+    "ovarian cancer screening",
+    "screening test for ovarian cancer",
+    "screen for ovarian cancer",
+    "ca125 screening",
+    "ca-125",
+    "transvaginal ultrasound screening",
+    "uspstf"
+   ]
+  },
+  {
+   "id": "gp-nhs-breast-pain-10c702",
+   "pmid": "",
+   "doi": null,
+   "title": "Breast pain: the link with periods, other causes, what helps and when to see a doctor (NHS, reviewed October 2026)",
+   "source": "NHS",
+   "journal": "NHS",
+   "organisation": "NHS",
+   "year": 2026,
+   "publicationTypes": [
+    "Patient information page"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://www.nhs.uk/symptoms/breast-pain/",
+   "summary": "The NHS says breast pain is most often linked to periods: it usually starts up to two weeks before a period and eases once the period is over. Other causes include a strain or injury in the neck, shoulder or back, some medicines (for example the contraceptive pill, HRT and some antidepressants), a breast infection (mastitis) or abscess, pregnancy, the menopause and a bra that does not fit well. Breast pain on its own is unlikely to be a sign of breast cancer. Things that may help are paracetamol or ibuprofen, or a painkilling gel, a well-fitting bra during the day and a soft bra at night. The NHS says there is little evidence that vitamin E or evening primrose oil help. It advises seeing a GP for a lump, swelling, nipple changes or dimpled skin, for pain that is not getting better, is new or feels different, with a family history of breast cancer, or when worried; and getting urgent help when breast pain comes with a high temperature or shivering, or part of the breast is hot, swollen or changes colour.",
+   "keyPoints": [
+    "Breast pain linked to periods usually starts up to two weeks before a period and eases when the period ends.",
+    "Other causes: neck, shoulder or back strain, some medicines (the pill, HRT, some antidepressants), mastitis, pregnancy, the menopause, a badly fitting bra.",
+    "Breast pain on its own is unlikely to be a sign of breast cancer.",
+    "May help: paracetamol, ibuprofen or a painkilling gel, a well-fitting bra by day and a soft bra at night; little evidence for vitamin E or evening primrose oil.",
+    "See a GP for a lump, swelling, nipple or skin changes, pain that does not improve or is new, or a family history of breast cancer.",
+    "Urgent help: breast pain with a high temperature or shivering, or a hot, swollen or discoloured area of the breast."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menstrual-cycle",
+    "general"
+   ],
+   "topics": [
+    "breast-health",
+    "pms-pmdd"
+   ],
+   "tags": [
+    "breast pain",
+    "cyclical breast pain",
+    "mastalgia",
+    "sore breasts",
+    "premenstrual symptoms"
+   ],
+   "keywords": [
+    "breast pain",
+    "sore breasts",
+    "breasts hurt",
+    "tender breasts",
+    "breast tenderness",
+    "sore breasts before period",
+    "breasts hurt before period",
+    "cyclical breast pain",
+    "cyclic breast pain",
+    "mastalgia",
+    "breast pain before period",
+    "evening primrose oil",
+    "breast pain cancer",
+    "bra"
+   ],
+   "sourceType": "guideline-page",
+   "page": {
+    "publisher": "NHS",
+    "url": "https://www.nhs.uk/symptoms/breast-pain/",
+    "fetchedAt": "2026-11-28T12:00:00.000Z",
+    "published": null,
+    "lastUpdated": null,
+    "lastReviewed": null,
+    "nextReview": null,
+    "licence": {
+     "name": "Open Government Licence v3.0",
+     "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+     "termsUrl": "https://www.nhs.uk/our-policies/terms-and-conditions/",
+     "notes": "NHS website content is released under the OGL v3.0, commercial use included (terms 3.3-3.4). Must show \"Information from the NHS website is licensed under the Open Government Licence v3.0\" with a link. Unchanged copies must show the date copied or be refreshed at least every 7 days (terms 3.6). Excluded from the OGL: logos, images with people, third-party content, medical devices (terms 3.5).",
+     "pageCopyright": null
+    },
+    "attribution": "Information from the NHS website is licensed under the Open Government Licence v3.0.",
+    "refreshDays": null,
+    "robots": {
+     "allowed": true,
+     "rule": null,
+     "checkedAt": "2026-11-28T12:00:00.000Z"
+    },
+    "contentHash": "feae2220",
+    "summariser": "hand-written",
+    "chunks": 0
+   }
+  },
+  {
+   "id": "gp-nhs-how-to-check-your-breasts-or-chest-7925ce",
+   "pmid": "",
+   "doi": null,
+   "title": "How to check your breasts: breasts of different sizes are common, and which changes to get checked (NHS, reviewed July 2024)",
+   "source": "NHS",
+   "journal": "NHS",
+   "organisation": "NHS",
+   "year": 2024,
+   "publicationTypes": [
+    "Patient information page"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://www.nhs.uk/tests-and-treatments/how-to-check-your-breasts-or-chest/",
+   "summary": "The NHS says it is common for breasts to be different sizes, and that breasts look and feel different at different times: through the menstrual cycle, in pregnancy and breastfeeding, and after the menopause. It advises getting to know how your breasts usually look and feel, so that you notice changes that are not normal for you. Changes to look out for are a lump or swelling in the breast, chest or armpit; skin changes such as dimpling or redness; a change in the size or shape of one or both breasts; nipple discharge when not pregnant or breastfeeding, which may contain blood; a nipple that turns inwards or gets a rash; and sores on the chest. The NHS advises seeing a GP for a lump or swelling, for any breast or nipple change that is not normal for you, or for breast or armpit pain that does not go away. These changes often have other causes, but finding cancer early makes it easier to treat.",
+   "keyPoints": [
+    "It is common for breasts to be different sizes.",
+    "Breasts look and feel different through the menstrual cycle, in pregnancy and breastfeeding, and after the menopause.",
+    "Get to know what is normal for you, so you notice a change.",
+    "Changes to get checked: a lump or swelling, skin dimpling or redness, a new change in the size or shape of a breast, nipple discharge, an inward-turning nipple or rash, sores.",
+    "See a GP for a lump, a change that is not normal for you, or breast or armpit pain that does not go away."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menstrual-cycle",
+    "general"
+   ],
+   "topics": [
+    "breast-health"
+   ],
+   "tags": [
+    "breast asymmetry",
+    "breasts different sizes",
+    "breast awareness",
+    "breast changes",
+    "breast self-check"
+   ],
+   "keywords": [
+    "breast asymmetry",
+    "uneven breasts",
+    "breasts different sizes",
+    "one breast bigger",
+    "one breast bigger than the other",
+    "one breast larger",
+    "one breast smaller",
+    "one breast growing faster",
+    "breasts uneven",
+    "lopsided breasts",
+    "check my breasts",
+    "breast self exam",
+    "breast changes",
+    "nipple discharge",
+    "inverted nipple"
+   ],
+   "sourceType": "guideline-page",
+   "page": {
+    "publisher": "NHS",
+    "url": "https://www.nhs.uk/tests-and-treatments/how-to-check-your-breasts-or-chest/",
+    "fetchedAt": "2026-11-28T12:00:00.000Z",
+    "published": null,
+    "lastUpdated": null,
+    "lastReviewed": null,
+    "nextReview": null,
+    "licence": {
+     "name": "Open Government Licence v3.0",
+     "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+     "termsUrl": "https://www.nhs.uk/our-policies/terms-and-conditions/",
+     "notes": "NHS website content is released under the OGL v3.0, commercial use included (terms 3.3-3.4). Must show \"Information from the NHS website is licensed under the Open Government Licence v3.0\" with a link. Unchanged copies must show the date copied or be refreshed at least every 7 days (terms 3.6). Excluded from the OGL: logos, images with people, third-party content, medical devices (terms 3.5).",
+     "pageCopyright": null
+    },
+    "attribution": "Information from the NHS website is licensed under the Open Government Licence v3.0.",
+    "refreshDays": null,
+    "robots": {
+     "allowed": true,
+     "rule": null,
+     "checkedAt": "2026-11-28T12:00:00.000Z"
+    },
+    "contentHash": "564f1708",
+    "summariser": "hand-written",
+    "chunks": 0
+   }
+  },
+  {
+   "id": "gp-nhs-symptoms-97b430",
+   "pmid": "",
+   "doi": null,
+   "title": "Ovarian cancer symptoms: persistent bloating, tummy pain, feeling full quickly, needing to pee more, and when to see a GP (NHS, reviewed November 2025)",
+   "source": "NHS",
+   "journal": "NHS",
+   "organisation": "NHS",
+   "year": 2025,
+   "publicationTypes": [
+    "Patient information page"
+   ],
+   "evidenceLevel": "guideline",
+   "url": "https://www.nhs.uk/conditions/ovarian-cancer/symptoms/",
+   "summary": "The NHS lists the main symptoms of ovarian cancer as a swollen tummy or feeling bloated, pain or tenderness in the tummy or between the hips, losing your appetite or feeling full quickly, and needing to pee more often or more urgently, especially when they happen often (about 12 or more times a month). Other possible symptoms are indigestion, constipation or diarrhoea, back pain, feeling tired all the time, losing weight without trying, and unusual vaginal bleeding (between periods, heavier periods, or bleeding after the menopause). These symptoms are common and usually caused by something else, but the NHS advises seeing a GP if you have them, and going back if they continue, get worse or come more often after a first visit. The GP asks about your family history of ovarian or breast cancer and may arrange a CA125 blood test and, if the level is raised, an ultrasound scan of the tummy and pelvis. An urgent referral, usually within 2 weeks, does not mean that cancer has been found.",
+   "keyPoints": [
+    "Main symptoms: a swollen tummy or bloating, tummy or pelvic pain, loss of appetite or feeling full quickly, needing to pee more often or urgently.",
+    "They matter most when they happen often, about 12 or more times a month.",
+    "Other possible symptoms: indigestion, bowel changes, back pain, constant tiredness, unexplained weight loss, unusual vaginal bleeding.",
+    "These symptoms usually have other causes, but see a GP, and go back if they continue or get worse.",
+    "The GP may arrange a CA125 blood test and, if it is raised, an ultrasound scan; an urgent referral does not mean cancer has been found."
+   ],
+   "certainty": "not stated",
+   "lifeStages": [
+    "menopause",
+    "post-menopause",
+    "general"
+   ],
+   "topics": [
+    "ovarian-cysts"
+   ],
+   "tags": [
+    "ovarian cancer",
+    "ovarian cancer symptoms",
+    "bloating",
+    "ca125"
+   ],
+   "keywords": [
+    "ovarian cancer",
+    "ovarian cancer symptoms",
+    "bloating",
+    "persistent bloating",
+    "bloated all the time",
+    "swollen tummy",
+    "feeling full quickly",
+    "pelvic pain",
+    "ca125",
+    "ca-125",
+    "cancer of the ovary"
+   ],
+   "sourceType": "guideline-page",
+   "page": {
+    "publisher": "NHS",
+    "url": "https://www.nhs.uk/conditions/ovarian-cancer/symptoms/",
+    "fetchedAt": "2026-11-28T12:00:00.000Z",
+    "published": null,
+    "lastUpdated": null,
+    "lastReviewed": null,
+    "nextReview": null,
+    "licence": {
+     "name": "Open Government Licence v3.0",
+     "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+     "termsUrl": "https://www.nhs.uk/our-policies/terms-and-conditions/",
+     "notes": "NHS website content is released under the OGL v3.0, commercial use included (terms 3.3-3.4). Must show \"Information from the NHS website is licensed under the Open Government Licence v3.0\" with a link. Unchanged copies must show the date copied or be refreshed at least every 7 days (terms 3.6). Excluded from the OGL: logos, images with people, third-party content, medical devices (terms 3.5).",
+     "pageCopyright": null
+    },
+    "attribution": "Information from the NHS website is licensed under the Open Government Licence v3.0.",
+    "refreshDays": null,
+    "robots": {
+     "allowed": true,
+     "rule": null,
+     "checkedAt": "2026-11-28T12:00:00.000Z"
+    },
+    "contentHash": "c477f91a",
+    "summariser": "hand-written",
+    "chunks": 0
+   }
   }
  ]
 }

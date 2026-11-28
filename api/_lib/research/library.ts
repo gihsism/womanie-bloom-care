@@ -460,6 +460,23 @@ const SUBJECT_MISMATCH: { ask: RegExp; unless: RegExp; title: RegExp; keep: RegE
     title: /\b(cancer-related|cancer treatments?|inhibitor-induced)\b/i,
     keep: /(?!)/,
   },
+  // Round 14: the new ovarian cancer symptom items came up for "What are the
+  // warning signs of OHSS?"; without a cancer word, ovarian cancer titles
+  // step back.
+  {
+    ask: /\w/,
+    unless: /\b(cancer|tumou?rs?|oncolog\w*|malignan\w*|ca-?125)\b/i,
+    title: /\bovarian cancer\b/i,
+    keep: /(?!)/,
+  },
+  // Round 14: the new breast pain and breast-check items came up for a
+  // late-first-period question; without a breast word they step back.
+  {
+    ask: /\w/,
+    unless: /\b(breasts?|nipples?|chest|mastalgia|bras?)\b/i,
+    title: /\b(breast pain|check your breasts)\b/i,
+    keep: /(?!)/,
+  },
 ];
 
 function subjectMismatchFactor(query: string, title: string): number {
