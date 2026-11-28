@@ -569,6 +569,96 @@ Tests: `src/lib/healthClaims.test.ts` (lab range wins; 20 removed
 cut-offs stay out; every number in the reference block is on an
 allow-list of sourced figures).
 
+## Round 8 (2026-11-28)
+
+### Round-7 open topics: sources added (all free, no API spend)
+
+Hand-written summaries in our own words with a link (`summariser:
+"hand-written"`, `chunks: 0`, built by `scripts/research/swiss-sources.mjs`),
+plus PubMed items whose summaries were written from the abstract. New
+summary-only publishers in `guideline-page.ts`: Fedlex (Swiss federal
+law, no copyright, URG Art. 5), FSRH / CoSRH, HFEA, FIGO. Only the
+Swiss items carry the `switzerland` tag, so the others get no Swiss lift.
+
+| Topic | Source added |
+|---|---|
+| Forgotten pill | CDC US SPR 2024 page (late under 24 h, missed 24 h+, 2+ missed = 7 pills of condoms, skip the break after week 3, EC after week 1; same limits as FSRH, the app's missed-pill card); FSRH CHC guideline (missed = more than 24 h late, vomiting within 3 h) |
+| Migraine with aura and the combined pill | FSRH CHC guideline 2019 / amended 2023 (UKMEC 4 with aura, 2 to start without aura, 3 for new migraine on it); `pmid-29086160` EHF / ESC consensus 2017; `pmid-43058720` review 2026 (guidelines agree: no combined methods with aura; progestogen-only considered safe) |
+| Typical-use effectiveness | FSRH table (pill 9% typical / 0.3% perfect; implant 0.05%, hormonal coil 0.2%, copper 0.8%, condom 18%); `pmid-28245088` US survey 2006-2010; `pmid-27018154` 43 countries. A WHO page was not used (licence-required) |
+| Normal cycle length | FIGO System 1 (IJGO 2023, CC BY): 24 to 38 days, bleeding up to 8 days, regularity 7 to 9 days by age; `pmid-31482137` 612,613 cycles, mean 29.3 days |
+| Thyroid and the cycle | `pmid-20938101` (2,000+ women: period problems only more common in severe thyroid disease); `pmid-33613678` narrative review (infrequent periods the commonest change) |
+| No period by 15 | `pmid-31259490` AFP 2019 and `pmid-33687345` EJE 2021: check if no period by 15, or 3 years after breast development (no puberty signs by 13). No ACOG primary-amenorrhoea document was free with a usable abstract |
+| Running after birth | `pmid-38148108` and `pmid-38191239` BJSM 2024 international Delphi consensus (minimum 3 weeks rest, screening, walk-run start, strength work) |
+| IVF success by age | HFEA "Fertility treatment 2024" (June 2026, preliminary): 30% per embryo transferred, 38% at 18-34, 8% at 43-44; `pmid-21558332` 400,135 UK cycles by age and egg number. Swiss figures by age: not found as text (BAG / BFS give only totals; charts without numbers) |
+| Swiss cervical screening | SGGG expert letter 97 (30 June 2026, replaces 50): every 3 years 21 to 70; cytology 21-29, cytology or HPV 30-70; no co-testing; HPV screening still not covered |
+| Swiss breast screening and smear coverage | KLV Art. 12e (fedlex, version 1 Aug 2026, unchanged in the 1 Jan 2027 text): smear yearly for the first two then every 3 years; HPV screening test not covered; programme mammography every 2 years from 50, no deductible |
+
+Found on the way: **SGGG letter 94 (7 January 2026) replaced letter 68**
+(anti-D). The library item now summarises letter 94 (fetal RhD test from
+week 16, not 18; written consent, genetic test; insurance pays once;
+anti-D for early bleeding only from 12+0 weeks; after a miscarriage
+managed at home or with tablets from 9+0). The old item is removed. App
+text updated: pregnancy schedule (weeks 16 to 24, consent note, source
+letter 94) and two pregnancy-tracker lines.
+
+App text also updated: the screening tracker's cervical line was the US
+schedule ("Pap + HPV co-test every 5 years through 65"); now SGGG 97 and
+KLV 12e. The mammogram line adds "no deductible, co-payment applies".
+
+### Ask AI retrieval audit, rerun (40 round-7 questions + 20 new)
+
+Offline, `selectChatSourcesHybrid` with the bundled model. On the 40
+round-7 questions, 14 changed, all because a new source joined; nothing
+on-topic was lost. The new sources lead for: forgotten pill (CDC), typical
+use (FSRH), IVF at 35 (HFEA), running after birth, cervical smear (SGGG
+97), mammogram (KLV); they are among the six for migraine with aura,
+thyroid, 35-day cycle and no period at 15. All 20 new questions get an
+on-topic source first. One ranking fix: "forget a pill" did not match
+"forgot / forgotten" (different stems), so the Cochrane period-pain
+review led; keywords added, the CDC item now leads.
+
+Side effects accepted: the SGGG cervical item is 2nd for the two Swiss
+mammography questions (it matches "screening" and the Swiss lift; no
+Swiss breast-screening programme text is in the library yet) and 4th for
+"When should girls get the HPV vaccine?"; the FIGO item joins "Why are my
+periods so heavy?" (3rd; it defines heavy flow). Tests:
+`api/_lib/research/ask-ai-audit.test.ts` (round 8 block), the keyword
+audit set now accepts the HFEA / UK register items for "IVF success rates
+at 40", `healthClaims.test.ts`, `pregnancySchedule.test.ts`.
+
+Still open: Swiss IVF success by age (no text figures), a free Swiss
+breast-screening programme page (swisscancerscreening.ch could not be
+fetched; which cantons run programmes is not in the library).
+
+### Summary content check, next 100 items
+
+Next 100 items on the round-6 exposure ranking (none skipped; all had
+PubMed abstracts). 82 fair. 19 fixes in 18 items, text only (12
+re-embedded offline with the incremental script; label-only changes need
+no re-embed):
+
+- Certainty "low" -> "not stated" where the abstract grades nothing:
+  `pmid-31135656`, `pmid-28333357`, `pmid-31618674`, `pmid-40420105`,
+  `pmid-31711271`, `pmid-26629884`, `pmid-34217581`.
+- Hedges restored to match the GRADE level: `pmid-25758061`
+  (paracetamol vs ibuprofen, "may"), `pmid-41701618` ("may"),
+  `pmid-37330773` (Pilates, "probably"), `pmid-27038134` (scar fillers,
+  "probably"), `pmid-31845767` (ovulation "may", pregnancy "probably"),
+  `pmid-39465967` (satisfaction "probably", was "may"), `pmid-32710657`
+  (infant growth, "probably").
+- Wrong scope or number: `pmid-28937705` (only erythromycin, and
+  possibly clindamycin, beat placebo, not "antibiotics"), `pmid-43010994`
+  (under one extra egg, not "a few more").
+- Overstated: `pmid-37192834` (frozen vs fresh transfer, mostly
+  retrospective: "linked to better results"), `pmid-27887710` (results
+  too imprecise to call the treatment safe for babies), `pmid-27228266`
+  (orlistat: "meaningful" drop not in the abstract).
+
+Left as is: 18 judgement calls (labels where the abstract grades a range
+or only some outcomes, one self-contradicting abstract), e.g.
+`pmid-41448220`, `pmid-30738885`, `pmid-26172878`, `pmid-32972380`,
+`pmid-30103263`, `pmid-41498229`, `pmid-32124980`, `pmid-41184155`.
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed

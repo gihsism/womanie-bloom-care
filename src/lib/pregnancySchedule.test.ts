@@ -51,7 +51,8 @@ describe('PREGNANCY_SCHEDULE sources', () => {
     const text = (id: string) => { const i = byId.get(id)!; return [i.summary, ...i.keyPoints].join(' '); };
     const rh = item('rhd-baby-test');
     expect(rh.source.id).toMatch(/^gp-sggg-/);
-    expect(text(rh.source.id)).toMatch(/weeks 18 and 24/);
+    expect(text(rh.source.id)).toMatch(/weeks 16 and 24/);
+    expect(rh.startWeek).toBe(16);
     expect(text(rh.source.id)).toMatch(/weeks 28 and 30/);
     expect(rh.note).toMatch(/28 to 30/);
     expect(rh.note).toMatch(/does not apply/);
@@ -60,7 +61,7 @@ describe('PREGNANCY_SCHEDULE sources', () => {
     expect(gbs.source.url).toMatch(/^https:\/\/www\.sggg\.ch\//);
     expect(text(gbs.source.id)).toMatch(/weeks 35 to 37/);
     expect(scheduleStatus(gbs, 36, {}).kind).toBe('now');
-    expect(scheduleStatus(rh, 16, {}).label).toBe('In 2 weeks');
+    expect(scheduleStatus(rh, 14, {}).label).toBe('In 2 weeks');
   });
 
   it('sends the rest of the schedule to the midwife or doctor', () => {

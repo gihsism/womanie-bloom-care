@@ -222,7 +222,7 @@ const WEEK_PERSPECTIVES: Record<number, WeekPerspectives> = {
   },
   28: {
     baby: 'Third trimester begins. Eyes can open and close. Baby may show a sleep-wake cycle. Brain is developing rapidly through the rest of pregnancy — much of the weight gain from here is brain growth.',
-    mother: 'Check-ups often become more frequent from now; ask your midwife or doctor about your schedule. Get to know your baby\'s usual pattern of movements. Sleep gets harder — heartburn, back pain, more bathroom trips, harder to find a comfortable position. Anti-D injection at weeks 28 to 30 if you are RhD negative (in Switzerland only if a blood test at weeks 18 to 24 shows the baby is RhD positive, SGGG).',
+    mother: 'Check-ups often become more frequent from now; ask your midwife or doctor about your schedule. Get to know your baby\'s usual pattern of movements. Sleep gets harder — heartburn, back pain, more bathroom trips, harder to find a comfortable position. Anti-D injection at weeks 28 to 30 if you are RhD negative (in Switzerland only if a blood test at weeks 16 to 24 shows the baby is RhD positive, SGGG).',
     partner: 'Help with anything that involves bending over (shoes, laundry, picking things up). Ask to feel the kicks — at this point they\'re usually visible from outside. Start the conversation about night feedings and parental-leave overlap.',
     employer: 'Begin a detailed handover document — what\'s in flight, where to find docs, who covers what for each project. Have it 80% done by week 32 so you\'re not scrambling if labor starts early.',
   },

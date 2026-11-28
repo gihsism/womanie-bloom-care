@@ -81,7 +81,7 @@ describe('pregnancy screens: Swiss BLV brochure (August 2025) and other free sou
     const t = read(`${D}PregnancyTracker.tsx`);
     expect(t).not.toMatch(/left side from now on/);
     expect(t).toMatch(/from 28 weeks the advice is to go to sleep on your side, left or right/);
-    expect(t).toMatch(/weeks 18 to 24 shows the baby is RhD positive/);
+    expect(t).toMatch(/weeks 16 to 24 shows the baby is RhD positive/);
   });
 });
 
@@ -122,14 +122,16 @@ describe('research library: Swiss pregnancy sources', () => {
   };
   const byPrefix = (p: string) => lib.items.find(i => i.id.startsWith(p))!;
 
-  it('holds the SGGG anti-D (68) and GBS (86) letters as hand-written summaries', () => {
-    const antiD = byPrefix('gp-sggg-empfehlungen-zur-anti-d');
+  it('holds the SGGG anti-D (94, replaces 68) and GBS (86) letters as hand-written summaries', () => {
+    const antiD = byPrefix('gp-sggg-94-empfehlungen-zur-anti-d');
+    expect(lib.items.some(i => i.id.startsWith('gp-sggg-empfehlungen-zur-anti-d'))).toBe(false);
     const gbs = byPrefix('gp-sggg-86-prophylaxe-gbs');
     for (const it of [antiD, gbs]) {
       expect(it.page?.summariser).toBe('hand-written');
       expect(it.page?.chunks).toBe(0);
     }
-    expect(antiD.summary).toMatch(/between weeks 18 and 24/);
+    expect(antiD.summary).toMatch(/between weeks 16 and 24/);
+    expect(antiD.url).toMatch(/^https:\/\/www\.sggg\.ch\//);
     expect(gbs.summary).toMatch(/weeks 35 to 37/);
   });
 
@@ -143,6 +145,19 @@ describe('research library: Swiss pregnancy sources', () => {
 });
 
 // Research round 6: cycle, contraception, IVF and first-period screens.
+describe('screening tracker: Swiss cervical and breast screening (round 8)', () => {
+  const t = read(`${D}ScreeningTracker.tsx`);
+  it('cervical screening follows SGGG letter 97 and KLV Art. 12e, not the US co-test schedule', () => {
+    expect(t).toMatch(/every 3 years from 21 to 70/);
+    expect(t).toMatch(/both together is not recommended \(SGGG 2026\)/);
+    expect(t).toMatch(/not for an HPV test used for screening \(KLV Art\. 12e\)/);
+    expect(t).not.toMatch(/Pap \+ HPV co-test/);
+  });
+  it('programme mammograms: no deductible, co-payment remains', () => {
+    expect(t).toMatch(/no deductible, the co-payment still applies/);
+  });
+});
+
 describe('cycle screens: FIGO ranges everywhere, PMS evidence not overstated', () => {
   it('cycle length is judged against FIGO 24-38 days in the overview and the doctor trends', () => {
     expect(read('src/lib/healthOverview.ts')).toMatch(/CYCLE_RANGE = \{ low: 24, high: 38 \}/);

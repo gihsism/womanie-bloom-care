@@ -57,9 +57,9 @@ const FIRST_TRIMESTER_GUIDELINE: ScheduleSource = {
 
 /** Swiss SGGG letters held in the research library as hand-written summaries (scripts/research/swiss-sources.mjs). */
 const SGGG_ANTI_D: ScheduleSource = {
-  id: 'gp-sggg-empfehlungen-zur-anti-d-immunglobulin-ga-d77009',
-  label: 'SGGG expert letter 68 (anti-D), Gynäkologie 1/2020',
-  url: 'https://www.rosenfluh.ch/media/gynaekologie/2020/01/Empfehlungen-zur-Anti-D-Immunglobulin-Gabe-in-der-Schwangerschaft-Anti-D-Prophylaxe.pdf',
+  id: 'gp-sggg-94-empfehlungen-zur-anti-d-immunglobulin-2aa414',
+  label: 'SGGG expert letter 94 (anti-D), January 2026',
+  url: 'https://www.sggg.ch/fileadmin/user_upload/Dokumente/3_Fachinformationen/1_Expertenbriefe/DE/94_Empfehlungen_zur_Anti-D_Immunglobulin_Gabe_in_der_Schwangerschaft___Anti-D-Prophylaxe__ersetzt_No_68.pdf',
 };
 
 const SGGG_GBS: ScheduleSource = {
@@ -139,10 +139,10 @@ export const PREGNANCY_SCHEDULE: ScheduleItem[] = [
   {
     key: 'rhd-baby-test',
     label: "Baby's RhD blood group test (if you are RhD negative)",
-    when: 'Weeks 18 to 24',
-    startWeek: 18,
+    when: 'Weeks 16 to 24',
+    startWeek: 16,
     endWeek: 24,
-    note: "Your blood group is checked at an early check-up. If you are RhD negative, a blood test from you can show your baby's RhD group. Only if the baby is RhD positive do you get an anti-D injection at weeks 28 to 30 and after the birth. If you are RhD positive, this step does not apply to you.",
+    note: "Your blood group is checked at an early check-up. If you are RhD negative, a blood test from you can show your baby's RhD group (you are asked for written consent first, as it is a genetic test). Only if the baby is RhD positive do you get an anti-D injection at weeks 28 to 30 and after the birth. If you are RhD positive, this step does not apply to you.",
     source: SGGG_ANTI_D,
   },
   {

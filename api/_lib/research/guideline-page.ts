@@ -754,6 +754,71 @@ PUBLISHERS.push(
   },
 );
 
+/**
+ * Round 8 (2026-11-28): further official sources held only as hand-written
+ * summaries with a link (scripts/research/swiss-sources.mjs). Nothing is
+ * fetched or stored. Federal ordinances on fedlex are not protected by
+ * copyright (URG Art. 5); the others are copyrighted publications.
+ */
+PUBLISHERS.push(
+  {
+    publisher: 'Fedlex',
+    hosts: ['www.fedlex.admin.ch'],
+    ingest: 'summary-only',
+    licence: {
+      name: 'Swiss federal law (not protected by copyright, URG Art. 5)',
+      url: null,
+      termsUrl: 'https://www.fedlex.admin.ch/de/broadcasting/legal-notice',
+      notes: SWISS_SUMMARY_ONLY,
+    },
+    evidenceLevel: 'guideline',
+    publicationType: 'Swiss federal ordinance (KLV)',
+    attribution: 'Source: Swiss Federal Department of Home Affairs, Health Insurance Benefits Ordinance (KLV), fedlex.admin.ch.',
+  },
+  {
+    publisher: 'FSRH',
+    hosts: ['www.cosrh.org', 'cosrh.org', 'www.fsrh.org', 'fsrh.org'],
+    ingest: 'summary-only',
+    licence: {
+      name: '© College of Sexual and Reproductive Healthcare (formerly FSRH)',
+      url: null,
+      termsUrl: 'https://www.cosrh.org/',
+      notes: SWISS_SUMMARY_ONLY,
+    },
+    evidenceLevel: 'guideline',
+    publicationType: 'UK clinical guideline (FSRH / CoSRH)',
+    attribution: 'Source: Faculty (now College) of Sexual and Reproductive Healthcare, UK.',
+  },
+  {
+    publisher: 'HFEA',
+    hosts: ['www.hfea.gov.uk'],
+    ingest: 'summary-only',
+    licence: {
+      name: '© Human Fertilisation and Embryology Authority',
+      url: null,
+      termsUrl: 'https://www.hfea.gov.uk/about-us/our-website/',
+      notes: SWISS_SUMMARY_ONLY,
+    },
+    evidenceLevel: 'guideline',
+    publicationType: 'UK national fertility treatment statistics (HFEA)',
+    attribution: 'Source: Human Fertilisation and Embryology Authority (HFEA), UK.',
+  },
+  {
+    publisher: 'FIGO',
+    hosts: ['www.figo.org', 'obgyn.onlinelibrary.wiley.com'],
+    ingest: 'summary-only',
+    licence: {
+      name: 'FIGO publications in the International Journal of Gynecology & Obstetrics (some CC BY 4.0)',
+      url: null,
+      termsUrl: 'https://www.figo.org/',
+      notes: SWISS_SUMMARY_ONLY,
+    },
+    evidenceLevel: 'guideline',
+    publicationType: 'International definitions (FIGO)',
+    attribution: 'Source: International Federation of Gynecology and Obstetrics (FIGO).',
+  },
+);
+
 export const HAND_WRITTEN_SUMMARISER = 'hand-written';
 
 export function publisherFor(url: string): PublisherPolicy | null {
