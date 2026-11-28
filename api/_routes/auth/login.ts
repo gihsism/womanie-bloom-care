@@ -5,12 +5,17 @@ import * as jose from 'jose';
 import bcrypt from 'bcryptjs';
 import { getAuthSecret } from '../../_lib/auth.js';
 import { withSentry } from '../../_lib/sentry.js';
-import { checkAndConsume } from '../../_lib/ratelimit.js';
+import { checkAndConsume, peekLimit } from '../../_lib/ratelimit.js';
 
 // Brute-force brakes (shared across instances, see ratelimit.ts): attempts per IP and
-// per target email per day. Generous enough that a real user never hits them.
+// failed attempts per target email per day. Generous enough that a real user never hits them.
 const ATTEMPTS_PER_IP_PER_DAY = 100;
 const ATTEMPTS_PER_EMAIL_PER_DAY = 30;
+
+// A bcrypt hash (cost 10, same as signup) of a throwaway string. Compared
+// against when the email has no account, so that answer takes as long as
+// a wrong password for a real one.
+export const DUMMY_HASH = '$2b$10$0zb0r/mL5aJbaMHKFj6J5.ycza4h2N0WArLIgOHRpc5aab/AxozlG';
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -33,31 +38,43 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       (typeof req.headers['x-forwarded-for'] === 'string'
         ? req.headers['x-forwarded-for'].split(',')[0].trim()
         : null) || req.socket?.remoteAddress || 'unknown';
+    // Per IP every attempt counts. Per email only FAILED attempts count:
+    // the counter is read first and bumped after a failure, so signing in
+    // successfully on several devices never uses up her own allowance.
+    // Both windows end at midnight UTC, so a lock never outlasts the day.
+    const emailKey = String(email).toLowerCase();
     const byIp = await checkAndConsume('login-ip', ip, ATTEMPTS_PER_IP_PER_DAY);
-    const byEmail = await checkAndConsume('login-email', String(email).toLowerCase(), ATTEMPTS_PER_EMAIL_PER_DAY);
+    const byEmail = await peekLimit('login-email', emailKey, ATTEMPTS_PER_EMAIL_PER_DAY);
     if (!byIp.ok || !byEmail.ok) {
       return res.status(429).json({
         error: 'Too many sign-in attempts. Please try again later, or use "Forgot password?".',
         retryInSec: Math.max(byIp.retryInSec, byEmail.retryInSec),
       });
     }
+    const failed = async (status: number, error: string) => {
+      await checkAndConsume('login-email', emailKey, ATTEMPTS_PER_EMAIL_PER_DAY);
+      return res.status(status).json({ error });
+    };
 
     const sql = neon(process.env.DATABASE_URL!);
 
-    const users = await sql.query('SELECT * FROM auth_users WHERE email = $1', [email.toLowerCase()]);
+    const users = await sql.query('SELECT * FROM auth_users WHERE email = $1', [emailKey]);
     if (users.length === 0) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+      // Same bcrypt cost as a real check, so the response time doesn't
+      // tell whether an email has an account.
+      await bcrypt.compare(password, DUMMY_HASH);
+      return failed(401, 'Invalid email or password');
     }
 
     const user = users[0];
 
     if (!user.password_hash) {
-      return res.status(401).json({ error: 'This account uses Google sign-in. Click "Continue with Google" instead.' });
+      return failed(401, 'This account uses Google sign-in. Click "Continue with Google" instead.');
     }
 
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+      return failed(401, 'Invalid email or password');
     }
 
     // Create session

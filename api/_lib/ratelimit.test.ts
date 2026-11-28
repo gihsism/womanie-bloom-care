@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 const query = vi.fn();
 vi.mock("@neondatabase/serverless", () => ({ neon: () => ({ query }) }));
 
-import { checkAndConsume, checkAndConsumeMemory, hashSubject } from "./ratelimit";
+import { checkAndConsume, checkAndConsumeMemory, hashSubject, peekLimit, peekMemory } from "./ratelimit";
 
 const WINDOW_MS = 24 * 60 * 60 * 1000;
 
@@ -153,5 +153,44 @@ describe("checkAndConsume (Neon-backed)", () => {
     query.mockResolvedValue([{ hits: 1 }]);
     await checkAndConsume("x", "u1", 5);
     expect(query.mock.calls.some(c => /DELETE FROM rate_limit_counters WHERE window_start </.test(c[0]))).toBe(true);
+  });
+});
+
+describe("peekLimit (read-only check)", () => {
+  const OLD_URL = process.env.DATABASE_URL;
+  afterEach(() => {
+    process.env.DATABASE_URL = OLD_URL;
+    vi.restoreAllMocks();
+  });
+
+  it("in memory: reports the state without consuming a hit", () => {
+    const name = freshName();
+    for (let i = 0; i < 5; i++) expect(peekMemory(name, "u1", 1).ok).toBe(true);
+    checkAndConsumeMemory(name, "u1", 1);
+    expect(peekMemory(name, "u1", 1).ok).toBe(false);
+    // and it frees once the window has passed
+    vi.advanceTimersByTime(WINDOW_MS + 1000);
+    expect(peekMemory(name, "u1", 1).ok).toBe(true);
+  });
+
+  it("Neon: only SELECTs (never inserts) and blocks at the limit", async () => {
+    process.env.DATABASE_URL = "postgres://test";
+    query.mockReset();
+    query.mockResolvedValueOnce([{ hits: 2 }]).mockResolvedValueOnce([{ hits: 3 }]).mockResolvedValueOnce([]);
+    expect((await peekLimit("login-email", "a@b.ch", 3)).ok).toBe(true);
+    expect((await peekLimit("login-email", "a@b.ch", 3)).ok).toBe(false);
+    expect((await peekLimit("login-email", "a@b.ch", 3))).toEqual({ ok: true, remaining: 3, limit: 3, retryInSec: 0 });
+    for (const [sql, params] of query.mock.calls) {
+      expect(sql).toMatch(/^\s*SELECT hits FROM rate_limit_counters/);
+      expect(JSON.stringify(params)).not.toContain("a@b.ch");
+    }
+  });
+
+  it("Neon error: falls back to the in-memory state instead of throwing", async () => {
+    process.env.DATABASE_URL = "postgres://test";
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    query.mockReset();
+    query.mockRejectedValue(Object.assign(new Error("down"), { code: "57P01" }));
+    expect((await peekLimit(freshName(), "u1", 1)).ok).toBe(true);
   });
 });

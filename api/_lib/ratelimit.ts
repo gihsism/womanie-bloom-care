@@ -122,3 +122,45 @@ export async function checkAndConsume(
     return checkAndConsumeMemory(name, subject, limit);
   }
 }
+
+// ---------- read-only check ----------
+
+export function peekMemory(name: string, subject: string, limit: number): RateLimitResult {
+  const now = Date.now();
+  const hits = (getBucket(name).get(subject) ?? []).filter(t => now - t < WINDOW_MS);
+  if (hits.length >= limit) {
+    const retryInSec = Math.max(1, Math.ceil((WINDOW_MS - (now - hits[0])) / 1000));
+    return { ok: false, remaining: 0, limit, retryInSec };
+  }
+  return { ok: true, remaining: limit - hits.length, limit, retryInSec: 0 };
+}
+
+/**
+ * Is `subject` already at `limit` in the current window? Reads the counter
+ * without consuming a hit. Used where only FAILED attempts should count
+ * (sign-in per email): check first, consume only after a failure, so a
+ * person who signs in successfully many times a day never uses up her own
+ * allowance. Never throws; on any error it falls back like checkAndConsume.
+ */
+export async function peekLimit(name: string, subject: string, limit: number): Promise<RateLimitResult> {
+  const url = process.env.DATABASE_URL;
+  if (!url) return peekMemory(name, subject, limit);
+
+  const now = Date.now();
+  const windowStart = Math.floor(now / WINDOW_MS) * WINDOW_MS;
+  const retryInSec = Math.max(1, Math.ceil((windowStart + WINDOW_MS - now) / 1000));
+  try {
+    const sql = neon(url);
+    const rows = (await sql.query(
+      `SELECT hits FROM rate_limit_counters
+        WHERE bucket = $1 AND subject_hash = $2 AND window_start = to_timestamp($3::double precision / 1000)`,
+      [name, hashSubject(subject), windowStart],
+    )) as Array<{ hits: number }>;
+    const hits = rows.length ? Number(rows[0].hits) : 0;
+    if (!Number.isFinite(hits) || hits >= limit) return { ok: false, remaining: 0, limit, retryInSec };
+    return { ok: true, remaining: limit - hits, limit, retryInSec: 0 };
+  } catch (err) {
+    console.warn(`[ratelimit] Neon counter unavailable for "${name}" (${errorCode(err)}); using in-memory limit`);
+    return peekMemory(name, subject, limit);
+  }
+}
