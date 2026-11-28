@@ -926,6 +926,31 @@ Left as is: 31 judgement calls (labels picked from a graded range), e.g.
 `pmid-31663890` (an FDA mesh sentence not in the abstract, but true),
 `pmid-41123921`. 247 exposed items stay unchecked for round 12.
 
+### Numbers without units in lab insights and cards
+
+Grep of non-test `src/` for "Nx more", "-fold", "1 in N", "every N
+months / years", "N% of / risk / chance", "twice", "doubles", plus a
+script listing every number in a user-facing string not followed by a
+unit (lab insight files, cycle and menopause insight libs):
+
+| Where | Claim | Now |
+|---|---|---|
+| `PersonalizedInsights` anti-TPO | "Hashimoto's is 4-10x more common in women" | no source in the library: "much more common in women than in men" |
+| `PersonalizedInsights` anti-TPO, normal TSH | "Monitor TSH every 6-12 months. Many people with positive antibodies eventually develop hypothyroidism" | unsourced interval, overstated: "Ask your doctor when to recheck your TSH. Some people ... develop an underactive thyroid over the years" |
+| `PersonalizedInsights` RA markers | "RA is 2-3x more common in women" | "more common in women than in men" |
+| `PersonalizedInsights` LH/FSH | "normal is ~1:1, PCOS-suggestive is >2:1"; "PCOS affects 1 in 10 women" | the ratio is not a criterion of the 2023 international PCOS guideline (`pmid-37589624`), said so; 1 in 10 sourced: about 8 to 12 in 100 by criteria (2026 global review, `pmid-41528735`) |
+| `PersonalizedInsights` pregnancy nutrients | "Ferritin x (need ≥30)", "Vitamin D x (need ≥30)", "Folate (need ≥5)", "B12 (need ≥200)"; "below optimal pregnancy levels" | values only; cut-offs differ, doctor or midwife judges (the 30 ng/mL vitamin D "need" contradicted the round-3 decision; the trigger thresholds are unchanged, labelled in code as the app's own check) |
+| `PersonalizedInsights` LDL/HDL | "ideal is below 3.0" | unsourced: doctors judge risk on LDL or non-HDL cholesterol and other risk factors, not this ratio |
+| `PersonalizedInsights` thalassaemia | "25% chance each pregnancy could result in thalassemia major" | true only when both carry beta trait (NHS "Thalassaemia: carriers"): scoped, 1 in 4, genetic counselling for other trait types |
+| `PostpartumDashboard` mood check | "Postpartum depression affects 10–20% of new parents" | ACOG CO 757 (`pmid-30629567`): about 1 in 7 mothers |
+| `MenopauseDashboard` after menopause | "Resistance training 3x/week. Balance exercises prevent falls"; "Annual eye exams" | WHO 2020: strength on at least 2 days, from 65 balance and strength on 3 or more days to help prevent falls; eye checks "ask your eye doctor how often" |
+
+Checked and left: Lp(a) "about 27% higher" (named study), "2x the upper
+limit" (the app's trigger on her value), NIPT "1 in 1000" (BAG item),
+ScreeningTracker intervals (pinned in round 8), "half of all people"
+have periods. Tests: `src/lib/healthClaims.test.ts` (round 11 block,
+code comments stripped).
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed

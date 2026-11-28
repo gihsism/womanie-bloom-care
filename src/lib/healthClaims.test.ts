@@ -331,3 +331,52 @@ describe('round 10: unsourced numbers in lab insights and cycle cards', () => {
     expect(t).toMatch(/3\.2 to 3\.3 kg \(WHO growth standards\)/);
   });
 });
+
+// Research round 11 (docs/research-gaps.md): numbers without units in lab
+// insights and cards ("4-10x more common", "1 in 10", "every 6-12
+// months", risk percentages): sourced or softened.
+describe('round 11: unitless numbers in lab insights and cards', () => {
+  const pi = code(`${D}PersonalizedInsights.tsx`);
+
+  it('no unsourced "x times more common" figures for thyroid or RA', () => {
+    expect(pi).not.toMatch(/4-10x/);
+    expect(pi).not.toMatch(/2-3x more common/);
+    expect(pi).toMatch(/much more common in women than in men/);
+  });
+
+  it('no fixed TSH recheck interval, no "many eventually" for positive antibodies', () => {
+    expect(pi).not.toMatch(/every 6-12 months/);
+    expect(pi).not.toMatch(/eventually develop hypothyroidism/);
+    expect(pi).toMatch(/Ask your doctor when to recheck your TSH/);
+  });
+
+  it('PCOS "1 in 10" carries its source; LH/FSH ratio is not presented as a diagnostic cut-off', () => {
+    expect(pi).toMatch(/roughly 1 in 10 women \(about 8 to 12 in 100 depending on the criteria used; 2026 global review, library pmid-41528735\)/);
+    expect(pi).not.toMatch(/PCOS-suggestive is >2:1/);
+    expect(pi).toMatch(/not one of the diagnostic criteria of the 2023 international PCOS guideline/);
+  });
+
+  it('pregnancy nutrient list shows values only, no "need ≥30" vitamin D target', () => {
+    expect(pi).not.toMatch(/need ≥/);
+    expect(pi).not.toMatch(/below optimal pregnancy levels/);
+  });
+
+  it('no "ideal" LDL/HDL ratio; thalassaemia 1 in 4 limited to beta trait with its source', () => {
+    expect(pi).not.toMatch(/ideal is below 3\.0/);
+    expect(pi).not.toMatch(/25% chance/);
+    expect(pi).toMatch(/both partners carry beta-thalassemia trait, each pregnancy has a 1 in 4 chance/);
+  });
+
+  it('postpartum mood check uses the ACOG 1 in 7 figure, not "10-20% of new parents"', () => {
+    const s = code(`${D}PostpartumDashboard.tsx`);
+    expect(s).not.toMatch(/10–20%/);
+    expect(s).toMatch(/about 1 in 7 mothers \(ACOG\)/);
+  });
+
+  it('after-menopause tips: WHO activity rule, no "3x/week" or "annual" eye exams in the app voice', () => {
+    const s = code(`${D}MenopauseDashboard.tsx`);
+    expect(s).not.toMatch(/3x\/week/);
+    expect(s).not.toMatch(/Annual eye exams/);
+    expect(s).toMatch(/3 or more days a week, which helps prevent falls \(WHO 2020\)/);
+  });
+});

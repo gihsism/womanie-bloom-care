@@ -110,10 +110,10 @@ const menoWellness = [
 const postWellness = [
   { icon: Bone, title: 'Bone Protection', tip: 'Weight-bearing exercise helps. Calcium mainly from food (Swiss BLV: about 950 mg a day up to 65, 1000-1200 mg from 66). A bone density scan (DXA) is recommended from 65, earlier with risk factors; how often to repeat it depends on your result (USPSTF 2025).', priority: 'Critical' },
   { icon: HeartPulse, title: 'Cardiovascular Care', tip: 'Blood pressure check at least once a year; cholesterol as often as your doctor advises. At least 150 min of moderate exercise a week (WHO).', priority: 'Critical' },
-  { icon: Dumbbell, title: 'Strength & Balance', tip: 'Resistance training 3x/week. Balance exercises prevent falls. Maintain muscle mass.', priority: 'Essential' },
+  { icon: Dumbbell, title: 'Strength & Balance', tip: 'Strength training on at least 2 days a week. From 65, WHO advises balance and strength exercise on 3 or more days a week, which helps prevent falls (WHO 2020).', priority: 'Essential' },
   { icon: Brain, title: 'Brain Health', tip: 'Stay socially active, learn new skills, do puzzles. Mediterranean diet supports cognition.', priority: 'Essential' },
   { icon: Shield, title: 'Cancer Screening', tip: 'Regular mammograms, colonoscopy, skin checks. Follow your doctor\'s schedule.', priority: 'Critical' },
-  { icon: Eye, title: 'Eye & Dental Health', tip: 'Annual eye exams for glaucoma/macular degeneration. Gum health affects heart health.', priority: 'High' },
+  { icon: Eye, title: 'Eye & Dental Health', tip: 'Regular eye checks: glaucoma and macular degeneration become more common with age; ask your eye doctor how often. Look after your gums and teeth too.', priority: 'High' },
   { icon: Salad, title: 'Nutrition Focus', tip: 'Protein at every meal for muscle. Vitamin B12, D, calcium. Fiber for gut health.', priority: 'Essential' },
   { icon: Smile, title: 'Social Connection', tip: 'Loneliness and social isolation are linked with a higher risk of dementia. Prioritize relationships and community.', priority: 'High' },
 ];

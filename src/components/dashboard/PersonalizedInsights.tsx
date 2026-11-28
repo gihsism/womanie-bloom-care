@@ -208,11 +208,14 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
 
   // Pregnancy: Iron + Vitamin D + Folate combo
   if (lifeStage === 'pregnancy') {
+    // Research round 11: the list shows her values only. The cut-offs
+    // below are the app's own check, not targets (there is no agreed
+    // 30 ng/mL vitamin D target, see round 3), so no "need ≥" figures.
     const issues = [];
-    if (ferritin && ferritin.value < 30) issues.push(`Ferritin ${ferritin.value} (need ≥30)`);
-    if (vitD && vitD.value < 30) issues.push(`Vitamin D ${vitD.value} (need ≥30)`);
-    if (folate && folate.value < 5) issues.push(`Folate ${folate.value} (need ≥5)`);
-    if (vitB12 && vitB12.value < 200) issues.push(`B12 ${vitB12.value} (need ≥200)`);
+    if (ferritin && ferritin.value < 30) issues.push(`ferritin ${ferritin.value}`);
+    if (vitD && vitD.value < 30) issues.push(`vitamin D ${vitD.value}`);
+    if (folate && folate.value < 5) issues.push(`folate ${folate.value}`);
+    if (vitB12 && vitB12.value < 200) issues.push(`B12 ${vitB12.value}`);
 
     if (issues.length >= 2) {
       insights.push({
@@ -221,7 +224,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
         connectedTests: ['Ferritin', 'Vitamin D', 'Folate', 'Vitamin B12'].filter(t =>
           data.some(d => d.title.toLowerCase().includes(t.toLowerCase()))
         ),
-        explanation: `You have ${issues.length} nutrients below optimal pregnancy levels: ${issues.join('; ')}. During pregnancy, your body needs significantly more of these nutrients for baby's development and your own health.`,
+        explanation: `${issues.length} of your results are on the low side: ${issues.join('; ')}. Labs and guidelines use different cut-offs, so your doctor or midwife judges which of them need treating. Pregnancy raises the need for several of these nutrients.`,
         recommendation: 'Discuss a comprehensive prenatal supplement plan with your doctor. A good prenatal vitamin plus individual supplements (especially iron and vitamin D) may be needed. Prioritize iron-rich foods and safe sun exposure.',
         severity: 'urgent',
       });
@@ -320,7 +323,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       title: 'LH/FSH ratio suggests possible PCOS pattern',
       emoji: '🔬',
       connectedTests: connected,
-      explanation: `Your LH/FSH ratio is ${(lh.value / fsh.value).toFixed(1)} (normal is ~1:1, PCOS-suggestive is >2:1).${hasHighT ? ' Combined with elevated testosterone, this strengthens a PCOS pattern.' : ''}${hasHighAMH ? ` Your AMH of ${amh.value} ng/mL is also elevated, which is common in PCOS.` : ''} PCOS affects 1 in 10 women and can cause irregular periods, acne, excess hair growth, and fertility challenges.`,
+      explanation: `Your LH/FSH ratio is ${(lh.value / fsh.value).toFixed(1)} (a ratio above about 2 is sometimes seen in PCOS, but it is not one of the diagnostic criteria of the 2023 international PCOS guideline).${hasHighT ? ' Combined with elevated testosterone, this strengthens a PCOS pattern.' : ''}${hasHighAMH ? ` Your AMH of ${amh.value} ng/mL is also elevated, which is common in PCOS.` : ''} PCOS affects roughly 1 in 10 women (about 8 to 12 in 100 depending on the criteria used; 2026 global review, library pmid-41528735) and can cause irregular periods, acne, excess hair growth, and fertility challenges.`,
       recommendation: 'Ask your doctor about a full PCOS evaluation (2023 International Guideline uses hyperandrogenism + ovulatory dysfunction + ovarian morphology/AMH). Lifestyle changes — regular exercise and reducing refined carbs — can significantly help manage symptoms.',
       severity: 'attention',
     });
@@ -455,12 +458,14 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       title: 'Positive thyroid antibodies — Hashimoto\'s thyroiditis',
       emoji: '🦋',
       connectedTests: connected,
-      explanation: `Your anti-TPO is ${antiTPO.value} IU/mL (positive >35). This indicates your immune system is attacking your thyroid gland (Hashimoto's). Hashimoto's is 4-10x more common in women.${tsh && tsh.value > 4 ? ` Your elevated TSH (${tsh.value}) suggests the thyroid is already underperforming.` : ' Your thyroid function may still be normal now, but monitoring is important.'}`,
+      explanation: `Your anti-TPO is ${antiTPO.value} IU/mL (positive >35). This indicates your immune system is attacking your thyroid gland (Hashimoto's). Hashimoto's is much more common in women than in men.${tsh && tsh.value > 4 ? ` Your elevated TSH (${tsh.value}) suggests the thyroid is already underperforming.` : ' Your thyroid function may still be normal now, but monitoring is important.'}`,
       recommendation: tsh && tsh.value > 4
         // Research round 10: no medicine advice, recheck interval or TSH
         // target in the app's voice (none of them is sourced here).
         ? 'Ask your doctor whether you need thyroid medicine. If you start it, your doctor rechecks TSH to find the right dose. If you are trying to conceive or are pregnant, tell your doctor, as the targets are different then.'
-        : 'Monitor TSH every 6-12 months. Many people with positive antibodies eventually develop hypothyroidism. If you notice fatigue, weight gain, or irregular periods, recheck sooner.',
+        // Round 11: no fixed recheck interval (unsourced); "many ...
+        // eventually" overstated how often the thyroid becomes underactive.
+        : 'Ask your doctor when to recheck your TSH. Some people with positive antibodies develop an underactive thyroid over the years. If you notice tiredness, weight gain or irregular periods, ask for a check sooner.',
       severity: tsh && tsh.value > 4 ? 'attention' : 'neutral',
     });
   }
@@ -470,7 +475,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
       title: 'Both RA markers positive — high specificity for rheumatoid arthritis',
       emoji: '🤲',
       connectedTests: ['Rheumatoid Factor', 'Anti-CCP'],
-      explanation: `Both your RF (${rf.value}) and anti-CCP (${antiCCP.value}) are elevated. Anti-CCP is highly specific for rheumatoid arthritis. When both are positive, the specificity is very high. RA is 2-3x more common in women.`,
+      explanation: `Both your RF (${rf.value}) and anti-CCP (${antiCCP.value}) are elevated. Anti-CCP is highly specific for rheumatoid arthritis. When both are positive, the specificity is very high. RA is more common in women than in men.`,
       recommendation: 'See a rheumatologist for evaluation. Early treatment with disease-modifying therapy (DMARDs) can prevent joint damage. Don\'t wait for symptoms to worsen.',
       severity: 'attention',
     });
@@ -594,7 +599,7 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
         title: 'Your cholesterol ratio needs attention',
         emoji: '❤️',
         connectedTests: ['LDL Cholesterol', 'HDL Cholesterol'],
-        explanation: `Your LDL/HDL ratio is ${ratio.toFixed(1)} (ideal is below 3.0). This means your "bad" cholesterol is high relative to your "good" cholesterol, increasing cardiovascular risk.`,
+        explanation: `Your LDL/HDL ratio is ${ratio.toFixed(1)} . This means your "bad" cholesterol is high compared with your "good" cholesterol. Doctors usually judge heart risk on LDL or non-HDL cholesterol together with your other risk factors rather than on this ratio.`,
         recommendation: 'Increase HDL: regular exercise (especially cardio), omega-3 fatty acids (fish, walnuts), olive oil. Reduce LDL: less saturated fat, more fiber, consider oat bran or psyllium.',
         severity: 'attention',
       });
@@ -626,7 +631,9 @@ function generateCrossInsights(data: LabResult[], lifeStage?: string | null): Cr
         emoji: '🩸',
         connectedTests: ['MCV', 'MCH', 'Ferritin', ...(hba2 ? ['HbA2'] : [])],
         explanation: `Your MCV (${mcv.value} fL) and MCH (${mch.value} pg) are low, but your iron stores are normal. This pattern is characteristic of thalassemia trait rather than iron deficiency.${hba2 && hba2.value > 3.5 ? ` Your HbA2 of ${hba2.value}% is in the range typical of beta-thalassemia trait.` : ' An HbA2 test can confirm this.'} Thalassemia trait is common and usually harmless, but important for family planning.`,
-        recommendation: 'If you\'re planning a pregnancy, your partner should also be tested for thalassemia. If both partners carry the trait, there\'s a 25% chance each pregnancy could result in thalassemia major.',
+        // Round 11: 1 in 4 is the carrier rule for beta-thalassaemia (NHS
+        // "Thalassaemia: carriers"); alpha traits follow other rules.
+        recommendation: 'If you\'re planning a pregnancy, your partner should also be tested for thalassemia. If both partners carry beta-thalassemia trait, each pregnancy has a 1 in 4 chance of a baby with thalassemia major (NHS); for other trait types the chances differ, so ask about genetic counselling.',
         severity: 'neutral',
       });
     }
