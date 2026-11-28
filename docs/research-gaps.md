@@ -784,6 +784,104 @@ pelvic-floor sources above it are unchanged). Search evals unchanged.
 Tests: `ask-ai-audit.test.ts` (round 9 sweep block: every pair steps back,
 every target is in the library and not itself superseded).
 
+## Round 10 (2026-11-28)
+
+### Round-9 side effect fixed: leaking after birth
+
+"I leak a bit of pee when I sneeze since giving birth" had the
+sling-operation review (`pmid-31990055`) 5th, ahead of an exercise review.
+Pelvic-floor training is what helps first, so:
+
+- New `SUBJECT_MISMATCH` rule in `library.ts` (x0.6): a leaking / bladder
+  / prolapse question with no word about an operation (surgery, sling,
+  mesh, tape, procedure ...), a title about an operation, sling, mesh or
+  repair that does not also name pelvic-floor training or exercise.
+- Keywords only (not embedded, no re-embed): "cough sneeze leak" removed
+  from the sling review; "leak when I sneeze", "leak when I cough",
+  "leaking when coughing" added to the two Cochrane training reviews
+  (`pmid-32378735`, `pmid-30288727`).
+
+Now no surgery review is among the six (bundled model: three training
+reviews lead, an exercise review is 6th; keyword-only: five training
+reviews). "I leak when I cough or run" now gets the two Cochrane training
+reviews too. Asked about surgery ("What surgery is there for bladder
+leaks?"), the sling reviews still lead. Search evals unchanged. Tests:
+`ask-ai-audit.test.ts` (round 10 block).
+
+### Summary content check, next 100 items
+
+Next 100 items on the round-6 exposure ranking (none skipped; all had
+PubMed abstracts). Only 32 items with any exposure are left unchecked
+after this round, so round 11 needs a new ranking (new questions). 85
+fair. 19 fixes in 15 items, text only (8 re-embedded offline with the
+incremental script; label-only changes need no re-embed):
+
+- Certainty -> "not stated" where the abstract grades nothing (risk of
+  bias or study-quality scales only): `pmid-27461606`, `pmid-34967466`,
+  `pmid-30624659`, `pmid-32635675`, `pmid-38715235`, `pmid-30928686`,
+  `pmid-40312882`.
+- Hedges restored to match the GRADE level: `pmid-29630882` (exercise for
+  period pain: pain "probably", duration "may", 2 places),
+  `pmid-41288141` (cyproterone vs other hirsutism treatments, "may"),
+  `pmid-27701665` (nausea in pregnancy, low quality, "may", 3 places),
+  `pmid-29045765` (metformin in pregnancy, "may", 2 places),
+  `pmid-42746920` (length gain, low certainty: "may", was "probably").
+- Causal wording on observational data: `pmid-34895348` (spiramycin
+  "linked to" lower toxoplasma transmission).
+- Wrong scope: `pmid-33461239` (two trials studied women as a group, not
+  "only two included women"), `pmid-38016166` (the combined estrogen /
+  bazedoxifene product is sold in the US at a lower dose; only the dose
+  studied is not).
+
+Left as is: 12 judgement calls (labels picked from a graded range; two
+hedges that repeat the Cochrane authors' own wording), e.g.
+`pmid-39546333`, `pmid-29068467`, `pmid-36635165`, `pmid-35099778`,
+`pmid-33034900`, `pmid-32096862`, `pmid-28444736`, `pmid-35416478`.
+
+### In-app static text: numbers with units
+
+Grep of `src/` (non-test `.ts` / `.tsx`) for a number followed by mg,
+IU, µg / mcg, %, week(s), day(s), hour(s), kg, mmol or ng: 345 lines.
+Skipped: code comments, durations of the user's own data ("last 30 days",
+"7 days" tiles), sharing / login / privacy timings, and the screens and
+claims already pinned in earlier rounds (`healthClaims.test.ts`,
+`pregnancySchedule.test.ts`, `missedPill.test.ts`: pregnancy and
+postpartum nutrition, exercise, weight, lochia and pelvic floor,
+screening tracker, cycle overview and flow, first periods, contraception,
+IVF nutrition and phases, menopause bone and vitamin D). About 45 health
+claims were left to judge:
+
+| Where | Claim | Status |
+|---|---|---|
+| `PersonalizedInsights` thyroid in pregnancy | "TSH every 4-6 weeks" | unsourced (the ATA 2026 library item gives no interval): doctor or midwife says how often |
+| `PersonalizedInsights` thyroid antibodies | "levothyroxine is likely needed", "TSH every 6-8 weeks", "keep TSH below 2.5" when trying to conceive | unsourced medicine advice: ask whether medicine is needed; targets differ before and in pregnancy |
+| `PersonalizedInsights` iron + B12 + folate | "likely causing significant fatigue"; "energy should improve within 4-8 weeks" | unsourced promise: "can add to tiredness", doctor decides treatment and rechecks |
+| `PersonalizedInsights` AMH | "below the low threshold of 1.1 ng/mL" | no source in the library: "on the low side for many labs", compare with the lab's range and age |
+| `PersonalizedInsights` bile acids | "monitored weekly from 32 weeks" | not a fixed rule in SMFM 2021 / RCOG 2022: doctor or midwife says how often. The 10 / 19 / 40 / 100 µmol/L figures and 35-36 weeks are sourced (SMFM 2021, RCOG 2022, in the text) |
+| `PersonalizedInsights` folate low | "at least 400mcg of folic acid" | sourced (USPSTF 2023, `pmid-37526713`; BLV); comment added, "ask whether you need more" added |
+| `PersonalizedInsights` APS | "repeat test 12 weeks later" | sourced (2023 ACR/EULAR criteria, named in the text) |
+| `PersonalizedInsights` heavy periods | "soak through pads hourly or bleed more than 7 days" | sourced (NHS signs, as in `PeriodFlowCard`) |
+| `PregnancyLabInsights` | unused cut-offs: vitamin D "≥30 ng/mL", glucose "<95 mg/dL", folate "≥5 ng/mL", calcium range ... | never shown (status comes from the lab's range) but contradicted the 20 ng/mL / 5.1 mmol/L decisions: removed |
+| `CyclePhaseExercise` | "Last 5-7 days (PMS window): ... + magnesium" | magnesium mixed evidence (ACOG, round 6): removed; "the 5 days or so before your period" (ACOG PMS definition) |
+| `LHSurgeCard` | "LH surge typically lasts 12-24 hours" | unsourced: "the surge can be short" |
+| `CycleUpdateSuggestions` progesterone | "ovulation likely happened 5-7 days before your blood test" | one result cannot date ovulation: "if the test was timed about a week before your next period, ovulation was probably about a week before it" |
+| `CycleUpdateSuggestions` LH | "ovulation within 24-48 hours"; "next 24-48 hours are optimal" | aligned with the ovulation-test card (12 to 36 hours): "within about a day and a half", "today and the next day or two" |
+| `PregnancyTracker` week 40 | "average newborn 50 cm and 3.4 kg (47-54 cm, 2.5-4.3 kg)"; "only about 5% arrive on the due date" | WHO Child Growth Standards medians (about 49-50 cm, 3.2-3.3 kg); "few babies arrive exactly on it" |
+| `PregnancyTracker` week 36 | early term 37, full term 39; GBS swab 35-37 | sourced (ACOG CO 579, comment added; SGGG 86 in the library) |
+| `PregnancyTracker` week 16 | US FMLA 12 weeks, Germany 14, UK 39 | legal, not health; left |
+| `BabyTracker` | newborns feed 8-12 times in 24 hours | sourced (AAP 2022, NHS); comment added |
+| `KickCounter` | more than 2 hours for 10 movements -> contact now | sourced (`kickSession.ts`: NHS, RCOG GTG 57) |
+| `ContractionTimer` | 5-1-1 rule, "follow your midwife's rule if different" | common rule, already deferred to her midwife; e2e-tested, left |
+| `OvulationTestsCard`, `BetaHcgTracker`, `CycleUpdateSuggestions`, `CycleImpactSection`, `IVFJourneyCard`, `TriggerShotTimer`, `MethodDatesCard` | ovulation 12-36 h after a positive test; temperature up 3 days; repeat hCG in 48(-72) h; first beta 9-14 days after transfer; retrieval ~36 h after trigger; ring / patch 3 weeks on, 1 off | standard clinic and leaflet rules, each worded as "usually" with "your clinic confirms"; left |
+| `PerimenopauseStageCard` | variability ≥ 7 days; gap of 60+ days; 1-3 years to final period | sourced (STRAW+10, cited in the file) |
+| `PMSForecastCard`, `EpdsScreener`, `labRecheck`, `CycleExplainedCard`, `hormone-reference` | 5 days before the period; EPDS below 10; FIGO anaemia check at 28 weeks; FIGO 24-38 days; day-21 progesterone ≥ 3 ng/mL | sourced (ACOG, EPDS, FIGO 2025, FIGO 2018, Mayo / ASRM; named in the text or file) |
+| `CycleHistoryCard` | "cycles vary by more than ±8 days" | the app's own band on her data, labelled in the code as not a guideline; left |
+
+Not in scope and left for a later round: numbers without one of these
+units ("4-10x more common", "1 in 10", "every 6-12 months") in
+`PersonalizedInsights`. Tests: `src/lib/healthClaims.test.ts` (round 10
+block, checked with code comments stripped).
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed

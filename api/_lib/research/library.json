@@ -22361,7 +22361,7 @@
     "Rates of bleeding, nausea and vomiting, headache, hot flushes and hair loss did not differ between the two treatments.",
     "The authors conclude that the choice between them can rest on a woman's preference, medical history and experience."
    ],
-   "certainty": "moderate",
+   "certainty": "not stated",
    "lifeStages": [
     "menstrual-cycle",
     "contraception",
@@ -36222,7 +36222,7 @@
    "summary": "Toxoplasmosis is an infection that can pass from a pregnant woman to her baby; undercooked meat and some other foods are common sources. This review combined 33 observational studies covering over 15,000 mothers and babies. It found that mothers treated with the antibiotic spiramycin passed the infection to their babies much less often than untreated mothers. The studies were observational rather than trials, so the results show an association.",
    "keyPoints": [
     "The rate of mother-to-baby transmission was about 19.5% in treated women versus about 50.7% in untreated women.",
-    "Spiramycin on its own also lowered transmission, to about 17.6% compared with 50.7% untreated.",
+    "Spiramycin on its own was also linked to lower transmission, to about 17.6% compared with 50.7% untreated.",
     "The authors conclude that treating suspected or confirmed toxoplasmosis in pregnancy significantly reduces transmission to the baby."
    ],
    "certainty": "not stated",
@@ -39015,8 +39015,8 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/29045765/",
    "summary": "This Cochrane review looked at whether diabetes tablets, rather than insulin, could be used by women with diabetes who are planning a pregnancy or are already pregnant. Only three small trials (241 women, all with type 2 diabetes) had usable data, and all compared metformin with insulin. Metformin may mean fewer caesarean births, less pregnancy-related high blood pressure and less low blood sugar in newborns. However, the evidence was low or very low quality, so there is not enough data to be sure.",
    "keyPoints": [
-    "Women taking metformin were less likely to have a caesarean section than those taking insulin (low-quality evidence).",
-    "Pregnancy-induced high blood pressure and newborn low blood sugar were lower with metformin, but this came from very few trials and the evidence was low or very low quality.",
+    "Women taking metformin may be less likely to have a caesarean section than those taking insulin (low-quality evidence).",
+    "Pregnancy-induced high blood pressure and newborn low blood sugar may be lower with metformin, but this came from very few trials and the evidence was low or very low quality.",
     "No clear difference was found for pre-eclampsia, induction of labour or babies who were large for their gestational age.",
     "The authors conclude there is not enough trial data and that better-quality trials are needed."
    ],
@@ -43254,7 +43254,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/38016166/",
-   "summary": "This review pooled results from many trials to compare fezolinetant, a newer non-hormone medicine, with hormone therapy and other non-hormone treatments for moderate to severe hot flushes and night sweats after menopause. Fezolinetant cut the number of daily hot flushes about as well as the hormone therapies studied, and more than the non-hormone options paroxetine, desvenlafaxine and gabapentin. Two hormone options, tibolone and conjugated estrogens with bazedoxifene, worked better on some measures, but neither is available in the United States.",
+   "summary": "This review pooled results from many trials to compare fezolinetant, a newer non-hormone medicine, with hormone therapy and other non-hormone treatments for moderate to severe hot flushes and night sweats after menopause. Fezolinetant cut the number of daily hot flushes about as well as the hormone therapies studied, and more than the non-hormone options paroxetine, desvenlafaxine and gabapentin. Two hormone options, tibolone and conjugated estrogens with bazedoxifene, worked better on some measures, but neither is available in the United States at the dose studied.",
    "keyPoints": [
     "Fezolinetant 45 mg did not differ significantly from any of the 27 hormone therapy regimens in reducing how often hot flushes happened.",
     "Fezolinetant reduced daily hot flush frequency significantly more than paroxetine 7.5 mg, desvenlafaxine, gabapentin ER 1800 mg and placebo.",
@@ -54627,7 +54627,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/33461239/",
-   "summary": "This Cochrane review pooled 10 trials (3,319 people aged two and over) that tested wheat flour with added iron, with or without other vitamins and minerals. Iron-fortified flour may lower the chance of anaemia, but the evidence is low certainty. Effects on iron deficiency and haemoglobin were mostly uncertain, and almost no trials reported side effects. Only two trials included women.",
+   "summary": "This Cochrane review pooled 10 trials (3,319 people aged two and over) that tested wheat flour with added iron, with or without other vitamins and minerals. Iron-fortified flour may lower the chance of anaemia, but the evidence is low certainty. Effects on iron deficiency and haemoglobin were mostly uncertain, and almost no trials reported side effects. Only two trials studied women as a group of their own.",
    "keyPoints": [
     "Iron-fortified wheat flour may reduce the risk of anaemia by about 27% (low-certainty evidence).",
     "Compared with unfortified flour, flour fortified with iron plus other micronutrients probably reduces iron deficiency (moderate-certainty evidence).",
@@ -63889,7 +63889,7 @@
     "Some modern molecular tests look promising, and further data are awaited.",
     "The results may help manage couples' expectations during IUI and IVF."
    ],
-   "certainty": "moderate",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "ivf"
@@ -70704,7 +70704,7 @@
     "Surgical menopause was linked to faster decline in verbal memory, semantic memory and processing speed.",
     "Among women who had the surgery, a younger age at surgery went with faster cognitive decline."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menopause",
     "post-menopause"
@@ -73832,7 +73832,7 @@
     "Only three trials found a clear difference from controls, and six found no difference.",
     "The authors say there is not enough evidence to prove acupuncture works, because the studies were small and of poor quality."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menopause",
     "post-menopause",
@@ -79501,10 +79501,10 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/27701665/",
-   "summary": "This review pulled together 78 studies (about 8,900 women) on treatments for nausea and vomiting in pregnancy, including the severe form called hyperemesis gravidarum. Several options helped more than a dummy treatment (placebo), including ginger, vitamin B6, antihistamines, metoclopramide, a vitamin B6 and doxylamine combination, and ondansetron. Corticosteroids may help in severe cases. The reviewers say the overall quality of the evidence was low.",
+   "summary": "This review pulled together 78 studies (about 8,900 women) on treatments for nausea and vomiting in pregnancy, including the severe form called hyperemesis gravidarum. Several options may help more than a dummy treatment (placebo), including ginger, vitamin B6, antihistamines, metoclopramide, a vitamin B6 and doxylamine combination, and ondansetron. Corticosteroids may help in severe cases. The reviewers say the overall quality of the evidence was low.",
    "keyPoints": [
-    "For mild symptoms, ginger, vitamin B6 (pyridoxine), antihistamines and metoclopramide worked better than placebo.",
-    "For moderate symptoms, pyridoxine-doxylamine, promethazine and metoclopramide worked better than placebo; ondansetron helped across a range of severity.",
+    "For mild symptoms, ginger, vitamin B6 (pyridoxine), antihistamines and metoclopramide may work better than placebo.",
+    "For moderate symptoms, pyridoxine-doxylamine, promethazine and metoclopramide may work better than placebo; ondansetron helped across a range of severity.",
     "Corticosteroids may help in severe cases.",
     "One small trial found psychotherapy improved moderate symptoms, and another found taking pyridoxine-doxylamine early lowered the chance of symptoms getting worse again; evidence for other treatments was limited."
    ],
@@ -79763,7 +79763,7 @@
     "A small increase in atrial septal defects (a type of heart defect) was seen with codeine, and higher but very uncertain estimates were seen for gut malformations and cleft palate.",
     "Eleven of the 12 studies were at high risk of bias, so the findings remain uncertain."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "pregnancy"
@@ -88975,7 +88975,10 @@
     "bowel leakage",
     "pregnancy exercises",
     "postnatal recovery",
-    "pelvic floor training"
+    "pelvic floor training",
+    "leak when I sneeze",
+    "leaking when coughing",
+    "leak when I cough"
    ]
   },
   {
@@ -89185,7 +89188,10 @@
     "weak pelvic floor",
     "after birth",
     "wee leaks",
-    "pelvic floor training"
+    "pelvic floor training",
+    "leak when I sneeze",
+    "leaking when coughing",
+    "leak when I cough"
    ]
   },
   {
@@ -90720,7 +90726,7 @@
     "A levonorgestrel intrauterine device with added low-dose menopausal estrogen showed positive results for disruptive symptoms and long-term outcomes, based on limited data.",
     "Benefits apply if a woman has no contraindications; choice should reflect her risk factors, symptoms, long-term risks and benefits, and preferences."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "contraception",
     "menopause"
@@ -94104,10 +94110,10 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/29630882/",
-   "summary": "This review pooled 15 randomized trials (1,681 women) to see whether regular physical activity helps period pain that is not caused by another condition. Women who exercised reported lower pain and shorter pain than comparison groups. The trials were mostly of low or moderate quality and their results varied a lot, so researchers say better trials are needed to confirm this.",
+   "summary": "This review pooled 15 randomized trials (1,681 women) to see whether regular physical activity helps period pain that is not caused by another condition. Regular exercise probably lowers period pain and may shorten how long it lasts, compared with not exercising. The trials were mostly of low or moderate quality and their results varied a lot, so researchers say better trials are needed to confirm this.",
    "keyPoints": [
     "Physical activity was linked to lower pain intensity, about 1.89 cm less on a 10 cm pain scale.",
-    "Pain lasted about 3.92 hours less in women who were physically active.",
+    "Pain may have lasted about 3.92 hours less in women who were physically active.",
     "Evidence quality was moderate for pain intensity and low for pain duration.",
     "The authors say physical activity may be an effective treatment, but high-quality trials are needed to confirm it."
    ],
@@ -100591,7 +100597,7 @@
    "summary": "This Cochrane review looked at whether daily exercise programmes (gentle stretching and movement of the limbs) help the bones and growth of babies born early. It pooled 15 small trials with 434 preterm babies, mostly in hospital for a few weeks. The exercises may increase bone density and weight gain, but the evidence is low or very low quality. It is very uncertain whether they change fractures or total bone mineral content.",
    "keyPoints": [
     "Exercise programmes for preterm babies may increase whole-body bone density (low-certainty evidence).",
-    "They may also increase weight gain, but probably make little to no difference to length gain (low-certainty evidence).",
+    "They may also increase weight gain, but may make little to no difference to length gain (low-certainty evidence).",
     "It is very uncertain whether they affect fracture risk or whole-body bone mineral content.",
     "No usable data were available on bone health at 12 to 24 months, and larger, better trials are needed."
    ],
@@ -108890,7 +108896,7 @@
     "Few studies looked at iron during pregnancy or in early infancy.",
     "The authors call for more high-quality research, especially in pregnancy and early infancy."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menstrual-cycle",
     "pregnancy",
@@ -114539,7 +114545,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/41288141/",
    "summary": "This Cochrane review pooled 23 small trials of cyproterone acetate (an anti-androgen, usually taken with ethinylestradiol) for women with excess unwanted hair growth (hirsutism). For most comparisons with other medicines, such as spironolactone and ketoconazole, hair scores were similar. There were small differences against flutamide, and mixed results against finasteride and spironolactone plus the pill. The studies were small and the evidence ranged from very low to high quality, so firm conclusions are hard to draw.",
    "keyPoints": [
-    "Cyproterone acetate plus ethinylestradiol showed little to no difference in hair scores compared with most other treatments tested, including spironolactone, ketoconazole and finasteride.",
+    "Cyproterone acetate plus ethinylestradiol may make little to no difference in hair scores (moderate- or low-certainty evidence, depending on the comparison) compared with most other treatments tested, including spironolactone, ketoconazole and finasteride.",
     "It may improve hirsutism slightly more than flutamide, based on one small trial of 28 women.",
     "Higher and lower doses of cyproterone acetate with ethinylestradiol were not clearly different in hair scores (very low-certainty evidence).",
     "There was not enough data to compare side effects, and larger, better-designed studies are needed."
@@ -123164,8 +123170,7 @@
     "leaking urine",
     "incontinence surgery",
     "colposuspension",
-    "mesh sling",
-    "cough sneeze leak"
+    "mesh sling"
    ]
   },
   {

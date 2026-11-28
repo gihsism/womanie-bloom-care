@@ -6,18 +6,21 @@ import EvidenceNote from '@/components/research/EvidenceNote';
 import { specsForLabs } from '@/lib/evidenceTopics';
 import { LabAttentionBanner, LabCardHeader, LabEmptyCard, LabMissingTests, LabRow } from './LabInsightParts';
 
-// Key tests to highlight during pregnancy
+// Key tests to highlight during pregnancy. The status comes from the lab's
+// own range (isOutsideRange). Research round 10 removed unused cut-offs
+// that were never shown and partly unsourced (vitamin D "30 ng/mL",
+// fasting glucose "95 mg/dL", folate "5 ng/mL").
 const PREGNANCY_TESTS = [
-  { names: ['ferritin'], label: 'Iron Stores', criticalBelow: 30, idealLabel: '≥30 ng/mL' },
-  { names: ['hemoglobin', 'hb', 'hgb'], label: 'Hemoglobin', criticalBelow: 11, idealLabel: '≥11 g/dL' },
-  { names: ['tsh'], label: 'Thyroid', idealLabel: '0.1-2.5 mIU/L' },
-  { names: ['vitamin d', '25-oh'], label: 'Vitamin D', criticalBelow: 30, idealLabel: '≥30 ng/mL' },
-  { names: ['glucose', 'fasting glucose'], label: 'Blood Sugar', idealLabel: '<95 mg/dL' },
-  { names: ['hcg', 'beta-hcg', 'beta hcg'], label: 'HCG', idealLabel: 'Rising' },
-  { names: ['folate', 'folic acid'], label: 'Folate', criticalBelow: 5, idealLabel: '≥5 ng/mL' },
-  { names: ['vitamin b12', 'b12'], label: 'Vitamin B12', criticalBelow: 200, idealLabel: '≥200 pg/mL' },
-  { names: ['platelets'], label: 'Platelets', criticalBelow: 150, idealLabel: '≥150 k/µL' },
-  { names: ['calcium'], label: 'Calcium', idealLabel: '8.5-10.5 mg/dL' },
+  { names: ['ferritin'], label: 'Iron Stores' },
+  { names: ['hemoglobin', 'hb', 'hgb'], label: 'Hemoglobin' },
+  { names: ['tsh'], label: 'Thyroid' },
+  { names: ['vitamin d', '25-oh'], label: 'Vitamin D' },
+  { names: ['glucose', 'fasting glucose'], label: 'Blood Sugar' },
+  { names: ['hcg', 'beta-hcg', 'beta hcg'], label: 'HCG' },
+  { names: ['folate', 'folic acid'], label: 'Folate' },
+  { names: ['vitamin b12', 'b12'], label: 'Vitamin B12' },
+  { names: ['platelets'], label: 'Platelets' },
+  { names: ['calcium'], label: 'Calcium' },
 ];
 
 export default function PregnancyLabInsights({ since = null }: { since?: Date | null } = {}) {

@@ -239,8 +239,13 @@ const WEEK_PERSPECTIVES: Record<number, WeekPerspectives> = {
     employer: 'Labor can start any time now. Make sure your team knows you may disappear without warning. Set up the actual out-of-office. Set boundaries about being contacted during leave.',
   },
   40: {
-    baby: 'Full term. Average newborn is 50 cm and 3.4 kg, but the typical range is wide (47-54 cm, 2.5-4.3 kg). Most healthy babies arrive between week 39 and week 41.',
-    mother: 'Today\'s your due date — only about 5% of babies actually arrive on it. Stay close to home, stay rested. Past 41 weeks your provider will discuss induction timing and increased monitoring.',
+    // Research round 10: newborn size from the WHO Child Growth Standards
+    // medians at birth (girls 49.1 cm / 3.2 kg, boys 49.9 cm / 3.3 kg); the
+    // unsourced "3.4 kg (47-54 cm, 2.5-4.3 kg)" and "about 5% on the due
+    // date" are gone. Term definitions (early term 37, full term 39, term
+    // ends at 42 weeks): ACOG Committee Opinion 579.
+    baby: 'Full term. An average newborn is about 49 to 50 cm long and weighs about 3.2 to 3.3 kg (WHO growth standards), but healthy babies vary a lot. Most healthy babies arrive between week 39 and week 41.',
+    mother: 'Today\'s your due date, but few babies arrive exactly on it. Stay close to home, stay rested. Past 41 weeks your provider will discuss induction timing and increased monitoring.',
     partner: 'Be patient. Most babies come within 2 weeks either side of the due date. Stay close, stay calm. The "is it happening yet?" texts from family will be relentless — set expectations now.',
     employer: 'You should already be on leave or on the verge of it. Resist the urge to "just finish one thing" — your job has waited for you to get here, it can wait the rest of the way.',
   },
