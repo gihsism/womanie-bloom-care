@@ -1,3 +1,4 @@
+import { formatTime, TIME_FMT } from '@/lib/timeFormat';
 import { DATE_FMT } from '@/lib/dateFormat';
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { useOnceTrue } from '@/hooks/useOnceTrue';
@@ -80,7 +81,7 @@ export default function UpcomingAppointments() {
 
   const cancel = async (apt: AppointmentRow) => {
     const doctorLabel = [apt.doctor_title, apt.doctor_name].filter(Boolean).join(' ') || 'this doctor';
-    const when = format(new Date(apt.scheduled_at), `${DATE_FMT}, p`);
+    const when = format(new Date(apt.scheduled_at), `${DATE_FMT}, ${TIME_FMT}`);
     if (!(await confirm(cancelAppointmentConfirm(doctorLabel, when)))) return;
     setBusyId(apt.id);
     try {
@@ -180,7 +181,7 @@ export default function UpcomingAppointments() {
                 </p>
                 <div className="mt-1.5 flex items-center gap-1.5 flex-wrap text-xs">
                   <span className="font-medium">{relativeDay(when)}</span>
-                  <span className="text-muted-foreground">at {format(when, 'p')}</span>
+                  <span className="text-muted-foreground">at {formatTime(when)}</span>
                   <span className="text-[10px] text-muted-foreground">
                     · in {formatDistanceToNowStrict(when)}
                   </span>

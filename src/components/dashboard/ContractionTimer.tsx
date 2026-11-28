@@ -1,3 +1,4 @@
+import { formatTimeSeconds } from '@/lib/timeFormat';
 import { useConfirm } from '@/components/ConfirmDialog';
 import { discardContractionConfirm, clearContractionsConfirm } from '@/lib/confirmCopy';
 import { useEffect, useState } from 'react';
@@ -6,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { Timer, Play, Square, RotateCcw, Phone, History, CloudOff } from 'lucide-react';
-import { format, formatDistanceToNowStrict } from 'date-fns';
+import { formatDistanceToNowStrict } from 'date-fns';
 import { importLocalOnce } from '@/hooks/useLifeEvents';
 import { useOfflineLifeEvents } from '@/hooks/useOfflineLifeEvents';
 import { useWakeLock } from '@/hooks/useWakeLock';
@@ -244,7 +245,7 @@ const ContractionTimer = () => {
             {rows.map(c => (
               <li key={c.id} className="grid grid-cols-[1fr_auto_auto_auto] gap-x-3 items-center text-xs py-1">
                 <span className="text-muted-foreground flex items-center gap-1">
-                  {format(new Date(c.startedAt), 'HH:mm:ss')}
+                  {formatTimeSeconds(c.startedAt)}
                   {pendingIds.has(c.id) && (
                     <CloudOff className="h-3 w-3" aria-label="Not synced yet" />
                   )}

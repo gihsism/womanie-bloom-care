@@ -1,3 +1,4 @@
+import { formatTime } from '@/lib/timeFormat';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -68,7 +69,7 @@ export function VisitPrepSheet({ data, now = new Date(), tz }: { data: VisitPrep
         <h1 className="text-xl font-bold">{data.name || 'Patient'}</h1>
         {when && (
           <p className="text-sm">
-            Visit on {localDate(when)} at {when.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+            Visit on {localDate(when)} at {formatTime(when)}
             {data.visit?.doctor ? ` with ${data.visit.doctor}` : ''}
           </p>
         )}

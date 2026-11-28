@@ -1,3 +1,4 @@
+import { formatTime } from '@/lib/timeFormat';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -5,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotificationPrefs } from '@/hooks/useNotificationPrefs';
 import { onHealthDataChange } from '@/lib/data-events';
-import { format, isToday, formatDistanceToNowStrict, differenceInMinutes } from 'date-fns';
+import { isToday, formatDistanceToNowStrict, differenceInMinutes } from 'date-fns';
 import { CalendarClock, Video, MapPin, Stethoscope, AlertCircle } from 'lucide-react';
 
 // Day-of reminder for appointments. Pulls upcoming consultations, keeps
@@ -127,7 +128,7 @@ const AppointmentTodayBanner = () => {
                 </div>
                 <p className="text-sm font-semibold mt-0.5">Consultation with {name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {format(when, 'p')}
+                  {formatTime(when)}
                   {minutesAway > 0 && ` · in ${formatDistanceToNowStrict(when)}`}
                   {inProgress && ' · in progress'}
                   {apt.duration ? ` · ${apt.duration} min` : ''}

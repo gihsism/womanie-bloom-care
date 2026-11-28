@@ -1,3 +1,4 @@
+import { TIME_FMT } from '@/lib/timeFormat';
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -84,7 +85,7 @@ export default function ChartAccessLog() {
                     </p>
                   </div>
                   <span className="text-[11px] text-muted-foreground whitespace-nowrap">
-                    {format(new Date(row.viewed_at), 'd MMM, p')}
+                    {format(new Date(row.viewed_at), `d MMM, ${TIME_FMT}`)}
                   </span>
                 </li>
               ))}

@@ -1,3 +1,4 @@
+import { formatTime } from '@/lib/timeFormat';
 import { WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
@@ -161,7 +162,7 @@ const PostpartumPelvicFloor = () => {
               .slice(0, 12)
               .map(s => (
                 <li key={s.at} className="flex items-center justify-between text-[11px] text-muted-foreground">
-                  <span>{format(parseISO(s.at), 'HH:mm')}</span>
+                  <span>{formatTime(s.at)}</span>
                   <button
                     type="button"
                     onClick={() => removeSet(s.at)}

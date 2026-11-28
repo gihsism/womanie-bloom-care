@@ -1,3 +1,4 @@
+import { formatTime } from '@/lib/timeFormat';
 import { formatDate } from '@/lib/dateFormat';
 import { lifeStageLabel } from './lifeStageLabels';
 // Pure helpers for the doctor's dashboard. Kept free of React so the
@@ -148,7 +149,7 @@ const CLOSEOUT_WINDOW_MS = 14 * 24 * 60 * 60 * 1000;
 const CANCEL_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 function timeLabel(d: Date): string {
-  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return formatTime(d);
 }
 
 // Everything that needs the doctor, ranked: today's visits (soonest

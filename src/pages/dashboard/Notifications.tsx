@@ -1,3 +1,4 @@
+import { formatTime } from '@/lib/timeFormat';
 import { formatDate } from '@/lib/dateFormat';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -278,7 +279,7 @@ export default function Notifications() {
                     <div className="flex items-center justify-between gap-2">
                       <span>
                         <span className="font-medium">{doctor}</span>
-                        <span className="text-muted-foreground"> · {formatDate(when)} at {when.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span className="text-muted-foreground"> · {formatDate(when)} at {formatTime(when)}</span>
                       </span>
                       <Button
                         size="sm"

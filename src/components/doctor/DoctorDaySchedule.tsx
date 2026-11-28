@@ -1,3 +1,4 @@
+import { formatTime } from '@/lib/timeFormat';
 import { formatWeekdayDayMonth } from '@/lib/dateFormat';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -23,7 +24,7 @@ interface Props {
   now?: number;
 }
 
-const timeLabel = (d: Date) => d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const timeLabel = (d: Date) => formatTime(d);
 
 const Row = ({ row, onOpen }: { row: ScheduleRow; onOpen: (r: ScheduleRow) => void }) => {
   const meta = [row.kind, row.duration ? `${row.duration} min` : null].filter(Boolean).join(' · ');

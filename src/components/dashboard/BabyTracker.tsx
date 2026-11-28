@@ -1,3 +1,4 @@
+import { formatTime } from '@/lib/timeFormat';
 import { DATE_FMT, WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
@@ -438,7 +439,7 @@ function EntryList<D>({ events, onRemove, render, dateOnly }: {
           <ul className="divide-y">
             {g.items.map(e => (
               <li key={e.id} className="flex items-center gap-3 py-2.5 text-sm">
-                <span className="tabular-nums w-12 flex-shrink-0 font-medium">{format(parseISO(e.occurred_at), 'HH:mm')}</span>
+                <span className="tabular-nums w-12 flex-shrink-0 font-medium">{formatTime(e.occurred_at)}</span>
                 <span className="flex-1">{render(e)}</span>
                 <Remove onClick={() => { void onRemove(e.id); }} />
               </li>

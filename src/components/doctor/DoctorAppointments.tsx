@@ -1,3 +1,4 @@
+import { formatTime } from '@/lib/timeFormat';
 import { formatDate, formatDateTime, formatWeekdayDayMonth } from '@/lib/dateFormat';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -152,7 +153,7 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
                       <p className="font-medium">{patientNameFor(apt.patient_id)}</p>
                       <p className="text-sm text-muted-foreground">
                         {formatWeekdayDayMonth(apt.scheduled_at)}{' '}
-                        at {new Date(apt.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        at {formatTime(apt.scheduled_at)}
                         {apt.duration ? ` · ${apt.duration} min` : ''}
                         {' · '}{apt.consultation_type === 'video' ? 'Video' : 'In person'}
                       </p>
