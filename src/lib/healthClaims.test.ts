@@ -218,3 +218,48 @@ describe('IVF screens', () => {
     expect(p).toMatch(/Usually one embryo/);
   });
 });
+
+// Research round 7: the AI lab-reading prompt (api/analyze-document.ts)
+// keeps only figures that a library source states, and the lab's own
+// reference range decides the status (same rule as api/_lib/lab-flags.ts).
+describe('AI lab-reading prompt: only sourced figures, lab range wins', () => {
+  const src = read('api/analyze-document.ts');
+  const start = src.indexOf('export const STATIC_RULES = `');
+  const rules = src.slice(start, src.indexOf('`;', start));
+
+  it('the lab range decides the status, never a figure from the prompt', () => {
+    expect(rules).toMatch(/Status comes from the LAB'S OWN REFERENCE RANGE/);
+    expect(rules).toMatch(/Never call a value abnormal when it is inside the lab's printed range/);
+    expect(rules).toMatch(/critical = only when the lab or the doctor marks/);
+    expect(rules).toMatch(/Do not use any other number from memory as a cut-off/);
+  });
+
+  it('unsourced cut-offs are gone', () => {
+    for (const old of [
+      '0.1-2.5', // old trimester TSH (ATA 2011)
+      '25.8', // trimester ferritin
+      'IL-6 >', 'LH/FSH ratio', 'DHEA-S/cortisol', '>86 ng/dL', 'Day 3 FSH', 'Mean ~276',
+      '<1.0 optimal', 'Fasting insulin >20', 'Lp(a): <75', 'ApoB: <80', 'CTX', 'Cushing',
+      'HbS 20-45%', 'Tennessee', 'discontinue combined', 'aspirin + LMWH', "= Hashimoto's",
+    ]) expect(rules, old).not.toContain(old);
+  });
+
+  it('every number in the reference figures belongs to a sourced figure', () => {
+    const block = rules.slice(rules.indexOf('═══ REFERENCE FIGURES'), rules.indexOf('═══ HOW TO READ'));
+    const nums = new Set(block.match(/\d+(?:[.,]\d+)?/g));
+    const allowed = new Set([
+      '1', '2', '3', '4', // rule numbers
+      '11', '110', '2025', // FIGO anaemia in pregnancy
+      '30', '2021', // Cochrane ferritin
+      '75', '24', '28', '5.1', '92', '10.0', '180', '8.5', '153', '81', // SGGG letter 81
+      '20', '50', '29', '25', '2018', '600', '800', '65', '4,000', // vitamin D review + BLV
+    ]);
+    for (const n of nums) expect(allowed.has(n), n).toBe(true);
+  });
+
+  it('notes name who to ask and never give doses or diagnoses', () => {
+    expect(rules).toMatch(/never a diagnosis/);
+    expect(rules).toMatch(/doctor or gynaecologist, midwife, or pharmacist/);
+    expect(rules).toMatch(/Never say how much of a medicine or supplement to take/);
+  });
+});

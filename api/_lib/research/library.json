@@ -27048,7 +27048,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34360381/",
-   "summary": "This review looked at research from the past ten years on social egg freezing, where women freeze eggs for non-medical reasons to protect against age-related fertility decline. It covered how freezing is done, its safety, how often frozen eggs are used, ethical questions and cost-effectiveness. The authors report that egg vitrification (fast freezing) is the preferred method and that many women feel more secure and in control of their reproductive choices. The abstract does not give success rates or rate the quality of the evidence.",
+   "summary": "This review looked at research from the past ten years on social egg freezing, where women freeze eggs for non-medical reasons to protect against age-related fertility decline. It covered how freezing is done, its safety, how often frozen eggs are used, ethical questions and cost-effectiveness. The authors report that egg vitrification (fast freezing) is the preferred method and that it may help women feel more secure and in control of their reproductive choices. The abstract does not give success rates or rate the quality of the evidence.",
    "keyPoints": [
     "Fertility can be preserved for non-medical reasons by freezing eggs, embryos or ovarian tissue.",
     "Egg vitrification is described as a new and optimal approach.",
@@ -32131,7 +32131,7 @@
    "summary": "The US Preventive Services Task Force reviewed ways to prevent depression during pregnancy and after birth, which affects as many as 1 in 7 women. It found convincing evidence that counseling, such as cognitive behavioral therapy and interpersonal therapy, helps prevent it. The Task Force is moderately certain this approach has a moderate benefit and little risk of harm. Evidence for other approaches, such as exercise, education or supplements, was too limited to judge.",
    "keyPoints": [
     "Counseling such as cognitive behavioral therapy and interpersonal therapy is effective in preventing perinatal depression.",
-    "Women with past depression, current depressive symptoms, or risk factors like low income or young or single parenthood may benefit most.",
+    "Women with past depression, current depressive symptoms, or risk factors like low income or young or single parenthood would benefit from counseling and could be considered at increased risk.",
     "Harms of counseling were judged to be no greater than small.",
     "There was not enough evidence to judge the benefits and harms of other non-counseling approaches."
    ],
@@ -32567,7 +32567,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/28472859/",
    "summary": "This Cochrane review pooled 15 randomised trials (4501 women) of lifestyle treatment for gestational diabetes, usually healthy eating, physical activity and blood sugar monitoring. Women who had lifestyle treatment were less likely to have babies born large for their age and were less likely to have postnatal depression, and more of them reached their weight goals a year after birth. Several of these findings came from only one trial and were low-quality evidence. Long-term effects for mothers and children were poorly reported.",
    "keyPoints": [
-    "Lifestyle treatment lowered the chance of a baby being born large for gestational age (moderate-quality evidence from six trials).",
+    "Lifestyle treatment probably lowered the chance of a baby being born large for gestational age (moderate-quality evidence from six trials).",
     "Postnatal depression was less likely with lifestyle treatment, and more women met postpartum weight goals at one year, but each came from a single trial with low-quality evidence.",
     "There was no clear difference in pre-eclampsia, caesarean section, perineal tearing, induction of labour or neonatal low blood sugar.",
     "Long-term outcomes for mothers and children were poorly reported, so lasting benefits or harms remain unclear."
@@ -37858,7 +37858,7 @@
    "keyPoints": [
     "Induction did not clearly change the risk of caesarean section or instrumental (forceps or vacuum) delivery.",
     "Shoulder dystocia and birth fractures were less common with induction; about 60 inductions would be needed to prevent one fracture.",
-    "Scan estimates of baby weight are often inaccurate, so some women may worry or be induced unnecessarily.",
+    "Scan estimates of baby weight are often inaccurate, so many women may worry unnecessarily and many inductions may not be needed.",
     "One large trial saw more use of phototherapy for newborns after induction, and the trials were too small to show an effect on the rare nerve injury called brachial plexus injury."
    ],
    "certainty": "moderate",
@@ -41378,10 +41378,10 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/26342714/",
-   "summary": "This Cochrane review looked at treatments for constipation in pregnancy, but found only a few small studies, so only two (180 women) gave usable results. Stimulant laxatives helped constipation more than bulk-forming laxatives, but caused more tummy discomfort and diarrhoea. Fibre supplements increased how often women passed stools compared with no treatment. Overall, there is not enough evidence to say for sure which treatments work best or are safest.",
+   "summary": "This Cochrane review looked at treatments for constipation in pregnancy, but found only a few small studies, so only two (180 women) gave usable results. Stimulant laxatives probably helped constipation more than bulk-forming laxatives, but caused more tummy discomfort and diarrhoea. Fibre supplements may increase how often women pass stools compared with no treatment. Overall, there is not enough evidence to say for sure which treatments work best or are safest.",
    "keyPoints": [
-    "Stimulant laxatives improved constipation more than bulk-forming laxatives, but led to more diarrhoea and abdominal discomfort; women's satisfaction was similar.",
-    "Fibre supplements increased stool frequency by about 2 times per week compared with no treatment, based on one small study of 40 women.",
+    "Stimulant laxatives probably improved constipation more than bulk-forming laxatives, but led to more diarrhoea and abdominal discomfort; women's satisfaction was similar.",
+    "Fibre supplements may have increased stool frequency by about 2 times per week compared with no treatment, based on one small study of 40 women.",
     "There was no data on other options such as osmotic laxatives, stool softeners, lubricant laxatives, enemas or suppositories.",
     "The authors conclude the evidence is insufficient and more good-quality trials are needed."
    ],
@@ -56996,7 +56996,7 @@
     "One study found increased risk of invasive breast cancer only in women aged 40-45.",
     "The authors suggest advice based on each person's own risk profile, and hormone-free options may be considered for women with a history of breast cancer."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "contraception",
     "menopause",
@@ -57710,8 +57710,8 @@
    "summary": "This Cochrane review looked at 13 trials (about 1,300 women) of tranexamic acid and similar medicines for heavy periods. Compared with a placebo, these medicines reduced blood loss and more women said their bleeding improved. They also seemed to work better than some other tablets, but may work less well than the hormonal coil (levonorgestrel IUS). The evidence ranged from very low to moderate quality, and there was too little data to be sure about side effects such as blood clots.",
    "keyPoints": [
     "Compared with placebo, antifibrinolytics cut blood loss by about 53 mL per cycle and more women improved (moderate-quality evidence).",
-    "TXA was more likely to bring improvement than progestogen tablets or NSAIDs, with fewer side effects than progestogens (low-quality evidence).",
-    "In one small trial, the levonorgestrel intrauterine system (hormonal coil) worked better than TXA, with 85% of women improving versus 20% to 65% (very low-quality evidence).",
+    "TXA may be more likely to bring improvement than progestogen tablets or NSAIDs, with fewer side effects than progestogens (low-quality evidence).",
+    "In one small trial, the levonorgestrel intrauterine system (hormonal coil) may have worked better than TXA, with 85% of women improving versus 20% to 65% (very low-quality evidence).",
     "Few blood clot events were reported, but most studies did not specifically look for them, so safety data are limited."
    ],
    "certainty": "low",
@@ -58993,10 +58993,10 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/31647106/",
-   "summary": "This study pooled the original data from 20 trials with almost 4,000 women who have polycystic ovary syndrome (PCOS) and trouble getting pregnant because they do not ovulate. It compared medicines used to trigger ovulation. Letrozole led to more live births and pregnancies, and to faster pregnancy, than clomiphene citrate (CC). CC plus metformin may help a little with pregnancy rates, but the evidence did not show a clear difference in live births.",
+   "summary": "This study pooled the original data from 20 trials with almost 4,000 women who have polycystic ovary syndrome (PCOS) and trouble getting pregnant because they do not ovulate. It compared medicines used to trigger ovulation. Letrozole probably led to more live births and pregnancies, and to faster pregnancy, than clomiphene citrate (CC). CC plus metformin may help a little with pregnancy rates, but the evidence did not show a clear difference in live births.",
    "keyPoints": [
-    "Compared with clomiphene, letrozole improved live birth rates (risk ratio 1.43) and clinical pregnancy rates (risk ratio 1.45), with moderate-certainty evidence.",
-    "Letrozole also shortened the time to pregnancy compared with clomiphene.",
+    "Compared with clomiphene, letrozole probably improved live birth rates (risk ratio 1.43) and clinical pregnancy rates (risk ratio 1.45), with moderate-certainty evidence.",
+    "Letrozole also probably shortened the time to pregnancy compared with clomiphene.",
     "Clomiphene plus metformin might improve pregnancy rates and shorten time to pregnancy compared with clomiphene alone, but the evidence was low certainty and there was insufficient evidence of a difference in live births.",
     "The authors concluded letrozole can be recommended as the preferred first-line treatment for women with PCOS and infertility, and that blood levels of testosterone and insulin may influence which treatment works best."
    ],
@@ -61411,11 +61411,11 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/28236310/",
-   "summary": "This review pooled 22 trials of women having IVF to see whether adding a pill (clomiphene citrate or letrozole) could reduce the amount of FSH injections needed during ovarian stimulation. Live birth and pregnancy rates were similar with and without clomiphene. In women who were not expected to respond poorly, clomiphene lowered the risk of ovarian hyperstimulation syndrome but also meant fewer eggs were collected. Evidence for letrozole was limited and more studies are needed.",
+   "summary": "This review pooled 22 trials of women having IVF to see whether adding a pill (clomiphene citrate or letrozole) could reduce the amount of FSH injections needed during ovarian stimulation. Live birth and pregnancy rates were similar with and without clomiphene. In women who were not expected to respond poorly, clomiphene probably lowered the risk of ovarian hyperstimulation syndrome but also meant fewer eggs were collected. Evidence for letrozole was limited and more studies are needed.",
    "keyPoints": [
     "Using clomiphene to cut down FSH gave similar live birth and clinical pregnancy rates, based on moderate- to high-quality evidence.",
     "In women expected to respond poorly, clomiphene gave similar results with lower medication costs.",
-    "In other women, clomiphene reduced the risk of ovarian hyperstimulation syndrome (OHSS) but also reduced the number of eggs retrieved.",
+    "In other women, clomiphene probably reduced the risk of ovarian hyperstimulation syndrome (OHSS) but also reduced the number of eggs retrieved.",
     "More studies are needed on letrozole, and on outcomes such as total pregnancies per egg collection and whether women would agree to repeat a cycle."
    ],
    "certainty": "moderate",
@@ -62948,7 +62948,7 @@
     "No clinical or embryological factor alone justifies a double embryo transfer instead of an elective single embryo transfer.",
     "Double embryo transfer is linked to more multiple pregnancies, which raises the risk of preterm birth, low birthweight and other problems for mother and babies.",
     "Single embryo transfer is the approach preferred by international and national professional organisations to reduce these risks.",
-    "Of the evidence-based recommendations, 28% rest on moderate-quality evidence and most of the rest on low or very low-quality evidence."
+    "Of the evidence-based recommendations, 28% rest on moderate-quality evidence and the rest on low (12%) or very low-quality (60%) evidence."
    ],
    "certainty": "low",
    "lifeStages": [
@@ -64596,7 +64596,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/32666584/",
-   "summary": "This Cochrane review combined 34 trials (over 21,000 women and babies) comparing a policy of inducing labour at or after 37 weeks with waiting for labour to start naturally. All women had low-risk pregnancies. Induction was linked to fewer baby deaths around the time of birth, fewer stillbirths, fewer NICU admissions and slightly fewer caesarean births. The overall chance of a baby dying was small either way (about 0.4 versus 3 per 1000).",
+   "summary": "This Cochrane review combined 34 trials (over 21,000 women and babies) comparing a policy of inducing labour at or after 37 weeks with waiting for labour to start naturally. All women had low-risk pregnancies. Induction was linked to fewer baby deaths around the time of birth, fewer stillbirths, fewer NICU admissions and probably slightly fewer caesarean births. The overall chance of a baby dying was small either way (about 0.4 versus 3 per 1000).",
    "keyPoints": [
     "Induction was linked to fewer deaths around birth (0.4 versus 3 per 1000) and fewer stillbirths, with high-certainty evidence.",
     "Caesarean births were probably slightly fewer with induction, and operative vaginal births (forceps or vacuum) were probably no different.",
@@ -66019,7 +66019,7 @@
    "keyPoints": [
     "Obesity, diabetes and metabolic syndrome in men were linked to poorer semen quality and sperm DNA integrity.",
     "Male obesity was linked to fewer live births, both with natural conception and assisted reproduction.",
-    "Physical exercise generally improved male fertility markers, though the type and intensity of exercise may matter.",
+    "Physical exercise generally appeared to improve male fertility markers, though the type and intensity of exercise may matter.",
     "Weight-loss medicines such as metformin and GLP-1 agonists, and gastric bypass surgery, showed mixed effects on male reproductive health, so more research is needed."
    ],
    "certainty": "not stated",
@@ -76096,7 +76096,7 @@
     "Estrogen plus progesterone was linked to a likely increase in breast cancer deaths, but estrogen alone was not.",
     "In 5 trials where MHT likely started at a younger age or soon after menopause, death rates were lower."
    ],
-   "certainty": "moderate",
+   "certainty": "not stated",
    "lifeStages": [
     "menopause",
     "post-menopause"
@@ -79800,7 +79800,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/34187385/",
-   "summary": "This review pooled four randomized trials with 1165 non-pregnant adult women who had an uncomplicated lower urinary tract infection (UTI, such as a bladder infection). It compared treating with anti-inflammatory painkillers (NSAIDs, like ibuprofen) against treating with antibiotics. Antibiotics worked better: more women had their symptoms clear by day 3 or 4, and fewer developed a kidney or other upper urinary tract infection. The study did not include pregnant women, so it does not tell us about NSAID use in pregnancy.",
+   "summary": "This review pooled four randomized trials with 1165 non-pregnant adult women who had an uncomplicated lower urinary tract infection (UTI, such as a bladder infection). It compared treating with anti-inflammatory painkillers (NSAIDs, like ibuprofen) against treating with antibiotics. Antibiotics probably worked better: more women had their symptoms clear by day 3 or 4, and fewer developed a kidney or other upper urinary tract infection. The study did not include pregnant women, so it does not tell us about NSAID use in pregnancy.",
    "keyPoints": [
     "Women taking NSAIDs were less likely to have their UTI symptoms resolve by day 3 or 4 than women taking antibiotics (moderate certainty).",
     "Upper urinary tract infection complications were more likely with NSAIDs than with antibiotics (moderate certainty).",
@@ -86977,11 +86977,11 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/31264709/",
-   "summary": "This Cochrane review looked at eight trials with 1546 women who have PCOS and irregular or absent ovulation, testing whether acupuncture helps fertility and symptoms. Compared with sham (fake) acupuncture, real acupuncture did not clearly change live birth, pregnancy, ovulation or miscarriage rates, though the evidence was low quality. Real acupuncture probably caused more side effects such as dizziness, nausea and bruising. Overall the evidence was very low to moderate quality, and there were too few trials to say if acupuncture works for PCOS.",
+   "summary": "This Cochrane review looked at eight trials with 1546 women who have PCOS and irregular or absent ovulation, testing whether acupuncture helps fertility and symptoms. Compared with sham (fake) acupuncture, real acupuncture did not clearly change live birth, pregnancy, ovulation or miscarriage rates, though the evidence was low quality. Real acupuncture probably caused more side effects than sham acupuncture; in other comparisons, reported side effects included dizziness, nausea and bruising. Overall the evidence was very low to moderate quality, and there were too few trials to say if acupuncture works for PCOS.",
    "keyPoints": [
     "Real acupuncture did not clearly improve live birth, clinical pregnancy, ovulation or miscarriage rates compared with sham acupuncture (low-quality evidence).",
     "Women receiving real acupuncture may have had fewer days between periods than those given sham acupuncture (low-quality evidence).",
-    "Real acupuncture probably leads to more adverse events than sham acupuncture (moderate-quality evidence); reported events included dizziness, nausea and bruising under the skin.",
+    "Real acupuncture probably leads to more adverse events than sham acupuncture (moderate-quality evidence); in other comparisons, reported events included dizziness, nausea and bruising under the skin.",
     "It is uncertain whether acupuncture improves ovulation compared with relaxation or Diane-35, because the evidence was very low quality."
    ],
    "certainty": "low",
@@ -89092,7 +89092,7 @@
    "summary": "This Cochrane review pooled 31 trials with 1817 women to see whether pelvic floor muscle training helps with leaking urine, compared with no treatment or inactive treatments. Women who did the training were much more likely to report being cured or improved, and they leaked less often and lost less urine. Side effects were rare and minor. Most trials were small, with follow-up mostly under 12 months, so long-term benefits are still unclear.",
    "keyPoints": [
     "Women with stress incontinence who did pelvic floor training were about 8 times more likely to report cure (56% versus 6%), rated high-quality evidence.",
-    "Training reduced leakage by about one episode in 24 hours and led to less urine lost on short pad tests.",
+    "Training probably reduced leakage by about one episode in 24 hours and led to less urine lost on short pad tests.",
     "Women who did the training were also more satisfied and had better sexual outcomes; adverse events were rare and minor.",
     "The authors suggest pelvic floor training could be part of first-line, non-surgical care, but long-term effects need more research."
    ],
@@ -113349,12 +113349,12 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/31425838/",
-   "summary": "This review pooled five small studies of women who had repeated failed embryo implantation (usually during fertility treatment) and were given IVIG, an immune-system treatment given through a drip. Women who received IVIG had higher pregnancy and live birth rates than women who did not, but miscarriage rates were not different. The studies were not randomised trials, so the authors say firm conclusions must wait for larger, better-designed trials.",
+   "summary": "This review pooled five studies of women who had repeated failed embryo implantation (usually during fertility treatment) and were given IVIG, an immune-system treatment given through a drip. Women who received IVIG had higher pregnancy and live birth rates than women who did not, but miscarriage rates were not different. The studies were not randomised trials, so the authors say firm conclusions must wait for larger, better-designed trials.",
    "keyPoints": [
     "Pregnancy and live birth rates were higher in women who received IVIG than in comparison groups.",
     "There was no significant difference in miscarriage rates between the IVIG and comparison groups.",
     "IVIG may help women with repeated implantation failure who have specific immune-system problems.",
-    "The review included only five small, non-randomised studies, so larger randomised trials are needed before final conclusions."
+    "The review included only five non-randomised studies, so larger randomised trials are needed before final conclusions."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -126666,7 +126666,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/42746921/",
-   "summary": "This Cochrane review pooled 34 trials (5012 babies) of vitamin D supplements in babies born early or at low birth weight. Giving vitamin D probably lowers the chance of vitamin D deficiency compared with giving none. Higher doses (800 IU a day or more) lowered deficiency more than lower doses, but probably raised the chance of too much vitamin D. Most trials had a high risk of bias, and the effects on bone health and growth are uncertain.",
+   "summary": "This Cochrane review pooled 34 trials (5012 babies) of vitamin D supplements in babies born early or at low birth weight. Giving vitamin D probably lowers the chance of vitamin D deficiency compared with giving none. Higher doses (800 IU a day or more) probably lowered deficiency more than lower doses, but probably raised the chance of too much vitamin D. Most trials had a high risk of bias, and the effects on bone health and growth are uncertain.",
    "keyPoints": [
     "In preterm babies, vitamin D supplements (at least 200 IU a day) probably reduce vitamin D deficiency up to discharge or term-corrected age (moderate-certainty evidence).",
     "In low birth weight babies born at or near term, weekly vitamin D probably reduces deficiency at six months (moderate-certainty evidence).",
@@ -127575,7 +127575,7 @@
     "Average infant birth weight was about 53 g higher with supplementation.",
     "25 of 66 trials had at least one area at high risk of bias, so benefits remain uncertain; better trials are needed in women with low vitamin D levels or higher risk."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "pregnancy",
     "postpartum"
@@ -130230,7 +130230,7 @@
    "summary": "This Cochrane review pooled 17 trials with 9,030 pregnant women to see whether diet education or food supplements that raise energy and protein intake help mothers and babies. Diet education looked helpful for some outcomes, such as fewer preterm births and low birthweight babies, but the evidence was low quality. Balanced energy and protein supplements seemed to help babies grow and may lower the chance of stillbirth, while high-protein supplements did not look helpful and may be harmful. None of these approaches clearly changed how much weight women gained in pregnancy, and the authors say the results should be read with caution.",
    "keyPoints": [
     "Nutritional education was linked to lower risk of preterm birth and low birthweight and to higher birthweight in undernourished women, though the evidence was low quality.",
-    "Balanced energy and protein supplements raised average birthweight, lowered the risk of stillbirth and of babies being small for their gestational age (moderate-quality evidence).",
+    "Balanced energy and protein supplements probably raised average birthweight and lowered the risk of stillbirth and of babies being small for their gestational age (moderate-quality evidence).",
     "High-protein supplements did not seem beneficial and were linked to more small-for-gestational-age babies in one trial.",
     "No approach clearly changed weekly or total weight gain in pregnancy, and many trials had unclear or high risk of bias."
    ],
