@@ -54,12 +54,14 @@ test('send one question and get a streamed answer', async ({ page }, testInfo) =
   await expect(dels.first()).toBeVisible();
   const n = await dels.count();
   const del = dels.first();
-  page.once('dialog', (d) => d.dismiss());
+  const ask = page.getByRole('alertdialog');
   await del.click();
+  await ask.getByRole('button', { name: 'Keep chat' }).click();
+  await expect(ask).toHaveCount(0);
   await expect(dels).toHaveCount(n);
-  page.once('dialog', (d) => d.accept());
   const deleted = page.waitForResponse((r) => r.url().includes('/api/chat/conversation') && r.request().method() === 'DELETE');
   await del.click();
+  await ask.getByRole('button', { name: 'Delete chat' }).click();
   expect((await deleted).status()).toBe(200);
   await expect(dels).toHaveCount(n - 1);
 });

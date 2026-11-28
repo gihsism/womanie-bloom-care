@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Minus, ArrowRight } from 'lucide-react';
@@ -66,7 +67,7 @@ export default function TestComparisonTable({ medicalData }: TestComparisonTable
       );
 
       const readings = sorted.map(l => ({
-        date: format(new Date(l.date_recorded!), 'MMM d, yy'),
+        date: format(new Date(l.date_recorded!), DATE_FMT),
         value: labNumber(l.value) as number,
         status: l.status,
       }));

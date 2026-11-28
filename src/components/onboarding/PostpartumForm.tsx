@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar as CalendarIcon } from 'lucide-react';
@@ -56,7 +57,7 @@ const PostpartumForm = () => {
                   className={cn('w-full justify-start text-left font-normal', !birthDate && 'text-muted-foreground')}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {birthDate ? format(birthDate, 'PPP') : <span>Pick a date</span>}
+                  {birthDate ? format(birthDate, DATE_FMT) : <span>Pick a date</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">

@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -207,7 +208,7 @@ const CycleHistoryCard = ({ enabled = true }: CycleHistoryCardProps) => {
               formatter={(value: number) => [`${value} days`, 'Length']}
               labelFormatter={(idx) => {
                 const c = cycles[Number(idx) - 1];
-                return c ? `Cycle ${idx} — started ${format(parseISO(c.startDate), 'MMM d, yyyy')}` : `Cycle ${idx}`;
+                return c ? `Cycle ${idx} — started ${format(parseISO(c.startDate), DATE_FMT)}` : `Cycle ${idx}`;
               }}
             />
             <ReferenceLine

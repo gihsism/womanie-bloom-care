@@ -1,3 +1,4 @@
+import { DATE_FMT, DATE_TIME_FMT } from '@/lib/dateFormat';
 import { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -96,7 +97,7 @@ export default function ConsentLog() {
                   </p>
                   {upToDate && latest ? (
                     <p className="text-[13px] text-muted-foreground">
-                      Accepted on {format(new Date(latest.accepted_at), 'd MMM yyyy, HH:mm')} {SOURCES[latest.source] ?? ''}.
+                      Accepted on {format(new Date(latest.accepted_at), DATE_TIME_FMT)} {SOURCES[latest.source] ?? ''}.
                     </p>
                   ) : (
                     <>
@@ -122,7 +123,7 @@ export default function ConsentLog() {
                 <ul className="mt-2 space-y-1">
                   {history.slice(1).map((h, i) => (
                     <li key={i}>
-                      {LABELS[h.document] ?? h.document} {h.version}: {format(new Date(h.accepted_at), 'd MMM yyyy')}
+                      {LABELS[h.document] ?? h.document} {h.version}: {format(new Date(h.accepted_at), DATE_FMT)}
                     </li>
                   ))}
                 </ul>

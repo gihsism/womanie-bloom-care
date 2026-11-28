@@ -2,6 +2,7 @@
 // as a question for her next visit ("Ask my doctor about this").
 // Pure helpers, unit-tested; the page does the saving.
 
+import { formatDateTime } from '@/lib/dateFormat';
 import { addQuestion, parseQuestions, MAX_QUESTION_CHARS, type VisitQuestion } from './visitQuestions';
 import { citedSources, splitSourcesFooter, stripUnknownCitations, type ChatSource } from './research-sources';
 
@@ -36,7 +37,7 @@ export function chatToMarkdown(turns: ChatTurn[], opts: { exportedAt: Date; mode
   const header = [
     '# Womanie AI Health Assistant',
     '',
-    `Exported: ${opts.exportedAt.toLocaleString()}`,
+    `Exported: ${formatDateTime(opts.exportedAt)}`,
     ...(opts.model ? [`Model: ${opts.model}`] : []),
     '',
     '> This conversation is for reference only. The AI assistant on Womanie is not a substitute for medical advice from a licensed clinician.',

@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -229,7 +230,7 @@ const RescheduleDialog = ({ appointment, open, onOpenChange, onRescheduled }: Re
                 </div>
               ) : slots.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center">
-                  No free slots on {format(selectedDate, 'PPP')} — try another day.
+                  No free slots on {format(selectedDate, DATE_FMT)} — try another day.
                 </p>
               ) : (
                 <div className="grid grid-cols-3 gap-2">

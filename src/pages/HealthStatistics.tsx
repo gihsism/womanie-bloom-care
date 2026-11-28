@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { LoadFailed } from "@/components/LoadFailed";
 import { useNavigate } from "react-router-dom";
@@ -343,7 +344,7 @@ export default function HealthStatistics() {
                       </Badge>
                       <span className="flex items-center gap-1 text-sm">
                         <Calendar className="h-3 w-3" />
-                        {format(new Date(doc.uploaded_at), 'MMM d, yyyy')}
+                        {format(new Date(doc.uploaded_at), DATE_FMT)}
                       </span>
                     </CardDescription>
                   </div>

@@ -1,3 +1,6 @@
+import { formatWeekdayDayMonth } from '@/lib/dateFormat';
+import { useConfirm } from '@/components/ConfirmDialog';
+import { deleteChatConfirm, deleteAllChatsConfirm } from '@/lib/confirmCopy';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -220,6 +223,7 @@ export default function AIDoctorChat() {
   const { user, loading: authLoading } = useAuth();
   const healthContext = useUserHealthContext();
   const { toast } = useToast();
+  const [confirm, confirmDialog] = useConfirm();
   usePageTitle('Ask AI');
   // The chat on screen. It always starts new; stored history is listed
   // under "Past chats" (history below) and can be reopened from there.
@@ -701,7 +705,7 @@ export default function AIDoctorChat() {
   const deletePastChat = async (chat: PastChat<StoredChatMessage & { sources?: ChatSource[] }>) => {
     const target = chatDeleteTarget(chat);
     if (!target) return;
-    if (!window.confirm(`Delete the chat "${chat.title}"? This cannot be undone.`)) return;
+    if (!(await confirm(deleteChatConfirm(chat.title)))) return;
     try {
       const resp = await fetch('/api/chat/conversation', {
         method: 'DELETE',
@@ -731,7 +735,7 @@ export default function AIDoctorChat() {
     // clearing an already-empty chat would just surface a pointless
     // prompt.
     const hasRealHistory = history.length > 0 || messages.some(m => m !== WELCOME_MESSAGE);
-    if (hasRealHistory && !window.confirm('Delete all your past chats? This cannot be undone.')) {
+    if (hasRealHistory && !(await confirm(deleteAllChatsConfirm()))) {
       return;
     }
     setMessages([WELCOME_MESSAGE]);
@@ -815,7 +819,7 @@ export default function AIDoctorChat() {
       const unschedRow = next ? rows.find(r => r.appointment_id === UNSCHEDULED_VISIT_ID) ?? null : null;
       const { list, added, carried } = addToVisitList(visitRow ? visitRow.questions : null, unschedRow?.questions ?? null, text);
       const where = next
-        ? `your visit on ${new Date(next.scheduled_at).toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' })}`
+        ? `your visit on ${formatWeekdayDayMonth(next.scheduled_at)}`
         : 'your next visit';
       if (added) {
         const { error: upErr } = await db.from('visit_questions').upsert(
@@ -895,6 +899,7 @@ export default function AIDoctorChat() {
     // The mobile nav is a left rail now, so the pinned input only needs to
     // clear the phone's home-indicator safe area.
     <main className="min-h-screen bg-background flex flex-col pb-[env(safe-area-inset-bottom)]">
+      {confirmDialog}
       {/* Header: title, Past chats / New chat, and a ⋯ menu for the rest */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="px-3 py-2.5 sm:px-4 sm:py-3 flex items-center gap-2">

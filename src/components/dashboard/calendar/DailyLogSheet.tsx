@@ -108,7 +108,7 @@ const DailyLogSheet = ({
       <SheetContent side="bottom" className="h-[80vh] rounded-t-3xl">
         <SheetHeader className="pb-4">
           <SheetTitle className="flex items-center gap-2">
-            <span className="text-xl">{format(date, 'EEEE, MMM d')}</span>
+            <span className="text-xl">{format(date, 'EEEE d MMM')}</span>
           </SheetTitle>
           <SheetDescription>
             Track how you're feeling today

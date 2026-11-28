@@ -1,3 +1,6 @@
+import { DATE_FMT } from '@/lib/dateFormat';
+import { useConfirm } from '@/components/ConfirmDialog';
+import { deleteDocumentConfirm } from '@/lib/confirmCopy';
 import { lazy, Suspense, useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import ReportChanges from '@/components/records/ReportChanges';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -565,7 +568,7 @@ function ResultCard({ item, history = [] }: { item: MedicalDataItem; history?: M
       )}
       {item.date_recorded && (
         <p className="text-[10px] text-muted-foreground mt-2">
-          📅 {format(new Date(item.date_recorded), 'MMMM d, yyyy')}
+          📅 {format(new Date(item.date_recorded), DATE_FMT)}
         </p>
       )}
     </div>
@@ -600,6 +603,7 @@ export default function MedicalHistory() {
   const [docFilter, setDocFilter] = useState<DocFilter>('all');
   const [docSearch, setDocSearch] = useState('');
   const { toast } = useToast();
+  const [confirm, confirmDialog] = useConfirm();
   const [searchParams] = useSearchParams();
   // Three segments: Results (default) | Documents | My charts.
   // ?tab=documents|charts opens one directly; ?doc=<id> opens Documents.
@@ -1012,7 +1016,7 @@ export default function MedicalHistory() {
       labTrendData[title] = {
         data: sorted.map(l => {
           const { low, high } = parseRange(l.reference_range);
-          return { date: format(new Date(l.date_recorded!), 'MMM d, yy'), value: l.numVal, refLow: low, refHigh: high };
+          return { date: format(new Date(l.date_recorded!), DATE_FMT), value: l.numVal, refLow: low, refHigh: high };
         }),
         unit: sorted[0].unit || '',
         latestStatus: sorted[sorted.length - 1].status,
@@ -1153,6 +1157,7 @@ export default function MedicalHistory() {
 
   return (
     <main className="min-h-screen bg-background">
+    {confirmDialog}
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="px-3 py-3 sm:px-4 sm:py-4 flex items-center gap-2 sm:gap-3">
@@ -1373,7 +1378,7 @@ export default function MedicalHistory() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{doc.ai_suggested_name || doc.file_name}</p>
                         <p className="text-[11px] text-muted-foreground flex items-center gap-1.5">
-                          <span>{doc.uploaded_at ? format(new Date(doc.uploaded_at), 'MMM d, yyyy') : ''}</span>
+                          <span>{doc.uploaded_at ? format(new Date(doc.uploaded_at), DATE_FMT) : ''}</span>
                           {fromDoctor[doc.id] && (
                             <span className="text-primary font-medium">· From {fromDoctor[doc.id].doctor_name}</span>
                           )}
@@ -1489,7 +1494,7 @@ export default function MedicalHistory() {
                                         </span>
                                         {other.uploaded_at && (
                                           <span className="text-[10px] text-muted-foreground">
-                                            {format(new Date(other.uploaded_at), 'MMM d, yyyy')}
+                                            {format(new Date(other.uploaded_at), DATE_FMT)}
                                           </span>
                                         )}
                                       </div>
@@ -1502,9 +1507,9 @@ export default function MedicalHistory() {
                             variant="outline"
                             size="sm"
                             className="h-7 text-xs gap-1.5 text-destructive hover:text-destructive"
-                            onClick={(e) => {
+                            onClick={async (e) => {
                               e.stopPropagation();
-                              if (window.confirm(`Delete "${doc.ai_suggested_name || doc.file_name}"?`)) {
+                              if (await confirm(deleteDocumentConfirm(doc.ai_suggested_name || doc.file_name))) {
                                 deleteDocument(doc.id);
                               }
                             }}
@@ -2036,7 +2041,7 @@ export default function MedicalHistory() {
                         {stats.nextCheckupEstimate && (
                           <p className="text-sm">
                             {differenceInDays(stats.nextCheckupEstimate, new Date()) > 0
-                              ? <>🗓️ Your next checkup might be around <span className="font-medium text-primary">{format(stats.nextCheckupEstimate, 'MMMM d, yyyy')}</span></>
+                              ? <>🗓️ Your next checkup might be around <span className="font-medium text-primary">{format(stats.nextCheckupEstimate, DATE_FMT)}</span></>
                               : <>⏰ You might be <span className="font-medium text-destructive">{Math.abs(differenceInDays(stats.nextCheckupEstimate, new Date()))} days overdue</span> for a checkup</>
                             }
                           </p>

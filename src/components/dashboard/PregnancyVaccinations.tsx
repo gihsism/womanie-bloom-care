@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -61,7 +62,7 @@ export default function PregnancyVaccinations({ dueDate }: PregnancyVaccinations
   const markReceived = (key: string) => {
     const today = format(new Date(), 'yyyy-MM-dd');
     persist({ ...state, [key]: { receivedDate: today } });
-    toast({ title: 'Marked received', description: `${VACCINES.find(v => v.key === key)?.label} on ${format(new Date(), 'MMM d, yyyy')}.` });
+    toast({ title: 'Marked received', description: `${VACCINES.find(v => v.key === key)?.label} on ${format(new Date(), DATE_FMT)}.` });
   };
   const markDeclined = (key: string) => {
     persist({ ...state, [key]: { declined: true } });
@@ -78,7 +79,7 @@ export default function PregnancyVaccinations({ dueDate }: PregnancyVaccinations
     if (state[v.key]?.receivedDate) {
       return {
         key: 'received',
-        label: `Received ${format(parseISO(state[v.key].receivedDate!), 'MMM d, yyyy')}`,
+        label: `Received ${format(parseISO(state[v.key].receivedDate!), DATE_FMT)}`,
         color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200',
       };
     }

@@ -1,3 +1,4 @@
+import { DAY_MONTH_FMT, formatDayRange } from '@/lib/dateFormat';
 import { useMemo } from 'react';
 import { parseISO, differenceInDays, addDays, format, isSameDay } from 'date-fns';
 import type { UserHealthContext } from './useUserHealthContext';
@@ -458,12 +459,10 @@ export function isOvulationDay(date: Date, predicted: Date): boolean {
 
 export function getPredictionMessage(prediction: CyclePrediction): string {
   if (prediction.isRegular) {
-    return `Expected ${format(prediction.predictedPeriodStart, 'MMM d')}`;
+    return `Expected ${format(prediction.predictedPeriodStart, DAY_MONTH_FMT)}`;
   }
   const rangeStart = addDays(prediction.predictedPeriodStart, -prediction.confidenceWindow);
   const rangeEnd = addDays(prediction.predictedPeriodStart, prediction.confidenceWindow);
-  // Repeat the month when the window crosses into the next one
-  // ("Jan 29-Feb 4", not "Jan 29-4").
-  const endFmt = rangeStart.getMonth() === rangeEnd.getMonth() ? 'd' : 'MMM d';
-  return `Expected ${format(rangeStart, 'MMM d')}-${format(rangeEnd, endFmt)}`;
+  // "18-22 Jan"; both months when the window crosses one ("29 Jan-4 Feb").
+  return `Expected ${formatDayRange(rangeStart, rangeEnd)}`;
 }

@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -44,7 +45,7 @@ const OvulationPrediction = ({ userId, lastPeriodStart, cycleLength = 28, onPred
     try {
       const date = parseISO(dateStr);
       if (!isValid(date)) return 'Invalid date';
-      return format(date, 'MMMM d, yyyy');
+      return format(date, DATE_FMT);
     } catch {
       return 'Invalid date';
     }

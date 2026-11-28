@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -247,7 +248,7 @@ export default function PrintHealthRecord() {
     );
   }
 
-  const today = format(new Date(), 'MMMM d, yyyy');
+  const today = format(new Date(), DATE_FMT);
   const totalLabResults = items.filter(i => i.data_type === 'lab_result').length;
 
   return (
@@ -276,7 +277,7 @@ export default function PrintHealthRecord() {
           <div className="text-sm text-gray-600 flex flex-wrap gap-x-3 gap-y-1">
             {user?.email && <span>{user.email}</span>}
             {profile?.life_stage && <span>· {lifeStageLabel(profile.life_stage)}</span>}
-            {profile?.pregnancy_due_date && <span>· pregnancy due {format(new Date(profile.pregnancy_due_date), 'MMM d, yyyy')}</span>}
+            {profile?.pregnancy_due_date && <span>· pregnancy due {format(new Date(profile.pregnancy_due_date), DATE_FMT)}</span>}
             {profile?.ivf_phase && <span>· IVF {profile.ivf_phase}</span>}
             <span>· printed {today}</span>
           </div>
@@ -300,7 +301,7 @@ export default function PrintHealthRecord() {
               <div className="mb-3">
                 <p className="text-sm leading-relaxed">
                   <span className="font-medium">Last period:</span>{' '}
-                  {format(cycleStats.lastPeriodDate, 'MMM d, yyyy')}{' '}
+                  {format(cycleStats.lastPeriodDate, DATE_FMT)}{' '}
                   ({cycleStats.daysSinceLast === 0
                     ? 'today'
                     : cycleStats.daysSinceLast === 1
@@ -440,7 +441,7 @@ export default function PrintHealthRecord() {
                       {prettyType && <span className="text-[10px] text-gray-500 ml-2 uppercase tracking-wide">{prettyType}</span>}
                     </p>
                     <p className="text-[11px] text-gray-600 mb-1">
-                      {docLabel}{spec} · {format(new Date(n.created_at), 'MMM d, yyyy')}
+                      {docLabel}{spec} · {format(new Date(n.created_at), DATE_FMT)}
                     </p>
                     <p className="text-[12px] text-gray-700 whitespace-pre-line leading-relaxed">{n.content}</p>
                   </div>
@@ -485,7 +486,7 @@ export default function PrintHealthRecord() {
                       {doc.uploaded_at && (
                         <>
                           {' · '}
-                          uploaded {format(new Date(doc.uploaded_at), 'MMM d, yyyy')}
+                          uploaded {format(new Date(doc.uploaded_at), DATE_FMT)}
                         </>
                       )}
                     </p>

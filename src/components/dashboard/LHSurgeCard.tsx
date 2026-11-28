@@ -1,3 +1,4 @@
+import { DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -158,7 +159,7 @@ const LHSurgeCard = () => {
                 {surgeIsFresh ? 'LH surge detected' : 'Last surge logged'}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {format(parseISO(surge.date), 'MMM d')}
+                {format(parseISO(surge.date), DAY_MONTH_FMT)}
                 {daysSinceSurge !== null && daysSinceSurge >= 0 && (
                   <>
                     {' · '}
@@ -172,7 +173,7 @@ const LHSurgeCard = () => {
                 {expectedOvulation && surgeIsFresh && (
                   <>
                     {' · ovulation expected '}
-                    {format(expectedOvulation, 'MMM d')}
+                    {format(expectedOvulation, DAY_MONTH_FMT)}
                   </>
                 )}
               </p>

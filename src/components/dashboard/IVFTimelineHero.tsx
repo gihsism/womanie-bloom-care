@@ -1,3 +1,4 @@
+import { WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useMemo } from 'react';
 import { format, differenceInDays } from 'date-fns';
 import { IVF_PHASES } from './ivfPhases';
@@ -56,7 +57,7 @@ export default function IVFTimelineHero({ startDate, phase: pickedPhase }: { sta
     : idx < IVF_PHASES.length - 1 ? `This phase usually lasts ${current.duration}. Next: ${label(idx + 1)}.` : 'The last step of this cycle.';
   return (
     <section className="mb-6" aria-label="Your IVF cycle at a glance">
-      <p className="label-mono">{format(now, 'EEE d MMM')}</p>
+      <p className="label-mono">{format(now, WEEKDAY_DAY_MONTH_FMT)}</p>
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
         {label(idx)} <span className="text-muted-foreground">· {status.stimDay != null ? 'stim ' : ''}day {day}</span>
       </h2>

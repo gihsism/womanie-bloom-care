@@ -87,16 +87,16 @@ describe("getPredictionMessage", () => {
     }) as CyclePrediction;
 
   it("gives a single expected date when regular", () => {
-    expect(getPredictionMessage(base({ isRegular: true }))).toBe("Expected Jan 20");
+    expect(getPredictionMessage(base({ isRegular: true }))).toBe("Expected 20 Jan");
   });
 
   it("gives a date range spanning the confidence window when irregular", () => {
     // 2026-01-20 ± 2 days => Jan 18-22
-    expect(getPredictionMessage(base({ isRegular: false, confidenceWindow: 2 }))).toBe("Expected Jan 18-22");
+    expect(getPredictionMessage(base({ isRegular: false, confidenceWindow: 2 }))).toBe("Expected 18-22 Jan");
   });
 
   it("names both months when the window crosses a month boundary", () => {
     const p = base({ isRegular: false, confidenceWindow: 3, predictedPeriodStart: new Date(2026, 0, 30) });
-    expect(getPredictionMessage(p)).toBe("Expected Jan 27-Feb 2");
+    expect(getPredictionMessage(p)).toBe("Expected 27 Jan-2 Feb");
   });
 });

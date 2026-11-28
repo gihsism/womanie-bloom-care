@@ -1,3 +1,4 @@
+import { WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useCallback, useEffect, useState } from 'react';
 import { format, subDays } from 'date-fns';
 import { db } from '@/integrations/db/client';
@@ -78,7 +79,7 @@ export default function PillRingHero(_props: { name?: string | null }) {
       : null;
     return (
       <section className="mb-6" aria-label="Your contraception at a glance">
-        <p className="label-mono">{format(now, 'EEE d MMM')}</p>
+        <p className="label-mono">{format(now, WEEKDAY_DAY_MONTH_FMT)}</p>
         <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
           {METHOD_LABELS[method]}
           {cycle?.cycleDay != null && <span className="text-muted-foreground"> · day {cycle.cycleDay}</span>}
@@ -97,7 +98,7 @@ export default function PillRingHero(_props: { name?: string | null }) {
 
   return (
     <section className="mb-6" aria-label="Your pill pack at a glance">
-      <p className="label-mono">{format(now, 'EEE d MMM')}</p>
+      <p className="label-mono">{format(now, WEEKDAY_DAY_MONTH_FMT)}</p>
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
         {ring.packDay ? <>Pill {ring.packDay} <span className="text-muted-foreground">of 28</span></> : <>Your pill <span className="text-muted-foreground">· last 28 days</span></>}
       </h2>

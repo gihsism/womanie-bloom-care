@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -283,7 +284,7 @@ const PostpartumDashboard = ({ onNavigateToDoctorChat }: PostpartumDashboardProp
                 : `${weeksPp} ${weeksPp === 1 ? 'week' : 'weeks'} postpartum`}
             </h2>
             <p className="text-xs text-muted-foreground">
-              Baby born {format(birthDate, 'MMM d, yyyy')} ·{' '}
+              Baby born {format(birthDate, DATE_FMT)} ·{' '}
               {weeksPp <= 6 ? 'fourth-trimester window' : weeksPp <= 26 ? 'early postpartum recovery' : weeksPp <= 52 ? 'first-year transition' : 'one-year-plus postpartum'}
             </p>
           </div>

@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { format, differenceInDays } from 'date-fns';
@@ -77,7 +78,7 @@ export default function HealthTimeline({ documents, medicalData }: HealthTimelin
 
       timeline.push({
         date,
-        dateLabel: format(date, 'MMM d, yyyy'),
+        dateLabel: format(date, DATE_FMT),
         type: 'document',
         icon: Icon,
         title: doc.ai_suggested_name || doc.file_name,

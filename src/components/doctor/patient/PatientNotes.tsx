@@ -1,3 +1,6 @@
+import { formatDate } from '@/lib/dateFormat';
+import { useConfirm } from '@/components/ConfirmDialog';
+import { deleteNoteConfirm } from '@/lib/confirmCopy';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -82,6 +85,7 @@ interface Props {
 
 const PatientNotes = ({ doctorId, patientId, notes, formOpen, draft, onDraftChange, onFormOpenChange, onChanged }: Props) => {
   const { toast } = useToast();
+  const [confirm, confirmDialog] = useConfirm();
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editing, setEditing] = useState<NoteDraft>(EMPTY_DRAFT);
@@ -129,7 +133,7 @@ const PatientNotes = ({ doctorId, patientId, notes, formOpen, draft, onDraftChan
   };
 
   const remove = async (id: string) => {
-    if (!window.confirm('Delete this note? This cannot be undone.')) return;
+    if (!(await confirm(deleteNoteConfirm()))) return;
     setDeletingId(id);
     try {
       const { error } = await db.from('doctor_notes').delete().eq('id', id);
@@ -151,6 +155,7 @@ const PatientNotes = ({ doctorId, patientId, notes, formOpen, draft, onDraftChan
 
   return (
     <div className="space-y-4">
+    {confirmDialog}
       {formOpen && (
         <Card>
           <CardHeader className="pb-3">
@@ -211,7 +216,7 @@ const PatientNotes = ({ doctorId, patientId, notes, formOpen, draft, onDraftChan
                 <div className="min-w-0 flex-1">
                   <h3 className="font-medium">{note.title}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {new Date(note.created_at).toLocaleDateString()} · {typeLabel(note.note_type)}
+                    {formatDate(note.created_at)} · {typeLabel(note.note_type)}
                   </p>
                 </div>
                 <Badge variant={note.is_visible_to_patient ? 'default' : 'outline'} className="shrink-0">

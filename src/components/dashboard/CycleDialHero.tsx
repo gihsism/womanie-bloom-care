@@ -1,3 +1,4 @@
+import { WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { differenceInDays, format } from 'date-fns';
 import { cycleDial } from '@/lib/bodyMap';
 import { useCycleModel } from '@/hooks/useCycleModel';
@@ -71,11 +72,11 @@ export default function CycleDialHero({
     ? `Your fertile window ends ${inDays(toFertileEnd)}.`
     : ttc && d.daysToFertile != null
       ? `Your fertile window starts ${inDays(d.daysToFertile)}.`
-      : `Next period ${inDays(d.daysToPeriod)}, around ${format(d.nextPeriod, 'EEE d MMM')}.`;
+      : `Next period ${inDays(d.daysToPeriod)}, around ${format(d.nextPeriod, WEEKDAY_DAY_MONTH_FMT)}.`;
 
   return (
     <section className="mb-6" aria-label="Your cycle at a glance">
-      <p className="label-mono">{format(now, 'EEE d MMM')}</p>
+      <p className="label-mono">{format(now, WEEKDAY_DAY_MONTH_FMT)}</p>
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
         Day {late ? L + lateBy + 1 : d.day} {!late && <span className="text-muted-foreground">of {L}</span>}
       </h2>

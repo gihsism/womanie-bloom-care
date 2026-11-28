@@ -1,3 +1,4 @@
+import { DATE_FMT, DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -305,12 +306,12 @@ function InvitePanel({ onChanged }: { onChanged: () => void }) {
 
       {created && (
         <div className="rounded-md border border-border p-3 space-y-2 bg-muted/30">
-          <p className="text-xs">Link for <span className="font-medium">{created.email}</span>, valid until {format(new Date(created.expiresAt), 'd MMM yyyy')}. It is shown only now.</p>
+          <p className="text-xs">Link for <span className="font-medium">{created.email}</span>, valid until {format(new Date(created.expiresAt), DATE_FMT)}. It is shown only now.</p>
           <p className="text-[11px] font-mono break-all select-all">{created.link}</p>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => copy(created.link)}><Copy className="h-3.5 w-3.5" /> Copy link</Button>
             <Button asChild size="sm" variant="outline" className="h-8 gap-1">
-              <a href={mailto(created.email, 'Your invitation to Womanie', `Hello,\n\nhere is your personal link to join Womanie as a doctor. It works once and expires on ${format(new Date(created.expiresAt), 'd MMMM yyyy')}:\n\n${created.link}\n\nAfter registering you land on a short setup checklist (profile, consultation hours, bookings).\n\nBest regards,\nWomanie`)}>
+              <a href={mailto(created.email, 'Your invitation to Womanie', `Hello,\n\nhere is your personal link to join Womanie as a doctor. It works once and expires on ${format(new Date(created.expiresAt), DATE_FMT)}:\n\n${created.link}\n\nAfter registering you land on a short setup checklist (profile, consultation hours, bookings).\n\nBest regards,\nWomanie`)}>
                 <Mail className="h-3.5 w-3.5" /> Email it
               </a>
             </Button>
@@ -324,7 +325,7 @@ function InvitePanel({ onChanged }: { onChanged: () => void }) {
             <li key={i.id} className="py-2 flex items-center gap-2">
               <span className="flex-1 min-w-0 break-all">{i.email}{i.note ? <span className="text-muted-foreground"> · {i.note}</span> : null}</span>
               <span className="text-muted-foreground shrink-0">
-                {i.status === 'open' ? `open until ${format(new Date(i.expires_at), 'd MMM')}` : i.status}
+                {i.status === 'open' ? `open until ${format(new Date(i.expires_at), DAY_MONTH_FMT)}` : i.status}
               </span>
               {i.status === 'open' && (
                 <Button size="sm" variant="ghost" className="h-7 gap-1 text-destructive hover:text-destructive" onClick={() => revoke(i.id)}>

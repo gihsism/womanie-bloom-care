@@ -1,3 +1,4 @@
+import { DATE_FMT, DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -175,7 +176,7 @@ const SleepTrendCard = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis
                 dataKey="day"
-                tickFormatter={(d) => format(subDays(new Date(), SCAN_DAYS - 1 - d), 'MMM d')}
+                tickFormatter={(d) => format(subDays(new Date(), SCAN_DAYS - 1 - d), DAY_MONTH_FMT)}
                 tick={{ fontSize: 10 }}
                 tickCount={5}
               />
@@ -187,7 +188,7 @@ const SleepTrendCard = () => {
               />
               <Tooltip
                 labelFormatter={(d) =>
-                  format(subDays(new Date(), SCAN_DAYS - 1 - Number(d)), 'MMM d, yyyy')
+                  format(subDays(new Date(), SCAN_DAYS - 1 - Number(d)), DATE_FMT)
                 }
                 formatter={(v: number) => [`${v.toFixed(1)}h`, 'Sleep']}
                 contentStyle={{

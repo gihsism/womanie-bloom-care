@@ -1,3 +1,4 @@
+import { DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Target, Info } from 'lucide-react';
@@ -113,10 +114,10 @@ export default function CyclePredictionAccuracyCard({ mode }: Props) {
           return (
             <div key={i} className="flex items-center gap-2 text-xs border-b border-border/40 pb-1.5 last:border-b-0 last:pb-0">
               <span className="text-muted-foreground tabular-nums w-20">
-                {format(p.actual, 'MMM d')}
+                {format(p.actual, DAY_MONTH_FMT)}
               </span>
               <span className="text-muted-foreground flex-1">
-                predicted {format(p.predicted, 'MMM d')}
+                predicted {format(p.predicted, DAY_MONTH_FMT)}
               </span>
               <span className={`tabular-nums font-medium ${tone}`}>
                 {sign}{abs}d

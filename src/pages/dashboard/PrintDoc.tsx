@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -162,7 +163,7 @@ export default function PrintDoc() {
             {doc.ai_suggested_category && (
               <span className="capitalize">{doc.ai_suggested_category.replace(/_/g, ' ')}</span>
             )}
-            {doc.uploaded_at && <span>Uploaded {format(new Date(doc.uploaded_at), 'MMMM d, yyyy')}</span>}
+            {doc.uploaded_at && <span>Uploaded {format(new Date(doc.uploaded_at), DATE_FMT)}</span>}
             {user?.email && <span>· {user.email}</span>}
           </div>
         </header>

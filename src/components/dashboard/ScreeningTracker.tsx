@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -229,7 +230,7 @@ const ScreeningTracker = ({ scope }: ScreeningTrackerProps) => {
                   </p>
                   {lastDone && (
                     <p className="text-[10px] text-muted-foreground mt-1">
-                      Last done {format(lastDone, 'MMM d, yyyy')}
+                      Last done {format(lastDone, DATE_FMT)}
                       {nextDue && ` · Next due ${format(nextDue, 'MMM yyyy')}`}
                     </p>
                   )}

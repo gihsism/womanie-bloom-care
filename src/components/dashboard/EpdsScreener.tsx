@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -221,7 +222,7 @@ export default function EpdsScreener({ mode }: EpdsScreenerProps) {
         <div className={`rounded-lg border p-3 ${lastInterp.color}`}>
           <p className="text-xs font-semibold">{lastInterp.label}</p>
           <p className="text-[11px] mt-1 leading-relaxed">{lastInterp.message}</p>
-          <p className="text-[10px] mt-2 opacity-75">Taken {format(parseISO(latest.date), 'MMM d, yyyy')}</p>
+          <p className="text-[10px] mt-2 opacity-75">Taken {format(parseISO(latest.date), DATE_FMT)}</p>
         </div>
       )}
 
@@ -285,7 +286,7 @@ export default function EpdsScreener({ mode }: EpdsScreenerProps) {
           <ul className="mt-2 space-y-1">
             {history.slice(0, 8).map((h, i) => (
               <li key={i} className="text-[11px] flex items-center gap-2">
-                <span className="text-muted-foreground w-24">{format(parseISO(h.date), 'MMM d, yyyy')}</span>
+                <span className="text-muted-foreground w-24">{format(parseISO(h.date), DATE_FMT)}</span>
                 <span className="font-mono">{h.total}/30</span>
                 {h.flaggedItem10 && <span className="text-destructive">· item 10 flagged</span>}
               </li>

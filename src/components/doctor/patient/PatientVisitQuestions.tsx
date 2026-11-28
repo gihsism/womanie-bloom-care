@@ -1,3 +1,4 @@
+import { formatDateTime } from '@/lib/dateFormat';
 import { Card } from '@/components/ui/card';
 import { Check, ClipboardList } from 'lucide-react';
 import { parseQuestions, type VisitQuestion } from '@/lib/visitQuestions';
@@ -29,7 +30,7 @@ const PatientVisitQuestions = ({ rows }: { rows: Row[] }) => {
     .filter(r => r.list.length > 0)
     .sort((a, b) => Date.parse(a.scheduled_at) - Date.parse(b.scheduled_at))[0];
   if (!next) return null;
-  const when = new Date(next.scheduled_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+  const when = formatDateTime(next.scheduled_at);
   return (
     <Card className="p-4" aria-labelledby="patient-visit-questions">
       <div className="flex items-center gap-2 mb-1">

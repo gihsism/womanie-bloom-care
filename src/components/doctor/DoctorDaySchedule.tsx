@@ -1,3 +1,4 @@
+import { formatWeekdayDayMonth } from '@/lib/dateFormat';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -109,7 +110,7 @@ const DoctorDaySchedule = ({ appointments, patients, now: fixedNow }: Props) => 
   const dateLabel = (offset: number) => {
     const d = new Date(now);
     d.setDate(d.getDate() + offset);
-    return d.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' });
+    return formatWeekdayDayMonth(d);
   };
   const open = (r: ScheduleRow) => navigate(`/doctor/patient/${r.patientId}?tab=summary`);
 

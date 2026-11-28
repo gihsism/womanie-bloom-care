@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar as CalendarIcon, ArrowLeft } from 'lucide-react';
@@ -163,7 +164,7 @@ const BasicInformation = () => {
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateOfBirth ? format(dateOfBirth, 'PPP') : <span>Or pick from calendar</span>}
+                    {dateOfBirth ? format(dateOfBirth, DATE_FMT) : <span>Or pick from calendar</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">

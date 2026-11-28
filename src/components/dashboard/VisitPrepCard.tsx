@@ -1,4 +1,7 @@
 import { nextVisitAhead } from '@/lib/visitAhead';
+import { WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
+import { useConfirm } from '@/components/ConfirmDialog';
+import { unshareVisitListConfirm } from '@/lib/confirmCopy';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -108,6 +111,7 @@ const MODE_DEFAULTS: Record<string, string[]> = {
 export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [confirm, confirmDialog] = useConfirm();
   const navigate = useNavigate();
   const ctx = useUserHealthContext();
 
@@ -311,7 +315,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
 
   const unshare = async () => {
     if (!user || !upcomingApt) return;
-    if (!window.confirm('Remove this list from your visit? Your doctor will no longer see it.')) return;
+    if (!(await confirm(unshareVisitListConfirm()))) return;
     const { error } = await db.from('visit_questions').delete()
       .eq('user_id', user.id).eq('appointment_id', String(upcomingApt.id));
     if (error) { toast({ variant: 'destructive', title: 'Could not remove', description: 'Try again.' }); return; }
@@ -349,6 +353,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
 
   return (
     <Card className="p-4">
+    {confirmDialog}
       <div className="flex items-center gap-2 mb-2">
         <ClipboardCheck className="h-4 w-4 text-primary" />
         <h3 className="text-sm font-semibold">Questions for your next visit</h3>
@@ -359,7 +364,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
 
       {upcomingApt && (
         <p className="text-[11px] text-muted-foreground mb-3">
-          Next visit: {format(parseISO(upcomingApt.scheduled_at), 'EEE d MMM, HH:mm')}
+          Next visit: {format(parseISO(upcomingApt.scheduled_at), `${WEEKDAY_DAY_MONTH_FMT}, HH:mm`)}
           {upcomingApt.doctor_name && ` with ${upcomingApt.doctor_name}`}
           {' '}({visitDaysAway(parseISO(upcomingApt.scheduled_at))})
         </p>
@@ -421,7 +426,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
           </form>
           {isSaved ? (
             <p className="text-[11px] text-muted-foreground">
-              Saved to your visit on {format(parseISO(upcomingApt.scheduled_at), 'EEE MMM d')}. Your doctor can see this list.{' '}
+              Saved to your visit on {format(parseISO(upcomingApt.scheduled_at), WEEKDAY_DAY_MONTH_FMT)}. Your doctor can see this list.{' '}
               <button type="button" className="underline hover:text-foreground" onClick={unshare}>Remove from visit</button>
             </p>
           ) : (

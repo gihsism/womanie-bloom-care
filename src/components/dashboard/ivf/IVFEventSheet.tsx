@@ -1,3 +1,4 @@
+import { WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { format } from 'date-fns';
 import { Trash2, CheckCircle2, Circle } from 'lucide-react';
@@ -50,7 +51,7 @@ const IVFEventSheet = ({ open, onClose, date, events, onAddEvent, onToggleComple
     <Sheet open={open} onOpenChange={() => onClose()}>
       <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh] overflow-y-auto">
         <SheetHeader className="pb-2">
-          <SheetTitle className="text-left text-base">{format(date, 'EEE, MMM d')}</SheetTitle>
+          <SheetTitle className="text-left text-base">{format(date, WEEKDAY_DAY_MONTH_FMT)}</SheetTitle>
         </SheetHeader>
 
         {/* Existing events */}

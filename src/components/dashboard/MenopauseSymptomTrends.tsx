@@ -1,3 +1,4 @@
+import { WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -135,7 +136,7 @@ export default function MenopauseSymptomTrends({ mode }: Props) {
     }
     const existing = parseQuestions((data as { questions?: unknown } | null)?.questions);
     const { list, added } = mergeIntoVisitList(existing, questions);
-    const visit = next ? format(parseISO(next.scheduled_at), 'EEE d MMM') : null;
+    const visit = next ? format(parseISO(next.scheduled_at), WEEKDAY_DAY_MONTH_FMT) : null;
     if (added > 0) {
       const { error: upErr } = await db.from('visit_questions').upsert(
         { user_id: user.id, appointment_id: appointmentId, questions: JSON.stringify(list), updated_at: new Date().toISOString() },

@@ -1,3 +1,4 @@
+import { WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useCallback, useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { db } from '@/integrations/db/client';
@@ -78,7 +79,7 @@ export default function BabyBodyMap() {
 
   return (
     <section className="mb-6" aria-label="Your baby at a glance">
-      <p className="label-mono">{name} · {format(now, 'EEE d MMM')}</p>
+      <p className="label-mono">{name} · {format(now, WEEKDAY_DAY_MONTH_FMT)}</p>
       <h2 className="font-display text-[38px] leading-[1.02] font-normal mt-1">
         {ago ? <>Last feed <span className="text-muted-foreground">{ago.value}{ago.unit ? ` ${ago.unit}` : ''} ago</span></> : <>No feeds yet</>}
       </h2>

@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { lazy, Suspense, useEffect, useState, useMemo } from 'react';
 import { isVisitAhead } from '@/lib/visitAhead';
 import { useOnceTrue } from '@/hooks/useOnceTrue';
@@ -84,7 +85,7 @@ function relativeDay(d: Date): string {
   if (isTomorrow(d)) return 'Tomorrow';
   const days = Math.round((d.getTime() - Date.now()) / 86_400_000);
   if (days > 0 && days < 7) return format(d, 'EEEE');
-  return format(d, 'MMM d, yyyy');
+  return format(d, DATE_FMT);
 }
 
 // A visit in progress is still "Your next visit" (shared rule, lib/visitAhead.ts).
@@ -303,7 +304,7 @@ const Appointments = () => {
           <p className="text-xs text-muted-foreground">
             {kind === 'upcoming'
               ? `${relativeDay(when)} · ${formatPracticeTime(when)}${swissSuffix(outside)} · ${when.getTime() <= Date.now() ? 'now' : `in ${formatDistanceToNowStrict(when)}`}`
-              : `${format(when, 'PPP')} · ${formatPracticeTime(when)}${swissSuffix(outside)}`}
+              : `${format(when, DATE_FMT)} · ${formatPracticeTime(when)}${swissSuffix(outside)}`}
             {apt.duration ? ` · ${apt.duration} min` : ''}
           </p>
           <p className="text-[11px] text-muted-foreground mt-0.5 inline-flex items-center gap-1">

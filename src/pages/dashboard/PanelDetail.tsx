@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -499,7 +500,7 @@ export default function PanelDetail() {
                       {s.readings.slice(0, 6).map(r => {
                         const tone = STATUS_TONE[r.status ?? ''] ?? '';
                         const dateLabel = r.date_recorded
-                          ? format(new Date(r.date_recorded), 'MMM d, yyyy')
+                          ? format(new Date(r.date_recorded), DATE_FMT)
                           : '—';
                         // Phase chip — only meaningful for cycle hormones.
                         // hormoneKeyForTitle returns null for non-hormones

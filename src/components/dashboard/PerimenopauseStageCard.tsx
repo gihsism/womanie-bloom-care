@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { Card } from '@/components/ui/card';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -209,7 +210,7 @@ export default function PerimenopauseStageCard({ mode }: PerimenopauseStageCardP
           <span className="font-medium text-foreground/80">Why this stage:</span> {result.rationale}
           {result.monthsSinceLastPeriod !== null && (
             <span className="block mt-0.5">
-              Last logged period: {format(parseISO(periodRecords[periodRecords.length - 1].period_start_date), 'MMM d, yyyy')}
+              Last logged period: {format(parseISO(periodRecords[periodRecords.length - 1].period_start_date), DATE_FMT)}
               {' '}({result.monthsSinceLastPeriod < 1
                 ? `${formatDistanceToNowStrict(parseISO(periodRecords[periodRecords.length - 1].period_start_date), { unit: 'day' })} ago`
                 : `${result.monthsSinceLastPeriod} month${result.monthsSinceLastPeriod === 1 ? '' : 's'} ago`})

@@ -1,3 +1,5 @@
+import { useConfirm } from '@/components/ConfirmDialog';
+import { untickBagConfirm } from '@/lib/confirmCopy';
 import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -27,6 +29,7 @@ const KEY = (uid: string) => `womanie_hospital_bag_${uid}`;
 const HospitalBagChecklist = ({ weeksPregnant }: HospitalBagChecklistProps) => {
   const { user } = useAuth();
   const userId = user?.id;
+  const [confirm, confirmDialog] = useConfirm();
   const [state, setState] = useState<BagState>(EMPTY_BAG);
   const [editing, setEditing] = useState(false);
   const [drafts, setDrafts] = useState<Partial<Record<BagSectionId, string>>>({});
@@ -52,9 +55,9 @@ const HospitalBagChecklist = ({ weeksPregnant }: HospitalBagChecklistProps) => {
     }
   };
 
-  const reset = () => {
+  const reset = async () => {
     if (state.packed.length === 0) return;
-    if (!window.confirm('Untick all packed items?')) return;
+    if (!(await confirm(untickBagConfirm()))) return;
     persist(clearPacked(state));
   };
 
@@ -80,6 +83,7 @@ const HospitalBagChecklist = ({ weeksPregnant }: HospitalBagChecklistProps) => {
 
   return (
     <Card className="p-4 space-y-3">
+    {confirmDialog}
       <div className="flex items-center justify-between">
         <h4 className="font-semibold flex items-center gap-2">
           <Briefcase className="h-4 w-4 text-primary" />

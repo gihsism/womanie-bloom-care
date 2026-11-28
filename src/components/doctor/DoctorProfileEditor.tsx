@@ -1,3 +1,5 @@
+import { useConfirm } from '@/components/ConfirmDialog';
+import { removeAvatarConfirm } from '@/lib/confirmCopy';
 import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -46,6 +48,7 @@ const splitList = (s: string): string[] =>
 
 const DoctorProfileEditor = ({ doctorId }: DoctorProfileEditorProps) => {
   const { toast } = useToast();
+  const [confirm, confirmDialog] = useConfirm();
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [fullName, setFullName] = useState('');
@@ -149,7 +152,7 @@ const DoctorProfileEditor = ({ doctorId }: DoctorProfileEditorProps) => {
   };
 
   const handleRemoveAvatar = async () => {
-    if (!window.confirm('Remove your profile photo? Patients will see the default placeholder.')) {
+    if (!(await confirm(removeAvatarConfirm()))) {
       return;
     }
     try {
@@ -226,6 +229,7 @@ const DoctorProfileEditor = ({ doctorId }: DoctorProfileEditorProps) => {
 
   return (
     <Card>
+    {confirmDialog}
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <User className="h-4 w-4" />

@@ -1,3 +1,4 @@
+import { formatDate, formatDateTime, formatWeekdayDayMonth } from '@/lib/dateFormat';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -105,7 +106,7 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
         const visitUrl = `/doctor/patient/${apt.patient_id}?addNote=visit&date=${isoDate}`;
         toast({
           title: label,
-          description: `${patientNameFor(apt.patient_id)} · ${new Date(apt.scheduled_at).toLocaleDateString()}`,
+          description: `${patientNameFor(apt.patient_id)} · ${formatDate(apt.scheduled_at)}`,
           action: (
             <Button
               size="sm"
@@ -117,7 +118,7 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
           ),
         });
       } else {
-        toast({ title: label, description: `${patientNameFor(apt.patient_id)} · ${new Date(apt.scheduled_at).toLocaleDateString()}` });
+        toast({ title: label, description: `${patientNameFor(apt.patient_id)} · ${formatDate(apt.scheduled_at)}` });
       }
       onChange();
     } catch (e) {
@@ -150,11 +151,7 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
                     <div className="min-w-0">
                       <p className="font-medium">{patientNameFor(apt.patient_id)}</p>
                       <p className="text-sm text-muted-foreground">
-                        {new Date(apt.scheduled_at).toLocaleDateString([], {
-                          weekday: 'short',
-                          month: 'short',
-                          day: 'numeric',
-                        })}{' '}
+                        {formatWeekdayDayMonth(apt.scheduled_at)}{' '}
                         at {new Date(apt.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         {apt.duration ? ` · ${apt.duration} min` : ''}
                         {' · '}{apt.consultation_type === 'video' ? 'Video' : 'In person'}
@@ -208,7 +205,7 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
                     <div className="min-w-0 flex-1">
                       <p className="font-medium">{patientNameFor(apt.patient_id)}</p>
                       <p className="text-sm text-muted-foreground">
-                        {new Date(apt.scheduled_at).toLocaleDateString()}
+                        {formatDate(apt.scheduled_at)}
                         {apt.duration ? ` · ${apt.duration} min` : ''}
                         {toClose && ' · did it happen?'}
                       </p>
@@ -297,7 +294,7 @@ const AppointmentsView = ({ appointments, patients, onChange }: { appointments: 
                 {cancelTarget && (
                   <>
                     {patientNameFor(cancelTarget.patient_id)} ·{' '}
-                    {new Date(cancelTarget.scheduled_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                    {formatDateTime(cancelTarget.scheduled_at)}
                   </>
                 )}
               </DialogDescription>

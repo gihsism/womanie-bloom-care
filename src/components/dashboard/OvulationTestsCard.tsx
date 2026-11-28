@@ -1,3 +1,4 @@
+import { DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { format, subDays } from 'date-fns';
 import { Card } from '@/components/ui/card';
@@ -35,7 +36,7 @@ const OPK_CHOICES: { id: OpkResult; label: string }[] = [
   { id: 'peak', label: 'Peak' },
 ];
 
-const short = (d: Date) => format(d, 'd MMM');
+const short = (d: Date) => format(d, DAY_MONTH_FMT);
 
 export default function OvulationTestsCard({ lastPeriodStart, cycleLength }: Props) {
   const { user } = useAuth();
@@ -262,7 +263,7 @@ function BbtChart({ chart, fw, cycleStart, cycleLength }: {
           <polyline points={line} fill="none" stroke="hsl(var(--foreground))" strokeOpacity={0.75} strokeWidth={2} strokeLinejoin="round" />
         )}
         {chart.temps.map(t => (
-          <g key={t.date} onMouseEnter={() => setHover(`Day ${t.day} (${format(parseYmd(t.date), 'd MMM')}): ${fmt(t.c)}°C`)} onMouseLeave={() => setHover(null)}>
+          <g key={t.date} onMouseEnter={() => setHover(`Day ${t.day} (${format(parseYmd(t.date), DAY_MONTH_FMT)}): ${fmt(t.c)}°C`)} onMouseLeave={() => setHover(null)}>
             <circle cx={x(t.day)} cy={y(t.c)} r={9} fill="transparent" />
             <circle cx={x(t.day)} cy={y(t.c)} r={3.5} fill="hsl(var(--foreground))" stroke="hsl(var(--card))" strokeWidth={2} />
             <title>{`Day ${t.day}: ${fmt(t.c)}°C`}</title>
@@ -271,7 +272,7 @@ function BbtChart({ chart, fw, cycleStart, cycleLength }: {
         {/* Ovulation tests strip */}
         <text x={L - 4} y={stripY + 3} textAnchor="end" fontSize={9} fill="hsl(var(--muted-foreground))">test</text>
         {chart.opks.map(o => (
-          <g key={o.date} onMouseEnter={() => setHover(`Day ${o.day} (${format(parseYmd(o.date), 'd MMM')}): test ${o.result}`)} onMouseLeave={() => setHover(null)}>
+          <g key={o.date} onMouseEnter={() => setHover(`Day ${o.day} (${format(parseYmd(o.date), DAY_MONTH_FMT)}): test ${o.result}`)} onMouseLeave={() => setHover(null)}>
             <circle cx={x(o.day)} cy={stripY} r={9} fill="transparent" />
             <circle cx={x(o.day)} cy={stripY} r={o.result === 'peak' ? 5.5 : 4}
               fill={o.result === 'negative' ? 'hsl(var(--card))' : 'hsl(var(--primary))'}
@@ -306,7 +307,7 @@ function BbtChart({ chart, fw, cycleStart, cycleLength }: {
                 const day = t?.day ?? o?.day;
                 return (
                   <tr key={date} className="border-t border-border/50">
-                    <td>{day}</td><td>{format(parseYmd(date), 'd MMM')}</td><td>{t ? `${fmt(t.c)}°C` : '—'}</td><td className={cn(o && o.result !== 'negative' && 'font-medium')}>{o?.result ?? '—'}</td>
+                    <td>{day}</td><td>{format(parseYmd(date), DAY_MONTH_FMT)}</td><td>{t ? `${fmt(t.c)}°C` : '—'}</td><td className={cn(o && o.result !== 'negative' && 'font-medium')}>{o?.result ?? '—'}</td>
                   </tr>
                 );
               })}

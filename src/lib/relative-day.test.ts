@@ -33,10 +33,10 @@ describe("relativeDay", () => {
     });
   });
 
-  it("falls back to 'MMM d' beyond a week out", () => {
+  it("falls back to 'd MMM' beyond a week out", () => {
     withNow(() => {
       const d = new Date(2026, 4, 1, 9, 0); // +11 days
-      expect(relativeDay(d)).toBe(format(d, "MMM d"));
+      expect(relativeDay(d)).toBe(format(d, "d MMM"));
     });
   });
 });

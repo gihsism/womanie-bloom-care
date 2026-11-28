@@ -1,3 +1,4 @@
+import { DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -237,9 +238,9 @@ const FertileWindowTimingCard = ({ userId, cycleLength, periodLength }: FertileW
             <div key={idx}>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[11px] text-muted-foreground">
-                  {format(cycle.cycleStart, 'MMM d')}
+                  {format(cycle.cycleStart, DAY_MONTH_FMT)}
                   {' → '}
-                  {cycle.isActive ? 'today' : format(cycle.cycleEnd, 'MMM d')}
+                  {cycle.isActive ? 'today' : format(cycle.cycleEnd, DAY_MONTH_FMT)}
                 </span>
                 <span className="text-[11px] text-muted-foreground">
                   {cycle.cycleLength} day{cycle.isActive ? ' (so far)' : ''}
@@ -278,7 +279,7 @@ const FertileWindowTimingCard = ({ userId, cycleLength, periodLength }: FertileW
                       entry.isProtected ? 'bg-muted-foreground' : 'bg-pink-500'
                     }`}
                     style={{ left: `calc(${((entry.day + 0.5) / renderDays) * 100}% - 4px)` }}
-                    title={`${format(addDays(cycle.cycleStart, entry.day), 'MMM d')} — ${
+                    title={`${format(addDays(cycle.cycleStart, entry.day), DAY_MONTH_FMT)} — ${
                       entry.isProtected ? 'protected' : 'unprotected'
                     } intercourse`}
                   />

@@ -1,3 +1,4 @@
+import { DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -178,8 +179,8 @@ const PeriodFlowCard = ({ lastPeriodStart }: PeriodFlowCardProps) => {
         <div key={ci} className="space-y-1.5">
           <div className="flex items-center justify-between text-xs">
             <span className="font-medium">
-              {format(cycle.start, 'MMM d')}
-              {cycle.end ? ` – ${format(cycle.end, 'MMM d')}` : ' (active)'}
+              {format(cycle.start, DAY_MONTH_FMT)}
+              {cycle.end ? ` – ${format(cycle.end, DAY_MONTH_FMT)}` : ' (active)'}
             </span>
             <span className="text-muted-foreground">
               {cycle.days.length} {cycle.days.length === 1 ? 'day' : 'days'}

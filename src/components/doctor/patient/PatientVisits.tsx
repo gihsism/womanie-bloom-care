@@ -1,3 +1,4 @@
+import { formatDate } from '@/lib/dateFormat';
 import { Card } from '@/components/ui/card';
 import { Calendar, Video } from 'lucide-react';
 import { parseQuestions } from '@/lib/visitQuestions';
@@ -35,7 +36,7 @@ const PatientVisits = ({ appointments, visitQuestions = [] }: { appointments: Pa
             <Icon className="h-4 w-4 mt-0.5 shrink-0 text-primary" aria-hidden="true" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium">
-                {when.toLocaleDateString()} at {when.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {formatDate(when)} at {when.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>
               <p className="text-xs text-muted-foreground">
                 {apt.consultation_type === 'video' ? 'Video' : 'In person'} · {label}

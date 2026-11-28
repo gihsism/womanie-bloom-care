@@ -10,6 +10,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { buttonVariants } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 // An in-app "are you sure?" for actions that end something (cancel a
 // visit, revoke a doctor's access, decline a request, cancel a share
@@ -26,6 +27,10 @@ export interface ConfirmOptions {
   cancelLabel?: string;
   /** Red confirm button for actions that remove or end something. */
   destructive?: boolean;
+  /** Type-to-confirm: the confirm button stays off until she types this
+   *  exact phrase (replaces window.prompt, which iOS web apps can also
+   *  suppress). */
+  requireText?: string;
 }
 
 /**
@@ -36,6 +41,7 @@ export interface ConfirmOptions {
  */
 export function useConfirm() {
   const [opts, setOpts] = useState<ConfirmOptions | null>(null);
+  const [typed, setTyped] = useState('');
   const resolver = useRef<((ok: boolean) => void) | null>(null);
 
   const settle = useCallback((ok: boolean) => {
@@ -47,6 +53,7 @@ export function useConfirm() {
   const confirm = useCallback((o: ConfirmOptions) => {
     // A second request while one is open answers the first with "no".
     resolver.current?.(false);
+    setTyped('');
     setOpts(o);
     return new Promise<boolean>(resolve => { resolver.current = resolve; });
   }, []);
@@ -58,10 +65,26 @@ export function useConfirm() {
           <AlertDialogTitle>{opts?.title}</AlertDialogTitle>
           {opts?.description ? <AlertDialogDescription>{opts.description}</AlertDialogDescription> : null}
         </AlertDialogHeader>
+        {opts?.requireText ? (
+          <div className="space-y-2">
+            <label htmlFor="confirm-require-text" className="text-sm text-muted-foreground">
+              To confirm, type exactly: <span className="font-semibold text-foreground">{opts.requireText}</span>
+            </label>
+            <Input
+              id="confirm-require-text"
+              value={typed}
+              onChange={e => setTyped(e.target.value)}
+              autoComplete="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+            />
+          </div>
+        ) : null}
         <AlertDialogFooter>
           <AlertDialogCancel onClick={() => settle(false)}>{opts?.cancelLabel ?? 'Go back'}</AlertDialogCancel>
           <AlertDialogAction
             className={opts?.destructive ? buttonVariants({ variant: 'destructive' }) : undefined}
+            disabled={!!opts?.requireText && typed !== opts.requireText}
             onClick={() => settle(true)}
           >
             {opts?.confirmLabel}

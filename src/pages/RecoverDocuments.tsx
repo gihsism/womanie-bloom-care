@@ -1,3 +1,4 @@
+import { formatDate } from '@/lib/dateFormat';
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -155,7 +156,7 @@ const RecoverDocuments = () => {
                   <p className="font-mono break-all">{g.user_id}</p>
                   <p className="text-muted-foreground">
                     {g.doc_count} documents · {g.data_count} data rows
-                    {g.first_upload && ` · ${new Date(g.first_upload).toLocaleDateString()}–${new Date(g.last_upload!).toLocaleDateString()}`}
+                    {g.first_upload && ` · ${formatDate(g.first_upload)}–${formatDate(g.last_upload)}`}
                   </p>
                   {g.known_auth_user ? (
                     <p className="text-muted-foreground">

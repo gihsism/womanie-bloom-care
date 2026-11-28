@@ -1,3 +1,4 @@
+import { DATE_FMT } from '@/lib/dateFormat';
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -130,7 +131,7 @@ export default function DoctorPatientTrackingSummary({
               Last period
             </span>
             <span className="font-medium">
-              {format(cycleStats.lastStart, 'MMM d, yyyy')}{' '}
+              {format(cycleStats.lastStart, DATE_FMT)}{' '}
               <span className="text-muted-foreground">
                 ({cycleStats.daysSince === 0
                   ? 'today'

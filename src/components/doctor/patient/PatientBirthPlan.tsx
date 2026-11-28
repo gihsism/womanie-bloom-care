@@ -1,3 +1,4 @@
+import { formatDate } from '@/lib/dateFormat';
 import { Card } from '@/components/ui/card';
 import { FileHeart } from 'lucide-react';
 import { parsePlan, planSummary } from '@/lib/birthPlan';
@@ -24,7 +25,7 @@ const PatientBirthPlan = ({ row }: { row: PatientBirthPlanRow | null }) => {
         <h3 id="patient-birth-plan" className="text-sm font-semibold">Birth plan</h3>
       </div>
       <p className="text-xs text-muted-foreground mb-3">
-        Written by the patient{updated && !Number.isNaN(updated.getTime()) ? ` · updated ${updated.toLocaleDateString([], { dateStyle: 'medium' })}` : ''} · read-only
+        Written by the patient{updated && !Number.isNaN(updated.getTime()) ? ` · updated ${formatDate(updated)}` : ''} · read-only
       </p>
       <div className="space-y-3">
         {sections.map(s => (

@@ -1,3 +1,5 @@
+import { format } from 'date-fns';
+import { WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
 import { Card } from '@/components/ui/card';
 import { AlertTriangle, ClipboardList, FlaskConical, HeartPulse, MapPin, Pill } from 'lucide-react';
 import { stageLabel } from '@/lib/doctorDashboard';
@@ -85,7 +87,7 @@ const PatientVisitBrief = ({ profile, appointments, periodRecords, signals, medi
   );
 
   const nextLine = next
-    ? `Next visit ${new Date(next.scheduled_at).toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}${next.consultation_type ? ` · ${next.consultation_type.replace(/_/g, ' ')}` : ''}`
+    ? `Next visit ${format(new Date(next.scheduled_at), `${WEEKDAY_DAY_MONTH_FMT}, HH:mm`)}${next.consultation_type ? ` · ${next.consultation_type.replace(/_/g, ' ')}` : ''}`
     : 'No visit booked with you';
 
   return (

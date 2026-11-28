@@ -25,7 +25,7 @@ describe('BabySummarySheet', () => {
   it('prints the daily averages, the day-by-day table and totals', () => {
     const { container } = render(<BabySummarySheet data={data} now={NOW} />);
     expect(container.textContent).toContain('Mia');
-    expect(container.textContent).toContain('6 weeks old (born 14 October 2026)');
+    expect(container.textContent).toContain('6 weeks old (born 14 Oct 2026)');
     const avg = container.querySelector('[data-section="averages"]')!;
     expect(avg.textContent).toContain('Feeds: 2 a day (1 of 7 days logged). Bottle: 80 ml in total.');
     expect(avg.textContent).toContain('Nappies: 1 wet and 0.5 dirty a day (2 of 7 days logged).');
@@ -44,7 +44,7 @@ describe('BabySummarySheet', () => {
   });
 
   it('babyAge handles days, weeks, months and a missing date', () => {
-    expect(babyAge('2026-11-20', NOW)).toBe('5 days old (born 20 November 2026)');
+    expect(babyAge('2026-11-20', NOW)).toBe('5 days old (born 20 Nov 2026)');
     expect(babyAge('2026-05-01', NOW)).toMatch(/^6 months old/);
     expect(babyAge(null, NOW)).toBeNull();
     expect(babyAge('2026-12-01', NOW)).toBeNull();
