@@ -302,3 +302,50 @@ describe('Research round 9: superseded-guideline sweep', () => {
     if (b.includes('pmid-28444286')) expect(b.indexOf('pmid-37721605')).toBeLessThan(b.indexOf('pmid-28444286'));
   });
 });
+
+// Round 10 (docs/research-gaps.md): leaking asked without any word about
+// an operation; surgery reviews step back behind pelvic-floor training.
+const PFMT = ['pmid-32378735', 'pmid-30288727', 'pmid-29271473', 'pmid-38556125', 'pmid-37849316'];
+const SLING = 'pmid-31990055';
+const SNEEZE = 'I leak a bit of pee when I sneeze since giving birth';
+const SURGERY_TITLE = /\b(surg\w*|operat\w*|sling\w*|mesh|repairs?)\b/i;
+const titleOf = (id: string) => getLibrary().items.find((i) => i.id === id)?.title ?? '';
+
+describe('Research round 10: pelvic-floor training ahead of surgery reviews', () => {
+  const lib = getLibrary();
+  const byId = new Map(lib.items.map((i) => [i.id, i]));
+
+  it('the sling review no longer carries the everyday "cough sneeze leak" keyword', () => {
+    expect(byId.get(SLING)!.keywords).not.toContain('cough sneeze leak');
+    expect(byId.get('pmid-30288727')!.keywords).toContain('leak when I sneeze');
+  });
+
+  it('keyword retrieval: no surgery review for the sneeze question, training first', () => {
+    const ids = selectChatSources(SNEEZE, 'postpartum').map((i) => i.id);
+    expect(PFMT).toContain(ids[0]);
+    expect(ids.some((id) => SURGERY_TITLE.test(titleOf(id)))).toBe(false);
+    expect(ids.filter((id) => PFMT.includes(id)).length).toBeGreaterThanOrEqual(4);
+  });
+
+  it('keyword retrieval: asked about surgery, the sling reviews still come up', () => {
+    const ids = selectChatSources('What surgery is there for bladder leaks?', null).map((i) => i.id);
+    expect(ids).toContain(SLING);
+    expect(ids).toContain('pmid-28756647');
+  });
+});
+
+describe.skipIf(!hasModel)('Research round 10: sneeze question (bundled model)', () => {
+  const sources = async (q: string, stage: string | null) =>
+    (await selectChatSourcesHybrid(q, stage, { timeoutMs: 20_000 })).map((i) => i.id);
+
+  it('pelvic-floor training leads and no surgery review is sent', async () => {
+    const ids = await sources(SNEEZE, 'postpartum');
+    expect(PFMT).toContain(ids[0]);
+    expect(ids.some((id) => SURGERY_TITLE.test(titleOf(id)))).toBe(false);
+    expect(ids.filter((id) => PFMT.includes(id)).length).toBeGreaterThanOrEqual(3);
+  }, 30_000);
+
+  it('the surgery question still gets the sling reviews', async () => {
+    expect(await sources('What surgery is there for bladder leaks?', null)).toContain(SLING);
+  }, 30_000);
+});

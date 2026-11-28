@@ -324,6 +324,18 @@ const SUBJECT_MISMATCH: { ask: RegExp; unless: RegExp; title: RegExp; keep: RegE
     title: /\bscreening\b/i,
     keep: /\bvaccin\w*\b/i,
   },
+  // Round 10: leaking or a bladder / prolapse problem asked without any
+  // word about an operation, a surgery review in the title. Pelvic-floor
+  // training comes first for this, so for "I leak a bit of pee when I
+  // sneeze since giving birth" the sling-operation review stepped ahead
+  // of an exercise review; it now steps back. Asked about surgery, it
+  // ranks as before.
+  {
+    ask: /\b(leak\w*|incontinen\w*|pee|wee|urine|bladder|prolapse)\b/i,
+    unless: /\b(surg\w*|operat\w*|sling\w*|mesh|tape|colposuspension|bulking|procedure\w*)\b/i,
+    title: /\b(surg\w*|operat\w*|sling\w*|mesh|tapes?|colposuspension|bulking|procedures?|repairs?)\b/i,
+    keep: /\b(pelvic floor|muscle training|exercis\w*|physiother\w*|conservative)\b/i,
+  },
 ];
 
 function subjectMismatchFactor(query: string, title: string): number {
@@ -709,6 +721,8 @@ function stageFactor(item: ResearchItem, stage: LifeStage | null): number {
  * Swiss (BAG / BLV / SGGG) items that match the question words x1.25.
  * Round 9: a title on a different screening / prevention subject than
  * the question (cervical vs breast, screening vs vaccine) x0.6.
+ * Round 10: a surgery title for a leaking / bladder / prolapse question
+ * that names no operation x0.6.
  */
 export function searchItems(
   items: ResearchItem[],

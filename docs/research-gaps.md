@@ -784,6 +784,30 @@ pelvic-floor sources above it are unchanged). Search evals unchanged.
 Tests: `ask-ai-audit.test.ts` (round 9 sweep block: every pair steps back,
 every target is in the library and not itself superseded).
 
+## Round 10 (2026-11-28)
+
+### Round-9 side effect fixed: leaking after birth
+
+"I leak a bit of pee when I sneeze since giving birth" had the
+sling-operation review (`pmid-31990055`) 5th, ahead of an exercise review.
+Pelvic-floor training is what helps first, so:
+
+- New `SUBJECT_MISMATCH` rule in `library.ts` (x0.6): a leaking / bladder
+  / prolapse question with no word about an operation (surgery, sling,
+  mesh, tape, procedure ...), a title about an operation, sling, mesh or
+  repair that does not also name pelvic-floor training or exercise.
+- Keywords only (not embedded, no re-embed): "cough sneeze leak" removed
+  from the sling review; "leak when I sneeze", "leak when I cough",
+  "leaking when coughing" added to the two Cochrane training reviews
+  (`pmid-32378735`, `pmid-30288727`).
+
+Now no surgery review is among the six (bundled model: three training
+reviews lead, an exercise review is 6th; keyword-only: five training
+reviews). "I leak when I cough or run" now gets the two Cochrane training
+reviews too. Asked about surgery ("What surgery is there for bladder
+leaks?"), the sling reviews still lead. Search evals unchanged. Tests:
+`ask-ai-audit.test.ts` (round 10 block).
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed
