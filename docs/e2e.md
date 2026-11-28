@@ -53,6 +53,22 @@ run in parallel; each starts from a fresh copy of the fixtures.
 | `round10.spec.ts` | Once: a critical result is the first Today row ("marked urgent by the lab"), the flagged count stays the Records total; Records lists flagged results once (no second "Results that need attention" card) with "20% below" relative to the limit, and Health Overview states "N of M latest results outside the lab's range" (no wellness %); a visit that started 5 minutes ago is still "Your next visit" on Visits |
 | `doctor.spec.ts` | Doctor side, fake doctor in `fixtures/doctor.json` (`mockDoctor()`): Lena approved, Sara pending. Dashboard: "Your day" row with "New: 1 result out of range, 2 new documents" and the open question (her superseded high TSH is not counted), pending visit says "waiting for her approval", Appointments offers "Open chart" only for Lena, saved opening hours (Mon + Wed) show the other weekdays off, no sideways scroll. Chart: Before-the-visit card (24-hour time, medicines, mood, results, her question), "1 result out of range" on Summary, Trends sentences. Notes: write, then delete through the in-app dialog (Keep note, then Delete note; no browser dialog). Revoked doctor (no role row): sent to doctor login, chart never requested |
 | `edge-cases.spec.ts` | Every main page (Home, stage page, Records, Ask AI, Visits, Me, prep sheet) renders with no error screen and no console errors, for a brand-new empty account and for rows whose optional columns are null |
+| `a11y.spec.ts` | axe-core (WCAG 2.0-2.2 A/AA) at 390 px only (skipped on `desktop`): Home, stage page, Records, Ask AI, Visits, prep sheet, Me and the Log sheet per stage; Ask AI error state; Rename dialog; doctor dashboard (all tabs incl. opening hours), chart Summary/Results/Trends, note form, delete-note confirm. Fails on any critical finding and on serious ones outside `KNOWN_SERIOUS`. Also checks focus: into the Rename/confirm dialog, back to the button that opened it on close, and onto the first revealed row after Today's "N more" |
+
+Accessibility check (`a11y.spec.ts`): axe-core 4.14.1 is vendored as
+`e2e-local/vendor/axe.min.js` (MPL-2.0, licence header kept) because the
+repo has no axe dependency and agents may not `npm install`. To update it,
+copy `node_modules/axe-core/axe.min.js` from any axe-core install. Known
+serious findings that are not failures (`KNOWN_SERIOUS`), November 2026:
+`color-contrast`, each of which needs a colour/design decision rather than a
+markup fix: primary text on `bg-primary/10` chips (4.3:1: STRAW stage chip
+on the menopause page, doctor dashboard chip), "Did you know?" in primary on
+the pink tint (4.4:1, before-first-period page), cycle-calendar day numbers
+in `secondary-foreground` on `bg-secondary/50` (3.25:1), IVF timeline
+future/past phases faded with `opacity-40`/`opacity-60` (1.9-4.3:1), doctor
+dashboard pending patient row at `opacity-70` (3.5:1); and `list` (Radix
+Toast puts `<li role="status">` in its `<ol>`). Moderate findings
+(`heading-order` on some cards) are not checked.
 
 Bugs it has caught: a period row with no `cycle_length` froze the stage page
 (endless loop) and crashed Home's cycle dial (fixed in `useStageProfile`).

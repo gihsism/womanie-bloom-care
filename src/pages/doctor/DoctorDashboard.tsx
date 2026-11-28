@@ -182,7 +182,7 @@ const DoctorDashboard = () => {
       : { tone: 'wait', text: 'We are checking your licence (1–3 working days). Patients can find you once it is approved and "Accept new bookings" is on in Profile & settings.' };
 
   return (
-    <div className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background">
       {/* Header: who you are + one Menu. No logo link out of the app. */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
@@ -279,7 +279,7 @@ const DoctorDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </main>
   );
 };
 

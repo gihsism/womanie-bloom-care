@@ -117,12 +117,13 @@ const ConsultationSettings = ({ doctorId }: { doctorId: string }) => {
           <div id="setup-price" className="space-y-4 scroll-mt-24">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium flex items-center gap-1.5">
+                <label htmlFor="consultation-price" className="text-sm font-medium flex items-center gap-1.5">
                   <DollarSign className="h-4 w-4" aria-hidden="true" />
                   Price per visit
                 </label>
                 <div className="flex gap-2">
                   <input
+                    id="consultation-price"
                     type="number"
                     value={settings.consultation_price}
                     onChange={(e) => setSettings(s => ({ ...s, consultation_price: Number(e.target.value) }))}
@@ -130,6 +131,7 @@ const ConsultationSettings = ({ doctorId }: { doctorId: string }) => {
                     min={0}
                   />
                   <select
+                    aria-label="Currency"
                     value={settings.currency}
                     onChange={(e) => setSettings(s => ({ ...s, currency: e.target.value }))}
                     className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary bg-background"
@@ -142,8 +144,9 @@ const ConsultationSettings = ({ doctorId }: { doctorId: string }) => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Visit length</label>
+                <label htmlFor="consultation-duration" className="text-sm font-medium">Visit length</label>
                 <select
+                  id="consultation-duration"
                   value={settings.consultation_duration}
                   onChange={(e) => setSettings(s => ({ ...s, consultation_duration: Number(e.target.value) }))}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary bg-background"
@@ -343,6 +346,7 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
                 <input
                   type="time"
                   value={schedule[index].start}
+                  aria-label={`${dayName} start time`}
                   onChange={(e) => updateTime(index, 'start', e.target.value)}
                   className={`px-3 py-1 border rounded bg-background ${invalid ? 'border-destructive' : ''}`}
                 />
@@ -350,6 +354,7 @@ const ScheduleEditor = ({ doctorId }: { doctorId: string }) => {
                 <input
                   type="time"
                   value={schedule[index].end}
+                  aria-label={`${dayName} end time`}
                   onChange={(e) => updateTime(index, 'end', e.target.value)}
                   className={`px-3 py-1 border rounded bg-background ${invalid ? 'border-destructive' : ''}`}
                 />

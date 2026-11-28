@@ -139,7 +139,7 @@ export default function Notifications() {
   }, [user]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background">
       <div className="border-b border-border bg-card">
         <div className="px-4 py-3 flex items-center gap-3 max-w-3xl mx-auto">
           <Button aria-label="Back" variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/dashboard')}>
@@ -339,6 +339,6 @@ export default function Notifications() {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 }

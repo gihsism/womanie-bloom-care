@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -41,6 +41,7 @@ function Row({ label, onClick }: { label: string; onClick: () => void }) {
  */
 export function TodayList({ items, go }: { items: TodayItem[]; go: (t: Target) => void }) {
   const [open, setOpen] = useState(false);
+  const listRef = useRef<HTMLUListElement>(null);
   const shown = open ? items : items.slice(0, MAX_TODAY);
   const hidden = items.length - shown.length;
   return (
@@ -49,12 +50,17 @@ export function TodayList({ items, go }: { items: TodayItem[]; go: (t: Target) =
       {items.length === 0 ? (
         <p className="py-3 text-[15px] text-muted-foreground border-y border-border">{NOTHING_TODAY}</p>
       ) : (
-        <ul className="divide-y divide-border border-y border-border">
+        <ul ref={listRef} className="divide-y divide-border border-y border-border">
           {shown.map((i) => <Row key={i.id} label={i.label} onClick={() => go(i.target)} />)}
         </ul>
       )}
       {hidden > 0 && (
-        <Button type="button" variant="link" size="sm" className="tap-target px-0 text-[15px]" onClick={() => setOpen(true)}>
+        <Button type="button" variant="link" size="sm" className="tap-target px-0 text-[15px]" onClick={() => {
+          setOpen(true);
+          // The "N more" button goes away: put focus on the first row it
+          // revealed, not on <body>.
+          requestAnimationFrame(() => listRef.current?.querySelectorAll('button')[MAX_TODAY]?.focus());
+        }}>
           {hidden} more
         </Button>
       )}

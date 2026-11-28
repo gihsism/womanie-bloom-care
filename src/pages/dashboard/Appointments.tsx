@@ -389,7 +389,7 @@ const Appointments = () => {
   const bookVisit = () => navigate('/find-doctor');
 
   return (
-    <div className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background">
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="w-full px-4 py-4">
           <div className="flex items-center justify-between">
@@ -554,7 +554,7 @@ const Appointments = () => {
         </Suspense>
       )}
       {confirmDialog}
-    </div>
+    </main>
   );
 };
 

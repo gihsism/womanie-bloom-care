@@ -156,7 +156,7 @@ export default function HealthOverview() {
   const ranged = metrics.filter(m => m.state !== 'none').length;
 
   return (
-    <div className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background">
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="px-4 py-3 flex items-center gap-3 max-w-2xl mx-auto">
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/dashboard/settings')} aria-label="Back to Me">
@@ -204,6 +204,6 @@ export default function HealthOverview() {
           </>
         )}
       </div>
-    </div>
+    </main>
   );
 }

@@ -391,11 +391,11 @@ export default function MedicineLog({ stage }: { stage?: string | null }) {
                 </Button>
                 <button type="button" onClick={() => startEdit(m)} aria-label={`Edit ${m.name}`}
                   disabled={adding}
-                  className="tap-target text-muted-foreground/60 hover:text-primary disabled:opacity-40">
+                  className="tap-target inline-flex h-6 w-6 items-center justify-center text-muted-foreground/60 hover:text-primary disabled:opacity-40">
                   <Pencil className="h-3.5 w-3.5" />
                 </button>
                 <button type="button" onClick={() => stop(m)} aria-label={`Stop tracking ${m.name}`}
-                  className="text-muted-foreground/60 hover:text-destructive">
+                  className="inline-flex h-6 w-6 items-center justify-center text-muted-foreground/60 hover:text-destructive">
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>

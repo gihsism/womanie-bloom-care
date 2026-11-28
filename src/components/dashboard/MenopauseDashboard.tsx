@@ -302,7 +302,8 @@ export default function MenopauseDashboard({ isPostMenopause = false, onNavigate
 
       {/* Stages Overview (menopause only) */}
       {!isPostMenopause && !withHero && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        // Scrolls sideways with no buttons inside: focusable so a keyboard can scroll it.
+        <div className="flex gap-2 overflow-x-auto pb-1" tabIndex={0} role="region" aria-label="Menopause stages">
           {stages.map(stage => (
             <Card key={stage.name} className="p-3 min-w-[160px] flex-shrink-0 border">
               <p className="text-xs font-bold mb-0.5">{stage.name}</p>

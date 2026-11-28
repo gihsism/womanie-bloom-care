@@ -10,6 +10,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
+import { restoreFocus } from '@/components/ConfirmDialog';
 
 // An in-app text question ("Rename document"). Replaces window.prompt,
 // which installed iOS web apps can suppress. Same AlertDialog pieces as
@@ -37,6 +38,7 @@ export function usePrompt() {
   const [opts, setOpts] = useState<PromptOptions | null>(null);
   const [value, setValue] = useState('');
   const resolver = useRef<((text: string | null) => void) | null>(null);
+  const returnFocus = useRef<HTMLElement | null>(null);
 
   const settle = useCallback((text: string | null) => {
     resolver.current?.(text);
@@ -46,6 +48,7 @@ export function usePrompt() {
 
   const ask = useCallback((o: PromptOptions) => {
     resolver.current?.(null);
+    returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setValue(o.defaultValue ?? '');
     setOpts(o);
     return new Promise<string | null>(resolve => { resolver.current = resolve; });
@@ -55,7 +58,7 @@ export function usePrompt() {
 
   const dialog = (
     <AlertDialog open={opts !== null} onOpenChange={open => { if (!open) settle(null); }}>
-      <AlertDialogContent>
+      <AlertDialogContent onCloseAutoFocus={e => { e.preventDefault(); restoreFocus(returnFocus); }}>
         <AlertDialogHeader>
           <AlertDialogTitle>{opts?.title}</AlertDialogTitle>
           {opts?.description ? <AlertDialogDescription>{opts.description}</AlertDialogDescription> : null}

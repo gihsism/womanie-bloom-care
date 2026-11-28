@@ -239,7 +239,7 @@ export default function PrintVisitPrep() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <main className="min-h-screen bg-white text-black">
       <div className="border-b border-gray-200 print:hidden">
         <div className="px-4 py-3 flex items-center gap-3 max-w-3xl mx-auto">
           <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Back" onClick={() => navigate(-1)}>
@@ -256,6 +256,6 @@ export default function PrintVisitPrep() {
         </div>
       </div>
       <VisitPrepSheet data={data} tz={deviceTz()} />
-    </div>
+    </main>
   );
 }

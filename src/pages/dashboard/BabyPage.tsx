@@ -13,7 +13,7 @@ export default function BabyPage() {
   const tab = params.get('tab');
   const initialTab = tab && ['feed', 'sleep', 'nappy', 'growth', 'vax', 'stats'].includes(tab) ? tab : 'feed';
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <main className="min-h-screen bg-background pb-24">
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="w-full px-4 py-4 flex items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')} className="gap-2">
@@ -26,6 +26,6 @@ export default function BabyPage() {
       <div className="max-w-3xl mx-auto px-4 py-6">
         <BabyTracker initialTab={initialTab} openAdd={params.get('add') === '1'} />
       </div>
-    </div>
+    </main>
   );
 }

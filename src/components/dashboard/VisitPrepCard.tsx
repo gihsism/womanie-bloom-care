@@ -388,7 +388,7 @@ export default function VisitPrepCard({ mode }: VisitPrepCardProps) {
               </p>
               <button
                 type="button"
-                className="tap-target text-[10px] text-primary hover:underline opacity-70 hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5 flex-shrink-0"
+                className="tap-target text-[10px] text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5 flex-shrink-0"
                 onClick={() => navigate(`/dashboard/ai-doctor?q=${encodeURIComponent(q.text)}`)}
                 title="Ask the AI assistant first"
               >

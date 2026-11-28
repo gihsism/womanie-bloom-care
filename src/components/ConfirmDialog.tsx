@@ -39,10 +39,20 @@ export interface ConfirmOptions {
  * Resolves true on the confirm button; false on the back-out button,
  * Escape, or a tap outside.
  */
+/** Focus the element that opened a dialog again, if it is still on the page. */
+export function restoreFocus(ref: { current: HTMLElement | null }) {
+  const el = ref.current;
+  ref.current = null;
+  if (el && el.isConnected && el !== document.body) el.focus();
+}
+
 export function useConfirm() {
   const [opts, setOpts] = useState<ConfirmOptions | null>(null);
   const [typed, setTyped] = useState('');
   const resolver = useRef<((ok: boolean) => void) | null>(null);
+  // The button that asked: focus goes back to it when the dialog closes
+  // (there is no Radix trigger here, so Radix would leave focus on <body>).
+  const returnFocus = useRef<HTMLElement | null>(null);
 
   const settle = useCallback((ok: boolean) => {
     resolver.current?.(ok);
@@ -53,6 +63,7 @@ export function useConfirm() {
   const confirm = useCallback((o: ConfirmOptions) => {
     // A second request while one is open answers the first with "no".
     resolver.current?.(false);
+    returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setTyped('');
     setOpts(o);
     return new Promise<boolean>(resolve => { resolver.current = resolve; });
@@ -60,7 +71,7 @@ export function useConfirm() {
 
   const dialog = (
     <AlertDialog open={opts !== null} onOpenChange={open => { if (!open) settle(false); }}>
-      <AlertDialogContent>
+      <AlertDialogContent onCloseAutoFocus={e => { e.preventDefault(); restoreFocus(returnFocus); }}>
         <AlertDialogHeader>
           <AlertDialogTitle>{opts?.title}</AlertDialogTitle>
           {opts?.description ? <AlertDialogDescription>{opts.description}</AlertDialogDescription> : null}

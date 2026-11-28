@@ -233,7 +233,7 @@ export default function PerimenopauseStageCard({ mode }: PerimenopauseStageCardP
               const q = `My tracking suggests I'm at STRAW+10 stage ${result.stage} (${def.label}). ${result.rationale} What should I expect next and what's worth discussing with my doctor?`;
               navigate(`/dashboard/ai-doctor?q=${encodeURIComponent(q)}`);
             }}
-            aria-label="Ask AI about my menopause stage"
+            aria-label="Ask AI about this: my menopause stage"
           >
             <MessageCircle className="h-3 w-3" />
             Ask AI about this

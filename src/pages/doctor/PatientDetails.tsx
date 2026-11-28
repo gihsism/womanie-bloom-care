@@ -180,7 +180,7 @@ const PatientDetails = () => {
   ].filter(Boolean);
 
   return (
-    <div className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background">
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
           <Button
@@ -285,7 +285,7 @@ const PatientDetails = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </main>
   );
 };
 
