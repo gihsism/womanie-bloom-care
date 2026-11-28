@@ -15,6 +15,8 @@ export interface DayRow {
   bottleMl: number;
   wet: number;
   dirty: number;
+  /** Minutes asleep on this calendar day (a sleep over midnight is split); 0 without sleeps. */
+  sleepMin: number;
 }
 
 export interface FeedSummary {
@@ -37,13 +39,37 @@ const localDate = (d: Date) => {
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MAX_GAP_MIN = 12 * 60; // ignore gaps that are clearly missed logging
 
+/**
+ * Spread each finished sleep over the calendar days it covers and add the
+ * minutes to that day's row. Sleeps longer than MAX_SLEEP_MIN (a timer
+ * never stopped) are left out. Calls onStart with the row the sleep began on.
+ */
+function addSleepByDay(sleeps: StatEvent[], index: Map<string, { sleepMin: number }>, onStart?: (date: string) => void) {
+  for (const s of sleeps) {
+    if (!s.ended_at) continue;
+    const a = Date.parse(s.occurred_at);
+    const b = Date.parse(s.ended_at);
+    if (!(b > a) || (b - a) / 60000 > MAX_SLEEP_MIN) continue;
+    onStart?.(localDate(new Date(a)));
+    let cur = a;
+    while (cur < b) {
+      const c = new Date(cur);
+      const nextMidnight = new Date(c.getFullYear(), c.getMonth(), c.getDate() + 1).getTime();
+      const end = Math.min(b, nextMidnight);
+      const row = index.get(localDate(c));
+      if (row) row.sleepMin += (end - cur) / 60000;
+      cur = end;
+    }
+  }
+}
+
 /** One row per day for the last `days` days (oldest first), ending today. */
-export function dailyRows(feeds: StatEvent[], nappies: StatEvent[], now: Date, days = 7): DayRow[] {
+export function dailyRows(feeds: StatEvent[], nappies: StatEvent[], now: Date, days = 7, sleeps: StatEvent[] = []): DayRow[] {
   const rows: DayRow[] = [];
   const index = new Map<string, DayRow>();
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
-    const row: DayRow = { date: localDate(d), label: i === 0 ? 'Today' : DOW[d.getDay()], feeds: 0, breastMin: 0, bottleMl: 0, wet: 0, dirty: 0 };
+    const row: DayRow = { date: localDate(d), label: i === 0 ? 'Today' : DOW[d.getDay()], feeds: 0, breastMin: 0, bottleMl: 0, wet: 0, dirty: 0, sleepMin: 0 };
     rows.push(row);
     index.set(row.date, row);
   }
@@ -65,6 +91,8 @@ export function dailyRows(feeds: StatEvent[], nappies: StatEvent[], now: Date, d
     if (t === 'wet' || t === 'both') row.wet += 1;
     if (t === 'dirty' || t === 'both') row.dirty += 1;
   }
+  addSleepByDay(sleeps, index);
+  for (const r of rows) r.sleepMin = Math.round(r.sleepMin);
   return rows;
 }
 
@@ -158,24 +186,7 @@ export function weeklySummary(feeds: StatEvent[], nappies: StatEvent[], sleeps: 
     if (t === 'wet' || t === 'both') row.wet += 1;
     if (t === 'dirty' || t === 'both') row.dirty += 1;
   }
-  for (const s of sleeps) {
-    if (!s.ended_at) continue;
-    const a = Date.parse(s.occurred_at);
-    const b = Date.parse(s.ended_at);
-    if (!(b > a) || (b - a) / 60000 > MAX_SLEEP_MIN) continue;
-    const startRow = index.get(localDate(new Date(a)));
-    if (startRow) startRow.sleeps += 1;
-    // Split the sleep over the calendar days it covers.
-    let cur = a;
-    while (cur < b) {
-      const c = new Date(cur);
-      const nextMidnight = new Date(c.getFullYear(), c.getMonth(), c.getDate() + 1).getTime();
-      const end = Math.min(b, nextMidnight);
-      const row = index.get(localDate(c));
-      if (row) row.sleepMin += (end - cur) / 60000;
-      cur = end;
-    }
-  }
+  addSleepByDay(sleeps, index, date => { const startRow = index.get(date); if (startRow) startRow.sleeps += 1; });
   for (const d of days) d.sleepMin = Math.round(d.sleepMin);
   const sum = (k: 'feeds' | 'bottleMl' | 'wet' | 'dirty' | 'sleepMin') => days.reduce((t, d) => t + d[k], 0);
   const totals = { feeds: sum('feeds'), bottleMl: sum('bottleMl'), wet: sum('wet'), dirty: sum('dirty'), sleepMin: sum('sleepMin') };

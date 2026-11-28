@@ -142,4 +142,24 @@ describe('BabyGrowthChart', () => {
     expect(p.onSaveMeasurement).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
   });
+
+  it('lists the measurements newest first with the WHO percentile under each value; remove works', async () => {
+    const onRemove = vi.fn();
+    setup({ events: [ev('a', 56, 3300), ev('b', 28, 4000, 53.5, 36.4)], onRemove });
+    const rows = screen.getAllByTestId('growth-row');
+    expect(rows).toHaveLength(2);
+    expect(rows[0].textContent).toContain('4.00 kg');
+    expect(rows[0].textContent).toContain('4 weeks');
+    expect(rows[0].textContent?.match(/\d+(st|nd|rd|th) percentile/g)).toHaveLength(3);
+    expect(rows[1].textContent).toContain('—');
+    await userEvent.click(screen.getAllByRole('button', { name: 'Remove entry' })[1]);
+    expect(onRemove).toHaveBeenCalledWith('a');
+  });
+
+  it('no sex yet: values without percentiles', () => {
+    setup({ sex: null });
+    const rows = screen.getAllByTestId('growth-row');
+    expect(rows[0].textContent).toContain('4.60 kg');
+    expect(rows[0].textContent).not.toMatch(/percentile/);
+  });
 });

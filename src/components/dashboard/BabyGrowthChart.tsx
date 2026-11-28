@@ -1,13 +1,14 @@
 import { useMemo, useRef, useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { CartesianGrid, ComposedChart, Line, ResponsiveContainer, XAxis, YAxis } from 'recharts';
-import { Camera } from 'lucide-react';
+import { Camera, Trash2 } from 'lucide-react';
+import { DATE_FMT } from '@/lib/dateFormat';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  ageLabel, curveRows, CURVES, DAYS_PER_MONTH, latestLine, MAX_AGE_DAYS, MEASURES, measurePoints, normaliseSex, parseCm,
-  parseWeight, UNIT, valueLabel, type GrowthEventData, type GrowthMeasure, type GrowthSex, type MeasurePoint,
+  ageLabel, chartXScale as xScale, chartYAxis as yAxis, curveRows, CURVES, latestLine, MEASURES, measurementRows, measurePoints, normaliseSex, parseCm,
+  parseWeight, percentileShort, UNIT, valueLabel, type GrowthEventData, type GrowthMeasure, type GrowthSex, type MeasureCell, type MeasurePoint,
 } from '@/lib/babyGrowth';
 
 // WHO Child Growth Standards charts (birth-24 months): weight-, length- and
@@ -45,6 +46,8 @@ interface Props {
   onSaveMeasurement: (m: MeasurementToSave) => Promise<boolean>;
   onSetSex: (sex: GrowthSex) => Promise<boolean>;
   onSetBirthDate: (date: string) => Promise<boolean>;
+  /** Remove a saved measurement (the list under the form). */
+  onRemove?: (id: string) => unknown;
 }
 
 const CURVE_STROKE: Record<number, { stroke: string; dash?: string; width: number }> = {
@@ -62,37 +65,6 @@ const today = () => format(new Date(), 'yyyy-MM-dd');
 const TITLE: Record<GrowthMeasure, string> = { weight: 'Weight for age', length: 'Length for age', head: 'Head circumference for age' };
 const TAB: Record<GrowthMeasure, string> = { weight: 'Weight', length: 'Length', head: 'Head' };
 const NOUN: Record<GrowthMeasure, string> = { weight: 'weight', length: 'length', head: 'head circumference' };
-
-/** Round y-axis ticks for the visible range. */
-function yAxis(lo: number, hi: number) {
-  const span = hi - lo;
-  const step = span > 40 ? 10 : span > 16 ? 5 : span > 8 ? 2 : 1;
-  const min = Math.max(0, Math.floor(lo / step) * step);
-  const max = Math.ceil(hi / step) * step;
-  const ticks: number[] = [];
-  for (let v = min; v <= max; v += step) ticks.push(v);
-  return { min, max, ticks };
-}
-
-/** X range and ticks: weeks for the first ~3 months, then months. */
-function xScale(lastDay: number) {
-  const want = Math.max(91, Math.ceil(lastDay * 1.2) + 14);
-  if (want <= 98) {
-    const end = 98;
-    const ticks = Array.from({ length: 8 }, (_, i) => i * 14);
-    return { end, ticks, label: (d: number) => (d === 0 ? 'Birth' : `${d / 7} wk`) };
-  }
-  const months = Math.min(24, Math.ceil(want / DAYS_PER_MONTH));
-  const step = months <= 6 ? 1 : months <= 12 ? 2 : 3;
-  const endMonths = Math.min(24, Math.ceil(months / step) * step);
-  const ticks: number[] = [];
-  for (let m = 0; m <= endMonths; m += step) ticks.push(Math.min(MAX_AGE_DAYS, Math.round(m * DAYS_PER_MONTH)));
-  return {
-    end: Math.min(MAX_AGE_DAYS, Math.round(endMonths * DAYS_PER_MONTH)),
-    ticks,
-    label: (d: number) => (d === 0 ? 'Birth' : `${Math.round(d / DAYS_PER_MONTH)} mo`),
-  };
-}
 
 /** Shrink a photo to <= 1600 px JPEG (base64) before it is sent. */
 async function photoToJpeg(file: File): Promise<string> {
@@ -311,6 +283,63 @@ function AddMeasurement({ onSaveMeasurement, birthDate }: { onSaveMeasurement: P
   );
 }
 
+function Cell({ c, measure }: { c: MeasureCell | null; measure: GrowthMeasure }) {
+  if (!c) return <td className="py-2 pl-2 text-right text-muted-foreground">—</td>;
+  const v = measure === 'weight' ? `${c.value.toFixed(2)} kg` : `${c.value} cm`;
+  return (
+    <td className="py-2 pl-2 text-right tabular-nums whitespace-nowrap">
+      {v}
+      {c.percentile !== null && (
+        <span className="block text-[11px] text-muted-foreground">{percentileShort(c.percentile)}<span className="sr-only"> percentile</span></span>
+      )}
+    </td>
+  );
+}
+
+/** Her saved measurements, newest first, each value with its WHO percentile underneath. */
+function MeasurementList({ rows, withPercentiles, onRemove }: {
+  rows: ReturnType<typeof measurementRows>; withPercentiles: boolean; onRemove?: (id: string) => unknown;
+}) {
+  if (rows.length === 0) return null;
+  return (
+    <div className="border-t pt-3 space-y-1" data-testid="growth-list">
+      <p className="label-mono">Measurements</p>
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="text-[11px] text-muted-foreground">
+            <th className="text-left font-normal py-1">Date</th>
+            <th className="text-right font-normal py-1 pl-2">Weight</th>
+            <th className="text-right font-normal py-1 pl-2">Length</th>
+            <th className="text-right font-normal py-1 pl-2">Head</th>
+            {onRemove && <th className="w-8"><span className="sr-only">Remove</span></th>}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(r => (
+            <tr key={r.id} className="border-t align-top" data-testid="growth-row">
+              <td className="py-2 pr-1">
+                <span className="tabular-nums">{format(parseISO(r.on), DATE_FMT)}</span>
+                {r.day !== null && r.day >= 0 && <span className="block text-[11px] text-muted-foreground">{ageLabel(r.day)}</span>}
+              </td>
+              <Cell c={r.weight} measure="weight" />
+              <Cell c={r.length} measure="length" />
+              <Cell c={r.head} measure="head" />
+              {onRemove && (
+                <td className="py-1.5 text-right">
+                  <button type="button" onClick={() => { void onRemove(r.id); }} aria-label="Remove entry" className="p-2.5 -mr-2 text-muted-foreground/60 hover:text-destructive">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </td>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {withPercentiles && <p className="text-[11px] text-muted-foreground">Under each value: its WHO percentile for the age on that day.</p>}
+    </div>
+  );
+}
+
 function MeasureTabs({ measure, onChange }: { measure: GrowthMeasure; onChange: (m: GrowthMeasure) => void }) {
   return (
     <div role="tablist" aria-label="Chart" className="inline-flex rounded-md border p-0.5">
@@ -322,13 +351,14 @@ function MeasureTabs({ measure, onChange }: { measure: GrowthMeasure; onChange: 
   );
 }
 
-export default function BabyGrowthChart({ babyName, birthDate, sex, events, onSaveMeasurement, onSetSex, onSetBirthDate }: Props) {
+export default function BabyGrowthChart({ babyName, birthDate, sex, events, onSaveMeasurement, onSetSex, onSetBirthDate, onRemove }: Props) {
   const [measure, setMeasure] = useState<GrowthMeasure>('weight');
   const growthSex = normaliseSex(sex);
   const points = useMemo(() => (birthDate ? measurePoints(measure, birthDate, events, localDate) : []), [measure, birthDate, events]);
   const last = points[points.length - 1];
   const line = growthSex && last ? latestLine(growthSex, last.day, last.value, measure) : null;
   const label = line ?? (last ? `${valueLabel(measure, last.value)} at ${ageLabel(last.day)}` : null);
+  const rows = useMemo(() => measurementRows(birthDate, growthSex, events, localDate), [birthDate, growthSex, events]);
 
   return (
     <section className="space-y-3" aria-labelledby="gc-title">
@@ -354,6 +384,7 @@ export default function BabyGrowthChart({ babyName, birthDate, sex, events, onSa
       )}
       {birthDate && !growthSex && label && <p className="text-sm" data-testid="growth-latest">{label}</p>}
       <AddMeasurement onSaveMeasurement={onSaveMeasurement} birthDate={birthDate} />
+      <MeasurementList rows={rows} withPercentiles={!!(birthDate && growthSex)} onRemove={onRemove} />
     </section>
   );
 }

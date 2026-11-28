@@ -94,8 +94,11 @@ test.describe('Baby growth chart', () => {
     expect(overflow).toBeLessThanOrEqual(0);
     await page.screenshot({ path: testInfo.outputPath('growth-head.png'), fullPage: true });
 
-    // The saved record is listed once with all three values.
-    await expect(page.getByText('4.70 kg · 57.5 cm long · head 38.5 cm')).toHaveCount(1);
+    // The saved record is listed once with all three values and their percentiles.
+    const saved = page.getByTestId('growth-row').filter({ hasText: '4.70 kg' });
+    await expect(saved).toHaveCount(1);
+    await expect(saved).toContainText('57.5 cm');
+    await expect(saved).toContainText('38.5 cm');
     expect(api.unhandled).toEqual([]);
     expect(consoleErrors).toEqual([]);
   });

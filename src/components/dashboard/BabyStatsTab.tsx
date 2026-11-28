@@ -6,10 +6,12 @@ import { Link } from 'react-router-dom';
 import { Printer } from 'lucide-react';
 import { dailyRows, feedSummary, weeklyLines, weeklySummary, type DayRow } from '@/lib/babyStats';
 
-// Feeding and nappy statistics for one baby (last 7 days).
-// Colours: feeds = brand primary (single series, title names it);
-// nappies wet = blue, dirty = amber - validated colour-blind safe in
-// light and dark mode. Text stays in text colours, never series colours.
+// Feeding, nappy and sleep statistics for one baby (last 7 days).
+// Same look as the WHO growth chart: light grid at 60%, muted 10 px axis
+// text, her baby's data in the brand primary. Feeds and sleep = primary
+// (single series, the title names it); nappies wet = foreground, dirty =
+// primary. Text stays in text colours, never series colours. Numbers
+// only: counts and hours, no "enough" / "good" words.
 const WET = 'hsl(var(--foreground))';
 const DIRTY = 'hsl(var(--primary))';
 
@@ -51,7 +53,8 @@ export default function BabyStatsTab({ babyId, onGoTo }: { babyId: string; onGoT
   const nappies = useLifeEvents('nappy', { babyId, limit: 500 });
   const sleeps = useLifeEvents('baby_sleep', { babyId, limit: 500 });
   const [showTable, setShowTable] = useState(false);
-  const rows: DayRow[] = useMemo(() => dailyRows(feeds.events, nappies.events, new Date()), [feeds.events, nappies.events]);
+  const rows: DayRow[] = useMemo(() => dailyRows(feeds.events, nappies.events, new Date(), 7, sleeps.events), [feeds.events, nappies.events, sleeps.events]);
+  const sleepRows = useMemo(() => rows.map(r => ({ label: r.label, hours: Math.round((r.sleepMin / 60) * 10) / 10 })), [rows]);
   const s = useMemo(() => feedSummary(feeds.events, new Date()), [feeds.events]);
   const week = useMemo(() => weeklySummary(feeds.events, nappies.events, sleeps.events, new Date()), [feeds.events, nappies.events, sleeps.events]);
 
@@ -59,6 +62,7 @@ export default function BabyStatsTab({ babyId, onGoTo }: { babyId: string; onGoT
   const sideTotal = s.left + s.right;
   const hasFeeds = rows.some(r => r.feeds > 0);
   const hasNappies = rows.some(r => r.wet + r.dirty > 0);
+  const hasSleep = rows.some(r => r.sleepMin > 0);
 
   return (
     <div className="space-y-4">
@@ -84,7 +88,7 @@ export default function BabyStatsTab({ babyId, onGoTo }: { babyId: string; onGoT
           <div className="h-40 text-primary" role="img" aria-label={`Feeds per day, last 7 days: ${rows.map(r => `${r.label} ${r.feeds}`).join(', ')}`}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={rows} margin={{ top: 8, right: 4, left: -24, bottom: 0 }}>
-                <CartesianGrid vertical={false} stroke="hsl(var(--border))" strokeDasharray="0" />
+                <CartesianGrid vertical={false} stroke="hsl(var(--border))" strokeOpacity={0.6} />
                 <XAxis dataKey="label" tick={axis} tickLine={false} axisLine={false} />
                 <YAxis allowDecimals={false} tick={axis} tickLine={false} axisLine={false} width={40} />
                 <Tooltip content={<ChartTip />} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }} />
@@ -112,7 +116,7 @@ export default function BabyStatsTab({ babyId, onGoTo }: { babyId: string; onGoT
           <div className="h-40" role="img" aria-label={`Nappies per day, last 7 days: ${rows.map(r => `${r.label} ${r.wet} wet ${r.dirty} dirty`).join(', ')}`}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={rows} margin={{ top: 8, right: 4, left: -24, bottom: 0 }}>
-                <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
+                <CartesianGrid vertical={false} stroke="hsl(var(--border))" strokeOpacity={0.6} />
                 <XAxis dataKey="label" tick={axis} tickLine={false} axisLine={false} />
                 <YAxis allowDecimals={false} tick={axis} tickLine={false} axisLine={false} width={40} />
                 <Tooltip content={<ChartTip />} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }} />
@@ -127,6 +131,30 @@ export default function BabyStatsTab({ babyId, onGoTo }: { babyId: string; onGoT
             {onGoTo && <Button size="sm" variant="outline" onClick={() => onGoTo('nappy')}>Log a nappy</Button>}
           </div>
         )}
+      </section>
+
+      <section className="space-y-1">
+        <h4 className="label-mono">Sleep per day (hours)</h4>
+        {hasSleep ? (
+          <div className="h-40 text-primary" role="img" data-testid="sleep-chart"
+            aria-label={`Sleep per day, last 7 days: ${rows.map(r => `${r.label} ${fmtMin(r.sleepMin)}`).join(', ')}`}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={sleepRows} margin={{ top: 8, right: 4, left: -24, bottom: 0 }}>
+                <CartesianGrid vertical={false} stroke="hsl(var(--border))" strokeOpacity={0.6} />
+                <XAxis dataKey="label" tick={axis} tickLine={false} axisLine={false} />
+                <YAxis allowDecimals={false} tick={axis} tickLine={false} axisLine={false} width={40} />
+                <Tooltip content={<ChartTip />} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }} />
+                <Bar dataKey="hours" name="Hours asleep" fill="currentColor" radius={[4, 4, 0, 0]} maxBarSize={12} isAnimationActive={false} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground space-y-2">
+            <p>No sleep logged yet. Start the timer in the Sleep tab or add an earlier sleep.</p>
+            {onGoTo && <Button size="sm" variant="outline" onClick={() => onGoTo('sleep')}>Log a sleep</Button>}
+          </div>
+        )}
+        <p className="text-[11px] text-muted-foreground">A sleep over midnight is split between the two days.</p>
       </section>
 
       <section className="space-y-2" data-testid="baby-week-summary">
@@ -146,13 +174,13 @@ export default function BabyStatsTab({ babyId, onGoTo }: { babyId: string; onGoT
       {showTable && (
         <table className="w-full text-xs">
           <thead><tr className="text-muted-foreground text-left">
-            <th className="font-normal py-1">Day</th><th className="font-normal">Feeds</th><th className="font-normal">Breast</th><th className="font-normal">Bottle</th><th className="font-normal">Wet</th><th className="font-normal">Dirty</th>
+            <th className="font-normal py-1">Day</th><th className="font-normal">Feeds</th><th className="font-normal">Breast</th><th className="font-normal">Bottle</th><th className="font-normal">Wet</th><th className="font-normal">Dirty</th><th className="font-normal">Sleep</th>
           </tr></thead>
           <tbody>
             {[...rows].reverse().map(r => (
               <tr key={r.date} className="border-t">
                 <td className="py-1">{r.label}</td><td>{r.feeds}</td><td>{r.breastMin ? fmtMin(r.breastMin) : '—'}</td>
-                <td>{r.bottleMl ? `${r.bottleMl} ml` : '—'}</td><td>{r.wet}</td><td>{r.dirty}</td>
+                <td>{r.bottleMl ? `${r.bottleMl} ml` : '—'}</td><td>{r.wet}</td><td>{r.dirty}</td><td>{r.sleepMin ? fmtMin(r.sleepMin) : '—'}</td>
               </tr>
             ))}
           </tbody>

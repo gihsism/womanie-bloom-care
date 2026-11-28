@@ -1,5 +1,5 @@
 import { formatWeekdayDayMonth } from '@/lib/dateFormat';
-import { useCallback, useEffect, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Printer, Loader2 } from 'lucide-react';
@@ -8,12 +8,17 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { hoursMin, weeklyLines, weeklySummary, type StatEvent } from '@/lib/babyStats';
 import { footerLine, localDate, parseDay, daysBetween } from '@/lib/visitSummary';
+import type { GrowthPrintEvent } from '@/components/dashboard/BabyGrowthPrint';
+// WHO growth charts + measurement table: SVG and the WHO tables, loaded
+// only when there are measurements to print.
+const BabyGrowthPrint = lazy(() => import('@/components/dashboard/BabyGrowthPrint'));
 
 // Baby: "Last 7 days" for the paediatrician visit. Feeds, nappies and
 // sleep per day over the 7 complete days before today, with the daily
 // averages on top. Neutral numbers only. Opened from the baby Stats tab;
 // same print decisions as the visit summary (white page, black text,
-// toolbar hidden on paper). Nothing leaves the device.
+// toolbar hidden on paper). Nothing leaves the device. Below the week:
+// the WHO growth charts and every measurement with its percentile.
 
 export interface BabySummaryData {
   name: string;
@@ -21,6 +26,10 @@ export interface BabySummaryData {
   feeds: StatEvent[];
   nappies: StatEvent[];
   sleeps: StatEvent[];
+  /** babies.sex, for the WHO charts (girls / boys). */
+  sex?: string | null;
+  /** Every baby_growth record (not only the last 7 days). */
+  growth?: GrowthPrintEvent[];
 }
 
 const H2 = 'text-[11px] font-bold uppercase tracking-wide text-gray-500 mb-1';
@@ -94,6 +103,12 @@ export function BabySummarySheet({ data, now = new Date() }: { data: BabySummary
         </section>
       )}
 
+      {data.growth && data.growth.length > 0 && (
+        <Suspense fallback={null}>
+          <BabyGrowthPrint birthDate={data.birthDate} sex={data.sex ?? null} events={data.growth} />
+        </Suspense>
+      )}
+
       <footer className="mt-6 pt-2 border-t border-gray-200 text-[10px] text-gray-500">{footerLine(now)}</footer>
     </article>
   );
@@ -111,7 +126,7 @@ export default function PrintBabySummary() {
   const load = useCallback(async () => {
     if (!user) return;
     const babiesRes = await db.from('babies').select('*').eq('user_id', user.id).order('created_at', { ascending: true });
-    const babies = (Array.isArray(babiesRes.data) ? babiesRes.data : []) as Array<{ id: string; name: string | null; birth_date: string | null }>;
+    const babies = (Array.isArray(babiesRes.data) ? babiesRes.data : []) as Array<{ id: string; name: string | null; birth_date: string | null; sex?: string | null }>;
     const baby = babies.find(b => String(b.id) === babyParam) ?? babies[0];
     if (babiesRes.error || !baby) { setFailed(true); return; }
     // 9 days back covers the 7 complete days and a sleep that started the evening before.
@@ -119,7 +134,10 @@ export default function PrintBabySummary() {
     const events = (kind: string) => db.from('life_events').select('*')
       .eq('user_id', user.id).eq('kind', kind).eq('baby_id', baby.id)
       .gte('occurred_at', since).order('occurred_at', { ascending: false }).limit(1000);
-    const [f, n, s] = await Promise.all([events('feed'), events('nappy'), events('baby_sleep')]);
+    const growthQ = db.from('life_events').select('*')
+      .eq('user_id', user.id).eq('kind', 'baby_growth').eq('baby_id', baby.id)
+      .order('occurred_at', { ascending: false }).limit(200);
+    const [f, n, s, g] = await Promise.all([events('feed'), events('nappy'), events('baby_sleep'), growthQ]);
     if (f.error || n.error || s.error) { setFailed(true); return; }
     const rows = (r: { data: unknown }) => ((Array.isArray(r.data) ? r.data : []) as Array<Record<string, unknown>>).map(x => {
       let d = x.data as unknown;
@@ -130,7 +148,13 @@ export default function PrintBabySummary() {
         data: (d ?? {}) as Record<string, unknown>,
       };
     });
-    setData({ name: baby.name || 'Baby', birthDate: baby.birth_date ? String(baby.birth_date).slice(0, 10) : null, feeds: rows(f), nappies: rows(n), sleeps: rows(s) });
+    // Growth is extra: if it fails to load, the week still prints.
+    const growthIds = ((Array.isArray(g.data) ? g.data : []) as Array<Record<string, unknown>>).map((x, i) => String(x.id ?? i));
+    const growth = g.error ? [] : rows(g).map((r, i) => ({ id: growthIds[i], occurred_at: r.occurred_at, data: r.data }));
+    setData({
+      name: baby.name || 'Baby', birthDate: baby.birth_date ? String(baby.birth_date).slice(0, 10) : null, sex: baby.sex ?? null,
+      feeds: rows(f), nappies: rows(n), sleeps: rows(s), growth,
+    });
   }, [user, babyParam]);
 
   useEffect(() => { void load(); }, [load]);

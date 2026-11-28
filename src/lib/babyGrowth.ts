@@ -226,3 +226,82 @@ export function weightPoints(
 ): WeightPoint[] {
   return measurePoints('weight', birthDate, events, localDate).map(p => ({ day: p.day, kg: p.value, on: p.on }));
 }
+
+/** Short percentile for a table cell: "42nd", "<1st", ">99th". */
+export function percentileShort(p: number): string {
+  if (p < 1) return '<1st';
+  if (p > 99) return '>99th';
+  return ordinal(Math.min(99, Math.max(1, Math.round(p))));
+}
+
+export interface MeasureCell { value: number; percentile: number | null }
+export interface MeasurementRow {
+  id: string;
+  on: string; // yyyy-mm-dd (local)
+  /** Age in days on that date; null without a birth date. */
+  day: number | null;
+  weight: MeasureCell | null;
+  length: MeasureCell | null;
+  head: MeasureCell | null;
+}
+
+/**
+ * Her saved measurements for a list or a printed table, newest first,
+ * each value with its WHO percentile (null without a sex or a birth date,
+ * or outside birth to 24 months). Numbers only, no judgement.
+ */
+export function measurementRows(
+  birthDate: string | null,
+  sex: GrowthSex | null,
+  events: Array<{ id: string; occurred_at: string; data?: GrowthEventData | null }>,
+  localDate: (iso: string) => string,
+): MeasurementRow[] {
+  const rows: MeasurementRow[] = [];
+  for (const e of events) {
+    const on = localDate(e.occurred_at);
+    const day = birthDate ? ageInDays(birthDate, on) : null;
+    const cell = (m: GrowthMeasure): MeasureCell | null => {
+      const value = valueOf(m, e.data);
+      if (value === null) return null;
+      const percentile = sex && day !== null ? percentileOf(m, sex, day, value) : null;
+      return { value, percentile };
+    };
+    const row = { id: e.id, on, day, weight: cell('weight'), length: cell('length'), head: cell('head') };
+    if (row.weight || row.length || row.head) rows.push(row);
+  }
+  return rows.sort((a, b) => b.on.localeCompare(a.on) || b.id.localeCompare(a.id));
+}
+
+// ---------------------------------------------------------------- chart axes
+// Shared by the screen chart (recharts) and the printed chart (plain SVG).
+
+/** Round y-axis ticks for the visible range. */
+export function chartYAxis(lo: number, hi: number) {
+  const span = hi - lo;
+  const step = span > 40 ? 10 : span > 16 ? 5 : span > 8 ? 2 : 1;
+  const min = Math.max(0, Math.floor(lo / step) * step);
+  const max = Math.ceil(hi / step) * step;
+  const ticks: number[] = [];
+  for (let v = min; v <= max; v += step) ticks.push(v);
+  return { min, max, ticks };
+}
+
+/** X range and ticks: weeks for the first ~3 months, then months. */
+export function chartXScale(lastDay: number) {
+  const want = Math.max(91, Math.ceil(lastDay * 1.2) + 14);
+  if (want <= 98) {
+    const end = 98;
+    const ticks = Array.from({ length: 8 }, (_, i) => i * 14);
+    return { end, ticks, label: (d: number) => (d === 0 ? 'Birth' : `${d / 7} wk`) };
+  }
+  const months = Math.min(24, Math.ceil(want / DAYS_PER_MONTH));
+  const step = months <= 6 ? 1 : months <= 12 ? 2 : 3;
+  const endMonths = Math.min(24, Math.ceil(months / step) * step);
+  const ticks: number[] = [];
+  for (let m = 0; m <= endMonths; m += step) ticks.push(Math.min(MAX_AGE_DAYS, Math.round(m * DAYS_PER_MONTH)));
+  return {
+    end: Math.min(MAX_AGE_DAYS, Math.round(endMonths * DAYS_PER_MONTH)),
+    ticks,
+    label: (d: number) => (d === 0 ? 'Birth' : `${Math.round(d / DAYS_PER_MONTH)} mo`),
+  };
+}

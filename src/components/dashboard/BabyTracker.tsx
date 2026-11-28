@@ -1,6 +1,6 @@
 import { formatTime } from '@/lib/timeFormat';
 import { DATE_FMT, WEEKDAY_DAY_MONTH_FMT } from '@/lib/dateFormat';
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { db } from '@/integrations/db/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLifeEvents, importLocalOnce, type LifeEvent } from '@/hooks/useLifeEvents';
-import { Baby, Milk, Moon, Droplets, Ruler, Syringe, Trash2, Play, Square, BarChart3, Plus, Timer } from 'lucide-react';
+import { Baby, Milk, Moon, Droplets, Ruler, Syringe, Trash2, Play, Square, BarChart3, Plus, Timer, Repeat, Undo2 } from 'lucide-react';
 // Stats tab draws charts (recharts, ~110 KB gzip): load it when opened.
 const BabyStatsTab = lazy(() => import('./BabyStatsTab'));
 // WHO growth charts + "Add a measurement" (recharts, WHO tables): loaded with the Growth tab.
@@ -66,17 +66,123 @@ function Remove({ onClick }: { onClick: () => void }) {
 
 // "Now" as the value of a datetime-local input (local time, minutes).
 const nowLocal = () => format(new Date(), "yyyy-MM-dd'T'HH:mm");
+const toLocalInput = (ms: number) => format(new Date(ms), "yyyy-MM-dd'T'HH:mm");
 
-function Saved({ text }: { text: string | null }) {
-  if (!text) return null;
-  return <p role="status" className="text-sm text-primary text-center">{text}</p>;
+/** Running timer as a clock: "4:07" or "1:02:05". */
+const fmtClock = (ms: number) => {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(s / 3600); const m = Math.floor((s % 3600) / 60); const sec = s % 60;
+  const two = (n: number) => String(n).padStart(2, '0');
+  return h ? `${h}:${two(m)}:${two(sec)}` : `${m}:${two(sec)}`;
+};
+
+/** A start time she typed for a running timer: in the past, at most 12 hours ago. */
+function parseStart(v: string): number | null {
+  const t = new Date(v).getTime();
+  if (Number.isNaN(t) || t > Date.now() + 60_000 || t < Date.now() - 12 * 3600_000) return null;
+  return Math.min(t, Date.now());
 }
 
-function useFlash() {
-  const [msg, setMsg] = useState<string | null>(null);
-  const flash = (m: string) => { setMsg(m); window.setTimeout(() => setMsg(null), 2500); };
-  return [msg, flash] as const;
+/** Same entry moved to a new start; a sleep or timed feed keeps its length. */
+function retimed(e: LifeEvent<unknown>, iso: string): { occurred_at: string; ended_at?: string } {
+  const delta = Date.parse(iso) - Date.parse(e.occurred_at);
+  return e.ended_at ? { occurred_at: iso, ended_at: new Date(Date.parse(e.ended_at) + delta).toISOString() } : { occurred_at: iso };
 }
+
+/**
+ * "Feed saved ✓ [Undo]" under the buttons. With an undo it stays 8 s;
+ * Undo runs once, then says "Removed." Plain confirmations go after 2.5 s.
+ */
+function useUndoNotice() {
+  const [state, setState] = useState<{ text: string; undo?: () => Promise<unknown> } | null>(null);
+  const timer = useRef<number | undefined>(undefined);
+  const show = useCallback((text: string, undo?: () => Promise<unknown>) => {
+    window.clearTimeout(timer.current);
+    setState({ text, undo });
+    timer.current = window.setTimeout(() => setState(null), undo ? 8000 : 2500);
+  }, []);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+  const node = state ? (
+    <div role="status" className="flex items-center justify-center gap-3 text-sm" data-testid="baby-notice">
+      <span className="text-primary">{state.text}</span>
+      {state.undo && (
+        <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => {
+          const u = state.undo as () => Promise<unknown>;
+          setState(null);
+          void u().then(() => show('Removed.'));
+        }}>
+          <Undo2 className="h-3.5 w-3.5" /> Undo
+        </Button>
+      )}
+    </div>
+  ) : null;
+  return [node, show] as const;
+}
+
+/** "Started 14:05 · Change" under a running timer; lets her set the real start. */
+function TimerStart({ start, onChange, id }: { start: number; onChange: (t: number) => void; id: string }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState('');
+  const [error, setError] = useState(false);
+  if (!editing) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        Started {formatTime(new Date(start).toISOString())} ·{' '}
+        <button type="button" className="underline" onClick={() => { setValue(toLocalInput(start)); setError(false); setEditing(true); }}>Change start time</button>
+      </p>
+    );
+  }
+  const save = () => {
+    const t = parseStart(value);
+    if (t === null) { setError(true); return; }
+    onChange(t); setEditing(false);
+  };
+  return (
+    <div className="space-y-1.5 text-left">
+      <Label htmlFor={id} className="text-xs">Started at</Label>
+      <div className="flex flex-wrap gap-2">
+        <Input id={id} type="datetime-local" value={value} max={nowLocal()} onChange={e => { setValue(e.target.value); setError(false); }} className="h-10 text-base flex-1 min-w-[12rem]" />
+        <Button size="sm" className="h-10" onClick={save}>Save</Button>
+        <Button size="sm" variant="ghost" className="h-10" onClick={() => setEditing(false)}>Cancel</Button>
+      </div>
+      {error && <p className="text-xs text-destructive">Choose a time in the last 12 hours.</p>}
+    </div>
+  );
+}
+
+/** Running timer card (feed or sleep): live clock, start time she can correct, save, discard. */
+function RunningTimer({ title, start, onStart, onSave, saveLabel, onDiscard, id }: {
+  title: string; start: number; onStart: (t: number) => void; onSave: () => void; saveLabel: string; onDiscard: () => void; id: string;
+}) {
+  const now = useTick(true);
+  return (
+    <div className="rounded-2xl bg-primary/10 border border-primary/30 p-4 text-center space-y-2" data-testid="baby-timer">
+      <div className="text-sm text-primary">{title}</div>
+      <div className="font-display text-4xl tabular-nums" aria-live="off" data-testid="baby-timer-clock">{fmtClock(now - start)}</div>
+      <TimerStart start={start} onChange={onStart} id={id} />
+      <Button size="lg" onClick={onSave} className="gap-2 w-full"><Square className="h-4 w-4" /> {saveLabel}</Button>
+      <button type="button" className="text-xs text-muted-foreground underline" onClick={onDiscard}>Discard timer</button>
+    </div>
+  );
+}
+
+interface QuickFeed { method: FeedMethod; minutes: number; ml: number | null; milk: 'breast_milk' | 'formula' | null }
+
+/** What one tap logs, from her last feed: the same bottle, or the other breast for as long as last time. */
+function quickFeedFrom(last: LifeEvent<FeedData> | undefined): QuickFeed | null {
+  const m = last?.data?.method;
+  if (!last || !m || !(m in METHOD_LABEL)) return null;
+  if (m === 'bottle') {
+    const ml = Number(last.data.ml);
+    return { method: 'bottle', minutes: 0, ml: Number.isFinite(ml) && ml > 0 ? ml : null, milk: last.data.milk ?? null };
+  }
+  const dur = last.ended_at ? differenceInMinutes(parseISO(last.ended_at), parseISO(last.occurred_at)) : 0;
+  return { method: m === 'breast_l' ? 'breast_r' : 'breast_l', minutes: dur > 0 && dur < 120 ? dur : 15, ml: null, milk: null };
+}
+
+const quickFeedLabel = (q: QuickFeed) => q.method === 'bottle'
+  ? ['Bottle', q.ml ? `${q.ml} ml` : null, q.milk ? (q.milk === 'formula' ? 'formula' : 'breast milk') : null].filter(Boolean).join(' · ')
+  : `${METHOD_LABEL[q.method]} · ${q.minutes} min`;
 
 function FeedTab({ babyId, openAdd = false }: { babyId: string; openAdd?: boolean }) {
   const feeds = useLifeEvents<FeedData>('feed', {
@@ -84,16 +190,21 @@ function FeedTab({ babyId, openAdd = false }: { babyId: string; openAdd?: boolea
     beforeLoad: (id) => importLocalOnce<{ at: string; method: FeedMethod }, FeedData>(id, OLD_FEEDS_KEY(id), 'feed', f =>
       f?.at ? { occurred_at: f.at, baby_id: babyId, data: { method: f.method } } : null),
   });
-  const [active, setActive] = useState<{ side: FeedMethod; start: number } | null>(() => {
+  // Running breastfeeding timer, kept on the device so it survives a reload.
+  const [active, setActiveState] = useState<{ side: FeedMethod; start: number } | null>(() => {
     try { const raw = localStorage.getItem(FEED_ACTIVE_KEY(babyId)); return raw ? JSON.parse(raw) : null; } catch { return null; }
   });
-  const now = useTick(!!active);
-  const [saved, flash] = useFlash();
+  const setActive = (a: { side: FeedMethod; start: number } | null) => {
+    setActiveState(a);
+    try { if (a) localStorage.setItem(FEED_ACTIVE_KEY(babyId), JSON.stringify(a)); else localStorage.removeItem(FEED_ACTIVE_KEY(babyId)); } catch { /* ignore */ }
+  };
+  const [notice, show] = useUndoNotice();
 
   // "Add a feed" form — for a feed that already happened (or one you
   // don't want to time). Opens straight away from Home's "+ Feed".
   const [adding, setAdding] = useState(openAdd);
   const lastSide = feeds.events.find(f => f.data?.method !== 'bottle')?.data?.method;
+  const quick = quickFeedFrom(feeds.events[0]);
   const [method, setMethod] = useState<FeedMethod>('breast_l');
   const [at, setAt] = useState(nowLocal);
   const [minutes, setMinutes] = useState('15');
@@ -107,38 +218,63 @@ function FeedTab({ babyId, openAdd = false }: { babyId: string; openAdd?: boolea
     if (lastSide === 'breast_r') setMethod(m => (m === 'bottle' ? m : 'breast_l'));
   }, [lastSide]);
 
-  const openForm = () => { setAt(nowLocal()); setAdding(true); };
+  // The form opens with her last choices (same bottle, or the other breast).
+  const openForm = () => {
+    setAt(nowLocal());
+    if (quick) {
+      setMethod(quick.method);
+      if (quick.method === 'bottle') { setMl(quick.ml ? String(quick.ml) : ''); if (quick.milk) setMilk(quick.milk); }
+      else setMinutes(String(quick.minutes));
+    }
+    setAdding(true);
+  };
+
+  const undoable = (saved: LifeEvent<FeedData> | null, text: string, after?: () => void) => {
+    if (!saved) return;
+    show(text, async () => { if (await feeds.remove(saved.id)) after?.(); });
+  };
 
   const saveFeed = async () => {
     const start = new Date(at);
     if (Number.isNaN(start.getTime())) return;
     setBusy(true);
     try {
+      let saved: LifeEvent<FeedData> | null;
       if (method === 'bottle') {
         const n = parseInt(ml, 10);
-        await feeds.add({ occurred_at: start.toISOString(), data: { method: 'bottle', ml: Number.isFinite(n) ? n : null, milk } });
+        saved = await feeds.add({ occurred_at: start.toISOString(), data: { method: 'bottle', ml: Number.isFinite(n) ? n : null, milk } });
       } else {
         const m = parseInt(minutes, 10);
         const ended = Number.isFinite(m) && m > 0 ? new Date(start.getTime() + m * 60000).toISOString() : undefined;
-        await feeds.add({ occurred_at: start.toISOString(), ...(ended ? { ended_at: ended } : {}), data: { method } });
+        saved = await feeds.add({ occurred_at: start.toISOString(), ...(ended ? { ended_at: ended } : {}), data: { method } });
       }
-      setAdding(false); setMl('');
-      flash('Feed added ✓');
+      if (saved) { setAdding(false); setMl(''); }
+      undoable(saved, 'Feed added ✓');
     } finally { setBusy(false); }
   };
 
-  const startBreast = (side: FeedMethod) => {
-    const a = { side, start: Date.now() };
-    setActive(a);
-    try { localStorage.setItem(FEED_ACTIVE_KEY(babyId), JSON.stringify(a)); } catch { /* ignore */ }
+  // One tap: her last feed again, logged as just finished.
+  const quickLog = async () => {
+    if (!quick || busy) return;
+    setBusy(true);
+    try {
+      const now = Date.now();
+      const saved = quick.method === 'bottle'
+        ? await feeds.add({ occurred_at: new Date(now).toISOString(), data: { method: 'bottle', ml: quick.ml, milk: quick.milk } })
+        : await feeds.add({ occurred_at: new Date(now - quick.minutes * 60000).toISOString(), ended_at: new Date(now).toISOString(), data: { method: quick.method } });
+      undoable(saved, `${quickFeedLabel(quick)} logged ✓`);
+    } finally { setBusy(false); }
   };
+
+  const startBreast = (side: FeedMethod) => setActive({ side, start: Date.now() });
   const stopBreast = async () => {
     if (!active) return;
     const a = active;
     setActive(null);
-    try { localStorage.removeItem(FEED_ACTIVE_KEY(babyId)); } catch { /* ignore */ }
-    await feeds.add({ occurred_at: new Date(a.start).toISOString(), ended_at: new Date().toISOString(), data: { method: a.side } });
-    flash('Feed saved ✓');
+    const saved = await feeds.add({ occurred_at: new Date(a.start).toISOString(), ended_at: new Date().toISOString(), data: { method: a.side } });
+    if (!saved) { setActive(a); return; }
+    // Undo puts the timer back as it was.
+    undoable(saved, 'Feed saved ✓', () => setActive(a));
   };
 
   const today = feeds.events.filter(f => isToday(parseISO(f.occurred_at)));
@@ -156,11 +292,9 @@ function FeedTab({ babyId, openAdd = false }: { babyId: string; openAdd?: boolea
       </div>
 
       {active ? (
-        <div className="rounded-2xl bg-primary/10 border border-primary/30 p-4 text-center space-y-2">
-          <div className="text-sm text-primary">{METHOD_LABEL[active.side]} · feeding now</div>
-          <div className="font-display text-4xl tabular-nums">{fmtMin((now - active.start) / 60000)}</div>
-          <Button size="lg" onClick={stopBreast} className="gap-2 w-full"><Square className="h-4 w-4" /> Finished — save feed</Button>
-        </div>
+        <RunningTimer id="feed-timer-start" title={`${METHOD_LABEL[active.side]} · feeding now`} start={active.start}
+          onStart={t => setActive({ ...active, start: t })} onSave={() => { void stopBreast(); }} saveLabel="Finished — save feed"
+          onDiscard={() => { setActive(null); show('Timer discarded.'); }} />
       ) : adding ? (
         <div className="rounded-2xl border border-foreground/20 bg-card p-4 space-y-4" aria-label="Add a feed" data-hide-install-banner>
           <p className="font-display text-lg">Add a feed</p>
@@ -204,7 +338,13 @@ function FeedTab({ babyId, openAdd = false }: { babyId: string; openAdd?: boolea
         </div>
       ) : (
         <div className="space-y-3">
-          <Button size="lg" className="w-full h-14 text-base gap-2" onClick={openForm}>
+          {quick && (
+            <Button size="lg" className="w-full h-auto min-h-14 py-2.5 text-base gap-2 flex-col" onClick={() => { void quickLog(); }} disabled={busy} data-testid="feed-quick-log">
+              <span className="flex items-center gap-2"><Repeat className="h-5 w-5" /> Quick log: {quickFeedLabel(quick)}</span>
+              <span className="text-xs font-normal opacity-90">Saved as just now · tap its time below to change it</span>
+            </Button>
+          )}
+          <Button size="lg" variant={quick ? 'outline' : 'default'} className={`w-full gap-2 ${quick ? '' : 'h-14 text-base'}`} onClick={openForm}>
             <Plus className="h-5 w-5" /> Add a feed
           </Button>
           <div className="rounded-2xl border border-border p-3 space-y-2">
@@ -217,12 +357,13 @@ function FeedTab({ babyId, openAdd = false }: { babyId: string; openAdd?: boolea
                 <Play className="h-3.5 w-3.5" /> Right{lastSide === 'breast_r' ? ' (last time)' : ''}
               </Button>
             </div>
+            <p className="text-[11px] text-muted-foreground">The timer keeps running if you close the app.</p>
           </div>
         </div>
       )}
-      <Saved text={saved} />
+      {notice}
 
-      <EntryList events={feeds.events.slice(0, 30)} onRemove={feeds.remove} render={f => (
+      <EntryList events={feeds.events.slice(0, 30)} onRemove={feeds.remove} onRetime={(e, iso) => feeds.update(e.id, retimed(e, iso))} render={f => (
         <>
           {METHOD_LABEL[f.data?.method as FeedMethod] ?? 'Feed'}
           {f.ended_at ? ` · ${fmtMin(differenceInMinutes(parseISO(f.ended_at), parseISO(f.occurred_at)))}` : ''}
@@ -238,24 +379,38 @@ function FeedTab({ babyId, openAdd = false }: { babyId: string; openAdd?: boolea
 
 function SleepTab({ babyId }: { babyId: string }) {
   const sleeps = useLifeEvents('baby_sleep', { babyId, limit: 100 });
-  const [start, setStart] = useState<number | null>(() => readActive(SLEEP_ACTIVE_KEY(babyId)));
-  const now = useTick(start !== null);
-  const [saved, flash] = useFlash();
+  const [start, setStartState] = useState<number | null>(() => readActive(SLEEP_ACTIVE_KEY(babyId)));
+  const setStart = (t: number | null) => { setStartState(t); writeActive(SLEEP_ACTIVE_KEY(babyId), t); };
+  const [notice, show] = useUndoNotice();
   const [adding, setAdding] = useState(false);
   const [from, setFrom] = useState(nowLocal);
   const [mins, setMins] = useState('60');
-  const begin = () => { const t = Date.now(); setStart(t); writeActive(SLEEP_ACTIVE_KEY(babyId), t); };
+  // Her last finished sleep: the "earlier sleep" form starts with its length.
+  const lastMin = (() => {
+    for (const e of sleeps.events) {
+      if (!e.ended_at) continue;
+      const m = differenceInMinutes(parseISO(e.ended_at), parseISO(e.occurred_at));
+      if (m > 0 && m <= 16 * 60) return m;
+    }
+    return null;
+  })();
+  const undoable = (saved: LifeEvent | null, text: string, after?: () => void) => {
+    if (saved) show(text, async () => { if (await sleeps.remove(saved.id)) after?.(); });
+  };
+  const begin = () => setStart(Date.now());
   const end = async () => {
     if (start === null) return;
-    const s = start; setStart(null); writeActive(SLEEP_ACTIVE_KEY(babyId), null);
-    await sleeps.add({ occurred_at: new Date(s).toISOString(), ended_at: new Date().toISOString() });
-    flash('Sleep saved ✓');
+    const s = start; setStart(null);
+    const saved = await sleeps.add({ occurred_at: new Date(s).toISOString(), ended_at: new Date().toISOString() });
+    if (!saved) { setStart(s); return; }
+    undoable(saved, 'Sleep saved ✓', () => setStart(s));
   };
   const savePast = async () => {
     const s = new Date(from); const m = parseInt(mins, 10);
     if (Number.isNaN(s.getTime()) || !Number.isFinite(m) || m <= 0) return;
-    await sleeps.add({ occurred_at: s.toISOString(), ended_at: new Date(s.getTime() + m * 60000).toISOString() });
-    setAdding(false); flash('Sleep added ✓');
+    const saved = await sleeps.add({ occurred_at: s.toISOString(), ended_at: new Date(s.getTime() + m * 60000).toISOString() });
+    if (saved) setAdding(false);
+    undoable(saved, 'Sleep added ✓');
   };
   const todayMin = sleeps.events
     .filter(e => e.ended_at && isToday(parseISO(e.ended_at)))
@@ -268,11 +423,9 @@ function SleepTab({ babyId }: { babyId: string }) {
         <Stat label="Naps today" value={String(sleeps.events.filter(e => e.ended_at && isToday(parseISO(e.ended_at))).length)} />
       </div>
       {start !== null ? (
-        <div className="rounded-2xl bg-primary/10 border border-primary/30 p-4 text-center space-y-2">
-          <div className="text-sm text-primary">Sleeping</div>
-          <div className="font-display text-4xl tabular-nums">{fmtMin((now - start) / 60000)}</div>
-          <Button size="lg" onClick={end} className="gap-2 w-full"><Square className="h-4 w-4" /> Woke up — save sleep</Button>
-        </div>
+        <RunningTimer id="sleep-timer-start" title="Sleeping" start={start} onStart={setStart}
+          onSave={() => { void end(); }} saveLabel="Woke up — save sleep"
+          onDiscard={() => { setStart(null); show('Timer discarded.'); }} />
       ) : adding ? (
         <div className="rounded-2xl border border-foreground/20 bg-card p-4 space-y-4" aria-label="Add a sleep" data-hide-install-banner>
           <p className="font-display text-lg">Add an earlier sleep</p>
@@ -292,11 +445,16 @@ function SleepTab({ babyId }: { babyId: string }) {
       ) : (
         <div className="space-y-2">
           <Button size="lg" onClick={begin} className="w-full h-14 text-base gap-2"><Moon className="h-5 w-5" /> Fell asleep now</Button>
-          <Button variant="outline" onClick={() => { setFrom(nowLocal()); setAdding(true); }} className="w-full gap-1.5"><Plus className="h-4 w-4" /> Add an earlier sleep</Button>
+          <Button variant="outline" onClick={() => {
+            // Default: the length of her last sleep, ending now.
+            const m = lastMin ?? 60;
+            setMins(String(m)); setFrom(toLocalInput(Date.now() - m * 60000)); setAdding(true);
+          }} className="w-full gap-1.5"><Plus className="h-4 w-4" /> Add an earlier sleep</Button>
+          <p className="text-[11px] text-muted-foreground text-center">The timer keeps running if you close the app.</p>
         </div>
       )}
-      <Saved text={saved} />
-      <EntryList events={sleeps.events.slice(0, 20)} onRemove={sleeps.remove} render={e => (
+      {notice}
+      <EntryList events={sleeps.events.slice(0, 20)} onRemove={sleeps.remove} onRetime={(e, iso) => sleeps.update(e.id, retimed(e, iso))} render={e => (
         <>{e.ended_at ? `Slept ${fmtMin(differenceInMinutes(parseISO(e.ended_at), parseISO(e.occurred_at)))}` : 'Sleep'}</>
       )} />
     </div>
@@ -308,9 +466,13 @@ function NappyTab({ babyId }: { babyId: string }) {
   const today = nappies.events.filter(e => isToday(parseISO(e.occurred_at)));
   const wet = today.filter(e => e.data?.type !== 'dirty').length;
   const dirty = today.filter(e => e.data?.type !== 'wet').length;
-  const log = (type: NappyData['type']) => nappies.add({ occurred_at: new Date().toISOString(), data: { type } });
   const label = { wet: 'Wet', dirty: 'Dirty', both: 'Wet + dirty' } as const;
-  const [saved, flash] = useFlash();
+  const lastType = nappies.events[0]?.data?.type;
+  const [notice, show] = useUndoNotice();
+  const log = async (type: NappyData['type']) => {
+    const saved = await nappies.add({ occurred_at: new Date().toISOString(), data: { type } });
+    if (saved) show(`${type === 'both' ? 'Nappy' : `${label[type]} nappy`} added ✓`, () => nappies.remove(saved.id));
+  };
   return (
     <div className="space-y-3">
       {nappies.error && <p className="text-xs text-destructive">{nappies.error}</p>}
@@ -321,13 +483,18 @@ function NappyTab({ babyId }: { babyId: string }) {
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground">Tap to add a nappy changed now:</p>
         <div className="grid grid-cols-3 gap-2">
-          <Button variant="outline" className="h-12 text-base" onClick={() => { void log('wet'); flash('Wet nappy added ✓'); }}>+ Wet</Button>
-          <Button variant="outline" className="h-12 text-base" onClick={() => { void log('dirty'); flash('Dirty nappy added ✓'); }}>+ Dirty</Button>
-          <Button variant="outline" className="h-12 text-base" onClick={() => { void log('both'); flash('Nappy added ✓'); }}>+ Both</Button>
+          {(['wet', 'dirty', 'both'] as const).map(t => (
+            <Button key={t} variant="outline" className="h-12 text-base flex-col gap-0 leading-tight" onClick={() => { void log(t); }}
+              aria-label={`+ ${t === 'both' ? 'Both' : label[t]}${lastType === t ? ' (last time)' : ''}`}>
+              <span>+ {t === 'both' ? 'Both' : label[t]}</span>
+              {lastType === t && <span className="text-[10px] font-normal text-muted-foreground">last time</span>}
+            </Button>
+          ))}
         </div>
+        <p className="text-[11px] text-muted-foreground">Changed it earlier? Tap the time in the list to change it.</p>
       </div>
-      <Saved text={saved} />
-      <EntryList events={nappies.events.slice(0, 10)} onRemove={nappies.remove} render={e => <>{label[e.data?.type ?? 'wet']}</>} />
+      {notice}
+      <EntryList events={nappies.events.slice(0, 10)} onRemove={nappies.remove} onRetime={(e, iso) => nappies.update(e.id, retimed(e, iso))} render={e => <>{label[e.data?.type ?? 'wet']}</>} />
       <p className="text-[10px] text-muted-foreground">From about day 5, around 6 or more wet nappies a day is a common sign of enough milk. Ask your midwife if you’re worried.</p>
     </div>
   );
@@ -337,6 +504,8 @@ function GrowthTab({ baby, onBabyChange }: { baby: BabyRow; onBabyChange: (patch
   const babyId = baby.id;
   const growth = useLifeEvents<GrowthData>('baby_growth', { babyId, limit: 100 });
   // One record per measurement (weight, length and head together), as before.
+  // The list of measurements, each with its WHO percentile, is drawn by
+  // BabyGrowthChart (lazy, with the WHO tables).
   const saveMeasurement = async (m: { measuredOn: string; weightG: number | null; lengthCm: number | null; headCm: number | null; source: 'typed' | 'photo' }) =>
     growth.add({ occurred_at: new Date(`${m.measuredOn}T12:00:00`).toISOString(), data: { weight_g: m.weightG, length_cm: m.lengthCm, head_cm: m.headCm, source: m.source } });
   return (
@@ -345,15 +514,9 @@ function GrowthTab({ baby, onBabyChange }: { baby: BabyRow; onBabyChange: (patch
       <Suspense fallback={<p className="text-xs text-muted-foreground">Loading the chart…</p>}>
         <BabyGrowthChart babyName={baby.name} birthDate={baby.birth_date} sex={baby.sex} events={growth.events}
           onSaveMeasurement={async m => !!(await saveMeasurement(m))}
-          onSetSex={sex => onBabyChange({ sex })} onSetBirthDate={birth_date => onBabyChange({ birth_date })} />
+          onSetSex={sex => onBabyChange({ sex })} onSetBirthDate={birth_date => onBabyChange({ birth_date })}
+          onRemove={growth.remove} />
       </Suspense>
-      <EntryList events={growth.events} onRemove={growth.remove} dateOnly render={e => (
-        <>
-          {[e.data?.weight_g ? `${(Number(e.data.weight_g) / 1000).toFixed(2)} kg` : null,
-            e.data?.length_cm ? `${e.data.length_cm} cm long` : null,
-            e.data?.head_cm ? `head ${e.data.head_cm} cm` : null].filter(Boolean).join(' · ')}
-        </>
-      )} />
     </div>
   );
 }
@@ -403,9 +566,39 @@ function dayHeading(iso: string) {
   return format(d, WEEKDAY_DAY_MONTH_FMT);
 }
 
-function EntryList<D>({ events, onRemove, render, dateOnly }: {
+/** Inline "change the time" row for one entry. */
+function RetimeRow({ e, onSave, onCancel }: { e: LifeEvent<unknown>; onSave: (iso: string) => Promise<unknown>; onCancel: () => void }) {
+  const [value, setValue] = useState(() => toLocalInput(Date.parse(e.occurred_at)));
+  const [error, setError] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const save = async () => {
+    const t = new Date(value).getTime();
+    if (Number.isNaN(t) || t > Date.now() + 60_000) { setError(true); return; }
+    setBusy(true);
+    const ok = await onSave(new Date(t).toISOString());
+    setBusy(false);
+    if (ok) onCancel(); else setError(true);
+  };
+  const id = `retime-${e.id}`;
+  return (
+    <li className="py-2.5 space-y-1.5" data-testid="retime-row">
+      <Label htmlFor={id} className="text-xs">{e.ended_at ? 'Started at' : 'Time'}</Label>
+      <div className="flex flex-wrap gap-2">
+        <Input id={id} type="datetime-local" value={value} max={nowLocal()} onChange={ev => { setValue(ev.target.value); setError(false); }} className="h-10 text-base flex-1 min-w-[12rem]" />
+        <Button size="sm" className="h-10" disabled={busy} onClick={() => { void save(); }}>Save time</Button>
+        <Button size="sm" variant="ghost" className="h-10" onClick={onCancel}>Cancel</Button>
+      </div>
+      {error && <p className="text-xs text-destructive">Choose a time up to now.</p>}
+    </li>
+  );
+}
+
+function EntryList<D>({ events, onRemove, render, dateOnly, onRetime }: {
   events: LifeEvent<D>[]; onRemove: (id: string) => unknown; render: (e: LifeEvent<D>) => React.ReactNode; dateOnly?: boolean;
+  /** Change an entry's time (tap the time). Omitted = the time is plain text. */
+  onRetime?: (e: LifeEvent<D>, iso: string) => Promise<unknown>;
 }) {
+  const [editing, setEditing] = useState<string | null>(null);
   if (events.length === 0) return null;
   if (dateOnly) {
     return (
@@ -420,9 +613,11 @@ function EntryList<D>({ events, onRemove, render, dateOnly }: {
       </ul>
     );
   }
-  // Grouped by day: Today / Yesterday / date, newest first.
+  // Grouped by day: Today / Yesterday / date, newest first (re-sorted, so
+  // an entry whose time she changed moves to its place).
+  const sorted = [...events].sort((a, b) => b.occurred_at.localeCompare(a.occurred_at));
   const groups: { label: string; items: LifeEvent<D>[] }[] = [];
-  for (const e of events) {
+  for (const e of sorted) {
     const label = dayHeading(e.occurred_at);
     const g = groups[groups.length - 1];
     if (g && g.label === label) g.items.push(e); else groups.push({ label, items: [e] });
@@ -433,13 +628,22 @@ function EntryList<D>({ events, onRemove, render, dateOnly }: {
         <section key={g.label}>
           <p className="label-mono mb-1">{g.label}</p>
           <ul className="divide-y">
-            {g.items.map(e => (
+            {g.items.map(e => (editing === e.id && onRetime ? (
+              <RetimeRow key={e.id} e={e as LifeEvent<unknown>} onSave={iso => onRetime(e, iso)} onCancel={() => setEditing(null)} />
+            ) : (
               <li key={e.id} className="flex items-center gap-3 py-2.5 text-sm">
-                <span className="tabular-nums w-12 flex-shrink-0 font-medium">{formatTime(e.occurred_at)}</span>
+                {onRetime ? (
+                  <button type="button" onClick={() => setEditing(e.id)} aria-label={`Change time, ${formatTime(e.occurred_at)}`}
+                    className="tabular-nums w-12 flex-shrink-0 font-medium text-left underline decoration-dotted underline-offset-4 -my-2 py-2">
+                    {formatTime(e.occurred_at)}
+                  </button>
+                ) : (
+                  <span className="tabular-nums w-12 flex-shrink-0 font-medium">{formatTime(e.occurred_at)}</span>
+                )}
                 <span className="flex-1">{render(e)}</span>
                 <Remove onClick={() => { void onRemove(e.id); }} />
               </li>
-            ))}
+            )))}
           </ul>
         </section>
       ))}
