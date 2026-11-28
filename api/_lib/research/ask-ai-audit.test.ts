@@ -143,7 +143,6 @@ describe.skipIf(!hasModel)('Ask AI audit round 8: sources the chat sends (bundle
     ['What should I do if I forget a pill?', 'contraception', CDC_MISSED],
     ['How effective is the pill with typical use?', 'contraception', FSRH_CHC],
     ['What is a normal cycle length?', 'menstrual-cycle', FIGO_NORMAL],
-    ['What are IVF success rates by age?', 'ivf', HFEA_2024],
     ['When can I start running again after giving birth?', 'postpartum', 'pmid-38148108'],
     ['How often should I have a smear test in Switzerland?', null, SGGG_CERVICAL],
     ['Does insurance cover a mammogram from age 50 in Switzerland?', 'post-menopause', KLV_SCREENING],
@@ -158,11 +157,96 @@ describe.skipIf(!hasModel)('Ask AI audit round 8: sources the chat sends (bundle
     ['Can thyroid problems affect my period?', 'menstrual-cycle', 'pmid-20938101'],
     ['My daughter is 15 and has not had her period yet, should we see a doctor?', 'pre-menstrual', 'pmid-33687345'],
     ['Does Swiss health insurance pay for the HPV test?', null, KLV_SCREENING],
+    // Round 9: the Swiss BFS IVF figures now lead (they say no Swiss rates
+    // by age exist); the HFEA rates by age stay among the sources.
+    ['What are IVF success rates by age?', 'ivf', HFEA_2024],
   ] as const)('%s -> %s among the sources sent', async (q, stage, id) => {
     expect(await sources(q, stage)).toContain(id);
   }, 30_000);
 
   it('the missed-pill item does not lead a morning-after pill question', async () => {
     expect((await sources('How does the morning after pill work and until when?', 'contraception'))[0]).not.toBe(CDC_MISSED);
+  }, 30_000);
+});
+
+// Round 9 (docs/research-gaps.md): weaker matches from round 8 fixed
+// (SUBJECT_MISMATCH: cervical-screening titles step back for breast or
+// vaccine questions; FIGO no longer tagged heavy-bleeding), plus the Swiss
+// cantonal breast-screening programmes and the BFS IVF figures.
+const SCS_CANTONS = 'gp-swiss-teilnahme-e165b7';
+const BFS_IVF = 'gp-bfs-reproduktive-perinatale-gesundheit-6ec7c0';
+
+describe('Ask AI audit round 9: library data and ranking rules', () => {
+  const lib = getLibrary();
+  const byId = new Map(lib.items.map((i) => [i.id, i]));
+  const text = (id: string) => {
+    const it = byId.get(id)!;
+    return [it.summary, ...it.keyPoints].join(' ');
+  };
+
+  it('the canton item names the 18 programme cantons and the 8 without', () => {
+    const t = text(SCS_CANTONS);
+    for (const c of ['Aargau', 'Bern', 'Geneva', 'Lucerne', 'Ticino', 'Vaud', 'Basel-Landschaft']) expect(t).toContain(c);
+    expect(t).toMatch(/Zurich, Schaffhausen, Zug, Glarus, Schwyz, Uri, Obwalden and Nidwalden had no programme/);
+    expect(t).toMatch(/about 20 francs/);
+    expect(byId.get(SCS_CANTONS)?.tags).toContain('switzerland');
+  });
+
+  it('the BFS item carries the 2024 Swiss figures and says there are no rates by age', () => {
+    const t = text(BFS_IVF);
+    expect(t).toMatch(/6,533 women/);
+    expect(t).toMatch(/2,475 babies/);
+    expect(t).toMatch(/do not show success rates by the woman's age/);
+    expect(byId.get(BFS_IVF)?.topics).not.toContain('age-fertility');
+  });
+
+  it('FIGO System 1 is no longer filed under heavy bleeding', () => {
+    expect(byId.get(FIGO_NORMAL)?.topics).not.toContain('heavy-bleeding');
+  });
+
+  it('keyword retrieval: the cervical letter steps back for breast and vaccine questions', () => {
+    for (const [q, stage] of [
+      ['Is there a breast cancer screening programme in my canton?', 'menopause'],
+      ['Does insurance cover a mammogram from age 50 in Switzerland?', 'post-menopause'],
+      ['Is the HPV vaccine free in Switzerland?', null],
+      ['When should girls get the HPV vaccine?', 'pre-menstrual'],
+    ] as const) {
+      expect(selectChatSources(q, stage).map((i) => i.id), q).not.toContain(SGGG_CERVICAL);
+    }
+    // ...but still leads its own question.
+    expect(selectChatSources('How often should I have a smear test in Switzerland?', null)[0]?.id).toBe(SGGG_CERVICAL);
+  });
+});
+
+describe.skipIf(!hasModel)('Ask AI audit round 9: sources the chat sends (bundled model)', () => {
+  const sources = async (q: string, stage: string | null) =>
+    (await selectChatSourcesHybrid(q, stage, { timeoutMs: 20_000 })).map((i) => i.id);
+
+  it.each([
+    ['Is there a breast cancer screening programme in my canton?', 'menopause', SCS_CANTONS],
+    ['I live in Zurich, can I get a free mammogram?', 'menopause', SCS_CANTONS],
+    ['Does insurance cover a mammogram from age 50 in Switzerland?', 'post-menopause', KLV_SCREENING],
+    ['What are IVF success rates in Switzerland?', 'ivf', BFS_IVF],
+    ['When should girls get the HPV vaccine?', 'pre-menstrual', BAG_HPV],
+  ] as const)('%s -> first source %s', async (q, stage, id) => {
+    expect((await sources(q, stage))[0]).toBe(id);
+  }, 30_000);
+
+  it.each([
+    ['When should I start mammograms in Switzerland?', 'post-menopause'],
+    ['Does insurance cover a mammogram from age 50 in Switzerland?', 'post-menopause'],
+    ['Is there a breast cancer screening programme in my canton?', 'menopause'],
+    ['When should girls get the HPV vaccine?', 'pre-menstrual'],
+    ['Is the HPV vaccine free in Switzerland?', null],
+  ] as const)('%s -> the cervical letter is not sent', async (q, stage) => {
+    expect(await sources(q, stage)).not.toContain(SGGG_CERVICAL);
+  }, 30_000);
+
+  it('heavy-period questions no longer get the FIGO normal-cycle item', async () => {
+    expect(await sources('Why are my periods so heavy?', 'menstrual-cycle')).not.toContain(FIGO_NORMAL);
+  }, 30_000);
+
+  it('the cervical letter still leads the smear question', async () => {
+    expect((await sources('How often should I have a cervical smear?', null))[0]).toBe(SGGG_CERVICAL);
   }, 30_000);
 });

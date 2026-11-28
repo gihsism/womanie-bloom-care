@@ -819,6 +819,42 @@ PUBLISHERS.push(
   },
 );
 
+/**
+ * Round 9 (2026-11-28): the Swiss cantonal breast-screening programmes
+ * (Swiss Cancer Screening) and the Swiss IVF statistics (BFS). Hand-written
+ * summaries with a link; nothing is fetched or stored.
+ */
+PUBLISHERS.push(
+  {
+    publisher: 'Swiss Cancer Screening',
+    hosts: ['www.swisscancerscreening.ch', 'swisscancerscreening.ch'],
+    ingest: 'summary-only',
+    licence: {
+      name: '© Swiss Cancer Screening (umbrella association of the cantonal cancer screening programmes)',
+      url: null,
+      termsUrl: 'https://www.swisscancerscreening.ch/',
+      notes: SWISS_SUMMARY_ONLY,
+    },
+    evidenceLevel: 'guideline',
+    publicationType: 'Swiss cantonal screening programme information',
+    attribution: 'Source: Swiss Cancer Screening, umbrella association of the cantonal screening programmes.',
+  },
+  {
+    publisher: 'BFS',
+    hosts: ['statistik.admin.ch', 'www.bfs.admin.ch', 'dam-api.bfs.admin.ch'],
+    ingest: 'summary-only',
+    licence: {
+      name: 'Swiss Federal Statistical Office (BFS), open government data, free use with source attribution',
+      url: null,
+      termsUrl: 'https://www.bfs.admin.ch/bfs/de/home/bfs/oeffentliche-statistik/open-government-data.html',
+      notes: SWISS_SUMMARY_ONLY,
+    },
+    evidenceLevel: 'guideline',
+    publicationType: 'Swiss federal statistics (BFS)',
+    attribution: 'Source: Swiss Federal Statistical Office (BFS), statistics of medically assisted reproduction.',
+  },
+);
+
 export const HAND_WRITTEN_SUMMARISER = 'hand-written';
 
 export function publisherFor(url: string): PublisherPolicy | null {

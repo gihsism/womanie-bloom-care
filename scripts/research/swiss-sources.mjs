@@ -274,6 +274,54 @@ export const SWISS_SOURCES = [
     tags: ['switzerland', 'mammography', 'breast screening', 'cervical screening', 'health insurance'],
     keywords: ['switzerland', 'swiss', 'mammogram', 'mammography', 'breast screening', 'breast cancer screening', 'screening programme', 'kanton', 'canton', 'smear', 'pap smear', 'hpv test', 'hpv', 'covered', 'insurance', 'krankenkasse', 'deductible', 'franchise', 'from 50', 'every two years', 'klv'],
   },
+  // Round 9 (2026-11-28): which cantons run a breast screening programme
+  // (Swiss Cancer Screening canton list and participation page; Aargau's
+  // start date from the Krebsliga Aargau / Clario press release of 1 June
+  // 2026). The eight cantons without a programme are those with no entry
+  // in the umbrella association's canton list.
+  {
+    url: 'https://www.swisscancerscreening.ch/de/krebs-frueherkennung/brust/teilnahme',
+    title: 'Breast cancer screening programmes in Swiss cantons: which cantons have one, who is invited and what it costs (Swiss Cancer Screening, 2026)',
+    year: 2026,
+    fetchedAt: '2026-11-28T12:00:00.000Z',
+    summary:
+      'Swiss Cancer Screening, the umbrella association of the cantonal screening programmes, lists which cantons run an organised breast cancer screening programme. In November 2026 these were 18 cantons: Aargau (since July 2026), Appenzell Ausserrhoden, Appenzell Innerrhoden, Basel-Stadt, Basel-Landschaft, Bern, Fribourg, Geneva, Graubünden, Jura, Lucerne, Neuchâtel, St. Gallen, Solothurn, Thurgau, Ticino, Valais and Vaud. Zurich, Schaffhausen, Zug, Glarus, Schwyz, Uri, Obwalden and Nidwalden had no programme on the list; women living there are advised to talk to their gynaecologist or family doctor about breast screening. In a programme, women who live in the canton and are aged 50 to 69 or 50 to 74, depending on the canton, get a letter with information on the benefits and drawbacks and decide for themselves whether to go; no doctor\'s referral is needed. After a normal result they are invited again two years later. Each mammogram is read separately by two specially trained radiologists, and the result arrives by letter after about eight working days. Basic insurance pays without the deductible; the woman pays only the 10% co-payment, about 20 francs. Most findings that need a closer look turn out to be harmless: about five in six, according to the association.',
+    keyPoints: [
+      '18 cantons ran a programme in November 2026: AG (since July 2026), AR, AI, BS, BL, BE, FR, GE, GR, JU, LU, NE, SG, SO, TG, TI, VS and VD.',
+      'No programme on the list: Zurich, Schaffhausen, Zug, Glarus, Schwyz, Uri, Obwalden and Nidwalden; there, ask the gynaecologist or family doctor.',
+      'Who is invited: women living in the canton aged 50 to 69 or 50 to 74, depending on the canton; taking part is her own choice and needs no referral.',
+      'A new invitation every two years after a normal result; two radiologists read each mammogram; the result comes by letter in about eight working days.',
+      'Costs: no deductible; the 10% co-payment, about 20 francs, remains.',
+      'About five in six findings that need a closer look turn out to be harmless.',
+    ],
+    lifeStages: ['menopause', 'post-menopause', 'general'],
+    topics: ['breast-health'],
+    tags: ['switzerland', 'breast screening', 'mammography', 'screening programme', 'canton'],
+    keywords: ['switzerland', 'swiss', 'canton', 'cantons', 'kanton', 'my canton', 'breast screening programme', 'screening programme', 'breast cancer screening', 'mammogram', 'mammography', 'invitation', 'invited', 'zurich', 'zürich', 'bern', 'geneva', 'genf', 'vaud', 'basel', 'lucerne', 'luzern', 'aargau', 'ticino', 'st. gallen', 'zug', 'co-payment', 'deductible', 'swiss cancer screening', 'donna'],
+  },
+  // Round 9 (2026-11-28): Swiss IVF figures, BFS tables T 14.03.07.01.01
+  // to .03 (data as of 16 April 2026). The BFS gives the age mix of the
+  // women treated but no success rates by age.
+  {
+    url: 'https://statistik.admin.ch/de/themen/gesundheit/reproduktive-perinatale-gesundheit',
+    title: 'IVF in Switzerland in 2024: how many women were treated and how often treatment led to a birth (Federal Statistical Office, BFS)',
+    year: 2026,
+    fetchedAt: '2026-11-28T12:00:00.000Z',
+    summary:
+      'The Swiss Federal Statistical Office (BFS) collects figures from all Swiss fertility centres. In 2024, 6,533 women had IVF or ICSI treatment, over 12,573 started treatment cycles, and 2,475 babies were born alive after these treatments. Of all the women treated that year, 47% became pregnant and 37% gave birth. Counted per embryo transfer, about 30% led to a birth (26% after a fresh transfer, 32% after a frozen one); counted per started cycle, about 19%. About one pregnancy in five ended in a miscarriage. Twins made up about 2% of births and there were no triplets. Women in treatment were 36.8 years old on average: 6% were under 30, 27% were 30 to 34, 43% were 35 to 39, 23% were 40 to 44 and 1% were 45 or older. The BFS tables do not show success rates by the woman\'s age, so for the effect of age other sources are needed, such as the UK register. These are national averages, not a personal chance; the fertility clinic can explain what they mean for her.',
+    keyPoints: [
+      '2024: 6,533 women treated with IVF or ICSI, 12,573 started cycles, 2,475 babies born alive.',
+      'Of the women treated in 2024, 47% became pregnant and 37% gave birth.',
+      'Birth per embryo transfer: about 30% (fresh 26%, frozen 32%); per started cycle about 19%.',
+      'About 1 in 5 pregnancies ended in a miscarriage; twins were about 2% of births, no triplets.',
+      'Average age in treatment 36.8 years; 43% were 35 to 39 and 23% were 40 to 44.',
+      'No Swiss success rates by age are published in these tables; national averages are not a personal chance.',
+    ],
+    lifeStages: ['ivf', 'conception'],
+    topics: ['ivf-outcomes'],
+    tags: ['switzerland', 'ivf statistics', 'national register', 'birth rate', 'bfs'],
+    keywords: ['switzerland', 'swiss', 'schweiz', 'ivf in switzerland', 'ivf success', 'success rate', 'chance of success', 'birth rate', 'live birth', 'per embryo', 'statistics', 'how many women', 'bfs', 'federal statistical office', 'icsi', 'twins'],
+  },
 ];
 
 // Round 8 (2026-11-28): non-Swiss official sources for questions the
@@ -354,7 +402,7 @@ export const OTHER_SOURCES = [
       'Heavy flow is judged by the woman herself; bleeding between regular periods is not normal.',
     ],
     lifeStages: ['menstrual-cycle', 'general'],
-    topics: ['irregular-cycles', 'cycle-tracking', 'heavy-bleeding'],
+    topics: ['irregular-cycles', 'cycle-tracking'],
     tags: ['normal cycle', 'cycle length', 'figo', 'abnormal uterine bleeding', 'regularity'],
     keywords: ['normal cycle', 'normal cycle length', 'cycle length', 'how long is a normal cycle', 'what is a normal period', 'how many days', 'irregular periods', 'regular cycle', 'period length', 'bleeding days', 'figo', '24 to 38 days', 'short cycle', 'long cycle'],
   },

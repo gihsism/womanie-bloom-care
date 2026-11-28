@@ -293,6 +293,45 @@ const IVF_TITLE = /\b(in vitro fertili[sz]ation|ivf|icsi|intracytoplasmic|assist
 const IVF_QUERY = /\b(ivf|icsi|in vitro|embryos?|egg retrieval|transfer|assisted reproduct\w*|fertility treatment|iui|insemination)\b/i;
 const IVF_STAGES = new Set<string>(['ivf', 'conception']);
 
+/**
+ * Research round 9: one screening or prevention subject asked, a different
+ * one in the title. The Swiss cervical-screening letter matched "cancer",
+ * "screening" and the Swiss lift, so it was the 2nd source for Swiss
+ * mammography questions and joined HPV-vaccine questions. A rule applies
+ * when the question matches `ask` and not `unless`; items whose title
+ * matches `title` and not `keep` get SUBJECT_MISMATCH_FACTOR.
+ */
+export const SUBJECT_MISMATCH_FACTOR = 0.6;
+const SUBJECT_MISMATCH: { ask: RegExp; unless: RegExp; title: RegExp; keep: RegExp }[] = [
+  // Breast screening asked, cervical screening in the title.
+  {
+    ask: /\b(mammo\w*|breast)\b/i,
+    unless: /\b(cervi\w*|smear|pap|hpv)\b/i,
+    title: /\b(cervi\w*|smear|pap)\b/i,
+    keep: /\b(breast|mammo\w*)\b/i,
+  },
+  // Cervical screening asked, breast screening in the title.
+  {
+    ask: /\b(cervi\w*|smear|pap)\b/i,
+    unless: /\b(mammo\w*|breast)\b/i,
+    title: /\b(mammo\w*|breast)\b/i,
+    keep: /\b(cervi\w*|smear|pap)\b/i,
+  },
+  // A vaccine asked, a screening programme in the title.
+  {
+    ask: /\bvaccin\w*\b/i,
+    unless: /\b(screen\w*|smear|pap|test\w*)\b/i,
+    title: /\bscreening\b/i,
+    keep: /\bvaccin\w*\b/i,
+  },
+];
+
+function subjectMismatchFactor(query: string, title: string): number {
+  for (const r of SUBJECT_MISMATCH)
+    if (r.ask.test(query) && !r.unless.test(query) && r.title.test(title) && !r.keep.test(title)) return SUBJECT_MISMATCH_FACTOR;
+  return 1;
+}
+
 function stem(w: string): string {
   if (w.length > 5 && w.endsWith('ies')) return w.slice(0, -3) + 'y';
   if (w.length > 4 && w.endsWith('s') && !w.endsWith('ss') && !w.endsWith('us') && !w.endsWith('is')) return w.slice(0, -1);
@@ -643,6 +682,8 @@ function stageFactor(item: ResearchItem, stage: LifeStage | null): number {
  * the question x0.8; IVF-population titles x0.85 outside fertility
  * questions; superseded guidelines and duplicate "Summary:" records x0.6;
  * Swiss (BAG / BLV / SGGG) items that match the question words x1.25.
+ * Round 9: a title on a different screening / prevention subject than
+ * the question (cervical vs breast, screening vs vaccine) x0.6.
  */
 export function searchItems(
   items: ResearchItem[],
@@ -749,8 +790,9 @@ export function searchItems(
     const ivf = !fertilityTreatmentContext && IVF_TITLE.test(it.item.title) ? IVF_TITLE_FACTOR : 1;
     const anchor = anchored ? 1 : ANCHOR_MISS_FACTOR;
     const swiss = anchored && own && isSwissItem(it.item) ? SWISS_SOURCE_FACTOR : 1;
+    const mismatch = subjectMismatchFactor(query, it.item.title);
     const score =
-      base * stageFactor(it.item, stage) * EVIDENCE_BOOST[it.item.evidenceLevel] * cochrane * recency * substance * pregnancy * ivf * anchor * swiss * current;
+      base * stageFactor(it.item, stage) * EVIDENCE_BOOST[it.item.evidenceLevel] * cochrane * recency * substance * pregnancy * ivf * anchor * swiss * current * mismatch;
     if (opts.minScore && score < opts.minScore) continue;
     results.push({ item: it.item, score: Math.round(score * 100) / 100 });
   }

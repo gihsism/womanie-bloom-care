@@ -659,6 +659,48 @@ or only some outcomes, one self-contradicting abstract), e.g.
 `pmid-41448220`, `pmid-30738885`, `pmid-26172878`, `pmid-32972380`,
 `pmid-30103263`, `pmid-41498229`, `pmid-32124980`, `pmid-41184155`.
 
+## Round 9 (2026-11-28)
+
+### Round-8 weaker matches fixed
+
+| Question | Problem | Fix |
+|---|---|---|
+| Swiss mammography questions | SGGG cervical letter 97 was 2nd / 3rd (matched "cancer", "screening" and the Swiss lift) | New rule `SUBJECT_MISMATCH` in `library.ts` (x0.6): breast / mammogram asked and no cervix / smear / Pap / HPV word, title about cervical screening only; and the reverse (smear asked, breast-only title). The cervical letter is no longer among the six; KLV Art. 12e stays first |
+| HPV-vaccine questions | Cervical letter 4th ("When should girls get the HPV vaccine?") and 2nd ("Is the HPV vaccine free in Switzerland?") | Same rule: a vaccine asked (no screening / smear / test word), a title about screening without "vaccine" x0.6. BAG HPV item still first, the letter is out |
+| "Why are my periods so heavy?" | FIGO normal-cycle item 3rd (it carried the topic `heavy-bleeding`, worth a topic hit) | Topic removed (it defines cycle length; flow is only "judged by the woman"). Now heavy-bleeding reviews and the NICE guideline fill the six. Topics are not embedded, so no re-embed |
+
+The cervical letter still leads both smear questions. Tests:
+`ask-ai-audit.test.ts` (round 9 block, keyword and bundled-model).
+
+### Swiss breast screening by canton, Swiss IVF figures
+
+- **Breast screening programmes** (new hand-written item, publisher
+  "Swiss Cancer Screening", `gp-swiss-teilnahme-e165b7`): the umbrella
+  association's canton list and participation page could be fetched this
+  time. 18 cantons run a programme in November 2026 (AG since July 2026
+  per the Krebsliga Aargau / Clario release of 1 June 2026; AR, AI, BS,
+  BL, BE, FR, GE, GR, JU, LU, NE, SG, SO, TG, TI, VS, VD); no programme
+  listed for ZH, SH, ZG, GL, SZ, UR, OW, NW (inferred from the list: the
+  "other cantons" page does not name them). Ages 50 to 69 or 74 by
+  canton, every 2 years, no deductible, 10% co-payment about CHF 20,
+  double reading, about five in six findings need no treatment. Now first
+  for "Is there a breast screening programme in my canton?" and "I live in
+  Zurich, can I get a free mammogram?"; 2nd after KLV for "When should I
+  start mammograms in Switzerland?".
+- **Swiss IVF figures** (new item, publisher "BFS",
+  `gp-bfs-reproduktive-perinatale-gesundheit-6ec7c0`): BFS tables
+  T 14.03.07.01.01 to .03 (XLSX, data as of 16 April 2026): 2024, 6,533
+  women, 12,573 started cycles, 2,475 live births; 47% of treated women
+  pregnant, 37% gave birth; birth per transfer 30% (fresh 26%, frozen
+  32%), per cycle 19%; miscarriage about 1 in 5; twins 2%; mean age 36.8
+  and the age mix. **No Swiss success rates by age exist in the BFS
+  tables** (BAG pages show them only as charts; no FIVNAT report found as
+  free text), and the item says so and points to the UK register. It now
+  leads the IVF-success questions (Swiss lift) with HFEA (rates by age)
+  2nd; the round-8 test moved HFEA from "first" to "among the sources".
+  Not tagged `age-fertility`, and "ages" kept out of the title, to avoid
+  matching age questions harder than it can answer them.
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed
