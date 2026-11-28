@@ -1100,7 +1100,7 @@
     "The studies differed a lot from one another, so these numbers are uncertain.",
     "The authors say better-designed comparison studies, ideally randomized trials, are badly needed."
    ],
-   "certainty": "very low",
+   "certainty": "not stated",
    "lifeStages": [
     "menstrual-cycle",
     "conception",
@@ -10564,9 +10564,9 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/36288631/",
-   "summary": "This review pooled six trials with 2,231 pregnant women to see whether anything can prevent low back and pelvic girdle pain in pregnancy. Exercise on its own was the most promising option: moderate-quality evidence found it was acceptable to pregnant women and slightly lowered the chance of low back pain in the long term. Other approaches did not show clear benefit, but the evidence was mostly moderate to very low quality and only a small number of trials were included. The authors say larger, higher-quality trials are still needed.",
+   "summary": "This review pooled six trials with 2,231 pregnant women to see whether anything can prevent low back and pelvic girdle pain in pregnancy. Exercise on its own was the most promising option: moderate-quality evidence found it was acceptable to pregnant women and probably slightly lowered the chance of low back pain in the long term. Other approaches did not show clear benefit, but the evidence was mostly moderate to very low quality and only a small number of trials were included. The authors say larger, higher-quality trials are still needed.",
    "keyPoints": [
-    "Exercise on its own was acceptable to pregnant women and slightly reduced low back pain episodes in the long term (moderate-quality evidence).",
+    "Exercise on its own was acceptable to pregnant women and probably slightly reduced low back pain episodes in the long term (moderate-quality evidence).",
     "Other prevention approaches did not show clear benefit, based on moderate to very low quality evidence.",
     "No strategy had high-quality evidence for preventing back or pelvic girdle pain or reducing sick leave.",
     "Only six trials were included, so more large, high-quality studies are needed."
@@ -11013,7 +11013,7 @@
    "summary": "Pelvic girdle pain in pregnancy is common, and for some women it carries on after the baby is born. This review looked for factors linked to whether the pain lasts, but only three small studies met its criteria. Past low back pain, pain in several pelvic locations, being overweight or obese, other pain conditions and emotional distress in pregnancy were linked to slower recovery. The evidence was low to very low quality, so the findings are uncertain.",
    "keyPoints": [
     "About a third of women still have pelvic girdle pain three months after birth, and 8.5% still have symptoms two years later.",
-    "Previous low back pain, pain in three to four pelvic locations, and being overweight or obese made recovery by 12 weeks after birth less likely.",
+    "Previous low back pain, pain in three to four pelvic locations, and being overweight or obese were linked to a lower chance of recovery by 12 weeks after birth.",
     "At six months after birth, pain was more likely to continue with crutch use, other pain conditions, obesity, earlier first period, or emotional distress during pregnancy.",
     "Only three studies were included and evidence quality was low to very low, so no firm conclusions can be drawn."
    ],
@@ -11168,7 +11168,7 @@
    "summary": "This review pooled 34 trials with 5121 pregnant women to see what helps prevent or ease low-back and pelvic pain in pregnancy. Exercise may reduce low-back pain, disability and sick leave compared with usual prenatal care. Single studies also suggested benefits from acupuncture, craniosacral therapy, osteomanipulative therapy and combined treatment programmes. The quality of the evidence was low to moderate, so these results could change with more research.",
    "keyPoints": [
     "Low-quality evidence suggests that exercise on land or in water may reduce pregnancy-related low-back pain and improve daily function.",
-    "Moderate-quality evidence found that an 8 to 12 week exercise programme reduced the number of women reporting low-back and pelvic pain, and land-based exercise reduced related sick leave.",
+    "Moderate-quality evidence suggests an 8 to 12 week exercise programme probably reduces the number of women reporting low-back and pelvic pain, and land-based exercise probably reduces related sick leave.",
     "Single studies suggested acupuncture or craniosacral therapy improved pelvic pain, and osteomanipulative therapy may help low-back pain and disability.",
     "When side effects were reported, they were minor and short-lived."
    ],
@@ -17535,7 +17535,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/38597126/",
-   "summary": "This Cochrane review pooled 17 trials with about 18,500 women to compare care from the same midwife (or small midwife team) through pregnancy and birth with other models of care. Women in midwife continuity models were a little more likely to have a spontaneous vaginal birth and a little less likely to have a caesarean, an instrumental birth (forceps or vacuum) or an episiotomy. Most trials did not include women at high risk of complications, and some findings are less certain than others.",
+   "summary": "This Cochrane review pooled 17 trials with about 18,500 women to compare care from the same midwife (or small midwife team) through pregnancy and birth with other models of care. Women in midwife continuity models were probably a little more likely to have a spontaneous vaginal birth and probably a little less likely to have a caesarean or an instrumental birth (forceps or vacuum); they may also have fewer episiotomies. Most trials did not include women at high risk of complications, and some findings are less certain than others.",
    "keyPoints": [
     "Midwife continuity of care likely increases spontaneous vaginal birth (about 66% to 70%) and likely lowers caesarean sections (about 16% to 15%), based on moderate-certainty evidence.",
     "It likely reduces forceps or vacuum births (14% to 13%) and may reduce episiotomy (23% to 19%).",
@@ -17640,7 +17640,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/39535297/",
-   "summary": "This Cochrane review looked at whether giving tranexamic acid (a drug that helps blood clot) to everyone during a caesarean birth prevents heavy bleeding afterwards. It combined six trials with almost 16,000 women, most at low risk of heavy bleeding. The drug made little to no difference to heavy blood loss when estimated by eye, and a slight difference when blood loss was measured more precisely. Need for blood transfusion or extra surgery was about the same in both groups, and the evidence on serious side effects such as blood clots is very uncertain because so few occurred.",
+   "summary": "This Cochrane review looked at whether giving tranexamic acid (a drug that helps blood clot) to everyone during a caesarean birth prevents heavy bleeding afterwards. It combined six trials with almost 16,000 women, most at low risk of heavy bleeding. The drug made little to no difference to heavy blood loss when estimated by eye, and probably a slight reduction when blood loss was measured more precisely. Need for blood transfusion or extra surgery was about the same in both groups, and the evidence on serious side effects such as blood clots is very uncertain because so few occurred.",
    "keyPoints": [
     "Tranexamic acid given routinely at caesarean made little to no difference to estimated blood loss of 1000 mL or more (high certainty evidence).",
     "It likely slightly reduced blood loss of 1000 mL or more when measured by calculation (moderate certainty evidence).",
@@ -18049,7 +18049,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/28681500/",
-   "summary": "This Cochrane review combined 26 trials with nearly 16,000 women to see what happens when someone stays with a woman throughout labour, compared with usual care. Women with continuous support were more likely to have a spontaneous vaginal birth and less likely to have a caesarean birth. They also had shorter labours and were less likely to report negative feelings about their birth. Much of the evidence was rated low quality, and no harms were found.",
+   "summary": "This Cochrane review combined 26 trials with nearly 16,000 women to see what happens when someone stays with a woman throughout labour, compared with usual care. Women with continuous support may be more likely to have a spontaneous vaginal birth and less likely to have a caesarean birth. They may also have shorter labours and be less likely to report negative feelings about their birth. Much of the evidence was rated low quality, and no harms were found.",
    "keyPoints": [
     "Continuous support in labour increased spontaneous vaginal birth (average RR 1.08) and reduced caesarean birth (average RR 0.75), though this evidence was low quality.",
     "Labours were about 0.69 hours shorter, and women were less likely to use pain relief medicines, have an instrumental birth (forceps or vacuum), or report negative feelings about their birth.",
@@ -18149,9 +18149,9 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/41639685/",
-   "summary": "This review combined 6 small trials (555 women) from Iran and Turkey looking at drinking coffee after a planned cesarean section. Women who drank coffee passed wind, had a bowel movement and had bowel sounds return sooner than women who had water or routine care. The effect was clearest when coffee started 2 hours after surgery rather than 8 hours. The authors say few studies were included and the evidence quality was low, so the results should be read with caution.",
+   "summary": "This review combined 6 small trials (555 women) from Iran and Turkey looking at drinking coffee after a planned cesarean section. Women who drank coffee may have passed wind, had a bowel movement and had bowel sounds return sooner than women who had water or routine care. The effect was clearest when coffee started 2 hours after surgery rather than 8 hours. The authors say few studies were included and the evidence quality was low, so the results should be read with caution.",
    "keyPoints": [
-    "Coffee after a planned cesarean shortened the time to first passing wind by about 2.75 hours.",
+    "Coffee after a planned cesarean may shorten the time to first passing wind by about 2.75 hours.",
     "Time to first bowel movement was about 3.20 hours shorter, and bowel sounds returned about 0.68 hours sooner.",
     "The benefit was seen mainly when coffee began 2 hours after surgery rather than 8 hours.",
     "Only 6 small trials were included and the quality of evidence was low."
@@ -18201,7 +18201,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/42456370/",
-   "summary": "This review pooled eight trials with 1,269 women who had a cesarean birth, comparing coffee with caffeine after surgery to water, decaf coffee or usual care. Women who drank caffeinated coffee passed gas and had a bowel movement sooner, felt less nausea, and left hospital a little earlier. The quality of the evidence was low to very low, and results varied a lot between studies, so the findings should be read with caution. The authors say more well-designed trials are needed.",
+   "summary": "This review pooled eight trials with 1,269 women who had a cesarean birth, comparing coffee with caffeine after surgery to water, decaf coffee or usual care. Women who drank caffeinated coffee may have passed gas and had a bowel movement sooner, felt less nausea, and left hospital a little earlier. The quality of the evidence was low to very low, and results varied a lot between studies, so the findings should be read with caution. The authors say more well-designed trials are needed.",
    "keyPoints": [
     "Caffeinated coffee after cesarean was linked to passing gas about 5 hours sooner and having a bowel movement (defecation) about 3 hours sooner.",
     "Nausea was less common with caffeinated coffee, and hospital stay was about 9 hours shorter on average.",
@@ -19074,7 +19074,7 @@
     "One study found a lower rate of full breastfeeding at 6 months postpartum.",
     "Chocolate and coffee intake was linked with more infant colic and worse eczema in two studies, but it is questionable whether caffeine was the cause."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "postpartum"
@@ -23225,7 +23225,7 @@
     "Any extra risk likely means a small number of events across the population.",
     "No studies on combined injectable contraceptives were found, and more research is needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "contraception"
    ],
@@ -29010,12 +29010,12 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/41270961/",
    "summary": "This review looked at what pharmacists, patients and others think about pharmacists prescribing ulipristal acetate (a type of emergency contraception) in the United States. Seven small studies were found, mostly from California. Patients saw benefits such as lower cost, less time and easier access, and other groups supported the idea. Pharmacists named barriers like lack of time, payment for the service and staff support. All seven studies had a high risk of bias because few people responded to the surveys, so the findings are uncertain.",
    "keyPoints": [
-    "Pharmacist-prescribed ulipristal acetate emergency contraception can improve access to EC.",
+    "The authors conclude that pharmacist prescribing of ulipristal acetate could improve access to emergency contraception.",
     "Patients in one of two reports described lower cost, less time and better access.",
     "Pharmacists most often cited barriers of time, payment for services, and staffing and workflow support; some wanted more training.",
     "All seven studies had a high risk of bias due to low response rates."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "contraception",
     "general"
@@ -35674,7 +35674,7 @@
    "keyPoints": [
     "Worldwide, about 36.6% of pregnant women had antibodies showing they had been exposed to Toxoplasma gondii.",
     "Rates were highest in South America (52.8%) and Africa (46.8%), and lowest in North America (19.7%) and Europe (24.6%).",
-    "Exposure levels mostly depend on age, lifestyle and how much people know about toxoplasmosis.",
+    "The authors say exposure levels mostly depend on age, lifestyle and how much people know about toxoplasmosis.",
     "The authors say public awareness and health programmes are needed to help prevent or catch toxoplasmosis early in pregnancy."
    ],
    "certainty": "not stated",
@@ -35972,7 +35972,7 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/34979320/",
    "summary": "This review looked at 67 studies on whether hygiene steps during pregnancy help prevent toxoplasmosis, an infection that can pass to the baby. It covered food advice, pet care, and other environmental measures. The authors concluded that hygiene measures are an effective and practical way to lower the chance of toxoplasmosis and congenital toxoplasmosis.",
    "keyPoints": [
-    "Hygiene measures are an effective, practical first line of prevention against toxoplasmosis in pregnancy.",
+    "The authors conclude hygiene measures are an effective, practical first line of prevention against toxoplasmosis in pregnancy.",
     "They can help reduce congenital toxoplasmosis, where the infection passes to the baby, and its consequences.",
     "The reviewed measures included dietary recommendations, pet care and environmental steps.",
     "The review also looked at how well pregnant women and health professionals know the risk factors."
@@ -36721,7 +36721,7 @@
     "Side effects were few and mild.",
     "Differences in how PRP was prepared and given, small sample sizes and methodological limits mean better randomized trials are needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menopause",
     "post-menopause",
@@ -39639,7 +39639,7 @@
    "keyPoints": [
     "Physical therapies, mainly pelvic floor muscle training, performed best for 'cure' and for 'cure or improvement' of incontinence in older women.",
     "Adding education or complementary therapies to physical therapy may help further, but this rested on very few studies.",
-    "Bladder medicines (β3-adrenergic agonists and antimuscarinic drugs) also improved symptoms compared with control, and some medicine trials reported serious side effects.",
+    "Bladder medicines (β3-adrenergic agonists and antimuscarinic drugs) may also have improved symptoms compared with control, but the evidence is very uncertain, and some medicine trials reported serious side effects.",
     "No serious adverse events were reported for conservative treatments, but the evidence was too limited to say whether any treatment is safer than another."
    ],
    "certainty": "very low",
@@ -46514,11 +46514,11 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/41421750/",
-   "summary": "This review pooled results from 40 trials on treating high blood pressure after birth. Water tablets (diuretics) helped control blood pressure when taken together with a blood pressure medicine, but are not recommended on their own. Evidence on which blood pressure medicine works best is still limited, and the review rated the overall certainty of the evidence as low or very low. No safety concerns were found, and checking and managing your own blood pressure, or making lifestyle changes, was linked to lower blood pressure 8 months after birth.",
+   "summary": "This review pooled results from 40 trials on treating high blood pressure after birth. Water tablets (diuretics) may help control blood pressure when taken together with a blood pressure medicine, but are not recommended on their own. Evidence on which blood pressure medicine works best is still limited, and the review rated the overall certainty of the evidence as low or very low. No safety concerns were found, and checking and managing your own blood pressure, or making lifestyle changes, was linked to lower blood pressure 8 months after birth.",
    "keyPoints": [
-    "Diuretics (mostly furosemide) improved blood pressure control when given alongside a blood pressure medicine, but cannot be recommended as the only treatment.",
+    "Diuretics (mostly furosemide) may improve blood pressure control when given alongside a blood pressure medicine, but cannot be recommended as the only treatment.",
     "Evidence on the best choice of blood pressure medicine after birth remains limited; enalapril or amlodipine compared with nifedipine were highlighted as relevant to practice.",
-    "Blood pressure self-monitoring or lifestyle change led to lower blood pressure 8 months after birth than usual care.",
+    "Blood pressure self-monitoring or lifestyle change may lead to lower blood pressure 8 months after birth than usual care.",
     "Certainty of the evidence was low or very low, and no safety concerns were found."
    ],
    "certainty": "low",
@@ -53302,7 +53302,7 @@
     "Caffeine was linked to sperm aneuploidy and DNA breaks, but not to other markers of DNA damage.",
     "Male coffee drinking was linked to a longer time to pregnancy in some studies but not all; better-designed studies are needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception"
    ],
@@ -61111,12 +61111,12 @@
    "url": "https://pubmed.ncbi.nlm.nih.gov/37267890/",
    "summary": "This review looked at women with a blocked or damaged fallopian tube on one side (such as hydrosalpinx, a fluid-filled tube) who want to conceive naturally or with intrauterine insemination (IUI), where IVF is not possible. Treating a hydrosalpinx by removing or blocking the tube seemed to improve the chance of pregnancy. Women with a blockage near the womb end of the tube did about as well with IUI as women with open tubes, while those with a blockage at the far end did less well per cycle. The authors say the evidence is limited and more studies are needed.",
    "keyPoints": [
-    "Removing or blocking a tube with hydrosalpinx (salpingectomy or tubal occlusion) improved the chance of natural or IUI pregnancy, though more prospective studies are needed.",
+    "Removing or blocking a tube with hydrosalpinx (salpingectomy or tubal occlusion) appeared to improve the chance of natural or IUI pregnancy, though more prospective studies are needed.",
     "Women with a blockage at the womb end of one tube (proximal) had similar IUI pregnancy rates to women with open tubes.",
     "Women with a blockage at the far end of one tube (distal) had lower pregnancy rates per IUI cycle, and extra IUI cycles added little benefit.",
     "The studies varied a lot and were mostly retrospective, so the evidence guiding care for this group has significant gaps."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "ivf"
@@ -65065,10 +65065,10 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/29781504/",
-   "summary": "This Cochrane review pooled 40 trials with over 11,000 women to compare epidural pain relief in labour with other options, mostly opioid injections. Epidurals gave better pain relief and higher satisfaction, though the evidence for this was low quality. Epidurals did not change caesarean rates or long-term backache, and there was no clear effect on babies' Apgar scores or neonatal intensive care admissions. Epidurals were linked to more low blood pressure, fever, difficulty passing urine and longer labours.",
+   "summary": "This Cochrane review pooled 40 trials with over 11,000 women to compare epidural pain relief in labour with other options, mostly opioid injections. Epidurals gave better pain relief and higher satisfaction, though the evidence for this was low quality. Epidurals probably did not change caesarean rates or long-term backache, and there was no clear effect on babies' Apgar scores or neonatal intensive care admissions. Epidurals were linked to more low blood pressure, fever, difficulty passing urine and longer labours.",
    "keyPoints": [
-    "Epidural analgesia probably reduces labour pain more than opioids and more women rated their pain relief as excellent or very good (low-quality evidence).",
-    "Assisted vaginal birth was more common with epidurals overall, but this difference was not seen in trials done after 2005.",
+    "Epidural analgesia may reduce labour pain more than opioids and more women rated their pain relief as excellent or very good (low-quality evidence).",
+    "Assisted vaginal birth may have been more common with epidurals overall, but this difference was not seen in trials done after 2005.",
     "No difference was found in caesarean section rates or long-term backache, and no clear differences in Apgar scores or neonatal intensive care admission.",
     "Epidurals were linked to more low blood pressure, fever, urinary retention and longer labours, but less nausea, vomiting and breathing depression than opioids."
    ],
@@ -65224,7 +65224,7 @@
    "keyPoints": [
     "Across all trials, there may be little or no difference in operative birth (caesarean or instrumental) between upright and recumbent positions (low-quality evidence).",
     "In the three studies at lowest risk of bias, upright positions meant about 63 more operative births per 1000 women, including about 25 more caesareans per 1000 (high-quality evidence).",
-    "Satisfaction with the childbirth experience was slightly lower in the upright group, and fewer babies had low cord pH in the upright group (moderate-quality evidence).",
+    "Satisfaction with the childbirth experience was slightly lower in the upright group, and probably fewer babies had low cord pH in the upright group (moderate-quality evidence).",
     "Position probably makes little or no difference to postpartum haemorrhage requiring transfusion (moderate-quality evidence)."
    ],
    "certainty": "low",
@@ -66125,7 +66125,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/33765343/",
-   "summary": "This Cochrane review looked at 10 trials of weight-loss strategies, such as diet and lifestyle programmes or medicines like metformin, for women with obesity who were having trouble getting pregnant. The evidence was low to very low quality, so it could not show whether any of these strategies changes the chance of live birth, pregnancy or miscarriage. Lifestyle programmes did seem to lower body mass index (BMI). No trials compared medicines directly with lifestyle changes.",
+   "summary": "This Cochrane review looked at 10 trials of weight-loss strategies, such as diet and lifestyle programmes or medicines like metformin, for women with obesity who were having trouble getting pregnant. The evidence was low to very low quality, so it could not show whether any of these strategies changes the chance of live birth, pregnancy or miscarriage. Lifestyle programmes may lower body mass index (BMI). No trials compared medicines directly with lifestyle changes.",
    "keyPoints": [
     "Evidence was too limited to say whether diet or lifestyle programmes change the chance of live birth or pregnancy in women with obesity and subfertility.",
     "Lifestyle programmes may lower BMI, though the evidence was low or very low quality.",
@@ -70063,7 +70063,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/27572944/",
-   "summary": "This Cochrane review looked at whether limiting dummy (pacifier) use helps healthy full-term babies keep breastfeeding for longer. Two trials with 1,302 babies showed that using a pacifier made no real difference to how many babies were exclusively or partly breastfed at three or four months. There was not enough evidence on breastfeeding problems like sore nipples or on longer-term effects on baby's health.",
+   "summary": "This Cochrane review looked at whether limiting dummy (pacifier) use helps healthy full-term babies keep breastfeeding for longer. Two trials with 1,302 babies suggest that using a pacifier probably makes no real difference to how many babies were exclusively or partly breastfed at three or four months. There was not enough evidence on breastfeeding problems like sore nipples or on longer-term effects on baby's health.",
    "keyPoints": [
     "Pacifier use did not significantly change the share of babies exclusively breastfed at 3 or 4 months.",
     "Pacifier use did not change the share of babies partly breastfed at 3 or 4 months.",
@@ -81854,7 +81854,7 @@
     "Combined hormonal contraceptives and other progestins did not show a statistically significant reduction in cyst size.",
     "Results varied widely between studies and most were at risk of selection bias, so the exact reduction is uncertain."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menstrual-cycle",
     "general"
@@ -84329,7 +84329,7 @@
     "No clear difference was found between upright and lying-down positions in operative birth (caesarean or instrumental), based on moderate-quality evidence.",
     "No clear differences were found for length of the second stage, tearing needing stitches, or baby outcomes, but the evidence was mostly very low quality.",
     "There were not enough data to reach firm conclusions, and more and larger studies are needed.",
-    "Women with an epidural should be encouraged to use whatever position they find comfortable in the second stage of labour."
+    "The authors say women with an epidural should be encouraged to use whatever position they find comfortable in the second stage of labour."
    ],
    "certainty": "low",
    "lifeStages": [
@@ -85502,7 +85502,7 @@
     "Testosterone and LH levels did not differ clearly between users and non-users; FSH was slightly lower in users.",
     "The authors conclude there is no evidence of a clinically significant link, but better-designed studies are needed."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "ivf",
@@ -91035,7 +91035,7 @@
     "The trials were very different from one another, which limits what can be concluded.",
     "A possible benefit in perimenopausal women taking estradiol alone may have been hidden by studies of older postmenopausal women whose low mood was not linked to menopause."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "menopause",
     "post-menopause"
@@ -92528,7 +92528,7 @@
    ],
    "evidenceLevel": "systematic review",
    "url": "https://pubmed.ncbi.nlm.nih.gov/32215906/",
-   "summary": "This Cochrane review looked at whether giving antibiotics through a drip right after a vacuum or forceps birth lowers the chance of infection. Two trials with 3813 women were included. Antibiotics reduced infections of the tear or stitches in the perineum (the area between the vagina and anus), reduced wound breakdown, and slightly eased perineal pain. For some outcomes, such as womb infection (endometritis) and side effects, the evidence was too weak to tell, and most of the evidence came from one large study in a high-income country.",
+   "summary": "This Cochrane review looked at whether giving antibiotics through a drip right after a vacuum or forceps birth lowers the chance of infection. Two trials with 3813 women were included. Antibiotics reduced infections of the tear or stitches in the perineum (the area between the vagina and anus), probably reduced wound breakdown, and slightly eased perineal pain. For some outcomes, such as womb infection (endometritis) and side effects, the evidence was too weak to tell, and most of the evidence came from one large study in a high-income country.",
    "keyPoints": [
     "Antibiotics given after a vacuum or forceps birth reduced superficial and deep perineal wound infections (high-certainty evidence).",
     "They probably reduced wound breakdown and serious infectious complications.",
@@ -97482,7 +97482,7 @@
     "Compared with D&C, endometrial sampling found 100% of endometrial cancers and 92% of atypical hyperplasia.",
     "Compared with hysteroscopy, it found 90% of cancers, 82% of atypical hyperplasia and only 39% of all womb lining problems, including polyps.",
     "Samples failed in about 11% of women and were insufficient in about 31%.",
-    "Because sampling can miss problems, further checks for focal (localised) changes are warranted after a benign result."
+    "The authors say that because sampling can miss problems, further checks for focal (localised) changes are warranted after a benign result."
    ],
    "certainty": "not stated",
    "lifeStages": [
@@ -105808,7 +105808,7 @@
    "keyPoints": [
     "No compelling evidence shows that one magnesium sulphate regimen is more effective than another for preventing or treating eclampsia.",
     "In women with eclampsia, a shorter maintenance course may reduce flushing compared with 24 hours of treatment (low-certainty evidence).",
-    "Shorter treatment after birth versus 24 hours showed an uncertain effect on eclampsia and little or no effect on severe illness or side effects such as slowed breathing (low-certainty evidence).",
+    "Shorter treatment after birth versus 24 hours showed an uncertain effect on eclampsia and may make little or no difference to severe illness or side effects such as slowed breathing (low-certainty evidence).",
     "Most trials were small and many important outcomes were not reported, so well-designed trials are needed."
    ],
    "certainty": "low",
@@ -112709,7 +112709,7 @@
    "summary": "This ACOG guidance looks at birth control and pregnancy planning for teenagers and young women who have heart conditions. Because pregnancy can carry serious health risks for people with heart disease, it advises that starting birth control should not be put off over safety worries. For some heart conditions, a progestin-only method is a reasonable starting choice while the safety of estrogen-containing methods is checked with the patient's heart doctor.",
    "keyPoints": [
     "Starting contraception should not be delayed because of worries about possible contraindications, since pregnancy can cause serious health problems in people with heart conditions.",
-    "For valvular heart disease, cardiomyopathy or hypertension, it is reasonable to start a progestin-only method until an estrogen-containing method is confirmed safe with the patient's cardiologist.",
+    "For valvular heart disease, cardiomyopathy or hypertension, ACOG says it is reasonable to start a progestin-only method until an estrogen-containing method is confirmed safe with the patient's cardiologist.",
     "Contraceptive counseling should be patient-centered, free of coercion, and suited to the person's age and health literacy.",
     "Future pregnancies should be planned with maternal-fetal medicine and cardiology specialists, and anyone continuing a pregnancy should be referred to a pregnancy heart team."
    ],
@@ -122149,7 +122149,7 @@
     "Kisspeptin might become a way to check pregnancy viability in the future.",
     "Stronger studies are needed before it can be used for diagnosis or prediction."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "pregnancy",
@@ -122357,7 +122357,7 @@
     "Exposure to pollutants such as pesticides, phthalates from food and water containers, and water disinfection by-products has been reported to harm male fertility.",
     "Trials of micronutrient supplements look encouraging for sperm quality and assisted fertilization outcomes, but the best way to use them is not yet established."
    ],
-   "certainty": "low",
+   "certainty": "not stated",
    "lifeStages": [
     "conception",
     "ivf",

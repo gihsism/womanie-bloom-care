@@ -882,6 +882,50 @@ units ("4-10x more common", "1 in 10", "every 6-12 months") in
 `PersonalizedInsights`. Tests: `src/lib/healthClaims.test.ts` (round 10
 block, checked with code comments stripped).
 
+## Round 11 (2026-11-28)
+
+### New exposure ranking
+
+167 new everyday questions (17 or so per stage: first periods, cycle,
+conception, pregnancy, postpartum, contraception, IVF, menopause, after
+menopause, plus 15 general ones), in plain words and with the worries
+German-speaking Swiss users bring (Krankenkasse, Hebamme, Frauenärztin,
+Pille danach, Rohmilchkäse, FSME, Ersttrimestertest, maternity leave).
+Retrieval run locally with the bundled model (no model calls): top-10
+hybrid hits (10 down to 1 points) plus the chat sources (6 down to 1).
+1,032 items got some exposure; 367 of them had never been checked (12
+Swiss hand-written items among them, checked in rounds 3-5 and skipped).
+
+### Summary content check, top 120 newly exposed items
+
+The first 120 PubMed items of the new ranking (none skipped; all had
+abstracts). 87 fair. 41 fixes in 33 items, text only (23 re-embedded
+offline with the incremental script; label-only changes need no
+re-embed):
+
+- Certainty -> "not stated" where the abstract grades nothing:
+  `pmid-30294771`, `pmid-41270961`, `pmid-37267890`, `pmid-41168677`,
+  `pmid-27771476`, `pmid-33251770`, `pmid-38065008`, `pmid-32597116`,
+  `pmid-28646871`, `pmid-27603786`, `pmid-38190884`, `pmid-37015836`.
+- Hedges restored to match the GRADE level: `pmid-38597126` (midwife
+  continuity), `pmid-28681500` (continuous labour support),
+  `pmid-27572944` (pacifiers), `pmid-32215906`, `pmid-26422811`
+  (exercise for pregnancy back pain), `pmid-33765343`, `pmid-29781504`
+  (epidurals, 3 places), `pmid-39535297`, `pmid-41307301`,
+  `pmid-42456370` and `pmid-41639685` (coffee after caesarean),
+  `pmid-30411804`, `pmid-37815037`, `pmid-36288631` (2 places),
+  `pmid-41421750` (blood pressure after birth, 3 places),
+  `pmid-37267890`.
+- Causal wording on observational data: `pmid-30142609` ("linked to").
+- Advice in the app's voice now credited to the authors or ACOG:
+  `pmid-34979320`, `pmid-41270961`, `pmid-33093423`, `pmid-26748390`,
+  `pmid-39885489`, `pmid-28231607`.
+
+Left as is: 31 judgement calls (labels picked from a graded range), e.g.
+`pmid-38009552`, `pmid-35506389`, `pmid-30264405`, `pmid-32103270`,
+`pmid-31663890` (an FDA mesh sentence not in the abstract, but true),
+`pmid-41123921`. 247 exposed items stay unchecked for round 12.
+
 ## Data-quality notes found during the audit
 
 These are not gaps. They are tagging problems in existing items. **Fixed
