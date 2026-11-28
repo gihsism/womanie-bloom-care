@@ -1,5 +1,6 @@
 import { DATE_FMT } from '@/lib/dateFormat';
 import { useConfirm } from '@/components/ConfirmDialog';
+import { usePrompt } from '@/components/PromptDialog';
 import { deleteDocumentConfirm } from '@/lib/confirmCopy';
 import { lazy, Suspense, useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import ReportChanges from '@/components/records/ReportChanges';
@@ -399,6 +400,7 @@ export default function MedicalHistory() {
   const [docSearch, setDocSearch] = useState('');
   const { toast } = useToast();
   const [confirm, confirmDialog] = useConfirm();
+  const [ask, promptDialog] = usePrompt();
   const [searchParams] = useSearchParams();
   // Three segments: Results (default) | Documents | My charts.
   // ?tab=documents|charts opens one directly; ?doc=<id> opens Documents.
@@ -632,7 +634,12 @@ export default function MedicalHistory() {
   };
 
   const renameDocument = async (docId: string, currentName: string) => {
-    const newName = window.prompt('Rename document:', currentName);
+    const newName = await ask({
+      title: 'Rename document',
+      label: 'Document name',
+      defaultValue: currentName,
+      confirmLabel: 'Rename',
+    });
     if (!newName || newName === currentName) return;
     try {
       await db.from('health_documents').update({ ai_suggested_name: newName }).eq('id', docId);
@@ -951,6 +958,7 @@ export default function MedicalHistory() {
   return (
     <main className="min-h-screen bg-background">
     {confirmDialog}
+    {promptDialog}
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="px-3 py-3 sm:px-4 sm:py-4 flex items-center gap-2 sm:gap-3">
